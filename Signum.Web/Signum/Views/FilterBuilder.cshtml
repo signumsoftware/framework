@@ -5,29 +5,64 @@
 @{ 
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    bool filtersVisible = (bool?)ViewData[ViewDataKeys.FiltersVisible] ?? true;
+    bool showAddColumn = (bool?)ViewData[ViewDataKeys.ShowAddColumn] ?? false;
 }
 
-<div class="ui-widget-content ui-corner-bottom sf-filters-list">
-    <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</span>
-    <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
-        <thead>
-            <tr>
-                <th>
-                </th>
-                <th class="sf-filter-field-header">@SearchMessage.Field.NiceToString()
-                </th>
-                <th>@SearchMessage.Operation.NiceToString()
-                </th>
-                <th>@SearchMessage.Value.NiceToString()
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < filterOptions.Count; i++)
-            {
-                FilterOption filter = filterOptions[i];
-                @Html.NewFilter(queryDescription.QueryName, filter, Model, i)
-            }
-        </tbody>
-    </table>
+
+<div id="@Model.Compose("tblFilterBuilder")" class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
+    <div class="ui-widget-header ui-corner-top sf-filters-body">
+        @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
+
+        @Html.Href(
+                            Model.Compose("btnAddFilter"),
+                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
+                            "",
+                            JavascriptMessage.selectToken.NiceToString(),
+                            "sf-query-button sf-add-filter sf-disabled",
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" }
+                            })
+
+        @if (showAddColumn)
+        {
+            @Html.Href(
+                            Model.Compose("btnAddColumn"),
+                            SearchMessage.FilterBuilder_AddColumn.NiceToString(),
+                            "",
+                            JavascriptMessage.selectToken.NiceToString(),
+                            "sf-query-button sf-add-column sf-disabled",
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-e" },
+                                { "data-url", Url.Action("GetColumnName", "Finder") }
+                            })
+        }
+    </div>
+
+
+    <div class="ui-widget-content ui-corner-bottom sf-filters-list">
+        <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</span>
+        <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="sf-filter-field-header">@SearchMessage.Field.NiceToString()
+                    </th>
+                    <th>@SearchMessage.Operation.NiceToString()
+                    </th>
+                    <th>@SearchMessage.Value.NiceToString()
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < filterOptions.Count; i++)
+                {
+                    FilterOption filter = filterOptions[i];
+                    @Html.NewFilter(queryDescription.QueryName, filter, Model, i)
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

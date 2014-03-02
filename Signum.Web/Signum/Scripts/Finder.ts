@@ -546,7 +546,6 @@ export class SearchControl {
     }
 
     fullScreen(evt) {
-
         var urlParams = this.requestDataForSearchInUrl();
 
         var url = this.element.attr("data-find-url") + "?" + urlParams;
@@ -1044,7 +1043,7 @@ export class FilterBuilder {
             data: data,
             async: false,
             success: function (filterHtml) {
-                var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
+                var $filterList = self.element.find(".sf-filters-list");
                 $filterList.find(".sf-explanation").hide();
                 $filterList.find("table").show();
 

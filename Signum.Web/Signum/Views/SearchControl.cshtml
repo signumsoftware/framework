@@ -36,47 +36,17 @@
     }
 
     <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
-        <div id="@Model.Compose("tblFilterBuilder")" class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
-            <div class="ui-widget-header ui-corner-top sf-filters-body">
-                @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
-
-                @Html.Href(
-                            Model.Compose("btnAddFilter"),
-                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-filter sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-s" }
-                            })
-
-                @if (string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns)
-                {
-                    @Html.Href(
-                            Model.Compose("btnAddColumn"),
-                            SearchMessage.FilterBuilder_AddColumn.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-column sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-e" },
-                                { "data-url", Url.Action("GetColumnName", "Finder") }
-                            })
-                }
-            </div>
-            @{ 
-                ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-                Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
-            }
-        </div>
-
+        @{
+            ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
+            ViewData[ViewDataKeys.FiltersVisible] = filtersVisible;
+            ViewData[ViewDataKeys.ShowAddColumn] = string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns;
+            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+        }
     </div>
 
-@if (!filtersAlwaysHidden)
-{
-    @Html.Href("",
+    @if (!filtersAlwaysHidden)
+    {
+        @Html.Href("",
                 (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
                 "",
                 (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
@@ -86,10 +56,10 @@
                     { "onclick", JsFunction.SFControlThen(prefix,  "toggleFilters()") },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
-}
-@if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
-{ 
-    @Html.Href(Model.Compose("sfFullScreen"),
+    }
+    @if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
+    { 
+        @Html.Href(Model.Compose("sfFullScreen"),
             "Full Screen",
             "",
             "Full Screen",
@@ -99,15 +69,15 @@
                 { "data-icon", "ui-icon-extlink" },
                 { "data-text", false }
             })
-}
-
-<div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-    <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
-    @if (findOptions.Create)
-    {
-        <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
     }
-    @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
+
+    <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
+        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
+        @if (findOptions.Create)
+        {
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
+        }
+        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
            Url = Url,
            ControllerContext = this.ViewContext,
@@ -116,58 +86,58 @@
            EntityType = entitiesType,
            Prefix = Model.Prefix
        }).ToString(Html)
-</div>
-@if (findOptions.FilterMode != FilterMode.OnlyResults)
-{
-    <div class="clearall">
     </div>
-}
-<div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
-    <table id="@Model.Compose("tblResults")" class="sf-search-results">
-        <thead class="ui-widget-header ui-corner-top">
-            <tr>
-                @if (findOptions.AllowSelection)
-                {
-                    <th class="ui-state-default sf-th-selection">
-                        @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()") })
-                    </th>
-                }
-                @if (findOptions.Navigate)
-                {
-                    <th class="ui-state-default sf-th-entity"></th>
-                }
-                @{List<Column> columns = findOptions.MergeColumns(); }
-                @foreach (var col in columns)
-                {
-                    var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
-                    OrderType? orderType = null;
-                    if (order != null)
+    @if (findOptions.FilterMode != FilterMode.OnlyResults)
+    {
+        <div class="clearall">
+        </div>
+    }
+    <div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
+        <table id="@Model.Compose("tblResults")" class="sf-search-results">
+            <thead class="ui-widget-header ui-corner-top">
+                <tr>
+                    @if (findOptions.AllowSelection)
                     {
-                        orderType = order.OrderType;
+                        <th class="ui-state-default sf-th-selection">
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()") })
+                        </th>
                     }
-                    <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
-                        <div class="sf-header-droppable sf-header-droppable-right"></div>
-                        <div class="sf-header-droppable sf-header-droppable-left"></div>
-                        <input type="hidden" value="@col.Name" />
-                        <span>@col.DisplayName</span>
-                    </th>
+                    @if (findOptions.Navigate)
+                    {
+                        <th class="ui-state-default sf-th-entity"></th>
+                    }
+                    @{List<Column> columns = findOptions.MergeColumns(); }
+                    @foreach (var col in columns)
+                    {
+                        var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
+                        OrderType? orderType = null;
+                        if (order != null)
+                        {
+                            orderType = order.OrderType;
+                        }
+                        <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                            <div class="sf-header-droppable sf-header-droppable-right"></div>
+                            <div class="sf-header-droppable sf-header-droppable-left"></div>
+                            <input type="hidden" value="@col.Name" />
+                            <span>@col.DisplayName</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody class="ui-widget-content">
+                @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); }
+                <tr>
+                    <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>
+                </tr>
+                @{ 
+                    ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
+                    ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
+                    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 }
-            </tr>
-        </thead>
-        <tbody class="ui-widget-content">
-            @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); }
-            <tr>
-                <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>
-            </tr>
-            @{ 
-                ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
-                ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
-                ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
-            }
-            @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
-        </tbody>
-    </table>
-</div>
+                @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+            </tbody>
+        </table>
+    </div>
 </div>
 <script type="text/javascript">
     require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});
