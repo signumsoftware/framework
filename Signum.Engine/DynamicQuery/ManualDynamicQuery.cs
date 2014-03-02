@@ -37,7 +37,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
             DEnumerableCount<T> manualResult = Execute(request, GetQueryDescription());
 
@@ -50,7 +50,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
+                Columns = new List<Column>() { new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName) },
                 Orders = new List<Order>(),
                 Pagination = new Pagination.All(),
             };
@@ -65,7 +65,7 @@ namespace Signum.Engine.DynamicQuery
                 QueryName = request.QueryName,
                 Filters = request.Filters,
                 Orders = request.Orders,
-                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
+                Columns = new List<Column> { new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName) },
                 Pagination = new Pagination.Firsts(2),
             };
 

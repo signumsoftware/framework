@@ -29,7 +29,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
             DQueryable<T> query = Query
                 .ToDQueryable(GetQueryDescription())
@@ -54,7 +54,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName);
+            var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
             DQueryable<T> orderQuery = Query
                 .ToDQueryable(GetQueryDescription())
