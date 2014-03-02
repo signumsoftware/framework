@@ -9,13 +9,13 @@
 @model TypeContext<ChartRequest>
 @Html.ScriptCss("~/Chart/Content/Chart.css")
 @{ 
-    QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     if (queryDescription == null)
     {
         queryDescription = DynamicQueryManager.Current.QueryDescription(Model.Value.QueryName);
         ViewData[ViewDataKeys.QueryDescription] = queryDescription;
     }
-    
+
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
@@ -32,25 +32,11 @@
     @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
         (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
     <div>
-            <div id="@Model.Compose("tblFilterBuilder")" class="ui-widget sf-filters">
-                <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.QueryTokenBuilder(null, Model, ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey : false))
-                    @Html.Href(
-                            Model.Compose("btnAddFilter"),
-                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-filter sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-s" },
-                                { "data-url", Url.Action("AddFilter", "Finder") }
-                            })
-                </div>
-                @{ 
-                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
-                }
-            </div>
+        @{
+            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+            Html.RenderPartial(Navigator.Manager.FilterBuilderView);
+        }
+
     </div>
     <div id="@Model.Compose("sfChartBuilderContainer")">
         @Html.Partial(ChartClient.ChartBuilderView, Model.Value)
@@ -67,7 +53,7 @@
             "Full Screen",
             "",
             "Full Screen",
-            "sf-query-button sf-query-fullscreen", 
+            "sf-query-button sf-query-fullscreen",
             new Dictionary<string, object> 
             { 
                 { "data-icon", "ui-icon-extlink" },
