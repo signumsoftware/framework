@@ -172,11 +172,11 @@ function insertLiteral() {
 export function createSmsWithTemplateFromEntity(options: Operations.EntityOperationOptions, url: string,
     smsTemplateFindOptions: Finder.FindOptions) {
 
-    Finder.find(smsTemplateFindOptions).then(entity=> {
-        if (entity != null)
+    Finder.find(smsTemplateFindOptions).then(ev => {
+        if (!ev)
             return;
 
-        options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+        options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
         options.controllerUrl = url;
 
         Operations.constructFromDefault(options);
@@ -187,11 +187,11 @@ export function createSmsWithTemplateFromEntity(options: Operations.EntityOperat
 export function sendMultipleSMSMessagesFromTemplate(options: Operations.OperationOptions, url: string,
     smsTemplateFindOptions: Finder.FindOptions) {
 
-    Finder.find(smsTemplateFindOptions).then(entity=> {
-        if (entity != null)
+    Finder.find(smsTemplateFindOptions).then(ev => {
+        if (!ev)
             return;
 
-        options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+        options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
         options.controllerUrl = url;
 
         Operations.constructFromManyDefault(options);

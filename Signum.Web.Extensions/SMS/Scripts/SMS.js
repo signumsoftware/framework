@@ -152,11 +152,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
 
     function createSmsWithTemplateFromEntity(options, url, smsTemplateFindOptions) {
-        Finder.find(smsTemplateFindOptions).then(function (entity) {
-            if (entity != null)
+        Finder.find(smsTemplateFindOptions).then(function (ev) {
+            if (!ev)
                 return;
 
-            options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+            options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
             options.controllerUrl = url;
 
             Operations.constructFromDefault(options);
@@ -165,11 +165,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.createSmsWithTemplateFromEntity = createSmsWithTemplateFromEntity;
 
     function sendMultipleSMSMessagesFromTemplate(options, url, smsTemplateFindOptions) {
-        Finder.find(smsTemplateFindOptions).then(function (entity) {
-            if (entity != null)
+        Finder.find(smsTemplateFindOptions).then(function (ev) {
+            if (!ev)
                 return;
 
-            options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+            options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
             options.controllerUrl = url;
 
             Operations.constructFromManyDefault(options);
