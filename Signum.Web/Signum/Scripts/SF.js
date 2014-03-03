@@ -440,4 +440,48 @@ once("stringExtensions", function () {
         };
     }
 });
+
+once("dateExtensions", function () {
+    Date.prototype.addMilisecconds = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setMilliseconds(this.getMilliseconds() + inc);
+        return n;
+    };
+
+    Date.prototype.addSeccond = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setSeconds(this.getSeconds() + inc);
+        return n;
+    };
+
+    Date.prototype.addMinutes = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setMinutes(this.getMinutes() + inc);
+        return n;
+    };
+
+    Date.prototype.addHour = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setHours(this.getHours() + inc);
+        return n;
+    };
+
+    Date.prototype.addDate = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setDate(this.getDate() + inc);
+        return n;
+    };
+
+    Date.prototype.addMonth = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setMonth(this.getMonth() + inc);
+        return n;
+    };
+
+    Date.prototype.addYear = function (inc) {
+        var n = new Date(this.valueOf());
+        n.setFullYear(this.getFullYear() + inc);
+        return n;
+    };
+});
 //# sourceMappingURL=SF.js.map
