@@ -99,7 +99,7 @@ namespace Signum.Web.Selenium
             return new SearchPageProxy(selenium);
         }
 
-        protected virtual string ViewOrCreateRoute(Type type, int? id)
+        protected virtual string NavigateRoute(Type type, int? id)
         {
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
@@ -109,9 +109,9 @@ namespace Signum.Web.Selenium
                 return "Create/{0}".Formato(typeName);
         }
 
-        protected virtual string ViewRoute(Lite<IIdentifiable> lite)
+        protected virtual string NavigateRoute(Lite<IIdentifiable> lite)
         {
-            return ViewOrCreateRoute(lite.EntityType, lite.IdOrNull);
+            return NavigateRoute(lite.EntityType, lite.IdOrNull);
         }
 
         public NormalPage<T> NormalPage<T>(int id, Action<string> checkLogin = null) where T : IdentifiableEntity
@@ -121,7 +121,7 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> NormalPage<T>(Action<string> checkLogin = null) where T : IdentifiableEntity
         {
-            var url = Url(ViewOrCreateRoute(typeof(T), null));
+            var url = Url(NavigateRoute(typeof(T), null));
 
             return NormalPageUrl<T>(url, checkLogin);
         }
@@ -131,7 +131,7 @@ namespace Signum.Web.Selenium
             if(lite != null && lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".Formato(lite.EntityType.Name));
             
-            var url = Url(ViewRoute(lite));
+            var url = Url(NavigateRoute(lite));
 
             return NormalPageUrl<T>(url, checkLogin);
         }
