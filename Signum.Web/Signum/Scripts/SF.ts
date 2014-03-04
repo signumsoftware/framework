@@ -305,6 +305,8 @@ once("serializeObject", () => {
 interface Array<T> {
     groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];
     groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    orderBy<V>(keySelector: (element: T) => V): T[];
+    orderByDescending<V>(keySelector: (element: T) => V): T[];
 }
 
 once("arrayExtensions", () => {
@@ -329,6 +331,34 @@ once("arrayExtensions", () => {
             result[key].push(element);
         }
         return result;
+    };
+
+    Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
+        var cloned = (<any[]>this).slice(0);
+        cloned.sort((e1, e2) => {
+            var v1 = keySelector(e1);
+            var v2 = keySelector(e2);
+            if (v1 > v2)
+                return 1;
+            if (v1 < v2)
+                return -1;
+            return 0;
+        });
+        return cloned;
+    };
+
+    Array.prototype.orderByDescending = function (keySelector: (element: any) => any): any[] {
+        var cloned = (<any[]>this).slice(0);
+        cloned.sort((e1, e2) => {
+            var v1 = keySelector(e1);
+            var v2 = keySelector(e2);
+            if (v1 < v2)
+                return 1;
+            if (v1 > v2)
+                return -1;
+            return 0;
+        });
+        return cloned;
     };
 });
 

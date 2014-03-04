@@ -321,6 +321,34 @@ once("arrayExtensions", function () {
         }
         return result;
     };
+
+    Array.prototype.orderBy = function (keySelector) {
+        var cloned = this.slice(0);
+        cloned.sort(function (e1, e2) {
+            var v1 = keySelector(e1);
+            var v2 = keySelector(e2);
+            if (v1 > v2)
+                return 1;
+            if (v1 < v2)
+                return -1;
+            return 0;
+        });
+        return cloned;
+    };
+
+    Array.prototype.orderByDescending = function (keySelector) {
+        var cloned = this.slice(0);
+        cloned.sort(function (e1, e2) {
+            var v1 = keySelector(e1);
+            var v2 = keySelector(e2);
+            if (v1 < v2)
+                return 1;
+            if (v1 > v2)
+                return -1;
+            return 0;
+        });
+        return cloned;
+    };
 });
 
 once("stringExtensions", function () {
