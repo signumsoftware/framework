@@ -466,6 +466,61 @@ once("stringExtensions", () => {
     }
 });
 
+interface Date {
+    addMilisecconds(inc: number): Date;
+    addSeccond(inc: number): Date;
+    addMinutes(inc: number): Date;
+    addHour(inc: number): Date;
+    addDate(inc: number): Date;
+    addMonth(inc: number): Date;
+    addYear(inc: number) : Date;
+}
+
+once("dateExtensions", () => {
+
+    Date.prototype.addMilisecconds = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setMilliseconds(this.getMilliseconds() + inc);
+        return n;
+    };
+
+    Date.prototype.addSeccond = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setSeconds(this.getSeconds() + inc);
+        return n;
+    };
+
+    Date.prototype.addMinutes = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setMinutes(this.getMinutes() + inc);
+        return n;
+    };
+
+    Date.prototype.addHour = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setHours(this.getHours() + inc);
+        return n;
+    };
+
+    Date.prototype.addDate = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setDate(this.getDate() + inc);
+        return n;
+    };
+
+    Date.prototype.addMonth = function(inc: number) {
+        var n = new Date(this.valueOf());
+        n.setMonth(this.getMonth() + inc);
+        return n;
+    };
+
+    Date.prototype.addYear = function (inc: number) {
+        var n = new Date(this.valueOf());
+        n.setFullYear(this.getFullYear() + inc);
+        return n;
+    };
+}); 
+
 interface Window {
     File: any;
     FileList: any;

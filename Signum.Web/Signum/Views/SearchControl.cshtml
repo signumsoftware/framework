@@ -11,7 +11,7 @@
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
     findOptions.Pagination = findOptions.Pagination ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
-    
+
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
     var prefix = Model.Compose("sfSearchControl");
@@ -22,59 +22,28 @@
      data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
      >
 
-    @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-                                implementations.IsByAll ? EntityBase.ImplementedByAllKey  :
+    @Html.Hidden(Model.Compose("sfEntityTypeNames"),
+                                implementations.IsByAll ? EntityBase.ImplementedByAllKey :
                                 implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), new { disabled = "disabled" })
-     @Html.Hidden(Model.Compose("sfEntityTypeNiceNames"), 
-                                implementations.IsByAll ? EntityBase.ImplementedByAllKey  :
-                                implementations.Types.ToString(t =>  t.NiceName(), ","), new { disabled = "disabled" })
-        
-    
+    @Html.Hidden(Model.Compose("sfEntityTypeNiceNames"),
+                                implementations.IsByAll ? EntityBase.ImplementedByAllKey :
+                                implementations.Types.ToString(t => t.NiceName(), ","), new { disabled = "disabled" })
+
+
     @{
         bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
         bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
-     }
-    
-    <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
-        <div class="sf-fields-list">
-            <div class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
-                <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
-                
-                    @Html.Href(
-                            Model.Compose("btnAddFilter"), 
-                            SearchMessage.FilterBuilder_AddFilter.NiceToString(), 
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-filter sf-disabled", 
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-s" }
-                            })
+    }
 
-                    @if (string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns)
-                    {
-                        @Html.Href(
-                            Model.Compose("btnAddColumn"), 
-                            SearchMessage.FilterBuilder_AddColumn.NiceToString(), 
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-column sf-disabled", 
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-e" },
-                                { "data-url", Url.Action("GetColumnName", "Finder") }
-                            })
-                    }
-                </div>
-                @{ 
-                    ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
-                }
-            </div>
-        </div>
+    <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
+        @{
+            ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
+            ViewData[ViewDataKeys.FiltersVisible] = filtersVisible;
+            ViewData[ViewDataKeys.ShowAddColumn] = string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns;
+            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+        }
     </div>
-    
+
     @if (!filtersAlwaysHidden)
     {
         @Html.Href("",
@@ -94,14 +63,14 @@
             "Full Screen",
             "",
             "Full Screen",
-            "sf-query-button sf-query-fullscreen", 
+            "sf-query-button sf-query-fullscreen",
             new Dictionary<string, object> 
             { 
                 { "data-icon", "ui-icon-extlink" },
                 { "data-text", false }
             })
     }
-    
+
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
         <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
@@ -130,13 +99,12 @@
                     @if (findOptions.AllowSelection)
                     {
                         <th class="ui-state-default sf-th-selection">
-                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()")})
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()") })
                         </th>
                     }
                     @if (findOptions.Navigate)
                     {
-                        <th class="ui-state-default sf-th-entity">
-                        </th>
+                        <th class="ui-state-default sf-th-entity"></th>
                     }
                     @{List<Column> columns = findOptions.MergeColumns(); }
                     @foreach (var col in columns)

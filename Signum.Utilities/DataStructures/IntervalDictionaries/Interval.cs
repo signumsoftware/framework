@@ -190,6 +190,16 @@ namespace Signum.Utilities.DataStructures
             return true;
         }
 
+        public bool Overlap(Interval<T> other)
+        {
+            if (max.HasValue && max.Value.CompareTo(other.Min) <= 0)
+                return false;
+            if (min.HasValue && other.Max.CompareTo(min.Value) <= 0)
+                return false;
+
+            return true;
+        }
+
         public NullableInterval<T>? Intersection(NullableInterval<T> other)
         {
             T? minVal = min.HasValue && other.min.HasValue ? (min.Value.CompareTo(other.min.Value) > 0 ? min.Value : other.min.Value) : min ?? other.min;

@@ -104,7 +104,7 @@ namespace Signum.Entities.DynamicQuery
         [Serializable]
         public class Firsts : Pagination
         {
-            public static int DefaultTopElements = 50; 
+            public static int DefaultTopElements = 20; 
 
             public Firsts(int topElements)
             {
@@ -136,7 +136,7 @@ namespace Signum.Entities.DynamicQuery
         [Serializable]
         public class Paginate : Pagination
         {
-            public static int DefaultElementsPerPage = 50;
+            public static int DefaultElementsPerPage = 20;
 
             public Paginate(int elementsPerPage, int currentPage = 1)
             {

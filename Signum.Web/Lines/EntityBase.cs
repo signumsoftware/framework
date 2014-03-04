@@ -218,6 +218,9 @@ namespace Signum.Web
 
         public override string ToString()
         {
+            if (lineInfo == null)
+                throw new InvalidOperationException("Attempt to call JsLineFunction.ToString without LineInfo. Consider using JsFunction instead.");
+
             var varModule = VarName(Module);
 
             var varLines = VarName(lineInfo.Module);

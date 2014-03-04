@@ -37,6 +37,8 @@ namespace Signum.Web
         public const string InPopup = "sfInPopup";
         public const string ShowOperations = "sfShowOperations";
         public const string SaveProtected = "sfSaveProtected";
+        public const string FiltersVisible = "sfFiltersVisible";
+        public const string ShowAddColumn = "sfShowAddColumn";
 
         public static string WindowPrefix(this HtmlHelper helper)
         {
