@@ -163,6 +163,7 @@ legend
 }
 .sf-chooser-button
 {
+    display: block;
     width: 100%;    
 }
 
