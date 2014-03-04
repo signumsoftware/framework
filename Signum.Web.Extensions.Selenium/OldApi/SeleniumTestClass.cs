@@ -99,7 +99,7 @@ namespace Signum.Web.Selenium
             return new SearchPageProxy(selenium);
         }
 
-        protected virtual string ViewRoute(Type type, int? id)
+        protected virtual string ViewOrCreateRoute(Type type, int? id)
         {
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
@@ -111,7 +111,7 @@ namespace Signum.Web.Selenium
 
         protected virtual string ViewRoute(Lite<IIdentifiable> lite)
         {
-            return ViewRoute(lite.EntityType, lite.IdOrNull);
+            return ViewOrCreateRoute(lite.EntityType, lite.IdOrNull);
         }
 
         public NormalPage<T> NormalPage<T>(int id, Action<string> checkLogin = null) where T : IdentifiableEntity
@@ -121,7 +121,7 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> NormalPage<T>(Action<string> checkLogin = null) where T : IdentifiableEntity
         {
-            var url = Url(ViewRoute(typeof(T), null));
+            var url = Url(ViewOrCreateRoute(typeof(T), null));
 
             return NormalPageUrl<T>(url, checkLogin);
         }

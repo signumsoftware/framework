@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Web.Selenium
 {
@@ -37,10 +38,17 @@ namespace Signum.Web.Selenium
 
             foreach (var mi in Reflector.GetMemberList(property))
             {
-                result = result.Add(mi);
-                if (newPrefix.HasText())
-                    newPrefix += "_";
-                newPrefix += mi.Name;
+                if (mi is MethodInfo && ((MethodInfo)mi).IsInstantiationOf(MixinDeclarations.miMixin))
+                {
+                    result = result.Add(((MethodInfo)mi).GetGenericArguments()[0]);
+                }
+                else
+                {
+                    result = result.Add(mi);
+                    if (newPrefix.HasText())
+                        newPrefix += "_";
+                    newPrefix += mi.Name;
+                }
             }
             return result;
         }
