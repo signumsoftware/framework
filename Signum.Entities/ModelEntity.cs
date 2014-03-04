@@ -19,6 +19,11 @@ namespace Signum.Entities
             throw new InvalidOperationException("ModelEntities are not meant to be retrieved"); 
         }
 
+        public override string ToString()
+        {
+            return "";
+        }
+
         public static Implementations GetImplementations(PropertyRoute route)
         {
             if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))

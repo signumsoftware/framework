@@ -81,10 +81,12 @@ namespace Signum.Web.Operations
             }
             else
             {
-                string newUrl = Navigator.NavigateRoute(entity);
-                if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
-                    return controller.RedirectHttpOrAjax(newUrl);
-
+                if (!entity.IsNew)
+                {
+                    string newUrl = Navigator.NavigateRoute(entity);
+                    if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
+                        return controller.RedirectHttpOrAjax(newUrl);
+                }
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);

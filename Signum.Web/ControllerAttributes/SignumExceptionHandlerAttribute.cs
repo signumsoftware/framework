@@ -33,6 +33,7 @@ namespace Signum.Web
             }
             else
             {
+                context.Response.ContentType = "text/html";
                 return new ViewResult
                 {
                     ViewName = NavigationManager.ViewPrefix.Formato("Error"),

@@ -47,7 +47,7 @@ namespace Signum.Engine.DynamicQuery
 
                 core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
-                core.EntityColumn().Implementations = entityImplementations;
+                core.EntityColumnFactory().Implementations = entityImplementations;
 
                 var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a => a.Name, ", ");
 
@@ -72,7 +72,7 @@ namespace Signum.Engine.DynamicQuery
         ColumnDescriptionFactory[] StaticColumns { get; }
         Expression Expression { get; } //Optional
 
-        ColumnDescriptionFactory EntityColumn();
+        ColumnDescriptionFactory EntityColumnFactory();
         QueryDescription GetQueryDescription();
 
         ResultTable ExecuteQuery(QueryRequest request);
@@ -119,7 +119,7 @@ namespace Signum.Engine.DynamicQuery
             return this;
         }
 
-        public ColumnDescriptionFactory EntityColumn()
+        public ColumnDescriptionFactory EntityColumnFactory()
         {
             return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
@@ -131,7 +131,7 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription GetQueryDescription()
         {
-            var entity = EntityColumn();
+            var entity = EntityColumnFactory();
             string allowed = entity.IsAllowed();
             if (allowed != null)
                 throw new InvalidOperationException(
