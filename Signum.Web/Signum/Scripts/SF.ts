@@ -309,7 +309,7 @@ interface Array<T> {
 
 once("arrayExtensions", () => {
     Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[]{
-        var result: { key: string; elements: any[] }[];
+        var result: { key: string; elements: any[] }[] = [];
         var objectGrouped = this.groupByObject(keySelector);
         for (var prop in objectGrouped) {
             if (objectGrouped.hasOwnProperty(prop))

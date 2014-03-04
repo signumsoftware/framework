@@ -300,7 +300,7 @@ once("serializeObject", function () {
 
 once("arrayExtensions", function () {
     Array.prototype.groupByArray = function (keySelector) {
-        var result;
+        var result = [];
         var objectGrouped = this.groupByObject(keySelector);
         for (var prop in objectGrouped) {
             if (objectGrouped.hasOwnProperty(prop))
