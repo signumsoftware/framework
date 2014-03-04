@@ -26,6 +26,13 @@ namespace Signum.Web.Files
         public const string FileType = "sfFileType";
     }
 
+    public enum DownloadBehaviour
+    {
+        SaveAs,
+        View,
+        None
+    }
+
     public class FileLine : EntityBase
     {
         public Enum FileType { get; set; }
@@ -35,7 +42,7 @@ namespace Signum.Web.Files
         public bool AsyncUpload { get; set; }
         public bool DragAndDrop { get; set; }
 
-        public bool Download { get; set; }
+        public DownloadBehaviour Download { get; set; }
 
         public string UploadUrl { get; set; }
         public string UploadDroppedUrl { get; set; }
@@ -45,7 +52,7 @@ namespace Signum.Web.Files
         {
             AsyncUpload = true;
             DragAndDrop = true;
-            Download = true;
+            Download = DownloadBehaviour.View;
             Create = false;
             View = false;
         }
@@ -68,6 +75,7 @@ namespace Signum.Web.Files
                 result.Add("uploadDroppedUrl", UploadDroppedUrl);
             if (!DragAndDrop)
                 result.Add("dragAndDrop", false);
+            result.Add("download", (int)Download); 
             return result;
         }
 
