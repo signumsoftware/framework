@@ -189,18 +189,21 @@ namespace Signum.Web.Operations
         {
         }
 
-        JsOperationOptions OperationOptions;
+        JsOperationOptions operationOptions;
         internal JsOperationFunction SetOptions(JsOperationOptions operationOptions)
         {
-            this.OperationOptions = operationOptions;
+            this.operationOptions = operationOptions;
             return this;
         }
 
         public override string ToString()
         {
+            if (operationOptions == null)
+                throw new InvalidOperationException("Attempt to call JsOperationFunction.ToString without JsOperationFunction. Consider using JsFunction instead.");
+
             var varName = VarName(Module);
 
-            var options = JsonConvert.SerializeObject(this.OperationOptions, JsonSerializerSettings);
+            var options = JsonConvert.SerializeObject(this.operationOptions, JsonSerializerSettings);
 
             var args = string.IsNullOrEmpty(Arguments) ? null : (", " + Arguments);
 
