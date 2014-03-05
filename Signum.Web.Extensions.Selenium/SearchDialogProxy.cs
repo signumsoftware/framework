@@ -53,6 +53,15 @@ namespace Signum.Web.Selenium
             this.OkWaitClosed();
         }
 
+        public void SelectById(int id)
+        {
+            this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, id);
+            this.SearchControl.Search();
+            this.Results.SelectRow(0);
+
+            this.OkWaitClosed();
+        }
+
         public void SelectByPosition(params int[] rowIndexes)
         {
             this.SearchControl.Search();
