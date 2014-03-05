@@ -371,6 +371,22 @@ namespace Signum.Web.Selenium
         {
             return RuntimeInfoInternal(null);
         }
+
+        public ILineContainer<T> GetOrCreateDetailControl<T>() where T : ModifiableEntity
+        {
+            if (this.HasEntity())
+                return this.Details<T>();
+
+            var imp = this.Route.TryGetImplementations();
+            if (imp == null || imp.Value.Types.Count() == 1)
+                this.Create();
+            else
+                this.CreateImplementations(typeof(T));
+
+            this.Selenium.Wait(() => this.HasEntity());
+
+            return this.Details<T>();
+        }
     }
 
     public class EntityListProxy : EntityBaseProxy
@@ -556,6 +572,21 @@ namespace Signum.Web.Selenium
         public RuntimeInfoProxy RuntimeInfo(int index)
         {
             return RuntimeInfoInternal(index);
+        }
+
+        public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
+        {
+            var index = NewIndex();
+
+            var imp = this.Route.TryGetImplementations();
+            if (imp == null || imp.Value.Types.Count() == 1)
+                this.Create();
+            else
+                this.CreateImplementations(typeof(T));
+
+            this.Selenium.Wait(() => this.HasEntity(index.Value));
+
+            return this.Details<T>(index.Value);
         }
     }
 
