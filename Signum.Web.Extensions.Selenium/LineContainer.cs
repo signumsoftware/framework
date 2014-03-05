@@ -212,10 +212,15 @@ namespace Signum.Web.Selenium
             return new QueryTokenBuilderProxy(lineContainer.Selenium, newPrefix + "_");
         }
 
+        public static void SelectTab<T>(this ILineContainer<T> lineContainer, string locator)
+            where T : ModifiableEntity
+        {
+            lineContainer.Selenium.Click("jq=a[href='#{0}']".Formato(locator));
+            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}".Formato(locator)));
+
+        }
+
     }
-
-
-   
 
     public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
     {
