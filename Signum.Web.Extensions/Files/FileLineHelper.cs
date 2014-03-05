@@ -55,7 +55,7 @@ namespace Signum.Web.Files
 
             EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
 
-            fl.Download = (context.Type.IsIIdentifiable() || context.Type.IsLite());
+            fl.Download = (context.Type.IsIIdentifiable() || context.Type.IsLite()) ? DownloadBehaviour.View : DownloadBehaviour.None;
 
             Common.FireCommonTasks(fl);
 
@@ -91,22 +91,22 @@ namespace Signum.Web.Files
                 using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
                 {
                     var label = EntityBaseHelper.BaseLineLabel(helper, fileLine,
-                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr));
+                            fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr));
 
                     if (!fileLine.ValueFirst)
                         sb.AddLine(label);
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        if (fileLine.Download)
+                        if (fileLine.Download != DownloadBehaviour.None)
                         {
-                            sb.AddLine(
-                                    helper.Href(fileLine.Compose(EntityBaseKeys.Link),
-                                        value.TryCC(f => f.FileName),
-                                        hasEntity ? FilesClient.GetDownloadPath(value) : null,
-                                        "Download",
-                                        "sf-value-line",
-                                        new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName)} }));
+                            sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
+                                value.TryCC(f => f.FileName),
+                                hasEntity ? FilesClient.GetDownloadPath(value) : null,
+                                "Download",
+                                "sf-value-line",
+                                fileLine.Download == DownloadBehaviour.View ? null :
+                                new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName) } }));
                         }
                         else
                         {

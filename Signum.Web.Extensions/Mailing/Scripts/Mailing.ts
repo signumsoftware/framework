@@ -145,6 +145,8 @@ export function initHtmlEditor(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
     CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
     CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
+    CKEDITOR.instances[idTargetTextArea].on('simpleuploads.finishedUpload', changed);
+    
 };
 
 export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {

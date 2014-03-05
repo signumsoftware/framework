@@ -6,6 +6,13 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Lines"], function(require, exports, Entities, Lines) {
+    (function (DownloadBehaviour) {
+        DownloadBehaviour[DownloadBehaviour["SaveAs"] = 0] = "SaveAs";
+        DownloadBehaviour[DownloadBehaviour["View"] = 1] = "View";
+        DownloadBehaviour[DownloadBehaviour["None"] = 2] = "None";
+    })(exports.DownloadBehaviour || (exports.DownloadBehaviour = {}));
+    var DownloadBehaviour = exports.DownloadBehaviour;
+
     once("SF-fileLine", function () {
         return $.fn.fileLine = function (opt) {
             var fl = new FileLine(this, opt);
@@ -127,10 +134,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(this.pf(Entities.Keys.loading)).hide();
             if (entityValue) {
                 $(this.pf(Entities.Keys.toStr)).html(entityValue.toStr);
-                $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("download", entityValue.toStr).attr("href", entityValue.link);
+                $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("href", entityValue.link);
+
+                if (this.options.download == 0 /* SaveAs */)
+                    $(this.pf(Entities.Keys.link)).attr("download", entityValue.toStr);
             } else {
                 $(this.pf(Entities.Keys.toStr)).html("");
-                $(this.pf(Entities.Keys.toStr)).html("").attr("download", undefined).attr("href", undefined);
+                $(this.pf(Entities.Keys.toStr)).html("").removeAttr("download").removeAttr("href");
             }
         };
 

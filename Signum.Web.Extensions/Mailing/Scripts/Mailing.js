@@ -143,6 +143,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
+        CKEDITOR.instances[idTargetTextArea].on('simpleuploads.finishedUpload', changed);
     }
     exports.initHtmlEditor = initHtmlEditor;
     ;
