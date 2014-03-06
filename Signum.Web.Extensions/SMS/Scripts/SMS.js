@@ -29,8 +29,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             remainingCharacters($($textAreasPresent[i]));
         }
 
-        exports.fillLiterals();
-
         $(document).on('keyup', 'textarea.sf-sms-msg-text', function () {
             remainingCharacters();
         });
@@ -56,6 +54,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             insertLiteral();
         });
     }
+    exports.init = init;
 
     function $control() {
         return $('.sf-sms-msg-text:visible');
@@ -109,37 +108,36 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
     }
 
-    function attachAssociatedType(entityCombo) {
-        entityCombo.entityChanged = exports.fillLiterals;
+    function attachAssociatedType(entityCombo, url) {
+        var fillLiterals = function () {
+            var $combo = $(".sf-associated-type");
+
+            var $list = $("#sfLiterals");
+            if ($list.length == 0) {
+                return;
+            }
+            var runtimeInfo = entityCombo.getRuntimeInfo();
+            if (!runtimeInfo) {
+                $list.html("");
+                return;
+            }
+            $.ajax({
+                url: url,
+                data: { type: runtimeInfo.key() },
+                success: function (data) {
+                    $list.html("");
+                    for (var i = 0; i < data.literals.length; i++) {
+                        $list.append($("<option>").val(data.literals[i]).html(data.literals[i]));
+                    }
+                    remainingCharacters();
+                }
+            });
+        };
+
+        entityCombo.entityChanged = fillLiterals;
+        fillLiterals();
     }
     exports.attachAssociatedType = attachAssociatedType;
-
-    function fillLiterals() {
-        var $combo = $(".sf-associated-type");
-        var prefix = $combo.attr("data-control-id");
-        var url = $combo.attr("data-url");
-        var $list = $("#sfLiterals");
-        if ($list.length == 0) {
-            return;
-        }
-        var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(prefix);
-        if (!runtimeInfo) {
-            $list.html("");
-            return;
-        }
-        $.ajax({
-            url: url,
-            data: runtimeInfo.toString(),
-            success: function (data) {
-                $list.html("");
-                for (var i = 0; i < data.literals.length; i++) {
-                    $list.append($("<option>").val(data.literals[i]).html(data.literals[i]));
-                }
-                remainingCharacters();
-            }
-        });
-    }
-    exports.fillLiterals = fillLiterals;
 
     function insertLiteral() {
         var selected = $("#sfLiterals").find(":selected").val();

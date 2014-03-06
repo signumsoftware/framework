@@ -32,7 +32,6 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
-        public static string TabsRepeaterModule = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
 
         private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {

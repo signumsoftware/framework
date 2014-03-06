@@ -41,9 +41,8 @@
         @Html.ValueLine(ec, e => e.IsBodyHtml)
 
         <div class="sf-email-replacements-container sf-tabs-repeater">
-            @Html.EntityRepeater(ec, e => e.Messages, er =>
+            @Html.EntityTabRepeater(ec, e => e.Messages, er =>
        {
-           er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
            er.PreserveViewData = true;
        })
         </div>
