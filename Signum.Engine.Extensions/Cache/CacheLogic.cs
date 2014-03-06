@@ -160,6 +160,7 @@ namespace Signum.Engine.Cache
             SqlConnector connector = (SqlConnector)Connector.Current;
             List<SqlPreCommand> commands = new List<SqlPreCommand>();
 
+            int index = 0; 
             foreach (var database in Schema.Current.DatabaseNames())
             {
                 SqlConnector sub = connector.ForDatabase(database);
@@ -195,10 +196,7 @@ namespace Signum.Engine.Cache
 
                     if (!enabled)
                     {
-                        commands.Add(new SqlPreCommandSimple(
-        @"DECLARE @SPId VARCHAR(7000)
-SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; ' FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
-EXEC(@SPId)".Formato(databaseName)));
+                        commands.Add(SchemaSynchronizer.DisconnectUsers(databaseName, "spid" + (index++)));
 
                         commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(databaseName)));
                         commands.Add(new SqlPreCommandSimple("--ALTER DATABASE {0} SET NEW_BROKER".Formato(databaseName)));
