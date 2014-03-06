@@ -20,6 +20,7 @@ namespace Signum.Web
     public static class EntityRepeaterKeys
     {
         public const string ItemsContainer = "sfItemsContainer";
+        public const string TabsContainer = "sfTabsContainer";
         public const string RepeaterElement = "sfRepeaterItem";
     }
 
@@ -32,12 +33,13 @@ namespace Signum.Web
             LabelClass = "sf-label-repeater-line";
             Reorder = false;
         }
+    }
 
-        protected override JObject OptionsJSInternal()
+    public class EntityTabRepeater : EntityRepeater
+    {
+        public EntityTabRepeater(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
-            var result = base.OptionsJSInternal();
-            result.Add("maxElements", MaxElements.TryToString());
-            return result;
         }
     }
 }

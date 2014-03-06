@@ -245,11 +245,12 @@ namespace Signum.Web
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
 
-        public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
+        public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template, string defaultString)
         {
-            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\">{1}</script>".Formato(
+            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\" data-toString=\"{2}\">{1}</script>".Formato(
                                 entityBase.Compose(EntityBaseKeys.Template),
-                                regex.Replace(template.ToHtmlString(), m => m.Value + "X")));
+                                regex.Replace(template.ToHtmlString(), m => m.Value + "X"),
+                                defaultString));
         }
 
         public static void ConfigureEntityBase(EntityBase eb, Type cleanType)
