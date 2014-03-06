@@ -320,6 +320,11 @@ namespace Signum.Web
             return Lite.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]);
         }
 
+        public static T ParsePercentage<T>(this ControllerBase controller, string requestKey, CultureInfo culture = null)
+        {
+            return (T)ReflectionTools.ParsePercentage(controller.ControllerContext.HttpContext.Request[requestKey], typeof(T), culture ?? CultureInfo.CurrentCulture);
+        }
+
         public static T ParseValue<T>(this ControllerBase controller, string requestKey)
         {
             return ReflectionTools.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]); 

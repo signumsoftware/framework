@@ -30,12 +30,12 @@ export interface ModelState {
     [prefix: string]: string[];
 }
 
-var inputErrorClass = "input-validation-error";
-var fieldErrorClass = "sf-field-validation-error";
-var summaryErrorClass = "validation-summary-errors";
-var inlineErrorVal = "inlineVal";
-var globalErrorsKey = "sfGlobalErrors";
-var globalValidationSummary = "sfGlobalValidationSummary";
+export var inputErrorClass = "input-validation-error";
+export var fieldErrorClass = "sf-field-validation-error";
+export var summaryErrorClass = "validation-summary-errors";
+export var inlineErrorVal = "inlineVal";
+export var globalErrorsKey = "sfGlobalErrors";
+export var globalValidationSummary = "sfGlobalValidationSummary";
 
 export function validate(valOptions: ValidationOptions): Promise<ValidationResult> {
     SF.log("validate");

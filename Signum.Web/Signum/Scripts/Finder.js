@@ -885,7 +885,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             };
 
             var $tabContainer = $button.closest(".sf-tabs");
-            if ($tabContainer.length == 0) {
+            if ($tabContainer.length == 0 || this.element.is(":visible")) {
                 makeSearch();
             } else {
                 var self = this;

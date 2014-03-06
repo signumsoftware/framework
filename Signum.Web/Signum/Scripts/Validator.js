@@ -1,16 +1,16 @@
 ﻿/// <reference path="globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], function(require, exports, Entities) {
     function cleanError($element) {
-        $element.removeClass(inputErrorClass);
+        $element.removeClass(exports.inputErrorClass);
     }
     exports.cleanError = cleanError;
 
-    var inputErrorClass = "input-validation-error";
-    var fieldErrorClass = "sf-field-validation-error";
-    var summaryErrorClass = "validation-summary-errors";
-    var inlineErrorVal = "inlineVal";
-    var globalErrorsKey = "sfGlobalErrors";
-    var globalValidationSummary = "sfGlobalValidationSummary";
+    exports.inputErrorClass = "input-validation-error";
+    exports.fieldErrorClass = "sf-field-validation-error";
+    exports.summaryErrorClass = "validation-summary-errors";
+    exports.inlineErrorVal = "inlineVal";
+    exports.globalErrorsKey = "sfGlobalErrors";
+    exports.globalValidationSummary = "sfGlobalValidationSummary";
 
     function validate(valOptions) {
         SF.log("validate");
@@ -127,9 +127,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         SF.log("Validator showErrors");
 
         //Remove previous errors
-        $('.' + fieldErrorClass).remove();
-        $('.' + inputErrorClass).removeClass(inputErrorClass);
-        $('.' + summaryErrorClass).remove();
+        $('.' + exports.fieldErrorClass).remove();
+        $('.' + exports.inputErrorClass).removeClass(exports.inputErrorClass);
+        $('.' + exports.summaryErrorClass).remove();
 
         var allErrors = [];
 
@@ -142,12 +142,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                 });
                 allErrors.push(errorsArray);
 
-                if (prefix != globalErrorsKey && prefix != "") {
+                if (prefix != exports.globalErrorsKey && prefix != "") {
                     var $control = $('#' + prefix);
-                    $control.addClass(inputErrorClass);
-                    $('#' + SF.compose(prefix, Entities.Keys.toStr) + ',#' + SF.compose(prefix, Entities.Keys.link)).addClass(inputErrorClass);
-                    if (valOptions.showInlineErrors && $control.hasClass(inlineErrorVal)) {
-                        var errorMessage = '<span class="' + fieldErrorClass + '">' + (valOptions.fixedInlineErrorText || errorsArray.join('')) + "</span>";
+                    $control.addClass(exports.inputErrorClass);
+                    $('#' + SF.compose(prefix, Entities.Keys.toStr) + ',#' + SF.compose(prefix, Entities.Keys.link)).addClass(exports.inputErrorClass);
+                    if (valOptions.showInlineErrors && $control.hasClass(exports.inlineErrorVal)) {
+                        var errorMessage = '<span class="' + exports.fieldErrorClass + '">' + (valOptions.fixedInlineErrorText || errorsArray.join('')) + "</span>";
 
                         if ($control.next().hasClass("ui-datepicker-trigger"))
                             $control.next().after(errorMessage);
@@ -169,22 +169,22 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
     //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
     function setPathErrors(valOptions, prefix, partialErrors) {
-        var pathPrefixes = (prefix != globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
+        var pathPrefixes = (prefix != exports.globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
         for (var i = 0, l = pathPrefixes.length; i < l; i++) {
             var currPrefix = pathPrefixes[i];
             if (currPrefix != undefined) {
                 var isEqual = (currPrefix === valOptions.prefix);
                 var isMoreInner = !isEqual && (currPrefix.indexOf(valOptions.prefix) > -1);
                 if (valOptions.showPathErrors || isMoreInner) {
-                    $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
-                    $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
+                    $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(exports.inputErrorClass);
+                    $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(exports.inputErrorClass);
                 }
-                if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
-                    var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
+                if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, exports.globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
+                    var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, exports.globalValidationSummary));
 
-                    var summaryUL = currentSummary.children('.' + summaryErrorClass);
+                    var summaryUL = currentSummary.children('.' + exports.summaryErrorClass);
                     if (summaryUL.length === 0) {
-                        currentSummary.append('<ul class="' + summaryErrorClass + '">\n' + partialErrors + '</ul>');
+                        currentSummary.append('<ul class="' + exports.summaryErrorClass + '">\n' + partialErrors + '</ul>');
                     } else {
                         summaryUL.append(partialErrors);
                     }

@@ -148,14 +148,52 @@ namespace Signum.Utilities
             return dateSpan.AddTo(date);
         }
 
-        public static DateTime Min(DateTime a, DateTime b)
+        public static DateTime Min(this DateTime a, DateTime b)
         {
             return a < b ? a : b;
         }
 
-        public static DateTime Max(DateTime a, DateTime b)
+        public static DateTime Max(this DateTime a, DateTime b)
         {
             return a > b ? a : b;
+        }
+
+        public static DateTime Min(this DateTime a, DateTime? b)
+        {
+            if (b == null)
+                return a;
+
+            return a < b.Value ? a : b.Value;
+        }
+
+        public static DateTime Max(this DateTime a, DateTime? b)
+        {
+            if (b == null)
+                return a;
+
+            return a > b.Value ? a : b.Value;
+        }
+
+        public static DateTime? Min(this DateTime? a, DateTime? b)
+        {
+            if (a == null)
+                return b;
+
+            if (b == null)
+                return a;
+
+            return a.Value < b.Value ? a.Value : b.Value;
+        }
+
+        public static DateTime? Max(this DateTime? a, DateTime? b)
+        {
+            if (a == null)
+                return b;
+
+            if (b == null)
+                return a;
+
+            return a.Value > b.Value ? a.Value : b.Value;
         }
 
         /// <param name="precision">Using Milliseconds does nothing, using Days use DateTime.Date</param>

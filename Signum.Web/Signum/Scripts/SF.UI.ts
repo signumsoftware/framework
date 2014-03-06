@@ -613,7 +613,8 @@ interface JQuery {
         };
 
         if (typeof options.onOk != "undefined") {
-            $this.find(".sf-ok-button").off('click').click(function () {
+            $this.find(".sf-ok-button").off('click').click(function (e) {
+                e.preventDefault();
                 var $this = $(this);
                 if ($this.hasClass("sf-save-protected")) {
                     var $popupDialog = $this.closest(".sf-popup-dialog");

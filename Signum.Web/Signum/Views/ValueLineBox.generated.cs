@@ -125,7 +125,9 @@ WriteLiteral("    ");
 Write(Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
 {
     LabelText = options.labelText,
-    LabelVisible = options.labelText.HasText()
+    LabelVisible = options.labelText.HasText(),
+    Format = options.format,
+    UnitText = options.unit,
 }));
 
             

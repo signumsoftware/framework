@@ -937,12 +937,12 @@ export class SearchControl {
         };
 
         var $tabContainer = $button.closest(".sf-tabs");
-        if ($tabContainer.length == 0) {
+        if ($tabContainer.length == 0 || this.element.is(":visible")) { 
             makeSearch();
         }
         else {
             var self = this;
-            $tabContainer.bind("tabsactivate", function (evt, ui) {
+            $tabContainer.bind("tabsactivate", function (evt, ui) { //OnVisible doesn't exist yet. 
                 if ($(ui.newPanel).find(self.element).length > 0) {
                     makeSearch();
                 }

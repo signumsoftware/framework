@@ -471,11 +471,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                 .Where(d => list.Contains(d.name))
                 .Select(d => new { d.name, d.snapshot_isolation_state, d.is_read_committed_snapshot_on }).ToList();
 
-            var cmd = results.Select(a =>  
+            var cmd = results.Select((a, i) =>
                 SqlPreCommand.Combine(Spacing.Simple,
-                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? new SqlPreCommandSimple(@"DECLARE @SPId VARCHAR(7000)
-SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
-EXEC(@SPId)".Formato(a.name)) : null,
+                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name, "SPID" + i) : null,
                 !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
                 !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double);
 
@@ -486,6 +484,13 @@ EXEC(@SPId)".Formato(a.name)) : null,
                 new SqlPreCommandSimple("use master -- Start Snapshot"),
                 cmd,
                 new SqlPreCommandSimple("use {0} -- Stop Snapshot".Formato(Connector.Current.DatabaseName())));
+        }
+
+        public static SqlPreCommandSimple DisconnectUsers(string databaseName, string variableName)
+        {
+            return new SqlPreCommandSimple(@"DECLARE @{1} VARCHAR(7000)
+SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
+EXEC(@{1})".Formato(databaseName, variableName));
         }
     }
 
