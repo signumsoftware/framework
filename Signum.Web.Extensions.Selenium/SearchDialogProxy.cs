@@ -71,31 +71,15 @@ namespace Signum.Web.Selenium
 
             this.OkWaitClosed();
         }
-
+     
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
-            Selenium.Click(SearchControl.CreateButtonLocator);
-
-            Selenium.WaitForPageToLoad();
-
-            return new PopupControl<T>(Selenium, Prefix);
+            return SearchControl.Create<T>();
         }
 
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
-            Selenium.Click(SearchControl.CreateButtonLocator);
-
-            //implementation popup opens
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Prefix));
-
-            if (!ChooserPopup.IsChooser(Selenium, SearchControl.Prefix))
-                throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
-
-            ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T)); 
-
-            Selenium.WaitForPageToLoad();
-
-            return new PopupControl<T>(Selenium, Prefix);
+            return SearchControl.CreateChoose<T>();
         }
 
         public void Search()
@@ -292,6 +276,32 @@ namespace Signum.Web.Selenium
         public void QueryButtonClick(string id)
         {
             Selenium.Click(QueryButtonLocator(id));
+        }
+
+        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        {
+            Selenium.Click(CreateButtonLocator);
+
+            Selenium.WaitForPageToLoad();
+
+            return new PopupControl<T>(Selenium, Prefix);
+        }
+
+        public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
+        {
+            Selenium.Click(CreateButtonLocator);
+
+            //implementation popup opens
+            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, Prefix));
+
+            if (!ChooserPopup.IsChooser(Selenium, Prefix))
+                throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
+
+            ChooserPopup.ChooseButton(Selenium, Prefix, typeof(T));
+
+            Selenium.WaitForPageToLoad();
+
+            return new PopupControl<T>(Selenium, Prefix);
         }
 
         public string CreateButtonLocator

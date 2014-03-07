@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Reflection;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Selenium
 {
@@ -218,6 +219,16 @@ namespace Signum.Web.Selenium
             lineContainer.Selenium.Click("jq=a[href='#{0}']".Formato(locator));
             lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}".Formato(locator)));
 
+        }
+
+        public static SearchControlProxy GetSearchControl<T>(this ILineContainer<T> lineContainer,object queryName)
+           where T : ModifiableEntity
+        {
+            string query = QueryUtils.GetQueryUniqueKey(queryName);
+
+            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-webQueryName=\"{0}\"]').data('prefix')".Formato(query));
+
+            return new SearchControlProxy(lineContainer.Selenium, prefix);
         }
 
     }
