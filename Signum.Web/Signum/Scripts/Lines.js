@@ -99,9 +99,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
 
             this.updateButtonsDisplay();
+            this.notifyChanges();
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
+        };
+
+        EntityBase.prototype.notifyChanges = function () {
+            $(this.element).closest(".sf-main-control").addClass("sf-changed");
         };
 
         EntityBase.prototype.remove_click = function () {
@@ -475,6 +480,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
+            this.notifyChanges();
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
@@ -507,6 +513,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
+            this.notifyChanges();
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
@@ -520,6 +527,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.removeEntitySpecific(itemPrefix);
 
             this.updateButtonsDisplay();
+            this.notifyChanges();
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }

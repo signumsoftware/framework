@@ -133,9 +133,14 @@ export class EntityBase {
         }
 
         this.updateButtonsDisplay();
+        this.notifyChanges();
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
+    }
+
+    notifyChanges() {
+        $(this.element).closest(".sf-main-control").addClass("sf-changed");
     }
 
     remove_click(): Promise<void> {
@@ -532,6 +537,7 @@ export class EntityListBase extends EntityBase {
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
         this.updateButtonsDisplay();
+        this.notifyChanges();
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
@@ -563,6 +569,7 @@ export class EntityListBase extends EntityBase {
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
         this.updateButtonsDisplay();
+        this.notifyChanges();
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
@@ -576,6 +583,7 @@ export class EntityListBase extends EntityBase {
         this.removeEntitySpecific(itemPrefix);
 
         this.updateButtonsDisplay();
+        this.notifyChanges();
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
