@@ -41,10 +41,10 @@ namespace Signum.Web
                 if (entityRepeater.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater)));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater), null));
                 }
-                
-                using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+
+                using (sb.Surround(new HtmlTag("div").Id(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (entityRepeater.UntypedValue != null)
                     {
@@ -63,53 +63,21 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 { 
                     if (entityRepeater.Remove)
-                        sb.AddLine(
-                            helper.Href(itemTC.Compose("btnRemove"),
-                                    EntityControlMessage.Remove.NiceToString(),
-                                    "",
-                                    EntityControlMessage.Remove.NiceToString(),
-                                    "sf-line-button sf-remove",
-                                    new Dictionary<string, object> 
-                                    {
-                                        { "onclick", entityRepeater.SFControlThen("removeItem_click('{0}')".Formato(itemTC.Prefix)) },
-                                        { "data-icon", "ui-icon-circle-close" }, 
-                                        { "data-text", false } 
-                                    }));
+                        sb.AddLine(EntityListBaseHelper.RemoveButtonItem(helper, itemTC, entityRepeater));
 
                     if (entityRepeater.Reorder)
                     {
-                        sb.AddLine(
-                            helper.Span(itemTC.Compose("btnUp"),
-                                JavascriptMessage.moveUp.NiceToString(),
-                                "sf-line-button sf-move-up",
-                                new Dictionary<string, object> 
-                                {  
-                                   { "onclick", entityRepeater.SFControlThen("moveUp('{0}')".Formato(itemTC.Prefix)) },
-                                   { "data-icon", "ui-icon-triangle-1-n" },
-                                   { "data-text", false },
-                                   { "title", JavascriptMessage.moveUp.NiceToString() }
-                                }));
-
-                        sb.AddLine(
-                            helper.Span(itemTC.Compose("btnDown"),
-                                JavascriptMessage.moveDown.NiceToString(),
-                                "sf-line-button sf-move-down",
-                                new Dictionary<string, object> 
-                                {   
-                                   { "onclick", entityRepeater.SFControlThen("moveDown('{0}')".Formato(itemTC.Prefix)) },
-                                   { "data-icon", "ui-icon-triangle-1-s" },
-                                   { "data-text", false },
-                                   { "title", JavascriptMessage.moveDown.NiceToString() }
-                                }));
+                        sb.AddLine(EntityListBaseHelper.MoveUpButtonItem(helper, itemTC, entityRepeater, true));
+                        sb.AddLine(EntityListBaseHelper.MoveDownButtonItem(helper, itemTC, entityRepeater, true));
                     }
                 }
 
-                sb.AddLine(ListBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
+                sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, entityRepeater));

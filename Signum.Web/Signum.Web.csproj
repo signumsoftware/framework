@@ -104,6 +104,8 @@
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="HtmlHelpers\TabHelpers.cs" />
+    <Compile Include="LineHelpers\EntityTabRepeaterHelper.cs" />
+    <Compile Include="LineHelpers\EntityListBaseHelper.cs" />
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
@@ -234,7 +236,6 @@
     <Compile Include="Lines\EntityCombo.cs" />
     <Compile Include="LineHelpers\EntityBaseHelper.cs" />
     <Compile Include="Lines\EntityLine.cs" />
-    <Compile Include="LineHelpers\ListBaseHelper.cs" />
     <Compile Include="LineHelpers\EntityListDetailHelper.cs" />
     <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />

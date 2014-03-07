@@ -20,6 +20,7 @@
      class="sf-search-control SF-control-container" 
      data-prefix="@Model.Prefix" 
      data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
+     data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
      >
 
     @Html.Hidden(Model.Compose("sfEntityTypeNames"),

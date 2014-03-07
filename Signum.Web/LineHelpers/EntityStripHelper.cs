@@ -36,7 +36,7 @@ namespace Signum.Web
                 if (entityStrip.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true)));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true), null));
                 }
 
                 using (sb.Surround(new HtmlTag("ul")
@@ -93,7 +93,7 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element")))
             {
-                sb.AddLine(ListBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
+                sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
@@ -117,61 +117,17 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("span").Class("sf-button-container")))
                 {
-
                     if (entityStrip.Reorder)
                     {
-                        sb.AddLine(
-                            helper.Span(itemTC.Compose("btnUp"),
-                                JavascriptMessage.moveUp.NiceToString(),
-                                "sf-line-button sf-move-up",
-                                new Dictionary<string, object> 
-                                {  
-                                   { "onclick", entityStrip.SFControlThen("moveUp('{0}')".Formato(itemTC.Prefix)) },
-                                   { "data-icon",  "ui-icon-triangle-1-" + (entityStrip.Vertical ? "n" : "w") },
-                                   { "data-text", false },
-                                   { "title", JavascriptMessage.moveUp.NiceToString() }
-                                }));
-
-                        sb.AddLine(
-                            helper.Span(itemTC.Compose("btnDown"),
-                                JavascriptMessage.moveDown.NiceToString(),
-                                "sf-line-button sf-move-down",
-                                new Dictionary<string, object> 
-                                {   
-                                   { "onclick", entityStrip.SFControlThen("moveDown('{0}')".Formato(itemTC.Prefix)) },
-                                   { "data-icon", "ui-icon-triangle-1-" + (entityStrip.Vertical ? "s" : "e")  },
-                                   { "data-text", false },
-                                   { "title", JavascriptMessage.moveDown.NiceToString() }
-                                }));
+                        sb.AddLine(EntityListBaseHelper.MoveUpButtonItem(helper, itemTC, entityStrip, entityStrip.Vertical));
+                        sb.AddLine(EntityListBaseHelper.MoveDownButtonItem(helper, itemTC, entityStrip, entityStrip.Vertical));
                     }
 
                     if (entityStrip.View)
-                        sb.AddLine(
-                            helper.Href(itemTC.Compose("btnView"),
-                                    EntityControlMessage.View.NiceToString(),
-                                    "",
-                                    EntityControlMessage.View.NiceToString(),
-                                    "sf-line-button sf-view",
-                                    new Dictionary<string, object> 
-                                {
-                                    { "onclick", entityStrip.SFControlThen("viewItem_click('{0}')".Formato(itemTC.Prefix)) },
-                                    { "data-icon",  "ui-icon-circle-arrow-e" },
-                                    { "data-text", false } 
-                                }));
+                        sb.AddLine(EntityListBaseHelper.ViewButtonItem(helper, itemTC, entityStrip));
 
                     if (entityStrip.Remove)
-                        sb.AddLine(
-                            helper.Href(itemTC.Compose("btnRemove"),
-                                    EntityControlMessage.Remove.NiceToString(),
-                                    "",
-                                    EntityControlMessage.Remove.NiceToString(),
-                                    "sf-line-button sf-remove",
-                                    new Dictionary<string, object> 
-                                {
-                                    { "onclick", entityStrip.SFControlThen("removeItem_click('{0}')".Formato(itemTC.Prefix)) },
-                                    { "data-icon", "ui-icon-circle-close" }, 
-                                    { "data-text", false } 
-                                }));
+                        sb.AddLine(EntityListBaseHelper.RemoveButtonItem(helper, itemTC, entityStrip));
                 }
             }
 
