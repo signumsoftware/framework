@@ -144,6 +144,10 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    public enum NewsletterProcess
+    {
+        SendNewsletter,
+    }
 
     public enum NewsletterOperation
     {

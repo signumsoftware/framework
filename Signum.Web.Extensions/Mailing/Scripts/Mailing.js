@@ -274,12 +274,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             if (entities == null)
                 return;
 
-            Operations.executeDefault($.extend({
-                keys: entities.map(function (e) {
-                    return e.runtimeInfo.key();
-                }).join(","),
-                controllerUrl: url
-            }, options));
+            options.requestExtraJsonData = { liteKeys: Finder.SearchControl.liteKeys(entities) };
+            options.controllerUrl = url;
+
+            Operations.executeDefault(options);
         });
     }
     exports.removeRecipients = removeRecipients;

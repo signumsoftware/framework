@@ -141,6 +141,11 @@ namespace Signum.Web.Mailing
                             OnClick = ctx =>new JsOperationFunction(Module, "removeRecipients",
                                 new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
                                 ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
+                        },
+
+                        new EntityOperationSettings(NewsletterOperation.Send)
+                        {
+                            Group = EntityOperationGroup.None,
                         }
                     });
                 }
