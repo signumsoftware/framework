@@ -226,7 +226,7 @@ namespace Signum.Web.Selenium
         {
             string query = QueryUtils.GetQueryUniqueKey(queryName);
 
-            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-webQueryName=\"{0}\"]').data('prefix')".Formato(query));
+            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".Formato(query));
 
             return new SearchControlProxy(lineContainer.Selenium, prefix);
         }
