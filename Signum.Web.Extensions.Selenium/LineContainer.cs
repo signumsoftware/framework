@@ -14,7 +14,12 @@ using System.Reflection;
 
 namespace Signum.Web.Selenium
 {
-    public interface ILineContainer<T> where T : ModifiableEntity
+    public interface ILineContainer<T> :ILineContainer where T : ModifiableEntity
+    {
+      
+    }
+
+    public interface ILineContainer
     {
         ISelenium Selenium { get; }
 
@@ -166,6 +171,15 @@ namespace Signum.Web.Selenium
             return new EntityRepeaterProxy(lineContainer.Selenium, newPrefix, newRoute);
         }
 
+        public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+           where T : ModifiableEntity
+        {
+            string newPrefix;
+            PropertyRoute newRoute = lineContainer.GetRoute(property, out newPrefix);
+
+            return new EntityTabRepeaterProxy(lineContainer.Selenium, newPrefix, newRoute);
+        }
+
         public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
             where T : ModifiableEntity
         {
@@ -220,6 +234,21 @@ namespace Signum.Web.Selenium
 
         }
 
+        public static string PrefixUnderscore(this ILineContainer lineContainer)
+        {
+            if (lineContainer.Prefix.HasText())
+                return lineContainer.Prefix + "_";
+
+            return "";
+        }
+
+        public static string[] Errors(this ILineContainer lineContainer)
+        {
+            var result = lineContainer.Selenium
+                .GetEval("window.$('#" + lineContainer.PrefixUnderscore() + "sfGlobalValidationSummary > ul > li').toArray().map(function(e){return $(e).text()}).join('\\r\\n');");
+
+            return result.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        }
     }
 
     public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
@@ -262,10 +291,7 @@ namespace Signum.Web.Selenium
         {
         }
 
-        public bool HasChanges()
-        {
-            return Selenium.IsElementPresent("jq=#divMainControl.sf-changed");
-        }
+       
 
         public bool HasId()
         {
@@ -280,6 +306,12 @@ namespace Signum.Web.Selenium
         public RuntimeInfoProxy RuntimeInfo()
         {
             return RuntimeInfoProxy.FromFormValue(Selenium.GetEval("window.$('#sfRuntimeInfo').val()"));
+        }
+
+        public T RetrieveEntity()
+        {
+            var lite = this.RuntimeInfo().ToLite();
+            return (T)(IIdentifiable)lite.Retrieve();
         }
 
         public string EntityState()
