@@ -147,6 +147,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                             newTempDiv.popup('restoreTitle');
                             newTempDiv.popup('destroy');
+                            entityHtml.html = newTempDiv.children();
                             newTempDiv.remove();
 
                             resolve(entityHtml);

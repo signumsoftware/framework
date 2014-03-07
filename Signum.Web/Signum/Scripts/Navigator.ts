@@ -174,6 +174,7 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
 
                         newTempDiv.popup('restoreTitle');
                         newTempDiv.popup('destroy');
+                        entityHtml.html = newTempDiv.children();
                         newTempDiv.remove();
 
                         resolve(entityHtml);
