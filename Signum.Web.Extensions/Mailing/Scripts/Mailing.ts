@@ -277,9 +277,11 @@ export function removeRecipients(options: Operations.EntityOperationOptions, new
         if (entities == null)
             return;
 
-        Operations.executeDefault($.extend({
-            keys: entities.map(e=> e.runtimeInfo.key()).join(","),
-            controllerUrl: url
-        }, options));
+        options.requestExtraJsonData = { liteKeys: Finder.SearchControl.liteKeys(entities) };
+        options.controllerUrl = url;
+
+        Operations.executeDefault(options);
     }); 
 }
+
+

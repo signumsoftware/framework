@@ -49,12 +49,12 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public JsonNetResult GetLiteralsForType(string prefix)
+        public JsonNetResult GetLiteralsForType()
         {
-            var type = this.ExtractEntity<TypeDN>();
+            var type = this.ParseLite<TypeDN>("type");
             return this.JsonNet(new
             {
-                literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType())
+                literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.Retrieve().ToType())
             });
         }
 

@@ -37,11 +37,11 @@ namespace Signum.Web.Mailing
         {
             var deliveries = this.ParseLiteKeys<NewsletterDeliveryDN>();
 
-            var newsletter = Lite.Parse<NewsletterDN>(Request["newsletter"]);
+            var newsletter = this.ExtractEntity<NewsletterDN>();
             
-            newsletter.ExecuteLite(NewsletterOperation.RemoveRecipients, deliveries);
+            newsletter.Execute(NewsletterOperation.RemoveRecipients, deliveries);
 
-            return this.RedirectHttpOrAjax(Navigator.NavigateRoute(newsletter));
+            return this.DefaultExecuteResult(newsletter);
         }
 
         [HttpPost]

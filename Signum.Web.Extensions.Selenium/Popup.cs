@@ -166,11 +166,6 @@ namespace Signum.Web.Selenium
             return "jq=#{0}_panelPopup #{1}.sf-entity-button".Formato(Prefix, buttonId);
         }
 
-        public bool HasChanges()
-        {
-            return Selenium.IsElementPresent("jq=#{0}_divMainControl.sf-changed".Formato(Prefix));
-        }
-
         public void CloseDiscardChanges()
         {
             Selenium.Click(CloseButtonLocator);

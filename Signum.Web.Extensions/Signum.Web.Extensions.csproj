@@ -239,6 +239,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Scheduler\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\Views\SMSConfiguration.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -248,6 +253,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSTemplateMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Translation\Controllers\TranslatedInstanceController.cs" />
     <Compile Include="Translation\Controllers\TranslationController.cs" />
@@ -800,11 +810,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
     <Compile Include="SMS\Models\MultipleSMSModel.cs" />
     <Compile Include="SMS\SMSClient.cs" />
@@ -1062,7 +1067,6 @@
     </Content>
     <Content Include="Mailing\Content\Mailing.css" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
-    <TypeScriptCompile Include="Mailing\Scripts\TabsRepeater.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\ckeditor.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1610,6 +1614,11 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SMSTemplateMessage.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="SMS\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\Web.config" />
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>
