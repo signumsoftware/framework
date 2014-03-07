@@ -984,6 +984,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             SF.triggerNewContent(entity);
 
             $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+            $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
         };
 
         EntityTabRepeater.prototype.getRepeaterCall = function () {

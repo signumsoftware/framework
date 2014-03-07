@@ -1031,6 +1031,7 @@ export class EntityTabRepeater extends EntityRepeater {
         SF.triggerNewContent(entity);
 
         $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+        $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
     }
 
     getRepeaterCall() {
