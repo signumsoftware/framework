@@ -193,34 +193,37 @@ var SF;
         NewContentProcessor.defaultPlaceholder = defaultPlaceholder;
 
         function defaultTabs($newContent) {
-            var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
-
-            $tabContainers.tabs();
-            $tabContainers.each(function () {
+            $newContent.find(".sf-tabs").each(function () {
                 var $tabContainer = $(this);
 
-                var $tabs = $tabContainer.children("fieldset");
-                $tabs.each(function () {
-                    var $this = $(this);
-                    var $legend = $this.children("legend");
-                    if ($legend.length == 0) {
-                        $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
-                        throw "No legend specified for tab";
-                    }
-                    var legend = $legend.html();
+                if ($tabContainer.children("ul").length == 0) {
+                    $tabContainer.prepend($("<ul></ul>"));
 
-                    var id = $this.attr("id");
-                    if (SF.isEmpty(id)) {
-                        $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
-                        throw "No id set for tab with legend: " + legend;
-                    } else {
-                        $("<li><a href='#" + id + "'>" + legend + "</a></li>").appendTo($($tabContainer.find(".ui-tabs-nav").first()));
-                        $legend.remove();
-                    }
-                });
+                    var $tabsNav = $tabContainer.children("ul");
 
-                $tabContainer.tabs("refresh");
-                $tabContainer.tabs("option", "active", 0);
+                    var $tabs = $tabContainer.children("fieldset");
+                    $tabs.each(function () {
+                        var $this = $(this);
+                        var $legend = $this.children("legend");
+                        if ($legend.length == 0) {
+                            $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
+                            throw "No legend specified for tab";
+                        }
+                        var legend = $legend.html();
+
+                        var id = $this.attr("id");
+                        if (SF.isEmpty(id)) {
+                            $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
+                            throw "No id set for tab with legend: " + legend;
+                        } else {
+                            $tabsNav.append($("<li><a href='#" + id + "'>" + legend + "</a></li>"));
+                            $legend.remove();
+                        }
+                    });
+                }
+
+                if (!$tabContainer.hasClass("ui-tabs"))
+                    $tabContainer.tabs();
             });
         }
         NewContentProcessor.defaultTabs = defaultTabs;
