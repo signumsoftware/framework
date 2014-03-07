@@ -135,7 +135,7 @@ namespace Signum.Engine.Disconnected
 
                             int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
 
-                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type == tuple.Type.ToTypeDN()).UnsafeUpdateMList()
+                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.RefersTo(tuple.Type.ToTypeDN())).UnsafeUpdateMList()
                             .Set(mle => mle.Element.CopyTable, mle => ms)
                             .Set(mle => mle.Element.MaxIdInRange, mle => maxId)
                             .Execute();
@@ -252,8 +252,8 @@ namespace Signum.Engine.Disconnected
                     "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
-                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type == typeof(T).ToTypeDN()).UnsafeUpdateMList()
-                        .Set(mle => mle.Element.Error, mle => result)
+                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.RefersTo(typeof(T).ToTypeDN())).UnsafeUpdateMList()
+                        .Set(mle => mle.Element.Errors, mle => result)
                         .Execute();
 
                 return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate()

@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Reflection;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Selenium
 {
@@ -249,6 +250,16 @@ namespace Signum.Web.Selenium
 
             return result.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer,object queryName)
+        {
+            string query = QueryUtils.GetQueryUniqueKey(queryName);
+
+            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".Formato(query));
+
+            return new SearchControlProxy(lineContainer.Selenium, prefix);
+        }
+
     }
 
     public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
