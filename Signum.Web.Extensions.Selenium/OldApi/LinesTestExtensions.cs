@@ -157,7 +157,7 @@ namespace Signum.Web.Selenium
 
             //implementation popup opens
             selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
-            selenium.Click(typeToChoose);
+            selenium.Click("jq=.sf-chooser-button[data-value={0}]".Formato(typeToChoose));
             selenium.Wait(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
 
             if (opensEntity)
@@ -220,61 +220,26 @@ namespace Signum.Web.Selenium
 
         public static void LineFind(this ISelenium selenium, string prefix)
         {
-            LineFind(selenium, prefix, -1);
-        }
-
-        /// <summary>
-        /// To be used for list lines
-        /// </summary>
-        /// <param name="selenium"></param>
-        /// <param name="elementIndexBase0"></param>
-        /// <param name="prefix"></param>
-        public static void LineFind(this ISelenium selenium, string prefix, int elementIndexBase0)
-        {
             selenium.Click(LineFindSelector(prefix));
-
-            if (elementIndexBase0 != -1)
-                prefix += elementIndexBase0 + "_";
             selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
         public static void LineFindWithImpl(this ISelenium selenium, string prefix, string typeToChoose)
         {
-            LineFindWithImpl(selenium, prefix, typeToChoose, -1);
-        }
-
-        /// <summary>
-        /// To be used for EntityList
-        /// </summary>
-        /// <param name="selenium"></param>
-        /// <param name="elementIndexBase0"></param>
-        /// <param name="prefix"></param>
-        public static void LineFindWithImpl(this ISelenium selenium, string prefix, string typeToChoose, int elementIndexBase0)
-        {
             selenium.Click(LineFindSelector(prefix));
 
             //implementation popup opens
             selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
-            selenium.Click(typeToChoose);
+            selenium.Click("jq=.sf-chooser-button[data-value={0}]".Formato(typeToChoose));
             selenium.Wait(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
 
             //search popup opens
-            if (elementIndexBase0 != -1)
-                prefix += elementIndexBase0 + "_";
             selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
         public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0)
         {
-            LineFindAndSelectElements(selenium, prefix, rowIndexesBase0, -1);
-        }
-
-        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0, int elementIndexBase0)
-        {
-            selenium.LineFind(prefix, elementIndexBase0);
-
-            if (elementIndexBase0 != -1)
-                prefix += elementIndexBase0 + "_";
+            selenium.LineFind(prefix);
 
             selenium.Search(prefix);
 
@@ -286,15 +251,7 @@ namespace Signum.Web.Selenium
 
         public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId)
         {
-            LineFindAndSelectElementById(selenium, prefix, elementId, -1);
-        }
-
-        public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId, int elementIndexBase0)
-        {
-            selenium.LineFind(prefix, elementIndexBase0);
-
-            if (elementIndexBase0 != -1)
-                prefix += elementIndexBase0 + "_";
+            selenium.LineFind(prefix);
 
             selenium.FilterSelectToken(0, "Id", false, prefix);
             selenium.AddFilter(0, prefix);
@@ -308,15 +265,7 @@ namespace Signum.Web.Selenium
 
         public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0)
         {
-            LineFindWithImplAndSelectElements(selenium, prefix, typeToChoose, rowIndexesBase0, -1);
-        }
-
-        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0, int elementIndexBase0)
-        {
-            selenium.LineFindWithImpl(prefix, typeToChoose, elementIndexBase0);
-
-            if (elementIndexBase0 != -1)
-                prefix += elementIndexBase0 + "_";
+            selenium.LineFindWithImpl(prefix, typeToChoose);
 
             selenium.Search(prefix);
 
