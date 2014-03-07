@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     List<string> parts = SplitSubparts(reader, contentType.Boundary);
 
-             
+
                     if (contentType.MediaType == "multipart/related")
                     {
                         var result = GetParts(parts[0], Request.AlternateView).ToList();
@@ -70,16 +70,16 @@ namespace Signum.Engine.Mailing.Pop3
 
                         foreach (string item in parts.Skip(1))
                         {
-                            foreach (var part in GetParts(item, best == null ? Request.None: Request.LinkedResource))
+                            foreach (var part in GetParts(item, best == null ? Request.None : Request.LinkedResource))
                             {
                                 if (best != null && part is LinkedResource)
                                     best.LinkedResources.Add((LinkedResource)part);
                                 else
-                                    result.Add(best); 
+                                    result.Add(best);
                             }
                         }
 
-                        return result; 
+                        return result;
                     }
                     else
                     {
@@ -97,11 +97,16 @@ namespace Signum.Engine.Mailing.Pop3
                 if (req == Request.LinkedResource)
                     return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: true) };
 
-                if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/"))
+                if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/") && !IsAttachment(headers["Content-Disposition"]))
                     return new List<AttachmentBase> { ParseTextView(reader, contentTransferEncoding, contentType) };
 
                 return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false) };
             }
+        }
+
+        private static bool IsAttachment(string contentDisposition)
+        {
+            return contentDisposition.HasText() && contentDisposition.StartsWith("attachment", StringComparison.InvariantCultureIgnoreCase);
         }
 
         static NameValueCollection ReadHeaders(StringReader reader, NameValueCollection headers)
