@@ -334,7 +334,7 @@ WriteLiteral("        ");
 
             
             #line 54 "..\..\Mailing\Views\EmailTemplate.cshtml"
-    Write(new JsLineFunction(MailingClient.Module, "initReplacements"));
+    Write(new JsFunction(MailingClient.Module, "initReplacements"));
 
             
             #line default

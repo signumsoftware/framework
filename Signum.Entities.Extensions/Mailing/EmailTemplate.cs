@@ -331,7 +331,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return cultureInfo.TryToString();
+            return cultureInfo.TryToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
     }
 
@@ -355,6 +355,7 @@ namespace Signum.Entities.Mailing
         Type0DoesNotHaveAPropertyWithName1,
         [Description("SystemEmail should be set to access model {0}")]
         SystemEmailShouldBeSetToAccessModel0,
+        NewCulture,
     }
 
     public enum EmailTemplateCanAddTokenMessage
