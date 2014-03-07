@@ -25,12 +25,12 @@ namespace Signum.Web.Processes
     public class ProcessController : Controller
     {
         [HttpPost]
-        public ContentResult GetProgressExecution(int id)
+        public JsonNetResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessDN>().Where(pe =>
-                    pe.Id == id && pe.State != ProcessState.Error).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 100;
+                    pe.Id == id && pe.State != ProcessState.Error).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 1;
 
-            return Content(Math.Round(progress, 0).ToString());
+            return this.JsonNet(progress);
         }
 
         [HttpGet]
