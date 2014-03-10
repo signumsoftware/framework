@@ -44,7 +44,7 @@ namespace Signum.Web.Selenium
         {
             get
             {
-                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
                     return Selenium.IsChecked(Prefix).ToString();
 
                 return Selenium.GetValue(Prefix);
@@ -52,7 +52,7 @@ namespace Signum.Web.Selenium
 
             set
             {
-                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
                     Selenium.SetChecked(Prefix, bool.Parse(value));
                 else
                     Selenium.Type(Prefix, value);
@@ -730,7 +730,7 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementPresent("jq=#{0}_DivNew .sf-file-drop:visible".Formato(Prefix));
             Selenium.Type("{0}_sfFile".Formato(Prefix), path);
             Selenium.FireEvent("{0}_sfFile".Formato(Prefix), "change");
-            Selenium.WaitElementPresent("jq=#{0}_sfToStr:visible".Formato(Prefix));
+            Selenium.WaitElementPresent("jq=#{0}_sfLink:visible".Formato(Prefix));
         }
     }
 }
