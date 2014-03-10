@@ -98,7 +98,7 @@ namespace Signum.Engine
                 if (dix.Columns.Count != mix.Columns.Length)
                     return true;
 
-                var dixColumns =dif.Colums.Where(kvp=>dix.Columns.Contains(kvp.Value.Name));
+                var dixColumns = dif.Colums.Where(kvp => dix.Columns.Contains(kvp.Value.Name));
 
                 return !dixColumns.All(kvp => dif.Colums.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key)));
             };
@@ -219,10 +219,12 @@ namespace Signum.Engine
                 {
                     var columnReplacements = replacements.TryGetC(Replacements.KeyColumnsForTable(tn));
 
+                    Func<IColumn, bool> isNew = c => !dif.Colums.ContainsKey(columnReplacements.TryGetC(c.Name) ?? c.Name);
+
                     Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
-                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
+                        (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
                         (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                             mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
