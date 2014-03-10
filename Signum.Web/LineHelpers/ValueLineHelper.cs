@@ -93,29 +93,10 @@ namespace Signum.Web
             }
 
             StringBuilder sb = new StringBuilder();
-            List<SelectListItem> items = valueLine.EnumComboItems;
-            if (items == null)
-            {
-                items = new List<SelectListItem>();
+            List<SelectListItem> items = valueLine.EnumComboItems ?? valueLine.CreateComboItems();
 
-                if (valueLine.UntypedValue == null ||
-                    valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.TryGetPropertyValidator(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
-                {
-                    items.Add(new SelectListItem() { Text = "-", Value = "" });
-                }
-
-                items.AddRange(Enum.GetValues(uType)
-                    .Cast<Enum>()
-                    .Select(v => new SelectListItem()
-                    {
-                        Text = v.NiceToString(),
-                        Value = v.ToString(),
-                        Selected = object.Equals(value, v),
-                    }));
-            }
-            else
-                if (value != null)
-                    items.Where(e => e.Value == value.ToString()).SingleEx(()=>"Not value present in ValueLine", ()=> "More than one values present in ValueLine").Selected = true;
+            if (value != null)
+                items.Where(e => e.Value == value.ToString()).SingleEx(() => "Not value present in ValueLine", () => "More than one values present in ValueLine").Selected = true;
 
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }

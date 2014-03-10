@@ -33,5 +33,26 @@ namespace Signum.Web
         protected override void SetReadOnly()
         {
         }
+
+        public List<SelectListItem> CreateComboItems()
+        {
+            var items = new List<SelectListItem>();
+
+            if (UntypedValue == null ||
+                Type.IsNullable() && (PropertyRoute == null || !Validator.TryGetPropertyValidator(PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
+            {
+                items.Add(new SelectListItem() { Text = "-", Value = "" });
+            }
+
+            items.AddRange(Enum.GetValues(Type.UnNullify())
+                .Cast<Enum>()
+                .Select(v => new SelectListItem()
+                {
+                    Text = v.NiceToString(),
+                    Value = v.ToString(),
+                }));
+
+            return items;
+        }
     }
 }
