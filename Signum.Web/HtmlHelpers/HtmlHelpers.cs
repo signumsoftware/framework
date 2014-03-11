@@ -276,10 +276,11 @@ namespace Signum.Web
                 values.Select(a => a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : HttpUtility.HtmlEncode(a)).ToArray()));
         }
 
-        public static MvcHtmlString Json(this HtmlHelper html, object value)
+        public static MvcHtmlString Json(this HtmlHelper html, object value, JsonSerializerSettings settings = null)
         {
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(new LiteJavaScriptConverter());
+            if (settings == null)
+                settings = new JsonSerializerSettings() { Converters = { new LiteJavaScriptConverter() } };
+
             return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
         }
 
