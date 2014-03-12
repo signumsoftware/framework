@@ -51,7 +51,7 @@ namespace Signum.Web.Extensions.Translation.Views
             #line 2 "..\..\Translation\Views\TranslatorUserCulture.cshtml"
  using (var tcc = Html.TypeContext<TranslatorUserCultureDN>())
 {
-    using (Html.FieldInline())
+    using (Html.FormInline())
     {
     
             

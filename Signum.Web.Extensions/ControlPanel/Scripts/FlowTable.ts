@@ -43,63 +43,63 @@ function updateRowAndColIndexes($column: JQuery) {
 }
 
 function createDraggables($target: JQuery) {
-    $target.draggable({
-        handle: ".sf-ftbl-part-header",
-        revert: "invalid",
-        start: function (event, ui) { setDraggingState(true); },
-        stop: function (event, ui) { setDraggingState(false); }
-    });
+    //$target.draggable({
+    //    handle: ".sf-ftbl-part-header",
+    //    revert: "invalid",
+    //    start: function (event, ui) { setDraggingState(true); },
+    //    stop: function (event, ui) { setDraggingState(false); }
+    //});
 }
 
 function createDroppables($target: JQuery) {
-    $target.droppable({
-        hoverClass: "ui-state-highlight sf-ftbl-droppable-active",
-        tolerance: "pointer",
-        over: function (event, ui) {
-            var $draggedContainer = ui.draggable.closest(".sf-ftbl-part-container");
-            $(this).css({
-                width: $draggedContainer.width(),
-                height: $draggedContainer.height()
-            });
-        },
-        out: function (event, ui) {
-            restoreDroppableSize($(this));
-        },
-        drop: function (event, ui) {
-            var $dragged = <JQuery>ui.draggable;
+    //$target.droppable({
+    //    hoverClass: "ui-state-highlight sf-ftbl-droppable-active",
+    //    tolerance: "pointer",
+    //    over: function (event, ui) {
+    //        var $draggedContainer = ui.draggable.closest(".sf-ftbl-part-container");
+    //        $(this).css({
+    //            width: $draggedContainer.width(),
+    //            height: $draggedContainer.height()
+    //        });
+    //    },
+    //    out: function (event, ui) {
+    //        restoreDroppableSize($(this));
+    //    },
+    //    drop: function (event, ui) {
+    //        var $dragged = <JQuery>ui.draggable;
 
-            var $startContainer = $dragged.closest(".sf-ftbl-part-container");
-            var $targetPlaceholder = $(this); //droppable
+    //        var $startContainer = $dragged.closest(".sf-ftbl-part-container");
+    //        var $targetPlaceholder = $(this); //droppable
 
-            var $targetCol = $targetPlaceholder.closest(".sf-ftbl-column");
-            var $originCol = $startContainer.closest(".sf-ftbl-column");
+    //        var $targetCol = $targetPlaceholder.closest(".sf-ftbl-column");
+    //        var $originCol = $startContainer.closest(".sf-ftbl-column");
 
-            //update html (drag new position is only visual)
-            var $newDroppable = $("<div></div>").addClass("sf-ftbl-droppable");
-            var $clonedPart = $startContainer.clone();
-            $targetPlaceholder.after($newDroppable).after($clonedPart);
+    //        //update html (drag new position is only visual)
+    //        var $newDroppable = $("<div></div>").addClass("sf-ftbl-droppable");
+    //        var $clonedPart = $startContainer.clone();
+    //        $targetPlaceholder.after($newDroppable).after($clonedPart);
 
-            $(".sf-ftbl-part").css({ top: 0, left: 0 });
+    //        $(".sf-ftbl-part").css({ top: 0, left: 0 });
 
-            //clear old elements
-            $startContainer.next(".sf-ftbl-droppable").remove();
-            $startContainer.html("").remove(); //empty before removing to force jquery ui clear current draggable bindings
+    //        //clear old elements
+    //        $startContainer.next(".sf-ftbl-droppable").remove();
+    //        $startContainer.html("").remove(); //empty before removing to force jquery ui clear current draggable bindings
 
-            //set all row and col number for target column parts
-            updateRowAndColIndexes($targetCol);
+    //        //set all row and col number for target column parts
+    //        updateRowAndColIndexes($targetCol);
 
-            //set all row and col number for origin column parts if it's different from target column
-            if ($originCol.index() != $targetCol.index()) {
-                updateRowAndColIndexes($originCol);
-            }
+    //        //set all row and col number for origin column parts if it's different from target column
+    //        if ($originCol.index() != $targetCol.index()) {
+    //            updateRowAndColIndexes($originCol);
+    //        }
 
-            //create draggable and droppable of new elements
-            createDroppables($newDroppable);
-            createDraggables($clonedPart.find(".sf-ftbl-part"));
+    //        //create draggable and droppable of new elements
+    //        createDroppables($newDroppable);
+    //        createDraggables($clonedPart.find(".sf-ftbl-part"));
 
-            setDraggingState(false);
-            restoreDroppableSize($targetPlaceholder);
-        }
-    });
+    //        setDraggingState(false);
+    //        restoreDroppableSize($targetPlaceholder);
+    //    }
+    //});
 }
 

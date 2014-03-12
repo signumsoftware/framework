@@ -8,7 +8,7 @@
     MinWidth="300">
     <ItemsControl ItemsSource="{Binding UserQueries}" Grid.IsSharedSizeScope="True">
         <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type d:CountUserQueryElement}">
+            <DataTemplate DataType="{x:Type d:CountUserQueryElementDN}">
                 <m:CountSearchControl swuq:UserQueryClient.UserQuery="{Binding UserQuery}"/>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

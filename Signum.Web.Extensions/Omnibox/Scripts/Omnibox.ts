@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
 export function initialize(omniboxId: string, autocompleteOptions?: any) {
     autocompleteOptions = autocompleteOptions || {};
@@ -7,7 +6,7 @@ export function initialize(omniboxId: string, autocompleteOptions?: any) {
     var $omnibox = $("#" + omniboxId); 
 
     var lastXhr :JQueryXHR; //To avoid previous requests results to be shown
-    $omnibox.autocomplete($.extend({
+    $omnibox.typeahead($.extend({
         delay: 0,
         minLength: 1,
         source: function (request, response) {

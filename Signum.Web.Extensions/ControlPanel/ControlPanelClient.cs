@@ -69,10 +69,10 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<UserQueryPartDN>(),
 
                     new EntitySettings<CountSearchControlPartDN>(),
-                    new EmbeddedEntitySettings<CountUserQueryElement> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
+                    new EmbeddedEntitySettings<CountUserQueryElementDN> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartDN>(),
-                    new EmbeddedEntitySettings<LinkElement> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
+                    new EmbeddedEntitySettings<LinkElementDN> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(

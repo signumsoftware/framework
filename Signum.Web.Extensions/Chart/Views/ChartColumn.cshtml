@@ -9,16 +9,20 @@
 @using Signum.Engine.Authorization;
 @using Signum.Entities.Authorization;
 @using Signum.Web.UserQueries;
-@helper ColorLink(Type type)
-    {
-        var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
+
+
+@helper ColorLink(TypeContext tc, Type type)
+{
+    var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
         
-    @Html.Field(ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
-                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
-                          (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
+    @Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
+                    Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
+                                    (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)), new { @class = "form-control-static" }));
 }
+
 @using (var tc = Html.TypeContext<ChartColumnDN>())
 {
+
     if (tc.Value == null)
     {
         tc.Value = new ChartColumnDN();
@@ -52,8 +56,8 @@
         </td>
         <td>
             <div class="sf-query-token">
-                @Html.QueryTokenDNBuilder(tc.SubContext(a=>a.Token), ChartClient.GetQueryTokenBuilderSettings(
-                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],  
+                @Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
+                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],
                 tc.Value.ParentChart.GroupResults, tc.Value.IsGroupKey == true))
             </div>
             <a class="sf-chart-token-config-trigger">@ChartMessage.Chart_ToggleInfo.NiceToString()</a>
@@ -63,8 +67,7 @@
    
     
     <tr class="sf-chart-token-config" style="display: none">
-        <td>
-        </td>
+        <td></td>
         <td colspan="2">
             @using (Html.FieldInline())
             { 
@@ -78,7 +81,7 @@
 
                     if (type.UnNullify().IsEnum)
                     {
-                @ColorLink(type.UnNullify());
+                @ColorLink(tc, type.UnNullify());
                     }
                     else
                     {
@@ -93,7 +96,7 @@
                 <text> | </text>
                                 }
                                 
-                @ColorLink(item.Value);
+                @ColorLink(tc, item.Value);
                             }
                         }
                     }

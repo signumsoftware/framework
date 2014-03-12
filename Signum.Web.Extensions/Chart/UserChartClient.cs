@@ -127,7 +127,7 @@ namespace Signum.Web.Chart
                     Text = uc.ToString(),
                     AltText = uc.ToString(),
                     Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc, null)),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
+                    CssClass = (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
             }
 
@@ -143,7 +143,6 @@ namespace Signum.Web.Chart
                     AltText = uqNewText,
                     Text = uqNewText,
                     OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c)=>c.CreateUserChart())),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }            
             
@@ -155,8 +154,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     AltText = ucEditText,
                     Text = ucEditText,
-                    Href = Navigator.NavigateRoute(currentUserChart),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                    Href = Navigator.NavigateRoute(currentUserChart)
                 });
             }
 
@@ -168,7 +166,6 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
                     AltText = ucUserChartText,
                     Text = ucUserChartText,
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
                     Items = items
                 }
             };
@@ -184,7 +181,6 @@ namespace Signum.Web.Chart
                     OnClick = new JsFunction(ChartClient.Module, "exportData", prefix, 
                         url.Action((ChartController c)=>c.Validate()),
                         url.Action((ChartController c)=>c.ExportData())),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
 

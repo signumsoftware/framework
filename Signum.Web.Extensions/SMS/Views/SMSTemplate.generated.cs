@@ -252,7 +252,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 28 "..\..\SMS\Views\SMSTemplate.cshtml"
-         using (Html.FieldInline())
+         using (Html.FormInline())
         {
             
             

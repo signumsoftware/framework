@@ -51,7 +51,7 @@ namespace Signum.Web.Extensions.Chart.Views
             #line 2 "..\..\Chart\Views\ChartScriptParameter.cshtml"
  using (var cc = Html.TypeContext<ChartScriptParameterDN>())
 {
-    using (Html.FieldInline())
+    using (Html.FormInline())
     {
     
             

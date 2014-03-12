@@ -3,9 +3,9 @@
 
 @using (var sc = Html.TypeContext<EmailAttachmentDN>())
 {
-    using (Html.FieldInline())
+    using (Html.FormInline())
     {
-        sc.LabelVisible = false;
+        sc.FormGroupStyle = FormGroupStyle.Inline;
     @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; })
     @Html.ValueLine(sc, c => c.Type)
     }

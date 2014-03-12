@@ -203,8 +203,8 @@ namespace Signum.Entities.ControlPanel
     public class CountSearchControlPartDN : Entity, IPartDN
     {
         [NotNullable]
-        MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
-        public MList<CountUserQueryElement> UserQueries
+        MList<CountUserQueryElementDN> userQueries = new MList<CountUserQueryElementDN>();
+        public MList<CountUserQueryElementDN> UserQueries
         {
             get { return userQueries; }
             set { Set(ref userQueries, value, () => UserQueries); }
@@ -241,7 +241,7 @@ namespace Signum.Entities.ControlPanel
     }
 
     [Serializable]
-    public class CountUserQueryElement : EmbeddedEntity
+    public class CountUserQueryElementDN : EmbeddedEntity
     {
         string label;
         public string Label
@@ -264,9 +264,9 @@ namespace Signum.Entities.ControlPanel
             get { return href; }
             set { Set(ref href, value, () => Href); }
         }
-        public CountUserQueryElement Clone()
+        public CountUserQueryElementDN Clone()
         {
-            return new CountUserQueryElement
+            return new CountUserQueryElementDN
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -294,8 +294,8 @@ namespace Signum.Entities.ControlPanel
     public class LinkListPartDN : Entity, IPartDN
     {
         [NotNullable]
-        MList<LinkElement> links = new MList<LinkElement>();
-        public MList<LinkElement> Links
+        MList<LinkElementDN> links = new MList<LinkElementDN>();
+        public MList<LinkElementDN> Links
         {
             get { return links; }
             set { Set(ref links, value, () => Links); }
@@ -303,7 +303,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
+            return "{0} {1}".Formato(links.Count, typeof(LinkElementDN).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -333,7 +333,7 @@ namespace Signum.Entities.ControlPanel
     }
 
     [Serializable]
-    public class LinkElement : EmbeddedEntity
+    public class LinkElementDN : EmbeddedEntity
     {
         string label;
         [NotNullValidator]
@@ -351,9 +351,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref link, value, () => Link); }
         }
 
-        public LinkElement Clone()
+        public LinkElementDN Clone()
         {
-            return new LinkElement
+            return new LinkElementDN
             {
                 Label = this.Label,
                 Link = this.Link

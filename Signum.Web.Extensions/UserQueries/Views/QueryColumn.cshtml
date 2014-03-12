@@ -6,7 +6,7 @@
 {
     using (var style = e.SubContext())
     {
-        style.OnlyValue = true;
+        style.FormGroupStyle = FormGroupStyle.None;
     @Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20)
     <div style="float: left">
         @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), 

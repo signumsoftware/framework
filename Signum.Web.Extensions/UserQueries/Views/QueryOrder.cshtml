@@ -7,7 +7,7 @@
 {
     using (var style = e.SubContext())
     {
-        style.OnlyValue = true;
+        style.FormGroupStyle = FormGroupStyle.None;
     <div style="float: left">
         @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), SearchControlHelper.GetQueryTokenBuilderSettings(
                 (QueryDescription)ViewData[ViewDataKeys.QueryDescription]))

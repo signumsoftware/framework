@@ -180,8 +180,7 @@ namespace Signum.Web.Chart
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
                 AltText = chartNewText,
                 Text = chartNewText,
-                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart")),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
+                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart"))
             };
         }
 

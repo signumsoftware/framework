@@ -152,7 +152,7 @@ namespace Signum.Web.UserQueries
                     Text = uq.ToString(),
                     AltText = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + " sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
+                    CssClass = "sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
             }
 
@@ -167,8 +167,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries")),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
                 });
             }
 
@@ -180,8 +179,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
                     AltText = uqEditText,
                     Text = uqEditText,
-                    Href = Navigator.NavigateRoute(currentUserQuery),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                    Href = Navigator.NavigateRoute(currentUserQuery)
                 });
             }
 
@@ -193,7 +191,6 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
                     AltText = uqUserQueriesText,
                     Text = uqUserQueriesText,
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
                     Items = items
                 }
             };

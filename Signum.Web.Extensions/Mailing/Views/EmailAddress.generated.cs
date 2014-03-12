@@ -53,7 +53,7 @@ WriteLiteral("\r\n");
             #line 3 "..\..\Mailing\Views\EmailAddress.cshtml"
  using (var sc = Html.TypeContext<EmailAddressDN>())
 {
-    using (Html.FieldInline())
+    using (Html.FormInline())
     {
     
             

@@ -4,12 +4,12 @@
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
-        @Html.Field(AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
-            Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
+        @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordKey), AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
+            Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty))
     
-        @Html.Field(AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
-            Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
+        @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
+            Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty))
     }
     @Html.ValueLine(e, f => f.PasswordNeverExpires)

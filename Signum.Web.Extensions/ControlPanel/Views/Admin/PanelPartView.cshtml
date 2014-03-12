@@ -9,7 +9,7 @@
     <div class="ui-widget ui-widget-content ui-corner-all sf-ftbl-part">
         <div class="ui-widget-header ui-corner-all sf-ftbl-part-header">
             <button class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false"></button>
-            @Html.ValueLine(tc, pp => pp.Title, vl => vl.LabelVisible = false)
+            @Html.ValueLine(tc, pp => pp.Title, vl => vl.FormGroupStyle = FormGroupStyle.None)
         </div>
         <div>
             @Html.HiddenRuntimeInfo(tc, pp => pp.Content)

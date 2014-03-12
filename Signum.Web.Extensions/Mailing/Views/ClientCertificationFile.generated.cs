@@ -53,7 +53,7 @@ WriteLiteral("\r\n");
             #line 3 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
  using (var sc = Html.TypeContext<ClientCertificationFileDN>())
 {
-    using (Html.FieldInline())
+    using (Html.FormInline())
     {
     
             

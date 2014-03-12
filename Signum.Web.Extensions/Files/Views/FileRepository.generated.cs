@@ -132,7 +132,7 @@ Write(Html.EntityList(e, f => f.FileTypes));
 Write(Html.CountSearchControl(new FindOptions(typeof(FilePathDN), "Repository", e.Value), csc =>
     {
         csc.PopupViewPrefix = "files";
-        csc.WriteQueryName = WriteQueryName.Field;
+        csc.WriteQueryName = WriteQueryName.FormGroup;
     }));
 
             

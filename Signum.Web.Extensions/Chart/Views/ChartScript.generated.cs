@@ -77,7 +77,6 @@ WriteLiteral("\r\n");
             #line 7 "..\..\Chart\Views\ChartScript.cshtml"
  using (var cc = Html.TypeContext<ChartScriptDN>())
 {
-    
     var imageRoute=cc.Compose("ImageIco");
     
 
@@ -93,7 +92,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 14 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 13 "..\..\Chart\Views\ChartScript.cshtml"
        Write(Html.ValueLine(cc, c => c.Name));
 
             
@@ -104,10 +103,10 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 15 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 14 "..\..\Chart\Views\ChartScript.cshtml"
        Write(Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
            {
-               a.LabelVisible = true;
+               a.FormGroupStyle = FormGroupStyle.Horizontal;
                a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
                a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);
            }));
@@ -118,13 +117,13 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </div>\r\n");
 
             
-            #line 22 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 21 "..\..\Chart\Views\ChartScript.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 22 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 21 "..\..\Chart\Views\ChartScript.cshtml"
          if (cc.Value.Icon != null && !cc.Value.Icon.IsNew)
         {
 
@@ -137,30 +136,30 @@ WriteLiteral(" style=\"float: left\"");
 
 WriteLiteral(">\r\n                <img");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 830), Tuple.Create("\"", 846)
+WriteAttribute("id", Tuple.Create(" id=\"", 847), Tuple.Create("\"", 863)
             
-            #line 25 "..\..\Chart\Views\ChartScript.cshtml"
-, Tuple.Create(Tuple.Create("", 835), Tuple.Create<System.Object, System.Int32>(imageRoute
+            #line 24 "..\..\Chart\Views\ChartScript.cshtml"
+, Tuple.Create(Tuple.Create("", 852), Tuple.Create<System.Object, System.Int32>(imageRoute
             
             #line default
             #line hidden
-, 835), false)
+, 852), false)
 );
 
-WriteAttribute("src", Tuple.Create(" src=\"", 847), Tuple.Create("\"", 943)
+WriteAttribute("src", Tuple.Create(" src=\"", 864), Tuple.Create("\"", 960)
             
-            #line 25 "..\..\Chart\Views\ChartScript.cshtml"
-, Tuple.Create(Tuple.Create("", 853), Tuple.Create<System.Object, System.Int32>(Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))
+            #line 24 "..\..\Chart\Views\ChartScript.cshtml"
+, Tuple.Create(Tuple.Create("", 870), Tuple.Create<System.Object, System.Int32>(Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))
             
             #line default
             #line hidden
-, 853), false)
+, 870), false)
 );
 
 WriteLiteral(" />\r\n            </div>\r\n");
 
             
-            #line 27 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 26 "..\..\Chart\Views\ChartScript.cshtml"
         }
 
             
@@ -173,21 +172,21 @@ WriteLiteral(" class=\"clearall\"");
 WriteLiteral(" />\r\n    </div>\r\n");
 
             
-            #line 30 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 29 "..\..\Chart\Views\ChartScript.cshtml"
  
     
             
             #line default
             #line hidden
             
-            #line 31 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 30 "..\..\Chart\Views\ChartScript.cshtml"
 Write(Html.ValueLine(cc, c => c.GroupBy));
 
             
             #line default
             #line hidden
             
-            #line 31 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 30 "..\..\Chart\Views\ChartScript.cshtml"
                                        
 
             
@@ -202,7 +201,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 33 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 32 "..\..\Chart\Views\ChartScript.cshtml"
    Write(Html.EntityRepeater(cc, c => c.Columns));
 
             
@@ -211,21 +210,21 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 35 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 34 "..\..\Chart\Views\ChartScript.cshtml"
     
     
             
             #line default
             #line hidden
             
-            #line 36 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 35 "..\..\Chart\Views\ChartScript.cshtml"
 Write(Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc));
 
             
             #line default
             #line hidden
             
-            #line 36 "..\..\Chart\Views\ChartScript.cshtml"
+            #line 35 "..\..\Chart\Views\ChartScript.cshtml"
                                                                        
 }
 

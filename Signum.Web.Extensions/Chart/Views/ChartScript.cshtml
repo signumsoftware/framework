@@ -6,7 +6,6 @@
     "~/Chart/Content/Chart.css")
 @using (var cc = Html.TypeContext<ChartScriptDN>())
 {
-    
     var imageRoute=cc.Compose("ImageIco");
     
     <div>
@@ -14,7 +13,7 @@
             @Html.ValueLine(cc, c => c.Name)
             @Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
            {
-               a.LabelVisible = true;
+               a.FormGroupStyle = FormGroupStyle.Horizontal;
                a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
                a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);
            })

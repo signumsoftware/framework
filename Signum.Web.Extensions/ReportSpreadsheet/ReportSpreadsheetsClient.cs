@@ -76,8 +76,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 AltText = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report")),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
+                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
             };
 
             if (ExcelReport) 
@@ -101,7 +100,6 @@ namespace Signum.Web.Reports
                             AltText = report.ToString(),
                             Text = report.ToString(),
                             OnClick = new JsFunction(Module, "toExcelReport", ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
-                            DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
                 }
@@ -116,7 +114,6 @@ namespace Signum.Web.Reports
                     AltText = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
                     OnClick = new JsFunction(Module, "administerExcelReports", ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
 
                 items.Add(new ToolBarButton
@@ -125,7 +122,6 @@ namespace Signum.Web.Reports
                     AltText = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
                     OnClick = new JsFunction(Module, "createExcelReports", ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
 
                 return new ToolBarButton[]
@@ -135,7 +131,6 @@ namespace Signum.Web.Reports
                         Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
                         AltText = "Excel", 
                         Text = "Excel",
-                        DivCssClass = ToolBarButton.DefaultQueryCssClass,
                         Items = items
                     }
                 };

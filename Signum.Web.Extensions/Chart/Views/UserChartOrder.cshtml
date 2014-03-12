@@ -12,7 +12,7 @@
 
     using (var style = e.SubContext())
     {
-        style.OnlyValue = true;
+        style.FormGroupStyle = FormGroupStyle.None;
     <div style="float: left">
         @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
         (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults, isKey: false))

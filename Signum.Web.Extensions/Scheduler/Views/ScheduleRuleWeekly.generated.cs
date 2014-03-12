@@ -75,7 +75,7 @@ Write(Html.ValueLine(e, f => f.DayOfTheWeek));
             #line 6 "..\..\Scheduler\Views\ScheduleRuleWeekly.cshtml"
                                            
 
-    using (@Html.FieldInline())
+    using (@Html.FormInline())
     {
         
             

@@ -34,9 +34,9 @@
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
         @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
-        @Html.Field("Query", Navigator.IsFindable(queryName) ?
-                 new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
-                 Html.Span("spanQuery", query.Value.Name, "sf-value-line"))
+        @Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
+                 new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                 Html.Span(null, query.Value.Name, "form-control-static"))
 
         <div class="clearall"></div>
         }

@@ -2,19 +2,9 @@
 @using Signum.Web.ControlPanel
 @using Signum.Entities.Reports
 
-@using (var tc = Html.TypeContext<CountUserQueryElement>())
+@using (var tc = Html.TypeContext<CountUserQueryElementDN>())
 {
-    tc.ValueFirst = true;
-    using (Html.FieldInline())
-    {
-        @Html.ValueLine(tc, cuq => cuq.Label)
-        @Html.EntityLine(tc, cuq => cuq.UserQuery, el => 
-        { 
-            el.Create = false;
-            el.Remove = false;
-            el.View = false;
-            el.Navigate = true;
-        })
-    }
+    @Html.ValueLine(tc, cuq => cuq.Label)
+    @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.ReadOnly = true)
     @Html.ValueLine(tc, cuq => cuq.Href)
 }

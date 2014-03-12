@@ -284,7 +284,7 @@ Write(Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnl
 Write(Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
 {
     csc.PopupViewPrefix = e.Compose("errors");
-    csc.WriteQueryName = WriteQueryName.Field;
+    csc.WriteQueryName = WriteQueryName.FormGroup;
 }));
 
             

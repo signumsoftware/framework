@@ -15,9 +15,6 @@
             FilterMode = FilterMode.Hidden
         };
 
-        @Html.Field(
-            uq.Label.HasText() ? uq.Label : uq.UserQuery.DisplayName,
-            Html.CountSearchControl(uq.UserQuery, fo, csc => { csc.Navigate = true; csc.Href = uq.Href; }))
-        <div class="clearall"></div>
+        @Html.CountSearchControl(uq.UserQuery, fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.WriteQueryName = WriteQueryName.FormGroup; csc.QueryLabelText = uq.Label; })
     }
 </div>

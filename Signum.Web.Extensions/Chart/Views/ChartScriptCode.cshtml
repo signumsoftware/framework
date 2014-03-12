@@ -30,7 +30,7 @@
       }
       .CodeMirror-focused span.CodeMirror-matchhighlight 
       { 
-          background: #efe7ff; !important 
+          background: #efe7ff !important 
       }
       
       .exceptionLine {background: #FFFF00 !important;}
@@ -59,7 +59,7 @@
 // use 'debugger' keyword or just throw JSON.stringify(myVariable)
 // All yours!...
  </pre>
-    @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; })
+    @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.FormGroupStyle = FormGroupStyle.None; })
  
     <script>
         require(["@ChartClient.ModuleScript"], function (ChartScript) {

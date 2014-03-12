@@ -142,13 +142,12 @@ namespace Signum.Web.AuthAdmin
         private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
             where T : ModifiableEntity
         {
-            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) =>
-                new[] { new ToolBarButton { 
-                    OnClick =  embedded?
-                    new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
-                    new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
+            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] {  new ToolBarButton 
+                { 
                     Text = AuthMessage.Save.NiceToString(),
-                    DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
+                    OnClick =  embedded?
+                      new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
+                      new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
                 }});
         }
 

@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Mailing.Views
+namespace Signum.Web.Extensions.ControlPanel.Views.Admin
 {
     using System;
     using System.Collections.Generic;
@@ -28,94 +28,83 @@ namespace Signum.Web.Extensions.Mailing.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 2 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Entities.DynamicQuery;
+    #line 1 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+    using Signum.Entities.ControlPanel;
     
     #line default
     #line hidden
     
-    #line 1 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Entities.Mailing;
+    #line 3 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+    using Signum.Entities.Reports;
     
     #line default
     #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 4 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Web.Mailing;
-    
-    #line default
-    #line hidden
-    
-    #line 3 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Web.UserQueries;
+    #line 2 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+    using Signum.Web.ControlPanel;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailTemplateContact.cshtml")]
-    public partial class EmailTemplateContact : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/CountUserQueryElement.cshtml")]
+    public partial class CountUserQueryElement : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public EmailTemplateContact()
+        public CountUserQueryElement()
         {
         }
         public override void Execute()
         {
+WriteLiteral("\r\n");
+
             
-            #line 5 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
- using (var tc = Html.TypeContext<EmailTemplateContactDN>())
+            #line 5 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+ using (var tc = Html.TypeContext<CountUserQueryElementDN>())
 {
-    using (Html.FormInline())
-    {
     
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.EmailAddress));
+            #line 7 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+Write(Html.ValueLine(tc, cuq => cuq.Label));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                            
+            #line 7 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+                                         
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.DisplayName));
+            #line 8 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                           
-    }
-    using (var qtTc = tc.SubContext(etTc => etTc.Token))
-    {
+            #line 8 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+                                                                        
     
             
             #line default
             #line hidden
             
-            #line 14 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.FormGroup(qtTc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, MailingClient.GetQueryTokenBuilderSettings(
-        (QueryDescription)ViewData[ViewDataKeys.QueryDescription]))));
+            #line 9 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+Write(Html.ValueLine(tc, cuq => cuq.Href));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                                                    
-    }
+            #line 9 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
+                                        
 }
             
             #line default

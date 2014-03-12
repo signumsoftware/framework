@@ -189,7 +189,7 @@ Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
 Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
-    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.Field; }));
+    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.FormGroup; }));
 
             
             #line default

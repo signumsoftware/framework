@@ -90,7 +90,7 @@ WriteLiteral("<ul class=\"sf-cp-link-list\">\r\n");
 
             
             #line 10 "..\..\ControlPanel\Views\LinkListPart.cshtml"
-     foreach (LinkElement link in linkList)
+     foreach (LinkElementDN link in linkList)
     {
 
             

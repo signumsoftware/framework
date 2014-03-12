@@ -80,16 +80,15 @@ define(["require", "exports"], function(require, exports) {
 
             e.preventDefault();
         });
-
-        $(".sf-annual-calendar-slider").slider({
-            min: 40,
-            max: 90,
-            value: 80,
-            step: 10,
-            slide: function (event, ui) {
-                $(".sf-annual-calendar td").width(ui.value + "px").height(ui.value + "px");
-            }
-        });
+        //$(".sf-annual-calendar-slider").slider({
+        //    min: 40,
+        //    max: 90,
+        //    value: 80,
+        //    step: 10,
+        //    slide: function (event, ui) {
+        //        $(".sf-annual-calendar td").width(ui.value + "px").height(ui.value + "px");
+        //    }
+        //});
     }
     exports.init = init;
 });

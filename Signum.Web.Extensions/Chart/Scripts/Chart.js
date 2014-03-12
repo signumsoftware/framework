@@ -124,7 +124,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         } else {
                             Validator.showErrors({}, null);
                             self.$chartControl.find(".sf-search-results-container").html(result);
-                            SF.triggerNewContent(self.$chartControl.find(".sf-search-results-container"));
                             self.initOrders();
                             self.reDraw();
                         }
@@ -186,7 +185,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 data: data,
                 success: function (result) {
                     $chartBuilder.replaceWith(result);
-                    SF.triggerNewContent(self.$chartControl.find(".sf-chart-builder"));
                     if (self.reDrawOnUpdateBuilder) {
                         self.reDraw();
                         self.reDrawOnUpdateBuilder = false;

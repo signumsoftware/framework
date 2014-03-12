@@ -109,9 +109,8 @@ WriteLiteral("\r\n<style");
 WriteLiteral(" type=\"text/css\"");
 
 WriteLiteral(">\r\n    .sf-chart-control .sf-repeater-element\r\n    {\r\n        padding: 2px 10px;\r" +
-"\n    }\r\n\r\n        .sf-chart-control .sf-repeater-element legend\r\n        {\r\n    " +
-"        float: left;\r\n            margin-right: 10px;\r\n        }\r\n</style>\r\n<div" +
-"");
+"\n    }\r\n\r\n    .sf-chart-control .sf-repeater-element legend\r\n    {\r\n        floa" +
+"t: left;\r\n        margin-right: 10px;\r\n    }\r\n</style>\r\n<div");
 
 WriteLiteral(" class=\"sf-chart-control\"");
 
@@ -237,16 +236,16 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 49 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.Field("Query", Navigator.IsFindable(queryName) ?
-                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
-                Html.Span("spanQuery", query.Value.Name, "sf-value-line")));
+   Write(Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
+                new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                Html.Span(null, query.Value.Name, "form-control-static")));
 
             
             #line default
             #line hidden
             
             #line 51 "..\..\Chart\Views\UserChart.cshtml"
-                                                                          
+                                                                         
 
 
             
@@ -370,14 +369,14 @@ WriteLiteral("\r\n        </p>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2904), Tuple.Create("\"", 2947)
+WriteAttribute("id", Tuple.Create(" id=\"", 2945), Tuple.Create("\"", 2988)
             
             #line 74 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 2909), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 2950), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2909), false)
+, 2950), false)
 );
 
 WriteLiteral(">\r\n");

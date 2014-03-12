@@ -150,6 +150,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanel\Views\Admin\CountUserQueryElement.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CountUserQueryElement.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\Admin\LinkElement.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LinkElement.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Files\Views\FileRepository.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -681,16 +691,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="ControlPanel\Views\Admin\CountUserQueryElement.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CountUserQueryElement.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="ControlPanel\Views\Admin\LinkElement.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>LinkElement.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanel\Views\Admin\LinkListPart.cs">
       <AutoGen>True</AutoGen>
@@ -1451,7 +1451,7 @@
     </None>
     <None Include="ControlPanel\Views\Admin\LinkElement.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>LinkElement.cs</LastGenOutput>
+      <LastGenOutput>LinkElement.generated.cs</LastGenOutput>
     </None>
     <None Include="ControlPanel\Views\Admin\LinkListPart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1459,7 +1459,7 @@
     </None>
     <None Include="ControlPanel\Views\Admin\CountUserQueryElement.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CountUserQueryElement.cs</LastGenOutput>
+      <LastGenOutput>CountUserQueryElement.generated.cs</LastGenOutput>
     </None>
     <None Include="ControlPanel\Views\Admin\CountSearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
