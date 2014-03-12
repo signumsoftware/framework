@@ -714,7 +714,9 @@ var SF;
         };
         resize($container, $container.find(".sf-search-track"));
 
-        $container.find(".sf-search-slider").disableTextSelect();
+        $(function () {
+            $container.find(".sf-search-slider").disableTextSelect();
+        });
     }
     SF.slider = slider;
 
@@ -725,8 +727,8 @@ var SF;
             posx = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
             posy = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
         } else {
-            //posx = e.clientX + window.scrollX;
-            //posy = e.clientY + window.scrollY;
+            posx = e.clientX + document.body.scrollLeft;
+            posy = e.clientY + document.body.scrollTop;
         }
 
         return {
