@@ -312,16 +312,13 @@ namespace Signum.Engine.Mailing
                 rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
         }
 
-
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
-            if (!dup.Recipients.SequenceEqual(email.Recipients))
+            if (!dup.Recipients.OrderBy(a => a.EmailAddress).SequenceEqual(email.Recipients.OrderBy(a => a.EmailAddress)))
                 return false;
 
             if (!dup.From.Equals(email.From))
                 return false;
-
-
 
             if (!dup.Attachments.Select(a=>a.ContentId).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.ContentId).OrderBy()))
                 return false;
