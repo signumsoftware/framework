@@ -75,26 +75,29 @@ namespace Signum.Web.Mailing
         {
             if (!options.Attachments.Any())
                 return body;
-         
-            var dic = options.Attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => a.ContentId, a => options.Url.Content(a.File.FullWebPath));
 
             var newBody = Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", src =>
             {
-                var value = src.Groups["link"].Value;
+                string value = src.Groups["link"].Value;
 
                 if (!value.StartsWith("cid:"))
-                {
-                    return src.Value;
-                }
-
-                value = value.After("cid:");
-
-                var link = dic.TryGetC(value);
-
-                if (link == null)
                     return src.Value;
 
-                return "src=\"{0}\"".Formato(options.Url.Content(link));
+                string cid = value.After("cid:");
+
+                EmailAttachmentDN only = options.Attachments.Where(a => a.ContentId == cid).Only();
+                if (only != null)
+                    return "src=\"{0}\"".Formato(options.Url.Content(only.File.FullWebPath));
+
+                string fileName = cid.TryBefore('@');
+                if (fileName == null)
+                    return src.Value;
+
+                only = options.Attachments.Where(a => a.File.FileName == fileName).Only();
+                if (only != null)
+                    return "src=\"{0}\"".Formato(options.Url.Content(only.File.FullWebPath));
+
+                return src.Value;
             });
 
             return newBody;
