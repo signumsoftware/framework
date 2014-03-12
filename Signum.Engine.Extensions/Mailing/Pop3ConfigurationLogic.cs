@@ -317,13 +317,13 @@ namespace Signum.Engine.Mailing
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
-            if (!dup.Recipients.OrderBy(a => a.EmailAddress).SequenceEqual(email.Recipients.OrderBy(a => a.EmailAddress)))
+            if (!dup.Recipients.OrderBy(a => a.GetHashCode()).SequenceEqual(email.Recipients.OrderBy(a => a.GetHashCode())))
                 return false;
 
             if (!dup.From.Equals(email.From))
                 return false;
 
-            if (!dup.Attachments.Select(a=>a.ContentId).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.ContentId).OrderBy()))
+            if (!dup.Attachments.Select(a=>a.File.FileName).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.File.FileName).OrderBy()))
                 return false;
 
             return true;
