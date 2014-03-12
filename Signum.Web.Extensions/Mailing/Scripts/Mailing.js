@@ -127,7 +127,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     ;
 
-    function initHtmlEditor(idTargetTextArea) {
+    function initHtmlEditor(idTargetTextArea, culture) {
+        CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
         CKEDITOR.replace(idTargetTextArea);
 
         // Update origin textarea
@@ -148,8 +149,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     exports.initHtmlEditor = initHtmlEditor;
     ;
 
-    function initHtmlEditorMasterTemplate(idTargetTextArea) {
-        exports.initHtmlEditor(idTargetTextArea);
+    function initHtmlEditorMasterTemplate(idTargetTextArea, culture) {
+        exports.initHtmlEditor(idTargetTextArea, culture);
 
         var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message").find(".sf-master-template-insert-content");
 
@@ -160,8 +161,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     exports.initHtmlEditorMasterTemplate = initHtmlEditorMasterTemplate;
 
-    function initHtmlEditorWithTokens(idTargetTextArea) {
-        exports.initHtmlEditor(idTargetTextArea);
+    function initHtmlEditorWithTokens(idTargetTextArea, culture) {
+        exports.initHtmlEditor(idTargetTextArea, culture);
 
         var lastCursorPosition;
 

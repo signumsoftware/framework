@@ -128,8 +128,9 @@ function updateHtmlEditorTextArea(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].updateElement();
 };
 
-export function initHtmlEditor(idTargetTextArea: string) {
+export function initHtmlEditor(idTargetTextArea: string, culture : string) {
 
+    CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
     CKEDITOR.replace(idTargetTextArea);
 
     // Update origin textarea
@@ -149,9 +150,9 @@ export function initHtmlEditor(idTargetTextArea: string) {
     
 };
 
-export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
+export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
         .find(".sf-master-template-insert-content");
@@ -162,9 +163,9 @@ export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
     });
 }
 
-export function initHtmlEditorWithTokens(idTargetTextArea: string) {
+export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var lastCursorPosition;
 
