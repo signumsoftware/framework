@@ -100,8 +100,22 @@ namespace Signum.Engine.Mailing.Pop3
                 if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/") && !IsAttachment(headers["Content-Disposition"]))
                     return new List<AttachmentBase> { ParseTextView(reader, contentTransferEncoding, contentType) };
 
-                return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false) };
+                var attachment = ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false);
+
+                if (IsWinMailDat(contentType) && OpenWinMailAttachment != null)
+                    return OpenWinMailAttachment((Attachment)attachment);
+
+                return new List<AttachmentBase> { attachment };
             }
+        }
+
+        public static Func<Attachment, List<AttachmentBase>> OpenWinMailAttachment = null;
+
+        static bool IsWinMailDat(ContentType contentType)
+        {
+            return contentType.MediaType != null &&
+                (string.Equals(contentType.MediaType, "application/ms-tnef") || string.Equals(contentType.MediaType, "application/dat")) &&
+                string.Equals(contentType.Name, "winmail.dat", StringComparison.CurrentCultureIgnoreCase);
         }
 
         private static bool IsAttachment(string contentDisposition)
@@ -226,7 +240,14 @@ namespace Signum.Engine.Mailing.Pop3
             if (contentType.CharSet == null)
                 return Encoding.UTF8;
 
-            return Encoding.GetEncoding(contentType.CharSet.ToLower());
+            try
+            {
+                return Encoding.GetEncoding(contentType.CharSet.ToLower());
+            }
+            catch
+            {
+                return Encoding.UTF8;
+            }
         }
 
         static AttachmentBase ParseAttachment(StringReader r, string encoding, ContentType contentType, NameValueCollection headers, bool asLinkedResource)
