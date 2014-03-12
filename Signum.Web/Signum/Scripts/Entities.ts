@@ -23,9 +23,9 @@ export class RuntimeInfo {
     type: string;
     id: number;
     isNew: boolean;
-    ticks: number;
+    ticks: string;
 
-    constructor(entityType: string, id: number, isNew: boolean, ticks?: number) {
+    constructor(entityType: string, id: number, isNew: boolean, ticks?: string) {
         if (SF.isEmpty(entityType))
             throw new Error("entityTyp is mandatory for RuntimeInfo");
 
@@ -44,7 +44,7 @@ export class RuntimeInfo {
             array[0],
             SF.isEmpty(array[1]) ? null : parseInt(array[1]),
             array[2] == "n",
-            SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+            array[3]);
     }
 
     public toString() {

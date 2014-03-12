@@ -36,7 +36,7 @@ define(["require", "exports"], function(require, exports) {
                 return null;
 
             var array = runtimeInfoString.split(';');
-            return new RuntimeInfo(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+            return new RuntimeInfo(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", array[3]);
         };
 
         RuntimeInfo.prototype.toString = function () {
