@@ -14,49 +14,28 @@ namespace Signum.Web
 {
     public static class ValueLineHelper
     {
+        public static string StaticValue = "sfStaticValue";
+
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
             if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
             {
-                if (valueLine.OnlyValue)
-                {
-                    InternalValueLineValue(helper, valueLine, sb);
-                }
-                else
-                {
-                    using (sb.Surround(new HtmlTag("div").Class("sf-field")))
-                    using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
-                    {
-                        if (!valueLine.ValueFirst)
-                            InternalValueLineLabel(helper, valueLine, sb);
+                var value = InternalValue(helper, valueLine);
 
-                        using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                            InternalValueLineValue(helper, valueLine, sb);
-
-                        if (valueLine.ValueFirst)
-                            InternalValueLineLabel(helper, valueLine, sb);
-                    }
-                }
+                return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
             }
 
-            return sb.ToHtml();
+            return MvcHtmlString.Empty;
         }
 
-        private static void InternalValueLineLabel(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
+        private static MvcHtmlString InternalValue(HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.LabelVisible)
-                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.Prefix, "sf-label-line", valueLine.LabelHtmlProps));
-        }
-
-        private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
-        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
 
             if (valueLine.ShowValidationMessage)
                 valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
@@ -72,6 +51,8 @@ namespace Signum.Web
             {
                 sb.AddLine(helper.ValidationMessage(valueLine.Prefix));
             }
+
+            return sb.ToHtml();
         }
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
@@ -89,7 +70,7 @@ namespace Signum.Web
                     value == null ? null :
                     LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members) ? value.NiceToString() : value.ToString();
 
-                return result.Concat(helper.Span("", str, "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.Span("", str, "form-control", valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -135,7 +116,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
-                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "form-control", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
@@ -170,9 +151,9 @@ namespace Signum.Web
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
+                return helper.Span(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", "form-control");
 
-            return HtmlHelperExtenders.InputType("hidden", valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            return helper.Hidden(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
@@ -185,7 +166,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
-                return result.Concat(helper.Span("", value, "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -218,7 +199,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
-                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "form-control", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
@@ -233,7 +214,7 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
 
             bool? value = (bool?)valueLine.UntypedValue;
-            return HtmlHelperExtenders.CheckBox(helper, valueLine.Prefix, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
+            return helper.CheckBox(valueLine.Prefix, value ?? false, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString RadioButtons(this HtmlHelper helper, ValueLine valueLine)

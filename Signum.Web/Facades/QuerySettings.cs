@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
+using System.Web.Mvc.Html;
 
 namespace Signum.Web
 {
@@ -83,7 +84,7 @@ namespace Signum.Web
                 }),
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => (h,o) => 
                 {
-                    return o != null ? AlignCenter(h.CheckBox("", (bool)o, false)) : MvcHtmlString.Empty;
+                    return o != null ? AlignCenter(h.CheckBox("", (bool)o, new { disabled = "disabled" })) : MvcHtmlString.Empty;
                 }),
             };
 

@@ -165,7 +165,7 @@ namespace Signum.Web
     {
         public QuickLink()
         {
-            DivCssClass = "sf-quicklink";
+            CssClass = "sf-quicklink";
         }
 
         public string Prefix { get; set; }

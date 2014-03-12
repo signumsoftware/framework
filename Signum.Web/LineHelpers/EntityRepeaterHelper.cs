@@ -29,7 +29,7 @@ namespace Signum.Web
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
+                    sb.AddLine(EntityBaseHelper.ListLabel(helper, entityRepeater));
 
                     sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater, hidden: false));
                     sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater, hidden: false));

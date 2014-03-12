@@ -46,8 +46,6 @@ export function createTempDiv(entityHtml: Entities.EntityHtml): string {
 
     tempDiv.html(entityHtml.html);
 
-    SF.triggerNewContent(tempDiv);
-
     return tempDivId; 
 }
 
@@ -254,7 +252,6 @@ export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {
 export function reloadMain(entityHtml: Entities.EntityHtml) {
     var $elem = $("#divNormalControl");
     $elem.html(entityHtml.html);
-    SF.triggerNewContent($elem);
 }
 
 export function closePopup(prefix: string): void {
@@ -283,8 +280,6 @@ export function reloadPopup(entityHtml : Entities.EntityHtml) {
     tempDiv.popup("destroy");
 
     tempDiv.html(entityHtml.html);
-
-    SF.triggerNewContent(tempDiv);
 
     tempDiv.popup(popupOptions);
 }
@@ -404,8 +399,6 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
     $("body").append(SF.hiddenDiv(tempDivId, div));
 
     var tempDiv = $("#" + tempDivId);
-
-    SF.triggerNewContent(tempDiv);
 
     return new Promise<T>((resolve, reject) => {
 

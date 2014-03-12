@@ -12,33 +12,53 @@ namespace Signum.Web
     {
         public List<ToolBarButton> Items { get; set; }
 
-        public override MvcHtmlString ToHtml(HtmlHelper helper)
+        public override MvcHtmlString ToHtmlButton(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
+            using(sb.Surround(new HtmlTag("div").Class("btn-group")))
+            {
+                var a = new HtmlTag("a")
+                    .Id(Id)
+                    .Class("btn")
+                    .Class(Style)
+                    .Class(CssClass)
+                    .Class("dropdown-toggle")
+                    .Attr("data-toggle", "dropdown")
+                    .Attr("alt", AltText)
+                    .Attrs(HtmlProps);
 
-            using (sb.Surround(new HtmlTag("ul").Class("sf-menu-button")))
-                if (Items != null)
+                if (!Enabled)
+                    a.Attr("disabled", "disabled");  
+
+                using (sb.Surround(a))
                 {
-                    foreach (ToolBarButton tbb in Items)
-                        sb.Add(tbb.ToHtml(helper).Surround("li"));
+                    sb.Add(new MvcHtmlString(Text));
+                    sb.Add(new HtmlTag("span").Class("caret"));
                 }
 
-            HtmlProps["onclick"] = "SF.Dropdowns.toggle(event, this);";
-            HtmlProps["data-icon-secondary"] = "ui-icon-triangle-1-s";
 
-            var title = new HtmlTag("div").InnerHtml(Text.EncodeHtml()).Class(DivCssClass)
-                .Attr("onclick", "SF.Dropdowns.toggle(event, this);")
-                .Attr("data-icon-secondary", "ui-icon-triangle-1-s").ToHtml();
+                using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
+                {
+                    if (Items != null)
+                        foreach (var tbb in Items)
+                            sb.Add(tbb.ToHtmlMenuItem(helper));
+                }
+            }
 
-            return helper.Div(Id, title.Concat(sb.ToHtml()), "sf-dropdown");
+            return sb.ToHtml();
         }
     }
 
     public class ToolBarSeparator : ToolBarButton
     {
-        public override MvcHtmlString ToHtml(HtmlHelper helper)
+        public override MvcHtmlString ToHtmlButton(HtmlHelper helper)
         {
-            return helper.Div("", null, DivCssClass != "not-set" ? DivCssClass : "sf-toolbar-menu-separator");
+            return MvcHtmlString.Empty;
+        }
+
+        public virtual MvcHtmlString ToHtmlMenuItem(HtmlHelper helper)
+        {
+            return new HtmlTag("li").Class("divider").ToHtml();
         }
     }
 }

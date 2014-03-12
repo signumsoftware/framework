@@ -78,7 +78,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var divId = SF.compose(findOptions.prefix, "Temp");
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
                     var div = $("#" + divId);
-                    SF.triggerNewContent(div);
 
                     div.popup({
                         onOk: function () {
@@ -119,7 +118,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var divId = SF.compose(findOptions.prefix, "Temp");
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
                     var div = $("#" + divId);
-                    SF.triggerNewContent(div);
 
                     var sc = exports.getFor(findOptions.prefix);
 
@@ -477,7 +475,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 success: function (items) {
                     $itemContainer.html(items);
                     $td.append($menu);
-                    SF.triggerNewContent($menu);
                 }
             });
 
@@ -501,7 +498,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     data: requestData,
                     success: function (items) {
                         $ul.find("li").removeClass(loadingClass).html(items);
-                        SF.triggerNewContent($ul);
                     }
                 });
             }
@@ -530,7 +526,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var $tbody = self.element.find(".sf-search-results-container tbody");
                     if (!SF.isEmpty(r)) {
                         $tbody.html(r);
-                        SF.triggerNewContent(self.element.find(".sf-search-results-container tbody"));
                     } else {
                         $tbody.html("");
                     }
@@ -715,7 +710,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>").append("<br />").append("<input type='text' value='" + colName + "' />").append("<br />").append("<br />").append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
 
             var $tempContainer = $("<div></div>").append($div);
-            SF.triggerNewContent($tempContainer);
             $tempContainer.popup({
                 onOk: function () {
                     $th.find("span").text($div.find("input:text").val());
@@ -742,29 +736,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.createMoveColumnDragDrop = function ($draggables, $droppables) {
             $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
             $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
-
-            $draggables.draggable({
-                revert: "invalid",
-                axis: "x",
-                opacity: 0.5,
-                distance: 8,
-                cursor: "move"
-            });
-            $draggables.removeAttr("style"); //remove relative positioning
-
-            var self = this;
-            $droppables.droppable({
-                hoverClass: "sf-header-droppable-active",
-                tolerance: "pointer",
-                drop: function (event, ui) {
-                    var $dragged = ui.draggable;
-
-                    var $targetPlaceholder = $(this);
-                    var $targetCol = $targetPlaceholder.closest("th");
-
-                    self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
-                }
-            });
+            //$draggables.draggable({
+            //    revert: "invalid",
+            //    axis: "x",
+            //    opacity: 0.5,
+            //    distance: 8,
+            //    cursor: "move"
+            //});
+            //$draggables.removeAttr("style"); //remove relative positioning
+            //var self = this;
+            //$droppables.droppable({
+            //    hoverClass: "sf-header-droppable-active",
+            //    tolerance: "pointer",
+            //    drop: function (event, ui) {
+            //        var $dragged = ui.draggable;
+            //        var $targetPlaceholder = $(this); //droppable
+            //        var $targetCol = $targetPlaceholder.closest("th");
+            //        self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
+            //    }
+            //});
         };
 
         SearchControl.prototype.removeColumn = function ($th) {
@@ -1004,7 +994,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     $filterList.find("table").show();
 
                     tableFilters.append(filterHtml);
-                    SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
                 }
             });
         };

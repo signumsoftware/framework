@@ -34,7 +34,7 @@
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.Prefix,
             ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
-        }, modifiable).ToString(Html)
+        }, modifiable).ToStringButton(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable.IsGraphModified ? " sf-changed" : "")" 

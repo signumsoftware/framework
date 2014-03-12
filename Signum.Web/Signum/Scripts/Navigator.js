@@ -31,8 +31,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         tempDiv.html(entityHtml.html);
 
-        SF.triggerNewContent(tempDiv);
-
         return tempDivId;
     }
     exports.createTempDiv = createTempDiv;
@@ -225,7 +223,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function reloadMain(entityHtml) {
         var $elem = $("#divNormalControl");
         $elem.html(entityHtml.html);
-        SF.triggerNewContent($elem);
     }
     exports.reloadMain = reloadMain;
 
@@ -252,8 +249,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         tempDiv.popup("destroy");
 
         tempDiv.html(entityHtml.html);
-
-        SF.triggerNewContent(tempDiv);
 
         tempDiv.popup(popupOptions);
     }
@@ -368,8 +363,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         $("body").append(SF.hiddenDiv(tempDivId, div));
 
         var tempDiv = $("#" + tempDivId);
-
-        SF.triggerNewContent(tempDiv);
 
         return new Promise(function (resolve, reject) {
             tempDiv.on("click", ":button", function () {

@@ -123,12 +123,12 @@ WriteLiteral("    ");
             
             #line 17 "..\..\Signum\Views\ValueLineBox.cshtml"
 Write(Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
-{
-    LabelText = options.labelText,
-    LabelVisible = options.labelText.HasText(),
-    Format = options.format,
-    UnitText = options.unit,
-}));
+    {
+        LabelText = options.labelText,
+        FormGroupStyle = options.labelText.HasText() ? Signum.Web.FormGroupStyle.None : FormGroupStyle.Basic,
+        Format = options.format,
+        UnitText = options.unit,
+    }));
 
             
             #line default

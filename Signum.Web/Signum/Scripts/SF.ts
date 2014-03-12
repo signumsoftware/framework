@@ -154,10 +154,6 @@ module SF {
         };
     }
 
-    export function triggerNewContent($source: JQuery) {
-        $source.trigger("sf-new-content");
-    }
-
     export function hiddenInput(id: string, value: any) {
         return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
     }

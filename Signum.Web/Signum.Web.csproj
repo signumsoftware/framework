@@ -251,10 +251,14 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Content\Lines.css" />
+    <Content Include="Signum\Headers\bootstrap\bootstrap.d.ts" />
+    <Content Include="Signum\Headers\bootstrap\bootstrap.datepicker.d.ts" />
+    <Content Include="Signum\Headers\bootstrap\bootstrap.timepicker.d.ts" />
+    <Content Include="Signum\Headers\bootstrap\typeahead.d.ts" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
-    <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Signum\Scripts\globals.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Finder.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Operations.ts" />
@@ -284,7 +288,6 @@
       <LastGenOutput>FilterBuilder.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <Content Include="Signum\Content\Widgets.css" />
     <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
@@ -305,11 +308,6 @@
       <LastGenOutput>NormalPage.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <Content Include="Signum\Content\reset.css" />
-    <Content Include="Signum\Content\Lines.css" />
-    <Content Include="Signum\Content\NormalPage.css" />
-    <Content Include="Signum\Content\Notify.css" />
-    <Content Include="Signum\Content\Search.css" />
     <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>

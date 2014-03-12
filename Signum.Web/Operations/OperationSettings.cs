@@ -71,10 +71,12 @@ namespace Signum.Web.Operations
 
         static EntityOperationSettings()
         {
-            CssClass = _ => "sf-operation";
+            Style = oi => oi.OperationType == OperationType.Delete ? ToolBarButton.DangerStyle : 
+                oi.OperationType == OperationType.Execute && oi.Key.ToString()  == "Save"  ? ToolBarButton.PrimaryStyle : 
+                ToolBarButton.DefaultStyle;
         }
 
-        public static Func<Enum, string> CssClass { get; set; }
+        public static Func<OperationInfo, string> Style { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 

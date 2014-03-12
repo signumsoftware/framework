@@ -38,7 +38,7 @@ namespace Signum.Web
     {
         No,
         Span,
-        Field
+        FormGroup
     }
 
     public static class SearchControlHelper
@@ -128,8 +128,8 @@ namespace Signum.Web
                       htmlAttr));
             }
 
-            if (options.WriteQueryName == WriteQueryName.Field)
-                return helper.Field(options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
+            if (options.WriteQueryName == WriteQueryName.FormGroup)
+                return helper.FormGroup(new Context(null, null), null, options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
 
             return sb.ToHtml();
         }

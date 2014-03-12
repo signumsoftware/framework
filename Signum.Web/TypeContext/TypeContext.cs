@@ -18,7 +18,6 @@ using System.Web.WebPages;
 
 namespace Signum.Web
 {
-    #region Context
     public class Context : IDisposable
     {
         public const string Separator = "_";
@@ -56,104 +55,125 @@ namespace Signum.Web
             return this.Compose(namesToAppend.ToString(Separator));
         }
 
-        #region Styles
-        [Flags]
-        enum BoolStyles : short
-        {
-            LabelVisible = 2,
-            ShowValidationMessage = 4,
-            ReadOnly =8,
-            ValueFirst = 16,
-            ShowFieldDiv =32,
-            OnlyValue = 64
-        }
-
-        BoolStyles styleValues;
-        BoolStyles styleHasValue;
-
-        private bool? this[BoolStyles pos]
-        {
-            get
-            {
-                if ((styleHasValue & pos) == pos)
-                    return (styleValues & pos) == pos;
-                return null;
-            }
-
-            set
-            {
-                if (!value.HasValue)
-                    styleHasValue &= ~pos;
-                else
-                {
-                    styleHasValue |= pos;
-
-                    if (value.Value)
-                        styleValues |= pos;
-                    else
-                        styleValues &= ~pos;
-                }
-            }
-        }
-
         public static readonly Context Default = new Context(null, null)
         {
-            LabelVisible = true,
+            FormGroupStyle = FormGroupStyle.Horizontal,
+            LabelColumns = new BsColumn(2),
             ShowValidationMessage = true,
             ReadOnly = false,
-            ValueFirst = false,
-            OnlyValue = false
         };
 
-        /* It prints only the value. Useful when used together with Html.Field helper
-         * to join different valueLines in the same line */
-        public bool OnlyValue
+        FormGroupStyle? formGroupStyle;
+        public FormGroupStyle FormGroupStyle
         {
-            get { return this[BoolStyles.OnlyValue] ?? Parent.OnlyValue; }
-            set { this[BoolStyles.OnlyValue] = value; }        
+            get { return formGroupStyle ?? Parent.FormGroupStyle; }
+            set { formGroupStyle = value; }
         }
 
-        public bool LabelVisible
+        BsColumn labelColummns;
+        public BsColumn LabelColumns
         {
-            get { return this[BoolStyles.LabelVisible] ?? Parent.LabelVisible; }
-            set { this[BoolStyles.LabelVisible] = value; }
+            get { return labelColummns ?? Parent.LabelColumns; }
+            set 
+            { 
+                labelColummns = value; 
+                valueColummns = value == null? null : value.Inverse();
+            }
         }
 
+        BsColumn valueColummns;
+        public BsColumn ValueColumns
+        {
+            get { return valueColummns ?? Parent.ValueColumns; }
+        }
+
+        
+
+        bool? readOnly; 
         public bool ReadOnly
         {
-            get { return this[BoolStyles.ReadOnly] ?? Parent.ReadOnly; }
+            get { return readOnly ?? Parent.ReadOnly; }
             set
             {
-                this[BoolStyles.ReadOnly] = value;
-                if (value) SetReadOnly();
+                readOnly = value;
+                if (value) 
+                    SetReadOnly();
             }
         }
 
         protected virtual void SetReadOnly() { }
 
+        bool? showValidationMessage; 
         public bool ShowValidationMessage
         {
-            get { return this[BoolStyles.ShowValidationMessage] ?? Parent.ShowValidationMessage; }
-            set { this[BoolStyles.ShowValidationMessage] = value; }
-        }
-
-        public bool ValueFirst
-        {
-            get { return this[BoolStyles.ValueFirst] ?? Parent.ValueFirst; }
-            set { this[BoolStyles.ValueFirst] = value; }
+            get { return showValidationMessage ?? Parent.ShowValidationMessage; }
+            set { showValidationMessage = value; }
         }
 
         public override string ToString()
         {
             return Prefix; 
         }
-        #endregion
 
         public void Dispose()
         {
         }
     }
-    #endregion
+
+
+    public class BsColumn
+    {
+        public readonly short? xs;
+        public readonly short? sm;
+        public readonly short? md;
+        public readonly short? lg;
+
+        readonly string catchedString; 
+
+        public BsColumn(short sm)
+        {
+            this.xs = null;
+            this.sm = sm;
+            this.md = null;
+            this.lg = null;
+            this.catchedString = "col-sm-" + sm;
+        }
+
+        public BsColumn(short? xs, short? sm, short? md, short? lg)
+        {
+            this.xs = xs;
+            this.sm = sm;
+            this.md = md;
+            this.lg = lg;
+            this.catchedString =  " ".CombineIfNotEmpty(
+                xs == null? null: "col-xs-" + xs,
+                sm == null ? null : "col-sm-" + sm,
+                md == null ? null : "col-md-" + md,
+                lg == null ? null : "col-lg-" + lg);
+        }
+
+        public BsColumn Inverse()
+        {
+            return new BsColumn(
+                (short?)(12 - xs),
+                (short?)(12 - sm),
+                (short?)(12 - md),
+                (short?)(12 - lg));
+        }
+
+        public override string ToString()
+        {
+            return catchedString;
+        }
+    }
+
+    public enum FormGroupStyle
+    {
+        None,
+        Basic,
+        Inline,
+        Horizontal,
+    }
 
     #region TypeContext
     public abstract class TypeContext : Context
@@ -303,60 +323,64 @@ namespace Signum.Web
 
     public interface IViewOverrides
     {
-        HelperResult OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result);
+        List<Tab> ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context);
         MvcHtmlString OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
+
     }
 
     public class ViewOverrides : IViewOverrides
     {
-        Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeFieldset;
-        public ViewOverrides BeforeFieldset(string id, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> beforeFieldset;
+        public ViewOverrides BeforeTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
         {
             if (beforeFieldset == null)
-                beforeFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+                beforeFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
 
             beforeFieldset.Add(id, constructor);
 
             return this;
         }
 
-        Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterFieldset;
-        public ViewOverrides AfterFieldset(string id, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> afterFieldset;
+        public ViewOverrides AfterTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
         {
             if (afterFieldset == null)
-                afterFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+                afterFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
 
             afterFieldset.Add(id, constructor);
 
             return this;
         }
 
-        HelperResult IViewOverrides.OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result)
+        List<Tab> IViewOverrides.ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context)
         {
-            var before = beforeFieldset.TryGetC(id);
-            var after = afterFieldset.TryGetC(id);
+            List<Tab> newTabs = new List<Tab>();
 
-            if (before == null && after == null)
-                return result;
+            var before = beforeFieldset.TryGetC(containerId);
+            if(before != null)
+                Expand(before(helper, context), helper, context, newTabs); 
 
-            return new HelperResult(writer =>
-            {
-                if (before != null)
-                {
-                    var b = before(helper, tc);
-                    if (!MvcHtmlString.IsNullOrEmpty(b))
-                        writer.WriteLine(b);
-                }
+            foreach (var item in newTabs)
+                Expand(item, helper, context, newTabs);
 
-                result.WriteTo(writer);
+            var after = afterFieldset.TryGetC(containerId);
+            if (after != null)
+                Expand(after(helper, context), helper, context, newTabs); 
 
-                if (after != null)
-                {
-                    var a = after(helper, tc);
-                    if (!MvcHtmlString.IsNullOrEmpty(a))
-                        writer.WriteLine(a);
-                }
-            }); 
+            return newTabs;
+        }
+
+        void Expand(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
+        {
+            var before = beforeFieldset.TryGetC(item.Id);
+            if (before != null)
+                Expand(before(helper, context), helper, context, newTabs);
+
+            newTabs.Add(item);
+
+            var after = afterFieldset.TryGetC(item.Id);
+            if (after != null)
+                Expand(after(helper, context), helper, context, newTabs);
         }
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
@@ -407,6 +431,5 @@ namespace Signum.Web
 
             return result;
         }
-
     }
 }

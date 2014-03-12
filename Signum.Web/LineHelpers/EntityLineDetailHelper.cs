@@ -28,7 +28,7 @@ namespace Signum.Web
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.ListLabel(helper, entityDetail));
 
                     sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));
                     sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));

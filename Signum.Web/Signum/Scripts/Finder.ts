@@ -109,7 +109,6 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                 var divId = SF.compose(findOptions.prefix, "Temp");
                 $("body").append(SF.hiddenDiv(divId, popupHtml));
                 var div = $("#" + divId);
-                SF.triggerNewContent(div);
                    
                 div.popup({
                     onOk: function () {
@@ -149,7 +148,6 @@ export function explore(findOptions: FindOptions): Promise<void> {
                 var divId = SF.compose(findOptions.prefix, "Temp");
                 $("body").append(SF.hiddenDiv(divId, popupHtml));
                 var div = $("#" + divId);
-                SF.triggerNewContent(div);
 
                 var sc = getFor(findOptions.prefix)
 
@@ -515,7 +513,6 @@ export class SearchControl {
             success: function (items) {
                 $itemContainer.html(items);
                 $td.append($menu);
-                SF.triggerNewContent($menu);
             }
         });
 
@@ -539,7 +536,6 @@ export class SearchControl {
                 data: requestData,
                 success: function (items) {
                     $ul.find("li").removeClass(loadingClass).html(items);
-                    SF.triggerNewContent($ul);
                 }
             });
         }
@@ -569,7 +565,6 @@ export class SearchControl {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
                     $tbody.html(r);
-                    SF.triggerNewContent(self.element.find(".sf-search-results-container tbody"));
                 }
                 else {
                     $tbody.html("");
@@ -770,7 +765,6 @@ export class SearchControl {
             .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
 
         var $tempContainer = $("<div></div>").append($div);
-        SF.triggerNewContent($tempContainer);
         $tempContainer.popup({
             onOk: function () { $th.find("span").text($div.find("input:text").val()); $tempContainer.remove();  },
             onCancel: function () { $tempContainer.remove(); }
@@ -795,28 +789,28 @@ export class SearchControl {
         $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
         $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 
-        $draggables.draggable({
-            revert: "invalid",
-            axis: "x",
-            opacity: 0.5,
-            distance: 8,
-            cursor: "move"
-        });
-        $draggables.removeAttr("style"); //remove relative positioning
+        //$draggables.draggable({
+        //    revert: "invalid",
+        //    axis: "x",
+        //    opacity: 0.5,
+        //    distance: 8,
+        //    cursor: "move"
+        //});
+        //$draggables.removeAttr("style"); //remove relative positioning
 
-        var self = this;
-        $droppables.droppable({
-            hoverClass: "sf-header-droppable-active",
-            tolerance: "pointer",
-            drop: function (event, ui) {
-                var $dragged = ui.draggable;
+        //var self = this;
+        //$droppables.droppable({
+        //    hoverClass: "sf-header-droppable-active",
+        //    tolerance: "pointer",
+        //    drop: function (event, ui) {
+        //        var $dragged = ui.draggable;
 
-                var $targetPlaceholder = $(this); //droppable
-                var $targetCol = $targetPlaceholder.closest("th");
+        //        var $targetPlaceholder = $(this); //droppable
+        //        var $targetCol = $targetPlaceholder.closest("th");
 
-                self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
-            }
-        });
+        //        self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
+        //    }
+        //});
     }
 
     removeColumn($th) {
@@ -1048,7 +1042,6 @@ export class FilterBuilder {
                 $filterList.find("table").show();
 
                 tableFilters.append(filterHtml);
-                SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
             }
         });
     }

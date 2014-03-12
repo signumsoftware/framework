@@ -243,7 +243,7 @@ namespace Signum.Web.Operations
                             Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
                             AltText = group.Description(),
                             Text = group.Description(),
-                            DivCssClass = " ".CombineIfNotEmpty(ToolBarButton.DefaultEntityDivCssClass, group.CssClass),
+                            CssClass = group.CssClass,
                             Items = new List<ToolBarButton>(),
                             Order = group.Order,
                         };
@@ -286,9 +286,7 @@ namespace Signum.Web.Operations
             {
                 Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
 
-                DivCssClass = " ".CombineIfNotEmpty(
-                    ToolBarButton.DefaultEntityDivCssClass,
-                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
+                Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
                 AltText = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
@@ -495,9 +493,7 @@ namespace Signum.Web.Operations
             {
                 Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
 
-                DivCssClass = " ".CombineIfNotEmpty(
-                    ToolBarButton.DefaultEntityDivCssClass,
-                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
+                Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
                 AltText = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,

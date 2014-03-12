@@ -48,7 +48,7 @@ namespace Signum.Web
                     new ToolBarMenu
                     {
                         Id = TypeContextUtilities.Compose(ctx.Prefix, "sfTmSelected"),
-                        DivCssClass = ToolBarMenu.DefaultQueryCssClass + " sf-tm-selected",
+                        CssClass = "sf-tm-selected",
                         Text = selectedText + " (0)",
                         AltText = selectedText,
                     }

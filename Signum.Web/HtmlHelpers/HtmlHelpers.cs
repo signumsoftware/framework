@@ -50,105 +50,74 @@ namespace Signum.Web
             }).Attrs(htmlAttributes).ToHtmlSelf();
         }
 
-        public static MvcHtmlString FieldString(this HtmlHelper html, string label, string value)
+        public static MvcHtmlString FormGroupStatic(this HtmlHelper html, Context context, string controlId, string label, string text)
         {
-            var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("sf-value-line").ToHtml();
-            return Field(html, label, span);
+            var span = html.FormControlStatic(controlId, text);
+            return FormGroup(html, context, label, controlId, span);
         }
 
-        public static MvcHtmlString Field(this HtmlHelper html, string label, MvcHtmlString value)
+        public static MvcHtmlString FormControlStatic(this HtmlHelper html, string controlId, string text, IDictionary<string, object> htmlProps = null)
         {
-            HtmlTag field = new HtmlTag("div")
-                                    .Class("sf-field");
-
-            HtmlTag labelLine = new HtmlTag("div")
-                                    .Class("sf-label-line")
-                                    .SetInnerText(label);
-
-            HtmlTag valueLine = new HtmlTag("div")
-                        .Class("sf-value-container")
-                        .InnerHtml(value);
-
-            field.InnerHtml(labelLine.ToHtml().Concat(valueLine.ToHtml()));
-
-            return field.ToHtml();
+            return new HtmlTag("p").Id(controlId).SetInnerText(text).Class("form-control-static").Attrs(htmlProps).ToHtml();
         }
 
-        public static IDisposable FieldInline(this HtmlHelper html)
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, MvcHtmlString value)
         {
-            return FieldInline(html, null);
+            if (context.FormGroupStyle == FormGroupStyle.None)
+                return value;
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div").Class("form-group")))
+            {
+                var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
+
+                if(context.FormGroupStyle == FormGroupStyle.Inline)
+                    lbl.Class("sr-only");
+                else if(context.FormGroupStyle == FormGroupStyle.Horizontal)
+                    lbl.Class("control-label").Class(context.LabelColumns.ToString());
+
+                sb.AddLine(lbl);
+
+                using (context.FormGroupStyle == FormGroupStyle.Horizontal ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
+                {
+                    sb.AddLine(value);
+                }
+            }
+
+            return sb.ToHtml();
         }
 
-        public static IDisposable FieldInline(this HtmlHelper html, string fieldTitle)
+        public static IDisposable FormInline(this HtmlHelper html)
         {
             TextWriter writer = html.ViewContext.Writer;
 
-            HtmlTag div = new HtmlTag("div").Class("sf-field");
-
+            HtmlTag div = new HtmlTag("div").Class("form-inline");
             writer.Write(div.ToHtml(TagRenderMode.StartTag));
-            if (fieldTitle != null)
-                writer.Write(new HtmlTag("label").Class("sf-label-line").SetInnerText(fieldTitle).ToHtml(TagRenderMode.Normal));
-
-            HtmlTag div2 = new HtmlTag("div").Class("sf-value-container sf-value-inline");
-            writer.Write(div2.ToHtml(TagRenderMode.StartTag));
 
             return new Disposable(() =>
             {
-                writer.Write(div2.ToHtml(TagRenderMode.EndTag));
                 writer.Write(div.ToHtml(TagRenderMode.EndTag));
             }); 
         }
 
-        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
+        public static IDisposable FormHorizontal(this HtmlHelper html)
         {
-            return CheckBox(html, name, value, enabled, null);
-        }
+            TextWriter writer = html.ViewContext.Writer;
 
-        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled, IDictionary<string, object> htmlAttributes)
-        {
-            if (htmlAttributes == null)
-                htmlAttributes = new Dictionary<string, object>();
+            HtmlTag div = new HtmlTag("div").Class("form-horizontal");
+            writer.Write(div.ToHtml(TagRenderMode.StartTag));
 
-            if (enabled)
-                return html.CheckBox(name, value, htmlAttributes);
-            else
+            return new Disposable(() =>
             {
-                HtmlTag checkbox = new HtmlTag("input")
-                                        .Id(name)
-                                        .Attrs(new
-                                        {
-                                            type = "checkbox",
-                                            name = name,
-                                            value = (value ? "true" : "false"),
-                                            disabled = "disabled"
-                                        })
-                                        .Attrs(htmlAttributes);
-
-                if (value)
-                    checkbox.Attr("checked", "checked");
-
-                HtmlTag hidden = new HtmlTag("input")
-                        .Id(name)
-                        .Attrs(new
-                        {
-                            type = "hidden",
-                            name = name,
-                            value = (value ? "true" : "false"),
-                            disabled = "disabled"
-                        });
-
-                return checkbox.ToHtmlSelf().Concat(hidden.ToHtmlSelf());
-            }
+                writer.Write(div.ToHtml(TagRenderMode.EndTag));
+            });
         }
 
-        public static MvcHtmlString InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
+        public static TabContainer Tabs(this HtmlHelper html, TypeContext ctx, string containerId = "tabs")
         {
-            return new HtmlTag("input")
-                            .Id(id)
-                            .Attrs(new { type = inputType, name = id, value = value })
-                            .Attrs(htmlAttributes)
-                            .ToHtmlSelf();
+            return new TabContainer(html, ctx, containerId);
         }
+
 
         /// <summary>
         /// Returns a "label" label that is used to show the name of a field in a form
@@ -281,36 +250,6 @@ namespace Signum.Web
             var settings = new JsonSerializerSettings();
             settings.Converters.Add(new LiteJavaScriptConverter());
             return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
-        }
-
-        public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText, int? marginTop = 10)
-        { 
-            var pContent = new HtmlTag("span").Class("ui-icon ui-icon-info").Attr("style", "float: left; margin-right: .3em;").ToHtml();
-            
-            if (strongText.HasText())
-                pContent = pContent.Concat(new HtmlTag("strong").SetInnerText(strongText).ToHtml());
-            
-            pContent = pContent.Concat(new MvcHtmlString(normalText));
-
-            return new HtmlTag("div").Class("ui-state-highlight ui-corner-all")
-                .Attr("style", "margin-top: {0}px; padding: 0 .7em; padding: 10px;".Formato(marginTop))
-                .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
-                .ToHtml();
-        }
-
-        public static MvcHtmlString JQueryError(this HtmlHelper helper, string strongText, string normalText)
-        {
-            var pContent = new HtmlTag("span").Class("ui-icon ui-icon-alert").Attr("style", "float: left; margin-right: .3em;").ToHtml();
-
-            if (strongText.HasText())
-                pContent = pContent.Concat(new HtmlTag("strong").SetInnerText(strongText).ToHtml());
-
-            pContent = pContent.Concat(new MvcHtmlString(normalText));
-
-            return new HtmlTag("div").Class("ui-state-error ui-corner-all")
-                .Attr("style", "margin-top: 10px; padding: 0 .7em; padding: 10px;")
-                .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
-                .ToHtml();
         }
     }
 }

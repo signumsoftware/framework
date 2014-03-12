@@ -227,9 +227,9 @@ namespace Signum.Web
             else
                 time = line.UntypedValue as TimeSpan?;
 
-            WriteField(sb, helper, line, QueryTokenMessage.Hour.NiceToString(), "Hour", time == null ? "" : time.Value.ToString("hh")); 
+            WriteField(sb, helper, line, QueryTokenMessage.Hour.NiceToString(), "Hour", time == null ? "" : time.Value.ToString("hh"));
 
-            sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
+            sb.Add(helper.Span("", ":", "form-control sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 
             WriteField(sb, helper, line, QueryTokenMessage.Minute.NiceToString(), "Minute", time == null ? "" : time.Value.ToString("mm")); 
 
@@ -238,31 +238,32 @@ namespace Signum.Web
 
         private static void WriteField(HtmlStringBuilder sb, HtmlHelper helper, HourMinuteLine line, string label, string name, string value)
         {
-            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
-            {
-                if (line.LabelVisible)
-                    sb.Add(new HtmlTag("div").Class("sf-label-line").SetInnerText(label));
+            throw new InvalidOperationException();
+            //using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+            //{
+            //    if (line.LabelVisible)
+            //        sb.Add(new HtmlTag("div").Class("sf-label-line").SetInnerText(label));
 
-                using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                {
-                    if (line.ReadOnly)
-                    {
-                        sb.Add(new HtmlTag("span").Class("sf-value-line").SetInnerText(value));
+            //    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+            //    {
+            //        if (line.ReadOnly)
+            //        {
+            //            sb.Add(new HtmlTag("span").Class("sf-value-line").SetInnerText(value));
 
-                        if (line.WriteHiddenOnReadonly)
-                            sb.Add(helper.Hidden(line.Compose(name), value));
-                    }
-                    else
-                    {
-                        line.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + line.ValueHtmlProps.TryGetC("onblur");
+            //            if (line.WriteHiddenOnReadonly)
+            //                sb.Add(helper.Hidden(line.Compose(name), value));
+            //        }
+            //        else
+            //        {
+            //            line.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + line.ValueHtmlProps.TryGetC("onblur");
 
-                        line.ValueHtmlProps["size"] = "2";
-                        line.ValueHtmlProps["class"] = "sf-value-line";
+            //            line.ValueHtmlProps["size"] = "2";
+            //            line.ValueHtmlProps["class"] = "sf-value-line";
 
-                        sb.Add(helper.TextBox(line.Compose(name), value, line.ValueHtmlProps));
-                    }
-                }
-            }
+            //            sb.Add(helper.TextBox(line.Compose(name), value, line.ValueHtmlProps));
+            //        }
+            //    }
+            //}
         }
     }
 }

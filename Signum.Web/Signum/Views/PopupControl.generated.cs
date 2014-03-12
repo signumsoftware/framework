@@ -228,7 +228,7 @@ WriteLiteral("        ");
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.Prefix,
             ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
-        }, modifiable).ToString(Html));
+        }, modifiable).ToStringButton(Html));
 
             
             #line default
@@ -246,25 +246,25 @@ Write(Html.ValidationSummaryAjax(Model));
             #line hidden
 WriteLiteral("\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1790), Tuple.Create("\"", 1827)
+WriteAttribute("id", Tuple.Create(" id=\"", 1796), Tuple.Create("\"", 1833)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1795), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 1801), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 1795), false)
+, 1801), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1828), Tuple.Create("\"", 1901)
-, Tuple.Create(Tuple.Create("", 1836), Tuple.Create("sf-main-control", 1836), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1834), Tuple.Create("\"", 1907)
+, Tuple.Create(Tuple.Create("", 1842), Tuple.Create("sf-main-control", 1842), true)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1851), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+, Tuple.Create(Tuple.Create("", 1857), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 1851), false)
+, 1857), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");

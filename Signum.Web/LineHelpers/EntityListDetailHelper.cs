@@ -30,7 +30,7 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field SF-control-container")))
             {
-                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
+                sb.AddLine(EntityBaseHelper.ListLabel(helper, listDetail));
 
                 sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
@@ -126,7 +126,7 @@ namespace Signum.Web
                         name = itemTC.Compose(EntityBaseKeys.ToStr),
                         value = ""
                     })
-                    .Class("sf-value-line")
+                    .Class("form-control")
                     .Class("sf-entity-list-option")
                     .SetInnerText(
                         (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??

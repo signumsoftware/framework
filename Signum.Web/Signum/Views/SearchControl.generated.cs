@@ -403,7 +403,7 @@ WriteLiteral("        ");
            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
            EntityType = entitiesType,
            Prefix = Model.Prefix
-       }).ToString(Html));
+       }).ToStringButton(Html));
 
             
             #line default
@@ -439,28 +439,28 @@ WriteLiteral(">\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4901), Tuple.Create("\"", 4934)
+WriteAttribute("id", Tuple.Create(" id=\"", 4907), Tuple.Create("\"", 4940)
             
             #line 96 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4906), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+, Tuple.Create(Tuple.Create("", 4912), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 4906), false)
+, 4912), false)
 );
 
 WriteLiteral(" class=\"ui-widget ui-corner-all sf-search-results-container\"");
 
 WriteLiteral(">\r\n        <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 5012), Tuple.Create("\"", 5045)
+WriteAttribute("id", Tuple.Create(" id=\"", 5018), Tuple.Create("\"", 5051)
             
             #line 97 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 5017), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
+, Tuple.Create(Tuple.Create("", 5023), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
             
             #line default
             #line hidden
-, 5017), false)
+, 5023), false)
 );
 
 WriteLiteral(" class=\"sf-search-results\"");
@@ -564,15 +564,15 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("                        <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 6183), Tuple.Create("\"", 6318)
-, Tuple.Create(Tuple.Create("", 6191), Tuple.Create("ui-state-default", 6191), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 6189), Tuple.Create("\"", 6324)
+, Tuple.Create(Tuple.Create("", 6197), Tuple.Create("ui-state-default", 6197), true)
             
             #line 119 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create(" ", 6207), Tuple.Create<System.Object, System.Int32>((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up")
+, Tuple.Create(Tuple.Create(" ", 6213), Tuple.Create<System.Object, System.Int32>((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up")
             
             #line default
             #line hidden
-, 6208), false)
+, 6214), false)
 );
 
 WriteLiteral(">\r\n                            <div");
@@ -587,14 +587,14 @@ WriteLiteral("></div>\r\n                            <input");
 
 WriteLiteral(" type=\"hidden\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 6559), Tuple.Create("\"", 6576)
+WriteAttribute("value", Tuple.Create(" value=\"", 6565), Tuple.Create("\"", 6582)
             
             #line 122 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6567), Tuple.Create<System.Object, System.Int32>(col.Name
+, Tuple.Create(Tuple.Create("", 6573), Tuple.Create<System.Object, System.Int32>(col.Name
             
             #line default
             #line hidden
-, 6567), false)
+, 6573), false)
 );
 
 WriteLiteral(" />\r\n                            <span>");
@@ -635,14 +635,14 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("\r\n                <tr>\r\n                    <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6960), Tuple.Create("\"", 6983)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6966), Tuple.Create("\"", 6989)
             
             #line 131 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6970), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 6976), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 6970), false)
+, 6976), false)
 );
 
 WriteLiteral(">");

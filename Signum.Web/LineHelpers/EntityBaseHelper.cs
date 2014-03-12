@@ -17,18 +17,6 @@ namespace Signum.Web
 {
     public static class EntityBaseHelper
     {
-        public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine)
-        {
-            return BaseLineLabel(helper, baseLine, baseLine.Compose(EntityBaseKeys.ToStr));
-        }
-
-        public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
-        {
-            return baseLine.LabelVisible && !baseLine.OnlyValue ?
-                   helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, baseLine.LabelClass) :
-                   MvcHtmlString.Empty;
-        }
-
         public static bool EmbeddedOrNew(Modifiable entity)
         {
             if (entity is EmbeddedEntity)
@@ -134,19 +122,16 @@ namespace Signum.Web
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", new MvcHtmlString(entityBase.SFControlThen("view_click()")) },
-                { "data-icon",  "ui-icon-circle-arrow-e" },
-                { "data-text", false}
             };
 
             if (hidden)
                 htmlAttr.Add("style", "display:none");
 
-            return helper.Href(entityBase.Compose("btnView"),
-                  EntityControlMessage.View.NiceToString(),
-                  "",
-                  EntityControlMessage.View.NiceToString(),
-                  "sf-line-button sf-view",
-                  htmlAttr);
+            return new HtmlTag("a", entityBase.Compose("btnView"))
+                .Class("btn btn-default sf-line-button sf-view")
+                .Attrs(htmlAttr)
+                .Attr("title", EntityControlMessage.View.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
         }
 
         public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityBase entityBase)
@@ -156,20 +141,17 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", new MvcHtmlString(entityBase.SFControlThen("view_click()")) },
-                { "data-icon", "ui-icon-arrowthick-1-e" },
-                { "data-text", false}
+                { "onclick", new MvcHtmlString(entityBase.SFControlThen("navigate_click()")) },
             };
 
             if (entityBase.UntypedValue == null)
                 htmlAttr.Add("style", "display:none");
 
-            return helper.Href(entityBase.Compose("btnView"),
-                  EntityControlMessage.Navigate.NiceToString(),
-                  "",
-                  EntityControlMessage.Navigate.NiceToString(),
-                  "sf-line-button sf-view",
-                  htmlAttr);
+            return new HtmlTag("a", entityBase.Compose("btnNavigate"))
+                .Class("btn btn-default sf-line-button sf-navigate")
+                .Attrs(htmlAttr)
+                .Attr("title", EntityControlMessage.Navigate.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-new-window"));
         }
 
         public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
@@ -182,19 +164,16 @@ namespace Signum.Web
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.SFControlThen("create_click()") },
-                { "data-icon", "ui-icon-circle-plus" },
-                { "data-text", false}
             };
 
             if (hidden)
                 htmlAttr.Add("style", "display:none");
 
-            return helper.Href(entityBase.Compose("btnCreate"),
-                  EntityControlMessage.Create.NiceToString(),
-                  "",
-                  EntityControlMessage.Create.NiceToString(),
-                  "sf-line-button sf-create",
-                  htmlAttr);
+            return new HtmlTag("a", entityBase.Compose("btnCreate"))
+                .Class("btn btn-default sf-line-button sf-create")
+                .Attrs(htmlAttr)
+                .Attr("title", EntityControlMessage.Create.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-plus"));
         }
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
@@ -205,19 +184,16 @@ namespace Signum.Web
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.SFControlThen("find_click()") },
-                { "data-icon", "ui-icon-circle-zoomin" },
-                { "data-text", false}
             };
 
             if (hidden)
                 htmlAttr.Add("style", "display:none");
 
-            return helper.Href(entityBase.Compose("btnFind"),
-                  EntityControlMessage.Find.NiceToString(),
-                  "",
-                  EntityControlMessage.Find.NiceToString(),
-                  "sf-line-button sf-find",
-                  htmlAttr);
+            return new HtmlTag("a", entityBase.Compose("btnFind"))
+                .Class("btn btn-default sf-line-button sf-find")
+                .Attrs(htmlAttr)
+                .Attr("title", EntityControlMessage.Find.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-search"));
         }
 
         public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
@@ -235,12 +211,11 @@ namespace Signum.Web
             if (hidden)
                 htmlAttr.Add("style", "display:none");
 
-            return helper.Href(entityBase.Compose("btnRemove"),
-                  EntityControlMessage.Remove.NiceToString(),
-                  "",
-                  EntityControlMessage.Remove.NiceToString(),
-                  "sf-line-button sf-remove",
-                  htmlAttr);
+            return new HtmlTag("a", entityBase.Compose("btnRemove"))
+                .Class("btn btn-default sf-line-button sf-remove")
+                .Attrs(htmlAttr)
+                .Attr("title", EntityControlMessage.Remove.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
         }
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
@@ -281,6 +256,11 @@ namespace Signum.Web
                 cleanType.IsEmbeddedEntity() ? false :
                 eb.Implementations.Value.IsByAll ? false :
                 eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
+        }
+
+        internal static MvcHtmlString ListLabel(HtmlHelper helper, BaseLine baseLine)
+        {
+            return new HtmlTag("label").Attr("for", baseLine.Prefix).SetInnerText(baseLine.LabelText).ToHtml();
         }
     }
 

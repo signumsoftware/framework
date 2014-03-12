@@ -86,7 +86,7 @@
            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
            EntityType = entitiesType,
            Prefix = Model.Prefix
-       }).ToString(Html)
+       }).ToStringButton(Html)
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {

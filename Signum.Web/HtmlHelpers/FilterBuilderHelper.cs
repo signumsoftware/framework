@@ -117,7 +117,7 @@ namespace Signum.Web
                         Implementations = implementations.Value,
                     };
                     EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
-                    ec.LabelVisible = false;
+                    ec.FormGroupStyle = FormGroupStyle.None;
                     ec.Create = false;
                     ec.ReadOnly = filterOption.Frozen;
                     return EntityComboHelper.InternalEntityCombo(helper, ec);
@@ -133,7 +133,7 @@ namespace Signum.Web
                         el.Autocomplete = false;
 
                     EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
-                    el.LabelVisible = false;
+                    el.FormGroupStyle = FormGroupStyle.None;
                     el.Create = false;
                     el.ReadOnly = filterOption.Frozen;
 
@@ -148,7 +148,7 @@ namespace Signum.Web
                     Implementations = null,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
-                el.LabelVisible = false;
+                el.FormGroupStyle = FormGroupStyle.None;
                 el.Create = false;
                 el.ReadOnly = filterOption.Frozen;
 

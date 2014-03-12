@@ -91,7 +91,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (entityValue)
                 entityValue.assertPrefixAndType(this.options.prefix, this.options.types);
 
-            SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : entityValue.html));
+            this.containerDiv().html(entityValue == null ? null : entityValue.html);
             Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
             if (entityValue == null) {
                 Validator.cleanError($(this.pf(Entities.Keys.toStr)).val(""));
@@ -475,7 +475,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
             if (entityValue.isLoaded())
-                SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
+                this.containerDiv(itemPrefix).html(entityValue.html);
 
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
@@ -509,7 +509,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
             if (entityValue.isLoaded())
-                SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
+                this.containerDiv(itemPrefix).html(entityValue.html);
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
@@ -737,7 +737,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $table.before(SF.hiddenDiv(SF.compose(itemPrefix, EntityList.key_entity), ""));
 
             var select = $(this.pf(EntityList.key_list));
-            select.append("\n<option id='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' name='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' value='' class='sf-value-line'>" + entityValue.toStr + "</option>");
+            select.append("\n<option id='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' name='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' value='' class='form-control'>" + entityValue.toStr + "</option>");
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
             select.children('option:last').attr('selected', true);
         };
@@ -875,8 +875,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var fieldSet = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + "</legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
             $(this.pf(EntityRepeater.key_itemsContainer)).append(fieldSet);
-
-            SF.triggerNewContent(fieldSet);
         };
 
         EntityRepeater.prototype.getRepeaterCall = function () {
@@ -952,7 +950,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityTabRepeater.prototype._create = function () {
             _super.prototype._create.call(this);
 
-            $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs();
+            $(this.pf(EntityTabRepeater.key_tabsContainer)).tab();
         };
 
         EntityTabRepeater.prototype.itemSuffix = function () {
@@ -966,8 +964,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityTabRepeater.prototype.removeEntitySpecific = function (itemPrefix) {
             $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)).remove();
             $("#" + SF.compose(itemPrefix, EntityBase.key_entity)).remove();
-
-            $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+            //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
         };
 
         EntityTabRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
@@ -975,16 +972,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $(this.pf(EntityTabRepeater.key_itemsContainer)).append(header);
 
-            SF.triggerNewContent(header);
-
             var entity = $("<div id='" + SF.compose(itemPrefix, EntityTabRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>");
 
             $(this.pf(EntityTabRepeater.key_tabsContainer)).append(entity);
 
-            SF.triggerNewContent(entity);
-
-            $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
-            $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
+            //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+            //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
+            header.tab("show");
         };
 
         EntityTabRepeater.prototype.getRepeaterCall = function () {
@@ -1031,8 +1025,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) + "<span class='sf-button-container'>" + ((this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) + "</span>" + "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" + "</li>");
 
             $(this.pf(EntityStrip.key_itemsContainer) + " ." + EntityStrip.key_input).before(li);
-
-            SF.triggerNewContent(li);
         };
 
         EntityStrip.prototype.getRepeaterCall = function () {

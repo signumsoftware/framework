@@ -125,7 +125,7 @@ export class EntityBase {
             entityValue.assertPrefixAndType(this.options.prefix, this.options.types);
 
 
-        SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : (<Entities.EntityHtml>entityValue).html));
+        this.containerDiv().html(entityValue == null ? null : (<Entities.EntityHtml>entityValue).html);
         Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
         if (entityValue == null) {
             Validator.cleanError($(this.pf(Entities.Keys.toStr)).val(""));
@@ -532,7 +532,7 @@ export class EntityListBase extends EntityBase {
         entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
-            SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
+            this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html);
 
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
@@ -565,7 +565,7 @@ export class EntityListBase extends EntityBase {
             entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
-            SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
+            this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html);
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
         this.updateButtonsDisplay();
@@ -783,7 +783,7 @@ export class EntityList extends EntityListBase {
         $table.before(SF.hiddenDiv(SF.compose(itemPrefix, EntityList.key_entity), ""));
 
         var select = $(this.pf(EntityList.key_list));
-        select.append("\n<option id='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' name='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' value='' class='sf-value-line'>" + entityValue.toStr + "</option>");
+        select.append("\n<option id='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' name='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' value='' class='form-control'>" + entityValue.toStr + "</option>");
         select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
         select.children('option:last').attr('selected', true);
     }
@@ -924,8 +924,6 @@ export class EntityRepeater extends EntityListBase {
             );
 
         $(this.pf(EntityRepeater.key_itemsContainer)).append(fieldSet);
-
-        SF.triggerNewContent(fieldSet);
     }
 
     getRepeaterCall() {
@@ -989,7 +987,7 @@ export class EntityTabRepeater extends EntityRepeater {
     _create() {
         super._create();
 
-        $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs();
+        $(this.pf(EntityTabRepeater.key_tabsContainer)).tab();
     }
 
     itemSuffix() {
@@ -1005,7 +1003,7 @@ export class EntityTabRepeater extends EntityRepeater {
         $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)).remove();
         $("#" + SF.compose(itemPrefix, EntityBase.key_entity)).remove();
 
-        $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
@@ -1021,17 +1019,14 @@ export class EntityTabRepeater extends EntityRepeater {
 
         $(this.pf(EntityTabRepeater.key_itemsContainer)).append(header);
 
-        SF.triggerNewContent(header);
-
         var entity = $("<div id='" + SF.compose(itemPrefix, EntityTabRepeater.key_entity) + "' class='sf-line-entity'>" +
             "</div>");
 
         $(this.pf(EntityTabRepeater.key_tabsContainer)).append(entity);
 
-        SF.triggerNewContent(entity);
-
-        $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
-        $(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
+        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
+        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
+        header.tab("show");
     }
 
     getRepeaterCall() {
@@ -1106,7 +1101,6 @@ export class EntityStrip extends EntityList {
 
         $(this.pf(EntityStrip.key_itemsContainer) + " ." + EntityStrip.key_input).before(li);
 
-        SF.triggerNewContent(li);
     }
 
     private getRepeaterCall() {
