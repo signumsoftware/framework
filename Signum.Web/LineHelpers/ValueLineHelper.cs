@@ -96,7 +96,9 @@ namespace Signum.Web
             List<SelectListItem> items = valueLine.EnumComboItems ?? valueLine.CreateComboItems();
 
             if (value != null)
-                items.Where(e => e.Value == value.ToString()).SingleEx(() => "Not value present in ValueLine", () => "More than one values present in ValueLine").Selected = true;
+                items.Where(e => e.Value == value.ToString())
+                    .SingleOrDefaultEx()
+                    .TryDoC(s => s.Selected = true);
 
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
