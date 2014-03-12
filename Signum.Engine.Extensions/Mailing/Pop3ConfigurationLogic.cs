@@ -201,9 +201,10 @@ namespace Signum.Engine.Mailing
                             using (OperationLogic.AllowSave<EmailMessageDN>())
                             using (Transaction tr = Transaction.ForceNew())
                             {
+                                string rawContent = null;
                                 try
                                 {
-                                    string rawContent = client.GetMessage(kvp.Key);
+                                    rawContent = client.GetMessage(kvp.Key);
 
                                     MailMessage mm = MailMimeParser.Parse(rawContent);
 
@@ -242,7 +243,9 @@ namespace Signum.Engine.Mailing
                                     tr.Commit();
                                 }
                                 catch (Exception e)
-                                {   
+                                {
+                                    e.Data["rawContent"] = rawContent;
+
                                     var ex = e.LogException();
 
                                     using (Transaction tr2 = Transaction.ForceNew())
