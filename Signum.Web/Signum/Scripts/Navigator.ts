@@ -24,8 +24,8 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
 
 export function navigate(runtimeInfo: Entities.RuntimeInfo, openNewWindow?: boolean) {
     var url = runtimeInfo.isNew ?
-        "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) :
-        "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+        SF.Urls.create.replace("MyType", runtimeInfo.type) :
+        SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
     if (openNewWindow)
         window.open(url, "_blank");

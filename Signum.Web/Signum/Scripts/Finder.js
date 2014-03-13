@@ -848,19 +848,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        SearchControl.prototype.viewOptionsForSearchCreate = function (viewOptions) {
-            return $.extend({
-                controllerUrl: SF.Urls.create
-            }, viewOptions);
-        };
-
-        SearchControl.prototype.viewOptionsForSearchPopupCreate = function (viewOptions) {
-            return $.extend({
-                controllerUrl: SF.Urls.popupNavigate,
-                requestExtraJsonData: this.requestDataForSearchPopupCreate()
-            }, viewOptions);
-        };
-
         SearchControl.prototype.requestDataForSearchPopupCreate = function () {
             return {
                 filters: this.filterBuilder.serializeFilters(),
