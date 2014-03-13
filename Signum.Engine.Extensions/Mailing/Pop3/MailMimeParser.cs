@@ -216,7 +216,7 @@ namespace Signum.Engine.Mailing.Pop3
 
             var enc = GetEncoding(contentType);
 
-            switch (encoding)
+            switch (encoding == null ? null : encoding.ToLower())
             {
                 case "quoted-printable":
                     result = enc.GetString(DecodeQuotePrintable(content));
