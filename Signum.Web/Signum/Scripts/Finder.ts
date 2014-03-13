@@ -896,21 +896,7 @@ export class SearchControl {
         }
         return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o == null ? null : o.type);
     }
-
-
-    viewOptionsForSearchCreate(viewOptions) {
-        return $.extend({
-            controllerUrl: SF.Urls.create
-        }, viewOptions);
-    }
-
-    viewOptionsForSearchPopupCreate(viewOptions) {
-        return $.extend({
-            controllerUrl: SF.Urls.popupNavigate,
-            requestExtraJsonData: this.requestDataForSearchPopupCreate()
-        }, viewOptions);
-    }
-
+  
     requestDataForSearchPopupCreate() {
         return {
             filters: this.filterBuilder.serializeFilters(),
