@@ -128,8 +128,9 @@ function updateHtmlEditorTextArea(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].updateElement();
 };
 
-export function initHtmlEditor(idTargetTextArea: string) {
+export function initHtmlEditor(idTargetTextArea: string, culture : string) {
 
+    CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
     CKEDITOR.replace(idTargetTextArea);
 
     // Update origin textarea
@@ -149,9 +150,9 @@ export function initHtmlEditor(idTargetTextArea: string) {
     
 };
 
-export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
+export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
         .find(".sf-master-template-insert-content");
@@ -162,9 +163,9 @@ export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
     });
 }
 
-export function initHtmlEditorWithTokens(idTargetTextArea: string) {
+export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var lastCursorPosition;
 
@@ -251,7 +252,7 @@ export function activateIFrame($iframe: JQuery) {
 
 
     function fixHeight() {
-        $iframe.height(container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100);
+        $iframe.height(Math.min(1000, container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100));
     }
     fixHeight();
     setInterval(fixHeight, 500);

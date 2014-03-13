@@ -270,7 +270,7 @@ WriteLiteral("                ");
 
             
             #line 39 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-            Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).Prefix));
+            Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).Prefix, UICulture));
 
             
             #line default

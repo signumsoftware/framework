@@ -170,7 +170,7 @@ WriteLiteral("               ");
 
             
             #line 33 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
-           Write(new JsFunction(MailingClient.Module, "initHtmlEditorMasterTemplate", ec.SubContext(e => e.Text).Prefix));
+           Write(new JsFunction(MailingClient.Module, "initHtmlEditorMasterTemplate", ec.SubContext(e => e.Text).Prefix, UICulture));
 
             
             #line default

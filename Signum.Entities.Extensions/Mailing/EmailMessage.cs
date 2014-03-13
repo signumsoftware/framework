@@ -266,8 +266,6 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailAttachmentDN : EmbeddedEntity
     {
-        
-
         EmailAttachmentType type;
         public EmailAttachmentType Type
         {

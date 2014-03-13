@@ -201,9 +201,10 @@ namespace Signum.Engine.Mailing
                             using (OperationLogic.AllowSave<EmailMessageDN>())
                             using (Transaction tr = Transaction.ForceNew())
                             {
+                                string rawContent = null;
                                 try
                                 {
-                                    string rawContent = client.GetMessage(kvp.Key);
+                                    rawContent = client.GetMessage(kvp.Key);
 
                                     MailMessage mm = MailMimeParser.Parse(rawContent);
 
@@ -242,7 +243,9 @@ namespace Signum.Engine.Mailing
                                     tr.Commit();
                                 }
                                 catch (Exception e)
-                                {   
+                                {
+                                    e.Data["rawContent"] = rawContent;
+
                                     var ex = e.LogException();
 
                                     using (Transaction tr2 = Transaction.ForceNew())
@@ -312,18 +315,15 @@ namespace Signum.Engine.Mailing
                 rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
         }
 
-
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
-            if (!dup.Recipients.SequenceEqual(email.Recipients))
+            if (!dup.Recipients.OrderBy(a => a.GetHashCode()).SequenceEqual(email.Recipients.OrderBy(a => a.GetHashCode())))
                 return false;
 
             if (!dup.From.Equals(email.From))
                 return false;
 
-
-
-            if (!dup.Attachments.Select(a=>a.ContentId).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.ContentId).OrderBy()))
+            if (!dup.Attachments.Select(a=>a.File.FileName).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.File.FileName).OrderBy()))
                 return false;
 
             return true;

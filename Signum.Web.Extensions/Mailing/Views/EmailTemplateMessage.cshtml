@@ -36,7 +36,7 @@
 
         <script>
             $(function () {
-                @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).Prefix));
+                @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).Prefix, UICulture));
             });
         </script>
     </div>

@@ -49,6 +49,7 @@
 
             <div class="clearall" />
             @Html.EntityLine(e, f => f.Target)
+ 		    @Html.ValueLine(e, f => f.BodyHash)
             @Html.ValueLine(e, f => f.Subject)
             @if (e.Value.State == EmailMessageState.Created)
             {

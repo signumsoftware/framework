@@ -40,18 +40,18 @@ export function init(removeCharactersUrl: string, getDictionariesUrl: string) {
 
 
     $(document).on('keyup', 'textarea.sf-sms-msg-text', function () {
-        remainingCharacters();
+        remainingCharacters($(this));
     });
 
     $(document).on('click', '.sf-sms-remove-chars', function () {
-        var $textarea = $control();
+        var $textarea = $(this).closest(".sf-sms-edit-container").find(".sf-sms-msg-text");
         $.ajax({
             dataType: "text",
             url: removeCharactersUrl,
             data: { text: $textarea.val() },
             success: function (result) {
                 $textarea.val(result);
-                remainingCharacters();
+                remainingCharacters($textarea);
             }
         });
     });
@@ -96,11 +96,9 @@ function charactersToEnd($textarea) {
     return maxLength - count;
 }
 
-
-
-
 function remainingCharacters($textarea?: JQuery) {
     $textarea = $textarea || $control();
+    
     var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
     var $remainingCharacters = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-characters-left > p');
 
