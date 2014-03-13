@@ -308,11 +308,11 @@ namespace Signum.Engine.Mailing
         {
             email.Target = dup.Target;
             foreach (var att in email.Attachments)
-                att.File = dup.Attachments.FirstOrDefault(a => a.ContentId == att.ContentId).File;
+                att.File = dup.Attachments.FirstEx(a => a.File.FileName == att.File.FileName).File;
 
             email.From.EmailOwner = dup.From.EmailOwner;
             foreach (var rec in email.Recipients)
-                rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
+                rec.EmailOwner = dup.Recipients.FirstEx(a => a.GetHashCode() == rec.GetHashCode()).EmailOwner;
         }
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
