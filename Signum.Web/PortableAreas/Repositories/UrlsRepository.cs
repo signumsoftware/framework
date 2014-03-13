@@ -7,6 +7,7 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Engine;
 
 namespace Signum.Web.PortableAreas
 {
@@ -16,15 +17,15 @@ namespace Signum.Web.PortableAreas
         {
             { "popupView", url => url.Action("PopupView", "Navigator") },
             { "partialView", url => url.Action("PartialView", "Navigator") },
-            { "create", url => url.Action("Create", "Navigator") },
-            { "view", url => url.Action("View", "Navigator") },
+            { "create", url => url.Action("Create", "Navigator", new { webTypeName = "MyType"}) },
+            { "view", url => url.Action("View", "Navigator", new { webTypeName = "MyType", id = "MyId" }) },
             { "popupNavigate", url => url.Action("PopupNavigate", "Navigator") },
             { "normalControl", url => url.Action("NormalControl", "Navigator") },
             { "valueLineBox", url => url.Action("ValueLineBox", "Navigator") },
 
             { "validate", url => url.Action("Validate", "Validator") },
 
-            { "find", url => url.Action("Find", "Finder") },
+            { "find", url => url.Action("Find", "Finder", new { webQueryName = "MyQuery"}) },
             { "partialFind", url => url.Action("PartialFind", "Finder") },
             { "search", url => url.Action("Search", "Finder") },
             { "subTokensCombo", url => url.Action("NewSubTokensCombo", "Finder") },
@@ -47,7 +48,7 @@ namespace Signum.Web.PortableAreas
 
             this.VirtualPathPrefix = virtualPathPrefix.ToLower();
 
-            FileLazy = new ResetLazy<StaticContentResult>(()=>new StaticContentResult(CreateFile(), fileName));
+            FileLazy = GlobalLazy.WithoutInvalidations(()=>new StaticContentResult(CreateFile(), fileName));
         }
 
         static readonly string fileName = "signumCommon.js";
