@@ -58,11 +58,8 @@ namespace Signum.Utilities.DataStructures
             return new Interval<T>(minVal, maxVal);
         }
 
-        public Interval<T>? Union(Interval<T> other)
+        public Interval<T> Union(Interval<T> other)
         {
-            if (!this.Overlap(other))
-                return null;
-
             T minVal = min.CompareTo(other.min) > 0 ? other.min : min;
             T maxVal = max.CompareTo(other.max) < 0 ? other.max : max;
 
@@ -211,11 +208,8 @@ namespace Signum.Utilities.DataStructures
             return new NullableInterval<T>(minVal, maxVal);
         }
 
-        public NullableInterval<T>? Union(NullableInterval<T> other)
+        public NullableInterval<T> Union(NullableInterval<T> other)
         {
-            if (!this.Overlap(other))
-                return null;
-
             T? minVal = !min.HasValue || !other.min.HasValue ? (T?)null : min.Value.CompareTo(other.min.Value) > 0 ? other.min.Value : min.Value;
             T? maxVal = !max.HasValue || !other.max.HasValue ? (T?)null : max.Value.CompareTo(other.max.Value) < 0 ? other.max.Value : max.Value;
 

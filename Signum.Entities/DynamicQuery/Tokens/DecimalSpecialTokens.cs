@@ -60,10 +60,11 @@ namespace Signum.Entities.DynamicQuery
         {
             var exp = Parent.BuildExpression(context);
 
-            if (exp.Type.UnNullify() == typeof(decimal))
-                return Expression.Convert(Expression.Call(miFloorDecimal, exp.UnNullify()), typeof(int?));
-            else
-                return Expression.Convert(Expression.Call(miFloorDecimal, Expression.Convert(exp, typeof(double))), typeof(int?));
+            var call = exp.Type.UnNullify() == typeof(decimal) ?
+                Expression.Call(miFloorDecimal, exp.UnNullify()) :
+                Expression.Call(miFloorDouble, Expression.Convert(exp, typeof(double)));
+
+            return Expression.Convert(call.Nullify(), typeof(int?));
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -130,17 +131,18 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        static MethodInfo miFloorDouble = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0));
-        static MethodInfo miFloorDecimal = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0m));
+        static MethodInfo miCeilingDouble = ReflectionTools.GetMethodInfo(() => Math.Ceiling(0.0));
+        static MethodInfo miCeilingDecimal = ReflectionTools.GetMethodInfo(() => Math.Ceiling(0.0m));
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 
-            if (exp.Type.UnNullify() == typeof(decimal))
-                return Expression.Convert(Expression.Call(miFloorDecimal, exp.UnNullify()), typeof(int?));
-            else
-                return Expression.Convert(Expression.Call(miFloorDecimal, Expression.Convert(exp, typeof(double))), typeof(int?));
+            var call = exp.Type.UnNullify() == typeof(decimal) ? 
+                Expression.Call(miCeilingDecimal, exp.UnNullify()) :
+                Expression.Call(miCeilingDouble, Expression.Convert(exp, typeof(double))); 
+
+            return Expression.Convert(call.Nullify(), typeof(int?));
         }
 
         public override PropertyRoute GetPropertyRoute()

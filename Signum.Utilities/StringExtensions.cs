@@ -61,7 +61,7 @@ namespace Signum.Utilities
         public static string[] Lines(this string str)
         {
             if (str.HasText())
-                return str.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                return str.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
             else
                 return new string[0];
         }
