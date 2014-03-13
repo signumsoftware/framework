@@ -247,6 +247,14 @@ export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfo {
     return Entities.RuntimeInfo.parse(mainControl.data("runtimeinfo"));
 }
 
+export function getMainControl(prefix: string) : JQuery {
+    return $(prefix ? "#{0}_divMainControl".format(prefix) : "#divMainControl");
+}
+
+export function hasChanges(prefix: string) : boolean {
+    return getMainControl(prefix).hasClass("sf-changed");
+}
+
 export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {
     return new Entities.EntityHtml(prefix, getRuntimeInfoValue(prefix));
 }

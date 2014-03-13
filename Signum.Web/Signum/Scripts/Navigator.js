@@ -217,6 +217,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.getRuntimeInfoValue = getRuntimeInfoValue;
 
+    function getMainControl(prefix) {
+        return $(prefix ? "#{0}_divMainControl".format(prefix) : "#divMainControl");
+    }
+    exports.getMainControl = getMainControl;
+
+    function hasChanges(prefix) {
+        return exports.getMainControl(prefix).hasClass("sf-changed");
+    }
+    exports.hasChanges = hasChanges;
+
     function getEmptyEntityHtml(prefix) {
         return new Entities.EntityHtml(prefix, exports.getRuntimeInfoValue(prefix));
     }
