@@ -250,10 +250,15 @@ export function activateIFrame($iframe: JQuery) {
     if (container.length == 0)
         container = $iframe.contents();
 
-
+    var currHeight = 0;
     function fixHeight() {
-        $iframe.height(Math.min(1000, container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100));
+        var newHeight = container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100; 
+        if (Math.abs(currHeight - newHeight) > 100) {
+            $iframe.css("height", newHeight);
+            currHeight = newHeight;
+        }
     }
+
     fixHeight();
     setInterval(fixHeight, 500);
 }
