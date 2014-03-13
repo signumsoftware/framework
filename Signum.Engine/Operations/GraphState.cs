@@ -94,7 +94,8 @@ namespace Signum.Engine.Operations
 
             protected override void OnEndOperation(T result)
             {
-                Graph<T, S>.AssertEnterState(result, this);
+                if (result != null)
+                    Graph<T, S>.AssertEnterState(result, this);
 
                 base.OnEndOperation(result);
             }
