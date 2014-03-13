@@ -820,13 +820,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     if (type == null)
                         return;
 
-                    var requestData = _this.requestDataForSearchPopupCreate();
-
                     var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
                         Navigator.navigate(runtimeInfo, false);
-                    else
-                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+
+                    var requestData = _this.requestDataForSearchPopupCreate();
+
+                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
                 });
         };
 

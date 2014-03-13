@@ -873,13 +873,13 @@ export class SearchControl {
                 if (type == null)
                     return;
 
-                var requestData = this.requestDataForSearchPopupCreate()
-
                 var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
                     Navigator.navigate(runtimeInfo, false);
-                else
-                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+
+                var requestData = this.requestDataForSearchPopupCreate();
+
+                Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
             });
     }
 
