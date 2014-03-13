@@ -12,173 +12,86 @@ using Signum.Web.Lines;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using System.Text.RegularExpressions;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Web
 {
-    public class DatePickerOptions
-    {
-        public static DatePickerOptions Default = new DatePickerOptions();
-        
-        public bool IsDefault()
-        {
-            return this.ChangeMonth == Default.ChangeMonth &&
-                   this.ChangeYear == Default.ChangeYear &&
-                   this.FirstDay == Default.FirstDay &&
-                   this.YearRange == Default.YearRange &&
-                   this.ShowOn == Default.ShowOn &&
-                   this.ButtonImageOnly == Default.ButtonImageOnly &&
-                   this.ButtonText == Default.ButtonText &&
-                   this.ButtonImageSrc == Default.ButtonImageSrc &&
-                   this.MinDate == Default.MinDate &&
-                   this.MaxDate == Default.MaxDate &&
-                   this.ConstrainInput == Default.ConstrainInput;
-        }
-
-        public string Format { get; set; }
-
-        public static string JsDateFormat(string dateFormat)
-        {
-            switch (dateFormat)
-            {
-                case "d":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-                case "D":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
-                case "f":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "F":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "g":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "G":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "m":
-                case "M":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern;
-                case "r":
-                case "R":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.RFC1123Pattern;
-                case "s":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.SortableDateTimePattern;
-                case "t":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "T":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "u":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern;
-                case "U":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "y":
-                case "Y":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern;
-            }
-            return dateFormat;
-        }
-
-        bool changeMonth = true;
-        public bool ChangeMonth
-        {
-            get { return changeMonth; }
-            set { changeMonth = value; }
-        }
-
-        bool changeYear = true;
-        public bool ChangeYear
-        {
-            get { return changeYear; }
-            set { changeYear = value; }
-        }
-
-        int firstDay = 1;
-        public int FirstDay
-        {
-            get { return firstDay; }
-            set { firstDay = value; }
-        }
-
-        string yearRange = "-90:+10";
-        public string YearRange
-        {
-            get { return yearRange; }
-            set { yearRange = value; }
-        }
-
-        string showOn = "button";
-        public string ShowOn
-        {
-            get { return showOn; }
-            set { showOn = value; }
-        }
-
-        bool buttonImageOnly = true;
-        public bool ButtonImageOnly
-        {
-            get { return buttonImageOnly; }
-            set { buttonImageOnly = value; }
-        }
-
-        string buttonText = CalendarMessage.ShowCalendar.NiceToString();
-        public string ButtonText
-        {
-            get { return buttonText; }
-            set { buttonText = value; }
-        }
-
-        string buttonImageSrc = VirtualPathUtility.ToAbsolute("~/Signum/Images/calendar.png");
-        public string ButtonImageSrc
-        {
-            get { return buttonImageSrc; }
-            set { buttonImageSrc = value; }
-        }
-
-        string minDate;
-        public string MinDate
-        {
-            get { return minDate; }
-            set { minDate = value; }
-        }
-
-        string maxDate;
-        public string MaxDate
-        {
-            get { return maxDate; }
-            set { maxDate = value; }
-        }
-
-        bool constrainInput;
-        public bool ConstrainInput
-        {
-            get { return constrainInput; }
-            set { constrainInput = value; }
-        }
-
-        public static string DefaultCulture
-        {
-            get { return CultureInfo.CurrentCulture.Name.Substring(0, 2); }
-        }
-
-        public override string ToString()
-        {
-            return "{" + 
-                "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}{11}".Formato(
-                    ChangeMonth ? "true" : "false",
-                    ChangeYear ? "true" : "false",
-                    FirstDay,
-                    YearRange,
-                    ShowOn,
-                    ButtonImageOnly ? "true" : "false",
-                    ButtonText,
-                    ButtonImageSrc,
-                    ConstrainInput ? "true" : "false",
-                    (MinDate.HasText() ? ", minDate: " + MinDate : ""),
-                    (MaxDate.HasText() ? ", maxDate: " + MaxDate : ""),
-                    (Format.HasText() ? ", dateFormat: '" + JsDateFormat(Format) + "'" : "") + 
-                "}");
-        }
-    }
-
     public static class CalendarHelper
     {
+        static readonly Regex parts = new Regex(@"(\w)\1{0,}");
+
+        public static string GetDatePickerFormat(string dateTimeFormat, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentCulture;
+
+            string format = Customize(dateTimeFormat, culture.DateTimeFormat);
+
+            var js = parts.Replace(format, m => ToJs(m.Value));
+
+            return Clean(js);
+        }
+
+        private static string Clean(string js)
+        {
+            var matches = parts.Matches(js).Cast<Match>();
+
+            if(matches.All(m=>m.Value == "X"))
+                return js;
+
+            matches.Where(m=>m.Value != "X")
+                .Select(m=>new Interval<int>(m.Index, m.Index + m.Length))
+                .Aggregate((a,b)=>a.Union(b));
+
+
+
+            matches.Where(m => m.Value != "X").Min(a=>a.
+        }
+
+        private static string ToJs(string part)
+        {
+            switch (part)
+            {
+                case "d": return "d";
+                case "dd": return "dd";
+                case "ddd": return "D";
+                case "dddd": return "DD";
+                case "M": return "m";
+                case "MM": return "mm";
+                case "MMM": return "M";
+                case "MMMM": return "MM";
+                case "yy": return "yy";
+                case "yyyy": return "yyyy";
+                default: return "X";
+            }
+        }
+
+        private static string Customize(string format, DateTimeFormatInfo info)
+        {
+            switch (format)
+            {
+                case "d": return info.ShortDatePattern;
+                case "D": return info.LongDatePattern;
+                case "f": return info.LongDatePattern + " " + info.ShortTimePattern;
+                case "F": return info.FullDateTimePattern;
+                case "g": return info.ShortDatePattern + " " + info.ShortTimePattern;
+                case "G": return info.ShortDatePattern + " " + info.LongTimePattern;
+                case "m":
+                case "M": return info.MonthDayPattern;
+                case "r":
+                case "R": return info.RFC1123Pattern;
+                case "s": return info.SortableDateTimePattern;
+                case "t": return info.ShortTimePattern;
+                case "T": return info.LongTimePattern;
+                case "u": return info.UniversalSortableDateTimePattern;
+                case "U": return info.FullDateTimePattern;
+                case "y":
+                case "Y": return info.YearMonthPattern;
+                default: return format;
+            }
+        }
+
         public static MvcHtmlString Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
