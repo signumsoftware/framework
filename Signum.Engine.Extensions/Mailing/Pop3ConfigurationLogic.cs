@@ -308,7 +308,7 @@ namespace Signum.Engine.Mailing
         {
             email.Target = dup.Target;
             foreach (var att in email.Attachments)
-                att.File = dup.Attachments.FirstEx(a => a.File.FileName == att.File.FileName).File;
+                att.File = dup.Attachments.FirstEx(a => a.Similar(att)).File;
 
             email.From.EmailOwner = dup.From.EmailOwner;
             foreach (var rec in email.Recipients)
@@ -323,7 +323,7 @@ namespace Signum.Engine.Mailing
             if (!dup.From.Equals(email.From))
                 return false;
 
-            if (!dup.Attachments.Select(a=>a.File.FileName).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.File.FileName).OrderBy()))
+            if (dup.Attachments.Count != email.Attachments.Count || !dup.Attachments.All(a=> email.Attachments.Any(a2=>a2.Similar(a))))
                 return false;
 
             return true;
