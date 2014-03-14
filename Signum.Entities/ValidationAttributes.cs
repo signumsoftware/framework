@@ -14,6 +14,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using Signum.Entities.Basics;
+using System.IO;
 
 namespace Signum.Entities
 {
@@ -267,17 +268,42 @@ namespace Signum.Entities
         }
     }
 
-    public class FileNameValidatorAttribute : RegexValidatorAttribute
+    public class FileNameValidatorAttribute : ValidatorAttribute
     {
-        public static readonly Regex FileNameRegex = new Regex(@"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\"";|/]+$");
+        public static readonly char[] InvalidCharts = Path.GetInvalidPathChars();
+
+        static readonly Regex invalidChartsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+
         public FileNameValidatorAttribute()
-            : base(FileNameRegex)
         {
         }
 
-        public override string FormatName
+        public string FormatName
         {
             get { return ValidationMessage.FileName.NiceToString(); }
+        }
+
+        public override string HelpMessage
+        {
+            get { return ValidationMessage.HaveValid0Format.NiceToString().Formato(FormatName); }
+        }
+
+        protected override string OverrideError(object value)
+        {
+            string str = (string)value;
+
+            if (str == null)
+                return null;
+
+            if (str.IndexOfAny(InvalidCharts) == -1)
+                return null;
+
+            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(FormatName);
+        }
+
+        public static string RemoveInvalidCharts(string a)
+        {
+            return invalidChartsRegex.Replace(a, "");
         }
     }
 
