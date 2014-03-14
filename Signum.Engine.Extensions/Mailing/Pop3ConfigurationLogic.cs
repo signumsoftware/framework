@@ -394,7 +394,8 @@ namespace Signum.Engine.Mailing
 
         private static string GetName(ContentType ct)
         {
-            return ct.Name ?? ("unknown" + MimeType.GetDefaultExtension(ct.MediaType));
+            return ct.Name.TryCC(a => FileNameValidatorAttribute.RemoveInvalidCharts(a)) ??
+                ("unknown" + MimeType.GetDefaultExtension(ct.MediaType));
         }
 
         private static DateTime GetDate(MailMessage mm)
