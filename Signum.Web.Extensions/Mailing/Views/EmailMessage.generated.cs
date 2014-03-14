@@ -552,21 +552,19 @@ WriteLiteral("                        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n                    </fieldset>\r\n\r\n                    <pre>\r\n");
-
-WriteLiteral("                        ");
+WriteLiteral("\r\n\r\n                    </fieldset>\r\n\r\n                    <pre>");
 
             
-            #line 121 "..\..\Mailing\Views\EmailMessage.cshtml"
-                   Write(ri.Value.RawContent);
+            #line 120 "..\..\Mailing\Views\EmailMessage.cshtml"
+                    Write(ri.Value.RawContent);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </pre>\r\n                </fieldset>\r\n");
+WriteLiteral("</pre>\r\n                </fieldset>\r\n");
 
             
-            #line 124 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 122 "..\..\Mailing\Views\EmailMessage.cshtml"
                 }
             }
 
@@ -576,7 +574,7 @@ WriteLiteral("\r\n                    </pre>\r\n                </fieldset>\r\n"
 WriteLiteral("        </div>\r\n\r\n\r\n\r\n    </div>\r\n");
 
             
-            #line 131 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 129 "..\..\Mailing\Views\EmailMessage.cshtml"
 }
 
             
