@@ -3,10 +3,6 @@
 @using System.Globalization
 
 @using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
-{    
-    using (Html.FieldInline())
-    {        
-        @Html.ValueLine(e, srd => srd.StartingOn, vl => { vl.Format = "d"; })
-        @Html.HourMinute(e, srd => srd.StartingOn)
-    }
+{     
+    @Html.ValueLine(e, srd => srd.StartingOn)
 }
