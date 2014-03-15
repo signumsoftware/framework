@@ -25,6 +25,7 @@ export class EntityBase {
     options: EntityBaseOptions;
     element: JQuery;
     hidden: JQuery;
+    inputGroup: JQuery;
     shownButton: JQuery;
     autoCompleter: EntityAutocompleter;
 
@@ -39,6 +40,7 @@ export class EntityBase {
         this.element.data("SF-control", this);
         this.options = options;
         this.hidden = $(this.pf("hidden"));
+        this.inputGroup = $(this.pf("inputGroup"));
         this.shownButton = $(this.pf("shownButton"));
       
         var temp = $(this.pf(Entities.Keys.template));
@@ -47,6 +49,8 @@ export class EntityBase {
             this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
             this.options.templateToString = temp.attr("data-toString");
         }
+
+        this.fixInputGroup();
 
         this._create();
     }
@@ -58,7 +62,7 @@ export class EntityBase {
 
     static key_entity = "sfEntity";
 
-    _create() {
+    _create() { //abstract
 
     }
 
@@ -262,6 +266,12 @@ export class EntityBase {
         this.visibleButton("btnFind", !hasEntity);
         this.visibleButton("btnView", hasEntity);
         this.visibleButton("btnRemove", hasEntity);
+
+        this.fixInputGroup();
+    }
+
+    fixInputGroup() {
+        this.inputGroup.toggleClass("input-group", !!this.shownButton.children().length);
     }
 
    
@@ -763,6 +773,15 @@ export class EntityList extends EntityListBase {
 
     static key_list = "sfList";
 
+    _create() {
+        var list = $(this.pf(EntityList.key_list));
+
+        list.change(() => this.updateButtonsDisplay());
+
+        if (list.height() < this.shownButton.height())
+            list.css("min-height", this.shownButton.height());
+    }
+
     itemSuffix() {
         return Entities.Keys.toStr;
     }
@@ -801,16 +820,17 @@ export class EntityList extends EntityListBase {
 
 
     updateButtonsDisplay() {
-        var hasElements = this.getItems().length > 0;
-        $(this.pf("btnRemove")).toggle(hasElements);
-        $(this.pf("btnView")).toggle(hasElements);
-        $(this.pf("btnUp")).toggle(hasElements);
-        $(this.pf("btnDown")).toggle(hasElements);
-
         var canAdd = this.canAddItems();
+        this.visibleButton("btnCreate", canAdd);
+        this.visibleButton("btnFind", canAdd);
 
-        $(this.pf("btnCreate")).toggle(canAdd);
-        $(this.pf("btnFind")).toggle(canAdd);
+        var hasSelected = this.selectedItemPrefix() != null;
+        this.visibleButton("btnView", hasSelected);
+        this.visibleButton("btnRemove", hasSelected);
+        this.visibleButton("btnUp", hasSelected);
+        this.visibleButton("btnDown", hasSelected);
+
+        this.fixInputGroup();
     }
 
     getToString(itemPrefix?: string): string {

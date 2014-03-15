@@ -76,8 +76,8 @@ namespace Signum.Web
                             sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail).Surround("li"));
                             sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail).Surround("li"));
                             sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail, hidden: false).Surround("li"));
-                            sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail).Surround("li"));
+                            sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail).Surround("li"));
                         }
                     }
                 }

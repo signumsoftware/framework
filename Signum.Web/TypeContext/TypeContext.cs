@@ -59,7 +59,6 @@ namespace Signum.Web
         {
             FormGroupStyle = FormGroupStyle.Horizontal,
             LabelColumns = new BsColumn(2),
-            ShowValidationMessage = true,
             ReadOnly = false,
         };
 
@@ -87,8 +86,6 @@ namespace Signum.Web
             get { return valueColummns ?? Parent.ValueColumns; }
         }
 
-        
-
         bool? readOnly; 
         public bool ReadOnly
         {
@@ -102,13 +99,6 @@ namespace Signum.Web
         }
 
         protected virtual void SetReadOnly() { }
-
-        bool? showValidationMessage; 
-        public bool ShowValidationMessage
-        {
-            get { return showValidationMessage ?? Parent.ShowValidationMessage; }
-            set { showValidationMessage = value; }
-        }
 
         public override string ToString()
         {

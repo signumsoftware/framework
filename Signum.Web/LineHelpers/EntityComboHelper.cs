@@ -29,65 +29,95 @@ namespace Signum.Web
                 throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            sb.AddLine(helper.HiddenRuntimeInfo(entityCombo));
-
-            if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
-                sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityCombo.Parent, RenderPopupMode.PopupInDiv, entityCombo));
-            else if (entityCombo.UntypedValue != null)
-                sb.AddLine(helper.Div(entityCombo.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-            if (entityCombo.ReadOnly)
-                sb.AddLine(helper.FormControlStatic(entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
-            else
+            using (sb.Surround(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))
             {
-                List<SelectListItem> items = new List<SelectListItem>();
-                items.Add(new SelectListItem() { Text = "-", Value = "" });
-                if (entityCombo.Preload)
+                sb.AddLine(helper.HiddenRuntimeInfo(entityCombo));
+
+                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("hidden")).Class("hide")))
                 {
-                    int? id = entityCombo.IdOrNull;
-
-                    IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
-
-                    items.AddRange(
-                        data.Select(lite => new SelectListItem()
-                            {
-                                Text = lite.ToString(),
-                                Value = lite.Key(),
-                                Selected = lite.IdOrNull == entityCombo.IdOrNull
-                            })
-                        );
+                    if (entityCombo.UntypedValue != null)
+                    {
+                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
+                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityCombo));
+                    }
+                    else
+                    {
+                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
+                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityCombo));
+                    }
                 }
 
-                entityCombo.ComboHtmlProperties.AddCssClass("form-control");
-
-                if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
-                    throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
-
-                entityCombo.ComboHtmlProperties.Add("onchange", entityCombo.SFControlThen("combo_selected()"));
-
-                if (entityCombo.Size > 0)
+                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
                 {
-                    entityCombo.ComboHtmlProperties.AddCssClass("sf-entity-list");
-                    entityCombo.ComboHtmlProperties.Add("size", Math.Min(entityCombo.Size, items.Count - 1));
+                    if (entityCombo.ReadOnly)
+                        sb.AddLine(helper.FormControlStatic(entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
+                    else
+                        sb.AddLine(DropDownList(helper, entityCombo));
+
+                    using (sb.Surround(new HtmlTag("span", entityCombo.Compose("shownButton")).Class("input-group-btn")))
+                    {
+                        if (entityCombo.UntypedValue == null)
+                        {
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityCombo));
+                        }
+                        else
+                        {
+                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityCombo));
+                        }
+                    }
                 }
 
-                sb.AddLine(helper.DropDownList(
-                        entityCombo.Compose(EntityComboKeys.Combo),
-                        items,
-                        entityCombo.ComboHtmlProperties));
+                if (entityCombo.Type.IsEmbeddedEntity())
+                {
+                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone((object)Constructor.Construct(entityCombo.Type.CleanType()));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityCombo, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityCombo, isTemplate: true), null));
+                }
+
+                if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
+                    sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityCombo.Parent, RenderPopupMode.PopupInDiv, entityCombo));
+
+                sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));
             }
-
-            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
-            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
-
-            if (entityCombo.ShowValidationMessage)
-            {
-                sb.AddLine(helper.ValidationMessage(entityCombo.Prefix));
-            }
-
-            sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));
 
             return helper.FormGroup(entityCombo, entityCombo.Prefix, entityCombo.LabelText, sb.ToHtml());
+        }
+
+        private static MvcHtmlString DropDownList(HtmlHelper helper, EntityCombo entityCombo)
+        {
+            List<SelectListItem> items = new List<SelectListItem>();
+            items.Add(new SelectListItem() { Text = "-", Value = "" });
+
+            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+
+            items.AddRange(
+                data.Select(lite => new SelectListItem()
+                {
+                    Text = lite.ToString(),
+                    Value = lite.Key(),
+                    Selected = lite.IdOrNull == entityCombo.IdOrNull
+                })
+                );
+
+
+            entityCombo.ComboHtmlProperties.AddCssClass("form-control");
+
+            if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
+                throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
+
+            entityCombo.ComboHtmlProperties.Add("onchange", entityCombo.SFControlThen("combo_selected()"));
+
+            if (entityCombo.Size > 0)
+            {
+                entityCombo.ComboHtmlProperties.AddCssClass("sf-entity-list");
+                entityCombo.ComboHtmlProperties.Add("size", Math.Min(entityCombo.Size, items.Count - 1));
+            }
+
+            return helper.DropDownList(
+                    entityCombo.Compose(EntityComboKeys.Combo),
+                    items,
+                    entityCombo.ComboHtmlProperties);
         }
 
         public static MvcHtmlString EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 

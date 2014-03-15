@@ -45,11 +45,6 @@ namespace Signum.Web
                 sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "sf-unit-line"));
             }
 
-            if (valueLine.ShowValidationMessage)
-            {
-                sb.AddLine(helper.ValidationMessage(valueLine.Prefix));
-            }
-
             return sb.ToHtml();
         }
 

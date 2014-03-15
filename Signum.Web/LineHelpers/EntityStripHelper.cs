@@ -70,11 +70,6 @@ namespace Signum.Web
                 }
             }
 
-            if (entityStrip.ShowValidationMessage)
-            {
-                sb.AddLine(helper.ValidationMessage(entityStrip.Prefix));
-            }
-
             sb.AddLine(entityStrip.ConstructorScript(JsFunction.LinesModule, "EntityStrip"));
 
             return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelText, sb.ToHtml());

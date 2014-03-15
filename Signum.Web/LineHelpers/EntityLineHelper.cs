@@ -46,7 +46,7 @@ namespace Signum.Web
                      }
                  }
 
-                using (sb.Surround(new HtmlTag("div").Class("input-group")))
+                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
                 {
                     if (entityLine.UntypedValue == null)
                         sb.AddLine(AutocompleteTextBox(helper, entityLine));
@@ -66,11 +66,6 @@ namespace Signum.Web
                             sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
                         }
                     }
-                }
-
-                if (entityLine.ShowValidationMessage)
-                {
-                    sb.AddLine(helper.ValidationMessage(entityLine.Prefix));
                 }
 
                 if (entityLine.Type.IsEmbeddedEntity())

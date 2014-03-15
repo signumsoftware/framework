@@ -12,6 +12,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.element.data("SF-control", this);
             this.options = options;
             this.hidden = $(this.pf("hidden"));
+            this.inputGroup = $(this.pf("inputGroup"));
             this.shownButton = $(this.pf("shownButton"));
 
             var temp = $(this.pf(Entities.Keys.template));
@@ -20,6 +21,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
                 this.options.templateToString = temp.attr("data-toString");
             }
+
+            this.fixInputGroup();
 
             this._create();
         }
@@ -225,6 +228,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.visibleButton("btnFind", !hasEntity);
             this.visibleButton("btnView", hasEntity);
             this.visibleButton("btnRemove", hasEntity);
+
+            this.fixInputGroup();
+        };
+
+        EntityBase.prototype.fixInputGroup = function () {
+            this.inputGroup.toggleClass("input-group", !!this.shownButton.children().length);
         };
 
         EntityBase.prototype.visibleButton = function (sufix, visible) {
@@ -711,6 +720,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         function EntityList() {
             _super.apply(this, arguments);
         }
+        EntityList.prototype._create = function () {
+            var _this = this;
+            var list = $(this.pf(EntityList.key_list));
+
+            list.change(function () {
+                return _this.updateButtonsDisplay();
+            });
+
+            if (list.height() < this.shownButton.height())
+                list.css("min-height", this.shownButton.height());
+        };
+
         EntityList.prototype.itemSuffix = function () {
             return Entities.Keys.toStr;
         };
@@ -749,16 +770,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityList.prototype.updateButtonsDisplay = function () {
-            var hasElements = this.getItems().length > 0;
-            $(this.pf("btnRemove")).toggle(hasElements);
-            $(this.pf("btnView")).toggle(hasElements);
-            $(this.pf("btnUp")).toggle(hasElements);
-            $(this.pf("btnDown")).toggle(hasElements);
-
             var canAdd = this.canAddItems();
+            this.visibleButton("btnCreate", canAdd);
+            this.visibleButton("btnFind", canAdd);
 
-            $(this.pf("btnCreate")).toggle(canAdd);
-            $(this.pf("btnFind")).toggle(canAdd);
+            var hasSelected = this.selectedItemPrefix() != null;
+            this.visibleButton("btnView", hasSelected);
+            this.visibleButton("btnRemove", hasSelected);
+            this.visibleButton("btnUp", hasSelected);
+            this.visibleButton("btnDown", hasSelected);
+
+            this.fixInputGroup();
         };
 
         EntityList.prototype.getToString = function (itemPrefix) {

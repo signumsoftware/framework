@@ -12,7 +12,7 @@ namespace Signum.Web
 {
     public static class EntityListBaseHelper
     {
-        public static MvcHtmlString MoveUpButton(HtmlHelper helper, EntityListBase listBase, bool hidden)
+        public static MvcHtmlString MoveUpButton(HtmlHelper helper, EntityListBase listBase)
         {
             if (!listBase.Reorder)
                 return MvcHtmlString.Empty;
@@ -23,9 +23,6 @@ namespace Signum.Web
                 { "data-icon", "ui-icon-triangle-1-n" },
                 { "data-text", false}
             };
-
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
 
             IList list = (IList)listBase.UntypedValue;
 
@@ -40,7 +37,7 @@ namespace Signum.Web
                   htmlAttr);
         }
 
-        public static MvcHtmlString MoveDownButton(HtmlHelper helper, EntityListBase listBase, bool hidden)
+        public static MvcHtmlString MoveDownButton(HtmlHelper helper, EntityListBase listBase)
         {
             if (!listBase.Reorder)
                 return MvcHtmlString.Empty;
@@ -51,9 +48,6 @@ namespace Signum.Web
                 { "data-icon", "ui-icon-triangle-1-s" },
                 { "data-text", false}
             };
-
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
 
             IList list = (IList)listBase.UntypedValue;
 
