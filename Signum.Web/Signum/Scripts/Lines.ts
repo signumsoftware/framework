@@ -463,20 +463,16 @@ export class EntityCombo extends EntityBase {
     }
 }
 
-export interface EntityLineDetailOptions extends EntityBaseOptions {
-    detailDiv: string;
-}
-
 export class EntityLineDetail extends EntityBase {
 
-    options: EntityLineDetailOptions;
+    options: EntityBaseOptions;
 
-    constructor(element: JQuery, options: EntityLineDetailOptions) {
+    constructor(element: JQuery, options: EntityBaseOptions) {
         super(element, options);
     }
 
     containerDiv(itemPrefix?: string) {
-        return $("#" + this.options.detailDiv);
+        return $(this.pf("sfDetail"));
     }
 
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {

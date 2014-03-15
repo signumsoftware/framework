@@ -33,3 +33,19 @@
     border-bottom-left-radius: 0;
 }
 
+/*legends*/
+fieldset
+{
+   border: 1px solid #aaa;
+   padding: 0px 10px;
+   border-radius: 4px;
+   margin: 10px -10px;
+}
+
+fieldset legend
+{
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0px 0px 0 10px;
+    margin: 10px 0px;
+}

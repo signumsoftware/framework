@@ -425,7 +425,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             _super.call(this, element, options);
         }
         EntityLineDetail.prototype.containerDiv = function (itemPrefix) {
-            return $("#" + this.options.detailDiv);
+            return $(this.pf("sfDetail"));
         };
 
         EntityLineDetail.prototype.setEntitySpecific = function (entityValue, itemPrefix) {

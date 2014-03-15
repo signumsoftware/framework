@@ -23,19 +23,49 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            using (sb.Surround(new HtmlTag("fieldset").Id(entityDetail.Prefix).Class("sf-line-detail-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset", entityDetail.Prefix).Class("SF-entity-line-details SF-control-container")))
             {
-                using (sb.Surround(new HtmlTag("legend")))
-                {
-                    sb.AddLine(EntityBaseHelper.ListLabel(helper, entityDetail));
+                sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
-                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                using (sb.Surround(new HtmlTag("div", entityDetail.Compose("hidden")).Class("hide")))
+                {
+                    if (entityDetail.UntypedValue != null)
+                    {
+                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
+                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                    }
+                    else
+                    {
+                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityDetail));
+                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                    }
                 }
 
-                sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));
+                using (sb.Surround(new HtmlTag("legend")))
+                using (sb.Surround(new HtmlTag("div").Class("input-group")))
+                {
+                    sb.AddLine(new HtmlTag("span").SetInnerText(entityDetail.LabelText).ToHtml());
+
+                    using (sb.Surround(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("input-group-btn")))
+                    {
+                        if (entityDetail.UntypedValue == null)
+                        {
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                        }
+                        else
+                        {
+                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityDetail));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                        }
+                    }
+                }
+
+                using (sb.Surround(new HtmlTag("div", entityDetail.Compose(EntityBaseKeys.Detail))))
+                {
+                    if (entityDetail.UntypedValue != null)
+                        sb.AddLine(EntityBaseHelper.RenderContent(helper, (TypeContext)entityDetail.Parent, RenderContentMode.Content, entityDetail));
+                }
 
                 if (entityDetail.Type.IsEmbeddedEntity())
                 {
@@ -43,21 +73,8 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail), null));
                 }
 
-                MvcHtmlString controlHtml = null;
-                if (entityDetail.UntypedValue != null)
-                    controlHtml = EntityBaseHelper.RenderContent(helper, (TypeContext)entityDetail.Parent, RenderContentMode.Content, entityDetail);
-
-                if (entityDetail.DetailDiv == entityDetail.DefaultDetailDiv)
-                    sb.AddLine(helper.Div(entityDetail.DetailDiv, controlHtml, "sf-entity-line-detail"));
-                else if (controlHtml != null)
-                    sb.AddLine(MvcHtmlString.Create("<script type=\"text/javascript\">\n" +
-                            "$(document).ready(function() {\n" +
-                            "$('#" + entityDetail.DetailDiv + "').html(" + controlHtml + ");\n" +
-                            "});\n" +
-                            "</script>"));
+                sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "EntityLineDetail"));
             }
-
-            sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "EntityLineDetail"));
 
             return sb.ToHtml();
         }
