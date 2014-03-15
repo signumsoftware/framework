@@ -13,7 +13,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.requestPartialView = requestPartialView;
 
     function navigate(runtimeInfo, openNewWindow) {
-        var url = runtimeInfo.isNew ? "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) : "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+        var url = runtimeInfo.isNew ? SF.Urls.create.replace("MyType", runtimeInfo.type) : SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
         if (openNewWindow)
             window.open(url, "_blank");
@@ -214,6 +214,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return Entities.RuntimeInfo.parse(mainControl.data("runtimeinfo"));
     }
     exports.getRuntimeInfoValue = getRuntimeInfoValue;
+
+    function getMainControl(prefix) {
+        return $(prefix ? "#{0}_divMainControl".format(prefix) : "#divMainControl");
+    }
+    exports.getMainControl = getMainControl;
+
+    function hasChanges(prefix) {
+        return exports.getMainControl(prefix).hasClass("sf-changed");
+    }
+    exports.hasChanges = hasChanges;
 
     function getEmptyEntityHtml(prefix) {
         return new Entities.EntityHtml(prefix, exports.getRuntimeInfoValue(prefix));

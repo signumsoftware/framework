@@ -810,13 +810,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     if (type == null)
                         return;
 
-                    var requestData = _this.requestDataForSearchPopupCreate();
-
                     var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
                         Navigator.navigate(runtimeInfo, false);
-                    else
-                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+
+                    var requestData = _this.requestDataForSearchPopupCreate();
+
+                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
                 });
         };
 
@@ -836,19 +836,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(function (o) {
                 return o == null ? null : o.type;
             });
-        };
-
-        SearchControl.prototype.viewOptionsForSearchCreate = function (viewOptions) {
-            return $.extend({
-                controllerUrl: SF.Urls.create
-            }, viewOptions);
-        };
-
-        SearchControl.prototype.viewOptionsForSearchPopupCreate = function (viewOptions) {
-            return $.extend({
-                controllerUrl: SF.Urls.popupNavigate,
-                requestExtraJsonData: this.requestDataForSearchPopupCreate()
-            }, viewOptions);
         };
 
         SearchControl.prototype.requestDataForSearchPopupCreate = function () {

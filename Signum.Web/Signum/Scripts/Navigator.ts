@@ -24,8 +24,8 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
 
 export function navigate(runtimeInfo: Entities.RuntimeInfo, openNewWindow?: boolean) {
     var url = runtimeInfo.isNew ?
-        "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) :
-        "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+        SF.Urls.create.replace("MyType", runtimeInfo.type) :
+        SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
     if (openNewWindow)
         window.open(url, "_blank");
@@ -243,6 +243,14 @@ export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfo {
     var mainControl = $("#{0}_divMainControl".format(prefix)); 
 
     return Entities.RuntimeInfo.parse(mainControl.data("runtimeinfo"));
+}
+
+export function getMainControl(prefix: string) : JQuery {
+    return $(prefix ? "#{0}_divMainControl".format(prefix) : "#divMainControl");
+}
+
+export function hasChanges(prefix: string) : boolean {
+    return getMainControl(prefix).hasClass("sf-changed");
 }
 
 export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {
