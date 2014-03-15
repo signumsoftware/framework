@@ -274,6 +274,13 @@ namespace Signum.Utilities
             return obj.ToString(format, CultureInfo.CurrentCulture);
         }
 
+        public static string TryToString(this IFormattable obj, string format, IFormatProvider formatProvider)
+        {
+            if (obj == null)
+                return null;
+            return obj.ToString(format, formatProvider);
+        }
+
         #region Map Try Do TryDo
         public static R Let<T, R>(this T t, Func<T, R> func)
         {
