@@ -5,9 +5,15 @@
     margin-top: 9px;
 }
 
-.sf-button-bar
+
+
+
+.input-group.date, .input-group.time
 {
-    margin-bottom: 16px;
-}
+    max-width: 140px;
+    float: left;
+    margin-right: 5px;
+    margin-bottom: 5px;
+} 
 
 

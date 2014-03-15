@@ -8,6 +8,7 @@ using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using System.Globalization;
 
 
 namespace Signum.Web
@@ -84,12 +85,9 @@ namespace Signum.Web
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
 
-        public static MvcHtmlString DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString DateTimePicker(this HtmlHelper helper, ValueLine valueLine)
         {
             DateTime? value = (DateTime?)valueLine.UntypedValue;
-
-            if (valueLine.DatePickerOptions == null)
-                valueLine.DatePickerOptions = new DatePickerOptions();
 
             if (value.HasValue)
                 value = value.Value.ToUserInterface();
@@ -102,33 +100,7 @@ namespace Signum.Web
                 return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "form-control", valueLine.ValueHtmlProps));
             }
 
-            valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
-
-            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");        
-            
-            string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
-
-            valueLine.ValueHtmlProps["size"] = jsDataFormat.Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
-
-            if (valueLine.DatePickerOptions.Format == null)
-                valueLine.DatePickerOptions.Format = jsDataFormat;
-
-            bool isDefaultDatepicker = valueLine.DatePickerOptions.IsDefault();
-            if (isDefaultDatepicker) //if default, datepicker will be created when processing html in javascript 
-            {
-                valueLine.ValueHtmlProps.AddCssClass("sf-datepicker");
-                valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
-            }
-
-            if (!valueLine.ValueHtmlProps.ContainsKey("placeholder") && jsDataFormat.HasText())
-                valueLine.ValueHtmlProps["placeholder"] = jsDataFormat.ToLower();
-
-            MvcHtmlString returnString = helper.TextBox(valueLine.Prefix, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
-            
-            if (!isDefaultDatepicker)
-                returnString = returnString.Concat(helper.Calendar(valueLine.Prefix, valueLine.DatePickerOptions));
-
-            return returnString;
+            return helper.DateTimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
@@ -329,7 +301,7 @@ namespace Signum.Web
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
             {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},
             {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
-            {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePickerTextbox(valueLine)},
+            {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)}
         };
     }

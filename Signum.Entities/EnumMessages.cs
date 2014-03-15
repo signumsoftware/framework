@@ -212,16 +212,9 @@ Lose changes?")]
 
 
     public enum CalendarMessage
-    {
-        [Description("Done")]
-        CalendarClose,
-        [Description("Next")]
-        CalendarNext,
-        [Description("Prev")]
-        CalendarPrevious,
+    {  
         [Description("Today")]
-        CalendarToday,
-        ShowCalendar
+        Today,
     }
 
     public enum JavascriptMessage
