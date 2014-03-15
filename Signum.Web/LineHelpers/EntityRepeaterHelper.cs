@@ -31,8 +31,8 @@ namespace Signum.Web
                 {
                     sb.AddLine(EntityBaseHelper.ListLabel(helper, entityRepeater));
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater, hidden: false));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater, hidden: false));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater));
                 }
 
                 sb.AddLine(helper.Hidden(entityRepeater.Compose(EntityListBaseKeys.ListPresent), ""));

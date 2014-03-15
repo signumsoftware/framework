@@ -77,8 +77,8 @@ namespace Signum.Web
                         entityCombo.ComboHtmlProperties));
             }
 
-            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo, hidden: entityCombo.UntypedValue == null));
-            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo, hidden: entityCombo.UntypedValue != null));
+            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
+            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
 
             if (entityCombo.ShowValidationMessage)
             {

@@ -67,10 +67,10 @@ namespace Signum.Web
                         using (sb.Surround(new HtmlTag("td")))
                         using (sb.Surround(new HtmlTag("ul")))
                         {
-                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityList, hidden: false).Surround("li"));
-                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityList, hidden: false).Surround("li"));
-                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityList, hidden: false).Surround("li"));
-                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityList).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityList).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityList).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityList).Surround("li"));
                             sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, entityList, hidden: false).Surround("li"));
                             sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, entityList, hidden: false).Surround("li"));
                         }

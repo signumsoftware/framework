@@ -30,9 +30,9 @@ namespace Signum.Web
                 {
                     sb.AddLine(EntityBaseHelper.ListLabel(helper, entityDetail));
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));
-                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail, hidden: entityDetail.UntypedValue == null));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
                 }
 
                 sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));

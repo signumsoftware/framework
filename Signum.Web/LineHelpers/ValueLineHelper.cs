@@ -38,9 +38,6 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps.AddCssClass("form-control");
 
-            if (valueLine.ShowValidationMessage)
-                valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-
             sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
 
             if (valueLine.UnitText.HasText())

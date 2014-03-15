@@ -57,16 +57,6 @@ interface CarouselOptions {
     pause?: string;
 }
 
-interface TypeaheadOptions {
-    source?: any;
-    items?: number;
-    minLength?: number;
-    matcher?: (item: any) => boolean;
-    sorter?: (items: any[]) => any[];
-    updater?: (item: any) => any;
-    highlighter?: (item: any) => string;
-}
-
 interface AffixOptions {
     offset?: any;
 }
@@ -102,8 +92,6 @@ interface JQuery {
 
     carousel(options?: CarouselOptions): JQuery;
     carousel(command: string): JQuery;
-
-    typeahead(options?: TypeaheadOptions): JQuery;
 
     affix(options?: AffixOptions): JQuery;
 }

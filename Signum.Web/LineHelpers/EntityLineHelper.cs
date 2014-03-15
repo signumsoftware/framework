@@ -30,68 +30,83 @@ namespace Signum.Web
             {
                  sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
 
-                if(entityLine.UntypedValue != null)
-                    sb.AddLine(AutocompleteTextBox(helper, entityLine, visible: false));
-                else
-                    sb.AddLine(LinkOrSpan(helper, entityLine, visible : false));
+                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("hidden")).Class("hide")))
+                 {
+                     if (entityLine.UntypedValue != null)
+                     {
+                         sb.AddLine(AutocompleteTextBox(helper, entityLine));
+                         sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine));
+                         sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
+                     }
+                     else
+                     {
+                         sb.AddLine(LinkOrSpan(helper, entityLine));
+                         sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
+                         sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
+                     }
+                 }
 
                 using (sb.Surround(new HtmlTag("div").Class("input-group")))
                 {
                     if (entityLine.UntypedValue == null)
-                        sb.AddLine(AutocompleteTextBox(helper, entityLine, visible: true));
+                        sb.AddLine(AutocompleteTextBox(helper, entityLine));
                     else
-                        sb.AddLine(LinkOrSpan(helper, entityLine, visible: true));
+                        sb.AddLine(LinkOrSpan(helper, entityLine));
 
-                    using (sb.Surround(new HtmlTag("span").Class("input-group-btn")))
+                    using (sb.Surround(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
                     {
-                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
-                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
-                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
-                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
+                        if (entityLine.UntypedValue == null)
+                        {
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
+                        }
+                        else
+                        {
+                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
+                        }
                     }
                 }
+
+                if (entityLine.ShowValidationMessage)
+                {
+                    sb.AddLine(helper.ValidationMessage(entityLine.Prefix));
+                }
+
+                if (entityLine.Type.IsEmbeddedEntity())
+                {
+                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
+                }
+
+                if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityLine.UntypedValue))
+                    sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));
+
+
+                sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
             }
-            
-            if (entityLine.ShowValidationMessage)
-            {
-                sb.AddLine(helper.ValidationMessage(entityLine.Prefix));
-            }
-
-            if (entityLine.Type.IsEmbeddedEntity())
-            {
-                TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
-                sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
-            }
-
-            if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityLine.UntypedValue))
-                sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));
-
-
-            sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
 
             return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());
         }
 
-        private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine, bool visible)
+        private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)
         {
             if (entityLine.Navigate)
             {
                 return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString(),
                         entityLine.IdOrNull != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, entityLine.IdOrNull.Value) : null,
-                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default",
-                        new Dictionary<string, object> { { "style", "display:" + (visible ? "block":  "none") } });
+                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default", null);
             }
             else
             {
                 return helper.Span(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString() ?? " ",
-                        "form-control btn-default",
-                        new Dictionary<string, object> { { "style", "display:" + (visible ? "block" : "none") } });
+                        "form-control btn-default");
             }
         }
 
-        private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine, bool visible)
+        private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine)
         {
             if (!entityLine.Autocomplete)
                 return MvcHtmlString.Empty;
@@ -103,7 +118,6 @@ namespace Signum.Web
             {
                 {"class", "form-control sf-entity-autocomplete"},
                 { "autocomplete", "off" }, 
-                { "style", "display:" + (visible ? "block" : "none")}
             };
 
             return helper.TextBox(

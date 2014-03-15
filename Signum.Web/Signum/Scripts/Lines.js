@@ -11,6 +11,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.element = element;
             this.element.data("SF-control", this);
             this.options = options;
+            this.hidden = $(this.pf("hidden"));
+            this.shownButton = $(this.pf("shownButton"));
+
             var temp = $(this.pf(Entities.Keys.template));
 
             if (temp.length > 0) {
@@ -25,15 +28,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityBase.prototype._create = function () {
-            var _this = this;
-            var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
-            if ($txt.length > 0) {
-                this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.options.types.join(","), l: 5, q: term });
-                });
-
-                this.setupAutocomplete($txt);
-            }
         };
 
         EntityBase.prototype.runtimeInfoHiddenElement = function (itemPrefix) {
@@ -94,8 +88,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.containerDiv().html(entityValue == null ? null : entityValue.html);
             Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
             if (entityValue == null) {
-                Validator.cleanHasError($(this.pf(Entities.Keys.toStr)).val(""));
-                Validator.cleanHasError($(this.pf(Entities.Keys.link)).val("").html(""));
+                Validator.cleanHasError(this.element);
             }
 
             this.updateButtonsDisplay();
@@ -228,40 +221,50 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.updateButtonsDisplay = function () {
             var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
-            $(this.pf("btnCreate")).toggle(!hasEntity);
-            $(this.pf("btnFind")).toggle(!hasEntity);
-            $(this.pf("btnRemove")).toggle(hasEntity);
-            $(this.pf("btnView")).toggle(hasEntity);
-            $(this.pf(Entities.Keys.link)).toggle(hasEntity);
-            $(this.pf(Entities.Keys.toStr)).toggle(!hasEntity);
+            this.visibleButton("btnCreate", !hasEntity);
+            this.visibleButton("btnFind", !hasEntity);
+            this.visibleButton("btnView", hasEntity);
+            this.visibleButton("btnRemove", hasEntity);
+        };
+
+        EntityBase.prototype.visibleButton = function (sufix, visible) {
+            var element = $(this.pf(sufix));
+
+            if (!element.length)
+                return;
+
+            (visible ? this.shownButton : this.hidden).append(element.detach());
         };
 
         EntityBase.prototype.setupAutocomplete = function ($txt) {
             var _this = this;
-            var auto = $txt.autocomplete({
-                delay: 200,
-                source: function (request, response) {
-                    _this.autoCompleter.getResults(request.term).then(function (entities) {
-                        response(entities.map(function (e) {
-                            return ({ label: e.toStr, value: e });
-                        }));
-                    });
+            var handler;
+            var auto = $txt.typeahead({
+                hint: false,
+                highlight: true
+            }, {
+                name: "autocmplete",
+                displayKey: "toStr",
+                templates: {
+                    suggestions: function (item) {
+                        return $("<div>").append($("p").attr("data-type", item.runtimeInfo.type).attr("data-id", item.runtimeInfo.id).text(item.toStr)).html();
+                    }
                 },
-                focus: function (event, ui) {
-                    $txt.val(ui.item.value.text);
-                    return false;
-                },
-                select: function (event, ui) {
-                    _this.onAutocompleteSelected(ui.item.value);
-                    event.preventDefault();
+                source: function (query, response) {
+                    if (handler)
+                        clearTimeout(handler);
+
+                    handler = setTimeout(function () {
+                        _this.autoCompleter.getResults(query).then(function (entities) {
+                            return response(entities);
+                        });
+                    }, 300);
                 }
             });
 
-            auto.data("uiAutocomplete")._renderItem = function (ul, item) {
-                var val = item.value;
-
-                return $("<li>").attr("data-type", val.runtimeInfo.type).attr("data-id", val.runtimeInfo.id).append($("<a>").text(item.label)).appendTo(ul);
-            };
+            $txt.on("typeahead:selected", function (event, val, name) {
+                _this.onAutocompleteSelected(val);
+            });
         };
 
         EntityBase.prototype.onAutocompleteSelected = function (entityValue) {
@@ -288,9 +291,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     data: _this.getData(term),
                     success: function (data) {
                         this.lastXhr = null;
-                        resolve(data.map(function (item) {
+                        var entities = data.map(function (item) {
                             return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link);
-                        }));
+                        });
+                        resolve(entities);
                     }
                 });
             });
@@ -304,6 +308,31 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         function EntityLine() {
             _super.apply(this, arguments);
         }
+        EntityLine.prototype._create = function () {
+            var _this = this;
+            var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
+            if ($txt.length > 0) {
+                this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
+                    return ({ types: _this.options.types.join(","), l: 5, q: term });
+                });
+
+                this.setupAutocomplete($txt);
+
+                var inputGroup = this.shownButton.parent();
+
+                var typeahead = $txt.parent();
+
+                var parts = typeahead.children().addClass("typeahead-parts").detach();
+
+                if (typeahead.parent().hasClass("hide"))
+                    parts.appendTo(typeahead.parent());
+                else
+                    parts.insertBefore(this.shownButton);
+
+                typeahead.remove();
+            }
+        };
+
         EntityLine.prototype.getLink = function (itemPrefix) {
             return $(this.pf(Entities.Keys.link)).attr("href");
         };
@@ -318,6 +347,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (link.filter('a').length !== 0)
                 link.attr('href', entityValue == null ? null : entityValue.link);
             $(this.pf(Entities.Keys.toStr)).val('');
+
+            this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
+            this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
+        };
+
+        EntityLine.prototype.visible = function (element, visible) {
+            if (!element.length)
+                return;
+
+            if (visible)
+                this.shownButton.before(element.detach());
+            else
+                this.hidden.append(element.detach());
         };
 
         EntityLine.prototype.onAutocompleteSelected = function (entityValue) {

@@ -85,17 +85,17 @@ var SF;
                     }
                 }
 
-                var originalSuccess = options.success;
+                var originalComplete = options.complete;
 
-                options.success = function (result) {
+                options.complete = function (jqXHR, textStatus) {
                     pendingRequests--;
                     if (pendingRequests <= 0) {
                         pendingRequests = 0;
                         Notify.clear();
                     }
 
-                    if (originalSuccess != null) {
-                        originalSuccess(result);
+                    if (originalComplete != null) {
+                        originalComplete(jqXHR, textStatus);
                     }
                 };
             }

@@ -114,7 +114,7 @@ namespace Signum.Web
             return result;
         }
 
-        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
+        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.View)
                 return MvcHtmlString.Empty;
@@ -123,9 +123,6 @@ namespace Signum.Web
             {
                 { "onclick", new MvcHtmlString(entityBase.SFControlThen("view_click()")) },
             };
-
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
 
             return new HtmlTag("a", entityBase.Compose("btnView"))
                 .Class("btn btn-default sf-line-button sf-view")
@@ -144,9 +141,6 @@ namespace Signum.Web
                 { "onclick", new MvcHtmlString(entityBase.SFControlThen("navigate_click()")) },
             };
 
-            if (entityBase.UntypedValue == null)
-                htmlAttr.Add("style", "display:none");
-
             return new HtmlTag("a", entityBase.Compose("btnNavigate"))
                 .Class("btn btn-default sf-line-button sf-navigate")
                 .Attrs(htmlAttr)
@@ -154,7 +148,7 @@ namespace Signum.Web
                 .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-new-window"));
         }
 
-        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
+        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
@@ -166,9 +160,6 @@ namespace Signum.Web
                 { "onclick", entityBase.SFControlThen("create_click()") },
             };
 
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
-
             return new HtmlTag("a", entityBase.Compose("btnCreate"))
                 .Class("btn btn-default sf-line-button sf-create")
                 .Attrs(htmlAttr)
@@ -176,7 +167,7 @@ namespace Signum.Web
                 .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-plus"));
         }
 
-        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
+        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Find)
                 return MvcHtmlString.Empty;
@@ -186,9 +177,6 @@ namespace Signum.Web
                 { "onclick", entityBase.SFControlThen("find_click()") },
             };
 
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
-
             return new HtmlTag("a", entityBase.Compose("btnFind"))
                 .Class("btn btn-default sf-line-button sf-find")
                 .Attrs(htmlAttr)
@@ -196,7 +184,7 @@ namespace Signum.Web
                 .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-search"));
         }
 
-        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
+        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Remove)
                 return MvcHtmlString.Empty;
@@ -207,9 +195,6 @@ namespace Signum.Web
                 { "data-icon", "ui-icon-circle-close" },
                 { "data-text", false}
             };
-
-            if (hidden)
-                htmlAttr.Add("style", "display:none");
 
             return new HtmlTag("a", entityBase.Compose("btnRemove"))
                 .Class("btn btn-default sf-line-button sf-remove")

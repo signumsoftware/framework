@@ -24,6 +24,8 @@ export interface EntityBaseOptions {
 export class EntityBase {
     options: EntityBaseOptions;
     element: JQuery;
+    hidden: JQuery;
+    shownButton: JQuery;
     autoCompleter: EntityAutocompleter;
 
     entityChanged: () => void;
@@ -36,6 +38,9 @@ export class EntityBase {
         this.element = element;
         this.element.data("SF-control", this);
         this.options = options;
+        this.hidden = $(this.pf("hidden"));
+        this.shownButton = $(this.pf("shownButton"));
+      
         var temp = $(this.pf(Entities.Keys.template));
 
         if (temp.length > 0) {
@@ -54,13 +59,7 @@ export class EntityBase {
     static key_entity = "sfEntity";
 
     _create() {
-        var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
-        if ($txt.length > 0) {
-            this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.join(","), l: 5, q: term }));
 
-            this.setupAutocomplete($txt);
-        }
     }
 
     runtimeInfoHiddenElement(itemPrefix?: string): JQuery {
@@ -128,8 +127,7 @@ export class EntityBase {
         this.containerDiv().html(entityValue == null ? null : (<Entities.EntityHtml>entityValue).html);
         Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
         if (entityValue == null) {
-            Validator.cleanHasError($(this.pf(Entities.Keys.toStr)).val(""));
-            Validator.cleanHasError($(this.pf(Entities.Keys.link)).val("").html(""));
+            Validator.cleanHasError(this.element);
         }
 
         this.updateButtonsDisplay();
@@ -260,42 +258,55 @@ export class EntityBase {
 
         var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
-        $(this.pf("btnCreate")).toggle(!hasEntity);
-        $(this.pf("btnFind")).toggle(!hasEntity);
-        $(this.pf("btnRemove")).toggle(hasEntity);
-        $(this.pf("btnView")).toggle(hasEntity);
-        $(this.pf(Entities.Keys.link)).toggle(hasEntity);
-        $(this.pf(Entities.Keys.toStr)).toggle(!hasEntity);
+        this.visibleButton("btnCreate", !hasEntity);
+        this.visibleButton("btnFind", !hasEntity);
+        this.visibleButton("btnView", hasEntity);
+        this.visibleButton("btnRemove", hasEntity);
     }
 
-    setupAutocomplete($txt) {
+   
 
-        var auto = $txt.autocomplete({
-            delay: 200,
-            source: (request, response) => {
-                this.autoCompleter.getResults(request.term).then(entities=> {
-                    response(entities.map(e=> ({ label: e.toStr, value: e })));
-                });
+    visibleButton(sufix: string, visible: boolean) {
+
+        var element = $(this.pf(sufix));
+
+        if (!element.length)
+            return;
+
+        (visible ? this.shownButton : this.hidden).append(element.detach());
+    }
+
+    setupAutocomplete($txt : JQuery) {
+
+        var handler : number;
+        var auto = $txt.typeahead({
+            hint: false,
+            highlight: true,
+        }, {
+            name: "autocmplete",
+            displayKey: "toStr",
+            templates: {
+                suggestions: (item: Entities.EntityValue) => $("<div>").append(
+                    $("p")
+                        .attr("data-type", item.runtimeInfo.type)
+                        .attr("data-id", item.runtimeInfo.id)
+                        .text(item.toStr)).html()
             },
-            focus: (event, ui) => {
-                $txt.val(ui.item.value.text);
-                return false;
-            },
-            select: (event, ui) => {
-                this.onAutocompleteSelected(ui.item.value);
-                event.preventDefault();
+
+            source: (query, response) => {
+                if (handler)
+                    clearTimeout(handler);
+
+                handler = setTimeout(() => {
+                    this.autoCompleter.getResults(query)
+                        .then(entities=> response(entities));
+                }, 300);
             },
         });
 
-        auto.data("uiAutocomplete")._renderItem = (ul, item) => {
-            var val = <Entities.EntityValue>item.value
-
-                return $("<li>")
-                .attr("data-type", val.runtimeInfo.type)
-                .attr("data-id", val.runtimeInfo.id)
-                .append($("<a>").text(item.label))
-                .appendTo(ul);
-        };
+        $txt.on("typeahead:selected", (event: JQueryEventObject, val: Entities.EntityValue, name: string) => {
+            this.onAutocompleteSelected(val);
+        }); 
     }
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
@@ -337,7 +348,8 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
                 data: this.getData(term),
                 success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link)));
+                    var entities = data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link));
+                    resolve(entities);
                 }
             });
         });
@@ -346,6 +358,29 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
 }
 
 export class EntityLine extends EntityBase {
+
+    _create() {
+        var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
+        if ($txt.length > 0) {
+            this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
+                term => ({ types: this.options.types.join(","), l: 5, q: term }));
+
+            this.setupAutocomplete($txt);
+
+            var inputGroup = this.shownButton.parent();
+
+            var typeahead = $txt.parent();
+
+            var parts = typeahead.children().addClass("typeahead-parts").detach();
+
+            if (typeahead.parent().hasClass("hide"))
+                parts.appendTo(typeahead.parent());
+            else
+                parts.insertBefore(this.shownButton);
+
+            typeahead.remove();
+        }
+    }
 
     getLink(itemPrefix?: string): string {
         return $(this.pf(Entities.Keys.link)).attr("href");
@@ -361,6 +396,19 @@ export class EntityLine extends EntityBase {
         if (link.filter('a').length !== 0)
             link.attr('href', entityValue == null ? null : entityValue.link);
         $(this.pf(Entities.Keys.toStr)).val('');
+
+        this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
+        this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
+    }
+
+    visible(element : JQuery, visible: boolean) {
+        if (!element.length)
+            return;
+
+        if (visible)
+            this.shownButton.before(element.detach());
+        else
+            this.hidden.append(element.detach());
     }
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {

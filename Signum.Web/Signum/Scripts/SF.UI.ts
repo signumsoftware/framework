@@ -8,6 +8,11 @@ interface JQuery {
     SFControlFullfill<T>(control: T) : void
 }
 
+interface JQueryAjaxSettings {
+    sfNotify? : boolean
+}
+
+
 module SF {
 
     once("SF-control", () => {
@@ -79,7 +84,7 @@ module SF {
         });
 
 
-        $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        $.ajaxPrefilter(function (options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR) {
             if (options.dataType == "script" && (typeof originalOptions.type == "undefined")) {
                 options.type = "GET";
             }
@@ -91,17 +96,17 @@ module SF {
                     }
                 }
 
-                var originalSuccess = options.success;
+                var originalComplete = options.complete;
 
-                options.success = function (result) {
+                options.complete = function (jqXHR, textStatus) {
                     pendingRequests--;
                     if (pendingRequests <= 0) {
                         pendingRequests = 0;
                         Notify.clear();
                     }
 
-                    if (originalSuccess != null) {
-                        originalSuccess(result);
+                    if (originalComplete != null) {
+                        originalComplete(jqXHR, textStatus);
                     }
                 };
             }

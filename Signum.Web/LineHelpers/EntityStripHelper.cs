@@ -65,8 +65,8 @@ namespace Signum.Web
                             htmlAttr));
                     }
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityStrip, hidden: false));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityStrip, hidden: false));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityStrip));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityStrip));
                 }
             }
 
