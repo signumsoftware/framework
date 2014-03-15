@@ -80,8 +80,6 @@ namespace Signum.Web.Files
                 sbg.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
             fileLine.ValueHtmlProps.AddCssClass("form-control");
-            if (fileLine.ShowValidationMessage)
-                fileLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
 
             bool hasEntity = value != null && value.FileName.HasText();
 
@@ -110,7 +108,7 @@ namespace Signum.Web.Files
                 if (fileLine.Type.IsEmbeddedEntity())
                     sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
 
-                sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine, hidden: false));
+                sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
 
                 sbg.AddLine(helper.FormGroup(fileLine,
                     fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr),
