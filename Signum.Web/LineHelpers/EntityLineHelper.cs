@@ -26,61 +26,31 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            using (sb.Surround(new HtmlTag("div").Class("input-group")))
+            using (sb.Surround(new HtmlTag("div", entityLine.Prefix).Class("SF-entity-line SF-control-container")))
             {
-                sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
-                if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
-                {
-                    if (entityLine.Autocomplete && entityLine.Implementations.Value.IsByAll)
-                        throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
+                 sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
 
-                    if (entityLine.Autocomplete)
-                    {
-                        var htmlAttr = new Dictionary<string, object>
-                        {
-                            {"class", "form-control" + (entityLine.Autocomplete ? " sf-entity-autocomplete" : "")},
-                            { "autocomplete", "off" }, 
-                            { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
-                        };
-
-                        sb.AddLine(helper.TextBox(
-                            entityLine.Compose(EntityBaseKeys.ToStr),
-                            entityLine.ToStr,
-                            htmlAttr));
-                    }
-
-                    if (entityLine.Navigate)
-                    {
-                        sb.AddLine(
-                            helper.Href(entityLine.Compose(EntityBaseKeys.Link),
-                                entityLine.UntypedValue.TryToString(),
-                                entityLine.IdOrNull != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, entityLine.IdOrNull.Value) : null,
-                                JavascriptMessage.navigate.NiceToString(), "form-control  btn-default",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
-                    }
-                    else
-                    {
-                        sb.AddLine(
-                            helper.Span(entityLine.Compose(EntityBaseKeys.Link),
-                                entityLine.UntypedValue.TryToString() ?? " ",
-                                "form-control btn-default",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
-                    }
-                }
+                if(entityLine.UntypedValue != null)
+                    sb.AddLine(AutocompleteTextBox(helper, entityLine, visible: false));
                 else
-                {
-                    sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.Link), entityLine.UntypedValue.TryToString(), "form-control  btn-default"));
-                }
+                    sb.AddLine(LinkOrSpan(helper, entityLine, visible : false));
 
-                using (sb.Surround(new HtmlTag("span").Class("input-group-btn")))
+                using (sb.Surround(new HtmlTag("div").Class("input-group")))
                 {
-                    sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
-                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
+                    if (entityLine.UntypedValue == null)
+                        sb.AddLine(AutocompleteTextBox(helper, entityLine, visible: true));
+                    else
+                        sb.AddLine(LinkOrSpan(helper, entityLine, visible: true));
+
+                    using (sb.Surround(new HtmlTag("span").Class("input-group-btn")))
+                    {
+                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
+                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
+                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
+                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
+                    }
                 }
-            } 
+            }
             
             if (entityLine.ShowValidationMessage)
             {
@@ -100,6 +70,46 @@ namespace Signum.Web
             sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
 
             return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());
+        }
+
+        private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine, bool visible)
+        {
+            if (entityLine.Navigate)
+            {
+                return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
+                        entityLine.UntypedValue.TryToString(),
+                        entityLine.IdOrNull != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, entityLine.IdOrNull.Value) : null,
+                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default",
+                        new Dictionary<string, object> { { "style", "display:" + (visible ? "block":  "none") } });
+            }
+            else
+            {
+                return helper.Span(entityLine.Compose(EntityBaseKeys.Link),
+                        entityLine.UntypedValue.TryToString() ?? " ",
+                        "form-control btn-default",
+                        new Dictionary<string, object> { { "style", "display:" + (visible ? "block" : "none") } });
+            }
+        }
+
+        private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine, bool visible)
+        {
+            if (!entityLine.Autocomplete)
+                return MvcHtmlString.Empty;
+
+            if (entityLine.Implementations.Value.IsByAll)
+                throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                {"class", "form-control sf-entity-autocomplete"},
+                { "autocomplete", "off" }, 
+                { "style", "display:" + (visible ? "block" : "none")}
+            };
+
+            return helper.TextBox(
+                entityLine.Compose(EntityBaseKeys.ToStr),
+                entityLine.ToStr,
+                htmlAttr);
         }
 
         public static MvcHtmlString EntityLine<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 

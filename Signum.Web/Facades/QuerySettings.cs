@@ -84,7 +84,12 @@ namespace Signum.Web
                 }),
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => (h,o) => 
                 {
-                    return o != null ? AlignCenter(h.CheckBox("", (bool)o, new { disabled = "disabled" })) : MvcHtmlString.Empty;
+                    return o != null ? new HtmlTag("input")
+                        .Attr("type", "checkbox")
+                        .Attr("style", "text-align:center")
+                        .Attr("disabled", "disabled")
+                        .Let(a => (bool)o ? a.Attr("checked", "checked") : a)
+                        .ToHtml() : MvcHtmlString.Empty;
                 }),
             };
 
@@ -100,14 +105,6 @@ namespace Signum.Web
             };
 
             PropertyFormatters = new Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>>();
-        }
-
-        public static MvcHtmlString AlignCenter(MvcHtmlString innerHTML)
-        {
-            return new HtmlTag("div")
-                .Attrs(new { style = "text-align:center" })
-                .InnerHtml(innerHTML)
-                .ToHtml();
         }
 
         public CellFormatter GetFormatter(Column column)

@@ -252,6 +252,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Content\Lines.css" />
+    <Content Include="Signum\Content\NormalPage.css" />
+    <Content Include="Signum\Content\Notify.css" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.datepicker.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.timepicker.d.ts" />

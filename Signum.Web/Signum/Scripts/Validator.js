@@ -15,7 +15,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     function validate(valOptions) {
         SF.log("validate");
 
-        valOptions = $.extend({
+        var options = $.extend({
             prefix: "",
             controllerUrl: SF.Urls.validate,
             requestExtraJsonData: null,
@@ -24,9 +24,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         }, valOptions);
 
         return SF.ajaxPost({
-            url: valOptions.controllerUrl,
+            url: options.controllerUrl,
             async: false,
-            data: constructRequestData(valOptions)
+            data: constructRequestData(options)
         }).then(function (result) {
             var validatorResult = {
                 modelState: result.ModelState,
@@ -34,7 +34,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                 newToStr: result[Entities.Keys.toStr],
                 newLink: result[Entities.Keys.link]
             };
-            exports.showErrors(valOptions, validatorResult.modelState);
+            exports.showErrors(options, validatorResult.modelState);
             return validatorResult;
         });
     }

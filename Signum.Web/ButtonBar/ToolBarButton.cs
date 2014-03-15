@@ -60,10 +60,13 @@ namespace Signum.Web
                 .Class("btn")
                 .Class(Style)
                 .Class(CssClass)
-                .Attr("href", Href)
-                .Attr("alt", AltText)
                 .Attrs(HtmlProps)
                 .SetInnerText(Text);
+
+            if (Href.HasText())
+                a.Attr("href", Href);
+            if (AltText.HasText())
+                a.Attr("alt", AltText);
 
             if (enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());
@@ -80,10 +83,13 @@ namespace Signum.Web
                .Class("btn")
                .Class(Style)
                .Class(CssClass)
-               .Attr("href", Href)
-               .Attr("alt", AltText)
                .Attrs(HtmlProps)
                .SetInnerText(Text);
+
+            if (Href.HasText())
+                a.Attr("href", Href);
+            if (AltText.HasText())
+                a.Attr("alt", AltText);
 
             if (enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());

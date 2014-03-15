@@ -40,7 +40,7 @@ export var globalValidationSummary = "sfGlobalValidationSummary";
 export function validate(valOptions: ValidationOptions): Promise<ValidationResult> {
     SF.log("validate");
 
-    valOptions = $.extend({
+    var options = $.extend({
         prefix: "",
         controllerUrl: SF.Urls.validate,
         requestExtraJsonData: null,
@@ -49,9 +49,9 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
     }, valOptions);
 
     return SF.ajaxPost({
-        url: valOptions.controllerUrl,
+        url: options.controllerUrl,
         async: false,
-        data: constructRequestData(valOptions),
+        data: constructRequestData(options),
     }).then(result => {
             var validatorResult: ValidationResult = {
                 modelState: result.ModelState,
@@ -59,7 +59,7 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
                 newToStr: result[Entities.Keys.toStr],
                 newLink: result[Entities.Keys.link]
             };
-            showErrors(valOptions, validatorResult.modelState);
+            showErrors(options, validatorResult.modelState);
             return validatorResult
         });
 }
