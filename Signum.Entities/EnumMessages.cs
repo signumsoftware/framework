@@ -278,6 +278,8 @@ Lose changes?")]
         moveUp,
         [Description("Navigate")]
         navigate,
+        [Description("New entity")]
+        newEntity,
     }
 
     public enum QuickLinkMessage

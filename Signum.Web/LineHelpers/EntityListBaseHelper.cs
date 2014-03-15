@@ -17,24 +17,11 @@ namespace Signum.Web
             if (!listBase.Reorder)
                 return MvcHtmlString.Empty;
 
-            var htmlAttr = new Dictionary<string, object>
-            {
-                { "onclick",  listBase.SFControlThen("moveUp_click()") },
-                { "data-icon", "ui-icon-triangle-1-n" },
-                { "data-text", false}
-            };
-
-            IList list = (IList)listBase.UntypedValue;
-
-            if (list == null || list.Count == 0)
-                htmlAttr.Add("style", "display:none");
-
-            return helper.Href(listBase.Compose("btnUp"),
-                  JavascriptMessage.moveUp.NiceToString(),
-                  "",
-                  JavascriptMessage.moveUp.NiceToString(),
-                  "sf-line-button move-up",
-                  htmlAttr);
+            return new HtmlTag("a", listBase.Compose("btnUp"))
+                .Class("btn btn-default sf-line-button move-up")
+                .Attr("onclick", listBase.SFControlThen("moveUp_click()"))
+                .Attr("title", JavascriptMessage.moveUp.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-chevron-up"));
         }
 
         public static MvcHtmlString MoveDownButton(HtmlHelper helper, EntityListBase listBase)
@@ -42,24 +29,11 @@ namespace Signum.Web
             if (!listBase.Reorder)
                 return MvcHtmlString.Empty;
 
-            var htmlAttr = new Dictionary<string, object>
-            {
-                { "onclick", listBase.SFControlThen("moveDown_click()") },
-                { "data-icon", "ui-icon-triangle-1-s" },
-                { "data-text", false}
-            };
-
-            IList list = (IList)listBase.UntypedValue;
-
-            if (list == null || list.Count == 0)
-                htmlAttr.Add("style", "display:none");
-
-            return helper.Href(listBase.Compose("btnDown"),
-                  JavascriptMessage.moveDown.NiceToString(),
-                  "",
-                  JavascriptMessage.moveDown.NiceToString(),
-                  "sf-line-button move-down",
-                  htmlAttr);
+            return new HtmlTag("a", listBase.Compose("btnDown"))
+             .Class("btn btn-default sf-line-button move-down")
+             .Attr("onclick", listBase.SFControlThen("moveDown_click()"))
+             .Attr("title", JavascriptMessage.moveDown.NiceToString())
+             .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-chevron-down"));
         }
 
         public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
@@ -71,60 +45,38 @@ namespace Signum.Web
 
         public static MvcHtmlString MoveUpButtonItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool isVertical)
         {
-            return helper.Span(itemContext.Compose("btnUp"),
-                JavascriptMessage.moveUp.NiceToString(),
-                "sf-line-button sf-move-up",
-                new Dictionary<string, object> 
-                {  
-                   { "onclick", entityListBase.SFControlThen("moveUp('{0}')".Formato(itemContext.Prefix)) },
-                   { "data-icon",  "ui-icon-triangle-1-" + (isVertical ? "n" : "w") },
-                   { "data-text", false },
-                   { "title", JavascriptMessage.moveUp.NiceToString() }
-                });
+            return new HtmlTag("a", itemContext.Compose("btnUp"))
+                .Class("btn btn-default sf-line-button move-up")
+                .Attr("onclick", entityListBase.SFControlThen("moveUp('{0}')".Formato(itemContext.Prefix)))
+                .Attr("title", JavascriptMessage.moveUp.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-up" : "glyphicon-chevron-left")));
         }
 
         public static MvcHtmlString MoveDownButtonItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool isVertical)
         {
-            return helper.Span(itemContext.Compose("btnDown"),
-                JavascriptMessage.moveDown.NiceToString(),
-                "sf-line-button sf-move-down",
-                new Dictionary<string, object> 
-                 {   
-                    { "onclick", entityListBase.SFControlThen("moveDown('{0}')".Formato(itemContext.Prefix)) },
-                    { "data-icon", "ui-icon-triangle-1-s" },
-                    { "data-text", false },
-                    { "title", JavascriptMessage.moveDown.NiceToString() }
-                 });
+            return new HtmlTag("a", itemContext.Compose("btnDown"))
+             .Class("btn btn-default sf-line-button move-down")
+             .Attr("onclick", entityListBase.SFControlThen("moveDown('{0}')".Formato(itemContext.Prefix)))
+             .Attr("title", JavascriptMessage.moveDown.NiceToString())
+             .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-down" : "glyphicon-chevron-right")));
         }
 
         public static MvcHtmlString RemoveButtonItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase)
         {
-            return helper.Href(itemContext.Compose("btnRemove"),
-                EntityControlMessage.Remove.NiceToString(),
-                "",
-                EntityControlMessage.Remove.NiceToString(),
-                "sf-line-button sf-remove",
-                new Dictionary<string, object> 
-                {
-                    { "onclick", entityListBase.SFControlThen("removeItem_click('{0}')".Formato(itemContext.Prefix)) },
-                    { "data-icon", "ui-icon-circle-close" }, 
-                    { "data-text", false } 
-                });
+            return new HtmlTag("a", itemContext.Compose("btnRemove"))
+                  .Class("btn btn-default sf-line-button sf-remove")
+                  .Attr("onclick", entityListBase.SFControlThen("removeItem_click('{0}')".Formato(itemContext.Prefix)))
+                  .Attr("title", EntityControlMessage.Remove.NiceToString())
+                  .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
         }
 
         public static MvcHtmlString ViewButtonItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase)
         {
-            return helper.Href(itemContext.Compose("btnView"),
-                EntityControlMessage.View.NiceToString(),
-                "",
-                EntityControlMessage.View.NiceToString(),
-                "sf-line-button sf-view",
-                new Dictionary<string, object> 
-                {
-                    { "onclick", entityListBase.SFControlThen("viewItem_click('{0}')".Formato(itemContext.Prefix)) },
-                    { "data-icon",  "ui-icon-circle-arrow-e" },
-                    { "data-text", false } 
-                });
+            return new HtmlTag("a", itemContext.Compose("btnView"))
+                .Class("btn btn-default sf-line-button sf-view")
+                .Attr("onclick", entityListBase.SFControlThen("viewItem_click('{0}')".Formato(itemContext.Prefix)))
+                .Attr("title", EntityControlMessage.View.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
         }
     }
 }

@@ -91,14 +91,17 @@ namespace Signum.Web
 
             IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
 
+
+            var current = entityCombo.UntypedValue is IIdentifiable ? ((IIdentifiable)entityCombo.UntypedValue).ToLite() :
+                entityCombo.UntypedValue as Lite<IIdentifiable>;
+
             items.AddRange(
                 data.Select(lite => new SelectListItem()
                 {
                     Text = lite.ToString(),
                     Value = lite.Key(),
-                    Selected = lite.IdOrNull == entityCombo.IdOrNull
-                })
-                );
+                    Selected = lite.Is(current)
+                }));
 
 
             entityCombo.ComboHtmlProperties.AddCssClass("form-control");

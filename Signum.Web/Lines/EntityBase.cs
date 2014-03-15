@@ -151,33 +151,6 @@ namespace Signum.Web
             }
         }
 
-        internal bool? IsNew
-        {
-            get 
-            {
-                return (UntypedValue as IIdentifiable).TryCS(i => i.IsNew) ??
-                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IsNew);
-            }
-        }
-
-        internal int? IdOrNull
-        {
-            get
-            {
-                return (UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
-                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
-            }
-        }
-
-        internal string ToStr
-        {
-            get 
-            {
-                return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
-                       (UntypedValue as Lite<IIdentifiable>).TryCC(l => l.ToString());
-            }
-        }
-
         public JsLineFunction AttachFunction;
 
         public MvcHtmlString ConstructorScript(string module, string type)

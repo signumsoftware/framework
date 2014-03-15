@@ -88,9 +88,12 @@ namespace Signum.Web
         {
             if (entityLine.Navigate)
             {
+                var id = (entityLine.UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
+                       (entityLine.UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
+
                 return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString(),
-                        entityLine.IdOrNull != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, entityLine.IdOrNull.Value) : null,
+                        id != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, id.Value) : null,
                         JavascriptMessage.navigate.NiceToString(), "form-control  btn-default", null);
             }
             else
@@ -117,7 +120,7 @@ namespace Signum.Web
 
             return helper.TextBox(
                 entityLine.Compose(EntityBaseKeys.ToStr),
-                entityLine.ToStr,
+                null,
                 htmlAttr);
         }
 

@@ -33,7 +33,7 @@ namespace Signum.Web
 
                 HtmlStringBuilder sbSelect = new HtmlStringBuilder();
 
-                var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple").Class("form-control")
+                var sbSelectContainer = new HtmlTag("select").Attr("size", "6").Class("form-control")
                     .IdName(entityList.Compose(EntityListBaseKeys.List));
 
                 if (entityList.ListHtmlProps.Any())
@@ -43,15 +43,12 @@ namespace Signum.Web
                 {
                     if (entityList.UntypedValue != null)
                     {
-                        bool isFirst = true;
                         foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityList.Parent))
-                        {
-                            sb.Add(InternalListElement(helper, sbSelect, itemTC, entityList, isFirst));
-                            isFirst = false;
-                        }
+                            sb.Add(InternalListElement(helper, sbSelect, itemTC, entityList));
                     }
                 }
-                using (sb.Surround(new HtmlTag("div").Class("input-group")))
+
+                using (sb.Surround(new HtmlTag("div", entityList.Compose("inputGroup")).Class("input-group")))
                 {
                     sb.Add(sbSelect.ToHtml());
 
@@ -77,7 +74,7 @@ namespace Signum.Web
             return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelText, sb.ToHtml());
         }
 
-        static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList, bool first)
+        static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
@@ -87,14 +84,14 @@ namespace Signum.Web
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
                 sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
-                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
-
+                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", 
+                    new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
 
             sbOptions.Add(new HtmlTag("option")
                     .Id(itemTC.Compose(EntityBaseKeys.ToStr))
                     .Class("form-control")
                     .Class("sf-entity-list-option")
-                    .Let(a=>!first ? a: a.Attr("selected", "selected"))
+                    .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
                     .SetInnerText(itemTC.Value.TryToString())
                     .ToHtml(TagRenderMode.Normal));
 

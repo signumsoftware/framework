@@ -22,89 +22,67 @@ namespace Signum.Web
             if (!listDetail.Visible || listDetail.HideIfNull && listDetail.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
-            string defaultDetailDiv = listDetail.Compose(EntityBaseKeys.Detail);
-            if (!listDetail.DetailDiv.HasText())
-                listDetail.DetailDiv = defaultDetailDiv;
-
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div", listDetail.Prefix).Class("SF-entity-list-detail SF-control-container")))
             {
-                sb.AddLine(EntityBaseHelper.ListLabel(helper, listDetail));
-
                 sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
+                using (sb.Surround(new HtmlTag("div", listDetail.Compose("hidden")).Class("hide")))
+                {
+                }
+
+                HtmlStringBuilder sbSelect = new HtmlStringBuilder();
+
+                var sbSelectContainer = new HtmlTag("select").Attr("size", "6").Class("form-control")
+                    .IdName(listDetail.Compose(EntityListBaseKeys.List));
+
+                if (listDetail.ListHtmlProps.Any())
+                    sbSelectContainer.Attrs(listDetail.ListHtmlProps);
+
+                using (sbSelect.Surround(sbSelectContainer))
+                {
+                    if (listDetail.UntypedValue != null)
+                    {
+                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)listDetail.Parent))
+                            sb.Add(InternalListDetailElement(helper, sbSelect, itemTC, listDetail));
+                    }
+                }
+
+                using (sb.Surround(new HtmlTag("div", listDetail.Compose("inputGroup")).Class("input-group")))
+                {
+                    sb.Add(sbSelect.ToHtml());
+
+                    using (sb.Surround(new HtmlTag("span", listDetail.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
+                    {
+                        sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail));
+                        sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail));
+                        sb.AddLine(EntityBaseHelper.ViewButton(helper, listDetail));
+                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail));
+                        sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail));
+                        sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail));
+                    }
+                }
+
                 if (listDetail.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail), templateTC.Value.ToString()));
                 }
 
-                using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field-list")))
-                {
-                    HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-
-                    var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
-                        .IdName(listDetail.Compose(EntityListBaseKeys.List))
-                        .Class("sf-entity-list")
-                        .Attr("onchange", listDetail.SFControlThen("selection_Changed()"));
-
-                    if (listDetail.ListHtmlProps.Any())
-                        sbSelectContainer.Attrs(listDetail.ListHtmlProps);
-
-                    using (sbSelect.Surround(sbSelectContainer))
-                    {
-                        if (listDetail.UntypedValue != null)
-                        {
-                            foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)listDetail.Parent))
-                                sb.Add(InternalListDetailElement(helper, sbSelect, itemTC, listDetail));
-                        }
-                    }
-
-                    using (sb.Surround(new HtmlTag("table").Class("sf-field-list-table")))
-                    using (sb.Surround(new HtmlTag("tr")))
-                    {
-                        using (sb.Surround(new HtmlTag("td")))
-                        {
-                            sb.Add(sbSelect.ToHtml());
-                        }
-
-                        using (sb.Surround(new HtmlTag("td")))
-                        using (sb.Surround(new HtmlTag("ul")))
-                        {
-                            sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail).Surround("li"));
-                        }
-                    }
-                }
-
-                if (listDetail.UntypedValue != null && ((IList)listDetail.UntypedValue).Count > 0)
-                {
-                    sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript").InnerHtml(new MvcHtmlString(
-                            "$(document).ready(function() {" +
-                            "$('#" + listDetail.Compose(EntityListBaseKeys.List) + "').change();\n" +
-                            "});"))
-                        .ToHtml());
-                }
-
-
                 sb.AddLine(listDetail.ConstructorScript(JsFunction.LinesModule, "EntityListDetail"));
             }
 
-            if (listDetail.DetailDiv == defaultDetailDiv)
-            {
-                using (sb.Surround(new HtmlTag("fieldset")))
-                {
-                    sb.AddLine(new HtmlTag("legend").InnerHtml(new MvcHtmlString(EntityControlMessage.Detail.NiceToString())));
-                    sb.AddLine(helper.Div(listDetail.DetailDiv, null, "sf-entity-list-detail"));
-                }
-            }
+            var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelText, sb.ToHtml());
 
-            return sb.ToHtml();
+            if (listDetail.DetailDiv != listDetail.Compose(EntityBaseKeys.Detail))
+                return formGroup;
+
+            HtmlStringBuilder sb2 = new HtmlStringBuilder();
+            sb2.Add(formGroup);
+            using (sb2.Surround(new HtmlTag("fieldset")))
+                sb2.AddLine(helper.Div(listDetail.DetailDiv, null, "SF-entity-list-detail-detaildiv"));
+
+            return sb2.ToHtml();
         }
 
         private static MvcHtmlString InternalListDetailElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityListDetail listDetail)
@@ -119,25 +97,13 @@ namespace Signum.Web
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-            //Note this is added to the sbOptions, not to the result sb
-            HtmlTag tbOption = new HtmlTag("option", itemTC.Compose(EntityBaseKeys.ToStr))
-                    .Attrs(new
-                    {
-                        name = itemTC.Compose(EntityBaseKeys.ToStr),
-                        value = ""
-                    })
+            sbOptions.Add(new HtmlTag("option")
+                    .Id(itemTC.Compose(EntityBaseKeys.ToStr))
                     .Class("form-control")
                     .Class("sf-entity-list-option")
-                    .SetInnerText(
-                        (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                        (itemTC.Value as Lite<IIdentifiable>).TryCC(i => i.ToString()) ??
-                        (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "");
-
-            if (itemTC.Index == 0)
-                tbOption.Attr("selected", "selected");
-
-
-            sbOptions.Add(tbOption.ToHtml());
+                    .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
+                    .SetInnerText(itemTC.Value.TryToString())
+                    .ToHtml(TagRenderMode.Normal));
 
             return sb.ToHtml();
         }
