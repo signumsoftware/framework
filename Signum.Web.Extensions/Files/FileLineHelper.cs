@@ -132,9 +132,6 @@ namespace Signum.Web.Files
                     fileLine.LabelText, sb.ToHtml()));
             }
 
-            if (fileLine.ShowValidationMessage)
-                sbg.AddLine(helper.ValidationMessage(fileLine.Compose(FileLineKeys.File)));
-
             sbg.AddLine(fileLine.ConstructorScript(FilesClient.Module, "FileLine"));
 
             return sbg.ToHtml();
