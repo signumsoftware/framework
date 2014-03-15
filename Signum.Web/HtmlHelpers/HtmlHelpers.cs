@@ -24,15 +24,14 @@ namespace Signum.Web
     {
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html)
         {
-            return new HtmlTag("div")
-                    .Id("sfGlobalValidationSummary")
-                    .ToHtml();
+            return new HtmlTag("div", "sfGlobalValidationSummary")
+            .ToHtml();
         }
 
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return new HtmlTag("div")
-                .Id(context.Compose("sfGlobalValidationSummary"))
+            return new HtmlTag("div", context.Compose("sfGlobalValidationSummary"))
+                .Class("alert alert-danger")
                 .ToHtml();
         }
 

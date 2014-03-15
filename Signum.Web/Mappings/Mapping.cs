@@ -55,7 +55,7 @@ namespace Signum.Web
             MappingRepository<float>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture) : float.Parse(ctx.Input));
             MappingRepository<double>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
             MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
-            MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
+            MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.HasInput ? ctx.Input : ctx.Inputs["Date"] + " " + ctx.Inputs["Time"]).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));

@@ -187,16 +187,6 @@ var SF;
     }
     SF.cloneWithValues = cloneWithValues;
 
-    function getPathPrefixes(prefix) {
-        var path = [], pathSplit = prefix.split("_");
-
-        for (var i = 0, l = pathSplit.length; i < l; i++)
-            path[i] = pathSplit.slice(0, i).join("_");
-
-        return path;
-    }
-    SF.getPathPrefixes = getPathPrefixes;
-
     function ajaxPost(settings) {
         return new Promise(function (resolve, reject) {
             settings.success = resolve;

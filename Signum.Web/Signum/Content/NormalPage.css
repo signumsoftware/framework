@@ -2,3 +2,8 @@
 {
     margin-bottom: 16px;
 }
+
+.validaton-summary li
+{
+    list-style: none;
+}

@@ -113,26 +113,22 @@ namespace Signum.Web
             }
         }
 
-
         public static MvcHtmlString DateTimePicker(this HtmlHelper helper, string name, bool formGroup, DateTime? value, string dateTimeFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
         {
             var dateFormat = SplitDateTimeFormat(dateTimeFormat, culture);
 
+            if (dateFormat.TimeFormat == null)
+                return helper.DatePicker(name, formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps);
+
+            if(dateFormat.DateFormat == null)
+                return helper.TimePicker(name, formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
+
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            if(dateFormat.DateFormat != null)
-                sb.Add(helper.DatePicker(dateFormat.TimeFormat == null? name : TypeContextUtilities.Compose(name, "Date"), formGroup, value == null ? "" : value.Value.ToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
-
-            if (dateFormat.TimeFormat != null)
+            using (sb.Surround(new HtmlTag("div", name)))
             {
-                if (dateFormat.TimeFormat.Contains("f") || dateFormat.TimeFormat.Contains("F"))
-                {
-                    htmlProps["class"] += " form-control";
-                    sb.Add(helper.TextBox(TypeContextUtilities.Compose(name, "Time"), value == null ? "" : value.Value.ToString(dateFormat.TimeFormat, culture), htmlProps));
-                }
-                else
-                    sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value == null ? "" : value.Value.ToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
+                sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
+                sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
             }
-
             return sb.ToHtml();
         }
 
@@ -191,6 +187,12 @@ namespace Signum.Web
 
         public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, string value, string format, IDictionary<string, object> htmlProps = null)
         {
+            if (format.Contains("f") || format.Contains("F"))
+            {
+                htmlProps["class"] += " form-control";
+                return helper.TextBox(TypeContextUtilities.Compose(name, "Time"), value, htmlProps);
+            }
+
             var input = new HtmlTag("input")
                 .IdName(name)
                 .Attr("type", "text")

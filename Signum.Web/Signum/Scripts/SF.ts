@@ -190,15 +190,6 @@ module SF {
     }
 
 
-    export function getPathPrefixes(prefix) {
-        var path = [],
-            pathSplit = prefix.split("_");
-
-        for (var i = 0, l = pathSplit.length; i < l; i++)
-            path[i] = pathSplit.slice(0, i).join("_");
-
-        return path;
-    }
 
     export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
         return new Promise<any>((resolve, reject) => {

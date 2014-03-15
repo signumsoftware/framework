@@ -60,7 +60,7 @@ namespace Signum.Web.Views
             
             #line default
             #line hidden
-WriteLiteral("               \r\n<h3>\r\n");
+WriteLiteral("\r\n<h3>\r\n");
 
 WriteLiteral("    ");
 
@@ -93,7 +93,7 @@ Write(Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialVie
             
             #line default
             #line hidden
-WriteLiteral("\r\n   \r\n");
+WriteLiteral("\r\n\r\n");
 
             
             #line 13 "..\..\Signum\Views\NormalControl.cshtml"
@@ -103,7 +103,7 @@ WriteLiteral("\r\n   \r\n");
             #line hidden
             
             #line 13 "..\..\Signum\Views\NormalControl.cshtml"
-     if(string.IsNullOrEmpty(ViewBag.Title))
+     if (string.IsNullOrEmpty(ViewBag.Title))
     {
         ViewBag.Title = modifiable.TryToString();
     }
@@ -137,7 +137,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</small>  \r\n</h3>\r\n");
+WriteLiteral("</small>\r\n</h3>\r\n");
 
             
             #line 21 "..\..\Signum\Views\NormalControl.cshtml"
@@ -157,32 +157,22 @@ WriteLiteral("    ");
             
             #line 23 "..\..\Signum\Views\NormalControl.cshtml"
 Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
-    { 
+    {
         Url = Url,
         ViewMode = ViewMode.Navigate,
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-        Prefix =  Model.Prefix
-    },  (ModifiableEntity)Model.UntypedValue).ToStringButton(Html));
+        Prefix = Model.Prefix
+    }, (ModifiableEntity)Model.UntypedValue).ToStringButton(Html));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n</div>\r\n\r\n<div");
-
-WriteLiteral(" class=\"clearall\"");
-
-WriteLiteral("></div>\r\n<div");
-
-WriteLiteral(" class=\"validationSummaryAjax\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("    ");
+WriteLiteral("\r\n</div>\r\n");
 
             
-            #line 36 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 33 "..\..\Signum\Views\NormalControl.cshtml"
 Write(Html.ValidationSummaryAjax());
 
             
@@ -190,11 +180,9 @@ Write(Html.ValidationSummaryAjax());
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("    ");
-
             
-            #line 37 "..\..\Signum\Views\NormalControl.cshtml"
-Write(Html.NormalPageHeader());
+            #line 34 "..\..\Signum\Views\NormalControl.cshtml"
+Write(Html.HiddenRuntimeInfo(Model));
 
             
             #line default
@@ -202,35 +190,29 @@ Write(Html.NormalPageHeader());
 WriteLiteral("\r\n");
 
             
-            #line 38 "..\..\Signum\Views\NormalControl.cshtml"
-     
+            #line 35 "..\..\Signum\Views\NormalControl.cshtml"
+ if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
+{
+    
             
             #line default
             #line hidden
             
-            #line 38 "..\..\Signum\Views\NormalControl.cshtml"
-      if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
-    {
-        
-            
-            #line default
-            #line hidden
-            
-            #line 40 "..\..\Signum\Views\NormalControl.cshtml"
-   Write(Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable)));
+            #line 37 "..\..\Signum\Views\NormalControl.cshtml"
+Write(Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable)));
 
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Signum\Views\NormalControl.cshtml"
-                                                                                             
-    }
+            #line 37 "..\..\Signum\Views\NormalControl.cshtml"
+                                                                                         
+}
 
             
             #line default
             #line hidden
-WriteLiteral("</div>\r\n<div");
+WriteLiteral("<div");
 
 WriteLiteral(" id=\"divMainControl\"");
 
@@ -239,7 +221,7 @@ WriteLiteral(" class=\"sf-main-control\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 39 "..\..\Signum\Views\NormalControl.cshtml"
                                                          Write(Model.Prefix);
 
             
@@ -250,7 +232,7 @@ WriteLiteral("\"");
 WriteLiteral(" data-test-ticks=\"");
 
             
-            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 39 "..\..\Signum\Views\NormalControl.cshtml"
                                                                                          Write(DateTime.Now.Ticks);
 
             
@@ -261,13 +243,13 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n");
 
             
-            #line 44 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 40 "..\..\Signum\Views\NormalControl.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 40 "..\..\Signum\Views\NormalControl.cshtml"
        Html.RenderPartial(partialViewName, Model);
             
             #line default

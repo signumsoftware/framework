@@ -94,8 +94,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.containerDiv().html(entityValue == null ? null : entityValue.html);
             Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
             if (entityValue == null) {
-                Validator.cleanError($(this.pf(Entities.Keys.toStr)).val(""));
-                Validator.cleanError($(this.pf(Entities.Keys.link)).val("").html(""));
+                Validator.cleanHasError($(this.pf(Entities.Keys.toStr)).val(""));
+                Validator.cleanHasError($(this.pf(Entities.Keys.link)).val("").html(""));
             }
 
             this.updateButtonsDisplay();

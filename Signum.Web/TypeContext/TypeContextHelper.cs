@@ -39,10 +39,5 @@ namespace Signum.Web
                 helper.ViewData.Model.GetType().TypeName(),
                 typeof(TypeContext<T>).TypeName()));
         }
-
-        public static MvcHtmlString NormalPageHeader(this HtmlHelper helper)
-        {
-            return helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
-        }
     }
 }
