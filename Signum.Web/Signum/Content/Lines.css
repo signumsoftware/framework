@@ -46,6 +46,28 @@ fieldset legend
 {
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 0px 0px 0 10px;
+    padding: 5px 10px 0 10px;
     margin: 0px;
+}
+
+
+/*EntityStrip*/
+.sf-strip-element
+{
+    border: 1px solid rgb(206, 206, 206);
+    border-radius: 4px;
+    padding: 0px 4px;
+    margin: 1px 0px;
+}
+
+.sf-strip
+{
+    list-style: none;
+    padding: 0px;
+}
+
+/*Tabs*/
+ul.nav-tabs
+{
+    margin-bottom: 10px;
 }

@@ -939,6 +939,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return EntityRepeater.key_repeaterItem;
         };
 
+        EntityRepeater.prototype.fixInputGroup = function () {
+        };
+
         EntityRepeater.prototype.getItems = function () {
             return $(this.pf(EntityRepeater.key_itemsContainer) + " > ." + EntityRepeater.key_repeaterItemClass);
         };
@@ -1070,6 +1073,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         function EntityStrip(element, options) {
             _super.call(this, element, options);
         }
+        EntityStrip.prototype.fixInputGroup = function () {
+        };
+
         EntityStrip.prototype._create = function () {
             var _this = this;
             var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");

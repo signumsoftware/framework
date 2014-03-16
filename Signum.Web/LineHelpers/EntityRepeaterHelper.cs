@@ -33,14 +33,14 @@ namespace Signum.Web
                 }
 
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("inputGroup")).Class("input-group")))
+                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("inputGroup"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(entityRepeater.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityRepeater.Compose("shownButton")).Class("input-group-btn")))
+                    using (sb.Surround(new HtmlTag("span", entityRepeater.Compose("shownButton")).Class("pull-right")))
                     {
-                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater));
-                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater));
+                        sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityRepeater));
+                        sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityRepeater));
                     }
                 }
 
@@ -70,23 +70,18 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-           
-
             using (sb.Surround(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div").Class("input-group")))
                 {
-                    using (sb.Surround(new HtmlTag("span").Class("input-group-btn")))
-                    {
-                        if (entityRepeater.Remove)
-                            sb.AddLine(EntityListBaseHelper.RemoveButtonItem(helper, itemTC, entityRepeater));
+                    if (entityRepeater.Remove)
+                        using (sb.Surround(new HtmlTag("div").Class("pull-right")))
+                            sb.AddLine(EntityListBaseHelper.RemoveSpanItem(helper, itemTC, entityRepeater, "a"));
 
-                        if (entityRepeater.Reorder)
-                        {
-                            sb.AddLine(EntityListBaseHelper.MoveUpButtonItem(helper, itemTC, entityRepeater, true));
-                            sb.AddLine(EntityListBaseHelper.MoveDownButtonItem(helper, itemTC, entityRepeater, true));
-                        }
+                    if (entityRepeater.Reorder)
+                    {
+                        sb.AddLine(EntityListBaseHelper.MoveUpSpanItem(helper, itemTC, entityRepeater, "a", true));
+                        sb.AddLine(EntityListBaseHelper.MoveDownSpanItem(helper, itemTC, entityRepeater, "a", true));
                     }
                 }
 

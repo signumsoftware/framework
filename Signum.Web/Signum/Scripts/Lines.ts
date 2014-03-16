@@ -979,6 +979,8 @@ export class EntityRepeater extends EntityListBase {
         return EntityRepeater.key_repeaterItem;
     }
 
+    fixInputGroup() {
+    }
 
     getItems() {
         return $(this.pf(EntityRepeater.key_itemsContainer) + " > ." + EntityRepeater.key_repeaterItemClass);
@@ -1132,6 +1134,9 @@ export class EntityStrip extends EntityList {
 
     constructor(element: JQuery, options: EntityStripOptions) {
         super(element, options);
+    }
+
+    fixInputGroup() {
     }
 
     _create() {
