@@ -30,9 +30,7 @@ namespace Signum.Web
 
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return new HtmlTag("div", context.Compose("sfGlobalValidationSummary"))
-                .Class("alert alert-danger")
-                .ToHtml();
+            return new HtmlTag("div", context.Compose("sfGlobalValidationSummary")).ToHtml();
         }
 
         public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)

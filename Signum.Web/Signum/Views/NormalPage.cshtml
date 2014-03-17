@@ -5,7 +5,7 @@
 @using (Html.BeginForm())
 {
     var ident = Model.UntypedValue as IdentifiableEntity;
-    <div id="divNormalControl" @Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : "") class="container form-horizontal">
+    <div id="divMainPage" @Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : "") class="container form-horizontal">
         @if (string.IsNullOrEmpty(ViewBag.Title))
         {
             ViewBag.Title = Model.UntypedValue.TryToString();

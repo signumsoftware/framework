@@ -142,7 +142,7 @@ export class EntityBase {
     }
 
     notifyChanges() {
-        $(this.element).closest(".sf-main-control").addClass("sf-changed");
+        SF.setHasChanges(this.element);
     }
 
     remove_click(): Promise<void> {

@@ -328,7 +328,7 @@ export function validateAndSubmit(options: EntityOperationOptions) {
 
 export function submit(options: EntityOperationOptions) {
 
-    var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl")
+    var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divMainControl")
 
     var $form = mainControl.closest("form");
     $form.append(SF.hiddenInput('isLite', options.isLite) +

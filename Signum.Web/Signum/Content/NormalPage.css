@@ -3,7 +3,22 @@
     margin-bottom: 16px;
 }
 
+.modal-body > .sf-button-bar
+{
+    margin-top: -5px;
+}
+
 .validaton-summary li
 {
     list-style: none;
+}
+
+.modal-footer
+{
+    margin-top: 0px
+}
+
+.sf-ok-button
+{
+    min-width: 70px;
 }

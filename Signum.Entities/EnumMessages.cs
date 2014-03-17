@@ -235,9 +235,10 @@ Lose changes?")]
         hideFilters,
         [Description("Loading...")]
         loading,
-        [Description(@"There are changes that haven't been saved. 
-Lose changes?")]
-        loseChanges,
+        [Description("Save changes before or press cancel")]
+        saveChangesBeforeOrPressCancel,
+        [Description("Loose current changes?")]
+        looseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
         [Description("No results found")]
@@ -280,6 +281,10 @@ Lose changes?")]
         navigate,
         [Description("New entity")]
         newEntity,
+        [Description("Ok")]
+        ok,
+        [Description("Cancel")]
+        cancel,
     }
 
     public enum QuickLinkMessage

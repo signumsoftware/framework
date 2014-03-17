@@ -100,64 +100,46 @@ export enum RequestType {
 }
 
 function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
-    return new Promise<Array<Entities.EntityValue>>(function (resolve) {
-        $.ajax({
-            url: findOptions.openFinderUrl || SF.Urls.partialFind,
-            data: requestDataForOpenFinder(findOptions, false),
-            async: false,
-            success: function (popupHtml) {
-                var divId = SF.compose(findOptions.prefix, "Temp");
-                $("body").append(SF.hiddenDiv(divId, popupHtml));
-                var div = $("#" + divId);
-                   
-                div.popup({
-                    onOk: function () {
+    return SF.ajaxPost({
+        url: findOptions.openFinderUrl || SF.Urls.partialFind,
+        data: requestDataForOpenFinder(findOptions, false)
+    }).then(modalDivHtml => {
 
-                        getFor(findOptions.prefix).then(sc=>{
+            var modalDiv = $(modalDivHtml);
 
-                            var items = sc.selectedItems();
-                            if (items.length == 0) {
-                                SF.Notify.info(lang.signum.noElementsSelected);
-                                return null;
-                            }
+            var okButtonId = SF.compose(findOptions.prefix, "btnOk");
 
-                            if (items.length > 1 && !findOptions.multipleSelection) {
-                                SF.Notify.info(lang.signum.onlyOneElement);
-                                return;
-                            }
+            var items: Entities.EntityValue[];
+            return Navigator.openModal(modalDiv, button => {
 
-                            div.remove();
+                if (button.id != okButtonId)
+                    return Promise.resolve(true);
 
-                            resolve(items);
-                        });
-                    },
-                    onCancel: function () { div.remove(); resolve(null); }
+                return getFor(findOptions.prefix).then(sc=> {
+
+                    items = sc.selectedItems();
+                    if (items.length == 0) {
+                        SF.Notify.info(lang.signum.noElementsSelected);
+                        return false;
+                    }
+
+                    if (items.length > 1 && !findOptions.multipleSelection) {
+                        SF.Notify.info(lang.signum.onlyOneElement);
+                        return false;
+                    }
+
+                    return true;
                 });
-            }
+            }).then(pair => pair.button.id == okButtonId ? items : null);
         });
-    });
 }
 
 export function explore(findOptions: FindOptions): Promise<void> {
-    return new Promise<void>(function (resolve) {
-        $.ajax({
-            url: findOptions.openFinderUrl || SF.Urls.partialFind,
-            data: requestDataForOpenFinder(findOptions, true),
-            async: false,
-            success: function (popupHtml) {
-                var divId = SF.compose(findOptions.prefix, "Temp");
-                $("body").append(SF.hiddenDiv(divId, popupHtml));
-                var div = $("#" + divId);
-
-                var sc = getFor(findOptions.prefix)
-
-                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
-                div.popup({
-                    onCancel: function () { div.remove(); resolve(null); }
-                });
-            }
-        });
-    });
+    return SF.ajaxPost({
+        url: findOptions.openFinderUrl || SF.Urls.partialFind,
+        data: requestDataForOpenFinder(findOptions, true)
+    }).then(modalDivHtml => Navigator.openModal($(modalDivHtml)))
+      .then(() => null);
 }
 
 export function requestDataForOpenFinder(findOptions: FindOptions, isExplore : boolean) {
@@ -751,26 +733,20 @@ export class SearchControl {
         });
     }
 
-    editColumn($th : JQuery) {
-        var colName = $th.text().trim();
+    editColumn($th: JQuery) {
+        var colName = $th.find("span").text().trim();
 
-        var popupPrefix = SF.compose(this.options.prefix, "newName");
-
-        var divId = SF.compose(popupPrefix, "Temp");
-        var $div = $("<div id='" + divId + "'></div>");
-        $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>")
-            .append("<br />")
-            .append("<input type='text' value='" + colName + "' />")
-            .append("<br />").append("<br />")
-            .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
-
-        var $tempContainer = $("<div></div>").append($div);
-        $tempContainer.popup({
-            onOk: function () { $th.find("span").text($div.find("input:text").val()); $tempContainer.remove();  },
-            onCancel: function () { $tempContainer.remove(); }
-        });
+        Navigator.valueLineBox({
+            prefix: SF.compose(this.options.prefix, "newName"),
+            title: lang.signum.editColumnName,
+            message: lang.signum.enterTheNewColumnName,
+            value: colName,
+            type: Navigator.ValueLineType.TextBox,
+        }).then(result => {
+                if (result)
+                    $th.find("span").text(result);
+            });
     }
-
 
     moveColumn($source : JQuery, $target : JQuery, before : boolean) {
         if (before) {

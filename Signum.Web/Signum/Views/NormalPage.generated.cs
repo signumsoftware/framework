@@ -58,13 +58,13 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" id=\"divNormalControl\"");
+WriteLiteral(" id=\"divMainPage\"");
 
 WriteLiteral(" ");
 
             
             #line 8 "..\..\Signum\Views\NormalPage.cshtml"
-                          Write(Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : ""));
+                     Write(Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : ""));
 
             
             #line default

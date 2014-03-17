@@ -102,7 +102,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityBase.prototype.notifyChanges = function () {
-            $(this.element).closest(".sf-main-control").addClass("sf-changed");
+            SF.setHasChanges(this.element);
         };
 
         EntityBase.prototype.remove_click = function () {

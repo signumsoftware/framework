@@ -69,67 +69,47 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     var RequestType = exports.RequestType;
 
     function findInternal(findOptions) {
-        return new Promise(function (resolve) {
-            $.ajax({
-                url: findOptions.openFinderUrl || SF.Urls.partialFind,
-                data: exports.requestDataForOpenFinder(findOptions, false),
-                async: false,
-                success: function (popupHtml) {
-                    var divId = SF.compose(findOptions.prefix, "Temp");
-                    $("body").append(SF.hiddenDiv(divId, popupHtml));
-                    var div = $("#" + divId);
+        return SF.ajaxPost({
+            url: findOptions.openFinderUrl || SF.Urls.partialFind,
+            data: exports.requestDataForOpenFinder(findOptions, false)
+        }).then(function (modalDivHtml) {
+            var modalDiv = $(modalDivHtml);
 
-                    div.popup({
-                        onOk: function () {
-                            exports.getFor(findOptions.prefix).then(function (sc) {
-                                var items = sc.selectedItems();
-                                if (items.length == 0) {
-                                    SF.Notify.info(lang.signum.noElementsSelected);
-                                    return null;
-                                }
+            var okButtonId = SF.compose(findOptions.prefix, "btnOk");
 
-                                if (items.length > 1 && !findOptions.multipleSelection) {
-                                    SF.Notify.info(lang.signum.onlyOneElement);
-                                    return;
-                                }
+            var items;
+            return Navigator.openModal(modalDiv, function (button) {
+                if (button.id != okButtonId)
+                    return Promise.resolve(true);
 
-                                div.remove();
+                return exports.getFor(findOptions.prefix).then(function (sc) {
+                    items = sc.selectedItems();
+                    if (items.length == 0) {
+                        SF.Notify.info(lang.signum.noElementsSelected);
+                        return false;
+                    }
 
-                                resolve(items);
-                            });
-                        },
-                        onCancel: function () {
-                            div.remove();
-                            resolve(null);
-                        }
-                    });
-                }
+                    if (items.length > 1 && !findOptions.multipleSelection) {
+                        SF.Notify.info(lang.signum.onlyOneElement);
+                        return false;
+                    }
+
+                    return true;
+                });
+            }).then(function (pair) {
+                return pair.button.id == okButtonId ? items : null;
             });
         });
     }
 
     function explore(findOptions) {
-        return new Promise(function (resolve) {
-            $.ajax({
-                url: findOptions.openFinderUrl || SF.Urls.partialFind,
-                data: exports.requestDataForOpenFinder(findOptions, true),
-                async: false,
-                success: function (popupHtml) {
-                    var divId = SF.compose(findOptions.prefix, "Temp");
-                    $("body").append(SF.hiddenDiv(divId, popupHtml));
-                    var div = $("#" + divId);
-
-                    var sc = exports.getFor(findOptions.prefix);
-
-                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
-                    div.popup({
-                        onCancel: function () {
-                            div.remove();
-                            resolve(null);
-                        }
-                    });
-                }
-            });
+        return SF.ajaxPost({
+            url: findOptions.openFinderUrl || SF.Urls.partialFind,
+            data: exports.requestDataForOpenFinder(findOptions, true)
+        }).then(function (modalDivHtml) {
+            return Navigator.openModal($(modalDivHtml));
+        }).then(function () {
+            return null;
         });
     }
     exports.explore = explore;
@@ -701,23 +681,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.editColumn = function ($th) {
-            var colName = $th.text().trim();
+            var colName = $th.find("span").text().trim();
 
-            var popupPrefix = SF.compose(this.options.prefix, "newName");
-
-            var divId = SF.compose(popupPrefix, "Temp");
-            var $div = $("<div id='" + divId + "'></div>");
-            $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>").append("<br />").append("<input type='text' value='" + colName + "' />").append("<br />").append("<br />").append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
-
-            var $tempContainer = $("<div></div>").append($div);
-            $tempContainer.popup({
-                onOk: function () {
-                    $th.find("span").text($div.find("input:text").val());
-                    $tempContainer.remove();
-                },
-                onCancel: function () {
-                    $tempContainer.remove();
-                }
+            Navigator.valueLineBox({
+                prefix: SF.compose(this.options.prefix, "newName"),
+                title: lang.signum.editColumnName,
+                message: lang.signum.enterTheNewColumnName,
+                value: colName,
+                type: 4 /* TextBox */
+            }).then(function (result) {
+                if (result)
+                    $th.find("span").text(result);
             });
         };
 

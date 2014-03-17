@@ -330,7 +330,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.validateAndSubmit = validateAndSubmit;
 
     function submit(options) {
-        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl");
+        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divMainControl");
 
         var $form = mainControl.closest("form");
         $form.append(SF.hiddenInput('isLite', options.isLite) + SF.hiddenInput('operationFullKey', options.operationKey) + SF.hiddenInput("prefix", options.prefix));
