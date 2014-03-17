@@ -96,6 +96,16 @@ namespace Signum.Utilities
         }
     }
 
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class FormatAttribute : Attribute
+    {
+        public string Format { get; private set; }
+        public FormatAttribute(string format)
+        {
+            this.Format = format;
+        }
+    }
+
     public static class DescriptionManager
     {
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
