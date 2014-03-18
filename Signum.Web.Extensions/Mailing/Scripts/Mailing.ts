@@ -253,6 +253,9 @@ export function activateIFrame($iframe: JQuery) {
     var currHeight = 0;
     function fixHeight() {
         var newHeight = container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100; 
+
+        newHeight = Math.min(newHeight, 2000);
+
         if (Math.abs(currHeight - newHeight) > 100) {
             $iframe.css("height", newHeight);
             currHeight = newHeight;

@@ -252,6 +252,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             }).reduce(function (a, b) {
                 return a + b;
             }, 0) + 100;
+
+            newHeight = Math.min(newHeight, 2000);
+
             if (Math.abs(currHeight - newHeight) > 100) {
                 $iframe.css("height", newHeight);
                 currHeight = newHeight;
