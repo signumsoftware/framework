@@ -64,6 +64,8 @@ namespace Signum.Engine.Mailing
 
                 MixinDeclarations.AssertDefined(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
 
+                MimeType.CacheExtension.TryAdd("message/rfc822", ".eml");
+
                 sb.Include<Pop3ConfigurationDN>();
                 sb.Include<Pop3ReceptionDN>();
                 sb.Include<Pop3ReceptionExceptionDN>();
@@ -394,8 +396,10 @@ namespace Signum.Engine.Mailing
 
         private static string GetName(ContentType ct)
         {
-            return ct.Name.TryCC(a => FileNameValidatorAttribute.RemoveInvalidCharts(a)) ??
-                ("unknown" + MimeType.GetDefaultExtension(ct.MediaType));
+            if (ct.Name.HasText())
+                return FileNameValidatorAttribute.RemoveInvalidCharts(ct.Name);
+
+            return "noname" +  MimeType.GetDefaultExtension(ct.MediaType) ?? ".unknown"; 
         }
 
         private static DateTime GetDate(MailMessage mm)
