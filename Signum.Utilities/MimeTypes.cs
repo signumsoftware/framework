@@ -234,6 +234,9 @@ namespace Signum.Utilities
 
         public static string FromExtension(string extension)
         {
+            if (string.IsNullOrEmpty(extension))
+                return extension;
+
             extension = extension.ToLower();
 
             return Cache.GetOrAdd(extension, ext =>
