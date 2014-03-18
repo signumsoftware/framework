@@ -121,21 +121,21 @@ Lose changes?")]
         CreateNew,
         Field,
         [Description("Add column")]
-        FilterBuilder_AddColumn,
+        AddColumn,
         [Description("Add filter")]
-        FilterBuilder_AddFilter,
-        [Description("Delete Filter")]
-        FilterBuilder_DeleteFilter,
+        AddFilter,
+        [Description("Delete filter")]
+        DeleteFilter,
         Filters,
         Find,
         [Description("Finder of {0}")]
         FinderOf0,
         Name,
-        [Description("New Column")]
+        [Description("New column")]
         NewColumn,
-        [Description("New Column's Name")]
+        [Description("New column's Name")]
         NewColumnSName,
-        [Description("New Filter")]
+        [Description("New filter")]
         NewFilter,
         NoActionsFound,
         NoColumnSelected,
@@ -219,7 +219,9 @@ Lose changes?")]
 
     public enum JavascriptMessage
     {
+        [Description("Choose a type")]
         chooseAType,
+        [Description("Choose a value")]
         chooseAValue,
         [Description("Add filter")]
         addFilter,

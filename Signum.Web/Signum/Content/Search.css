@@ -1,0 +1,159 @@
+﻿.sf-search-footer div
+{
+    float: left;
+    width: 33%;
+}
+
+.sf-pagination-center
+{
+    text-align: center;
+}
+
+.sf-pagination-right
+{
+    text-align: right;
+}
+
+div.sf-pagination-right > ul.pagination
+{
+    margin: 0px;
+}
+
+div.sf-pagination-right > ul.pagination > li > a,
+div.sf-pagination-right > ul.pagination > li > span
+{
+    padding: 0px 6px;
+}
+
+div.sf-pagination-right > ul.pagination > .disabled > a,
+div.sf-pagination-right > ul.pagination > .disabled > span
+{
+    cursor: default;
+}
+
+.sf-popup-fullscreen
+{
+    font-size:18px;
+}
+
+.table-hover > tbody > tr:hover.sf-search-footer > td
+{
+    background-color:transparent;
+}
+
+span.token-builder > select.form-control
+{
+    width: auto;
+    display: inline;
+    height: 28px;
+    padding: 2px;
+    margin: 2px 0px;
+}
+
+.panel-heading.sf-filters-body
+{
+    padding: 3px 5px;
+}
+
+.panel-body.sf-filters-list
+{
+    padding: 5px;
+}
+
+.sf-explanation
+{
+    margin: 10px;
+}
+
+.sf-filters-list > table.table
+{
+    margin-bottom:0px;
+}
+
+.sf-filter-token
+{
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 0px 3px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+div.panel.sf-filters
+{
+    margin: 0px 0px 4px 0px;
+}
+
+div.sf-filters-list table.table
+{
+    width:auto;
+}
+
+.sf-filters-list .form-control
+{
+    width: auto;
+    padding: 1px 3px;
+    height: auto;
+}
+
+.sf-filters-list .input-group .btn,
+.sf-filters-list .input-group .input-group-addon
+{
+    padding: 1px 6px;
+}
+
+
+.caret.caret-reversed {
+    border-top-width: 0;
+    border-bottom: 4px solid #000000;
+}
+
+
+
+.sf-header-sort.l3
+{
+    border-top-color: #CCC !important;
+    border-bottom-color: #CCC !important;
+}
+
+.sf-header-sort.l2
+{
+    border-top-color: #999 !important;
+    border-bottom-color: #999 !important;
+}
+
+.sf-header-sort.l1
+{
+    border-top-color: #666 !important;
+    border-bottom-color: #666 !important;
+}
+
+.sf-header-sort.l0
+{
+    border-top-color: #000 !important;
+    border-bottom-color: #000 !important;
+}
+
+.sf-header-sort.asc
+{
+    border-top-width: 0;
+    border-bottom: 8px solid;
+}
+
+.sf-header-sort.desc
+{
+    border-bottom-width: 0;
+    border-top: 8px solid;
+}
+
+.sf-header-sort.desc,
+.sf-header-sort.asc
+{
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin: 2px;
+    vertical-align: middle;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+}

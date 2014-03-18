@@ -26,7 +26,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
             var id = context.Compose("ddlTokenContainer");
-            using (sb.Surround(new HtmlTag("span").Id(id)))
+            using (sb.Surround(new HtmlTag("span").Id(id).Class("token-builder")))
             {
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
@@ -89,6 +89,7 @@ namespace Signum.Web
             }
 
             HtmlTag dropdown = new HtmlTag("select")
+                .Class("form-control")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml()) 
                 .Attr("data-parenttoken", previous == null ? "" : previous.FullKey());

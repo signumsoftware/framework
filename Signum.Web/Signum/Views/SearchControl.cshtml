@@ -45,39 +45,20 @@
         }
     </div>
 
-    @if (!filtersAlwaysHidden)
-    {
-        @Html.Href("",
-                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
-                "",
-                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
-                "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
-                new Dictionary<string, object> 
-                { 
-                    { "onclick", JsFunction.SFControlThen(prefix,  "toggleFilters()") },
-                    { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
-                })
-    }
-    @if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
-    { 
-        @Html.Href(Model.Compose("sfFullScreen"),
-            "Full Screen",
-            "",
-            "Full Screen",
-            "sf-query-button sf-query-fullscreen",
-            new Dictionary<string, object> 
-            { 
-                { "data-icon", "ui-icon-extlink" },
-                { "data-text", false }
-            })
-    }
 
-    <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
-        @if (findOptions.Create)
+
+
+    <div class="sf-query-button-bar" style="@(findOptions.FilterMode != FilterMode.OnlyResults ? null : "display:none")">
+        @if (!filtersAlwaysHidden)
         {
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
+            <a  class="sf-query-button sf-filters-header btn btn-default @(filtersVisible ? "active" : "")"
+            onclick="@JsFunction.SFControlThen(prefix, "toggleFilters()")"
+            title="@(filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString())">
+                 <span class="glyphicon glyphicon glyphicon-filter"></span>
+            </a>
         }
+        <button class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")" >@SearchMessage.Search.NiceToString()</button>
+      
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
            Url = Url,
@@ -87,25 +68,33 @@
            EntityType = entitiesType,
            Prefix = Model.Prefix
        }).ToStringButton(Html)
+
+        @if (findOptions.Create)
+        {
+            <a class="sf-query-button btn btn-default pull-right" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.Create.NiceToString()" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
+                <span class="glyphicon glyphicon-plus"></span>
+            </a>
+        }
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
         <div class="clearall">
         </div>
     }
-    <div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
-        <table id="@Model.Compose("tblResults")" class="sf-search-results">
-            <thead class="ui-widget-header ui-corner-top">
+    <div id="@Model.Compose("divResults")" class="sf-search-results-container table-responsive">
+
+        <table id="@Model.Compose("tblResults")" class="sf-search-results  table table-hover  table-condensed">
+            <thead>
                 <tr>
                     @if (findOptions.AllowSelection)
                     {
-                        <th class="ui-state-default sf-th-selection">
+                        <th class="sf-th-selection">
                             @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()") })
                         </th>
                     }
                     @if (findOptions.Navigate)
                     {
-                        <th class="ui-state-default sf-th-entity"></th>
+                        <th class="sf-th-entity"></th>
                     }
                     @{List<Column> columns = findOptions.MergeColumns(); }
                     @foreach (var col in columns)
@@ -116,16 +105,17 @@
                         {
                             orderType = order.OrderType;
                         }
-                        <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                        <th class="">
                             <div class="sf-header-droppable sf-header-droppable-right"></div>
                             <div class="sf-header-droppable sf-header-droppable-left"></div>
                             <input type="hidden" value="@col.Name" />
+                            <span class="sf-header-sort @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "asc" : "desc"))"></span>
                             <span>@col.DisplayName</span>
                         </th>
                     }
                 </tr>
             </thead>
-            <tbody class="ui-widget-content">
+            <tbody>
                 @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); }
                 <tr>
                     <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>

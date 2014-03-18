@@ -2,17 +2,18 @@
 @{  FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];}
 <div id="@Model.Compose("panelPopup")">
     <span class="sf-popup-title">
-        <span style="float:left; display:block">@ViewBag.Title</span>
+        <span style="float: left; display: block">@ViewBag.Title</span>
         @{
             <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
-                <span class="ui-icon ui-icon-extlink">fullscreen</span>
+                <span class="glyphicon glyphicon-new-window"></span>
             </a>
         }
     </span>
-    @if(ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find)){
-    <div class="sf-query-button-bar">
-        <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" />
-    </div>
+    @if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+    {
+        <div class="sf-query-button-bar">
+            <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" />
+        </div>
     }
     <div class="sf-popup-body">
         @{ 

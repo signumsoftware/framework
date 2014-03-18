@@ -192,10 +192,10 @@ WriteLiteral("></span>\r\n                        </a>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    <br />\r\n                    <small>");
+WriteLiteral("\r\n\r\n                    <br />\r\n                    <small>");
 
             
-            #line 28 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 29 "..\..\Signum\Views\PopupControl.cshtml"
                       Write(Navigator.Manager.GetTypeTitle(modifiable));
 
             
@@ -214,7 +214,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 33 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 34 "..\..\Signum\Views\PopupControl.cshtml"
                Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
                     {
                         Url = Url,
@@ -233,7 +233,7 @@ WriteLiteral("\r\n                </div>\r\n\r\n");
 WriteLiteral("                ");
 
             
-            #line 44 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
            Write(Html.ValidationSummaryAjax(Model));
 
             
@@ -241,32 +241,32 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n                <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2135), Tuple.Create("\"", 2172)
+WriteAttribute("id", Tuple.Create(" id=\"", 2137), Tuple.Create("\"", 2174)
             
-            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 2140), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 2142), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 2140), false)
+, 2142), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 2173), Tuple.Create("\"", 2262)
-, Tuple.Create(Tuple.Create("", 2181), Tuple.Create("sf-main-control", 2181), true)
-, Tuple.Create(Tuple.Create(" ", 2196), Tuple.Create("form-horizontal", 2197), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2175), Tuple.Create("\"", 2264)
+, Tuple.Create(Tuple.Create("", 2183), Tuple.Create("sf-main-control", 2183), true)
+, Tuple.Create(Tuple.Create(" ", 2198), Tuple.Create("form-horizontal", 2199), true)
             
-            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
-                  , Tuple.Create(Tuple.Create("", 2212), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
+                  , Tuple.Create(Tuple.Create("", 2214), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 2212), false)
+, 2214), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");
 
             
-            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
                 Write(Model.Prefix);
 
             
@@ -277,7 +277,7 @@ WriteLiteral("\"");
 WriteLiteral(" \r\n        data-runtimeinfo=\"");
 
             
-            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 48 "..\..\Signum\Views\PopupControl.cshtml"
                      Write(Model.RuntimeInfo().ToString());
 
             
@@ -288,7 +288,7 @@ WriteLiteral("\"");
 WriteLiteral("\r\n        data-test-ticks=\"");
 
             
-            #line 48 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 49 "..\..\Signum\Views\PopupControl.cshtml"
                     Write(DateTime.Now.Ticks);
 
             
@@ -299,13 +299,13 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n");
 
             
-            #line 49 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 50 "..\..\Signum\Views\PopupControl.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 49 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 50 "..\..\Signum\Views\PopupControl.cshtml"
                      if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
                     {
                         
@@ -313,14 +313,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 51 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 52 "..\..\Signum\Views\PopupControl.cshtml"
                    Write(Html.Hidden(Model.Compose(ViewDataKeys.EntityState), Navigator.Manager.SerializeEntity(modifiable)));
 
             
             #line default
             #line hidden
             
-            #line 51 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 52 "..\..\Signum\Views\PopupControl.cshtml"
                                                                                                                             
                     }
 
@@ -330,7 +330,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 53 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 54 "..\..\Signum\Views\PopupControl.cshtml"
                        
                         ViewData[ViewDataKeys.InPopup] = true;
 
@@ -342,13 +342,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n            </div>\r\n");
 
             
-            #line 60 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 61 "..\..\Signum\Views\PopupControl.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 60 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 61 "..\..\Signum\Views\PopupControl.cshtml"
              if (viewMode == ViewMode.View)
             {
                 var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
@@ -362,35 +362,35 @@ WriteLiteral(" class=\"modal-footer\"");
 
 WriteLiteral(">\r\n                    <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3142), Tuple.Create("\"", 3170)
+WriteAttribute("id", Tuple.Create(" id=\"", 3144), Tuple.Create("\"", 3172)
             
-            #line 64 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 3147), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+            #line 65 "..\..\Signum\Views\PopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 3149), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 3147), false)
+, 3149), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3171), Tuple.Create("\"", 3284)
-, Tuple.Create(Tuple.Create("", 3179), Tuple.Create("btn", 3179), true)
-, Tuple.Create(Tuple.Create(" ", 3182), Tuple.Create("btn-primary", 3183), true)
-, Tuple.Create(Tuple.Create(" ", 3194), Tuple.Create("sf-entity-button", 3195), true)
-, Tuple.Create(Tuple.Create(" ", 3211), Tuple.Create("sf-close-button", 3212), true)
-, Tuple.Create(Tuple.Create(" ", 3227), Tuple.Create("sf-ok-button", 3228), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 3173), Tuple.Create("\"", 3286)
+, Tuple.Create(Tuple.Create("", 3181), Tuple.Create("btn", 3181), true)
+, Tuple.Create(Tuple.Create(" ", 3184), Tuple.Create("btn-primary", 3185), true)
+, Tuple.Create(Tuple.Create(" ", 3196), Tuple.Create("sf-entity-button", 3197), true)
+, Tuple.Create(Tuple.Create(" ", 3213), Tuple.Create("sf-close-button", 3214), true)
+, Tuple.Create(Tuple.Create(" ", 3229), Tuple.Create("sf-ok-button", 3230), true)
             
-            #line 64 "..\..\Signum\Views\PopupControl.cshtml"
-                                              , Tuple.Create(Tuple.Create("", 3240), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
+            #line 65 "..\..\Signum\Views\PopupControl.cshtml"
+                                              , Tuple.Create(Tuple.Create("", 3242), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
             
             #line default
             #line hidden
-, 3240), false)
+, 3242), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 64 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 65 "..\..\Signum\Views\PopupControl.cshtml"
                                                                                                                                                                       Write(JavascriptMessage.ok.NiceToString());
 
             
@@ -398,14 +398,14 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("</button>\r\n                    <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3360), Tuple.Create("\"", 3392)
+WriteAttribute("id", Tuple.Create(" id=\"", 3362), Tuple.Create("\"", 3394)
             
-            #line 65 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 3365), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
+            #line 66 "..\..\Signum\Views\PopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 3367), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
             
             #line default
             #line hidden
-, 3365), false)
+, 3367), false)
 );
 
 WriteLiteral(" class=\"btn btn-default sf-entity-button sf-close-button sf-cancel-button\"");
@@ -413,7 +413,7 @@ WriteLiteral(" class=\"btn btn-default sf-entity-button sf-close-button sf-cance
 WriteLiteral(">");
 
             
-            #line 65 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 66 "..\..\Signum\Views\PopupControl.cshtml"
                                                                                                                                   Write(JavascriptMessage.cancel.NiceToString());
 
             
@@ -422,7 +422,7 @@ WriteLiteral(">");
 WriteLiteral("</button>\r\n                </div>\r\n");
 
             
-            #line 67 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 68 "..\..\Signum\Views\PopupControl.cshtml"
             }
 
             

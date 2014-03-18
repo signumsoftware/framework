@@ -326,6 +326,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function typeChooser(prefix, types) {
         return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
+            alert("hi type!");
             return t == null ? null : t.value;
         });
     }
@@ -348,15 +349,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             };
         }
 
-        var modalBody = $("div");
+        var modalBody = $("<div>");
         options.forEach(function (o) {
             return $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody);
         });
 
         var modalDiv = exports.createBootstrapModal({ titleText: title, body: modalBody });
 
-        exports.openModal(modalDiv).then(function (pair) {
-            return $(pair.button).data("option");
+        var option;
+        return exports.openModal(modalDiv, function (button) {
+            option = $(button).data("option");
+            return Promise.resolve(true);
+        }).then(function (pair) {
+            return option;
         });
     }
     exports.chooser = chooser;

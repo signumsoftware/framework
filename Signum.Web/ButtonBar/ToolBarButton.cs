@@ -80,8 +80,7 @@ namespace Signum.Web
         {
             var a = new HtmlTag("a")
                .Id(Id)
-               .Class("btn")
-               .Class(Style)
+               .Class(ToBackgroundStyle(Style))
                .Class(CssClass)
                .Attrs(HtmlProps)
                .SetInnerText(Text);
@@ -97,6 +96,15 @@ namespace Signum.Web
                 a.Attr("disabled", "disabled");
 
             return new HtmlTag("li").InnerHtml(a);
+        }
+
+        private string ToBackgroundStyle(string style)
+        {
+            if (string.IsNullOrEmpty(style))
+                return style;
+
+            return style.Replace("btn-", "bg-");
+            
         }
     }
 }

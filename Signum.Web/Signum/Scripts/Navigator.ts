@@ -355,7 +355,10 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 
 export function typeChooser(prefix: string, types: ChooserOption[]): Promise<string> {
     return chooser(prefix, lang.signum.chooseAType, types)
-        .then(t=> t == null ? null : t.value);
+        .then(t=> {
+            alert("hi type!");
+            return t == null ? null : t.value
+        });
 }
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
@@ -378,15 +381,16 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
             a.toString();
     }
 
-    var modalBody = $("div")
+    var modalBody = $("<div>")
     options.forEach(o=> $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>')
         .data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody));
 
     var modalDiv = createBootstrapModal({  titleText: title, body: modalBody})
 
-    openModal(modalDiv).then(pair=> {
-        return $(pair.button).data("option");
-    }); 
+    var option : T; 
+    return openModal(modalDiv,
+        button => { option = <T>$(button).data("option"); return Promise.resolve(true); })
+        .then(pair=> option);
 }
 
 export interface BootstrapModalOptions

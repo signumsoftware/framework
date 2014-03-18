@@ -632,22 +632,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var col = cols.length == 0 ? null : cols[0];
 
             var oposite = col == null ? 0 /* Ascending */ : col.orderType == 0 /* Ascending */ ? 1 /* Descending */ : 0 /* Ascending */;
-
+            var $sort = $th.find("span.sf-header-sort");
             if (!multiCol) {
-                this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
+                this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+                $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
                 this.options.orders = [{ columnName: columnName, orderType: oposite }];
             } else {
                 if (col !== null) {
                     col.orderType = oposite;
+                    $sort.removeClass("asc desc").addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
                 } else {
                     this.options.orders.push({ columnName: columnName, orderType: oposite });
+                    $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
                 }
             }
-
-            if (oposite == 1 /* Descending */)
-                $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
-            else
-                $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
         };
 
         SearchControl.prototype.addColumn = function () {
@@ -745,14 +743,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.toggleFilters = function () {
             var $toggler = this.element.find(".sf-filters-header");
             this.element.find(".sf-filters").toggle();
-            $toggler.toggleClass('close');
-            if ($toggler.hasClass('close')) {
-                $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-n").addClass("ui-icon-triangle-1-e");
-                $toggler.find(".ui-button-text").html(lang.signum.showFilters);
-            } else {
-                $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-e").addClass("ui-icon-triangle-1-n");
-                $toggler.find(".ui-button-text").html(lang.signum.hideFilters);
-            }
+            $toggler.toggleClass('active');
             return false;
         };
 
@@ -909,14 +900,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var hiddenId = $button.attr("id") + "temp";
             if (typeof disablingMessage != "undefined") {
-                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+                $button.attr("disabled", "disabled").attr("title", disablingMessage);
                 $button.unbind('click').bind('click', function (e) {
                     e.preventDefault();
                     return false;
                 });
             } else {
                 var self = this;
-                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+                $button.removeAttr("disabled").attr("title", "");
                 $button.unbind('click').bind('click', enableCallback);
             }
         };

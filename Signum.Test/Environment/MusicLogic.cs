@@ -37,11 +37,11 @@ namespace Signum.Test.Environment
                     from a in Database.Query<AlbumDN>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
-                        Author = a.Author.ToLite(),
-                        Label = a.Label.ToLite(),
                         a.Name,
+                        a.Author,
+                        a.Label,
                         a.Year
                     });
 
@@ -49,10 +49,10 @@ namespace Signum.Test.Environment
                     from a in Database.Query<NoteWithDateDN>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Text,
-                        Target = a.Target.ToLite(),
+                        a.Target,
                         a.CreationTime,
                     });
 
@@ -60,13 +60,13 @@ namespace Signum.Test.Environment
                     from a in Database.Query<ArtistDN>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Name,
                         a.IsMale,
                         a.Sex,
                         a.Dead,
-                        LastAward = a.LastAward.ToLite(),
+                        a.LastAward,
                     });
 
                 dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => typeof(AlbumDN).NiceName(), "Albums");
@@ -78,7 +78,7 @@ namespace Signum.Test.Environment
                         Entity = a.ToLite(),
                         a.Id,
                         a.Name,
-                        LastAward = a.LastAward.ToLite(),
+                        a.LastAward,
                     });
 
 

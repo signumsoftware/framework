@@ -1,9 +1,12 @@
 ﻿
 @using (Html.BeginForm())
 {
-    <div id="divSearchPage">
+    <div id="divSearchPage" class="container">
         <h2>
             <span class="sf-entity-title">@(ViewBag.Title)</span>
+                     <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
+                            <span class="glyphicon glyphicon-new-window"></span>
+                        </a>
         </h2>
         @Html.ValidationSummaryAjax()
         @Html.Partial(ViewData[ViewDataKeys.PartialViewName].ToString())

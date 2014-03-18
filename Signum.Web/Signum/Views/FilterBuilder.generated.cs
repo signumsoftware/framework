@@ -80,20 +80,20 @@ WriteAttribute("id", Tuple.Create(" id=\"", 498), Tuple.Create("\"", 537)
 , 503), false)
 );
 
-WriteLiteral(" class=\"ui-widget sf-filters\"");
+WriteLiteral(" class=\"panel panel-default sf-filters\"");
 
 WriteLiteral(" ");
 
             
             #line 13 "..\..\Signum\Views\FilterBuilder.cshtml"
-                                                                      Write(filtersVisible ? "" : "style=display:none");
+                                                                                Write(filtersVisible ? "" : "style=display:none");
 
             
             #line default
             #line hidden
 WriteLiteral(">\r\n    <div");
 
-WriteLiteral(" class=\"ui-widget-header ui-corner-top sf-filters-body\"");
+WriteLiteral(" class=\"panel-heading sf-filters-body\"");
 
 WriteLiteral(">\r\n");
 
@@ -106,115 +106,155 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n\r\n        <a");
 
-WriteLiteral("        ");
-
+WriteAttribute("id", Tuple.Create(" id=\"", 801), Tuple.Create("\"", 836)
             
             #line 17 "..\..\Signum\Views\FilterBuilder.cshtml"
-   Write(Html.Href(
-                            Model.Compose("btnAddFilter"),
-                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-filter sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-s" }
-                            }));
+, Tuple.Create(Tuple.Create("", 806), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnAddFilter")
+            
+            #line default
+            #line hidden
+, 806), false)
+);
+
+WriteLiteral(" class=\"sf-query-button sf-add-filter btn btn-default btn-sm\"");
+
+WriteAttribute("title", Tuple.Create(" title=\"", 898), Tuple.Create("\"", 945)
+            
+            #line 17 "..\..\Signum\Views\FilterBuilder.cshtml"
+                                    , Tuple.Create(Tuple.Create("", 906), Tuple.Create<System.Object, System.Int32>(SearchMessage.AddFilter.NiceToString()
+            
+            #line default
+            #line hidden
+, 906), false)
+);
+
+WriteLiteral(">\r\n          <span");
+
+WriteLiteral(" class=\"glyphicon glyphicon-arrow-down\"");
+
+WriteLiteral("></span>");
+
+            
+            #line 18 "..\..\Signum\Views\FilterBuilder.cshtml"
+                                                         Write(SearchMessage.AddFilter.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n        </a>\r\n       \r\n");
 
             
-            #line 28 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 21 "..\..\Signum\Views\FilterBuilder.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 28 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 21 "..\..\Signum\Views\FilterBuilder.cshtml"
          if (showAddColumn)
         {
-            
-            
-            #line default
-            #line hidden
-            
-            #line 30 "..\..\Signum\Views\FilterBuilder.cshtml"
-       Write(Html.Href(
-                            Model.Compose("btnAddColumn"),
-                            SearchMessage.FilterBuilder_AddColumn.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-column sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-e" },
-                                { "data-url", Url.Action("GetColumnName", "Finder") }
-                            }));
 
             
             #line default
             #line hidden
+WriteLiteral("             <a");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 1130), Tuple.Create("\"", 1165)
             
-            #line 40 "..\..\Signum\Views\FilterBuilder.cshtml"
-                              
+            #line 23 "..\..\Signum\Views\FilterBuilder.cshtml"
+, Tuple.Create(Tuple.Create("", 1135), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnAddColumn")
+            
+            #line default
+            #line hidden
+, 1135), false)
+);
+
+WriteLiteral(" class=\"sf-query-button sf-add-column btn btn-default btn-sm\"");
+
+WriteAttribute("title", Tuple.Create(" title=\"", 1227), Tuple.Create("\"", 1274)
+            
+            #line 23 "..\..\Signum\Views\FilterBuilder.cshtml"
+                                        , Tuple.Create(Tuple.Create("", 1235), Tuple.Create<System.Object, System.Int32>(SearchMessage.AddColumn.NiceToString()
+            
+            #line default
+            #line hidden
+, 1235), false)
+);
+
+WriteLiteral(">\r\n                <span");
+
+WriteLiteral(" class=\"glyphicon glyphicon-arrow-right\"");
+
+WriteLiteral("></span>");
+
+            
+            #line 24 "..\..\Signum\Views\FilterBuilder.cshtml"
+                                                                Write(SearchMessage.AddColumn.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </a>\r\n");
+
+            
+            #line 26 "..\..\Signum\Views\FilterBuilder.cshtml"
         }
 
             
             #line default
             #line hidden
-WriteLiteral("    </div>\r\n\r\n\r\n    <div");
+WriteLiteral("    </div>\r\n\r\n    <div");
 
-WriteLiteral(" class=\"ui-widget-content ui-corner-bottom sf-filters-list\"");
+WriteLiteral(" class=\"panel-body sf-filters-list\"");
 
-WriteLiteral(">\r\n        <span");
+WriteLiteral(">\r\n        <div");
 
 WriteLiteral(" class=\"sf-explanation\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2157), Tuple.Create("\"", 2242)
+WriteAttribute("style", Tuple.Create(" style=\"", 1512), Tuple.Create("\"", 1597)
             
-            #line 46 "..\..\Signum\Views\FilterBuilder.cshtml"
-, Tuple.Create(Tuple.Create("", 2165), Tuple.Create<System.Object, System.Int32>((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;"
+            #line 30 "..\..\Signum\Views\FilterBuilder.cshtml"
+, Tuple.Create(Tuple.Create("", 1520), Tuple.Create<System.Object, System.Int32>((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;"
             
             #line default
             #line hidden
-, 2165), false)
+, 1520), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 46 "..\..\Signum\Views\FilterBuilder.cshtml"
-                                                                                                                      Write(SearchMessage.NoFiltersSpecified.NiceToString());
+            #line 30 "..\..\Signum\Views\FilterBuilder.cshtml"
+                                                                                                                     Write(SearchMessage.NoFiltersSpecified.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</span>\r\n        <table");
+WriteLiteral("</div>\r\n        <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2315), Tuple.Create("\"", 2348)
+WriteAttribute("id", Tuple.Create(" id=\"", 1669), Tuple.Create("\"", 1702)
             
-            #line 47 "..\..\Signum\Views\FilterBuilder.cshtml"
-, Tuple.Create(Tuple.Create("", 2320), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblFilters")
+            #line 31 "..\..\Signum\Views\FilterBuilder.cshtml"
+, Tuple.Create(Tuple.Create("", 1674), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblFilters")
             
             #line default
             #line hidden
-, 2320), false)
+, 1674), false)
 );
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2349), Tuple.Create("\"", 2434)
+WriteAttribute("style", Tuple.Create(" style=\"", 1703), Tuple.Create("\"", 1789)
             
-            #line 47 "..\..\Signum\Views\FilterBuilder.cshtml"
-, Tuple.Create(Tuple.Create("", 2357), Tuple.Create<System.Object, System.Int32>((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : ""
+            #line 31 "..\..\Signum\Views\FilterBuilder.cshtml"
+, Tuple.Create(Tuple.Create("", 1711), Tuple.Create<System.Object, System.Int32>((filterOptions == null || filterOptions.Count == 0) ? "display:none" : null
             
             #line default
             #line hidden
-, 2357), false)
+, 1711), false)
 );
+
+WriteLiteral(" class=\"table\"");
 
 WriteLiteral(">\r\n            <thead>\r\n                <tr>\r\n                    <th></th>\r\n    " +
 "                <th");
@@ -224,7 +264,7 @@ WriteLiteral(" class=\"sf-filter-field-header\"");
 WriteLiteral(">");
 
             
-            #line 51 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 35 "..\..\Signum\Views\FilterBuilder.cshtml"
                                                   Write(SearchMessage.Field.NiceToString());
 
             
@@ -233,7 +273,7 @@ WriteLiteral(">");
 WriteLiteral("\r\n                    </th>\r\n                    <th>");
 
             
-            #line 53 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 37 "..\..\Signum\Views\FilterBuilder.cshtml"
                    Write(SearchMessage.Operation.NiceToString());
 
             
@@ -242,7 +282,7 @@ WriteLiteral("\r\n                    </th>\r\n                    <th>");
 WriteLiteral("\r\n                    </th>\r\n                    <th>");
 
             
-            #line 55 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 39 "..\..\Signum\Views\FilterBuilder.cshtml"
                    Write(SearchMessage.Value.NiceToString());
 
             
@@ -252,13 +292,13 @@ WriteLiteral("\r\n                    </th>\r\n                </tr>\r\n        
 "     <tbody>\r\n");
 
             
-            #line 60 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 44 "..\..\Signum\Views\FilterBuilder.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 60 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 44 "..\..\Signum\Views\FilterBuilder.cshtml"
                  for (int i = 0; i < filterOptions.Count; i++)
                 {
                     FilterOption filter = filterOptions[i];
@@ -267,14 +307,14 @@ WriteLiteral("\r\n                    </th>\r\n                </tr>\r\n        
             #line default
             #line hidden
             
-            #line 63 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 47 "..\..\Signum\Views\FilterBuilder.cshtml"
                Write(Html.NewFilter(queryDescription.QueryName, filter, Model, i));
 
             
             #line default
             #line hidden
             
-            #line 63 "..\..\Signum\Views\FilterBuilder.cshtml"
+            #line 47 "..\..\Signum\Views\FilterBuilder.cshtml"
                                                                                  
                 }
 

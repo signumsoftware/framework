@@ -37,19 +37,11 @@ namespace Signum.Web
                 {
                     if (!filterOptions.Frozen)
                     {
-                        var htmlAttr = new Dictionary<string, object>
-                        {
-                            { "data-icon", "ui-icon-close" },
-                            { "data-text", false},
-                            { "onclick", new JsFunction(JsFunction.FinderModule, "deleteFilter",  id) },
-                        };
-                        sb.AddLine(helper.Href(
-                            context.Compose("btnDelete", index.ToString()),
-                            SearchMessage.FilterBuilder_DeleteFilter.NiceToString(),
-                            "",
-                            SearchMessage.FilterBuilder_DeleteFilter.NiceToString(),
-                            "sf-button",
-                            htmlAttr));
+                        sb.AddLine(new HtmlTag("a", context.Compose("btnDelete", index.ToString()))
+                        .Attr("title",  SearchMessage.DeleteFilter.NiceToString())
+                        .Attr("onclick", new JsFunction(JsFunction.FinderModule, "deleteFilter",  id).ToString())
+                        .Class("sf-button")
+                        .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove")));
                     }
                 }
 
@@ -60,7 +52,7 @@ namespace Signum.Web
                     foreach (var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
                     {
                         sb.AddLine(new HtmlTag("span")
-                            .Class("sf-filter-token ui-widget-content ui-corner-all")
+                            .Class("sf-filter-token")
                             .Attr("title", t.NiceTypeName)
                             .Attr("style", "color:" + t.TypeColor)
                             .SetInnerText(t.ToString()).ToHtml());
@@ -69,6 +61,10 @@ namespace Signum.Web
 
                 using (sb.Surround("td"))
                 {
+                    var dic = new Dictionary<string, object> { { "class", "form-control" } };
+                    if (filterOptions.Frozen)
+                        dic.Add("disabled", "disabled");
+
                     sb.AddLine(
                         helper.DropDownList(
                         context.Compose("ddlSelector", index.ToString()),
@@ -79,7 +75,7 @@ namespace Signum.Web
                                 Value = fo.ToString(),
                                 Selected = fo == filterOptions.Operation
                             }),
-                            (filterOptions.Frozen) ? new Dictionary<string, object> { { "disabled", "disabled" } } : null));
+                            dic));
                 }
 
                 using (sb.Surround("td"))
@@ -156,9 +152,11 @@ namespace Signum.Web
             }
             else
             {
-                ValueLineType vlType = ValueLineHelper.Configurator.GetDefaultValueLineType(filterOption.Token.Type);
-                return ValueLineHelper.Configurator.Constructor[vlType](
-                        helper, new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute()));
+                return ValueLineHelper.ValueLine(helper, new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                {
+                    FormGroupStyle = FormGroupStyle.None,
+                    ReadOnly = filterOption.Frozen,
+                });
             }
             
             throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));

@@ -671,32 +671,28 @@ export class SearchControl {
 
     newSortOrder($th : JQuery, multiCol : boolean) {
         var columnName = $th.find("input:hidden").val();
-        
+
         var cols = this.options.orders.filter(o=> o.columnName == columnName);
         var col = cols.length == 0 ? null : cols[0];
 
-
         var oposite = col == null ? OrderType.Ascending :
             col.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
-     
-
+        var $sort = $th.find("span.sf-header-sort")
         if (!multiCol) {
-            this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
+            this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+            $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc");
             this.options.orders = [{ columnName: columnName, orderType: oposite }];
         }
         else {
             if (col !== null) {
                 col.orderType = oposite;
+                $sort.removeClass("asc desc").addClass(oposite == OrderType.Ascending ? "asc" : "desc");
             }
             else {
                 this.options.orders.push({ columnName: columnName, orderType: oposite });
+                $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
             }
         }
-
-        if (oposite == OrderType.Descending)
-            $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
-        else
-            $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
     }
 
     addColumn() {
@@ -803,15 +799,7 @@ export class SearchControl {
     toggleFilters() {
         var $toggler = this.element.find(".sf-filters-header");
         this.element.find(".sf-filters").toggle();
-        $toggler.toggleClass('close');
-        if ($toggler.hasClass('close')) {
-            $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-n").addClass("ui-icon-triangle-1-e");
-            $toggler.find(".ui-button-text").html(lang.signum.showFilters);
-        }
-        else {
-            $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-e").addClass("ui-icon-triangle-1-n");
-            $toggler.find(".ui-button-text").html(lang.signum.hideFilters);
-        }
+        $toggler.toggleClass('active');
         return false;
     }
 
@@ -959,12 +947,12 @@ export class FilterBuilder {
 
         var hiddenId = $button.attr("id") + "temp";
         if (typeof disablingMessage != "undefined") {
-            $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+            $button.attr("disabled", "disabled").attr("title", disablingMessage);
             $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
         }
         else {
             var self = this;
-            $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+            $button.removeAttr("disabled").attr("title", "");
             $button.unbind('click').bind('click', enableCallback);
         }
     }
