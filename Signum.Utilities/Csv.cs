@@ -16,31 +16,36 @@ namespace Signum.Utilities
     {
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
 
-        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false)
+        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
-                ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush);
+                ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
 
             return fileName;
         }
 
-        public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false)
+        public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                collection.ToCsv(ms, encoding, culture, writeHeaders, autoFlush);
+                collection.ToCsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory);
                 return ms.ToArray();
             }
         }
 
-        public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false)
+        public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             string separator = culture.TextInfo.ListSeparator;
 
-            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
+            var columns = ColumnInfoCache<T>.Columns;
+            var members = columns.Select(c => c.MemberEntry).ToList();
+            var toString = columns.Select(c => GetToString(culture, c, toStringFactory)).ToList();
 
             using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
             {
@@ -49,7 +54,18 @@ namespace Signum.Utilities
 
                 foreach (var item in collection)
                 {
-                    sw.WriteLine(members.ToString(m => m.Getter(item).TryCC(a => EncodeCsv(ConvertToString(a, culture), culture)), separator));
+                    for (int i = 0; i < members.Count; i++)
+                    {
+                        var obj = members[i].Getter(item); 
+                        
+                        var str = EncodeCsv(toString[i](obj), culture);
+
+                        sw.Write(str);
+                        if(i < members.Count - 1)
+                            sw.Write(separator);
+                        else
+                            sw.WriteLine();
+                    }
                 }
             }
         }
@@ -68,13 +84,29 @@ namespace Signum.Utilities
             return p;
         }
 
-        static string ConvertToString(object a, CultureInfo culture)
+        private static Func<object, string> GetToString<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory)
         {
-            IFormattable f = a as IFormattable;
+            if (toStringFactory != null)
+            {
+                var result = toStringFactory(column, culture);
+
+                if (result != null)
+                    return result;
+            }
+
+            return obj => ConvertToString(obj, column.Format, culture);
+        }
+
+        static string ConvertToString(object obj, string format, CultureInfo culture)
+        {
+            if (obj == null)
+                return "";
+
+            IFormattable f = obj as IFormattable;
             if (f != null)
                 return f.ToString(null, culture);
             else
-                return a.ToString();
+                return obj.ToString();
         }
 
         static string HandleSpaces(string p)
@@ -82,26 +114,33 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = false) where T : new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = false, 
+            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, trim).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, trim, parserFactory).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true) where T : new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true,
+            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, trim).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, trim, parserFactory).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true)
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true, 
+            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
             where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
+
+            var columns = ColumnInfoCache<T>.Columns;
+            var members = columns.Select(c => c.MemberEntry).ToList();
+            var parsers =  columns.Select(c => GetParser(culture, trim, c, parserFactory)).ToList();
 
             Regex regex = GetRegex(culture);
 
@@ -118,7 +157,7 @@ namespace Signum.Utilities
                 {
                     if (m.Length > 0)
                     {
-                        T t = ReadObject<T>(culture, m, trim);
+                        T t = ReadObject<T>(m, members, parsers);
 
                         yield return t;
                     }
@@ -126,7 +165,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, bool trim = true)
+        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, bool trim = true, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
             where T : new()
         {
             culture = culture ?? CultureInfo.CurrentCulture;
@@ -135,13 +174,28 @@ namespace Signum.Utilities
 
             Match m = regex.Match(csvLine);
 
-            return ReadObject<T>(culture, m);
+            var columns = ColumnInfoCache<T>.Columns;
+
+            return ReadObject<T>(m,
+                columns.Select(c => c.MemberEntry).ToList(),
+                columns.Select(c => GetParser(culture, trim, c, parserFactory)).ToList());
         }
 
-        static T ReadObject<T>(CultureInfo culture, Match m, bool trim = true) where T : new()
+        private static Func<string, object> GetParser<T>(CultureInfo culture, bool trim, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory)
         {
-            var members = MemberEntryCache<T>.Members;
+            if (parserFactory != null)
+            {
+                var result = parserFactory(column, culture);
 
+                if (result != null)
+                    return result;
+            }
+
+            return str => ConvertTo(str, column.MemberInfo.ReturningType(), culture, column.Format);
+        }
+
+        static T ReadObject<T>(Match m, List<MemberEntry<T>> members, List<Func<string, object>> parsers) where T : new()
+        {
             var vals = m.Groups["val"].Captures;
 
             if (vals.Count < members.Count)
@@ -152,15 +206,15 @@ namespace Signum.Utilities
             {
                 string str = DecodeCsv(vals[i].Value);
 
-                if(trim)
-                    str = str.Trim();
+                object val = parsers[i](str);
 
-                object value = ConvertTo(str, members[i].MemberInfo.ReturningType(), culture);
+                members[i].Setter(t, val);
 
-                members[i].UntypedSetter(t, value);
             }
             return t;
         }
+
+     
 
         static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
@@ -172,9 +226,10 @@ namespace Signum.Utilities
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture));
         }
 
-        static class MemberEntryCache<T> where T : new()
+        static class ColumnInfoCache<T>
         {
-            public static List<MemberEntry<T>> Members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
+            public static List<CsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter)
+                .Select((me, i) => new CsvColumnInfo<T>(i, me,me.MemberInfo.SingleAttribute<FormatAttribute>().TryCC(f => f.Format))).ToList();
         }
 
         static string DecodeCsv(string s)
@@ -195,22 +250,45 @@ namespace Signum.Utilities
             return s;
         }
 
-        static object ConvertTo(string s, Type type, CultureInfo culture)
+        static object ConvertTo(string s, Type type, CultureInfo culture, string format)
         {
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
                 if (!s.HasText()) return null;
-                else return ConvertTo(s, baseType, culture);
+                else return ConvertTo(s, baseType, culture, format);
             }
 
             if (type.IsEnum)
                 return Enum.Parse(type, s);
 
             if (type == typeof(DateTime))
-                return DateTime.Parse(s, culture);
+                if (format == null)
+                    return DateTime.Parse(s, culture);
+                else
+                    return DateTime.ParseExact(s, format, culture);
 
             return Convert.ChangeType(s, type, culture);
+        }
+    }
+
+
+    public class CsvColumnInfo<T>
+    {
+        public readonly int Index;
+        public readonly MemberEntry<T> MemberEntry;
+        public readonly string Format;
+
+        public MemberInfo MemberInfo
+        {
+            get { return this.MemberEntry.MemberInfo; }
+        }
+
+        internal CsvColumnInfo(int index, MemberEntry<T> memberEntry, string format)
+        {
+            this.Index = index;
+            this.MemberEntry = memberEntry;
+            this.Format = format;
         }
     }
 }

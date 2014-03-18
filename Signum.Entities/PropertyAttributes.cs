@@ -31,14 +31,4 @@ namespace Signum.Entities
             this.UnitName = unitName;
         }
     }
-
-    [AttributeUsage(AttributeTargets.Property)]
-    public class FormatAttribute : Attribute
-    {
-        public string Format { get; private set; }
-        public FormatAttribute(string format)
-        {
-            this.Format = format;
-        }
-    }
 }

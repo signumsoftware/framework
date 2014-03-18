@@ -289,12 +289,9 @@ namespace Signum.Engine
             if (!query.Any())
                 return;
 
-            int min = query.Min(a => a.Id);
-            int max = query.Max(a => a.Id);
-
-            min.To(max + 1, 100).ProgressForeach(id => id.ToString(), null, (i, writer) =>
+            query.Select(a => a.Id).IntervalsOf(100).ProgressForeach(inter => inter.ToString(), null, (interva, writer) =>
             {
-                var list = query.Where(a => i <= a.Id && a.Id < i + 100).ToList();
+                var list = query.Where(a => interva.Contains(a.Id)).ToList();
 
                 foreach (var item in list)
                 {
