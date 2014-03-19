@@ -33,6 +33,8 @@ namespace Signum.Web
         public ViewOverrides ViewOverrides { get; set; }
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
+
+        public bool AvoidValidateRequest { get; set; }
     }
 
     public class EntitySettings<T> : EntitySettings where T : IdentifiableEntity
