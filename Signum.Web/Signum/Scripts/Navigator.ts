@@ -498,9 +498,3 @@ export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
 }
 
 
-once("widgetToggler", () =>
-    $(document).on("click", ".sf-widget-toggler", function (evt) {
-        SF.Dropdowns.toggle(evt, this, 1);
-        return false;
-    }));
-

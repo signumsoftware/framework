@@ -196,11 +196,8 @@ namespace Signum.Web
 
         public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            Common.FireCommonTasks(valueLine);
-
             return helper.InternalValueLine(valueLine);
         }
-
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {

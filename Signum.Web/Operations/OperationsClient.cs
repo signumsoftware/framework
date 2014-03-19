@@ -415,7 +415,7 @@ namespace Signum.Web.Operations
 
             List<IMenuItem> menuItems = context.Select(coc => CreateContextual(coc, DefaultEntityClick)).OrderBy(a => a.Order).Cast<IMenuItem>().ToList();
 
-            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Create.NiceToString()));
+            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Operation.NiceToString()));
 
             return menuItems;
         }

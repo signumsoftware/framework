@@ -202,6 +202,8 @@ export function deleteFilter(trId) {
     $tr.remove();
 }
 
+
+
 export class SearchControl {
 
     filterBuilder: FilterBuilder;
@@ -288,19 +290,6 @@ export class SearchControl {
         }
 
         if (this.options.allowChangeColumns) {
-            $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
-                var $elem = $(this).closest("th");
-
-                self.removeColumn($elem);
-                return false;
-            });
-
-            $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
-                var $elem = $(this).closest("th");
-
-                self.editColumn($elem);
-                return false;
-            });
 
             this.createMoveColumnDragDrop();
         }
@@ -330,18 +319,6 @@ export class SearchControl {
                 return false;
             });
 
-            $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter > span", function () {
-                var $elem = $(this).closest("td");
-                $('.sf-search-ctxmenu-overlay').remove();
-                self.quickFilterCell($elem);
-            });
-
-            $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter-header > span", function () {
-                var $elem = $(this).closest("th");
-                $('.sf-search-ctxmenu-overlay').remove();
-                self.quickFilterHeader($elem);
-                return false;
-            });
         }
 
         if (this.options.filterMode != FilterMode.OnlyResults) {
@@ -404,9 +381,7 @@ export class SearchControl {
 
         if (!$dropdown.closest(".btn-group").hasClass("open")) {
 
-            var loadingClass = "sf-tm-selected-loading";
-
-            $dropdown.html($("<li></li>").addClass(loadingClass).html($("<span></span>").addClass("sf-query-button").html(lang.signum.loading)));
+            $dropdown.html(this.loadingMessage());
 
             $.ajax({
                 url: SF.Urls.selectedItemsContextMenu,
@@ -418,53 +393,44 @@ export class SearchControl {
         }
     }
 
-    createCtxMenu(e : JQueryEventObject) {
-
-        var $cmenu = $("<ul class='dropdown-menu'></ul>");
-        $cmenu.css({
-            left: e.pageX,
-            top: e.pageY,
-            zIndex: '101'
-        });
-
-        var $ctxMenuOverlay = $('<div class="sf-search-ctxmenu-overlay"></div>').click(function (e) {
-            var $clickTarget = $(e.target);
-            if ($clickTarget.hasClass("sf-search-ctxitem") || $clickTarget.parent().hasClass("sf-search-ctxitem"))
-                $cmenu.hide();
-            else
-                $('.sf-search-ctxmenu-overlay').remove();
-        }).append($cmenu);
-
-        return $ctxMenuOverlay;
-    }
+ 
 
     headerContextMenu(e: JQueryEventObject) {
         var $th = $(e.target).closest("th");
-        var $menu = this.createCtxMenu(e);
+        var menu = SF.ContextMenu.createContextMenu(e);
 
-        var $itemContainer = $menu.find(".sf-search-ctxmenu");
-        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults){
-            $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
+        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
+            menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter-header").click(() => this.quickFilterHeader($th))));
         }
+
 
         if (this.options.allowChangeColumns) {
-            $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>")
-                .append("<div class='sf-search-ctxitem sf-remove-column'><span>" + lang.signum.removeColumn + "</span></div>");
+            menu
+                .append($("<li>").append($("<a>").text(lang.signum.editColumnName).addClass("sf-edit-header").click(() => this.editColumn($th))))
+                .append($("<li>").append($("<a>").text(lang.signum.removeColumn).addClass("sf-remove-header").click(() => this.removeColumn($th))));
         }
-
-        $th.append($menu);
-        return false;
     }
 
     cellContextMenu(e : JQueryEventObject) {
         var $td = $(e.target);
-        var $menu = this.createCtxMenu(e);
+        var $menu = SF.ContextMenu.createContextMenu(e);
 
-        $menu.find(".sf-search-ctxmenu")
-            .html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
+        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
+            $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(() => this.quickFilterCell($td))));
+            $menu.append($("<li class='divider'></li>"));
+        }
 
-        $td.append($menu);
-        return false;
+        var message = this.loadingMessage(); 
+
+        $menu.append(message);
+
+        SF.ajaxPost({
+            url: SF.Urls.selectedItemsContextMenu,
+            data: this.requestDataForContextMenu()
+        })
+        .then((items) => {
+            message.replaceWith(items);
+        });
     }
 
     requestDataForContextMenu() {
@@ -479,22 +445,24 @@ export class SearchControl {
     entityContextMenu(e: JQueryEventObject) {
         var $td = $(e.target).closest("td");
 
-        var $menu = this.createCtxMenu(e);
-        var $itemContainer = $menu.find(".sf-search-ctxmenu");
+        var $menu = SF.ContextMenu.createContextMenu(e);
 
-        $.ajax({
+        $menu.html(this.loadingMessage());
+
+        SF.ajaxPost({
             url: SF.Urls.selectedItemsContextMenu,
-            data: this.requestDataForContextMenu(),
-            success: function (items) {
-                $itemContainer.html(items);
-                $td.append($menu);
-            }
+            data: this.requestDataForContextMenu()
+        })
+        .then((items) => {
+            $menu.html(items);
         });
 
         return false;
     }
 
-   
+    private loadingMessage() {
+        return $("<li></li>").addClass("sf-tm-selected-loading").html($("<span></span>").html(lang.signum.loading));
+    }
 
     fullScreen(evt) {
         var urlParams = this.requestDataForSearchInUrl();

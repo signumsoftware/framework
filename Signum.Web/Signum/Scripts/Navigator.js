@@ -431,12 +431,5 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         });
     }
     exports.valueLineBox = valueLineBox;
-
-    once("widgetToggler", function () {
-        return $(document).on("click", ".sf-widget-toggler", function (evt) {
-            SF.Dropdowns.toggle(evt, this, 1);
-            return false;
-        });
-    });
 });
 //# sourceMappingURL=Navigator.js.map

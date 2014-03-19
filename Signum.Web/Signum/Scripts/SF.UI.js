@@ -185,46 +185,36 @@ once("disableTextSelect", function () {
 
 var SF;
 (function (SF) {
-    (function (Dropdowns) {
-        function toggle(event, elem, topFix) {
-            var $elem = $(elem), clss = "sf-open";
-
-            if (!$elem.hasClass("sf-dropdown")) {
-                $elem = $elem.closest(".sf-dropdown");
-            }
-
-            var opened = $elem.hasClass(clss);
-            if (opened) {
-                $elem.removeClass(clss);
-            } else {
-                //topFix is used to correct top when the toggler element is inside another panel with borders or anything
-                if (typeof topFix == "undefined") {
-                    topFix = 0;
-                }
-
-                $(".sf-dropdown").removeClass(clss);
-                var $content = $elem.find(".sf-menu-button");
-                var left = $elem.width() - $content.width();
-                $content.css({
-                    top: $elem.outerHeight() + topFix,
-                    left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
-                });
-                $elem.addClass(clss);
-            }
-
-            event.stopPropagation();
-        }
-        Dropdowns.toggle = toggle;
-
-        once("closeDropDowns", function () {
-            return $(function () {
-                $(document).on("click", function (e) {
-                    $(".sf-dropdown").removeClass("sf-open");
-                });
-            });
+    (function (ContextMenu) {
+        $(document).on("click", function () {
+            $("#sfContextMenu").hide();
         });
-    })(SF.Dropdowns || (SF.Dropdowns = {}));
-    var Dropdowns = SF.Dropdowns;
+
+        function createContextMenu(e) {
+            var menu = $("#sfContextMenu");
+
+            if (menu.length)
+                menu.html("");
+            else
+                menu = $("<ul id='sfContextMenu' class='dropdown-menu sf-context-menu'></ul>").appendTo("body");
+
+            menu.css({
+                left: e.pageX,
+                top: e.pageY,
+                zIndex: '101',
+                display: "block",
+                position: 'absolute'
+            });
+
+            menu.on("hidden.bs.dropdown", function () {
+                menu.remove();
+            });
+
+            return menu;
+        }
+        ContextMenu.createContextMenu = createContextMenu;
+    })(SF.ContextMenu || (SF.ContextMenu = {}));
+    var ContextMenu = SF.ContextMenu;
 
     (function (Blocker) {
         var blocked = false;

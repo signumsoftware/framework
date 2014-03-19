@@ -191,44 +191,35 @@ once("disableTextSelect", () =>
 
 
 module SF {
-    export module Dropdowns {
-        export function toggle(event, elem, topFix) {
-            var $elem = $(elem),
-                clss = "sf-open";
 
-            if (!$elem.hasClass("sf-dropdown")) {
-                $elem = $elem.closest(".sf-dropdown");
-            }
+    export module ContextMenu {
+        $(document).on("click", function () {
+            $("#sfContextMenu").hide();
+        });
 
-            var opened = $elem.hasClass(clss);
-            if (opened) {
-                $elem.removeClass(clss);
-            }
-            else {
-                //topFix is used to correct top when the toggler element is inside another panel with borders or anything
-                if (typeof topFix == "undefined") {
-                    topFix = 0;
-                }
+        export function createContextMenu(e : JQueryEventObject) {
 
-                $(".sf-dropdown").removeClass(clss);
-                var $content = $elem.find(".sf-menu-button");
-                var left = $elem.width() - $content.width();
-                $content.css({
-                    top: $elem.outerHeight() + topFix,
-                    left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
-                });
-                $elem.addClass(clss);
-            }
+            var menu = $("#sfContextMenu");
 
-            event.stopPropagation();
+            if (menu.length)
+                menu.html("");
+            else
+                menu = $("<ul id='sfContextMenu' class='dropdown-menu sf-context-menu'></ul>").appendTo("body");
+
+            menu.css({
+                left: e.pageX,
+                top: e.pageY,
+                zIndex: '101',
+                display: "block",
+                position: 'absolute'
+            });
+
+            menu.on("hidden.bs.dropdown", function () {
+                menu.remove();
+            });
+
+            return menu;
         }
-
-        once("closeDropDowns", () =>
-            $(function () {
-                $(document).on("click", function (e) {
-                    $(".sf-dropdown").removeClass("sf-open");
-                });
-            }));
     }
 
     export module Blocker {
