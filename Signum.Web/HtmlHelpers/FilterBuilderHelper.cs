@@ -40,7 +40,7 @@ namespace Signum.Web
                         sb.AddLine(new HtmlTag("a", context.Compose("btnDelete", index.ToString()))
                         .Attr("title",  SearchMessage.DeleteFilter.NiceToString())
                         .Attr("onclick", new JsFunction(JsFunction.FinderModule, "deleteFilter",  id).ToString())
-                        .Class("sf-button")
+                        .Class("sf-line-button")
                         .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove")));
                     }
                 }

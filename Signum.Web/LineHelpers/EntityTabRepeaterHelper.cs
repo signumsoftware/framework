@@ -28,7 +28,7 @@ namespace Signum.Web
             using (sb.Surround(new HtmlTag("fieldset").Id(entityTabRepeater.Prefix).Class("sf-tab-repeater-field SF-control-container")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityTabRepeater.Compose("inputGroup"))))
+                using (sb.Surround(new HtmlTag("div", entityTabRepeater.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(entityTabRepeater.LabelText).ToHtml());
 

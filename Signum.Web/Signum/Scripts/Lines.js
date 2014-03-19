@@ -428,6 +428,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return $(this.pf("sfDetail"));
         };
 
+        EntityLineDetail.prototype.fixInputGroup = function () {
+        };
+
         EntityLineDetail.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
             if (entityValue == null)
                 return;
@@ -875,26 +878,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityListDetail.prototype.stageCurrentSelected = function () {
+            var _this = this;
             var selPrefix = this.selectedItemPrefix();
 
             var detailDiv = $("#" + this.options.detailDiv);
 
             var children = detailDiv.children();
-
-            if (children.length != 0) {
+            if (children.length) {
                 var itemPrefix = children[0].id.before("_" + EntityListDetail.key_entity);
                 if (selPrefix == itemPrefix) {
                     children.show();
                     return;
                 }
-                children.hide();
-                this.runtimeInfo(itemPrefix).after(children);
             }
 
             if (selPrefix) {
                 var selContainer = this.containerDiv(selPrefix);
-
                 if (selContainer.children().length > 0) {
+                    children.hide();
+                    this.runtimeInfo(itemPrefix).after(children);
                     detailDiv.append(selContainer);
                     selContainer.show();
                 } else {
@@ -902,10 +904,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                     Navigator.requestPartialView(entity, this.defaultViewOptions()).then(function (e) {
                         selContainer.html(e.html);
+                        children.hide();
+                        _this.runtimeInfo(itemPrefix).after(children);
                         detailDiv.append(selContainer);
                         selContainer.show();
                     });
                 }
+            } else {
+                children.hide();
+                this.runtimeInfo(itemPrefix).after(children);
             }
         };
 
@@ -951,7 +958,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var fieldSet = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend><div class='item-group'>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") + (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") + (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") + "</div></legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
+            var fieldSet = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend><div class='item-group'>" + (this.options.remove ? ("<div class='pull-right'><a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a></div>") : "") + (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") + (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") + "</div></legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
             $(this.pf(EntityRepeater.key_itemsContainer)).append(fieldSet);
         };

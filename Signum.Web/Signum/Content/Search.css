@@ -82,6 +82,7 @@ span.token-builder > select.form-control
     padding: 0px 3px;
     display: inline-block;
     margin-bottom: 4px;
+    background-color: #F5F5F5;
 }
 
 div.panel.sf-filters
@@ -188,4 +189,13 @@ div.sf-filters-list table.table
 .sf-search-popup .sf-search-results
 {
     margin-bottom: 0px
+}
+
+/* check box */
+
+input[type=checkbox].sf-td-selection,
+th.sf-th-selection > input[type=checkbox]
+{
+    width: 16px;
+    height: 16px;
 }

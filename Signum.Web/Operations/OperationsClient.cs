@@ -225,13 +225,6 @@ namespace Signum.Web.Operations
 
             foreach (var eoc in operations)
             {
-                //if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom &&
-                //   (eoc.OperationSettings == null || !eoc.OperationSettings.AvoidMoveToSearchControl))
-                //{
-                //    if(EntityOperationToolBarButton.MoveToSearchControls(eoc))
-                //        continue; 
-                //}
-
                 EntityOperationGroup group = GetDefaultGroup(eoc);
 
                 if(group != null)
@@ -241,7 +234,7 @@ namespace Signum.Web.Operations
                         var tbm = new ToolBarDropDown
                         {
                             Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
-                            Tooltip = group.Description(),
+                            Title = group.Description(),
                             Text = group.Description(),
                             CssClass = group.CssClass,
                             Items = new List<IMenuItem>(),

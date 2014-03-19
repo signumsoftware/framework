@@ -105,5 +105,17 @@ namespace Signum.Web
                 .Attr("title", EntityControlMessage.Find.NiceToString())
                 .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-search"));
         }
+
+        public static MvcHtmlString RemoveSpan(HtmlHelper helper, EntityBase entityBase)
+        {
+            if (!entityBase.Find)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnRemove"))
+                .Class("sf-line-button sf-remove")
+                .Attr("onclick", entityBase.SFControlThen("remove_click()"))
+                .Attr("title", EntityControlMessage.Remove.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
+        }
     }
 }

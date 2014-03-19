@@ -56,7 +56,6 @@ namespace Signum.Web
                     {
                         sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail));
                         sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail));
-                        sb.AddLine(EntityBaseHelper.ViewButton(helper, listDetail));
                         sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail));
                         sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail));
                         sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail));

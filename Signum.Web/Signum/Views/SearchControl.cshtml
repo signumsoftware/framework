@@ -82,7 +82,7 @@
 
         @if (findOptions.Create)
         {
-            <a class="sf-query-button btn btn-default pull-right" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.Create.NiceToString()" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
+            <a class="sf-query-button btn btn-default pull-right sf-line-button" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.Create.NiceToString()" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
                 <span class="glyphicon glyphicon-plus"></span>
             </a>
         }

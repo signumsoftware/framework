@@ -33,7 +33,7 @@ namespace Signum.Web
                 }
 
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("inputGroup"))))
+                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(entityRepeater.LabelText).ToHtml());
 

@@ -31,32 +31,30 @@ namespace Signum.Web
                 {
                     if (entityDetail.UntypedValue != null)
                     {
-                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
-                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                        sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityDetail));
+                        sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityDetail));
                     }
                     else
                     {
-                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityDetail));
-                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                        sb.AddLine(EntityListBaseHelper.RemoveSpan(helper, entityDetail));
                     }
                 }
 
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityDetail.Compose("inputGroup")).Class("input-group")))
+                using (sb.Surround(new HtmlTag("div", entityDetail.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(entityDetail.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("input-group-btn")))
+                    using (sb.Surround(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("pull-right")))
                     {
                         if (entityDetail.UntypedValue == null)
                         {
-                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
-                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                            sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityDetail));
+                            sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityDetail));
                         }
                         else
                         {
-                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityDetail));
-                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                            sb.AddLine(EntityListBaseHelper.RemoveSpan(helper, entityDetail));
                         }
                     }
                 }

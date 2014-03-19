@@ -13,6 +13,21 @@
     margin-bottom: 5px;
 } 
 
+/* Buttons */
+.btn.btn-default.sf-line-button,
+.sf-entity-line-entity
+{
+    background: transparent;
+}
+
+.sf-line-button
+{
+    color:lightgray;
+}
+.sf-line-button:hover
+{
+    color:gray;
+}
 
 /* EntityLine buttons  */
 .input-group-btn.btn-group-vertical
@@ -36,7 +51,7 @@
 /*legends*/
 fieldset
 {
-   border: 1px solid #aaa;
+   border: 1px solid #ddd;
    padding: 10px;
    border-radius: 4px;
    margin: 10px 0px;
@@ -50,6 +65,12 @@ fieldset legend
     margin: 0px;
 }
 
+.border
+{
+   border: 1px solid #ddd;
+   padding: 10px;
+   border-radius: 4px;
+}
 
 /*EntityStrip*/
 .sf-strip-element

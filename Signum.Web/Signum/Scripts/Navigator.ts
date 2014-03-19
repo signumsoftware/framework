@@ -382,7 +382,7 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
     options.forEach(o=> $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>')
         .data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody));
 
-    var modalDiv = createBootstrapModal({  titleText: title, body: modalBody})
+    var modalDiv = createBootstrapModal({ titleText: title, body: modalBody, titleClose: true });
 
     var option : T; 
     return openModal(modalDiv,

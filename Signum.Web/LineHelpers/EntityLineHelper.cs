@@ -94,13 +94,13 @@ namespace Signum.Web
                 return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString(),
                         id != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, id.Value) : null,
-                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default", null);
+                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default sf-entity-line-entity", null);
             }
             else
             {
                 return helper.Span(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString() ?? " ",
-                        "form-control btn-default");
+                        "form-control btn-default sf-entity-line-entity");
             }
         }
 

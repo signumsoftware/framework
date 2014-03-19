@@ -353,7 +353,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody);
         });
 
-        var modalDiv = exports.createBootstrapModal({ titleText: title, body: modalBody });
+        var modalDiv = exports.createBootstrapModal({ titleText: title, body: modalBody, titleClose: true });
 
         var option;
         return exports.openModal(modalDiv, function (button) {
