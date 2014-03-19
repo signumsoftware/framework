@@ -59,81 +59,112 @@ WriteAttribute("id", Tuple.Create(" id=\"", 96), Tuple.Create("\"", 129)
 , 101), false)
 );
 
-WriteLiteral(" class=\"sf-popup-control\"");
+WriteLiteral(" class=\"sf-popup-control modal fade sf-value-line-box\"");
+
+WriteLiteral(" tabindex=\"-1\"");
+
+WriteLiteral(" role=\"dialog\"");
+
+WriteLiteral(" aria-labelledby=\"XXXX\"");
 
 WriteLiteral(" data-prefix=\"");
 
             
             #line 6 "..\..\Signum\Views\ValueLineBox.cshtml"
-                                                                        Write(Model.Prefix);
+                                                                                                                                                        Write(Model.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(">\r\n    <span");
+WriteLiteral(">\r\n    <div");
 
-WriteLiteral(" class=\"sf-popup-title\"");
+WriteLiteral(" class=\"modal-dialog modal-sm\"");
 
-WriteLiteral(">\r\n");
+WriteLiteral(">\r\n        <div");
 
-WriteLiteral("        ");
+WriteLiteral(" class=\"modal-content\"");
+
+WriteLiteral(">\r\n            <div");
+
+WriteLiteral(" class=\"modal-header\"");
+
+WriteLiteral(">\r\n                <button");
+
+WriteLiteral(" type=\"button\"");
+
+WriteLiteral(" class=\"close sf-close-button\"");
+
+WriteLiteral(">×</button>\r\n                <h4>");
 
             
-            #line 8 "..\..\Signum\Views\ValueLineBox.cshtml"
-   Write(options.title);
+            #line 11 "..\..\Signum\Views\ValueLineBox.cshtml"
+               Write(options.title);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </span>\r\n\r\n    <div");
+WriteLiteral("</h4>\r\n            </div>\r\n\r\n            <div");
 
-WriteLiteral(" class=\"sf-button-bar\"");
+WriteLiteral(" class=\"modal-body\"");
 
-WriteLiteral(">\r\n        <button");
+WriteLiteral(">\r\n                <p>\r\n");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 308), Tuple.Create("\"", 336)
+WriteLiteral("                    ");
+
             
-            #line 12 "..\..\Signum\Views\ValueLineBox.cshtml"
-, Tuple.Create(Tuple.Create("", 313), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+            #line 16 "..\..\Signum\Views\ValueLineBox.cshtml"
+               Write(options.message);
+
             
             #line default
             #line hidden
-, 313), false)
+WriteLiteral("\r\n                </p>\r\n");
+
+WriteLiteral("                ");
+
+            
+            #line 18 "..\..\Signum\Views\ValueLineBox.cshtml"
+           Write(Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
+                {
+                    LabelText = options.labelText,
+                    FormGroupStyle = options.labelText.HasText() ? Signum.Web.FormGroupStyle.None : FormGroupStyle.Basic,
+                    Format = options.format,
+                    UnitText = options.unit,
+                }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </div>\r\n            <div");
+
+WriteLiteral(" class=\"modal-footer\"");
+
+WriteLiteral(">\r\n                <button");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 1134), Tuple.Create("\"", 1162)
+            
+            #line 27 "..\..\Signum\Views\ValueLineBox.cshtml"
+, Tuple.Create(Tuple.Create("", 1139), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+            
+            #line default
+            #line hidden
+, 1139), false)
 );
 
-WriteLiteral(" class=\"sf-entity-button sf-ok-button\"");
+WriteLiteral(" class=\"btn btn-primary sf-entity-button sf-close-button sf-ok-button\"");
 
-WriteLiteral(">OK</button>\r\n    </div>\r\n    <p>\r\n");
-
-WriteLiteral("        ");
+WriteLiteral(">");
 
             
-            #line 15 "..\..\Signum\Views\ValueLineBox.cshtml"
-   Write(options.message);
+            #line 27 "..\..\Signum\Views\ValueLineBox.cshtml"
+                                                                                                                      Write(JavascriptMessage.ok.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </p>\r\n");
-
-WriteLiteral("    ");
-
-            
-            #line 17 "..\..\Signum\Views\ValueLineBox.cshtml"
-Write(Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
-    {
-        LabelText = options.labelText,
-        FormGroupStyle = options.labelText.HasText() ? Signum.Web.FormGroupStyle.None : FormGroupStyle.Basic,
-        Format = options.format,
-        UnitText = options.unit,
-    }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n</div>\r\n");
+WriteLiteral("</button>\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n");
 
         }
     }

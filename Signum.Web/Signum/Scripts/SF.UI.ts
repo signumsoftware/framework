@@ -194,8 +194,12 @@ module SF {
 
     export module ContextMenu {
         $(document).on("click", function () {
-            $("#sfContextMenu").hide();
+            hideContextMenu();
         });
+
+        export function hideContextMenu() {
+            $("#sfContextMenu").hide();
+        }
 
         export function createContextMenu(e : JQueryEventObject) {
 

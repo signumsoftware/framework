@@ -187,8 +187,13 @@ var SF;
 (function (SF) {
     (function (ContextMenu) {
         $(document).on("click", function () {
-            $("#sfContextMenu").hide();
+            hideContextMenu();
         });
+
+        function hideContextMenu() {
+            $("#sfContextMenu").hide();
+        }
+        ContextMenu.hideContextMenu = hideContextMenu;
 
         function createContextMenu(e) {
             var menu = $("#sfContextMenu");

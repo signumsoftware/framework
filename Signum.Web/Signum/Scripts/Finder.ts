@@ -406,13 +406,13 @@ export class SearchControl {
 
         if (this.options.allowChangeColumns) {
             menu
-                .append($("<li>").append($("<a>").text(lang.signum.editColumnName).addClass("sf-edit-header").click(() => this.editColumn($th))))
+                .append($("<li>").append($("<a>").text(lang.signum.renameColumn).addClass("sf-edit-header").click(() => this.editColumn($th))))
                 .append($("<li>").append($("<a>").text(lang.signum.removeColumn).addClass("sf-remove-header").click(() => this.removeColumn($th))));
         }
     }
 
     cellContextMenu(e : JQueryEventObject) {
-        var $td = $(e.target);
+        var $td = $(e.target).closest("td");
         var $menu = SF.ContextMenu.createContextMenu(e);
 
         if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
@@ -610,7 +610,10 @@ export class SearchControl {
         return this.selectedItems().map(function (item) { return item.runtimeInfo.key(); }).join(',');
     }
 
-    newSortOrder($th : JQuery, multiCol : boolean) {
+    newSortOrder($th: JQuery, multiCol: boolean) {
+
+        SF.ContextMenu.hideContextMenu();
+
         var columnName = $th.find("input:hidden").val();
 
         var cols = this.options.orders.filter(o=> o.columnName == columnName);
@@ -675,13 +678,13 @@ export class SearchControl {
 
         Navigator.valueLineBox({
             prefix: SF.compose(this.options.prefix, "newName"),
-            title: lang.signum.editColumnName,
+            title: lang.signum.renameColumn,
             message: lang.signum.enterTheNewColumnName,
             value: colName,
             type: Navigator.ValueLineType.TextBox,
         }).then(result => {
                 if (result)
-                    $th.find("span").text(result);
+                    $th.find("span:not(.sf-header-sort)").text(result);
             });
     }
 

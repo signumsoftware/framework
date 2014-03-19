@@ -225,8 +225,8 @@ Lose changes?")]
         chooseAValue,
         [Description("Add filter")]
         addFilter,
-        [Description("Edit column name")]
-        editColumnName,
+        [Description("Rename column")]
+        renameColumn,
         [Description("Enter the new column name")]
         enterTheNewColumnName,
         [Description("Error")]

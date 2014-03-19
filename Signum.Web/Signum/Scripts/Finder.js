@@ -361,7 +361,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
 
             if (this.options.allowChangeColumns) {
-                menu.append($("<li>").append($("<a>").text(lang.signum.editColumnName).addClass("sf-edit-header").click(function () {
+                menu.append($("<li>").append($("<a>").text(lang.signum.renameColumn).addClass("sf-edit-header").click(function () {
                     return _this.editColumn($th);
                 }))).append($("<li>").append($("<a>").text(lang.signum.removeColumn).addClass("sf-remove-header").click(function () {
                     return _this.removeColumn($th);
@@ -371,7 +371,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.cellContextMenu = function (e) {
             var _this = this;
-            var $td = $(e.target);
+            var $td = $(e.target).closest("td");
             var $menu = SF.ContextMenu.createContextMenu(e);
 
             if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
@@ -566,6 +566,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.newSortOrder = function ($th, multiCol) {
+            SF.ContextMenu.hideContextMenu();
+
             var columnName = $th.find("input:hidden").val();
 
             var cols = this.options.orders.filter(function (o) {
@@ -625,13 +627,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             Navigator.valueLineBox({
                 prefix: SF.compose(this.options.prefix, "newName"),
-                title: lang.signum.editColumnName,
+                title: lang.signum.renameColumn,
                 message: lang.signum.enterTheNewColumnName,
                 value: colName,
                 type: 4 /* TextBox */
             }).then(function (result) {
                 if (result)
-                    $th.find("span").text(result);
+                    $th.find("span:not(.sf-header-sort)").text(result);
             });
         };
 
