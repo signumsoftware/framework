@@ -263,7 +263,7 @@ namespace Signum.Web.Operations
 
             foreach (var item in buttons.OfType<ToolBarDropDown>())
             {
-                item.Items = item.Items.OrderBy(a => ((ToolBarButton)a).Order).ToList();
+                item.Items = item.Items.OrderBy(a => ((MenuItem)a).Order).ToList();
             }
 
             return buttons.OrderBy(a=>a.Order).ToArray();

@@ -171,3 +171,21 @@ div.sf-filters-list table.table
 {
     text-align: center
 }
+
+/*  Search Popup */
+
+.sf-search-popup .modal-footer
+{
+    padding: 10px;
+}
+
+.sf-search-popup .modal-body
+{  
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
+.sf-search-popup .sf-search-results
+{
+    margin-bottom: 0px
+}

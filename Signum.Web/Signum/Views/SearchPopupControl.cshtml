@@ -1,25 +1,35 @@
 ﻿@model Context
 @{  FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];}
-<div id="@Model.Compose("panelPopup")">
-    <span class="sf-popup-title">
-        <span style="float: left; display: block">@ViewBag.Title</span>
-        @{
-            <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
-                <span class="glyphicon glyphicon-new-window"></span>
-            </a>
-        }
-    </span>
-    @if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
-    {
-        <div class="sf-query-button-bar">
-            <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" />
+<div id="@Model.Compose("panelPopup")" class="sf-search-popup modal fade" tabindex="-1" role="dialog" aria-labelledby="XXXX" data-prefix="@Model.Prefix">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>
+                    <span class="sf-entity-title">@ViewBag.Title</span>
+                    <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
+                        <span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                </h4>
+                @if (!ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+                {
+                    <button type="button" class="close sf-close-button">×</button>
+                }
+            </div>
+
+            <div class="modal-body">
+                @{ 
+                    ViewData[ViewDataKeys.InPopup] = true;
+                    Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
+                }
+                @Html.ValidationSummaryAjax(Model)
+            </div>
+            @if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+            {
+                <div class="modal-footer">
+                    <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button">@JavascriptMessage.ok.NiceToString()</button>
+                    <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>
+                </div>
+            }
         </div>
-    }
-    <div class="sf-popup-body">
-        @{ 
-            ViewData[ViewDataKeys.InPopup] = true;
-            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
-        }
-        @Html.ValidationSummaryAjax(Model)
     </div>
 </div>

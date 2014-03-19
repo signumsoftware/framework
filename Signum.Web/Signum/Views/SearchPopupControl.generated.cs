@@ -57,144 +57,207 @@ WriteAttribute("id", Tuple.Create(" id=\"", 101), Tuple.Create("\"", 134)
 , 106), false)
 );
 
-WriteLiteral(">\r\n    <span");
+WriteLiteral(" class=\"sf-search-popup modal fade\"");
 
-WriteLiteral(" class=\"sf-popup-title\"");
+WriteLiteral(" tabindex=\"-1\"");
 
-WriteLiteral(">\r\n        <span");
+WriteLiteral(" role=\"dialog\"");
 
-WriteLiteral(" style=\"float: left; display: block\"");
+WriteLiteral(" aria-labelledby=\"XXXX\"");
+
+WriteLiteral(" data-prefix=\"");
+
+            
+            #line 3 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                                                                                                                                     Write(Model.Prefix);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"");
+
+WriteLiteral(">\r\n    <div");
+
+WriteLiteral(" class=\"modal-dialog\"");
+
+WriteLiteral(">\r\n        <div");
+
+WriteLiteral(" class=\"modal-content\"");
+
+WriteLiteral(">\r\n            <div");
+
+WriteLiteral(" class=\"modal-header\"");
+
+WriteLiteral(">\r\n                <h4>\r\n                    <span");
+
+WriteLiteral(" class=\"sf-entity-title\"");
 
 WriteLiteral(">");
 
             
-            #line 5 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            #line 8 "..\..\Signum\Views\SearchPopupControl.cshtml"
                                              Write(ViewBag.Title);
 
             
             #line default
             #line hidden
-WriteLiteral("</span>\r\n");
+WriteLiteral("</span>\r\n                    <a");
 
+WriteAttribute("id", Tuple.Create(" id=\"", 478), Tuple.Create("\"", 513)
             
-            #line 6 "..\..\Signum\Views\SearchPopupControl.cshtml"
-        
+            #line 9 "..\..\Signum\Views\SearchPopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 483), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
             
             #line default
             #line hidden
-            
-            #line 6 "..\..\Signum\Views\SearchPopupControl.cshtml"
-          
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <a");
-
-WriteAttribute("id", Tuple.Create(" id=\"", 272), Tuple.Create("\"", 307)
-            
-            #line 7 "..\..\Signum\Views\SearchPopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 277), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
-            
-            #line default
-            #line hidden
-, 277), false)
+, 483), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
 
-WriteLiteral(">\r\n                <span");
+WriteLiteral(">\r\n                        <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
 
-WriteLiteral("></span>\r\n            </a>\r\n");
+WriteLiteral("></span>\r\n                    </a>\r\n                </h4>\r\n");
 
             
-            #line 10 "..\..\Signum\Views\SearchPopupControl.cshtml"
-        
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </span>\r\n");
-
-            
-            #line 12 "..\..\Signum\Views\SearchPopupControl.cshtml"
-    
+            #line 13 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Signum\Views\SearchPopupControl.cshtml"
-     if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
-    {
+            #line 13 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                 if (!ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+                {
 
             
             #line default
             #line hidden
-WriteLiteral("        <div");
-
-WriteLiteral(" class=\"sf-query-button-bar\"");
-
-WriteLiteral(">\r\n            <input");
+WriteLiteral("                    <button");
 
 WriteLiteral(" type=\"button\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 598), Tuple.Create("\"", 626)
-            
-            #line 15 "..\..\Signum\Views\SearchPopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 603), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
-            
-            #line default
-            #line hidden
-, 603), false)
-);
+WriteLiteral(" class=\"close sf-close-button\"");
 
-WriteLiteral(" class=\"sf-query-button sf-ok-button\"");
-
-WriteLiteral(" value=\"OK\"");
-
-WriteLiteral(" />\r\n        </div>\r\n");
+WriteLiteral(">×</button>\r\n");
 
             
-            #line 17 "..\..\Signum\Views\SearchPopupControl.cshtml"
-    }
+            #line 16 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                }
 
             
             #line default
             #line hidden
-WriteLiteral("    <div");
+WriteLiteral("            </div>\r\n\r\n            <div");
 
-WriteLiteral(" class=\"sf-popup-body\"");
+WriteLiteral(" class=\"modal-body\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 19 "..\..\Signum\Views\SearchPopupControl.cshtml"
-        
+            #line 20 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Signum\Views\SearchPopupControl.cshtml"
-           
-            ViewData[ViewDataKeys.InPopup] = true;
-            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
-        
+            #line 20 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                   
+                    ViewData[ViewDataKeys.InPopup] = true;
+                    Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
+                
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("        ");
+WriteLiteral("                ");
 
             
-            #line 23 "..\..\Signum\Views\SearchPopupControl.cshtml"
-   Write(Html.ValidationSummaryAjax(Model));
+            #line 24 "..\..\Signum\Views\SearchPopupControl.cshtml"
+           Write(Html.ValidationSummaryAjax(Model));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n</div>\r\n");
+WriteLiteral("\r\n            </div>\r\n");
+
+            
+            #line 26 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 26 "..\..\Signum\Views\SearchPopupControl.cshtml"
+             if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+            {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                <div");
+
+WriteLiteral(" class=\"modal-footer\"");
+
+WriteLiteral(">\r\n                    <button");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 1362), Tuple.Create("\"", 1390)
+            
+            #line 29 "..\..\Signum\Views\SearchPopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 1367), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+            
+            #line default
+            #line hidden
+, 1367), false)
+);
+
+WriteLiteral(" class=\"btn btn-primary sf-entity-button sf-close-button sf-ok-button\"");
+
+WriteLiteral(">");
+
+            
+            #line 29 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                                                                                                                          Write(JavascriptMessage.ok.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                    <button");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 1536), Tuple.Create("\"", 1568)
+            
+            #line 30 "..\..\Signum\Views\SearchPopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 1541), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
+            
+            #line default
+            #line hidden
+, 1541), false)
+);
+
+WriteLiteral(" class=\"btn btn-default sf-entity-button sf-close-button sf-cancel-button\"");
+
+WriteLiteral(">");
+
+            
+            #line 30 "..\..\Signum\Views\SearchPopupControl.cshtml"
+                                                                                                                                  Write(JavascriptMessage.cancel.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                </div>\r\n");
+
+            
+            #line 32 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        </div>\r\n    </div>\r\n</div>\r\n");
 
         }
     }
