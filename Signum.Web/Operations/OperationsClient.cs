@@ -241,7 +241,7 @@ namespace Signum.Web.Operations
                         var tbm = new ToolBarDropDown
                         {
                             Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
-                            AltText = group.Description(),
+                            Tooltip = group.Description(),
                             Text = group.Description(),
                             CssClass = group.CssClass,
                             Items = new List<IMenuItem>(),
@@ -288,7 +288,7 @@ namespace Signum.Web.Operations
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
-                AltText = ctx.CanExecute,
+                Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
 
@@ -443,7 +443,7 @@ namespace Signum.Web.Operations
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
-                AltText = ctx.CanExecute,
+                Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
 
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,

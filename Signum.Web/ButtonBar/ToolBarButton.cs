@@ -22,7 +22,9 @@ namespace Signum.Web
     {
         public string Id { get; set; }
         public string Text { get; set; }
-        public string AltText { get; set; }
+        public MvcHtmlString Html { get; set; }
+        public string Title { get; set; }
+        public string Tooltip { get; set; }
         public JsFunction OnClick { get; set; }
         public string Href { get; set; }
         public double Order { get; set; }
@@ -44,21 +46,35 @@ namespace Signum.Web
                 .Class("btn")
                 .Class("btn-" + Style.ToString().ToLower())
                 .Class(CssClass)
-                .Attrs(HtmlProps)
-                .SetInnerText(Text);
+                .Attrs(HtmlProps);
+
+            if (Text != null)
+                a.SetInnerText(Text);
+
+            if (Html != null)
+                a.InnerHtml(Html);
 
             if (Href.HasText())
                 a.Attr("href", Href);
 
-            if (AltText.HasText())
-                a.Attr("alt", AltText);
+            if (Title.HasText())
+                a.Attr("title", Title);
 
             if (Enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());
             else
                 a.Attr("disabled", "disabled");
 
-            return new HtmlTag("div").Class("btn-group").InnerHtml(a);
+            var result = new HtmlTag("div").Class("btn-group").InnerHtml(a);
+
+            if (Tooltip.HasText())
+            {
+                result.Attr("data-toggle", "tooltip");
+                result.Attr("data-placement", "bottom");
+                result.Attr("title", Tooltip);
+            }
+
+            return result;
         }
 
         public IMenuItem ToMenuItem()
@@ -67,7 +83,8 @@ namespace Signum.Web
             {
                 Id = Id,
                 Text = Text,
-                AltText = AltText,
+                Tooltip = Tooltip,
+                Title = Title,
                 OnClick = OnClick,
                 Href = Href,
                 Order = Order,
@@ -91,7 +108,9 @@ namespace Signum.Web
     {
         public string Id { get; set; }
         public string Text { get; set; }
-        public string AltText { get; set; }
+        public MvcHtmlString Html { get; set; }
+        public string Title { get; set; }
+        public string Tooltip { get; set; }
         public JsFunction OnClick { get; set; }
         public string Href { get; set; }
         public double Order { get; set; }
@@ -112,20 +131,35 @@ namespace Signum.Web
                .Id(Id)
                .Class("bg-" + Style.ToString().ToLower())
                .Class(CssClass)
-               .Attrs(HtmlProps)
-               .SetInnerText(Text);
+               .Attrs(HtmlProps);
+
+            if (Text != null)
+                a.SetInnerText(Text);
+
+            if (Html != null)
+                a.InnerHtml(Html);
 
             if (Href.HasText())
                 a.Attr("href", Href);
-            if (AltText.HasText())
-                a.Attr("alt", AltText);
+
+            if (Title.HasText())
+                a.Attr("title", Title);
 
             if (Enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());
             else
                 a.Attr("disabled", "disabled");
 
-            return new HtmlTag("li").InnerHtml(a);
+            var result = new HtmlTag("li").InnerHtml(a);
+
+            if (Tooltip.HasText())
+            {
+                result.Attr("data-toggle", "tooltip");
+                result.Attr("data-placement", "bottom");
+                result.Attr("title", Tooltip);
+            }
+
+            return result;
         }
     }
 }

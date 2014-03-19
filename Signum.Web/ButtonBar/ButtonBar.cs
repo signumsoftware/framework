@@ -94,7 +94,11 @@ namespace Signum.Web
 
         public static MvcHtmlString ToStringButton(this List<ToolBarButton> elements, HtmlHelper helper)
         {
-            return MvcHtmlString.Create(elements.ToString(tb => tb.ToHtml(helper).ToHtmlString(), "\r\n"));
+            HtmlStringBuilder sb = new HtmlStringBuilder(elements.Select(tb=> tb.ToHtml(helper)));
+
+            sb.Add(new MvcHtmlString(@"<script>$(function(){ $('[data-toggle=""tooltip""]').tooltip({}); });</script>"));
+
+            return sb.ToHtml();
         }
     }
 }

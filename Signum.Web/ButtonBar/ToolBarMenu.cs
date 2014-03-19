@@ -24,7 +24,7 @@ namespace Signum.Web
                     .Class(CssClass)
                     .Class("dropdown-toggle")
                     .Attr("data-toggle", "dropdown")
-                    .Attr("alt", AltText)
+                    .Attr("alt", Tooltip)
                     .Attrs(HtmlProps);
 
                 if (!Enabled)
