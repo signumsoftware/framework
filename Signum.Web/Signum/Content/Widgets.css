@@ -1,0 +1,19 @@
+﻿ul.sf-widgets
+{
+    float:right;
+    list-style-type: none;
+    margin-top:-25px;
+}
+
+ul.sf-widgets>li
+{
+    display:block;
+    position:relative;
+    float: left;
+    margin-left: 4px;
+}
+
+ul.sf-widgets > li > a:not(.sf-widget-active)
+{
+    background-color:#ddd;
+}

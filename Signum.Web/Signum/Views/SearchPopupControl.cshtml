@@ -4,16 +4,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                @if (!ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
+                {
+                    <button type="button" class="close sf-close-button">×</button>
+                }
                 <h4>
                     <span class="sf-entity-title">@ViewBag.Title</span>
                     <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
                         <span class="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h4>
-                @if (!ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
-                {
-                    <button type="button" class="close sf-close-button">×</button>
-                }
+              
             </div>
 
             <div class="modal-body">

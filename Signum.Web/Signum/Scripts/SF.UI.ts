@@ -12,7 +12,6 @@ interface JQueryAjaxSettings {
     sfNotify? : boolean
 }
 
-
 module SF {
 
     once("SF-control", () => {

@@ -15,46 +15,26 @@ namespace Signum.Web
 {
     static class QuickLinkWidgetHelper
     {  
-        internal static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
+        internal static IWidget CreateWidget(WidgetContext ctx)
         {
-            if (identifiable.IsNew)
+            var ident = ctx.Entity as IdentifiableEntity;
+
+            if(ident == null || ident.IsNew)
                 return null;
 
-            List<QuickLink> quicklinks = LinksClient.GetForEntity(identifiable.ToLiteFat(), partialViewName, prefix);
+            List<QuickLink> quicklinks = LinksClient.GetForEntity(ident.ToLiteFat(), ctx.PartialViewName, ctx.Prefix);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-menu-button sf-widget-content sf-quicklinks")))
+            return new Widget 
             {
-                foreach (var q in quicklinks)
-                {
-                    using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
-                    {
-                        content.Add(q.Execute());
-                    }
-                }
-            }
-
-            HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-quicklink-toggler").Attr("title", QuickLinkMessage.Quicklinks.NiceToString())))
-            {
-                label.Add(new HtmlTag("span")
-                    .Class("ui-icon ui-icon-star")
-                    .InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml())
-                    .ToHtml());
-
-                label.Add(new HtmlTag("span")
-                    .Class("sf-widget-count")
-                    .SetInnerText(quicklinks.Count.ToString())
-                    .ToHtml());
-            }
-
-            return new WidgetItem
-            {
-                Id = TypeContextUtilities.Compose(prefix, "quicklinksWidget"),
-                Label = label.ToHtml(),
-                Content = content.ToHtml()
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "quicklinksWidget"),
+                Class = "sf-quicklinks",
+                Title = QuickLinkMessage.Quicklinks.NiceToString(),
+                IconClass = "glyphicon glyphicon-star",
+                Text = quicklinks.Count.ToString(),
+                Items = quicklinks.OrderBy(a=>a.Order).Cast<IMenuItem>().ToList(),
+                Active = true,
             };
         }
     }
@@ -131,7 +111,7 @@ namespace Signum.Web
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (widget)
-                    WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? QuickLinkWidgetHelper.CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
+                    WidgetsHelper.GetWidget += QuickLinkWidgetHelper.CreateWidget;
 
                 if (contextualItems)
                     ContextualItemsHelper.GetContextualItemsForLites += QuickLinkContextualMenu.ContextualItemsHelper_GetContextualItemsForLite;
@@ -144,6 +124,7 @@ namespace Signum.Web
         public string Prefix { get; set; }
         public bool IsVisible { get; set; }
         public string Text { get; set; }
+        public double Order { get; set; }
 
         public QuickLink()
         {

@@ -141,7 +141,7 @@ WriteLiteral("</small>\r\n</h3>\r\n");
 
             
             #line 21 "..\..\Signum\Views\NormalControl.cshtml"
-Write(Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.Prefix));
+Write(Html.RenderWidgetsForEntity(new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix }));
 
             
             #line default

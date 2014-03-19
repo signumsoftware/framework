@@ -18,7 +18,7 @@
     <br />
     <small class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</small>
 </h3>
-@Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.Prefix)
+@Html.RenderWidgetsForEntity(new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix })
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     {
