@@ -56,7 +56,7 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailAttachmentDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAttachment")},
                     new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     
-                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage"), AvoidValidateRequest = true },
                     
                     new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
@@ -64,7 +64,7 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailConfiguration")},
                     new EntitySettings<SystemEmailDN>{ },
                     
-                    new EntitySettings<EmailMasterTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplate") },
+                    new EntitySettings<EmailMasterTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplate"), AvoidValidateRequest = true  },
                     new EmbeddedEntitySettings<EmailMasterTemplateMessageDN>
                     {
                         PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplateMessage"),
@@ -75,10 +75,7 @@ namespace Signum.Web.Mailing
                             })
                     },
                     
-                    new EntitySettings<EmailTemplateDN>
-                    { 
-                        PartialViewName = e => ViewPrefix.Formato("EmailTemplate"),
-                    },
+                    new EntitySettings<EmailTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailTemplate"), AvoidValidateRequest = true },
                     new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage"),
