@@ -161,5 +161,21 @@ namespace Signum.Web
                 option.Attr("data-filter", canFilter);
         }
 
+
+        public static MvcHtmlString Header(Column col, OrderType? orderType)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("th")
+                .Attr("data-column-name", col.Name)
+                .Attr("data-nice-name", col.Token.NiceName())))
+            {
+                sb.Add(new HtmlTag("span").Class("sf-header-sort")
+                    .Class(orderType == null ? null :
+                    orderType == OrderType.Ascending ? "asc" : "desc"));
+
+                sb.Add(new HtmlTag("span").SetInnerText(col.DisplayName));
+            }
+            return sb.ToHtml();
+        }
     }
 }

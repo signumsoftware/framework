@@ -116,13 +116,7 @@
                         {
                             orderType = order.OrderType;
                         }
-                        <th class="">
-                            <div class="sf-header-droppable sf-header-droppable-right"></div>
-                            <div class="sf-header-droppable sf-header-droppable-left"></div>
-                            <input type="hidden" value="@col.Name" />
-                            <span class="sf-header-sort @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "asc" : "desc"))"></span>
-                            <span>@col.DisplayName</span>
-                        </th>
+                        @SearchControlHelper.Header(col, orderType)
                     }
                 </tr>
             </thead>

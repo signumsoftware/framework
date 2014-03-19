@@ -30,6 +30,8 @@ namespace Signum.Web.PortableAreas
             { "search", url => url.Action("Search", "Finder") },
             { "subTokensCombo", url => url.Action("NewSubTokensCombo", "Finder") },
             { "addFilter", url => url.Action("AddFilter", "Finder") },
+            { "addColumn", url => url.Action("AddColumn", "Finder") },
+            
             { "quickFilter", url => url.Action("QuickFilter", "Finder") },
             { "selectedItemsContextMenu", url => url.Action("SelectedItemsContextMenu", "Finder") },
 

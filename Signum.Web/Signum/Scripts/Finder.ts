@@ -553,10 +553,11 @@ export class SearchControl {
     serializeColumns() {
         var self = this;
         return $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).toArray().map(th=> {
-            var $this = $(th);
-            var token = $this.find("input:hidden").val();
-            var displayName = $this.text().trim();
-            if (token == displayName)
+            var $th = $(th);
+            var token = $th.data("column-name");
+            var niceName = $th.data("nice-name");
+            var displayName = $th.text().trim();
+            if (niceName == displayName)
                 return token;
             else
                 return token + "," + displayName;
@@ -614,7 +615,7 @@ export class SearchControl {
 
         SF.ContextMenu.hideContextMenu();
 
-        var columnName = $th.find("input:hidden").val();
+        var columnName = $th.data("column-name");
 
         var cols = this.options.orders.filter(o=> o.columnName == columnName);
         var col = cols.length == 0 ? null : cols[0];
@@ -656,21 +657,11 @@ export class SearchControl {
 
         var $tblHeaders = $(this.pf("tblResults thead tr"));
 
-        var self = this;
-        $.ajax({
-            url: $(this.pf("btnAddColumn")).attr("data-url"),
+        SF.ajaxPost({
+            url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
             async: false,
-            success: function (columnNiceName) {
-                $tblHeaders.append("<th class='ui-state-default'>" +
-                    "<div class='sf-header-droppable sf-header-droppable-right'></div>" +
-                    "<div class='sf-header-droppable sf-header-droppable-left'></div>" +
-                    "<input type=\"hidden\" value=\"" + tokenName + "\" />" +
-                    "<span>" + columnNiceName + "</span></th>");
-                var $newTh = $tblHeaders.find("th:last");
-                self.createMoveColumnDragDrop($newTh, $newTh.find(".sf-header-droppable"));
-            }
-        });
+        }).then(html => $tblHeaders.append(html));
     }
 
     editColumn($th: JQuery) {
@@ -754,13 +745,13 @@ export class SearchControl {
                 
 
         var cellIndex = $elem[0].cellIndex;
-        var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
+        var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).data("column-name");
 
         this.filterBuilder.addFilter(tokenName, value);
     }
 
-    quickFilterHeader($elem) {
-        this.filterBuilder.addFilter($elem.find("input:hidden").val(), "");
+    quickFilterHeader($th) {
+        this.filterBuilder.addFilter($th.data("column-name"), "");
     }
 
     create_click() {

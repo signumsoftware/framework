@@ -60,15 +60,13 @@ namespace Signum.Web.Controllers
             return Navigator.Search(this, queryRequest, allowSelection, navigate, filterMode, prefix);
         }
 
-       
-
         [HttpPost]
-        public ContentResult GetColumnName(string webQueryName, string tokenName)
+        public ContentResult AddColumn(string webQueryName, string tokenName)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
-            return Content(token.NiceName());
+            return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
         }
 
         [HttpPost]
