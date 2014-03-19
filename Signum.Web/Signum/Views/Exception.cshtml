@@ -25,24 +25,19 @@
     @Html.ValueLine(e, f => f.RequestUrl)
     @Html.ValueLine(e, f => f.UrlReferer)
     
-    <h3>
-        QueryString</h3>
-    <pre>@e.Value.QueryString</pre>
+    <h3>QueryString</h3>
+    <pre><code>@e.Value.QueryString</code></pre>
     
-    <h3>
-        Form</h3>
-    <pre>@e.Value.Form</pre>
+    <h3>Form</h3>
+    <pre><code>@e.Value.Form</code></pre>
 
-    <h3>
-        Session</h3>
-    <pre>@e.Value.Session</pre>
+    <h3>Session</h3>
+    <pre><code>@e.Value.Session</code></pre>
 
     <h3 style="color: rgb(139,0,0)">@e.Value.ExceptionType</h3>
-    <pre>@e.Value.ExceptionMessage</pre>
-    <h3>
-        StackTrace</h3>
-    <pre>@e.Value.StackTrace</pre>
-    <h3>
-        Data</h3>
-    <pre>@e.Value.Data</pre>
+    <pre><code>@e.Value.ExceptionMessage</code></pre>
+    <h3>StackTrace</h3>
+    <pre><code>@e.Value.StackTrace</code></pre>
+    <h3>Data</h3>
+    <pre><code>@e.Value.Data</code></pre>
 }
