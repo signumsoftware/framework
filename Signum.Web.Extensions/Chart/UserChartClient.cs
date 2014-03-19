@@ -152,7 +152,7 @@ namespace Signum.Web.Chart
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
-                    Tooltip = uqNewText,
+                    Title = uqNewText,
                     Text = uqNewText,
                     OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c) => c.CreateUserChart())),
                 });

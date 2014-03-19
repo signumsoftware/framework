@@ -90,7 +90,7 @@ namespace Signum.Web.Reports
                     {
                         items.Add(new MenuItem
                         {
-                            Tooltip = report.ToString(),
+                            Title = report.ToString(),
                             Text = report.ToString(),
                             OnClick = new JsFunction(Module, "toExcelReport", ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
                         });
@@ -122,7 +122,7 @@ namespace Signum.Web.Reports
                     new ToolBarDropDown
                     { 
                         Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
-                        Tooltip = "Excel", 
+                        Title = "Excel", 
                         Text = "Excel",
                         Items = items
                     }
@@ -142,7 +142,7 @@ namespace Signum.Web.Reports
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
-                Tooltip = ExcelMessage.ExcelReport.NiceToString(),
+                Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
             };
@@ -153,7 +153,7 @@ namespace Signum.Web.Reports
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
-                Tooltip = ExcelMessage.ExcelReport.NiceToString(),
+                Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = new JsFunction(ChartClient.Module, "exportData", prefix,
                     url.Action((ChartController c) => c.Validate()),

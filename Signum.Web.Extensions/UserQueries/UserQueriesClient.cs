@@ -150,7 +150,7 @@ namespace Signum.Web.UserQueries
                 items.Add(new MenuItem
                 {
                     Text = uq.ToString(),
-                    Tooltip = uq.ToString(),
+                    Title = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
                     CssClass = "sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
@@ -161,24 +161,22 @@ namespace Signum.Web.UserQueries
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
-                string uqNewText = UserQueryMessage.UserQueries_CreateNew.NiceToString();
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
-                    Tooltip = uqNewText,
-                    Text = uqNewText,
+                    Title = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
+                    Text = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
                     OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
                 });
             }
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string uqEditText = UserQueryMessage.UserQueries_Edit.NiceToString();
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
-                    Title = uqEditText,
-                    Text = uqEditText,
+                    Title = UserQueryMessage.UserQueries_Edit.NiceToString(),
+                    Text = UserQueryMessage.UserQueries_Edit.NiceToString(),
                     Href = Navigator.NavigateRoute(currentUserQuery)
                 });
             }
