@@ -98,7 +98,7 @@ namespace Signum.Engine
                 if (dix.Columns.Count != mix.Columns.Length)
                     return true;
 
-                var dixColumns =dif.Colums.Where(kvp=>dix.Columns.Contains(kvp.Value.Name));
+                var dixColumns = dif.Colums.Where(kvp => dix.Columns.Contains(kvp.Value.Name));
 
                 return !dixColumns.All(kvp => dif.Colums.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key)));
             };
@@ -219,10 +219,12 @@ namespace Signum.Engine
                 {
                     var columnReplacements = replacements.TryGetC(Replacements.KeyColumnsForTable(tn));
 
+                    Func<IColumn, bool> isNew = c => !dif.Colums.ContainsKey(columnReplacements.TryGetC(c.Name) ?? c.Name);
+
                     Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
-                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
+                        (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
                         (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                             mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
@@ -471,11 +473,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                 .Where(d => list.Contains(d.name))
                 .Select(d => new { d.name, d.snapshot_isolation_state, d.is_read_committed_snapshot_on }).ToList();
 
-            var cmd = results.Select(a =>  
+            var cmd = results.Select((a, i) =>
                 SqlPreCommand.Combine(Spacing.Simple,
-                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? new SqlPreCommandSimple(@"DECLARE @SPId VARCHAR(7000)
-SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
-EXEC(@SPId)".Formato(a.name)) : null,
+                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name, "SPID" + i) : null,
                 !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
                 !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double);
 
@@ -486,6 +486,13 @@ EXEC(@SPId)".Formato(a.name)) : null,
                 new SqlPreCommandSimple("use master -- Start Snapshot"),
                 cmd,
                 new SqlPreCommandSimple("use {0} -- Stop Snapshot".Formato(Connector.Current.DatabaseName())));
+        }
+
+        public static SqlPreCommandSimple DisconnectUsers(string databaseName, string variableName)
+        {
+            return new SqlPreCommandSimple(@"DECLARE @{1} VARCHAR(7000)
+SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
+EXEC(@{1})".Formato(databaseName, variableName));
         }
     }
 

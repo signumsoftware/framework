@@ -96,6 +96,16 @@ namespace Signum.Utilities
         }
     }
 
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class FormatAttribute : Attribute
+    {
+        public string Format { get; private set; }
+        public FormatAttribute(string format)
+        {
+            this.Format = format;
+        }
+    }
+
     public static class DescriptionManager
     {
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
@@ -170,7 +180,7 @@ namespace Signum.Utilities
                 NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
         }
 
-        public static string NiceToString(this Enum a)
+        public static string NiceToString(this Enum a, params object[] args)
         {
             if (a == null)
                 return null;
@@ -179,7 +189,7 @@ namespace Signum.Utilities
             if (fi != null)
                 return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
 
-            return a.ToString().NiceName();
+            return a.ToString().NiceName().Formato(args);
         }
 
         public static string NiceName(this PropertyInfo pi)

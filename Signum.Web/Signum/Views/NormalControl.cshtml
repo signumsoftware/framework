@@ -42,6 +42,6 @@
         @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
     }
 </div>
-<div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix">
+<div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix" data-test-ticks="@DateTime.Now.Ticks">
     @{ Html.RenderPartial(partialViewName, Model);}
 </div>

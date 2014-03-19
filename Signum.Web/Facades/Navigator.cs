@@ -320,6 +320,11 @@ namespace Signum.Web
             return Lite.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]);
         }
 
+        public static T ParsePercentage<T>(this ControllerBase controller, string requestKey, CultureInfo culture = null)
+        {
+            return (T)ReflectionTools.ParsePercentage(controller.ControllerContext.HttpContext.Request[requestKey], typeof(T), culture ?? CultureInfo.CurrentCulture);
+        }
+
         public static T ParseValue<T>(this ControllerBase controller, string requestKey)
         {
             return ReflectionTools.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]); 
@@ -458,8 +463,6 @@ namespace Signum.Web
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
-        public string PopupOkControlView = ViewPrefix.Formato("PopupOkControl");
-        public string PopupCancelControlView = ViewPrefix.Formato("PopupCancelControl");
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");
         public string SearchControlView = ViewPrefix.Formato("SearchControl");

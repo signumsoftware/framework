@@ -361,5 +361,7 @@ FROM {1} as [table]".Formato(
 
             return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlScape() + "." + s.StatsName.SqlScape(), ",\r\n"));
         }
+
+     
     }
 }

@@ -39,7 +39,8 @@
     @Html.ValidationSummaryAjax(Model)
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable.IsGraphModified ? " sf-changed" : "")" 
         data-prefix="@Model.Prefix" 
-        data-runtimeinfo="@Model.RuntimeInfo().ToString()">
+        data-runtimeinfo="@Model.RuntimeInfo().ToString()"
+        data-test-ticks="@DateTime.Now.Ticks">
         @if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
         {
             @Html.Hidden(Model.Compose(ViewDataKeys.EntityState), Navigator.Manager.SerializeEntity(modifiable))

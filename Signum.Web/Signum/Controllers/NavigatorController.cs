@@ -19,6 +19,8 @@ using System.Web.Script.Serialization;
 using System.Text;
 using System.IO;
 using Signum.Engine.Basics;
+using System.Globalization;
+using Signum.Utilities.Reflection;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -122,9 +124,16 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult ValueLineBox(string prefix, ValueLineType type, string title, string labelText, string message)
+        public PartialViewResult ValueLineBox(string prefix, ValueLineType type, string title, string labelText, string message, string unit, string format)
         {
-            ValueLineBoxOptions options = new ValueLineBoxOptions(type, prefix, null) { labelText = labelText, title = title };
+            ValueLineBoxOptions options = new ValueLineBoxOptions(type, prefix, null) 
+            { 
+                message = message,
+                labelText = labelText, 
+                title = title, 
+                unit = unit, 
+                format = format 
+            };
 
             Type vlType = null;
             switch (type)
@@ -140,7 +149,10 @@ namespace Signum.Web.Controllers
                     break;
                 case ValueLineType.Number:
                     vlType = typeof(decimal);
-                    options.value = this.ParseValue<decimal?>("value");
+
+                    options.value = format != null && format.StartsWith("p", StringComparison.InvariantCultureIgnoreCase) ?
+                        this.ParsePercentage<decimal?>("value"):
+                        this.ParseValue<decimal?>("value");
                     break;
                 case ValueLineType.DateTime:
                     vlType = typeof(DateTime);

@@ -289,16 +289,27 @@ WriteLiteral(" \r\n        data-runtimeinfo=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(">\r\n");
+WriteLiteral("\r\n        data-test-ticks=\"");
 
             
             #line 43 "..\..\Signum\Views\PopupControl.cshtml"
+                    Write(DateTime.Now.Ticks);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"");
+
+WriteLiteral(">\r\n");
+
+            
+            #line 44 "..\..\Signum\Views\PopupControl.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 44 "..\..\Signum\Views\PopupControl.cshtml"
          if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
         {
             
@@ -306,14 +317,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
        Write(Html.Hidden(Model.Compose(ViewDataKeys.EntityState), Navigator.Manager.SerializeEntity(modifiable)));
 
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
                                                                                                                 
         }
 
@@ -323,7 +334,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 48 "..\..\Signum\Views\PopupControl.cshtml"
            
             ViewData[ViewDataKeys.InPopup] = true;
 

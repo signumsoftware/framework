@@ -35,6 +35,7 @@ namespace Signum.Web.PortableAreas
             response.AppendHeader("Vary", "Accept-Encoding");
             response.Cache.SetCacheability(HttpCacheability.Public);
             response.Cache.SetMaxAge(CacheDuration);
+            response.Cache.SetSlidingExpiration(true);
 
             if (!VersionChanged(request, ScriptHtmlHelper.Manager.LastModified))
             {

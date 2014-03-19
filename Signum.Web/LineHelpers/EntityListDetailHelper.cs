@@ -38,7 +38,7 @@ namespace Signum.Web
                 if (listDetail.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail)));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail), templateTC.Value.ToString()));
                 }
 
                 using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field-list")))
@@ -76,8 +76,8 @@ namespace Signum.Web
                             sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail, hidden: false).Surround("li"));
                             sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail, hidden: false).Surround("li"));
                             sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail, hidden: false).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, listDetail, hidden: false).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, listDetail, hidden: false).Surround("li"));
                         }
                     }
                 }
@@ -111,7 +111,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(ListBaseHelper.WriteIndex(helper, listDetail, itemTC, itemTC.Index));
+            sb.AddLine(EntityListBaseHelper.WriteIndex(helper, listDetail, itemTC, itemTC.Index));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

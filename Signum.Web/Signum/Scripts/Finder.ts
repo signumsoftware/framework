@@ -873,13 +873,13 @@ export class SearchControl {
                 if (type == null)
                     return;
 
-                var requestData = this.requestDataForSearchPopupCreate()
-
                 var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
                     Navigator.navigate(runtimeInfo, false);
-                else
-                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+
+                var requestData = this.requestDataForSearchPopupCreate();
+
+                Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
             });
     }
 
@@ -896,21 +896,7 @@ export class SearchControl {
         }
         return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o == null ? null : o.type);
     }
-
-
-    viewOptionsForSearchCreate(viewOptions) {
-        return $.extend({
-            controllerUrl: SF.Urls.create
-        }, viewOptions);
-    }
-
-    viewOptionsForSearchPopupCreate(viewOptions) {
-        return $.extend({
-            controllerUrl: SF.Urls.popupNavigate,
-            requestExtraJsonData: this.requestDataForSearchPopupCreate()
-        }, viewOptions);
-    }
-
+  
     requestDataForSearchPopupCreate() {
         return {
             filters: this.filterBuilder.serializeFilters(),
@@ -937,12 +923,12 @@ export class SearchControl {
         };
 
         var $tabContainer = $button.closest(".sf-tabs");
-        if ($tabContainer.length == 0) {
+        if ($tabContainer.length == 0 || this.element.is(":visible")) { 
             makeSearch();
         }
         else {
             var self = this;
-            $tabContainer.bind("tabsactivate", function (evt, ui) {
+            $tabContainer.bind("tabsactivate", function (evt, ui) { //OnVisible doesn't exist yet. 
                 if ($(ui.newPanel).find(self.element).length > 0) {
                     makeSearch();
                 }
