@@ -83,60 +83,61 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             
             #line 7 "..\..\AuthAdmin\Views\User.cshtml"
    Write(Html.FormGroup(e, e.Compose(UserMapping.NewPasswordKey), AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
-            Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
-            Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty)));
+            Html.Password(e.Compose(UserMapping.NewPasswordKey), "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
+            Html.ValidationMessage(e.Compose(UserMapping.NewPasswordKey)) ?? MvcHtmlString.Empty)));
 
             
             #line default
             #line hidden
             
             #line 9 "..\..\AuthAdmin\Views\User.cshtml"
-                                                                                       
-    
+                                                                                                  
+
         
             
             #line default
             #line hidden
             
             #line 11 "..\..\AuthAdmin\Views\User.cshtml"
-   Write(Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
-            Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
-            Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty)));
+   Write(Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(),
+            Html.Password(e.Compose(UserMapping.NewPasswordBisKey), "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
+            Html.ValidationMessage(e.Compose(UserMapping.NewPasswordBisKey)) ?? MvcHtmlString.Empty)));
 
             
             #line default
             #line hidden
             
             #line 13 "..\..\AuthAdmin\Views\User.cshtml"
-                                                                                          
+                                                                                                     
+
     }
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordNeverExpires));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
                                                    
     
             
             #line default
             #line hidden
             
-            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordSetDate));
 
             
             #line default
             #line hidden
             
-            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
                                               
 
     
@@ -144,58 +145,59 @@ Write(Html.ValueLine(e, f => f.PasswordSetDate));
             #line default
             #line hidden
             
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30));
 
             
             #line default
             #line hidden
             
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
                                                                           
     
             
             #line default
             #line hidden
             
-            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityCombo(e, f => f.CultureInfo));
 
             
             #line default
             #line hidden
             
-            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
                                             
     
             
             #line default
             #line hidden
             
-            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityLine(e, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
                                     
     
             
             #line default
             #line hidden
             
-            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 22 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityLine(e, f => f.Related));
 
             
             #line default
             #line hidden
             
-            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 22 "..\..\AuthAdmin\Views\User.cshtml"
                                        
 }
+
             
             #line default
             #line hidden
