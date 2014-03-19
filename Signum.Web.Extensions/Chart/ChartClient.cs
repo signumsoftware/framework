@@ -178,7 +178,7 @@ namespace Signum.Web.Chart
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
-                AltText = chartNewText,
+                Tooltip = chartNewText,
                 Text = chartNewText,
                 OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart"))
             };

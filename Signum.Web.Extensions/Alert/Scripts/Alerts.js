@@ -1,8 +1,6 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Entities, Finder, Operations) {
-    function exploreAlerts(prefix, column) {
-        var findOptions = JSON.parse(JSON.stringify($("#" + SF.compose(prefix, "alertsWidget") + " ul").data("findoptions")));
-
+    function exploreAlerts(prefix, column, findOptions) {
         findOptions.filters.push({ columnName: "Entity." + column, operation: 0 /* EqualTo */, value: "true" });
 
         Finder.explore(findOptions).then(function () {

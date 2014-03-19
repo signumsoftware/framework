@@ -5,9 +5,7 @@ import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-export function exploreAlerts(prefix : string, column : string) {
-    var findOptions: Finder.FindOptions = JSON.parse(JSON.stringify( $("#" + SF.compose(prefix, "alertsWidget") + " ul").data("findoptions")));
-
+export function exploreAlerts(prefix : string, column : string, findOptions : Finder.FindOptions) {
     findOptions.filters.push({ columnName: "Entity." + column, operation: Finder.FilterOperation.EqualTo, value: "true" }); 
 
     Finder.explore(findOptions).then(() => updateAlerts(prefix)); 

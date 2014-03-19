@@ -137,7 +137,7 @@ namespace Signum.Web.Chart
                 items.Add(new MenuItem
                 {
                     Text = uc.ToString(),
-                    AltText = uc.ToString(),
+                    Title = uc.ToString(),
                     Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc, null)),
                     CssClass = (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
@@ -152,7 +152,7 @@ namespace Signum.Web.Chart
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
-                    AltText = uqNewText,
+                    Tooltip = uqNewText,
                     Text = uqNewText,
                     OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c) => c.CreateUserChart())),
                 });
@@ -164,7 +164,7 @@ namespace Signum.Web.Chart
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
-                    AltText = ucEditText,
+                    Title = ucEditText,
                     Text = ucEditText,
                     Href = Navigator.NavigateRoute(currentUserChart)
                 });
@@ -175,7 +175,7 @@ namespace Signum.Web.Chart
             return new ToolBarDropDown
             {
                 Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
-                AltText = ucUserChartText,
+                Title = ucUserChartText,
                 Text = ucUserChartText,
                 Items = items
             };

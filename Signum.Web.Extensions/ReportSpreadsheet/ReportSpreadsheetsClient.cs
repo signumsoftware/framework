@@ -90,7 +90,7 @@ namespace Signum.Web.Reports
                     {
                         items.Add(new MenuItem
                         {
-                            AltText = report.ToString(),
+                            Tooltip = report.ToString(),
                             Text = report.ToString(),
                             OnClick = new JsFunction(Module, "toExcelReport", ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
                         });
@@ -104,7 +104,7 @@ namespace Signum.Web.Reports
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
-                    AltText = ExcelMessage.Administer.NiceToString(),
+                    Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
                     OnClick = new JsFunction(Module, "administerExcelReports", ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
@@ -112,7 +112,7 @@ namespace Signum.Web.Reports
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"),
-                    AltText = ExcelMessage.CreateNew.NiceToString(),
+                    Title = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
                     OnClick = new JsFunction(Module, "createExcelReports", ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
                 });
@@ -122,7 +122,7 @@ namespace Signum.Web.Reports
                     new ToolBarDropDown
                     { 
                         Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
-                        AltText = "Excel", 
+                        Tooltip = "Excel", 
                         Text = "Excel",
                         Items = items
                     }
@@ -142,7 +142,7 @@ namespace Signum.Web.Reports
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
-                AltText = ExcelMessage.ExcelReport.NiceToString(),
+                Tooltip = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
             };
@@ -153,7 +153,7 @@ namespace Signum.Web.Reports
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
-                AltText = ExcelMessage.ExcelReport.NiceToString(),
+                Tooltip = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = new JsFunction(ChartClient.Module, "exportData", prefix,
                     url.Action((ChartController c) => c.Validate()),

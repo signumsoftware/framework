@@ -150,7 +150,7 @@ namespace Signum.Web.UserQueries
                 items.Add(new MenuItem
                 {
                     Text = uq.ToString(),
-                    AltText = uq.ToString(),
+                    Tooltip = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
                     CssClass = "sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
@@ -165,7 +165,7 @@ namespace Signum.Web.UserQueries
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
-                    AltText = uqNewText,
+                    Tooltip = uqNewText,
                     Text = uqNewText,
                     OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
                 });
@@ -177,7 +177,7 @@ namespace Signum.Web.UserQueries
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
-                    AltText = uqEditText,
+                    Title = uqEditText,
                     Text = uqEditText,
                     Href = Navigator.NavigateRoute(currentUserQuery)
                 });
@@ -189,7 +189,7 @@ namespace Signum.Web.UserQueries
                 new ToolBarDropDown
                 { 
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
-                    AltText = uqUserQueriesText,
+                    Title = uqUserQueriesText,
                     Text = uqUserQueriesText,
                     Items = items
                 }

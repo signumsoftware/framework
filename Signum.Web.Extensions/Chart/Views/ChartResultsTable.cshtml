@@ -14,7 +14,7 @@
 }
 @if (queryResult == null)
 { 
-    @JavascriptMessage.noResults.NiceToString()
+    @SearchMessage.NoResultsFound.NiceToString()
 }
 else
 {
@@ -48,7 +48,7 @@ else
             @if (!queryResult.Rows.Any())
             {
                 <tr>
-                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@JavascriptMessage.noResults.NiceToString()
+                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@SearchMessage.NoResultsFound.NiceToString()
                     </td>
                 </tr>
             }

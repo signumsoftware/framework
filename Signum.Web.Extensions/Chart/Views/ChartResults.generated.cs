@@ -106,14 +106,14 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 17 "..\..\Chart\Views\ChartResults.cshtml"
-Write(JavascriptMessage.noResults.NiceToString());
+Write(SearchMessage.NoResultsFound.NiceToString());
 
             
             #line default
             #line hidden
             
             #line 17 "..\..\Chart\Views\ChartResults.cshtml"
-                                               
+                                                
 }
 else
 {
