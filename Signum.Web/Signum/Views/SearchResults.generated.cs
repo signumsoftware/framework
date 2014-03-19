@@ -90,23 +90,21 @@ WriteLiteral(" class=\"sf-tr-multiply\"");
 
 WriteLiteral(">\r\n        <td");
 
-WriteLiteral(" class=\"sf-td-multiply ui-state-highlight\"");
+WriteLiteral(" class=\"sf-td-multiply alert alert-warning\"");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 1072), Tuple.Create("\"", 1095)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 1073), Tuple.Create("\"", 1096)
             
             #line 22 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 1082), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 1083), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 1082), false)
+, 1083), false)
 );
 
 WriteLiteral(">\r\n            <span");
 
-WriteLiteral(" class=\"ui-icon ui-icon-info\"");
-
-WriteLiteral(" style=\"float: left; margin-right: .3em;\"");
+WriteLiteral(" class=\"glyphicon glyphicon-exclamation-sign\"");
 
 WriteLiteral("></span>\r\n");
 
@@ -287,14 +285,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <tr>\r\n        <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2477), Tuple.Create("\"", 2500)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2453), Tuple.Create("\"", 2476)
             
             #line 66 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 2487), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 2463), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 2487), false)
+, 2463), false)
 );
 
 WriteLiteral(">");

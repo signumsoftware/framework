@@ -156,6 +156,8 @@ namespace Signum.Web
                 {
                     FormGroupStyle = FormGroupStyle.None,
                     ReadOnly = filterOption.Frozen,
+                    Format = filterOption.Token.Format,
+                    UnitText = filterOption.Token.Unit,
                 });
             }
             

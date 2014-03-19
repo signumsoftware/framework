@@ -19,8 +19,8 @@
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
 { 
     <tr class="sf-tr-multiply">
-        <td class="sf-td-multiply ui-state-highlight" colspan="@columnsCount">
-            <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+        <td class="sf-td-multiply alert alert-warning" colspan="@columnsCount">
+            <span class="glyphicon glyphicon-exclamation-sign"></span>
             @ViewData[ViewDataKeys.MultipliedMessage]
         </td>
     </tr>
