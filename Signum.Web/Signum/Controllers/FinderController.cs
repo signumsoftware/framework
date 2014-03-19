@@ -74,7 +74,7 @@ namespace Signum.Web.Controllers
         {
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
             if (lites.IsEmpty())
-                return Content(NoResult());
+                return Content("");
 
             object queryName = Navigator.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
@@ -91,19 +91,13 @@ namespace Signum.Web.Controllers
             });
 
             if (items.IsNullOrEmpty())
-                return Content(NoResult());
+                return Content("");
 
             var helper = CreateHtmlHelper(this);
             return Content(new HtmlStringBuilder(items.Select(mi => mi.ToHtml(helper))).ToHtml().ToString());
         }
 
-        static string NoResult()
-        {
-            var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
-                .ToHtml().ToString();
-            return noResults;
-        }
+      
 
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix, string value)

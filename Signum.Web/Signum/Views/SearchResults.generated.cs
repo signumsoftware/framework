@@ -301,7 +301,7 @@ WriteLiteral(">");
 
             
             #line 66 "..\..\Signum\Views\SearchResults.cshtml"
-                               Write(JavascriptMessage.noResults.NiceToString());
+                               Write(SearchMessage.NoResultsFound.NiceToString());
 
             
             #line default

@@ -63,7 +63,7 @@
 @if (queryResult.Rows.IsNullOrEmpty())
 {
     <tr>
-        <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>
+        <td colspan="@columnsCount">@SearchMessage.NoResultsFound.NiceToString()</td>
     </tr>
 }
 

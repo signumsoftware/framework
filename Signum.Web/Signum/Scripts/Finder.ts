@@ -382,13 +382,10 @@ export class SearchControl {
 
             $dropdown.html(this.loadingMessage());
 
-            $.ajax({
+            SF.ajaxPost({
                 url: SF.Urls.selectedItemsContextMenu,
                 data: this.requestDataForContextMenu(),
-                success: function (items) {
-                    $dropdown.html(items);
-                }
-            });
+            }).then(items => $dropdown.html(items || this.noActionsFoundMessage()));
         }
     }
 
@@ -410,7 +407,7 @@ export class SearchControl {
         }
     }
 
-    cellContextMenu(e : JQueryEventObject) {
+    cellContextMenu(e: JQueryEventObject) {
         var $td = $(e.target).closest("td");
         var $menu = SF.ContextMenu.createContextMenu(e);
 
@@ -419,17 +416,14 @@ export class SearchControl {
             $menu.append($("<li class='divider'></li>"));
         }
 
-        var message = this.loadingMessage(); 
+        var message = this.loadingMessage();
 
         $menu.append(message);
 
         SF.ajaxPost({
             url: SF.Urls.selectedItemsContextMenu,
             data: this.requestDataForContextMenu()
-        })
-        .then((items) => {
-            message.replaceWith(items);
-        });
+        }).then((items) => message.replaceWith(items || this.noActionsFoundMessage()));
     }
 
     requestDataForContextMenu() {
@@ -453,7 +447,7 @@ export class SearchControl {
             data: this.requestDataForContextMenu()
         })
         .then((items) => {
-            $menu.html(items);
+            $menu.html(items || this.noActionsFoundMessage());
         });
 
         return false;
@@ -461,6 +455,10 @@ export class SearchControl {
 
     private loadingMessage() {
         return $("<li></li>").addClass("sf-tm-selected-loading").html($("<span></span>").html(lang.signum.loading));
+    }
+
+    private noActionsFoundMessage() {
+        return $("<li></li>").addClass("sf-search-ctxitem-no-results").html($("<span></span>").html(lang.signum.noActionsFound));
     }
 
     fullScreen(evt) {
@@ -956,18 +954,29 @@ export class FilterBuilder {
     }
 
     encodeValue($filter: JQuery, index: string) {
-        var valBool = $("input:checkbox[id=" + SF.compose(this.prefix, "value", index) + "]", $filter); //it's a checkbox
-        if (valBool.length > 0)
-            return (<HTMLInputElement> valBool[0]).checked;
+        var id = SF.compose(this.prefix, "value", index);
 
-        var infoElem = $("#" + SF.compose(this.prefix, "value", index, Entities.Keys.runtimeInfo));
+        var eleme = $filter.find("#" + id);
+
+        if (!eleme.length)
+            throw Error("value for filter " + index + " no found");
+
+        var date = $filter.find("#" + SF.compose(id, "Date"));
+        var time = $filter.find("#" + SF.compose(id, "Time"));
+
+        if (date.length && time.length)
+            return SearchControl.encodeCSV(date.val() + " " + time.val());
+
+        if (eleme.is("input:checkbox"))
+            return (<HTMLInputElement> eleme[0]).checked;
+
+        var infoElem = eleme.find("#" + SF.compose(id, Entities.Keys.runtimeInfo));
         if (infoElem.length > 0) { //If it's a Lite, the value is the Id
             var val = Entities.RuntimeInfo.parse(infoElem.val());
             return SearchControl.encodeCSV(val == null ? null : val.key());
         }
 
-        return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
-
+        return SearchControl.encodeCSV(eleme.val());
     }
 
 }

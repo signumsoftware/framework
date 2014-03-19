@@ -166,7 +166,8 @@ div.sf-filters-list table.table
 
 /* Context Menu */
 
-.sf-tm-selected-loading
+.sf-tm-selected-loading,
+.sf-search-ctxitem-no-results
 {
     text-align: center
 }

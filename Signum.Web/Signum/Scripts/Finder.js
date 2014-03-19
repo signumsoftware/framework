@@ -333,17 +333,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.ctxMenuInDropdown = function () {
+            var _this = this;
             var $dropdown = $(this.pf("btnSelectedDropDown"));
 
             if (!$dropdown.closest(".btn-group").hasClass("open")) {
                 $dropdown.html(this.loadingMessage());
 
-                $.ajax({
+                SF.ajaxPost({
                     url: SF.Urls.selectedItemsContextMenu,
-                    data: this.requestDataForContextMenu(),
-                    success: function (items) {
-                        $dropdown.html(items);
-                    }
+                    data: this.requestDataForContextMenu()
+                }).then(function (items) {
+                    return $dropdown.html(items || _this.noActionsFoundMessage());
                 });
             }
         };
@@ -388,7 +388,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 url: SF.Urls.selectedItemsContextMenu,
                 data: this.requestDataForContextMenu()
             }).then(function (items) {
-                message.replaceWith(items);
+                return message.replaceWith(items || _this.noActionsFoundMessage());
             });
         };
 
@@ -404,6 +404,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.entityContextMenu = function (e) {
+            var _this = this;
             var $td = $(e.target).closest("td");
 
             var $menu = SF.ContextMenu.createContextMenu(e);
@@ -414,7 +415,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 url: SF.Urls.selectedItemsContextMenu,
                 data: this.requestDataForContextMenu()
             }).then(function (items) {
-                $menu.html(items);
+                $menu.html(items || _this.noActionsFoundMessage());
             });
 
             return false;
@@ -422,6 +423,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.loadingMessage = function () {
             return $("<li></li>").addClass("sf-tm-selected-loading").html($("<span></span>").html(lang.signum.loading));
+        };
+
+        SearchControl.prototype.noActionsFoundMessage = function () {
+            return $("<li></li>").addClass("sf-search-ctxitem-no-results").html($("<span></span>").html(lang.signum.noActionsFound));
         };
 
         SearchControl.prototype.fullScreen = function (evt) {
@@ -916,17 +921,29 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FilterBuilder.prototype.encodeValue = function ($filter, index) {
-            var valBool = $("input:checkbox[id=" + SF.compose(this.prefix, "value", index) + "]", $filter);
-            if (valBool.length > 0)
-                return valBool[0].checked;
+            var id = SF.compose(this.prefix, "value", index);
 
-            var infoElem = $("#" + SF.compose(this.prefix, "value", index, Entities.Keys.runtimeInfo));
+            var eleme = $filter.find("#" + id);
+
+            if (!eleme.length)
+                throw Error("value for filter " + index + " no found");
+
+            var date = $filter.find("#" + SF.compose(id, "Date"));
+            var time = $filter.find("#" + SF.compose(id, "Time"));
+
+            if (date.length && time.length)
+                return SearchControl.encodeCSV(date.val() + " " + time.val());
+
+            if (eleme.is("input:checkbox"))
+                return eleme[0].checked;
+
+            var infoElem = eleme.find("#" + SF.compose(id, Entities.Keys.runtimeInfo));
             if (infoElem.length > 0) {
                 var val = Entities.RuntimeInfo.parse(infoElem.val());
                 return SearchControl.encodeCSV(val == null ? null : val.key());
             }
 
-            return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
+            return SearchControl.encodeCSV(eleme.val());
         };
         return FilterBuilder;
     })();

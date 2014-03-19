@@ -140,7 +140,6 @@ Lose changes?")]
         NoActionsFound,
         NoColumnSelected,
         NoFiltersSpecified,
-        NoResults,
         [Description("of")]
         Of,
         Operation,
@@ -169,7 +168,8 @@ Lose changes?")]
         [Description("View Selected")]
         ViewSelected,
         Operations,
-        Processes
+        Processes,
+        NoResultsFound
     }
 
     public enum SelectorMessage
@@ -237,14 +237,14 @@ Lose changes?")]
         hideFilters,
         [Description("Loading...")]
         loading,
+        [Description("No actions found")]
+        noActionsFound,
         [Description("Save changes before or press cancel")]
         saveChangesBeforeOrPressCancel,
         [Description("Loose current changes?")]
         looseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
-        [Description("No results found")]
-        noResults,
         [Description("Seach for results")]
         searchForResults,
         [Description("You can select only one element")]
