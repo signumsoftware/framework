@@ -283,9 +283,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
 
             if (this.options.filterMode != 3 /* OnlyResults */) {
-                $tblResults.on("click", ".sf-pagination-button", function () {
-                    $(self.pf(self.keys.page)).val($(this).attr("data-page"));
-                    self.search();
+                $tblResults.on("click", "ul.pagination a", function () {
+                    self.search(parseInt($(this).attr("data-page")));
                 });
 
                 $tblResults.on("change", ".sf-pagination-size", function () {
@@ -436,14 +435,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
         };
 
-        SearchControl.prototype.search = function () {
+        SearchControl.prototype.search = function (page) {
             var $searchButton = $(this.pf("qbSearch"));
             $searchButton.addClass("sf-searching");
             var count = parseInt($searchButton.attr("data-searchCount")) || 0;
             var self = this;
             $.ajax({
                 url: SF.Urls.search,
-                data: this.requestDataForSearch(0 /* QueryRequest */),
+                data: this.requestDataForSearch(0 /* QueryRequest */, page),
                 success: function (r) {
                     var $tbody = self.element.find(".sf-search-results-container tbody");
                     if (!SF.isEmpty(r)) {
@@ -458,19 +457,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var form = this.requestDataForSearch(2 /* FullScreen */);
+            var page = $(this.pf(this.keys.page)).val() || 1;
+            var form = this.requestDataForSearch(2 /* FullScreen */, page);
 
             return $.param(form);
         };
 
-        SearchControl.prototype.requestDataForSearch = function (type) {
+        SearchControl.prototype.requestDataForSearch = function (type, page) {
             var requestData = {};
             if (type != 2 /* FullScreen */)
                 requestData["webQueryName"] = this.options.webQueryName;
 
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
             requestData["elems"] = $(this.pf(this.keys.elems)).val();
-            requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
+            requestData["page"] = page;
             requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
             requestData["filters"] = this.filterBuilder.serializeFilters();

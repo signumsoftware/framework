@@ -322,9 +322,8 @@ export class SearchControl {
         }
 
         if (this.options.filterMode != FilterMode.OnlyResults) {
-            $tblResults.on("click", ".sf-pagination-button", function () {
-                $(self.pf(self.keys.page)).val($(this).attr("data-page"));
-                self.search();
+            $tblResults.on("click", "ul.pagination a", function () {
+                self.search(parseInt($(this).attr("data-page")));
             });
 
             $tblResults.on("change", ".sf-pagination-size", function () {
@@ -476,14 +475,14 @@ export class SearchControl {
         }
     }
 
-    search() {
+    search(page? : number) {
         var $searchButton = $(this.pf("qbSearch"));
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
         var self = this;
         $.ajax({
             url: SF.Urls.search,
-            data: this.requestDataForSearch(RequestType.QueryRequest),
+            data: this.requestDataForSearch(RequestType.QueryRequest, page),
             success: function (r) {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
@@ -499,21 +498,22 @@ export class SearchControl {
     }
 
     requestDataForSearchInUrl(): string {
-        var form = this.requestDataForSearch(RequestType.FullScreen);
+        var page = $(this.pf(this.keys.page)).val() || 1
+        var form = this.requestDataForSearch(RequestType.FullScreen, page);
 
         return $.param(form);
     }
 
 
 
-    requestDataForSearch(type: RequestType) : FormObject {
+    requestDataForSearch(type: RequestType, page?: number) : FormObject {
         var requestData: FormObject = {};
         if (type != RequestType.FullScreen)
             requestData["webQueryName"] = this.options.webQueryName;
 
         requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
         requestData["elems"] = $(this.pf(this.keys.elems)).val();
-        requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
+        requestData["page"] = page;
         requestData["allowSelection"] = this.options.allowSelection;
         requestData["navigate"] = this.options.navigate;
         requestData["filters"] = this.filterBuilder.serializeFilters();

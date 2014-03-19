@@ -76,13 +76,13 @@
                 
                 <input type="hidden" id="@(Model.Compose("sfPage"))" value="@paginate.CurrentPage" />
                 <ul class="pagination">
-                    <li class="@((paginate.CurrentPage <= 1) ? "disabled" : null)" ><a data-page="@(paginate.CurrentPage - 1)" >&laquo;</a></li>
+                    <li class="@((paginate.CurrentPage <= 1) ? "disabled" : null)" ><a data-page="@(paginate.CurrentPage - 1)" href="#">&laquo;</a></li>
 
 
 
                     @if (interval.Min != 1)
                     {
-                        <li><a data-page="1" />1</li>
+                        <li><a data-page="1" href="#">1</a></li>
                         if (interval.Min - 1 != 1)
                         {
                         <li class="disabled"><span>...</span></li>
@@ -91,14 +91,14 @@
 
                     @for (int i = interval.Min; i < paginate.CurrentPage; i++)
                     {
-                        <li><a data-page="@i" />@i</li>  
+                        <li><a data-page="@i" href="#">@i</a></li>  
                     }
 
                     <li class="active"><span>@paginate.CurrentPage.ToString()</span></li>
 
                     @for (int i = paginate.CurrentPage + 1; i <= interval.Max; i++)
                     {
-                        <li><a data-page="@i" />@i</li> 
+                        <li><a data-page="@i" href="#">@i</a></li> 
                     }
 
                     @if (interval.Max != resultTable.TotalPages)
@@ -107,10 +107,10 @@
                         {
                         <li class="disabled"><span>...</span></li> 
                         }
-                        <li><a data-page="@resultTable.TotalPages">@resultTable.TotalPages</a></li> 
+                        <li><a data-page="@resultTable.TotalPages" href="#">@resultTable.TotalPages</a></li> 
                     }
 
-                    <li class="@(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null)"><a class="sf-pagination-button" data-page="@(paginate.CurrentPage + 1)"   >&raquo;</a></li>
+                    <li class="@(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null)"><a class="sf-pagination-button" data-page="@(paginate.CurrentPage + 1)" href="#">&raquo;</a></li>
                 </ul>
             }
         </div>
