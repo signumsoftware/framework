@@ -15,13 +15,15 @@
         @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
 
         <a id="@Model.Compose("btnAddFilter")" class="sf-query-button sf-add-filter btn btn-default btn-sm" title="@SearchMessage.AddFilter.NiceToString()">
-          <span class="glyphicon glyphicon-arrow-down"></span>@SearchMessage.AddFilter.NiceToString()
+          <span class="glyphicon glyphicon-arrow-down"></span>
+            @SearchMessage.AddFilter.NiceToString()
         </a>
        
         @if (showAddColumn)
         {
              <a id="@Model.Compose("btnAddColumn")" class="sf-query-button sf-add-column btn btn-default btn-sm" title="@SearchMessage.AddColumn.NiceToString()">
-                <span class="glyphicon glyphicon-arrow-right"></span>@SearchMessage.AddColumn.NiceToString()
+                <span class="glyphicon glyphicon-arrow-right"></span>
+                 @SearchMessage.AddColumn.NiceToString()
             </a>
         }
     </div>

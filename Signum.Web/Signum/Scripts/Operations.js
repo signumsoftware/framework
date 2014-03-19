@@ -34,8 +34,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.executeAjax = executeAjax;
 
     function executeDefaultContextual(options) {
-        Finder.removeOverlay();
-
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
@@ -93,8 +91,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function constructFromDefaultContextual(options, newPrefix) {
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
             exports.markCells(options.prefix);
@@ -157,8 +153,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
-        Finder.removeOverlay();
-
         return exports.deleteAjaxContextual(options).then(function (result) {
             exports.markCells(options.prefix);
         });
@@ -183,8 +177,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
             exports.markCells(options.prefix);

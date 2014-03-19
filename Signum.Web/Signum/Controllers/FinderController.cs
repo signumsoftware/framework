@@ -82,7 +82,7 @@ namespace Signum.Web.Controllers
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());
 
-            string result = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
+            var items = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
             {
                 Url = RouteHelper.New(),
                 ControllerContext = this.ControllerContext,
@@ -90,12 +90,13 @@ namespace Signum.Web.Controllers
                 QueryName = queryName,
                 Implementations = implementations,
                 Prefix = prefix,
-            }).ToString("");
+            });
 
-            if (string.IsNullOrEmpty(result))
+            if (items.IsNullOrEmpty())
                 return Content(NoResult());
-            else
-                return Content(result);
+
+            var helper = CreateHtmlHelper(this);
+            return Content(new HtmlStringBuilder(items.Select(mi => mi.ToHtml(helper))).ToHtml().ToString());
         }
 
         static string NoResult()

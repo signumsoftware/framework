@@ -8,67 +8,52 @@ using System.Web;
 
 namespace Signum.Web
 {
+    public enum BootstrapStyle 
+    {
+        Default,
+        Primary,
+        Success,
+        Info,
+        Warning,
+        Danger,
+    }
+
     public class ToolBarButton
     {
-        public static readonly string DefaultStyle = "btn-default";
-        public static readonly string PrimaryStyle = "btn-primary";
-        public static readonly string SuccessStyle = "btn-success";
-        public static readonly string InfoStyle = "btn-info";
-        public static readonly string WarningStyle = "btn-warning";
-        public static readonly string DangerStyle = "btn-danger";
-
         public string Id { get; set; }
         public string Text { get; set; }
         public string AltText { get; set; }
         public JsFunction OnClick { get; set; }
         public string Href { get; set; }
         public double Order { get; set; }
+        public BootstrapStyle Style { get; set; }
+        public string CssClass { get; set; }
+        public bool Enabled { get; set; }
+        public Dictionary<string, object> HtmlProps { get; private set; }
 
-
-        private string style = DefaultStyle;
-        public string Style
+        public ToolBarButton()
         {
-            get { return style; }
-            set { style = value; }
+            Enabled = true;
+            HtmlProps = new Dictionary<string, object>(0);
         }
 
-
-        private string cssClass;
-        public string CssClass
-        {
-            get { return cssClass; }
-            set { cssClass = value; }
-        }
-
-        private bool enabled = true;
-        public bool Enabled
-        {
-            get { return enabled; }
-            set { enabled = value; }
-        }
-
-        Dictionary<string, object> htmlProps = new Dictionary<string, object>(0);
-        public Dictionary<string, object> HtmlProps
-        {
-            get { return htmlProps; }
-        }
-
-        public virtual MvcHtmlString ToHtmlButton(HtmlHelper helper)
+        public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
             var a = new HtmlTag("a")
                 .Id(Id)
                 .Class("btn")
-                .Class(Style)
+                .Class("btn-" + Style.ToString().ToLower())
                 .Class(CssClass)
                 .Attrs(HtmlProps)
                 .SetInnerText(Text);
 
             if (Href.HasText())
                 a.Attr("href", Href);
+
             if (AltText.HasText())
                 a.Attr("alt", AltText);
 
-            if (enabled && (OnClick != null || Href.HasText()))
+            if (Enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());
             else
                 a.Attr("disabled", "disabled");
@@ -76,11 +61,56 @@ namespace Signum.Web
             return new HtmlTag("div").Class("btn-group").InnerHtml(a);
         }
 
-        public virtual MvcHtmlString ToHtmlMenuItem(HtmlHelper helper)
+        public IMenuItem ToMenuItem()
+        {
+            var result = new MenuItem
+            {
+                Id = Id,
+                Text = Text,
+                AltText = AltText,
+                OnClick = OnClick,
+                Href = Href,
+                Order = Order,
+                Style = Style,
+                CssClass = CssClass,
+                Enabled = Enabled,
+            };
+
+            result.HtmlProps.AddRange(HtmlProps);
+
+            return result;
+        }
+    }
+
+    public interface IMenuItem 
+    {
+        MvcHtmlString ToHtml(HtmlHelper helper);
+    }
+
+    public class MenuItem : IMenuItem
+    {
+        public string Id { get; set; }
+        public string Text { get; set; }
+        public string AltText { get; set; }
+        public JsFunction OnClick { get; set; }
+        public string Href { get; set; }
+        public double Order { get; set; }
+        public BootstrapStyle Style { get; set; }
+        public string CssClass { get; set; }
+        public bool Enabled { get; set; }
+        public Dictionary<string, object> HtmlProps { get; private set; }
+
+        public MenuItem()
+        {
+            Enabled = true;
+            HtmlProps = new Dictionary<string, object>(0);
+        }
+
+        public MvcHtmlString ToHtml(HtmlHelper helper)
         {
             var a = new HtmlTag("a")
                .Id(Id)
-               .Class(ToBackgroundStyle(Style))
+               .Class("bg-" + Style.ToString().ToLower())
                .Class(CssClass)
                .Attrs(HtmlProps)
                .SetInnerText(Text);
@@ -90,21 +120,12 @@ namespace Signum.Web
             if (AltText.HasText())
                 a.Attr("alt", AltText);
 
-            if (enabled && (OnClick != null || Href.HasText()))
+            if (Enabled && (OnClick != null || Href.HasText()))
                 a.Attr("onclick", OnClick.ToString());
             else
                 a.Attr("disabled", "disabled");
 
             return new HtmlTag("li").InnerHtml(a);
-        }
-
-        private string ToBackgroundStyle(string style)
-        {
-            if (string.IsNullOrEmpty(style))
-                return style;
-
-            return style.Replace("btn-", "bg-");
-            
         }
     }
 }

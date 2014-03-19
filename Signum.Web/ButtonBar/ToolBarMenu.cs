@@ -8,11 +8,11 @@ using System.Web;
 
 namespace Signum.Web
 {
-    public class ToolBarMenu : ToolBarButton
+    public class ToolBarDropDown : ToolBarButton
     {
-        public List<ToolBarButton> Items { get; set; }
+        public List<IMenuItem> Items { get; set; }
 
-        public override MvcHtmlString ToHtmlButton(HtmlHelper helper)
+        public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using(sb.Surround(new HtmlTag("div").Class("btn-group")))
@@ -20,7 +20,7 @@ namespace Signum.Web
                 var a = new HtmlTag("a")
                     .Id(Id)
                     .Class("btn")
-                    .Class(Style)
+                    .Class("btn-" + Style.ToString().ToLower())
                     .Class(CssClass)
                     .Class("dropdown-toggle")
                     .Attr("data-toggle", "dropdown")
@@ -32,16 +32,16 @@ namespace Signum.Web
 
                 using (sb.Surround(a))
                 {
-                    sb.Add(new MvcHtmlString(Text));
-                    sb.Add(new HtmlTag("span").Class("caret"));
+                    sb.AddLine(new MvcHtmlString(Text));
+                    sb.AddLine(new HtmlTag("span").Class("caret"));
                 }
 
 
                 using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
                 {
                     if (Items != null)
-                        foreach (var tbb in Items)
-                            sb.Add(tbb.ToHtmlMenuItem(helper));
+                        foreach (var ci in Items)
+                            sb.Add(ci.ToHtml(helper));
                 }
             }
 
@@ -49,16 +49,25 @@ namespace Signum.Web
         }
     }
 
-    public class ToolBarSeparator : ToolBarButton
+    public class MenuItemSeparator : IMenuItem
     {
-        public override MvcHtmlString ToHtmlButton(HtmlHelper helper)
-        {
-            return MvcHtmlString.Empty;
-        }
-
-        public virtual MvcHtmlString ToHtmlMenuItem(HtmlHelper helper)
+        public MvcHtmlString ToHtml(HtmlHelper helper)
         {
             return new HtmlTag("li").Class("divider").ToHtml();
+        }
+    }
+
+    public class MenuItemHeader : IMenuItem
+    {
+        public string Text { get; set; }
+        public MenuItemHeader(string text)
+        {
+            this.Text = text;
+        }
+
+        public MvcHtmlString ToHtml(HtmlHelper helper)
+        {
+            return new HtmlTag("li").Class("dropdown-header").SetInnerText(this.Text).ToHtml();
         }
     }
 }

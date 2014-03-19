@@ -71,12 +71,12 @@ namespace Signum.Web.Operations
 
         static EntityOperationSettings()
         {
-            Style = oi => oi.OperationType == OperationType.Delete ? ToolBarButton.DangerStyle : 
-                oi.OperationType == OperationType.Execute && oi.Key.ToString()  == "Save"  ? ToolBarButton.PrimaryStyle : 
-                ToolBarButton.DefaultStyle;
+            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+                oi.OperationType == OperationType.Execute && oi.Key.ToString() == "Save" ? BootstrapStyle.Primary :
+                BootstrapStyle.Default;
         }
 
-        public static Func<OperationInfo, string> Style { get; set; }
+        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 

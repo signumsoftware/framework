@@ -19,71 +19,38 @@ namespace Signum.Web
         public string Prefix { get; set; }
     }
 
-    public delegate ContextualItem GetContextualItemDelegate(SelectedItemsMenuContext context);
-
-    public class ContextualItem : ToolBarMenu
-    {
-        public string Content { get; set; }
-
-        public override string ToString()
-        {
-            return Content;
-        }
-    }
-
     public static class ContextualItemsHelper
     {
         public static bool SelectedItemsMenuInSearchPage = false;
-        public static event GetContextualItemDelegate GetContextualItemsForLites;
+        public static event Func<SelectedItemsMenuContext, List<IMenuItem>> GetContextualItemsForLites;
 
         public static void Start()
         {
             SelectedItemsMenuInSearchPage = true;
-
-            ButtonBarQueryHelper.RegisterGlobalButtons(ctx =>
-            {
-                var selectedText = JavascriptMessage.searchControlMenuSelected.NiceToString();
-                return new ToolBarButton[]
-                {
-                    new ToolBarMenu
-                    {
-                        Id = TypeContextUtilities.Compose(ctx.Prefix, "sfTmSelected"),
-                        CssClass = "sf-tm-selected",
-                        Text = selectedText + " (0)",
-                        AltText = selectedText,
-                    }
-                };
-            });
         }
 
-        public static List<ContextualItem> GetContextualItemListForLites(SelectedItemsMenuContext ctx)
+        public static List<IMenuItem> GetContextualItemListForLites(SelectedItemsMenuContext ctx)
         {
-            List<ContextualItem> items = new List<ContextualItem>();
+            List<IMenuItem> items = new List<IMenuItem>();
             if (!ctx.Lites.IsNullOrEmpty())
             {
                 if (GetContextualItemsForLites != null)
-                    items.AddRange(GetContextualItemsForLites.GetInvocationList()
-                        .Cast<GetContextualItemDelegate>()
-                        .Select(d => d(ctx))
-                        .NotNull().ToList());
+                {
+                    foreach (Func<SelectedItemsMenuContext, List<IMenuItem>> d in GetContextualItemsForLites.GetInvocationList())
+                    {
+                        var newItems = d(ctx);
+
+                        if (newItems != null)
+                        {
+                            if (items.Any() && newItems.NotNull().Any())
+                                items.Add(new MenuItemSeparator());
+
+                            items.AddRange(newItems.NotNull());
+                        }
+                    }
+                }
             }
             return items;
-        }
-
-        public static string ContextualItemsToString(this List<ContextualItem> items)
-        {
-            if (items == null || items.Count == 0)
-                return "";
-
-            StringBuilder sb = new StringBuilder();
-
-            foreach (var item in items)
-            {
-                if (item != null)
-                    sb.AppendLine(item.ToString());
-            }
-
-            return sb.ToString();
         }
     }
 }

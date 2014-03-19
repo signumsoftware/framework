@@ -202,14 +202,6 @@ export function deleteFilter(trId) {
     $tr.remove();
 }
 
-export function removeOverlay() {
-    $('.sf-search-ctxmenu-overlay').remove();
-}
-
-
-
-
-
 export class SearchControl {
 
     filterBuilder: FilterBuilder;
@@ -263,15 +255,6 @@ export class SearchControl {
         return "#" + SF.compose(this.options.prefix, s);
     }
 
-    public closeMyOpenedCtxMenu() {
-        if (this.element.find(".sf-search-ctxmenu-overlay").length > 0) {
-            $('.sf-search-ctxmenu-overlay').remove();
-            return false;
-        }
-
-        return true;
-    }
-
     _create() {
         var self = this;
 
@@ -299,9 +282,6 @@ export class SearchControl {
 
         if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults)) {
             $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                if (!self.closeMyOpenedCtxMenu()) {
-                    return false;
-                }
                 self.headerContextMenu(e);
                 return false;
             });
@@ -310,7 +290,6 @@ export class SearchControl {
         if (this.options.allowChangeColumns) {
             $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
                 var $elem = $(this).closest("th");
-                $('.sf-search-ctxmenu-overlay').remove();
 
                 self.removeColumn($elem);
                 return false;
@@ -318,7 +297,6 @@ export class SearchControl {
 
             $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
                 var $elem = $(this).closest("th");
-                $('.sf-search-ctxmenu-overlay').remove();
 
                 self.editColumn($elem);
                 return false;
@@ -329,10 +307,7 @@ export class SearchControl {
 
         if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
             $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                if (!self.closeMyOpenedCtxMenu()) {
-                    return false;
-                }
-
+                
                 var $td = $(this).closest("td");
 
                 var $tr = $td.closest("tr");
@@ -393,12 +368,8 @@ export class SearchControl {
                 self.fullScreen(e);
             });
 
-            this.element.find(".sf-tm-selected").click(function () {
-                if (!self.closeMyOpenedCtxMenu()) {
-                    return false;
-                }
-
-                self.ctxMenuInDropdown($(this).closest(".sf-dropdown"));
+            this.element.find(this.pf("btnSelected")).click(function () {
+                self.ctxMenuInDropdown();
             });
         }
 
@@ -415,22 +386,44 @@ export class SearchControl {
 
     changeRowSelection($rowSelectors, select : boolean) {
         $rowSelectors.prop("checked", select);
-        $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
+        $rowSelectors.closest("tr").toggleClass("active", select);
 
-        var $control = $(this.pf("sfSearchControl"));
+        var selected = this.element.find(".sf-td-selection:checked").length;
 
-        var selected = $control.find(".sf-td-selection:checked").length;
-        $control.find(".sf-tm-selected > .ui-button-text").html(lang.signum.searchControlMenuSelected + " (" + selected + ")");
+        this.element.find(this.pf("btnSelectedSpan")).text(selected);
+        var btn = this.element.find(this.pf("btnSelected"));
+        if (selected == 0)
+            btn.attr("disabled", "disabled");
+        else
+            btn.removeAttr("disabled");
     }
 
-    createCtxMenu($rightClickTarget) {
-        var left = $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2);
-        var top = $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2);
+    ctxMenuInDropdown() {
 
-        var $cmenu = $("<div class='ui-state-default sf-search-ctxmenu'></div>");
+        var $dropdown = $(this.pf("btnSelectedDropDown"));
+
+        if (!$dropdown.closest(".btn-group").hasClass("open")) {
+
+            var loadingClass = "sf-tm-selected-loading";
+
+            $dropdown.html($("<li></li>").addClass(loadingClass).html($("<span></span>").addClass("sf-query-button").html(lang.signum.loading)));
+
+            $.ajax({
+                url: SF.Urls.selectedItemsContextMenu,
+                data: this.requestDataForContextMenu(),
+                success: function (items) {
+                    $dropdown.html(items);
+                }
+            });
+        }
+    }
+
+    createCtxMenu(e : JQueryEventObject) {
+
+        var $cmenu = $("<ul class='dropdown-menu'></ul>");
         $cmenu.css({
-            left: left,
-            top: top,
+            left: e.pageX,
+            top: e.pageY,
             zIndex: '101'
         });
 
@@ -445,9 +438,9 @@ export class SearchControl {
         return $ctxMenuOverlay;
     }
 
-    headerContextMenu(e) {
+    headerContextMenu(e: JQueryEventObject) {
         var $th = $(e.target).closest("th");
-        var $menu = this.createCtxMenu($th);
+        var $menu = this.createCtxMenu(e);
 
         var $itemContainer = $menu.find(".sf-search-ctxmenu");
         if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults){
@@ -463,9 +456,9 @@ export class SearchControl {
         return false;
     }
 
-    cellContextMenu(e) {
+    cellContextMenu(e : JQueryEventObject) {
         var $td = $(e.target);
-        var $menu = this.createCtxMenu($td);
+        var $menu = this.createCtxMenu(e);
 
         $menu.find(".sf-search-ctxmenu")
             .html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
@@ -483,10 +476,10 @@ export class SearchControl {
         };
     }
 
-    entityContextMenu(e) {
+    entityContextMenu(e: JQueryEventObject) {
         var $td = $(e.target).closest("td");
 
-        var $menu = this.createCtxMenu($td);
+        var $menu = this.createCtxMenu(e);
         var $itemContainer = $menu.find(".sf-search-ctxmenu");
 
         $.ajax({
@@ -501,27 +494,7 @@ export class SearchControl {
         return false;
     }
 
-    ctxMenuInDropdown($dropdown) {
-        if ($dropdown.hasClass("sf-open")) {
-            var requestData = this.requestDataForContextMenu();
-            if (SF.isEmpty(requestData.implementationsKey)) {
-                return;
-            }
-
-            var loadingClass = "sf-tm-selected-loading";
-
-            var $ul = $dropdown.children(".sf-menu-button");
-            $ul.html($("<li></li>").addClass(loadingClass).html($("<span></span>").addClass("sf-query-button").html(lang.signum.loading)));
-
-            $.ajax({
-                url: SF.Urls.selectedItemsContextMenu,
-                data: requestData,
-                success: function (items) {
-                    $ul.find("li").removeClass(loadingClass).html(items);
-                }
-            });
-        }
-    }
+   
 
     fullScreen(evt) {
         var urlParams = this.requestDataForSearchInUrl();

@@ -45,9 +45,14 @@ span.token-builder > select.form-control
 {
     width: auto;
     display: inline;
-    height: 28px;
+    height: 30px;
     padding: 2px;
     margin: 2px 0px;
+}
+
+.sf-filters-body .btn-sm
+{
+    margin-top: -2px;
 }
 
 .panel-heading.sf-filters-body
@@ -109,6 +114,7 @@ div.sf-filters-list table.table
 }
 
 
+/* SORTER */
 
 .sf-header-sort.l3
 {
@@ -156,4 +162,11 @@ div.sf-filters-list table.table
     vertical-align: middle;
     border-right: 6px solid transparent;
     border-left: 6px solid transparent;
+}
+
+/* Context Menu */
+
+.sf-tm-selected-loading
+{
+    text-align: center
 }

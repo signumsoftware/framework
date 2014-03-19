@@ -245,6 +245,8 @@ Lose changes?")]
         noElementsSelected,
         [Description("No results found")]
         noResults,
+        [Description("Seach for results")]
+        searchForResults,
         [Description("You can select only one element")]
         onlyOneElement,
         [Description("There are errors in the entity, you want to continue?")]
@@ -261,8 +263,8 @@ Lose changes?")]
         saved,
         [Description("Search")]
         search,
-        [Description("selected")]
-        searchControlMenuSelected,
+        [Description("Selected")]
+        Selected,
         [Description("Select a token")]
         selectToken,
         [Description("Show filters")]

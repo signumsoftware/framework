@@ -54,11 +54,22 @@
             <a  class="sf-query-button sf-filters-header btn btn-default @(filtersVisible ? "active" : "")"
             onclick="@JsFunction.SFControlThen(prefix, "toggleFilters()")"
             title="@(filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString())">
-                 <span class="glyphicon glyphicon glyphicon-filter"></span>
+                <span class="glyphicon glyphicon glyphicon-filter"></span>
             </a>
         }
         <button class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")" >@SearchMessage.Search.NiceToString()</button>
-      
+
+        <div class="btn-group">
+            <button class="sf-query-button sf-tm-selectedbtn btn btn-default dropdown-toggle" data-toggle="dropdown" id="@Model.Compose("btnSelected")" disabled="disabled">
+                @JavascriptMessage.Selected
+                (<span id="@Model.Compose("btnSelectedSpan")">0</span>)
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="@Model.Compose("btnSelectedDropDown")">
+                <li>hi there!</li>
+            </ul>
+        </div>
+
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
            Url = Url,
@@ -118,7 +129,7 @@
             <tbody>
                 @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); }
                 <tr>
-                    <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>
+                    <td colspan="@columnsCount">@JavascriptMessage.searchForResults.NiceToString()</td>
                 </tr>
                 @{ 
                     ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;

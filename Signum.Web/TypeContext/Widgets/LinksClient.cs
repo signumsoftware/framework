@@ -13,8 +13,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Signum.Web
 {
-   
-
     static class QuickLinkWidgetHelper
     {  
         internal static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
@@ -63,40 +61,20 @@ namespace Signum.Web
 
     static class QuickLinkContextualMenu
     {
-        internal static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
+        internal static List<IMenuItem> ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
                 return null;
 
-            List<QuickLink> quicklinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
-            if (quicklinks == null || quicklinks.Count == 0)
+            List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
+            if (quickLinks.IsNullOrEmpty())
                 return null;
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-quicklinks")))
-            {
-                string ctxItemClass = "sf-search-ctxitem";
+            List<IMenuItem> menuItems = new List<IMenuItem>();
+            menuItems.Add(new MenuItemHeader(QuickLinkMessage.Quicklinks.NiceToString()));
+            menuItems.AddRange(quickLinks);
 
-                content.AddLine(new HtmlTag("li")
-                    .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(
-                        new HtmlTag("span").InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml()))
-                    );
-
-                foreach (var q in quicklinks)
-                {
-                    using (content.Surround(new HtmlTag("li").Class(ctxItemClass)))
-                    {
-                        content.Add(q.Execute());
-                    }
-                }
-            }
-
-            return new ContextualItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemQuickLinks"),
-                Content = content.ToHtml().ToString()
-            };
+            return menuItems;
         }
     }
 
@@ -161,16 +139,20 @@ namespace Signum.Web
         }
     }
 
-    public abstract class QuickLink : ToolBarButton
+    public abstract class QuickLink : IMenuItem
     {
+        public string Prefix { get; set; }
+        public bool IsVisible { get; set; }
+        public string Text { get; set; }
+
         public QuickLink()
         {
-            CssClass = "sf-quicklink";
         }
 
-        public string Prefix { get; set; }
-
-        public bool IsVisible { get; set; }
+        public MvcHtmlString ToHtml(HtmlHelper helper)
+        {
+            return new HtmlTag("li").InnerHtml(Execute());
+        }
 
         public abstract MvcHtmlString Execute();
     }
