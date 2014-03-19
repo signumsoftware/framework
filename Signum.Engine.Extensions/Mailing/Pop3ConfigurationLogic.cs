@@ -64,6 +64,8 @@ namespace Signum.Engine.Mailing
 
                 MixinDeclarations.AssertDefined(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
 
+                MimeType.CacheExtension.TryAdd("message/rfc822", ".eml");
+
                 sb.Include<Pop3ConfigurationDN>();
                 sb.Include<Pop3ReceptionDN>();
                 sb.Include<Pop3ReceptionExceptionDN>();
@@ -201,9 +203,10 @@ namespace Signum.Engine.Mailing
                             using (OperationLogic.AllowSave<EmailMessageDN>())
                             using (Transaction tr = Transaction.ForceNew())
                             {
+                                string rawContent = null;
                                 try
                                 {
-                                    string rawContent = client.GetMessage(kvp.Key);
+                                    rawContent = client.GetMessage(kvp.Key);
 
                                     MailMessage mm = MailMimeParser.Parse(rawContent);
 
@@ -242,7 +245,9 @@ namespace Signum.Engine.Mailing
                                     tr.Commit();
                                 }
                                 catch (Exception e)
-                                {   
+                                {
+                                    e.Data["rawContent"] = rawContent;
+
                                     var ex = e.LogException();
 
                                     using (Transaction tr2 = Transaction.ForceNew())
@@ -305,25 +310,22 @@ namespace Signum.Engine.Mailing
         {
             email.Target = dup.Target;
             foreach (var att in email.Attachments)
-                att.File = dup.Attachments.FirstOrDefault(a => a.ContentId == att.ContentId).File;
+                att.File = dup.Attachments.FirstEx(a => a.Similar(att)).File;
 
             email.From.EmailOwner = dup.From.EmailOwner;
             foreach (var rec in email.Recipients)
-                rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
+                rec.EmailOwner = dup.Recipients.FirstEx(a => a.GetHashCode() == rec.GetHashCode()).EmailOwner;
         }
-
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
-            if (!dup.Recipients.SequenceEqual(email.Recipients))
+            if (!dup.Recipients.OrderBy(a => a.GetHashCode()).SequenceEqual(email.Recipients.OrderBy(a => a.GetHashCode())))
                 return false;
 
             if (!dup.From.Equals(email.From))
                 return false;
 
-
-
-            if (!dup.Attachments.Select(a=>a.ContentId).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.ContentId).OrderBy()))
+            if (dup.Attachments.Count != email.Attachments.Count || !dup.Attachments.All(a=> email.Attachments.Any(a2=>a2.Similar(a))))
                 return false;
 
             return true;
@@ -394,7 +396,10 @@ namespace Signum.Engine.Mailing
 
         private static string GetName(ContentType ct)
         {
-            return ct.Name ?? ("unknown" + MimeType.GetDefaultExtension(ct.MediaType));
+            if (ct.Name.HasText())
+                return FileNameValidatorAttribute.RemoveInvalidCharts(ct.Name);
+
+            return "noname" +  MimeType.GetDefaultExtension(ct.MediaType) ?? ".unknown"; 
         }
 
         private static DateTime GetDate(MailMessage mm)

@@ -8,15 +8,9 @@ using Signum.Utilities;
 
 namespace Signum.Web.Selenium
 {
-    public interface IEntityButtonContainer
+    public interface IEntityButtonContainer : ILineContainer
     {
-        ISelenium Selenium { get; }
-
-        string Prefix { get; }
-
         RuntimeInfoProxy RuntimeInfo();
-
-        bool HasChanges();
 
         string ButtonLocator(string buttonId);
     }
@@ -59,8 +53,14 @@ namespace Signum.Web.Selenium
 
         public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
         {
-            container.OperationClick(operationKey);
-            container.Selenium.Wait(() => !container.HasChanges());
+            container.WaitReload(() => container.OperationClick(operationKey));
+        }
+
+        public static void WaitReload(this IEntityButtonContainer container, Action action)
+        {
+            var ticks = container.TestTicks().Value;
+            action();
+            container.Selenium.Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
         public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
@@ -144,6 +144,23 @@ namespace Signum.Web.Selenium
                 throw new InvalidOperationException("{0} not found on {1}".Formato(optionId, menuId));
 
             return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
+        }
+
+        public static bool HasChanges(this IEntityButtonContainer container)
+        {
+            return container.Selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(container.PrefixUnderscore()));
+        }
+
+        public static long? TestTicks(this IEntityButtonContainer container)
+        {
+            try
+            {
+                return container.Selenium.GetEval("window && window.$ && window.$('#" + container.PrefixUnderscore() + "divMainControl').attr('data-test-ticks')").ToLong();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
     }

@@ -44,7 +44,7 @@ namespace Signum.Web.Selenium
         {
             get
             {
-                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
                     return Selenium.IsChecked(Prefix).ToString();
 
                 return Selenium.GetValue(Prefix);
@@ -52,7 +52,7 @@ namespace Signum.Web.Selenium
 
             set
             {
-                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
                     Selenium.SetChecked(Prefix, bool.Parse(value));
                 else
                     Selenium.Type(Prefix, value);
@@ -371,6 +371,22 @@ namespace Signum.Web.Selenium
         {
             return RuntimeInfoInternal(null);
         }
+
+        public ILineContainer<T> GetOrCreateDetailControl<T>() where T : ModifiableEntity
+        {
+            if (this.HasEntity())
+                return this.Details<T>();
+
+            var imp = this.Route.TryGetImplementations();
+            if (imp == null || imp.Value.Types.Count() == 1)
+                this.Create();
+            else
+                this.CreateImplementations(typeof(T));
+
+            this.Selenium.Wait(() => this.HasEntity());
+
+            return this.Details<T>();
+        }
     }
 
     public class EntityListProxy : EntityBaseProxy
@@ -494,7 +510,7 @@ namespace Signum.Web.Selenium
             get { return "jq=#{0}_sfItemsContainer".Formato(Prefix); }
         }
 
-        public string RepeaterItemSelector(int index)
+        public virtual string RepeaterItemSelector(int index)
         {
             return "{0} > #{1}_{2}_sfRepeaterItem".Formato(ItemsContainerLocator, Prefix, index);
         }
@@ -504,12 +520,12 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementPresent(RepeaterItemSelector(index));
         }
 
-        public void MoveUp(int index)
+        public virtual void MoveUp(int index)
         {
             Selenium.Click("{0} > legend .sf-move-up".Formato(RepeaterItemSelector(index)));
         }
 
-        public void MoveDown(int index)
+        public virtual void MoveDown(int index)
         {
             Selenium.Click("{0} > legend .sf-move-down".Formato(RepeaterItemSelector(index)));
         }
@@ -519,7 +535,7 @@ namespace Signum.Web.Selenium
             return Selenium.IsElementPresent(RepeaterItemSelector(index)); ;
         }
 
-        public int ItemsCount()
+        public virtual int ItemsCount()
         {
             string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').length".Formato(ItemsContainerLocator));
 
@@ -556,6 +572,53 @@ namespace Signum.Web.Selenium
         public RuntimeInfoProxy RuntimeInfo(int index)
         {
             return RuntimeInfoInternal(index);
+        }
+
+        public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
+        {
+            var index = NewIndex();
+
+            var imp = this.Route.TryGetImplementations();
+            if (imp == null || imp.Value.Types.Count() == 1)
+                this.Create();
+            else
+                this.CreateImplementations(typeof(T));
+
+            this.Selenium.Wait(() => this.HasEntity(index.Value));
+
+            return this.Details<T>(index.Value);
+        }
+    }
+
+    public class EntityTabRepeaterProxy : EntityRepeaterProxy
+    {
+        public EntityTabRepeaterProxy(ISelenium selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+        {
+        }
+
+        public virtual void MoveUp(int index)
+        {
+            Selenium.Click("{0} .sf-move-up".Formato(RepeaterItemSelector(index)));
+        }
+
+        public virtual void MoveDown(int index)
+        {
+            Selenium.Click("{0} .sf-move-down".Formato(RepeaterItemSelector(index)));
+        }
+
+        public virtual int ItemsCount()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').length".Formato(ItemsContainerLocator));
+
+            return int.Parse(result);
+        }
+
+        public override int? NewIndex()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+
+            return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
     }
 
@@ -667,7 +730,7 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementPresent("jq=#{0}_DivNew .sf-file-drop:visible".Formato(Prefix));
             Selenium.Type("{0}_sfFile".Formato(Prefix), path);
             Selenium.FireEvent("{0}_sfFile".Formato(Prefix), "change");
-            Selenium.WaitElementPresent("jq=#{0}_sfToStr:visible".Formato(Prefix));
+            Selenium.WaitElementPresent("jq=#{0}_sfLink:visible".Formato(Prefix));
         }
     }
 }

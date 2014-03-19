@@ -45,7 +45,7 @@ namespace Signum.Engine.Mailing
                 sb.Include<NewsletterDeliveryDN>();
 
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgorithm());
+                ProcessLogic.Register(NewsletterProcess.SendNewsletter, new NewsletterProcessAlgorithm());
 
                 dqm.RegisterQuery(typeof(NewsletterDN), () =>
                  from n in Database.Query<NewsletterDN>()
@@ -238,33 +238,22 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperation.Send)
+            new Graph<ProcessDN>.ConstructFrom<NewsletterDN>(NewsletterOperation.Send)
             {
-                FromStates = { NewsletterState.Saved },
-                ToState = NewsletterState.Sent,
-                CanExecute = n =>
+                CanConstruct = n =>
                 {
                     if (n.Subject.IsNullOrEmpty())
                         return "Subject must be set";
-                    
+
                     if (n.Text.IsNullOrEmpty())
                         return "Text must be set";
 
-                    if (!Database.Query<NewsletterDeliveryDN>().Any(d => d.Newsletter.RefersTo(n))) 
+                    if (!Database.Query<NewsletterDeliveryDN>().Any(d => d.Newsletter.RefersTo(n)))
                         return "There is not any delivery for this newsletter";
 
                     return null;
                 },
-                Execute = (n, _) =>
-                {
-                    using (OperationLogic.AllowSave<NewsletterDN>())
-                    {
-                        var process = ProcessLogic.Create(NewsletterOperation.Send, n);
-                        process.Execute(ProcessOperation.Execute);
-                    }
-                    
-                    n.State = NewsletterState.Sent;
-                }
+                Construct = (n, _) => ProcessLogic.Create(NewsletterProcess.SendNewsletter, n)
             }.Register();
         }
     }
@@ -328,9 +317,9 @@ namespace Signum.Engine.Mailing
 
             var dicTokenColumn = resultTable.Columns.ToDictionary(rc => rc.Column.Token);
 
-            var entityColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity");
-            var deliveryColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
-            var emailOwnerColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "EmailOwnerData");
+            var entityColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity");
+            var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
+            var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
 
             var lines = resultTable.Rows.GroupBy(r => (Lite<IdentifiableEntity>)r[entityColumn]).Select(g => new SendLine
                 {
@@ -422,6 +411,11 @@ namespace Signum.Engine.Mailing
 
                 executingProcess.ProgressChanged(processed, lines.Count);
             }
+
+            newsletter.State = NewsletterState.Sent;
+
+            using (OperationLogic.AllowSave<NewsletterDN>())
+                newsletter.Save();
         }
     }
 }

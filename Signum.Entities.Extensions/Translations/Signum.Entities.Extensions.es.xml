@@ -438,7 +438,7 @@
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="Exception" Description="Error" />
     <Member Name="From" Description="De" />
-    <Member Name="IsBodyHtml" Description="Cuerpo html" />
+    <Member Name="IsBodyHtml" Description="Es html" />
     <Member Name="Package" Description="Paquete" />
     <Member Name="ReceptionNotified" Description="Recepción notificada" />
     <Member Name="Recipients" Description="Destinatarios" />

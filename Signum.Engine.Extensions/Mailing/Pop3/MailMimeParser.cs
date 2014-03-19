@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     List<string> parts = SplitSubparts(reader, contentType.Boundary);
 
-             
+
                     if (contentType.MediaType == "multipart/related")
                     {
                         var result = GetParts(parts[0], Request.AlternateView).ToList();
@@ -70,16 +70,16 @@ namespace Signum.Engine.Mailing.Pop3
 
                         foreach (string item in parts.Skip(1))
                         {
-                            foreach (var part in GetParts(item, best == null ? Request.None: Request.LinkedResource))
+                            foreach (var part in GetParts(item, best == null ? Request.None : Request.LinkedResource))
                             {
                                 if (best != null && part is LinkedResource)
                                     best.LinkedResources.Add((LinkedResource)part);
                                 else
-                                    result.Add(best); 
+                                    result.Add(best);
                             }
                         }
 
-                        return result; 
+                        return result;
                     }
                     else
                     {
@@ -97,11 +97,30 @@ namespace Signum.Engine.Mailing.Pop3
                 if (req == Request.LinkedResource)
                     return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: true) };
 
-                if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/"))
+                if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/") && !IsAttachment(headers["Content-Disposition"]))
                     return new List<AttachmentBase> { ParseTextView(reader, contentTransferEncoding, contentType) };
 
-                return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false) };
+                var attachment = ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false);
+
+                if (IsWinMailDat(contentType) && OpenWinMailAttachment != null)
+                    return OpenWinMailAttachment((Attachment)attachment);
+
+                return new List<AttachmentBase> { attachment };
             }
+        }
+
+        public static Func<Attachment, List<AttachmentBase>> OpenWinMailAttachment = null;
+
+        static bool IsWinMailDat(ContentType contentType)
+        {
+            return contentType.MediaType != null &&
+                (string.Equals(contentType.MediaType, "application/ms-tnef") || string.Equals(contentType.MediaType, "application/dat")) &&
+                string.Equals(contentType.Name, "winmail.dat", StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        private static bool IsAttachment(string contentDisposition)
+        {
+            return contentDisposition.HasText() && contentDisposition.StartsWith("attachment", StringComparison.InvariantCultureIgnoreCase);
         }
 
         static NameValueCollection ReadHeaders(StringReader reader, NameValueCollection headers)
@@ -117,7 +136,7 @@ namespace Signum.Engine.Mailing.Pop3
                 //If the line starts with a whitespace it is a continuation of the previous line
                 if (Regex.IsMatch(line, @"^\s"))
                 {
-                    headers[lastHeader] = GetHeaderValue(headers, lastHeader) + " " + line.TrimStart('\t', ' ');
+                    headers[lastHeader] += line.TrimStart('\t', ' ');
                 }
                 else
                 {
@@ -197,7 +216,7 @@ namespace Signum.Engine.Mailing.Pop3
 
             var enc = GetEncoding(contentType);
 
-            switch (encoding)
+            switch (encoding == null ? null : encoding.ToLower())
             {
                 case "quoted-printable":
                     result = enc.GetString(DecodeQuotePrintable(content));
@@ -221,7 +240,14 @@ namespace Signum.Engine.Mailing.Pop3
             if (contentType.CharSet == null)
                 return Encoding.UTF8;
 
-            return Encoding.GetEncoding(contentType.CharSet.ToLower());
+            try
+            {
+                return Encoding.GetEncoding(contentType.CharSet.ToLower());
+            }
+            catch
+            {
+                return Encoding.UTF8;
+            }
         }
 
         static AttachmentBase ParseAttachment(StringReader r, string encoding, ContentType contentType, NameValueCollection headers, bool asLinkedResource)

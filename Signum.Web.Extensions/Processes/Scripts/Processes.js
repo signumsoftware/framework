@@ -39,8 +39,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Navigator", "
     function refreshUpdate(idProcess, prefix, getProgressUrl) {
         setTimeout(function () {
             $.post(getProgressUrl, { id: idProcess }, function (data) {
-                $("#progressBar").width(data + '%');
-                if (data < 100) {
+                $("#progressBar").width(data * 100 + '%');
+                if (data < 1) {
                     exports.refreshUpdate(idProcess, prefix, getProgressUrl);
                 } else {
                     Navigator.requestAndReload(prefix);

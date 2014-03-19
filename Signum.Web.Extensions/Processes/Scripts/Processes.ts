@@ -44,8 +44,8 @@ export function initControlPanel(url : string) {
 export function refreshUpdate(idProcess: string, prefix: string, getProgressUrl: string) {
     setTimeout(function () {
         $.post(getProgressUrl, { id: idProcess }, function (data) {
-            $("#progressBar").width(data + '%');
-            if (data < 100) {
+            $("#progressBar").width(data * 100 + '%');
+            if (data < 1) {
                 refreshUpdate(idProcess, prefix, getProgressUrl);
             }
             else {

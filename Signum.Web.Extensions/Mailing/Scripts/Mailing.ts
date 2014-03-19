@@ -128,8 +128,9 @@ function updateHtmlEditorTextArea(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].updateElement();
 };
 
-export function initHtmlEditor(idTargetTextArea: string) {
+export function initHtmlEditor(idTargetTextArea: string, culture : string) {
 
+    CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
     CKEDITOR.replace(idTargetTextArea);
 
     // Update origin textarea
@@ -145,11 +146,13 @@ export function initHtmlEditor(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
     CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
     CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
+    CKEDITOR.instances[idTargetTextArea].on('simpleuploads.finishedUpload', changed);
+    
 };
 
-export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
+export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
         .find(".sf-master-template-insert-content");
@@ -160,9 +163,9 @@ export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
     });
 }
 
-export function initHtmlEditorWithTokens(idTargetTextArea: string) {
+export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea);
+    initHtmlEditor(idTargetTextArea, culture);
 
     var lastCursorPosition;
 
@@ -247,10 +250,18 @@ export function activateIFrame($iframe: JQuery) {
     if (container.length == 0)
         container = $iframe.contents();
 
-
+    var currHeight = 0;
     function fixHeight() {
-        $iframe.height(container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100);
+        var newHeight = container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100; 
+
+        newHeight = Math.min(newHeight, 2000);
+
+        if (Math.abs(currHeight - newHeight) > 100) {
+            $iframe.css("height", newHeight);
+            currHeight = newHeight;
+        }
     }
+
     fixHeight();
     setInterval(fixHeight, 500);
 }
@@ -275,9 +286,11 @@ export function removeRecipients(options: Operations.EntityOperationOptions, new
         if (entities == null)
             return;
 
-        Operations.executeDefault($.extend({
-            keys: entities.map(e=> e.runtimeInfo.key()).join(","),
-            controllerUrl: url
-        }, options));
+        options.requestExtraJsonData = { liteKeys: Finder.SearchControl.liteKeys(entities) };
+        options.controllerUrl = url;
+
+        Operations.executeDefault(options);
     }); 
 }
+
+

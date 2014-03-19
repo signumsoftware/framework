@@ -16,7 +16,7 @@ var normalCharacters;
 var doubleCharacters;
 
 
-function init(removeCharactersUrl: string, getDictionariesUrl: string) {
+export function init(removeCharactersUrl: string, getDictionariesUrl: string) {
     if (!editable()) {
         return;
     }
@@ -38,21 +38,20 @@ function init(removeCharactersUrl: string, getDictionariesUrl: string) {
         remainingCharacters($($textAreasPresent[i]));
     }
 
-    fillLiterals();
 
     $(document).on('keyup', 'textarea.sf-sms-msg-text', function () {
-        remainingCharacters();
+        remainingCharacters($(this));
     });
 
     $(document).on('click', '.sf-sms-remove-chars', function () {
-        var $textarea = $control();
+        var $textarea = $(this).closest(".sf-sms-edit-container").find(".sf-sms-msg-text");
         $.ajax({
             dataType: "text",
             url: removeCharactersUrl,
             data: { text: $textarea.val() },
             success: function (result) {
                 $textarea.val(result);
-                remainingCharacters();
+                remainingCharacters($textarea);
             }
         });
     });
@@ -97,11 +96,9 @@ function charactersToEnd($textarea) {
     return maxLength - count;
 }
 
-
-
-
 function remainingCharacters($textarea?: JQuery) {
     $textarea = $textarea || $control();
+    
     var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
     var $remainingCharacters = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-characters-left > p');
 
@@ -124,35 +121,35 @@ function remainingCharacters($textarea?: JQuery) {
 }
 
 
-export function attachAssociatedType(entityCombo: Lines.EntityCombo)
-{
-    entityCombo.entityChanged = fillLiterals;
-}
+export function attachAssociatedType(entityCombo: Lines.EntityCombo, url: string) {
 
-export function fillLiterals() {
-    var $combo = $(".sf-associated-type");
-    var prefix = $combo.attr("data-control-id");
-    var url = $combo.attr("data-url");
-    var $list = $("#sfLiterals");
-    if ($list.length == 0) {
-        return;
-    }
-    var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(prefix);
-    if (!runtimeInfo) {
-        $list.html("");
-        return;
-    }
-    $.ajax({
-        url: url,
-        data: runtimeInfo.toString(),
-        success: function (data) {
-            $list.html("");
-            for (var i = 0; i < data.literals.length; i++) {
-                $list.append($("<option>").val(data.literals[i]).html(data.literals[i]));
-            }
-            remainingCharacters();
+    var fillLiterals = () => {
+        var $combo = $(".sf-associated-type");
+
+        var $list = $("#sfLiterals");
+        if ($list.length == 0) {
+            return;
         }
-    });
+        var runtimeInfo = entityCombo.getRuntimeInfo();
+        if (!runtimeInfo) {
+            $list.html("");
+            return;
+        }
+        $.ajax({
+            url: url,
+            data: { type: runtimeInfo.key() },
+            success: function (data) {
+                $list.html("");
+                for (var i = 0; i < data.literals.length; i++) {
+                    $list.append($("<option>").val(data.literals[i]).html(data.literals[i]));
+                }
+                remainingCharacters();
+            }
+        });
+    }
+
+    entityCombo.entityChanged = fillLiterals;
+    fillLiterals();
 }
 
 function insertLiteral() {

@@ -231,7 +231,7 @@ namespace Signum.Entities.SMS
 
         public override string ToString()
         {
-            return cultureInfo.TryToString();
+            return cultureInfo.TryToString() ?? SMSTemplateMessage.NewCulture.NiceToString();
         }
     }
 
@@ -244,6 +244,7 @@ namespace Signum.Entities.SMS
         [Description("There must be a message for {0}")]
         ThereMustBeAMessageFor0,
         [Description("There's more than one message for the same language")]
-        TheresMoreThanOneMessageForTheSameLanguage
+        TheresMoreThanOneMessageForTheSameLanguage,
+        NewCulture
     }
 }

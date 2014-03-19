@@ -7,7 +7,6 @@
 @using Signum.Utilities
 @using Signum.Web.Mailing
 
-
 @Html.ScriptCss("~/SMS/Content/SMS.css")
 
 @using (var tc = Html.TypeContext<SMSTemplateDN>())
@@ -32,9 +31,7 @@
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
-                ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.Prefix));
-                ec.ComboHtmlProperties["data-control-id"] = ec.Prefix;
-                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType");
+                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
             })
         }
         @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
@@ -43,16 +40,15 @@
     </div>
     
     <div class="sf-tabs-repeater sf-sms-template-messages">
-        @Html.EntityRepeater(tc, e => e.Messages, er =>
+        @Html.EntityTabRepeater(tc, e => e.Messages, er =>
         {
-            er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
             er.PreserveViewData = true;
         })
     </div>
+    
+    <script>
+    @(new JsFunction(SMSClient.Module, "init", 
+    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
+    Url.Action<SMSController>(s => s.GetDictionaries())))
+</script>
 }
-
-@*@Html.RegisterUrls(new Dictionary<string, string> 
-{ 
-    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
-    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
-})*@

@@ -123,7 +123,7 @@ namespace Signum.Engine.Disconnected
 
                 new Execute(DisconnectedMachineOperation.UnsafeUnlock)
                 {
-                    FromStates = { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed },
+                    FromStates = { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed, DisconnectedMachineState.Connected }, //not fully disconnected
                     ToState = DisconnectedMachineState.Connected,
                     Execute = (dm, _) =>
                     {

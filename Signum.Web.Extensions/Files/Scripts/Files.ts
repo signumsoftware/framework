@@ -3,12 +3,19 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 
+export enum DownloadBehaviour {
+    SaveAs,
+    View,
+    None
+}
+
 export interface FileLineOptions extends Lines.EntityBaseOptions {
     downloadUrl?: string;
     uploadUrl?: string;
     uploadDroppedUrl?: string;
     asyncUpload?: boolean;
     dragAndDrop?: boolean;
+    download: DownloadBehaviour;
 }
 
 export interface FileAsyncUploadResult {
@@ -143,10 +150,14 @@ export class FileLine extends Lines.EntityBase {
         $(this.pf(Entities.Keys.loading)).hide();
         if (entityValue) {
             $(this.pf(Entities.Keys.toStr)).html(entityValue.toStr);
-            $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("download", entityValue.toStr).attr("href", entityValue.link);
+            $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("href", entityValue.link);
+
+            if (this.options.download == DownloadBehaviour.SaveAs)
+                $(this.pf(Entities.Keys.link)).attr("download", entityValue.toStr);
+
         } else {
-            $(this.pf(Entities.Keys.toStr)).html("")
-            $(this.pf(Entities.Keys.toStr)).html("").attr("download", undefined).attr("href", undefined)
+            $(this.pf(Entities.Keys.toStr)).html("");
+            $(this.pf(Entities.Keys.toStr)).html("").removeAttr("download").removeAttr("href");
         }
     }
 

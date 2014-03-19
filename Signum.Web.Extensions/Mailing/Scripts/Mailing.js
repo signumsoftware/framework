@@ -127,7 +127,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     ;
 
-    function initHtmlEditor(idTargetTextArea) {
+    function initHtmlEditor(idTargetTextArea, culture) {
+        CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
         CKEDITOR.replace(idTargetTextArea);
 
         // Update origin textarea
@@ -143,12 +144,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
+        CKEDITOR.instances[idTargetTextArea].on('simpleuploads.finishedUpload', changed);
     }
     exports.initHtmlEditor = initHtmlEditor;
     ;
 
-    function initHtmlEditorMasterTemplate(idTargetTextArea) {
-        exports.initHtmlEditor(idTargetTextArea);
+    function initHtmlEditorMasterTemplate(idTargetTextArea, culture) {
+        exports.initHtmlEditor(idTargetTextArea, culture);
 
         var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message").find(".sf-master-template-insert-content");
 
@@ -159,8 +161,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     exports.initHtmlEditorMasterTemplate = initHtmlEditorMasterTemplate;
 
-    function initHtmlEditorWithTokens(idTargetTextArea) {
-        exports.initHtmlEditor(idTargetTextArea);
+    function initHtmlEditorWithTokens(idTargetTextArea, culture) {
+        exports.initHtmlEditor(idTargetTextArea, culture);
 
         var lastCursorPosition;
 
@@ -243,13 +245,22 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         if (container.length == 0)
             container = $iframe.contents();
 
+        var currHeight = 0;
         function fixHeight() {
-            $iframe.height(container.children().toArray().map(function (a) {
+            var newHeight = container.children().toArray().map(function (a) {
                 return $(a).height();
             }).reduce(function (a, b) {
                 return a + b;
-            }, 0) + 100);
+            }, 0) + 100;
+
+            newHeight = Math.min(newHeight, 2000);
+
+            if (Math.abs(currHeight - newHeight) > 100) {
+                $iframe.css("height", newHeight);
+                currHeight = newHeight;
+            }
         }
+
         fixHeight();
         setInterval(fixHeight, 500);
     }
@@ -273,12 +284,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             if (entities == null)
                 return;
 
-            Operations.executeDefault($.extend({
-                keys: entities.map(function (e) {
-                    return e.runtimeInfo.key();
-                }).join(","),
-                controllerUrl: url
-            }, options));
+            options.requestExtraJsonData = { liteKeys: Finder.SearchControl.liteKeys(entities) };
+            options.controllerUrl = url;
+
+            Operations.executeDefault(options);
         });
     }
     exports.removeRecipients = removeRecipients;

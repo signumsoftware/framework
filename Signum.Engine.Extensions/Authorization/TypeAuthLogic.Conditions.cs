@@ -219,6 +219,18 @@ namespace Signum.Engine.Authorization
             if (entity.IsNew)
                 throw new InvalidOperationException("The entity {0} is new".Formato(entity));
 
+            var tac = GetAllowed(entity.GetType());
+
+            var min = inUserInterface ? tac.MinUI() : tac.MinDB();
+
+            if (allowed <= min)
+                return true;
+
+            var max = inUserInterface ? tac.MaxUI() : tac.MaxDB();
+
+            if (max < allowed)
+                return false;
+
             using (DisableQueryFilter())
                 return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
         }

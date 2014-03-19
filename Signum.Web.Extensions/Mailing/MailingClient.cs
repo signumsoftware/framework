@@ -32,7 +32,6 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
-        public static string TabsRepeaterModule = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
 
         private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -139,6 +138,11 @@ namespace Signum.Web.Mailing
                             OnClick = ctx =>new JsOperationFunction(Module, "removeRecipients",
                                 new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
                                 ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
+                        },
+
+                        new EntityOperationSettings(NewsletterOperation.Send)
+                        {
+                            Group = EntityOperationGroup.None,
                         }
                     });
                 }

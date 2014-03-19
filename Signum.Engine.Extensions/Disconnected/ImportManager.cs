@@ -162,7 +162,7 @@ namespace Signum.Engine.Disconnected
                                     using (token.MeasureTime(l =>
                                     {
                                         if (result != null)
-                                            import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type == tuple.Type.ToTypeDN()).UnsafeUpdateMList()
+                                            import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type.RefersTo(tuple.Type.ToTypeDN())).UnsafeUpdateMList()
                                                 .Set(mle => mle.Element.CopyTable, mle => l)
                                                 .Set(mle => mle.Element.DisableForeignKeys, mle => tuple.Strategy.DisableForeignKeys.Value)
                                                 .Set(mle => mle.Element.InsertedRows, mle => result.Inserted)
