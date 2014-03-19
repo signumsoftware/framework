@@ -138,7 +138,7 @@ namespace Signum.Web.UserQueries
             if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearchEntity: true))
                 return null;
 
-            var items = new List<ToolBarButton>();
+            var items = new List<IMenuItem>();
 
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
@@ -147,7 +147,7 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Text = uq.ToString(),
                     AltText = uq.ToString(),
@@ -157,12 +157,12 @@ namespace Signum.Web.UserQueries
             }
 
             if (items.Count > 0)
-                items.Add(new ToolBarSeparator());
+                items.Add(new MenuItemSeparator());
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
                 string uqNewText = UserQueryMessage.UserQueries_CreateNew.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
@@ -174,7 +174,7 @@ namespace Signum.Web.UserQueries
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string uqEditText = UserQueryMessage.UserQueries_Edit.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
                     AltText = uqEditText,
@@ -186,7 +186,7 @@ namespace Signum.Web.UserQueries
             string uqUserQueriesText = UserQueryMessage.UserQueries_UserQueries.NiceToString();
             return new ToolBarButton[]
             {
-                new ToolBarMenu
+                new ToolBarDropDown
                 { 
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
                     AltText = uqUserQueriesText,

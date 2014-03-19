@@ -18,6 +18,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.Files;
 using Signum.Entities.UserQueries;
+using Signum.Web.Chart;
 #endregion
 
 namespace Signum.Web.Reports
@@ -70,32 +71,24 @@ namespace Signum.Web.Reports
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
                 currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
-
-            ToolBarButton plain = new ToolBarButton
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
-                AltText = ExcelMessage.ExcelReport.NiceToString(),
-                Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
-            };
-
+            
             if (ExcelReport) 
             {
-                var items = new List<ToolBarButton>();
+                var items = new List<IMenuItem>();
                 
                 if (ToExcelPlain)
-                    items.Add(plain);
+                    items.Add(PlainExcel(ctx).ToMenuItem());
 
                 List<Lite<ExcelReportDN>> reports = ReportSpreadsheetsLogic.GetExcelReports(ctx.QueryName);
 
                 if (reports.Count > 0)
                 {
                     if (items.Count > 0)
-                        items.Add(new ToolBarSeparator());
+                        items.Add(new MenuItemSeparator());
 
                     foreach (Lite<ExcelReportDN> report in reports)
                     {
-                        items.Add(new ToolBarButton
+                        items.Add(new MenuItem
                         {
                             AltText = report.ToString(),
                             Text = report.ToString(),
@@ -104,11 +97,11 @@ namespace Signum.Web.Reports
                     }
                 }
 
-                items.Add(new ToolBarSeparator());
+                items.Add(new MenuItemSeparator());
 
                 var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key(); 
 
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
                     AltText = ExcelMessage.Administer.NiceToString(),
@@ -116,7 +109,7 @@ namespace Signum.Web.Reports
                     OnClick = new JsFunction(Module, "administerExcelReports", ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
 
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"),
                     AltText = ExcelMessage.CreateNew.NiceToString(),
@@ -126,7 +119,7 @@ namespace Signum.Web.Reports
 
                 return new ToolBarButton[]
                 {
-                    new ToolBarMenu
+                    new ToolBarDropDown
                     { 
                         Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
                         AltText = "Excel", 
@@ -138,10 +131,34 @@ namespace Signum.Web.Reports
             else
             {
                 if (ToExcelPlain)
-                    return new ToolBarButton[] { plain };
+                    return new ToolBarButton[] { PlainExcel(ctx) };
             }
 
             return null;
+        }
+
+        private static ToolBarButton PlainExcel(QueryButtonContext ctx)
+        {
+            return new ToolBarButton
+            {
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
+                AltText = ExcelMessage.ExcelReport.NiceToString(),
+                Text = ExcelMessage.ExcelReport.NiceToString(),
+                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
+            };
+        }
+
+        internal static ToolBarButton UserChartButton(UrlHelper url, string prefix)
+        {
+            return new ToolBarButton
+            {
+                Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
+                AltText = ExcelMessage.ExcelReport.NiceToString(),
+                Text = ExcelMessage.ExcelReport.NiceToString(),
+                OnClick = new JsFunction(ChartClient.Module, "exportData", prefix,
+                    url.Action((ChartController c) => c.Validate()),
+                    url.Action((ChartController c) => c.ExportData())),
+            };
         }
     }
 }

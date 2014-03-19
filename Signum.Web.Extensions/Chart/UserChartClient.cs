@@ -115,14 +115,26 @@ namespace Signum.Web.Chart
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, UrlHelper url, object queryName, Type entityType, string prefix, Lite<UserChartDN> currentUserChart)
         {
-            if (!Navigator.IsNavigable(typeof(UserChartDN), null,  isSearchEntity: true))
+            if (!Navigator.IsNavigable(typeof(UserChartDN), null, isSearchEntity: true))
                 return new List<ToolBarButton>();
 
-            var items = new List<ToolBarButton>();
+            var buttons = new List<ToolBarButton>();
+            buttons.Add(UserCharButton(url, queryName, prefix, currentUserChart));
+
+            if (ReportSpreadsheetClient.ToExcelPlain)
+                buttons.Add(ReportSpreadsheetClient.UserChartButton(url, prefix)); 
+
+            return buttons;
+        }
+
+        private static ToolBarButton UserCharButton(UrlHelper url, object queryName, string prefix, Lite<UserChartDN> currentUserChart)
+        {
+
+            var items = new List<IMenuItem>();
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName))
             {
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Text = uc.ToString(),
                     AltText = uc.ToString(),
@@ -132,24 +144,24 @@ namespace Signum.Web.Chart
             }
 
             if (items.Count > 0)
-                items.Add(new ToolBarSeparator());
+                items.Add(new MenuItemSeparator());
 
             if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
             {
                 string uqNewText = ChartMessage.UserChart_CreateNew.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c)=>c.CreateUserChart())),
+                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c) => c.CreateUserChart())),
                 });
-            }            
-            
+            }
+
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string ucEditText = ChartMessage.UserChart_Edit.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     AltText = ucEditText,
@@ -159,32 +171,14 @@ namespace Signum.Web.Chart
             }
 
             string ucUserChartText = ChartMessage.UserChart_UserCharts.NiceToString();
-            var buttons = new List<ToolBarButton> 
+
+            return new ToolBarDropDown
             {
-                new ToolBarMenu
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
-                    AltText = ucUserChartText,
-                    Text = ucUserChartText,
-                    Items = items
-                }
+                Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
+                AltText = ucUserChartText,
+                Text = ucUserChartText,
+                Items = items
             };
-
-            if (ReportSpreadsheetClient.ToExcelPlain)
-            {
-                string ucExportDataText = ChartMessage.UserChart_ExportData.NiceToString();
-                buttons.Add(new ToolBarButton
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
-                    AltText = ucExportDataText,
-                    Text = ucExportDataText,
-                    OnClick = new JsFunction(ChartClient.Module, "exportData", prefix, 
-                        url.Action((ChartController c)=>c.Validate()),
-                        url.Action((ChartController c)=>c.ExportData())),
-                });
-            }
-
-            return buttons;
         }
     }
 }

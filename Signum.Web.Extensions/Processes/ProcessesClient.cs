@@ -66,7 +66,7 @@ namespace Signum.Web.Processes
             }
         }
 
-        public static ContextualItem CreateGroupContextualItem(SelectedItemsMenuContext ctx)
+        public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)
         {
             if (!Navigator.IsViewable(typeof(PackageOperationDN), null))
                 return null;
@@ -116,35 +116,14 @@ namespace Signum.Web.Processes
                 }
             }
 
-            List<ContextualItem> operations = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
+            List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
                 coc => new JsOperationFunction(ProcessesClient.Module, "processFromMany")
-                )).OrderBy(o => o.Order).ToList();
+                )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
-            {
-                string ctxItemClass = "sf-search-ctxitem";
 
-                content.AddLine(new HtmlTag("li")
-                    .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Processes.NiceToString().EncodeHtml())));
+            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Processes.NiceToString()));
 
-                foreach (var operation in operations)
-                {
-                    content.AddLine(new HtmlTag("li")
-                        .Class(ctxItemClass)
-                        .InnerHtml(OperationClient.Manager.ContextualOperationLink(operation)));
-                }
-            }
-
-            return new ContextualItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemOperations"),
-                Content = content.ToHtml().ToString()
-            };
+            return menuItems;
         }
-
-
-
     }
 }
