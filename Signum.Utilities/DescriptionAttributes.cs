@@ -170,7 +170,7 @@ namespace Signum.Utilities
                 NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
         }
 
-        public static string NiceToString(this Enum a, params object[] args)
+        public static string NiceToString(this Enum a)
         {
             if (a == null)
                 return null;
@@ -179,7 +179,7 @@ namespace Signum.Utilities
             if (fi != null)
                 return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
 
-            return a.ToString().NiceName().Formato(args);
+            return a.ToString().NiceName();
         }
 
         public static string NiceName(this PropertyInfo pi)
