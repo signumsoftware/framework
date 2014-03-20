@@ -316,26 +316,32 @@ namespace Signum.Engine.Mailing.Pop3
 
         static ContentType FindContentType(NameValueCollection headers)
         {
-            ContentType returnValue = new ContentType();
+            ContentType result = new ContentType();
             var ct = headers["content-type"];
             if (ct == null)
-                return returnValue;
+                return result;
 
-            returnValue = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
+            result = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
 
             var m = Regex.Match(ct, @"name\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
             if(m.Success)
-                returnValue.Name = m.Groups[1].Value.Trim('\'', '"');
+                result.Name = m.Groups[1].Value.Trim('\'', '"');
 
             m = Regex.Match(ct, @"boundary\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
             if (m.Success)
-                returnValue.Boundary = m.Groups[1].Value.Trim('\'', '"');
+                result.Boundary = m.Groups[1].Value.Trim('\'', '"');
 
             m = Regex.Match(ct, @"charset\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
             if (m.Success)
-                returnValue.CharSet = m.Groups[1].Value.Trim('\'', '"');
-        
-            return returnValue;
+                result.CharSet = m.Groups[1].Value.Trim('\'', '"');
+
+            if (result.CharSet != null)
+                result.CharSet = result.CharSet.ToLowerInvariant();
+
+            if (result.MediaType != null)
+                result.MediaType = result.MediaType.ToLowerInvariant();
+
+            return result;
         }
 
         static void DecodeHeaders(NameValueCollection headers)
