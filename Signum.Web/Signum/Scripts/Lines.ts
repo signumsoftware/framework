@@ -187,7 +187,7 @@ export class EntityBase {
                 return null;
 
             var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
-                new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+                new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
 
             return Navigator.viewPopup(newEntity, this.defaultViewOptions());
         });
@@ -406,7 +406,8 @@ export class EntityLine extends EntityBase {
         $(this.pf(Entities.Keys.toStr)).val('');
 
         this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
-        this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
+        this.visible($(this.pf(Entities.Keys.toStr)), entityValue == null); //embedded entities is alone
+        this.visible($(this.pf(Entities.Keys.toStr)).siblings(".typeahead-parts"), entityValue == null);
     }
 
     visible(element : JQuery, visible: boolean) {
@@ -495,7 +496,7 @@ export class EntityLineDetail extends EntityBase {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
 
             return Navigator.requestPartialView(newEntity, this.defaultViewOptions());
         });
@@ -997,7 +998,7 @@ export class EntityRepeater extends EntityListBase {
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
         var fieldSet = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" +
             "<legend><div class='item-group'>" +
-            (this.options.remove ? ("<div class='pull-right'><a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a></div>") : "") +
+            (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") +
             (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") +
             (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") +
             "</div></legend>" +
@@ -1035,7 +1036,7 @@ export class EntityRepeater extends EntityListBase {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
 
             return Navigator.requestPartialView(newEntity, this.defaultViewOptions());
         });
@@ -1087,30 +1088,28 @@ export class EntityTabRepeater extends EntityRepeater {
     removeEntitySpecific(itemPrefix: string) {
         $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)).remove();
         $("#" + SF.compose(itemPrefix, EntityBase.key_entity)).remove();
-
-        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
         var header = $("<li id='" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem) + "' class='" + EntityTabRepeater.key_repeaterItemClass + "'>" +
-             ("<a href='#" + SF.compose(itemPrefix, EntityBase.key_entity)  +   "' >" + entityValue.toStr + "</a>") +
-            (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") +
-            (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") +
-            (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") +
+            "<a data-toggle='tab' href='#" + SF.compose(itemPrefix, EntityBase.key_entity) + "' >" +
+            "<span>" + entityValue.toStr + "</span>" +
             SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) +
             SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) +
+            (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") +
+            (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") +
+            (this.options.remove ? ("<span id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' ><span class='glyphicon glyphicon-remove'></span></span>") : "") +
+            "</a>" +
             "</li>"
             );
 
         $(this.pf(EntityTabRepeater.key_itemsContainer)).append(header);
 
-        var entity = $("<div id='" + SF.compose(itemPrefix, EntityTabRepeater.key_entity) + "' class='sf-line-entity'>" +
+        var entity = $("<div id='" + SF.compose(itemPrefix, EntityTabRepeater.key_entity) + "' class='tab-pane'>" +
             "</div>");
 
         $(this.pf(EntityTabRepeater.key_tabsContainer)).append(entity);
 
-        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("refresh");
-        //$(this.pf(EntityTabRepeater.key_tabsContainer)).tabs("option", "active", -1);
         header.tab("show");
     }
 
@@ -1191,18 +1190,25 @@ export class EntityStrip extends EntityList {
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
-        var li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + " input-group'>" +
+
+        var itemGroup = this.options.vertical ? "input-group" : "";
+        var itemGroupBtn = this.options.vertical ? "input-group-btn" : "";
+        var formControl = this.options.vertical ? "form-control" : "";
+        var btnDefault = this.options.vertical ? "btn btn-default" : "";
+
+
+        var li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + " " + itemGroup + "'>" +
             (this.options.navigate ?
-            ("<a class='sf-entitStrip-link form-control btn-default' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
-            ("<span class='sf-entitStrip-link form-control btn-default' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) +
+            ("<a class='sf-entitStrip-link " + formControl + "' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
+            ("<span class='sf-entitStrip-link " + formControl + "' id='" + SF.compose(itemPrefix, Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) +
             SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), this.getNextPosIndex()) +
             SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) +
             "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" +
-            "<span class='input-group-btn'>" + (
-            (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button move-up'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "up" : "left") + "'></span></a>") : "") +
-            (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button move-down'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "down" : "right") + "'></span></a>") : "") +
-            (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") +
-            (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='btn btn-default sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) +
+            "<span class='" + itemGroupBtn + "'>" + (
+            (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='" + btnDefault + " sf-line-button move-up'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "up" : "left") + "'></span></a>") : "") +
+            (this.options.reorder ? ("<a id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='" + btnDefault + " sf-line-button move-down'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "down" : "right") + "'></span></a>") : "") +
+            (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='" + btnDefault + " sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") +
+            (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='" + btnDefault + " sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) +
             "</span>" +
             "</li>" 
             );
@@ -1247,7 +1253,7 @@ export class EntityStrip extends EntityList {
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
         this.addEntity(entityValue, this.getNextPrefix());
-        $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").val("");
+        $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").typeahead('val', '');
     }
 }
 

@@ -69,7 +69,7 @@ WriteLiteral(" ");
             
             #line default
             #line hidden
-WriteLiteral(" class=\"container form-horizontal\">\r\n");
+WriteLiteral(" class=\"form-horizontal\">\r\n");
 
             
             #line 9 "..\..\Signum\Views\NormalPage.cshtml"

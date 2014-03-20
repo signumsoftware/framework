@@ -31,12 +31,12 @@ namespace Signum.Web
                 {
                     if (entityDetail.UntypedValue != null)
                     {
-                        sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityDetail));
-                        sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityDetail));
+                        sb.AddLine(EntityButtonHelper.Create(helper, entityDetail, btn: false));
+                        sb.AddLine(EntityButtonHelper.Find(helper, entityDetail, btn: false));
                     }
                     else
                     {
-                        sb.AddLine(EntityListBaseHelper.RemoveSpan(helper, entityDetail));
+                        sb.AddLine(EntityButtonHelper.Remove(helper, entityDetail, btn: false));
                     }
                 }
 
@@ -49,12 +49,12 @@ namespace Signum.Web
                     {
                         if (entityDetail.UntypedValue == null)
                         {
-                            sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityDetail));
-                            sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityDetail));
+                            sb.AddLine(EntityButtonHelper.Create(helper, entityDetail, btn: false));
+                            sb.AddLine(EntityButtonHelper.Find(helper, entityDetail, btn: false));
                         }
                         else
                         {
-                            sb.AddLine(EntityListBaseHelper.RemoveSpan(helper, entityDetail));
+                            sb.AddLine(EntityButtonHelper.Remove(helper, entityDetail, btn: false));
                         }
                     }
                 }

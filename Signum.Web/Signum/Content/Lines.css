@@ -72,13 +72,30 @@ fieldset legend
    border-radius: 4px;
 }
 
-/*EntityStrip*/
-.sf-strip-element
+/*EntityRepeater*/
+
+fieldset.sf-repeater-element > legend
 {
-    border: 1px solid rgb(206, 206, 206);
-    border-radius: 4px;
-    padding: 0px 4px;
+    width: auto;
+}
+
+/*EntityStrip*/
+
+ul.sf-strip-horizontal > li
+{
+    float: left;
+    margin-right: 10px;
+}
+
+ul.sf-strip-vertical>li
+{
     margin: 1px 0px;
+}
+
+ul.sf-strip-vertical>li>.form-control
+{
+    background-color:transparent;
+    box-shadow:none;
 }
 
 .sf-strip
@@ -87,8 +104,41 @@ fieldset legend
     padding: 0px;
 }
 
+.sf-strip-horizontal > li > *
+{
+    vertical-align: middle;
+}
+
 /*Tabs*/
 ul.nav-tabs
 {
     margin-bottom: 10px;
+}
+
+
+/*buton colors*/
+.sf-create:hover
+{
+    color:#22BA00;
+}
+
+.sf-remove:hover
+{
+    color:#CF0000;
+}
+
+.sf-find:hover
+{
+    color:#FFCC00;
+}
+
+.sf-view:hover
+{
+    color:#007CE8;
+}
+
+.move-down:hover, 
+.move-up:hover
+{
+    color:#9900E0;
 }

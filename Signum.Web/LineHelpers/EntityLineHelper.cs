@@ -35,14 +35,14 @@ namespace Signum.Web
                      if (entityLine.UntypedValue != null)
                      {
                          sb.AddLine(AutocompleteTextBox(helper, entityLine));
-                         sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine));
-                         sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
+                         sb.AddLine(EntityButtonHelper.Create(helper, entityLine, btn: true));
+                         sb.AddLine(EntityButtonHelper.Find(helper, entityLine, btn: true));
                      }
                      else
                      {
                          sb.AddLine(LinkOrSpan(helper, entityLine));
-                         sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
-                         sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
+                         sb.AddLine(EntityButtonHelper.View(helper, entityLine, btn: true));
+                         sb.AddLine(EntityButtonHelper.Remove(helper, entityLine, btn: true));
                      }
                  }
 
@@ -57,13 +57,13 @@ namespace Signum.Web
                     {
                         if (entityLine.UntypedValue == null)
                         {
-                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine));
-                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
+                            sb.AddLine(EntityButtonHelper.Create(helper, entityLine, btn: true));
+                            sb.AddLine(EntityButtonHelper.Find(helper, entityLine, btn: true));
                         }
                         else
                         {
-                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
-                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
+                            sb.AddLine(EntityButtonHelper.View(helper, entityLine, btn: true));
+                            sb.AddLine(EntityButtonHelper.Remove(helper, entityLine, btn: true));
                         }
                     }
                 }
@@ -88,12 +88,11 @@ namespace Signum.Web
         {
             if (entityLine.Navigate)
             {
-                var id = (entityLine.UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
-                       (entityLine.UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
+                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ?? (entityLine.UntypedValue as IIdentifiable).TryCC(i => i.ToLite(i.IsNew));
 
                 return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
-                        entityLine.UntypedValue.TryToString(),
-                        id != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, id.Value) : null,
+                        lite.TryToString(),
+                        lite == null ? null : Navigator.NavigateRoute(lite),
                         JavascriptMessage.navigate.NiceToString(), "form-control  btn-default sf-entity-line-entity", null);
             }
             else
@@ -107,7 +106,7 @@ namespace Signum.Web
         private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine)
         {
             if (!entityLine.Autocomplete)
-                return MvcHtmlString.Empty;
+                return new HtmlTag("span", entityLine.Compose(EntityBaseKeys.ToStr)).Class("form-control").Attr("disabled", "disabled");
 
             if (entityLine.Implementations.Value.IsByAll)
                 throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");

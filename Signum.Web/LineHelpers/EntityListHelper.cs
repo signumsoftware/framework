@@ -54,12 +54,12 @@ namespace Signum.Web
 
                     using (sb.Surround(new HtmlTag("span", entityList.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
                     {
-                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityList));
-                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityList));
-                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityList));
-                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityList));
-                        sb.AddLine(EntityListBaseHelper.MoveUpButton(helper, entityList));
-                        sb.AddLine(EntityListBaseHelper.MoveDownButton(helper, entityList));
+                        sb.AddLine(EntityButtonHelper.Create(helper, entityList, btn: true));
+                        sb.AddLine(EntityButtonHelper.Find(helper, entityList, btn: true));
+                        sb.AddLine(EntityButtonHelper.View(helper, entityList, btn: true));
+                        sb.AddLine(EntityButtonHelper.Remove(helper, entityList, btn: true));
+                        sb.AddLine(EntityButtonHelper.MoveUp(helper, entityList, btn: true));
+                        sb.AddLine(EntityButtonHelper.MoveDown(helper, entityList, btn: true));
                     }
                 }
 
@@ -78,7 +78,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityList, itemTC, itemTC.Index));
+            sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityList, itemTC, itemTC.Index));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

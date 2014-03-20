@@ -416,37 +416,37 @@ WriteLiteral("\r\n\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteLiteral(" class=\"sf-query-button btn btn-default pull-right sf-line-button\"");
+WriteLiteral(" class=\"sf-query-button btn btn-default pull-right sf-line-button sf-create\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4405), Tuple.Create("\"", 4442)
+WriteAttribute("id", Tuple.Create(" id=\"", 4415), Tuple.Create("\"", 4452)
             
             #line 85 "..\..\Signum\Views\SearchControl.cshtml"
-     , Tuple.Create(Tuple.Create("", 4410), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearchCreate")
+               , Tuple.Create(Tuple.Create("", 4420), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearchCreate")
             
             #line default
             #line hidden
-, 4410), false)
+, 4420), false)
 );
 
-WriteAttribute("title", Tuple.Create(" title=\"", 4443), Tuple.Create("\"", 4487)
+WriteAttribute("title", Tuple.Create(" title=\"", 4453), Tuple.Create("\"", 4497)
             
             #line 85 "..\..\Signum\Views\SearchControl.cshtml"
-                                              , Tuple.Create(Tuple.Create("", 4451), Tuple.Create<System.Object, System.Int32>(SearchMessage.Create.NiceToString()
+                                                        , Tuple.Create(Tuple.Create("", 4461), Tuple.Create<System.Object, System.Int32>(SearchMessage.Create.NiceToString()
             
             #line default
             #line hidden
-, 4451), false)
+, 4461), false)
 );
 
-WriteAttribute("onclick", Tuple.Create(" onclick=\"", 4488), Tuple.Create("\"", 4572)
-, Tuple.Create(Tuple.Create("", 4498), Tuple.Create("event.preventDefault();", 4498), true)
+WriteAttribute("onclick", Tuple.Create(" onclick=\"", 4498), Tuple.Create("\"", 4582)
+, Tuple.Create(Tuple.Create("", 4508), Tuple.Create("event.preventDefault();", 4508), true)
             
             #line 85 "..\..\Signum\Views\SearchControl.cshtml"
-                                                                                                                    , Tuple.Create(Tuple.Create("", 4521), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "create_click()")
+                                                                                                                              , Tuple.Create(Tuple.Create("", 4531), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "create_click()")
             
             #line default
             #line hidden
-, 4521), false)
+, 4531), false)
 );
 
 WriteLiteral(">\r\n                <span");
@@ -493,28 +493,28 @@ WriteLiteral(">\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4811), Tuple.Create("\"", 4844)
+WriteAttribute("id", Tuple.Create(" id=\"", 4821), Tuple.Create("\"", 4854)
             
             #line 95 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4816), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+, Tuple.Create(Tuple.Create("", 4826), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 4816), false)
+, 4826), false)
 );
 
 WriteLiteral(" class=\"sf-search-results-container table-responsive\"");
 
 WriteLiteral(">\r\n\r\n        <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4917), Tuple.Create("\"", 4950)
+WriteAttribute("id", Tuple.Create(" id=\"", 4927), Tuple.Create("\"", 4960)
             
             #line 97 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4922), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
+, Tuple.Create(Tuple.Create("", 4932), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
             
             #line default
             #line hidden
-, 4922), false)
+, 4932), false)
 );
 
 WriteLiteral(" class=\"sf-search-results  table table-hover  table-condensed\"");
@@ -643,14 +643,14 @@ WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbod
             #line hidden
 WriteLiteral("\r\n                <tr>\r\n                    <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6355), Tuple.Create("\"", 6378)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6365), Tuple.Create("\"", 6388)
             
             #line 126 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6365), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 6375), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 6365), false)
+, 6375), false)
 );
 
 WriteLiteral(">");

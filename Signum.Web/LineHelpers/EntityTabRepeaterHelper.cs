@@ -34,16 +34,16 @@ namespace Signum.Web
 
                     using (sb.Surround(new HtmlTag("span", entityTabRepeater.Compose("shownButton")).Class("pull-right")))
                     {
-                        sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityTabRepeater));
-                        sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityTabRepeater));
+                        sb.AddLine(EntityButtonHelper.Create(helper, entityTabRepeater, btn: false));
+                        sb.AddLine(EntityButtonHelper.Find(helper, entityTabRepeater, btn: false));
                     }
                 }
 
                 sb.AddLine(helper.Hidden(entityTabRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div").Id(entityTabRepeater.Compose(EntityRepeaterKeys.TabsContainer))))
+                using (sb.Surround(new HtmlTag("div")))
                 {
-                    using (sb.Surround(new HtmlTag("ul").Class("nav nav-tabs").Id(entityTabRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                    using (sb.Surround(new HtmlTag("ul", entityTabRepeater.Compose(EntityRepeaterKeys.ItemsContainer)).Class("nav nav-tabs")))
                     {
                         if (entityTabRepeater.UntypedValue != null)
                         {
@@ -52,7 +52,7 @@ namespace Signum.Web
                         }
                     }
 
-                    using (sb.Surround(new HtmlTag("div").Class("tab-content").Id(entityTabRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                    using (sb.Surround(new HtmlTag("div", entityTabRepeater.Compose(EntityRepeaterKeys.TabsContainer)).Class("tab-content")))
                         if (entityTabRepeater.UntypedValue != null)
                         {
                             foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityTabRepeater.Parent))
@@ -88,17 +88,17 @@ namespace Signum.Web
                 {
                     sb.Add(new HtmlTag("span").SetInnerText(itemTC.Value.ToString()));
 
-                    sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityTabRepeater, itemTC, itemTC.Index));
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityTabRepeater, itemTC, itemTC.Index));
                     sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                     if (entityTabRepeater.Reorder)
                     {
-                        sb.AddLine(EntityListBaseHelper.MoveUpSpanItem(helper, itemTC, entityTabRepeater, "span", false));
-                        sb.AddLine(EntityListBaseHelper.MoveDownSpanItem(helper, itemTC, entityTabRepeater, "span", false));
+                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityTabRepeater, btn: false, elementType: "span", isVertical: false));
+                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityTabRepeater, btn: false, elementType: "span", isVertical: false));
                     }
 
                     if (entityTabRepeater.Remove)
-                        sb.AddLine(EntityListBaseHelper.RemoveSpanItem(helper, itemTC, entityTabRepeater, "span"));
+                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, entityTabRepeater, btn: false, elementType: "span"));
                 }
 
             }
@@ -109,7 +109,7 @@ namespace Signum.Web
         public static MvcHtmlString EntityTabRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : Modifiable
         {
-            return helper.EntityRepeater(tc, property, null);
+            return helper.EntityTabRepeater(tc, property, null);
         }
 
         public static MvcHtmlString EntityTabRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityTabRepeater> settingsModifier)

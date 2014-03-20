@@ -229,7 +229,7 @@ WriteLiteral("            ");
 
             
             #line 58 "..\..\Signum\Views\PaginationSelector.cshtml"
-       Write(Html.DropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size" }));
+       Write(Html.DropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size form-control" }));
 
             
             #line default
@@ -255,14 +255,14 @@ WriteLiteral("\r\n\r\n");
             #line hidden
             
             #line 65 "..\..\Signum\Views\PaginationSelector.cshtml"
-           Write(Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size" }));
+           Write(Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" }));
 
             
             #line default
             #line hidden
             
             #line 65 "..\..\Signum\Views\PaginationSelector.cshtml"
-                                                                                                             
+                                                                                                                          
             }
 
             
@@ -296,24 +296,24 @@ WriteLiteral("                <input");
 
 WriteLiteral(" type=\"hidden\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3896), Tuple.Create("\"", 3927)
+WriteAttribute("id", Tuple.Create(" id=\"", 3922), Tuple.Create("\"", 3953)
             
             #line 77 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3901), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
+, Tuple.Create(Tuple.Create("", 3927), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
             
             #line default
             #line hidden
-, 3901), false)
+, 3927), false)
 );
 
-WriteAttribute("value", Tuple.Create(" value=\"", 3928), Tuple.Create("\"", 3957)
+WriteAttribute("value", Tuple.Create(" value=\"", 3954), Tuple.Create("\"", 3983)
             
             #line 77 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3936), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
+, Tuple.Create(Tuple.Create("", 3962), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
             
             #line default
             #line hidden
-, 3936), false)
+, 3962), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -324,14 +324,14 @@ WriteLiteral(" class=\"pagination\"");
 
 WriteLiteral(">\r\n                    <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 4027), Tuple.Create("\"", 4085)
+WriteAttribute("class", Tuple.Create(" class=\"", 4053), Tuple.Create("\"", 4111)
             
             #line 79 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 4035), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 4061), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
             
             #line default
             #line hidden
-, 4035), false)
+, 4061), false)
 );
 
 WriteLiteral(" ><a");
@@ -572,14 +572,14 @@ WriteLiteral("</a></li> \r\n");
             #line hidden
 WriteLiteral("\r\n                    <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 5434), Tuple.Create("\"", 5511)
+WriteAttribute("class", Tuple.Create(" class=\"", 5460), Tuple.Create("\"", 5537)
             
             #line 113 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 5442), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 5468), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
             
             #line default
             #line hidden
-, 5442), false)
+, 5468), false)
 );
 
 WriteLiteral("><a");

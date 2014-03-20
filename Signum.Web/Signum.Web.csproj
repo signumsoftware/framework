@@ -105,7 +105,6 @@
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="HtmlHelpers\TabHelpers.cs" />
     <Compile Include="LineHelpers\EntityTabRepeaterHelper.cs" />
-    <Compile Include="LineHelpers\EntityListBaseHelper.cs" />
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />

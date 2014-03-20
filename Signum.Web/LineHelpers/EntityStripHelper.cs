@@ -23,9 +23,9 @@ namespace Signum.Web
             if (!entityStrip.Visible || entityStrip.HideIfNull && entityStrip.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
-            
+
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityStrip.Prefix).Class("SF-entity-strip SF-control-container")))
+            using (sb.Surround(new HtmlTag("div", entityStrip.Prefix).Class("SF-entity-strip SF-control-container" + (entityStrip.Vertical ? "" : " form-control-static"))))
             {
                 sb.AddLine(helper.Hidden(entityStrip.Compose(EntityListBaseKeys.ListPresent), ""));
 
@@ -34,7 +34,7 @@ namespace Signum.Web
                 }
 
                 using (sb.Surround(new HtmlTag("ul", entityStrip.Compose(EntityStripKeys.ItemsContainer))
-                    .Class("sf-strip").Class(entityStrip.Vertical ? "sf-strip-vertical" : null)))
+                    .Class("sf-strip").Class(entityStrip.Vertical ? "sf-strip-vertical" : "sf-strip-horizontal")))
                 {
                     if (entityStrip.UntypedValue != null)
                     {
@@ -42,13 +42,13 @@ namespace Signum.Web
                             sb.Add(InternalStripElement(helper, itemTC, entityStrip));
                     }
 
-                    using (sb.Surround(new HtmlTag("li").Class("sf-strip-input")))
+                    using (sb.Surround(new HtmlTag("li").Class("sf-strip-input input-group")))
                     {
                         if (entityStrip.Autocomplete)
                         {
                             var htmlAttr = new Dictionary<string, object>
                             {
-                                { "class", "sf-entity-autocomplete"},
+                                { "class", "sf-entity-autocomplete" + (entityStrip.Vertical ? " form-control" : null)},
                                 { "autocomplete", "off" }, 
                             };
 
@@ -61,10 +61,10 @@ namespace Signum.Web
                                 htmlAttr));
                         }
 
-                        using (sb.Surround(new HtmlTag("span", entityStrip.Compose("shownButton")).Class(entityStrip.Vertical ? "pull-right" : null)))
+                        using (sb.Surround(new HtmlTag("span", entityStrip.Compose("shownButton")).Class(entityStrip.Vertical ? "input-group-btn" : null)))
                         {
-                            sb.AddLine(EntityListBaseHelper.CreateSpan(helper, entityStrip));
-                            sb.AddLine(EntityListBaseHelper.FindSpan(helper, entityStrip));
+                            sb.AddLine(EntityButtonHelper.Create(helper, entityStrip, btn: entityStrip.Vertical));
+                            sb.AddLine(EntityButtonHelper.Find(helper, entityStrip, btn: entityStrip.Vertical));
                         }
                     }
                 }
@@ -85,45 +85,44 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element")))
+            using (sb.Surround(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
             {
-                var id = (itemTC.UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
-                        (itemTC.UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
+                var lite = (itemTC.UntypedValue as Lite<IIdentifiable>) ?? (itemTC.UntypedValue as IIdentifiable).TryCC(i => i.ToLite(i.IsNew));
 
-                if (id != null && entityStrip.Navigate)
+                if (lite != null && !lite.IsNew && entityStrip.Navigate)
                 {
                     sb.AddLine(
                         helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                            itemTC.UntypedValue.ToString(), Navigator.NavigateRoute(itemTC.Type.CleanType(), id),
-                            JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
+                            lite.ToString(), Navigator.NavigateRoute(lite),
+                            JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link" + (entityStrip.Vertical ? " form-control" : null), null));
                 }
                 else
                 {
                     sb.AddLine(
                         helper.Span(itemTC.Compose(EntityBaseKeys.Link),
-                            itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
+                            itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link" + (entityStrip.Vertical ? " form-control" : null)));
                 }
 
-                sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityStrip));
 
 
-                using (sb.Surround(new HtmlTag("span").Class(entityStrip.Vertical ? "pull-right" : null)))
+                using (sb.Surround(new HtmlTag("span").Class(entityStrip.Vertical? "input-group-btn" : null)))
                 {
                     if (entityStrip.Reorder)
                     {
-                        sb.AddLine(EntityListBaseHelper.MoveUpSpanItem(helper, itemTC, entityStrip, "a", entityStrip.Vertical));
-                        sb.AddLine(EntityListBaseHelper.MoveDownSpanItem(helper, itemTC, entityStrip, "a", entityStrip.Vertical));
+                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityStrip, btn: entityStrip.Vertical, elementType: "a", isVertical: entityStrip.Vertical));
+                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityStrip, btn: entityStrip.Vertical, elementType: "a", isVertical: entityStrip.Vertical));
                     }
 
                     if (entityStrip.View)
-                        sb.AddLine(EntityListBaseHelper.ViewSpanItem(helper, itemTC, entityStrip, "a"));
+                        sb.AddLine(EntityButtonHelper.ViewItem(helper, itemTC, entityStrip, btn: entityStrip.Vertical));
 
                     if (entityStrip.Remove)
-                        sb.AddLine(EntityListBaseHelper.RemoveSpanItem(helper, itemTC, entityStrip, "a"));
+                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, entityStrip, btn: entityStrip.Vertical));
                 }
             }
 

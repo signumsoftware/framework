@@ -37,13 +37,13 @@ namespace Signum.Web
                 {
                     if (entityCombo.UntypedValue != null)
                     {
-                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
-                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityCombo));
+                        sb.AddLine(EntityButtonHelper.Create(helper, entityCombo, btn: true));
+                        sb.AddLine(EntityButtonHelper.Find(helper, entityCombo, btn: true));
                     }
                     else
                     {
-                        sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
-                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityCombo));
+                        sb.AddLine(EntityButtonHelper.View(helper, entityCombo, btn: true));
+                        sb.AddLine(EntityButtonHelper.Remove(helper, entityCombo, btn: true));
                     }
                 }
 
@@ -58,13 +58,13 @@ namespace Signum.Web
                     {
                         if (entityCombo.UntypedValue == null)
                         {
-                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
-                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityCombo));
+                            sb.AddLine(EntityButtonHelper.Create(helper, entityCombo, btn: true));
+                            sb.AddLine(EntityButtonHelper.Find(helper, entityCombo, btn: true));
                         }
                         else
                         {
-                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
-                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityCombo));
+                            sb.AddLine(EntityButtonHelper.View(helper, entityCombo, btn: true));
+                            sb.AddLine(EntityButtonHelper.Remove(helper, entityCombo, btn: true));
                         }
                     }
                 }

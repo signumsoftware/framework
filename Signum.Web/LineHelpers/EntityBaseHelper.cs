@@ -114,66 +114,13 @@ namespace Signum.Web
             return result;
         }
 
-        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
+    
+
+        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
         {
-            if (!entityBase.View)
-                return MvcHtmlString.Empty;
-
-            return new HtmlTag("a", entityBase.Compose("btnView"))
-                .Class("btn btn-default sf-line-button sf-view")
-                .Attr("onclick", entityBase.SFControlThen("view_click()"))
-                .Attr("title", EntityControlMessage.View.NiceToString())
-                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
-        }
-
-        public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityBase entityBase)
-        {
-            if (!entityBase.Navigate)
-                return MvcHtmlString.Empty;
-
-            return new HtmlTag("a", entityBase.Compose("btnNavigate"))
-                .Class("btn btn-default sf-line-button sf-navigate")
-                .Attr("onclick", entityBase.SFControlThen("navigate_click()"))
-                .Attr("title", EntityControlMessage.Navigate.NiceToString())
-                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-new-window"));
-        }
-
-        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
-        {
-            if (!entityBase.Create)
-                return MvcHtmlString.Empty;
-
-            Type type = entityBase.Type.CleanType();
-
-            return new HtmlTag("a", entityBase.Compose("btnCreate"))
-                .Class("btn btn-default sf-line-button sf-create")
-                .Attr("onclick", entityBase.SFControlThen("create_click()"))
-                .Attr("title", EntityControlMessage.Create.NiceToString())
-                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-plus"));
-        }
-
-        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
-        {
-            if (!entityBase.Find)
-                return MvcHtmlString.Empty;
-
-            return new HtmlTag("a", entityBase.Compose("btnFind"))
-                .Class("btn btn-default sf-line-button sf-find")
-                .Attr("onclick", entityBase.SFControlThen("find_click()"))
-                .Attr("title", EntityControlMessage.Find.NiceToString())
-                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-search"));
-        }
-
-        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase)
-        {
-            if (!entityBase.Remove)
-                return MvcHtmlString.Empty;
-
-            return new HtmlTag("a", entityBase.Compose("btnRemove"))
-                .Class("btn btn-default sf-line-button sf-remove")
-                .Attr("onclick", entityBase.SFControlThen("remove_click()"))
-                .Attr("title", EntityControlMessage.Remove.NiceToString())
-                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "",
+                itemIndex.ToString()));
         }
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
@@ -234,5 +181,150 @@ namespace Signum.Web
     {
         Popup,
         PopupInDiv,
-    }   
+    }
+
+    public static class EntityButtonHelper
+    {
+        public static MvcHtmlString View(HtmlHelper helper, EntityBase entityBase, bool btn)
+        {
+            if (!entityBase.View)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnView"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-view")
+                .Attr("onclick", entityBase.SFControlThen("view_click()"))
+                .Attr("title", EntityControlMessage.View.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
+        }
+
+        public static MvcHtmlString ViewItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool btn, string elementType = "a")
+        {
+            return new HtmlTag(elementType, itemContext.Compose("btnView"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-view")
+                .Attr("onclick", entityListBase.SFControlThen("viewItem_click('{0}')".Formato(itemContext.Prefix)))
+                .Attr("title", EntityControlMessage.View.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
+        }
+
+
+        public static MvcHtmlString Navigate(HtmlHelper helper, EntityBase entityBase, bool btn)
+        {
+            if (!entityBase.Navigate)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnNavigate"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-navigate")
+                .Attr("onclick", entityBase.SFControlThen("navigate_click()"))
+                .Attr("title", EntityControlMessage.Navigate.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-new-window"));
+        }
+
+
+
+        public static MvcHtmlString Create(HtmlHelper helper, EntityBase entityBase, bool btn)
+        {
+            if (!entityBase.Create)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnCreate"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-create")
+                .Attr("onclick", entityBase.SFControlThen("create_click()"))
+                .Attr("title", EntityControlMessage.Create.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-plus"));
+        }
+
+
+
+        public static MvcHtmlString Find(HtmlHelper helper, EntityBase entityBase, bool btn)
+        {
+            if (!entityBase.Find)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnFind"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-find")
+                .Attr("onclick", entityBase.SFControlThen("find_click()"))
+                .Attr("title", EntityControlMessage.Find.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-search"));
+        }
+
+
+        public static MvcHtmlString Remove(HtmlHelper helper, EntityBase entityBase, bool btn)
+        {
+            if (!entityBase.Remove)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", entityBase.Compose("btnRemove"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button sf-remove")
+                .Attr("onclick", entityBase.SFControlThen("remove_click()"))
+                .Attr("title", EntityControlMessage.Remove.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
+        }
+
+        public static MvcHtmlString RemoveItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool btn, string elementType = "a")
+        {
+            return new HtmlTag(elementType, itemContext.Compose("btnRemove"))
+                  .Class(btn ? "btn btn-default" : null)
+                  .Class("sf-line-button sf-remove")
+                  .Attr("onclick", entityListBase.SFControlThen("removeItem_click('{0}')".Formato(itemContext.Prefix)))
+                  .Attr("title", EntityControlMessage.Remove.NiceToString())
+                  .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
+        }
+
+
+        public static MvcHtmlString MoveUp(HtmlHelper helper, EntityListBase listBase, bool btn)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", listBase.Compose("btnUp"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("btn btn-default sf-line-button move-up")
+                .Attr("onclick", listBase.SFControlThen("moveUp_click()"))
+                .Attr("title", JavascriptMessage.moveUp.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-chevron-up"));
+        }
+
+        public static MvcHtmlString MoveUpItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool btn, string elementType = "a", bool isVertical = true)
+        {
+            return new HtmlTag(elementType, itemContext.Compose("btnUp"))
+                .Class(btn ? "btn btn-default" : null)
+                .Class("sf-line-button move-up")
+                .Attr("onclick", entityListBase.SFControlThen("moveUp('{0}')".Formato(itemContext.Prefix)))
+                .Attr("title", JavascriptMessage.moveUp.NiceToString())
+                .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-up" : "glyphicon-chevron-left")));
+        }
+
+
+
+        public static MvcHtmlString MoveDown(HtmlHelper helper, EntityListBase listBase, bool btn)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            return new HtmlTag("a", listBase.Compose("btnDown"))
+             .Class(btn ? "btn btn-default" : null)
+             .Class("sf-line-button move-down")
+             .Attr("onclick", listBase.SFControlThen("moveDown_click()"))
+             .Attr("title", JavascriptMessage.moveDown.NiceToString())
+             .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-chevron-down"));
+        }
+
+        public static MvcHtmlString MoveDownItem(HtmlHelper helper, TypeContext itemContext, EntityListBase entityListBase, bool btn, string elementType = "a", bool isVertical = true)
+        {
+            return new HtmlTag(elementType, itemContext.Compose("btnDown"))
+             .Class(btn ? "btn btn-default" : null)
+             .Class("sf-line-button move-down")
+             .Attr("onclick", entityListBase.SFControlThen("moveDown('{0}')".Formato(itemContext.Prefix)))
+             .Attr("title", JavascriptMessage.moveDown.NiceToString())
+             .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-down" : "glyphicon-chevron-right")));
+        }
+
+      
+    }
 }

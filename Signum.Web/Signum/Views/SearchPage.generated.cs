@@ -53,8 +53,6 @@ WriteLiteral("    <div");
 
 WriteLiteral(" id=\"divSearchPage\"");
 
-WriteLiteral(" class=\"container\"");
-
 WriteLiteral(">\r\n        <h2>\r\n            <span");
 
 WriteLiteral(" class=\"sf-entity-title\"");
@@ -70,14 +68,14 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("</span>\r\n                     <a");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 184), Tuple.Create("\"", 219)
+WriteAttribute("id", Tuple.Create(" id=\"", 166), Tuple.Create("\"", 201)
             
             #line 7 "..\..\Signum\Views\SearchPage.cshtml"
-, Tuple.Create(Tuple.Create("", 189), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
+, Tuple.Create(Tuple.Create("", 171), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
             
             #line default
             #line hidden
-, 189), false)
+, 171), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
