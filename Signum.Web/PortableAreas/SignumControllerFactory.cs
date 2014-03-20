@@ -102,7 +102,15 @@ namespace Signum.Web.PortableAreas
             return (ControllerFilterConfig<Controller>)Config.GetOrCreate(typeof(Controller), () => new ControllerFilterConfig<Controller>());
         }
 
-        public static void AvoidValidate(Type[] doNotValidateInput)
+
+        static bool AvoidValidate(Type type)
+        {
+            var es = Navigator.Manager.EntitySettings.TryGetC(type);
+
+            return es != null && es.AvoidValidateRequest; 
+        }
+
+        public static void RegisterAvoidValidate()
         {
             ValidateInputAttribute doNotValidateInputAttribute = new ValidateInputAttribute(false);
          
@@ -115,13 +123,13 @@ namespace Signum.Web.PortableAreas
 
                     RuntimeInfo ri = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
 
-                    if (doNotValidateInput.Contains(ri.EntityType))
+                    if (AvoidValidate(ri.EntityType))
                         return doNotValidateInputAttribute;
 
                     if (form.AllKeys.Contains(EntityBaseKeys.RuntimeInfo))
                     {
                         RuntimeInfo riBase = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
-                        if (doNotValidateInput.Contains(riBase.EntityType))
+                        if (AvoidValidate(riBase.EntityType))
                             return doNotValidateInputAttribute;
                     }
 
@@ -136,7 +144,7 @@ namespace Signum.Web.PortableAreas
                      var prefix = form["prefix"];
 
                      RuntimeInfo ri = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                     if (doNotValidateInput.Contains(ri.EntityType))
+                     if (AvoidValidate(ri.EntityType))
                          return doNotValidateInputAttribute;
                      return null;
                  });

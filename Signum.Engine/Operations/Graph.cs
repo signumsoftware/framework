@@ -10,6 +10,8 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Operations
 {
+    public delegate F Overrider<F>(F baseFunc); 
+
     public class Graph<T>
          where T : class, IIdentifiable
     {
@@ -29,6 +31,11 @@ namespace Signum.Engine.Operations
             public Construct(Enum key)
             {
                 this.key = key;
+            }
+
+            public void OverrideConstruct(Overrider<Func<object[], T>> overrider)
+            {
+                this.Construct = overrider(this.Construct);
             }
 
             IIdentifiable IConstructOperation.Construct(params object[] args)
@@ -115,8 +122,20 @@ namespace Signum.Engine.Operations
 
             public bool AllowsNew { get; set; }
 
-            public Func<F, object[], T> Construct { get; set; }
             public Func<F, string> CanConstruct { get; set; }
+
+            public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string>> overrider)
+            {
+                this.CanConstruct = overrider(this.CanConstruct ?? (f => null));
+                return this;
+            }
+
+            public Func<F, object[], T> Construct { get; set; }
+
+            public void OverrideConstruct(Overrider<Func<F, object[], T>> overrider)
+            {
+                this.Construct = overrider(this.Construct);
+            }
 
             public ConstructFrom(Enum key)
             {
@@ -230,6 +249,11 @@ namespace Signum.Engine.Operations
 
             public Func<List<Lite<F>>, object[], T> Construct { get; set; }
 
+            public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object[], T>> overrider)
+            {
+                this.Construct = overrider(this.Construct);
+            }
+
             public ConstructFromMany(Enum key)
             {
                 this.key = key;
@@ -324,6 +348,17 @@ namespace Signum.Engine.Operations
 
             //public Action<T, object[]> Execute { get; set; } (inherited)
             public Func<T, string> CanExecute { get; set; }
+
+            public Execute OverrideCanExecute(Overrider<Func<T, string>> overrider)
+            {
+                this.CanExecute = overrider(this.CanExecute ?? (t => null));
+                return this;
+            }
+
+            public void OverrideExecute(Overrider<Action<T, object[]>> overrider)
+            {
+                this.Execute = overrider(this.Execute);
+            }
 
             public Execute(Enum key)
             {
@@ -459,6 +494,17 @@ namespace Signum.Engine.Operations
 
             //public Action<T, object[]> Delete { get; set; } (inherited)
             public Func<T, string> CanDelete { get; set; }
+
+            public Delete OverrideCanDelete(Overrider<Func<T, string>> overrider)
+            {
+                this.CanDelete = overrider(this.CanDelete ?? (t => null));
+                return this;
+            }
+
+            public void OverrideDelete(Overrider<Action<T, object[]>> overrider)
+            {
+                this.Delete = overrider(this.Delete);
+            }
 
             public Delete(Enum key)
             {
