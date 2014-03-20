@@ -108,7 +108,7 @@ namespace Signum.Web.Files
                 if (fileLine.Type.IsEmbeddedEntity())
                     sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
 
-                sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
+                sb.AddLine(EntityButtonHelper.Remove(helper, fileLine, btn: true));
 
                 sbg.AddLine(helper.FormGroup(fileLine,
                     fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr),
