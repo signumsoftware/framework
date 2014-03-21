@@ -23,7 +23,7 @@
     @Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
 {
     csc.PopupViewPrefix = e.Compose("errors");
-    csc.WriteQueryName = WriteQueryName.Field;
+    csc.WriteQueryName = WriteQueryName.FormGroup;
 })
 
       if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
