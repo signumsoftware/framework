@@ -72,7 +72,7 @@ WriteAttribute("id", Tuple.Create(" id=\"", 224), Tuple.Create("\"", 257)
 , 229), false)
 );
 
-WriteLiteral(" class=\"sf-popup-control modal fade\"");
+WriteLiteral(" class=\"sf-popup-control modal fade modal-lg\"");
 
 WriteLiteral(" tabindex=\"-1\"");
 
@@ -84,7 +84,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 8 "..\..\Signum\Views\PopupControl.cshtml"
-                                                                                                                                      Write(Model.Prefix);
+                                                                                                                                               Write(Model.Prefix);
 
             
             #line default
@@ -167,14 +167,14 @@ WriteLiteral(" </span>\r\n");
             #line hidden
 WriteLiteral("                        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1027), Tuple.Create("\"", 1065)
+WriteAttribute("href", Tuple.Create(" href=\"", 1036), Tuple.Create("\"", 1074)
             
             #line 22 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1034), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
+, Tuple.Create(Tuple.Create("", 1043), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
             
             #line default
             #line hidden
-, 1034), false)
+, 1043), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
@@ -241,26 +241,26 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n                <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2137), Tuple.Create("\"", 2174)
+WriteAttribute("id", Tuple.Create(" id=\"", 2146), Tuple.Create("\"", 2183)
             
             #line 46 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 2142), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 2151), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 2142), false)
+, 2151), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 2175), Tuple.Create("\"", 2264)
-, Tuple.Create(Tuple.Create("", 2183), Tuple.Create("sf-main-control", 2183), true)
-, Tuple.Create(Tuple.Create(" ", 2198), Tuple.Create("form-horizontal", 2199), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2184), Tuple.Create("\"", 2273)
+, Tuple.Create(Tuple.Create("", 2192), Tuple.Create("sf-main-control", 2192), true)
+, Tuple.Create(Tuple.Create(" ", 2207), Tuple.Create("form-horizontal", 2208), true)
             
             #line 46 "..\..\Signum\Views\PopupControl.cshtml"
-                  , Tuple.Create(Tuple.Create("", 2214), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+                  , Tuple.Create(Tuple.Create("", 2223), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 2214), false)
+, 2223), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");
@@ -362,29 +362,29 @@ WriteLiteral(" class=\"modal-footer\"");
 
 WriteLiteral(">\r\n                    <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3144), Tuple.Create("\"", 3172)
+WriteAttribute("id", Tuple.Create(" id=\"", 3153), Tuple.Create("\"", 3181)
             
             #line 65 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 3149), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+, Tuple.Create(Tuple.Create("", 3158), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 3149), false)
+, 3158), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3173), Tuple.Create("\"", 3286)
-, Tuple.Create(Tuple.Create("", 3181), Tuple.Create("btn", 3181), true)
-, Tuple.Create(Tuple.Create(" ", 3184), Tuple.Create("btn-primary", 3185), true)
-, Tuple.Create(Tuple.Create(" ", 3196), Tuple.Create("sf-entity-button", 3197), true)
-, Tuple.Create(Tuple.Create(" ", 3213), Tuple.Create("sf-close-button", 3214), true)
-, Tuple.Create(Tuple.Create(" ", 3229), Tuple.Create("sf-ok-button", 3230), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 3182), Tuple.Create("\"", 3295)
+, Tuple.Create(Tuple.Create("", 3190), Tuple.Create("btn", 3190), true)
+, Tuple.Create(Tuple.Create(" ", 3193), Tuple.Create("btn-primary", 3194), true)
+, Tuple.Create(Tuple.Create(" ", 3205), Tuple.Create("sf-entity-button", 3206), true)
+, Tuple.Create(Tuple.Create(" ", 3222), Tuple.Create("sf-close-button", 3223), true)
+, Tuple.Create(Tuple.Create(" ", 3238), Tuple.Create("sf-ok-button", 3239), true)
             
             #line 65 "..\..\Signum\Views\PopupControl.cshtml"
-                                              , Tuple.Create(Tuple.Create("", 3242), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
+                                              , Tuple.Create(Tuple.Create("", 3251), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
             
             #line default
             #line hidden
-, 3242), false)
+, 3251), false)
 );
 
 WriteLiteral(">");
@@ -398,14 +398,14 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("</button>\r\n                    <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3362), Tuple.Create("\"", 3394)
+WriteAttribute("id", Tuple.Create(" id=\"", 3371), Tuple.Create("\"", 3403)
             
             #line 66 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 3367), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
+, Tuple.Create(Tuple.Create("", 3376), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
             
             #line default
             #line hidden
-, 3367), false)
+, 3376), false)
 );
 
 WriteLiteral(" class=\"btn btn-default sf-entity-button sf-close-button sf-cancel-button\"");

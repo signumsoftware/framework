@@ -36,13 +36,12 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            valueLine.ValueHtmlProps.AddCssClass("form-control");
-
-            sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
-
-            if (valueLine.UnitText.HasText())
+            using (valueLine.UnitText == null ? null : sb.Surround(new HtmlTag("div").Class("input-group")))
             {
-                sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "sf-unit-line"));
+                sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
+
+                if (valueLine.UnitText.HasText())
+                    sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "input-group-addon"));
             }
 
             return sb.ToHtml();
@@ -59,11 +58,10 @@ namespace Signum.Web
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, valueLine.UntypedValue.ToString()));
 
-                string str =
-                    value == null ? null :
+                string str = value == null ? null :
                     LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members) ? value.NiceToString() : value.ToString();
 
-                return result.Concat(helper.Span("", str, "form-control", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(null, str, valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -74,6 +72,7 @@ namespace Signum.Web
                     .SingleOrDefaultEx()
                     .TryDoC(s => s.Selected = true);
 
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
 
@@ -89,18 +88,11 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
-                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "form-control", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
 
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.DateTimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
-        }
-
-        public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
-        {
-            if (valueLine.ReadOnly)
-                return helper.Span(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", "form-control");
-
-            return helper.Hidden(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
@@ -126,6 +118,7 @@ namespace Signum.Web
             if (!valueLine.ValueHtmlProps.ContainsKey("type"))
                 valueLine.ValueHtmlProps["type"] = "text";
 
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.TextBox(valueLine.Prefix, value, valueLine.ValueHtmlProps);
         }
 
@@ -146,12 +139,12 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
-                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "form-control", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic("", (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
             valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + valueLine.ValueHtmlProps.TryGetC("onblur");
-
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.TextArea(valueLine.Prefix, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
 
@@ -161,37 +154,8 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
 
             bool? value = (bool?)valueLine.UntypedValue;
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.CheckBox(valueLine.Prefix, value ?? false, valueLine.ValueHtmlProps);
-        }
-
-        public static MvcHtmlString RadioButtons(this HtmlHelper helper, ValueLine valueLine)
-        {
-            bool? value = (bool?)valueLine.UntypedValue;
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            if (valueLine.ReadOnly)
-            {
-                if (valueLine.WriteHiddenOnReadonly)
-                    sb.AddLine(helper.Hidden(valueLine.Prefix, value ?? false));
-                
-                valueLine.ValueHtmlProps.Add("disabled", "disabled");
-            }
-
-            valueLine.ValueHtmlProps.Add("name", valueLine.Prefix);
-
-            valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
-
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, true, value == true, valueLine.ValueHtmlProps).ToHtmlString()
-                .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_True\"")));
-
-            sb.AddLine(helper.Span(valueLine.Compose("lblRadioTrue"), valueLine.RadioButtonLabelTrue, "sf-value-line-radiolbl"));
-
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, false, value == false, valueLine.ValueHtmlProps).ToHtmlString()
-              .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_False\"")));
-
-            sb.AddLine(helper.Span(valueLine.Compose("lblRadioFalse"), valueLine.RadioButtonLabelFalse, "sf-value-line-radiolbl"));
-
-            return sb.ToHtml();
         }
 
         public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
@@ -222,25 +186,6 @@ namespace Signum.Web
                 return result;
 
             return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
-        }
-
-        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
-        {
-            return helper.HiddenLine(tc, property, null);
-        }
-
-        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
-        {
-            TypeContext<S> context = Common.WalkExpression(tc, property);
-
-            ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
-
-            Common.FireCommonTasks(hl);
-
-            if (settingsModifier != null)
-                settingsModifier(hl);
-
-            return Hidden(helper, hl);
         }
     }
 
@@ -290,7 +235,6 @@ namespace Signum.Web
             {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
-            {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},
             {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)}
@@ -300,7 +244,6 @@ namespace Signum.Web
     public enum ValueLineType
     {
         Boolean,
-        RadioButtons,
         Combo,
         DateTime,
         TextBox,
