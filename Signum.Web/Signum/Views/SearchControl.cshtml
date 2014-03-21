@@ -93,7 +93,6 @@
         </div>
     }
     <div id="@Model.Compose("divResults")" class="sf-search-results-container table-responsive">
-
         <table id="@Model.Compose("tblResults")" class="sf-search-results  table table-hover  table-condensed">
             <thead>
                 <tr>
@@ -125,15 +124,16 @@
                 <tr>
                     <td colspan="@columnsCount">@JavascriptMessage.searchForResults.NiceToString()</td>
                 </tr>
-                @{ 
-                    ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
-                    ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
-                    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
-                }
-                @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+
+
             </tbody>
         </table>
     </div>
+    @{ 
+        ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
+        ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
+    }
+    @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
 </div>
 <script type="text/javascript">
     require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});

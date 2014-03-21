@@ -3,21 +3,23 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
+export var doubleScroll = true;
+
 export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
     allowSelection?: boolean;
     multipleSelection?: boolean;
     columnMode?: ColumnOptionsMode;
-    columns?: ColumnOption[]; 
+    columns?: ColumnOption[];
     create?: boolean;
     elems?: number;
     selectedItemsContextMenu?: boolean;
     filterMode?: FilterMode;
-    filters?: FilterOption[]; 
+    filters?: FilterOption[];
     navigate?: boolean;
     openFinderUrl?: boolean;
-    orders?: OrderOption[]; 
+    orders?: OrderOption[];
     prefix: string;
     webQueryName: string;
     searchOnLoad?: boolean;
@@ -139,10 +141,10 @@ export function explore(findOptions: FindOptions): Promise<void> {
         url: findOptions.openFinderUrl || SF.Urls.partialFind,
         data: requestDataForOpenFinder(findOptions, true)
     }).then(modalDivHtml => Navigator.openModal($(modalDivHtml)))
-      .then(() => null);
+        .then(() => null);
 }
 
-export function requestDataForOpenFinder(findOptions: FindOptions, isExplore : boolean) {
+export function requestDataForOpenFinder(findOptions: FindOptions, isExplore: boolean) {
     var requestData = {
         webQueryName: findOptions.webQueryName,
         elems: findOptions.elems,
@@ -244,16 +246,14 @@ export class SearchControl {
             webQueryName: null
         }, _options);
 
-      
-
         this._create();
     }
 
     public ready() {
-        this.element.SFControlFullfill(this); 
+        this.element.SFControlFullfill(this);
     }
 
-    public pf(s : string) {
+    public pf(s: string) {
         return "#" + SF.compose(this.options.prefix, s);
     }
 
@@ -296,7 +296,7 @@ export class SearchControl {
 
         if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
             $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                
+
                 var $td = $(this).closest("td");
 
                 var $tr = $td.closest("tr");
@@ -322,11 +322,11 @@ export class SearchControl {
         }
 
         if (this.options.filterMode != FilterMode.OnlyResults) {
-            $tblResults.on("click", "ul.pagination a", function () {
+            this.element.on("click", ".sf-search-footer ul.pagination a", function () {
                 self.search(parseInt($(this).attr("data-page")));
             });
 
-            $tblResults.on("change", ".sf-pagination-size", function () {
+            this.element.on("change", ".sf-search-footer .sf-pagination-size", function () {
                 if ($(this).find("option:selected").val() == "All") {
                     self.clearResults();
                 }
@@ -353,14 +353,45 @@ export class SearchControl {
             return false;
         });
 
+        if (doubleScroll) {
+            var div = $(this.pf("divResults"));
+
+            div.removeClass("table-responsive");
+            div.css("overflow-x", "auto");
+
+            var divUp = $("<div>")
+                .attr("id", SF.compose(this.options.prefix, "divResults_Up"))
+                .css("overflow-x", "auto")
+                .css("overflow-y", "hidden")
+                .css("height", "15")
+                .insertBefore(div);
+
+            var resultUp = $("<div>").attr("id", SF.compose(this.options.prefix, "tblResults_Up")).css("height", "1").appendTo(divUp)
+
+            div.scroll(() => { this.syncSize(); divUp.scrollLeft(div.scrollLeft()); });
+            divUp.scroll(() => { this.syncSize(); div.scrollLeft(divUp.scrollLeft()); });
+
+            this.syncSize();
+
+            window.onresize = () => this.syncSize();
+        }
+
         if (this.options.searchOnLoad) {
             this.searchOnLoad();
         }
     }
 
+    syncSize() {
+        if (!doubleScroll)
+            return;
 
+        $(this.pf("tblResults_Up")).width($(this.pf("tblResults")).width());
 
-    changeRowSelection($rowSelectors, select : boolean) {
+        $(this.pf("divResults_Up")).css("height",
+            $(this.pf("tblResults_Up")).width() > $(this.pf("divResults_Up")).width() ? "15" : "1");
+    }
+
+    changeRowSelection($rowSelectors, select: boolean) {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("active", select);
 
@@ -389,7 +420,7 @@ export class SearchControl {
         }
     }
 
- 
+
 
     headerContextMenu(e: JQueryEventObject) {
         var $th = $(e.target).closest("th");
@@ -446,9 +477,9 @@ export class SearchControl {
             url: SF.Urls.selectedItemsContextMenu,
             data: this.requestDataForContextMenu()
         })
-        .then((items) => {
-            $menu.html(items || this.noActionsFoundMessage());
-        });
+            .then((items) => {
+                $menu.html(items || this.noActionsFoundMessage());
+            });
 
         return false;
     }
@@ -473,26 +504,40 @@ export class SearchControl {
         }
     }
 
-    search(page? : number) {
+    search(page?: number) {
         var $searchButton = $(this.pf("qbSearch"));
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
         var self = this;
-        $.ajax({
+        SF.ajaxPost({
             url: SF.Urls.search,
-            data: this.requestDataForSearch(RequestType.QueryRequest, page),
-            success: function (r) {
+            data: this.requestDataForSearch(RequestType.QueryRequest, page)
+        }).then(r => {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
-                    $tbody.html(r);
+                    var rows = $(r);
+
+                    var divs = rows.filter("tr.extract").children().children();
+
+                    this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
+
+                    var mult = divs.filter("div.sf-td-multiply");
+                    var multCurrent = this.element.find("div.sf-td-multiply");
+
+                    if (multCurrent.length)
+                        multCurrent.replaceWith(mult);
+                    else
+                        this.element.find("div.sf-query-button-bar").after(mult);
+
+                    $tbody.html(rows.not("tr.extract"));
                 }
                 else {
                     $tbody.html("");
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-            }
-        });
+                this.syncSize();
+            });
     }
 
     requestDataForSearchInUrl(): string {
@@ -504,7 +549,7 @@ export class SearchControl {
 
 
 
-    requestDataForSearch(type: RequestType, page?: number) : FormObject {
+    requestDataForSearch(type: RequestType, page?: number): FormObject {
         var requestData: FormObject = {};
         if (type != RequestType.FullScreen)
             requestData["webQueryName"] = this.options.webQueryName;
@@ -528,7 +573,7 @@ export class SearchControl {
     }
 
 
-  
+
 
     static encodeCSV(value: string) {
         if (!value)
@@ -562,13 +607,13 @@ export class SearchControl {
         }).join(";");
     }
 
-    static getSelectedItems(prefix: string) : Array<Entities.EntityValue> {
+    static getSelectedItems(prefix: string): Array<Entities.EntityValue> {
         return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(v=> {
             var parts = (<HTMLInputElement>v).value.split("__");
             return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false),
                 parts[2],
                 $(v).parent().next().children('a').attr('href'));
-        }); 
+        });
     }
 
     static liteKeys(values: Array<Entities.EntityValue>): string {
@@ -576,10 +621,10 @@ export class SearchControl {
     }
 
     selectedItems(): Array<Entities.EntityValue> {
-        return SearchControl.getSelectedItems(this.options.prefix); 
+        return SearchControl.getSelectedItems(this.options.prefix);
     }
 
-    selectedItemsLiteKeys() : string {
+    selectedItemsLiteKeys(): string {
         return SearchControl.liteKeys(this.selectedItems());
     }
 
@@ -659,7 +704,7 @@ export class SearchControl {
             url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
             async: false,
-        }).then(html => $tblHeaders.append(html));
+        }).then(html => { $tblHeaders.append(html); this.syncSize(); });
     }
 
     editColumn($th: JQuery) {
@@ -674,10 +719,11 @@ export class SearchControl {
         }).then(result => {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
+                this.syncSize();
             });
     }
 
-    moveColumn($source : JQuery, $target : JQuery, before : boolean) {
+    moveColumn($source: JQuery, $target: JQuery, before: boolean) {
         if (before) {
             $target.before($source);
         }
@@ -690,9 +736,67 @@ export class SearchControl {
         this.createMoveColumnDragDrop();
     }
 
-    createMoveColumnDragDrop($draggables? : JQuery, $droppables? : JQuery) {
-        $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
-        $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
+    createMoveColumnDragDrop() {
+
+        var rowsSelector = ".sf-search-results th:not(.sf-th-entity):not(.sf-th-selection)";
+        var current : HTMLTableHeaderCellElement = null;
+        this.element.on("dragstart", rowsSelector, function (e: JQueryEventObject) {
+            var de = <DragEvent><Event>e.originalEvent;
+            de.dataTransfer.effectAllowed = "move";
+            de.dataTransfer.setData("Text", $(this).attr("data-column-name")); 
+            current = this;
+        });  
+
+
+        function dragClass(offsetX: number, width: number) {
+            if (!offsetX)
+                return null;
+
+            if (width < 100 ? (offsetX < (width / 2)) : (offsetX < 50))
+                return "drag-left";
+
+            if (width < 100 ? (offsetX > (width / 2)) : (offsetX > (width - 50)))
+                return "drag-right";
+
+            return null;
+        }
+    
+        var onDragOver = function (e: JQueryEventObject) {
+            if (e.preventDefault) e.preventDefault();
+
+            var de = <DragEvent><Event>e.originalEvent;
+            if (this == current) {
+                de.dataTransfer.dropEffect = "none";
+                return;
+            }
+
+            $(this).removeClass("drag-left drag-right");
+            $(this).addClass(dragClass(de.offsetX, $(this).width()));
+
+            de.dataTransfer.dropEffect = "move";
+        }
+        this.element.on("dragover", rowsSelector, onDragOver);
+        this.element.on("dragenter", rowsSelector, onDragOver);
+
+
+        this.element.on("dragleave", rowsSelector, function () {
+            $(this).removeClass("drag-left drag-right");
+        });
+
+        var me = this;
+        this.element.on("drop", rowsSelector, function (e) {
+            $(this).removeClass("drag-left drag-right");
+
+            var de = <DragEvent><Event>e.originalEvent;
+
+            var result = dragClass(de.offsetX, $(this).width());
+
+            if (result)
+                me.moveColumn($(current), $(this), result == "drag-left");
+        });
+
+        //$draggables = $draggables || $(this.pf("tblResults") + " ");
+        //$droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 
         //$draggables.draggable({
         //    revert: "invalid",
@@ -721,6 +825,7 @@ export class SearchControl {
     removeColumn($th) {
         $th.remove();
         this.clearResults();
+        this.syncSize();
     }
 
     clearResults() {
@@ -740,7 +845,7 @@ export class SearchControl {
         var value = $elem.data("value");
         if (typeof value == "undefined")
             value = $elem.html().trim()
-                
+
 
         var cellIndex = $elem[0].cellIndex;
         var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).data("column-name");
@@ -775,10 +880,10 @@ export class SearchControl {
     }
 
     getEntityType(): Promise<string> {
-        var names = (<string>$(this.pf(Entities.Keys.entityTypeNames)).val()).split(","); 
-        var niceNames = (<string>$(this.pf(Entities.Keys.entityTypeNiceNames)).val()).split(","); 
+        var names = (<string>$(this.pf(Entities.Keys.entityTypeNames)).val()).split(",");
+        var niceNames = (<string>$(this.pf(Entities.Keys.entityTypeNiceNames)).val()).split(",");
 
-        var options = names.map((p, i)=> ({
+        var options = names.map((p, i) => ({
             type: p,
             toStr: niceNames[i]
         }));
@@ -787,7 +892,7 @@ export class SearchControl {
         }
         return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o == null ? null : o.type);
     }
-  
+
     requestDataForSearchPopupCreate() {
         return {
             filters: this.filterBuilder.serializeFilters(),
@@ -814,7 +919,7 @@ export class SearchControl {
         };
 
         var $tabContainer = $button.closest(".sf-tabs");
-        if ($tabContainer.length == 0 || this.element.is(":visible")) { 
+        if ($tabContainer.length == 0 || this.element.is(":visible")) {
             makeSearch();
         }
         else {
@@ -900,7 +1005,7 @@ export class FilterBuilder {
         this.addFilter(tokenName, null);
     }
 
-    addFilter(tokenName : string, value: string) {
+    addFilter(tokenName: string, value: string) {
         var tableFilters = $(this.pf("tblFilters tbody"));
         if (tableFilters.length == 0) {
             throw "Adding filters is not allowed";
@@ -915,18 +1020,17 @@ export class FilterBuilder {
         };
 
         var self = this;
-        $.ajax({
+        SF.ajaxPost({
             url: this.url,
             data: data,
             async: false,
-            success: function (filterHtml) {
+        }).then((filterHtml) => {
                 var $filterList = self.element.find(".sf-filters-list");
                 $filterList.find(".sf-explanation").hide();
                 $filterList.find("table").show();
 
                 tableFilters.append(filterHtml);
-            }
-        });
+            });
     }
 
     newFilterRowIndex(): number {
@@ -983,13 +1087,13 @@ export class FilterBuilder {
 
 export module QueryTokenBuilder {
 
-    export function init(containerId : string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function init(containerId: string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
         $("#" + containerId).on("change", "select", function () {
             tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
         });
     }
 
-    export function tokenChanged($selectedCombo: JQuery, webQueryName : string,  controllerUrl : string, requestExtraJsonData : any) {
+    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
 
         var prefix = $selectedCombo.attr("id").before("ddlTokens_");
         if (prefix.endsWith("_"))
@@ -999,7 +1103,7 @@ export module QueryTokenBuilder {
 
         clearChildSubtokenCombos($selectedCombo, prefix, index);
         $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-        
+
         var $selectedOption = $selectedCombo.children("option:selected");
         if ($selectedOption.val() == "") {
             return;
@@ -1014,14 +1118,13 @@ export module QueryTokenBuilder {
             prefix: prefix
         }, requestExtraJsonData);
 
-        $.ajax({
+        SF.ajaxPost({
             url: controllerUrl,
             data: data,
             dataType: "html",
-            success: function (newHtml) {
+        }).then(newHtml => {
                 $selectedCombo.parent().html(newHtml);
-            }
-        });
+            });
     };
 
     export function clearChildSubtokenCombos($selectedCombo: JQuery, prefix: string, index: number) {
