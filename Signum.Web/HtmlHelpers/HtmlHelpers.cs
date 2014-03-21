@@ -68,7 +68,7 @@ namespace Signum.Web
             {
                 var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 
-                if(context.FormGroupStyle == FormGroupStyle.Inline)
+                if(context.FormGroupStyle == FormGroupStyle.SrOnly)
                     lbl.Class("sr-only");
                 else if(context.FormGroupStyle == FormGroupStyle.Horizontal)
                     lbl.Class("control-label").Class(context.LabelColumns.ToString());
