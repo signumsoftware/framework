@@ -59,7 +59,7 @@ WriteLiteral("\r\n");
 {
     using (Html.FormInline())
     {
-        sc.FormGroupStyle = FormGroupStyle.Inline;
+        sc.FormGroupStyle = FormGroupStyle.SrOnly;
     
             
             #line default

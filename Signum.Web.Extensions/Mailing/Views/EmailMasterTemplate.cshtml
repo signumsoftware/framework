@@ -6,10 +6,8 @@
 {
     @Html.ValueLine(ec, e => e.Name)
     <div class="clearall"></div>
-    <div class="sf-email-replacements-container sf-tabs-repeater">
-        @Html.EntityTabRepeater(ec, e => e.Messages, er =>
+    @Html.EntityTabRepeater(ec, e => e.Messages, er =>
         {
             er.PreserveViewData = true;
         })
-    </div>
 }

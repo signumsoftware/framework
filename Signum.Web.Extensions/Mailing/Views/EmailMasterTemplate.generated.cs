@@ -88,17 +88,15 @@ WriteLiteral(" class=\"clearall\"");
 
 WriteLiteral("></div>\r\n");
 
-WriteLiteral("    <div");
-
-WriteLiteral(" class=\"sf-email-replacements-container sf-tabs-repeater\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
             
-            #line 10 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-   Write(Html.EntityTabRepeater(ec, e => e.Messages, er =>
+            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.EntityTabRepeater(ec, e => e.Messages, er =>
         {
             er.PreserveViewData = true;
         }));
@@ -106,10 +104,9 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n");
-
             
-            #line 15 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 12 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+          
 }
             
             #line default
