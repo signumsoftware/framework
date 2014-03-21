@@ -86,6 +86,9 @@ namespace Signum.Web
 
         private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)
         {
+            if (entityLine.ReadOnly)
+                return helper.FormControlStatic(entityLine.Compose(EntityBaseKeys.Link), entityLine.UntypedValue.TryToString(), null);
+
             if (entityLine.Navigate)
             {
                 var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ?? (entityLine.UntypedValue as IIdentifiable).TryCC(i => i.ToLite(i.IsNew));
@@ -106,7 +109,7 @@ namespace Signum.Web
         private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine)
         {
             if (!entityLine.Autocomplete)
-                return new HtmlTag("span", entityLine.Compose(EntityBaseKeys.ToStr)).Class("form-control").Attr("disabled", "disabled");
+                return helper.FormControlStatic(entityLine.Compose(EntityBaseKeys.ToStr), null, null);
 
             if (entityLine.Implementations.Value.IsByAll)
                 throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
