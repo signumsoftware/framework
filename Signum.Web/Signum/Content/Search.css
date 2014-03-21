@@ -4,6 +4,10 @@
     width: 33%;
 }
 
+table.sf-search-results > thead
+{
+    white-space:nowrap;
+}
 
 /*Pagination*/
 
@@ -196,7 +200,7 @@ div.sf-filters-list table.table
     padding-bottom: 0px;
 }
 
-.sf-search-popup .sf-search-results
+.sf-search-results
 {
     margin-bottom: 0px
 }

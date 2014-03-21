@@ -1,5 +1,7 @@
 ﻿/// <reference path="globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
+    exports.doubleScroll = true;
+
     (function (FilterOperation) {
         FilterOperation[FilterOperation["EqualTo"] = 0] = "EqualTo";
         FilterOperation[FilterOperation["DistinctTo"] = 1] = "DistinctTo";
@@ -313,9 +315,44 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return false;
             });
 
+            if (exports.doubleScroll) {
+                var div = $(this.pf("divResults"));
+
+                div.removeClass("table-responsive");
+                div.css("overflow-x", "auto");
+
+                var divUp = $("<div>").attr("id", SF.compose(this.options.prefix, "divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
+
+                var resultUp = $("<div>").attr("id", SF.compose(this.options.prefix, "tblResults_Up")).css("height", "1").appendTo(divUp);
+
+                div.scroll(function () {
+                    _this.syncSize();
+                    divUp.scrollLeft(div.scrollLeft());
+                });
+                divUp.scroll(function () {
+                    _this.syncSize();
+                    div.scrollLeft(divUp.scrollLeft());
+                });
+
+                this.syncSize();
+
+                window.onresize = function () {
+                    return _this.syncSize();
+                };
+            }
+
             if (this.options.searchOnLoad) {
                 this.searchOnLoad();
             }
+        };
+
+        SearchControl.prototype.syncSize = function () {
+            if (!exports.doubleScroll)
+                return;
+
+            $(this.pf("tblResults_Up")).width($(this.pf("tblResults")).width());
+
+            $(this.pf("divResults_Up")).css("height", $(this.pf("tblResults_Up")).width() > $(this.pf("divResults_Up")).width() ? "15" : "1");
         };
 
         SearchControl.prototype.changeRowSelection = function ($rowSelectors, select) {
@@ -441,23 +478,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.search = function (page) {
+            var _this = this;
             var $searchButton = $(this.pf("qbSearch"));
             $searchButton.addClass("sf-searching");
             var count = parseInt($searchButton.attr("data-searchCount")) || 0;
             var self = this;
-            $.ajax({
+            SF.ajaxPost({
                 url: SF.Urls.search,
-                data: this.requestDataForSearch(0 /* QueryRequest */, page),
-                success: function (r) {
-                    var $tbody = self.element.find(".sf-search-results-container tbody");
-                    if (!SF.isEmpty(r)) {
-                        $tbody.html(r);
-                    } else {
-                        $tbody.html("");
-                    }
-                    $searchButton.removeClass("sf-searching");
-                    $searchButton.attr("data-searchCount", count + 1);
+                data: this.requestDataForSearch(0 /* QueryRequest */, page)
+            }).then(function (r) {
+                var $tbody = self.element.find(".sf-search-results-container tbody");
+                if (!SF.isEmpty(r)) {
+                    $tbody.html(r);
+                } else {
+                    $tbody.html("");
                 }
+                $searchButton.removeClass("sf-searching");
+                $searchButton.attr("data-searchCount", count + 1);
+                _this.syncSize();
             });
         };
 
@@ -599,6 +637,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.addColumn = function () {
+            var _this = this;
             if (!this.options.allowChangeColumns || $(this.pf("tblFilters tbody")).length == 0) {
                 throw "Adding columns is not allowed";
             }
@@ -620,11 +659,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
                 async: false
             }).then(function (html) {
-                return $tblHeaders.append(html);
+                $tblHeaders.append(html);
+                _this.syncSize();
             });
         };
 
         SearchControl.prototype.editColumn = function ($th) {
+            var _this = this;
             var colName = $th.find("span").text().trim();
 
             Navigator.valueLineBox({
@@ -636,6 +677,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).then(function (result) {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
+                _this.syncSize();
             });
         };
 
@@ -678,6 +720,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.removeColumn = function ($th) {
             $th.remove();
             this.clearResults();
+            this.syncSize();
         };
 
         SearchControl.prototype.clearResults = function () {
@@ -882,17 +925,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             };
 
             var self = this;
-            $.ajax({
+            SF.ajaxPost({
                 url: this.url,
                 data: data,
-                async: false,
-                success: function (filterHtml) {
-                    var $filterList = self.element.find(".sf-filters-list");
-                    $filterList.find(".sf-explanation").hide();
-                    $filterList.find("table").show();
+                async: false
+            }).then(function (filterHtml) {
+                var $filterList = self.element.find(".sf-filters-list");
+                $filterList.find(".sf-explanation").hide();
+                $filterList.find("table").show();
 
-                    tableFilters.append(filterHtml);
-                }
+                tableFilters.append(filterHtml);
             });
         };
 
@@ -981,13 +1023,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 prefix: prefix
             }, requestExtraJsonData);
 
-            $.ajax({
+            SF.ajaxPost({
                 url: controllerUrl,
                 data: data,
-                dataType: "html",
-                success: function (newHtml) {
-                    $selectedCombo.parent().html(newHtml);
-                }
+                dataType: "html"
+            }).then(function (newHtml) {
+                $selectedCombo.parent().html(newHtml);
             });
         }
         QueryTokenBuilder.tokenChanged = tokenChanged;

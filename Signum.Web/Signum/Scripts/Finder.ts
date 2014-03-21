@@ -3,6 +3,8 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
+export var doubleScroll = true;
+
 export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
@@ -244,8 +246,6 @@ export class SearchControl {
             webQueryName: null
         }, _options);
 
-      
-
         this._create();
     }
 
@@ -353,12 +353,43 @@ export class SearchControl {
             return false;
         });
 
+        if (doubleScroll) {
+            var div = $(this.pf("divResults"));
+
+            div.removeClass("table-responsive");
+            div.css("overflow-x", "auto");
+
+            var divUp = $("<div>")
+                .attr("id", SF.compose(this.options.prefix, "divResults_Up"))
+                .css("overflow-x", "auto")
+                .css("overflow-y", "hidden")
+                .css("height", "15")
+                .insertBefore(div);
+
+            var resultUp = $("<div>").attr("id", SF.compose(this.options.prefix, "tblResults_Up")).css("height", "1").appendTo(divUp)
+
+            div.scroll(() => { this.syncSize(); divUp.scrollLeft(div.scrollLeft()); });
+            divUp.scroll(() => { this.syncSize(); div.scrollLeft(divUp.scrollLeft()); });
+
+            this.syncSize();
+
+            window.onresize = () => this.syncSize();
+        }
+
         if (this.options.searchOnLoad) {
             this.searchOnLoad();
         }
     }
 
+    syncSize() {
+        if (!doubleScroll)
+            return;
 
+        $(this.pf("tblResults_Up")).width($(this.pf("tblResults")).width());
+
+        $(this.pf("divResults_Up")).css("height",
+            $(this.pf("tblResults_Up")).width() > $(this.pf("divResults_Up")).width() ? "15" : "1");
+    }
 
     changeRowSelection($rowSelectors, select : boolean) {
         $rowSelectors.prop("checked", select);
@@ -478,10 +509,10 @@ export class SearchControl {
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
         var self = this;
-        $.ajax({
+        SF.ajaxPost({
             url: SF.Urls.search,
-            data: this.requestDataForSearch(RequestType.QueryRequest, page),
-            success: function (r) {
+            data: this.requestDataForSearch(RequestType.QueryRequest, page)
+        }).then(r => {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
                     $tbody.html(r);
@@ -491,8 +522,8 @@ export class SearchControl {
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-            }
-        });
+                this.syncSize();
+            });
     }
 
     requestDataForSearchInUrl(): string {
@@ -659,7 +690,7 @@ export class SearchControl {
             url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
             async: false,
-        }).then(html => $tblHeaders.append(html));
+        }).then(html => { $tblHeaders.append(html); this.syncSize(); });
     }
 
     editColumn($th: JQuery) {
@@ -674,6 +705,7 @@ export class SearchControl {
         }).then(result => {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
+                this.syncSize();
             });
     }
 
@@ -721,6 +753,7 @@ export class SearchControl {
     removeColumn($th) {
         $th.remove();
         this.clearResults();
+        this.syncSize();
     }
 
     clearResults() {
@@ -915,17 +948,16 @@ export class FilterBuilder {
         };
 
         var self = this;
-        $.ajax({
+        SF.ajaxPost({
             url: this.url,
             data: data,
             async: false,
-            success: function (filterHtml) {
-                var $filterList = self.element.find(".sf-filters-list");
-                $filterList.find(".sf-explanation").hide();
-                $filterList.find("table").show();
+        }).then((filterHtml) => {
+            var $filterList = self.element.find(".sf-filters-list");
+            $filterList.find(".sf-explanation").hide();
+            $filterList.find("table").show();
 
-                tableFilters.append(filterHtml);
-            }
+            tableFilters.append(filterHtml);
         });
     }
 
@@ -1014,13 +1046,12 @@ export module QueryTokenBuilder {
             prefix: prefix
         }, requestExtraJsonData);
 
-        $.ajax({
+        SF.ajaxPost({
             url: controllerUrl,
             data: data,
             dataType: "html",
-            success: function (newHtml) {
-                $selectedCombo.parent().html(newHtml);
-            }
+        }).then(newHtml => {
+            $selectedCombo.parent().html(newHtml);
         });
     };
 
