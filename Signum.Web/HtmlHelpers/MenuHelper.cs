@@ -17,11 +17,15 @@ namespace Signum.Web
 
     public static class WebMenuHelper
     {
-        public static MvcHtmlString WebMenu(this HtmlHelper helper, params WebMenuItem[] children)
+        public static MvcHtmlString WebMenu(this HtmlHelper helper, params  WebMenuItem[] menuItems)
+        {
+            return helper.WebMenu((IEnumerable<WebMenuItem>)menuItems);
+        }
+        public static MvcHtmlString WebMenu(this HtmlHelper helper, IEnumerable<WebMenuItem> menuITems)
         {
             var currentUrl = helper.ViewContext.RequestContext.HttpContext.Request.RawUrl; 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            foreach (WebMenuItem menu in children)
+            foreach (WebMenuItem menu in menuITems)
             {
                 menu.Write(sb, currentUrl, 0);
             }
