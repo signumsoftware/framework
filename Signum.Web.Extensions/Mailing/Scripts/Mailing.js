@@ -245,13 +245,22 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         if (container.length == 0)
             container = $iframe.contents();
 
+        var currHeight = 0;
         function fixHeight() {
-            $iframe.height(Math.min(1000, container.children().toArray().map(function (a) {
+            var newHeight = container.children().toArray().map(function (a) {
                 return $(a).height();
             }).reduce(function (a, b) {
                 return a + b;
-            }, 0) + 100));
+            }, 0) + 100;
+
+            newHeight = Math.min(newHeight, 2000);
+
+            if (Math.abs(currHeight - newHeight) > 100) {
+                $iframe.css("height", newHeight);
+                currHeight = newHeight;
+            }
         }
+
         fixHeight();
         setInterval(fixHeight, 500);
     }

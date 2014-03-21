@@ -5,12 +5,13 @@
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
         @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordKey), AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
-            Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
-            Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty))
-    
-        @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
-            Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
-            Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty))
+            Html.Password(e.Compose(UserMapping.NewPasswordKey), "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
+            Html.ValidationMessage(e.Compose(UserMapping.NewPasswordKey)) ?? MvcHtmlString.Empty))
+
+        @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(),
+            Html.Password(e.Compose(UserMapping.NewPasswordBisKey), "", new Dictionary<string, string> { { "class", "form-control" } }).Concat(
+            Html.ValidationMessage(e.Compose(UserMapping.NewPasswordBisKey)) ?? MvcHtmlString.Empty))
+
     }
     @Html.ValueLine(e, f => f.PasswordNeverExpires)
     @Html.ValueLine(e, f => f.PasswordSetDate)

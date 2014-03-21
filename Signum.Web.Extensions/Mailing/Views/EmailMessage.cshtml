@@ -4,13 +4,11 @@
 @using Signum.Web.Files
 
 <style type="text/css">
-    .sf-email-message .sf-repeater-element
-    {
+    .sf-email-message .sf-repeater-element {
         padding: 2px 10px;
     }
 
-        .sf-email-message .sf-repeater-element legend
-        {
+        .sf-email-message .sf-repeater-element legend {
             float: left;
             margin-right: 10px;
         }
@@ -49,7 +47,7 @@
 
             <div class="clearall" />
             @Html.EntityLine(e, f => f.Target)
- 		    @Html.ValueLine(e, f => f.BodyHash)
+            @Html.ValueLine(e, f => f.BodyHash)
             @Html.ValueLine(e, f => f.Subject)
             @if (e.Value.State == EmailMessageState.Created)
             {
@@ -61,8 +59,8 @@
 
 <script>
     $(function () {
-                        @(new JsFunction(MailingClient.Module, "initHtmlEditor", e.Compose("Body")))
-                    });
+        @(new JsFunction(MailingClient.Module, "initHtmlEditor", e.Compose("Body")))
+    });
                 </script>
             }
             else
@@ -113,9 +111,7 @@
 
             </fieldset>
 
-            <pre>
-                        @ri.Value.RawContent
-                </pre>
+            <pre>@ri.Value.RawContent</pre>
             </text>);
                 }
             }

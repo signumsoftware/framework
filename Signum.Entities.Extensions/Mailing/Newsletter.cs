@@ -40,18 +40,18 @@ namespace Signum.Entities.Mailing
             set { Set(ref smtpConfig, value, () => SmtpConfig); }
         }
 
-        [NotNullable, SqlDbType(Size = 50)]
+        [NotNullable, SqlDbType(Size = 100)]
         string from;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
+        [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string From
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
         }
 
-        [NotNullable, SqlDbType(Size = 50)]
+        [NotNullable, SqlDbType(Size = 100)]
         string displayFrom;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string DisplayFrom
         {
             get { return displayFrom; }

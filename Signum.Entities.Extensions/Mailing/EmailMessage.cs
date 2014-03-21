@@ -307,6 +307,11 @@ namespace Signum.Entities.Mailing
                 Type = type,
             }; 
         }
+
+        internal bool Similar(EmailAttachmentDN a)
+        {
+            return ContentId == a.ContentId || File.FileName == a.File.FileName;
+        }
     }
 
     public enum EmailAttachmentType
