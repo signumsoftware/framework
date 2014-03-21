@@ -194,8 +194,8 @@ namespace Signum.Engine.Authorization
         public bool Merge(object key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
         {
             bool best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
-                baseValues.Max(a => a.Value) :
-                baseValues.Min(a => a.Value);
+                baseValues.Any(a => a.Value) :
+                baseValues.All(a => a.Value);
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
