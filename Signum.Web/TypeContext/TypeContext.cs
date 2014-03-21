@@ -161,7 +161,7 @@ namespace Signum.Web
     {
         None,
         Basic,
-        Inline,
+        SrOnly,
         Horizontal,
     }
 
