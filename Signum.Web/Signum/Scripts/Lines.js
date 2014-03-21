@@ -358,8 +358,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(this.pf(Entities.Keys.toStr)).val('');
 
             this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
-            this.visible($(this.pf(Entities.Keys.toStr)), entityValue == null); //embedded entities is alone
-            this.visible($(this.pf(Entities.Keys.toStr)).siblings(".typeahead-parts"), entityValue == null);
+            this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
+            this.visible($(this.pf(Entities.Keys.toStr) + ":not(.typeahead-parts)"), entityValue == null); //embedded entities is alone
         };
 
         EntityLine.prototype.visible = function (element, visible) {
