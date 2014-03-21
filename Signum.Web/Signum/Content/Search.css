@@ -9,6 +9,18 @@ table.sf-search-results > thead
     white-space:nowrap;
 }
 
+/*Drag and drop*/
+
+th.drag-left
+{
+    box-shadow: inset #AAA 3px 0px 0px 0px;
+}
+
+th.drag-right
+{
+    box-shadow: inset #AAA -3px 0px 0px 0px;
+}
+
 /*Pagination*/
 
 .sf-pagination-size.form-control

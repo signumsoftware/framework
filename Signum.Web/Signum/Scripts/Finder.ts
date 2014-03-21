@@ -736,9 +736,67 @@ export class SearchControl {
         this.createMoveColumnDragDrop();
     }
 
-    createMoveColumnDragDrop($draggables?: JQuery, $droppables?: JQuery) {
-        $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
-        $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
+    createMoveColumnDragDrop() {
+
+        var rowsSelector = ".sf-search-results th:not(.sf-th-entity):not(.sf-th-selection)";
+        var current : HTMLTableHeaderCellElement = null;
+        this.element.on("dragstart", rowsSelector, function (e: JQueryEventObject) {
+            var de = <DragEvent><Event>e.originalEvent;
+            de.dataTransfer.effectAllowed = "move";
+            de.dataTransfer.setData("Text", $(this).attr("data-column-name")); 
+            current = this;
+        });  
+
+
+        function dragClass(offsetX: number, width: number) {
+            if (!offsetX)
+                return null;
+
+            if (width < 100 ? (offsetX < (width / 2)) : (offsetX < 50))
+                return "drag-left";
+
+            if (width < 100 ? (offsetX > (width / 2)) : (offsetX > (width - 50)))
+                return "drag-right";
+
+            return null;
+        }
+    
+        var onDragOver = function (e: JQueryEventObject) {
+            if (e.preventDefault) e.preventDefault();
+
+            var de = <DragEvent><Event>e.originalEvent;
+            if (this == current) {
+                de.dataTransfer.dropEffect = "none";
+                return;
+            }
+
+            $(this).removeClass("drag-left drag-right");
+            $(this).addClass(dragClass(de.offsetX, $(this).width()));
+
+            de.dataTransfer.dropEffect = "move";
+        }
+        this.element.on("dragover", rowsSelector, onDragOver);
+        this.element.on("dragenter", rowsSelector, onDragOver);
+
+
+        this.element.on("dragleave", rowsSelector, function () {
+            $(this).removeClass("drag-left drag-right");
+        });
+
+        var me = this;
+        this.element.on("drop", rowsSelector, function (e) {
+            $(this).removeClass("drag-left drag-right");
+
+            var de = <DragEvent><Event>e.originalEvent;
+
+            var result = dragClass(de.offsetX, $(this).width());
+
+            if (result)
+                me.moveColumn($(current), $(this), result == "drag-left");
+        });
+
+        //$draggables = $draggables || $(this.pf("tblResults") + " ");
+        //$droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 
         //$draggables.draggable({
         //    revert: "invalid",

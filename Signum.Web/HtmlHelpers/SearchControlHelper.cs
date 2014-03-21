@@ -166,6 +166,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.Surround(new HtmlTag("th")
+                .Attr("draggable", "true")
                 .Attr("data-column-name", col.Name)
                 .Attr("data-nice-name", col.Token.NiceName())))
             {

@@ -22,6 +22,7 @@
 
 .sf-line-button
 {
+    cursor:pointer;
     color:lightgray;
 }
 .sf-line-button:hover
