@@ -24,7 +24,6 @@ namespace Signum.Web
         public const string AllowSelection = "sfAllowMultiple";
         public const string FilterMode = "sfFilterMode";
         public const string Pagination = "sfPagination";
-        public const string SearchControlColumnsCount = "sfSearchControlColumnsCount";
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";
         public const string Results = "sfResults";

@@ -47,6 +47,19 @@ div.sf-pagination-right > ul.pagination > .disabled > span
     cursor: default;
 }
 
+#divSearchPage .sf-search-footer
+{
+    margin-bottom: 80px;
+}
+
+
+/* Multiply */
+
+.sf-td-multiply.alert
+{
+    padding: 4px 10px;
+    margin: 3px 0px;
+}
 
 
 
@@ -127,12 +140,11 @@ div.sf-filters-list table.table
     padding: 1px 6px;
 }
 
-
-.caret.caret-reversed {
+.caret.caret-reversed
+{
     border-top-width: 0;
     border-bottom: 4px solid #000000;
 }
-
 
 /* SORTER */
 
@@ -204,6 +216,8 @@ div.sf-filters-list table.table
 {
     margin-bottom: 0px
 }
+
+
 
 /* check box */
 

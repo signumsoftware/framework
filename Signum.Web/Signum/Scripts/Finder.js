@@ -285,11 +285,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
 
             if (this.options.filterMode != 3 /* OnlyResults */) {
-                $tblResults.on("click", "ul.pagination a", function () {
+                this.element.on("click", ".sf-search-footer ul.pagination a", function () {
                     self.search(parseInt($(this).attr("data-page")));
                 });
 
-                $tblResults.on("change", ".sf-pagination-size", function () {
+                this.element.on("change", ".sf-search-footer .sf-pagination-size", function () {
                     if ($(this).find("option:selected").val() == "All") {
                         self.clearResults();
                     } else {
@@ -489,7 +489,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).then(function (r) {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
-                    $tbody.html(r);
+                    var rows = $(r);
+
+                    var divs = rows.filter("tr.extract").children().children();
+
+                    _this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
+
+                    var mult = divs.filter("div.sf-td-multiply");
+                    var multCurrent = _this.element.find("div.sf-td-multiply");
+
+                    if (multCurrent.length)
+                        multCurrent.replaceWith(mult);
+                    else
+                        _this.element.find("div.sf-query-button-bar").after(mult);
+
+                    $tbody.html(rows.not("tr.extract"));
                 } else {
                     $tbody.html("");
                 }

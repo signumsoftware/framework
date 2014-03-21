@@ -4,24 +4,26 @@
 @model Context
 
 @{ 
-   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-   Implementations implementations = entityColumn.Implementations.Value;
-   bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true)));
-   bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
-   
-   ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-   Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+    Implementations implementations = entityColumn.Implementations.Value;
+    bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true)));
+    bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
 
-   int columnsCount = queryResult.Columns.Count() + (navigable ? 1 : 0) + (allowSelection ? 1 : 0);
+    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
+    Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
+
+    int columnsCount = queryResult.Columns.Count() + (navigable ? 1 : 0) + (allowSelection ? 1 : 0);
 }
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
 { 
-    <tr class="sf-tr-multiply">
-        <td class="sf-td-multiply alert alert-warning" colspan="@columnsCount">
-            <span class="glyphicon glyphicon-exclamation-sign"></span>
-            @ViewData[ViewDataKeys.MultipliedMessage]
+    <tr class="extract">
+        <td>
+            <div class="sf-td-multiply alert alert-warning">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                @ViewData[ViewDataKeys.MultipliedMessage]
+            </div>
         </td>
     </tr>
 }
@@ -35,10 +37,10 @@
             <td>
                 @Html.CheckBox(
                     Model.Compose("rowSelection", row.Index.ToString()),
-                        new 
+                        new
                         {
-                            @class = "sf-td-selection", 
-                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString() 
+                            @class = "sf-td-selection",
+                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString()
                         })
             </td>
         }
@@ -69,6 +71,9 @@
 
 @{ 
     ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
-    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
 }
-@Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+<tr class="extract">
+    <td>
+        @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+    </td>
+</tr>
