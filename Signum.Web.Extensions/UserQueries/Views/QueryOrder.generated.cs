@@ -69,48 +69,37 @@ WriteLiteral("\r\n");
             #line 6 "..\..\UserQueries\Views\QueryOrder.cshtml"
  using (var e = Html.TypeContext<QueryOrderDN>())
 {
-    using (var style = e.SubContext())
-    {
-        style.FormGroupStyle = FormGroupStyle.None;
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
-
-WriteLiteral(" style=\"float: left\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 12 "..\..\UserQueries\Views\QueryOrder.cshtml"
-   Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), SearchControlHelper.GetQueryTokenBuilderSettings(
-                (QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </div>\r\n");
-
-            
-            #line 15 "..\..\UserQueries\Views\QueryOrder.cshtml"
+    e.FormGroupStyle = FormGroupStyle.None;
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\UserQueries\Views\QueryOrder.cshtml"
-Write(Html.ValueLine(style, f => f.OrderType));
+            #line 9 "..\..\UserQueries\Views\QueryOrder.cshtml"
+Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), SearchControlHelper.GetQueryTokenBuilderSettings(
+                (QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\UserQueries\Views\QueryOrder.cshtml"
-                                            
-    }
+            #line 10 "..\..\UserQueries\Views\QueryOrder.cshtml"
+                                                                           
+    
+    
+            
+            #line default
+            #line hidden
+            
+            #line 12 "..\..\UserQueries\Views\QueryOrder.cshtml"
+Write(Html.ValueLine(e, f => f.OrderType));
+
+            
+            #line default
+            #line hidden
+            
+            #line 12 "..\..\UserQueries\Views\QueryOrder.cshtml"
+                                        
 }
 
             

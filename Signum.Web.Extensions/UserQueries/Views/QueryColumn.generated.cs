@@ -67,48 +67,37 @@ namespace Signum.Web.Extensions.UserQueries.Views
             #line 5 "..\..\UserQueries\Views\QueryColumn.cshtml"
  using (var e = Html.TypeContext<QueryColumnDN>())
 {
-    using (var style = e.SubContext())
-    {
-        style.FormGroupStyle = FormGroupStyle.None;
+    e.FormGroupStyle = FormGroupStyle.None;
+    
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\UserQueries\Views\QueryColumn.cshtml"
+Write(Html.ValueLine(e, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20));
+
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\UserQueries\Views\QueryColumn.cshtml"
+                                                                                
+
     
             
             #line default
             #line hidden
             
             #line 10 "..\..\UserQueries\Views\QueryColumn.cshtml"
-Write(Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20));
-
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\UserQueries\Views\QueryColumn.cshtml"
-                                                                                    
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
-
-WriteLiteral(" style=\"float: left\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 12 "..\..\UserQueries\Views\QueryColumn.cshtml"
-   Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), 
+Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token),
         SearchControlHelper.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n");
-
             
-            #line 15 "..\..\UserQueries\Views\QueryColumn.cshtml"
-    }
+            #line 11 "..\..\UserQueries\Views\QueryColumn.cshtml"
+                                                                                                                    
 }
 
             

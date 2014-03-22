@@ -74,7 +74,7 @@ namespace Signum.Windows.UserQueries
                 {
                     MessageBox.Show(Window.GetWindow(elem),
                         ChartMessage._0CanOnlyBeCreatedFromTheSearchWindow.NiceToString().Formato(typeof(UserQueryDN).NicePluralName()),
-                        ChartMessage.UserChart_CreateNew.NiceToString(),
+                        ChartMessage.CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
                 });

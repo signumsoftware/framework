@@ -399,6 +399,16 @@ namespace Signum.Entities.UserQueries
             token.ParseData(context, description, canAggregate);
         }
 
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Token) && token != null && token.Token != null)
+            {
+                return QueryUtils.CanOrder(token.Token);
+            }
+
+            return base.PropertyValidation(pi);
+        }
+
         public override string ToString()
         {
             return "{0} {1}".Formato(token, orderType);
@@ -452,6 +462,16 @@ namespace Signum.Entities.UserQueries
         {
             token.ParseData(context, description, canAggregate);
             DisplayName = DisplayName;
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Token) && token != null && token.Token != null)
+            {
+                return QueryUtils.CanColumn(token.Token);
+            }
+
+            return base.PropertyValidation(pi);
         }
 
         public override string ToString()
@@ -544,6 +564,11 @@ namespace Signum.Entities.UserQueries
         {
             if (token != null)
             {
+                if (pi.Is(() => Token) && token.Token != null)
+                {
+                    return QueryUtils.CanFilter(token.Token);
+                }
+
                 if (pi.Is(() => Operation))
                 {
                     FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);

@@ -6,59 +6,57 @@
 @using Signum.Web.UserQueries
 @using Signum.Entities.UserQueries
 
-<style type="text/css">
-    .sf-user-query-edit .sf-repeater-element
-    {
-        padding: 2px 10px;
-    }
 
-        .sf-user-query-edit .sf-repeater-element legend
-        {
-            float: left;
-            margin-right: 10px;
-        }
-</style>
-
-<div class="sf-user-query-edit">
-    @using (var e = Html.TypeContext<UserQueryDN>())
+@using (var e = Html.TypeContext<UserQueryDN>())
+{
+    e.LabelColumns = new BsColumn(2);
+    
+    object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
+    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
+    
+    @Html.EntityLine(e, f => f.Related, el => el.Create = false)
+    
+    using (var query = e.SubContext(f => f.Query))
     {
-        object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
-        ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
-    
-        @Html.EntityLine(e, f => f.Related, el => el.Create = false)
-    
-        using (var query = e.SubContext(f => f.Query))
-        {
-        @Html.HiddenRuntimeInfo(query)
+    @Html.HiddenRuntimeInfo(query)
        
-        @Html.Hidden(query.Compose("Key"), query.Value.Key)
-        @Html.Hidden(query.Compose("Name"), query.Value.Name)
+    @Html.Hidden(query.Compose("Key"), query.Value.Key)
+    @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
-        @Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
+    @Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
                  new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
                  Html.Span(null, query.Value.Name, "form-control-static"))
 
-        <div class="clearall"></div>
-        }
-    
-        @Html.ValueLine(e, f => f.DisplayName)
-        
-        var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
-        
-        @Html.EntityLine(e, f => f.EntityType, el => 
-        { 
-            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-            el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity"); 
-        })
-        <p class="messageEntity">
-            @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
-        </p>
-        @Html.ValueLine(e, f => f.WithoutFilters)
-        @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
-        @Html.ValueLine(e, f => f.ColumnsMode)
-        @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
-        @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
-        @Html.ValueLine(e, f => f.PaginationMode)
-        @Html.ValueLine(e, f => f.ElementsPerPage)
     }
+    
+    @Html.ValueLine(e, f => f.DisplayName)
+        
+    var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
+        
+    @Html.EntityLine(e, f => f.EntityType, el =>
+        {
+            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+            el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity");
+        })
+    
+    <p class="messageEntity col-sm-offset-2">
+        @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
+    </p>
+    @Html.ValueLine(e, f => f.WithoutFilters)
+
+    <div class="form-inline form-sm sf-filters-list ">
+        @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
+    </div>
+
+    @Html.ValueLine(e, f => f.ColumnsMode)
+    <div class="form-inline form-sm sf-filters-list">
+        @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
+    </div>
+    
+    <div class="form-inline form-sm sf-filters-list">
+        @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
+    </div>
+    @Html.ValueLine(e, f => f.PaginationMode)
+    @Html.ValueLine(e, f => f.ElementsPerPage)
+}
 </div>
