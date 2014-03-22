@@ -116,7 +116,7 @@ namespace Signum.Entities.Authorization
         TheSpecifiedPasswordsDontMatch,
         TheUserStateMustBeDisabled,
      
-        User,
+        Username,
         [Description("Username {0} is not valid")]
         Username0IsNotValid,
         [Description("The user name must have a value")]

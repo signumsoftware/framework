@@ -2,10 +2,11 @@
 @using Signum.Engine.Authorization
 @using (var tc = Html.TypeContext<PropertyRulePack>())
 {
-    @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.Strategy)
-    @Html.EntityLine(tc, f => f.Type)
-
+    <div class="form-compact">
+        @Html.EntityLine(tc, f => f.Role)
+        @Html.ValueLine(tc, f => f.Strategy)
+        @Html.EntityLine(tc, f => f.Type)
+    </div>
     <table class="sf-auth-rules" id="properties">
         <thead>
             <tr>

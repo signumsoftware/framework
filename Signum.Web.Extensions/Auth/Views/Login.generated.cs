@@ -59,7 +59,7 @@ WriteLiteral(" class=\"container\"");
 
 WriteLiteral(">\r\n    <div");
 
-WriteLiteral(" class=\"col-md-offset-2\"");
+WriteLiteral(" class=\"col-md-offset-4\"");
 
 WriteLiteral(">\r\n        <h2>Login</h2>\r\n        <p>\r\n");
 
@@ -111,20 +111,20 @@ WriteLiteral(">\r\n                <label");
 
 WriteLiteral(" for=\"username\"");
 
-WriteLiteral(" class=\"col-sm-2 control-label\"");
+WriteLiteral(" class=\"col-md-offset-2 col-sm-2 control-label\"");
 
 WriteLiteral(">");
 
             
             #line 20 "..\..\Auth\Views\Login.cshtml"
-                                                                Write(AuthMessage.User.NiceToString());
+                                                                                Write(AuthMessage.Username.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("</label>\r\n                <div");
 
-WriteLiteral(" class=\"col-sm-10\"");
+WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
@@ -132,7 +132,7 @@ WriteLiteral("                    ");
 
             
             #line 22 "..\..\Auth\Views\Login.cshtml"
-               Write(Html.TextBox("username", null, new { @class = "form-control", placeholder = AuthMessage.User.NiceToString() }));
+               Write(Html.TextBox("username", null, new { @class = "form-control", placeholder = AuthMessage.Username.NiceToString() }));
 
             
             #line default
@@ -156,20 +156,20 @@ WriteLiteral(">\r\n                <label");
 
 WriteLiteral(" for=\"password\"");
 
-WriteLiteral(" class=\"col-sm-2 control-label\"");
+WriteLiteral(" class=\"col-md-offset-2 col-sm-2 control-label\"");
 
 WriteLiteral(">");
 
             
             #line 27 "..\..\Auth\Views\Login.cshtml"
-                                                                Write(AuthMessage.Password.NiceToString());
+                                                                                Write(AuthMessage.Password.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("</label>\r\n                <div");
 
-WriteLiteral(" class=\"col-sm-10\"");
+WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
@@ -199,7 +199,7 @@ WriteLiteral(" class=\"form-group\"");
 
 WriteLiteral(">\r\n                <div");
 
-WriteLiteral(" class=\"col-sm-offset-2 col-sm-10\"");
+WriteLiteral(" class=\"col-sm-offset-4 col-sm-6\"");
 
 WriteLiteral(">\r\n                    <div");
 
@@ -232,7 +232,7 @@ WriteLiteral(" class=\"form-group\"");
 
 WriteLiteral(">\r\n                <div");
 
-WriteLiteral(" class=\"col-sm-offset-2 col-sm-10\"");
+WriteLiteral(" class=\"col-sm-offset-4 col-sm-6\"");
 
 WriteLiteral(">\r\n                    <button");
 

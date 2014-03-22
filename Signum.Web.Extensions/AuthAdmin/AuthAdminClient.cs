@@ -145,6 +145,7 @@ namespace Signum.Web.AuthAdmin
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] {  new ToolBarButton 
                 { 
                     Text = AuthMessage.Save.NiceToString(),
+                    Style = BootstrapStyle.Primary,
                     OnClick =  embedded?
                       new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
                       new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
