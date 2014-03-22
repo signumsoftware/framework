@@ -20,12 +20,12 @@ else
 {
     using(var tabs = Html.Tabs(Model))
     {
-        tabs.Tab("sfChartContainer", "Chart", @<div class="sf-chart-container" 
+        tabs.Tab("sfChartContainer", ChartMessage.Chart.NiceToString(), @<div class="sf-chart-container" 
                 data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.Prefix)))"
                 data-json="@Html.Json(ChartUtils.DataJson(Model.Value, queryResult)).ToString()">
             </div>);
-               
-        tabs.Tab("sfChartContainer", "Chart", @<text>
+
+        tabs.Tab("sfChartData", ChartMessage.Data.NiceToString(), @<text>
             @{Html.RenderPartial(ChartClient.ChartResultsTableView, Model, ViewData);}
         </text>);
     }

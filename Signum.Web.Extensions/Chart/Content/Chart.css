@@ -9,21 +9,59 @@
     float:left;
 }
 
-.sf-chart-builder
+@media (min-width: 1200px)
 {
-    width: 100%;    
-    margin-top: 2px;
-    border-collapse: separate !important;
+    .sf-chart-type
+    {
+        margin-right: -25px;
+    }
 }
-.sf-chart-type
+
+.sf-chart-type 
 {
-    width: 162px;
+    margin-bottom: 4px;
 }
-.sf-chart-type .ui-widget-header, .sf-chart-tokens .ui-widget-header
+
+.sf-chart-type > .panel-body
 {
-    padding: 5px;
-    border: 0 !important;    
+    padding: 14px;
 }
+
+.sf-chart-tokens
+{
+    margin-bottom: 6px;
+}
+
+.sf-chart-tokens > .panel-body
+{
+    padding: 0px
+}
+
+.sf-chart-tokens table.table
+{
+    width:auto;
+}
+
+.sf-chart-tokens table.table > thead > tr > th
+{
+    border-top: 0px;
+}
+
+.sf-chart-tokens table.table > tbody > tr > th
+{
+    text-align:right
+}
+
+.sf-chart-tokens table.table td,
+.sf-chart-tokens table.table th
+{
+    vertical-align: middle;
+}
+
+.sf-chart-token-wide {
+    width: 100%;
+}
+
 .sf-chart-img
 {
     height: 40px;
@@ -40,6 +78,7 @@
     background-color: #81bffc;    
 }
 
+/*
 .sf-chart-tokens table
 {
     width: 100%;    
@@ -73,9 +112,11 @@
 {
     font-weight: bold;    
 }
+*/
+
 .sf-chart-token-config td
 {
-    border-top: 1px dashed #AAA;     
+    border-top: 1px dashed #ddd !important;     
 }
 .sf-chart-token-config-trigger
 {

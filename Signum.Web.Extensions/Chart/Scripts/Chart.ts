@@ -70,7 +70,7 @@ export class ChartBuilder extends Finder.SearchControl {
 
         $(document).on("click", ".sf-chart-img", function () {
             var $this = $(this);
-            $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
+            $this.closest(".sf-chart-type").find(".sf-chart-type-value").val($this.attr("data-related"));
 
 
             var $resultsContainer = self.$chartControl.find(".sf-search-results-container");
@@ -109,23 +109,22 @@ export class ChartBuilder extends Finder.SearchControl {
         $(document).on("click", ".sf-chart-draw", function (e) {
             e.preventDefault();
             var $this = $(this);
-            $.ajax({
+            SF.ajaxPost({
                 url: $this.attr("data-url"),
                 data: self.requestData(),
-                success: function (result) {
-                    if (typeof result === "object") {
-                        if (typeof result.ModelState != "undefined") {
-                            var modelState = result.ModelState;
-                            Validator.showErrors({}, modelState);
-                            SF.Notify.error(lang.signum.error, 2000);
-                        }
+            }).then((result) => {
+                if (typeof result === "object") {
+                    if (typeof result.ModelState != "undefined") {
+                        var modelState = result.ModelState;
+                        Validator.showErrors({}, modelState);
+                        SF.Notify.error(lang.signum.error, 2000);
                     }
-                    else {
-                        Validator.showErrors({}, null);
-                        self.$chartControl.find(".sf-search-results-container").html(result);
-                        self.initOrders();
-                        self.reDraw();
-                    }
+                }
+                else {
+                    Validator.showErrors({}, null);
+                    self.$chartControl.find(".sf-search-results-container").html(result);
+                    self.initOrders();
+                    self.reDraw();
                 }
             });
         });
@@ -184,13 +183,11 @@ export class ChartBuilder extends Finder.SearchControl {
         $.ajax({
             url: $chartBuilder.attr("data-url"),
             data: data,
-            success: function (result) {
-                $chartBuilder.replaceWith(result);
-                if (self.reDrawOnUpdateBuilder) {
-                    self.reDraw();
-                    self.reDrawOnUpdateBuilder = false;
-                }
-
+        }).then((result) => {
+            $chartBuilder.replaceWith(result);
+            if (self.reDrawOnUpdateBuilder) {
+                self.reDraw();
+                self.reDrawOnUpdateBuilder = false;
             }
         });
     }
@@ -317,15 +314,11 @@ export class ChartBuilder extends Finder.SearchControl {
 
     initOrders() {
         var self = this;
-        $(this.pf("tblResults") + " th").mousedown(function (e) {
-            this.onselectstart = function () { return false };
+        $(this.pf("tblResults")).on("click", "th", function (e) {
+            self.newSortOrder($(this), e.shiftKey);
+            self.$chartControl.find(".sf-chart-draw").click();
             return false;
-        })
-            .click(function (e) {
-                self.newSortOrder($(e.target), e.shiftKey);
-                self.$chartControl.find(".sf-chart-draw").click();
-                return false;
-            });
+        });
     }
 
     bindMouseClick($chartContainer: JQuery) {

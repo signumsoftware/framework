@@ -367,26 +367,19 @@ namespace Signum.Entities.Chart
         [Description("Toggle info")]
         Chart_ToggleInfo,
         [Description("Edit Script")]
-        ChartScript_Edit,
+        EditScript,
         [Description("Colors for {0}")]
         ColorsFor0,
         CreatePalette,
         [Description("My Charts")]
         MyCharts,
-        [Description("Create")]
-        UserChart_CreateNew,
-        [Description("Edit")]
-        UserChart_Edit,
-        [Description("Export data")]
-        UserChart_ExportData,
-        [Description("User charts")]
-        UserChart_UserCharts,
+        CreateNew,
+        EditUserChart,
         ViewPalette,
         [Description("Chart for")]
         ChartFor,
         [Description("Chart of {0}")]
         ChartOf0,
-
         [Description("{0} is key, but {1} is an aggregate")]
         _0IsKeyBut1IsAnAggregate,
         [Description("{0} should be an aggregate")]
@@ -403,6 +396,7 @@ namespace Signum.Entities.Chart
         _0IsNotOptional,
         SavePalette,
         NewPalette,
+        Data,
     }
 
 }

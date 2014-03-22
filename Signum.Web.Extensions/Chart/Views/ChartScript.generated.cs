@@ -106,7 +106,7 @@ WriteLiteral("            ");
             #line 14 "..\..\Chart\Views\ChartScript.cshtml"
        Write(Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
            {
-               a.FormGroupStyle = FormGroupStyle.Horizontal;
+               a.FormGroupStyle = FormGroupStyle.LabelColumns;
                a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
                a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);
            }));

@@ -18,81 +18,79 @@
 }
 else
 {
-    <table id="@Model.Compose("tblResults")" class="sf-search-results">
-        <thead class="ui-widget-header ui-corner-top">
-            <tr>
-                @if (!Model.Value.GroupResults && navigate)
-                {
-                    <th class="ui-state-default sf-th-entity">
-                    </th>
-                }
-                @if (queryResult.Columns.Any())
-                {
-                    foreach (ResultColumn col in queryResult.Columns)
+    <div class="table-responsive">
+        <table id="@Model.Compose("tblResults")" class="sf-search-results table table-hover  table-condensed">
+            <thead>
+                <tr>
+                    @if (!Model.Value.GroupResults && navigate)
                     {
-                        var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
-                        OrderType? orderType = null;
-                        if (order != null)
+                        <th class="sf-th-entity"></th>
+                    }
+                    @if (queryResult.Columns.Any())
+                    {
+                        foreach (ResultColumn col in queryResult.Columns)
                         {
-                            orderType = order.OrderType;
+                            var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                        <th data-column-name="@col.Column.Name">
+                            <span class="sf-header-sort @(order == null ? "" : ((order.OrderType == OrderType.Ascending ? "asc" : "desc") + (" l" + Model.Value.Orders.IndexOf(order) % 4)))"></span>
+                            <span>@col.Column.DisplayName</span>
+                        </th>
                         }
-                    <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
-                        <input type="hidden" value="@col.Column.Name" />
-                        @col.Column.DisplayName
-                    </th>
                     }
-                }
-            </tr>
-        </thead>
-        <tbody class="ui-widget-content">
-            @if (!queryResult.Rows.Any())
-            {
-                <tr>
-                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@SearchMessage.NoResultsFound.NiceToString()
-                    </td>
                 </tr>
-            }
-            else
-            {
-                foreach (var row in queryResult.Rows)
+            </thead>
+            <tbody>
+                @if (!queryResult.Rows.Any())
                 {
-                    if (Model.Value.GroupResults)
+                    <tr>
+                        <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@SearchMessage.NoResultsFound.NiceToString()
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var row in queryResult.Rows)
                     {
-                <tr>
-                    @foreach (var col in queryResult.Columns)
-                    {
-                        CellFormatter ft = formatters[col.Index];
-                        var value = row[col];
+                        if (Model.Value.GroupResults)
+                        {
+                            
+                    <tr>
+                        @foreach (var col in queryResult.Columns)
+                        {
+                            CellFormatter ft = formatters[col.Index];
+                            var value = row[col];
                             <td @ft.WriteDataAttribute(value)>
-                            @ft.Formatter(Html, value)
-                        </td>
-                    }
-                </tr>
-                    }
-                    else
-                    {
-                        Lite<IdentifiableEntity> entityField = row.Entity;
-                <tr data-entity="@entityField.Key()">
-                    @if (entityField != null && navigate)
-                    {
-                        <td>
-                            @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
-                        </td>
-                    }
-                    @foreach (var col in queryResult.Columns)
-                    {
-                        var value = row[col];
-                        var ft = formatters[col.Index];
-                        <td @ft.WriteDataAttribute(value)>
-                            @ft.Formatter(Html, value)
-                        </td>
-                    }
-                </tr>
+                                @ft.Formatter(Html, value)
+                            </td>
+                        }
+                    </tr>
+                    
+                        }
+                        else
+                        {
+                            
+                            Lite<IdentifiableEntity> entityField = row.Entity;
+                    <tr data-entity="@entityField.Key()">
+                        @if (entityField != null && navigate)
+                        {
+                            <td>
+                                @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
+                            </td>
+                        }
+                        @foreach (var col in queryResult.Columns)
+                        {
+                            var value = row[col];
+                            var ft = formatters[col.Index];
+                            <td @ft.WriteDataAttribute(value)>
+                                @ft.Formatter(Html, value)
+                            </td>
+                        }
+                    </tr>
+                    
+                        }
                     }
                 }
-            }
-        </tbody>
-        <tfoot>
-        </tfoot>
-    </table>
+            </tbody>
+        </table>
+    </div>
 }

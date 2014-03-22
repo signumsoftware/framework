@@ -119,7 +119,7 @@ else
 {
     using(var tabs = Html.Tabs(Model))
     {
-        tabs.Tab("sfChartContainer", "Chart", 
+        tabs.Tab("sfChartContainer", ChartMessage.Chart.NiceToString(), 
             
             #line default
             #line hidden
@@ -157,8 +157,8 @@ WriteLiteralTo(__razor_template_writer, ">\r\n            </div>");
             
             #line 26 "..\..\Chart\Views\ChartResults.cshtml"
                   );
-               
-        tabs.Tab("sfChartContainer", "Chart", 
+
+        tabs.Tab("sfChartData", ChartMessage.Data.NiceToString(), 
             
             #line default
             #line hidden

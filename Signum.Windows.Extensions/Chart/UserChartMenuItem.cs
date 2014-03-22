@@ -63,7 +63,7 @@ namespace Signum.Windows.Chart
                 Inlines = 
                 { 
                     new Run(
-                    current == null ? ChartMessage.MyCharts.NiceToString() : current.DisplayName), 
+                    current == null ? typeof(UserChartDN).NicePluralName() : current.DisplayName), 
                     UserCharts == null || UserCharts.Count==0 ? (Inline)new Run():  new Bold(new Run(" (" + UserCharts.Count + ")")) 
                 }
             };

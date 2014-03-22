@@ -148,7 +148,7 @@ namespace Signum.Web.Chart
 
             if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
             {
-                string uqNewText = ChartMessage.UserChart_CreateNew.NiceToString();
+                string uqNewText = ChartMessage.CreateNew.NiceToString();
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
@@ -160,7 +160,7 @@ namespace Signum.Web.Chart
 
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string ucEditText = ChartMessage.UserChart_Edit.NiceToString();
+                string ucEditText = ChartMessage.EditUserChart.NiceToString();
                 items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
@@ -170,7 +170,7 @@ namespace Signum.Web.Chart
                 });
             }
 
-            string ucUserChartText = ChartMessage.UserChart_UserCharts.NiceToString();
+            string ucUserChartText = typeof(UserChartDN).NicePluralName();
 
             return new ToolBarDropDown
             {

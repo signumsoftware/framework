@@ -88,48 +88,38 @@ WriteLiteral("\r\n");
 {
     var userChart = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
 
-    using (var style = e.SubContext())
-    {
-        style.FormGroupStyle = FormGroupStyle.None;
+    e.FormGroupStyle = FormGroupStyle.None;
 
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
-
-WriteLiteral(" style=\"float: left\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 17 "..\..\Chart\Views\UserChartOrder.cshtml"
-   Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
-        (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults, isKey: false)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </div>\r\n");
-
-            
-            #line 20 "..\..\Chart\Views\UserChartOrder.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 20 "..\..\Chart\Views\UserChartOrder.cshtml"
-Write(Html.ValueLine(style, f => f.OrderType));
+            #line 15 "..\..\Chart\Views\UserChartOrder.cshtml"
+Write(Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
+        (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults, isKey: false)));
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\Chart\Views\UserChartOrder.cshtml"
-                                            
-    }
+            #line 16 "..\..\Chart\Views\UserChartOrder.cshtml"
+                                                                                                         
+
+    
+            
+            #line default
+            #line hidden
+            
+            #line 18 "..\..\Chart\Views\UserChartOrder.cshtml"
+Write(Html.ValueLine(e, f => f.OrderType));
+
+            
+            #line default
+            #line hidden
+            
+            #line 18 "..\..\Chart\Views\UserChartOrder.cshtml"
+                                        
 }
             
             #line default
