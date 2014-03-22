@@ -59,23 +59,23 @@ namespace Signum.Web
             var newTabs = context.ViewOverrides == null ? tabs : 
                 context.ViewOverrides.ExpandTabs(tabs, containerId, helper, context);
 
+            if (newTabs.IsEmpty())
+                return;
+
             TextWriter writer = helper.ViewContext.Writer;
+
+            var first = newTabs.First();
 
             using (Surround(writer, new HtmlTag("ul", context.Compose(containerId)).Class("nav nav-tabs")))
                 foreach (var t in newTabs)
-                    using (Surround(writer, new HtmlTag("li")))
-                        using (Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(t.Id))))
-                            t.Title.WriteTo(writer);
+                    using (Surround(writer, new HtmlTag("li").Class(t == first ? "active" : null)))
+                    using (Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(t.Id)).Attr("data-toggle", "tab")))
+                        t.Title.WriteTo(writer);
 
             using (Surround(writer, new HtmlTag("div").Class("tab-content")))
                 foreach (var t in newTabs)
-                    using (Surround(writer, new HtmlTag("div", context.Compose(t.Id))))
+                    using (Surround(writer, new HtmlTag("div", context.Compose(t.Id)).Class("tab-pane fade").Class(t == first ?  "in active" : null)))
                         t.Body.WriteTo(writer);
-
-            //using (Surround(writer, new HtmlTag("script")))
-            //{
-            //    writer.WriteLine("$(function () { $('#myTab a:last').tab('show')  })");
-            //}
         }
 
         public static IDisposable Surround(TextWriter writer, HtmlTag div)
