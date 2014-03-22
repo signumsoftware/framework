@@ -180,6 +180,11 @@ namespace Signum.Utilities
                 NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
         }
 
+        public static string NiceToString(this Enum a, params object[] args)
+        {
+            return a.NiceToString().Formato(args);
+        }
+
         public static string NiceToString(this Enum a)
         {
             if (a == null)
