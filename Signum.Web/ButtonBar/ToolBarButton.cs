@@ -139,14 +139,17 @@ namespace Signum.Web
             if (Html != null)
                 a.InnerHtml(Html);
 
-            if (Href.HasText())
-                a.Attr("href", Href);
-
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled && (OnClick != null || Href.HasText()))
-                a.Attr("onclick", OnClick.ToString());
+            if (Enabled)
+            {
+                if (OnClick != null)
+                    a.Attr("onclick", OnClick.ToString());
+
+                if (Href.HasText())
+                    a.Attr("href", Href);
+            }
             else
                 a.Attr("disabled", "disabled");
 
