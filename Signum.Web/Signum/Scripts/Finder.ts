@@ -9,7 +9,6 @@ export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
     allowSelection?: boolean;
-    multipleSelection?: boolean;
     columnMode?: ColumnOptionsMode;
     columns?: ColumnOption[];
     create?: boolean;
@@ -85,14 +84,12 @@ export function getFor(prefix: string): Promise<SearchControl> {
 
 export function findMany(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
     findOptions.allowSelection = true;
-    findOptions.multipleSelection = true;
-    return findInternal(findOptions);
+    return findInternal(findOptions, true);
 }
 
 export function find(findOptions: FindOptions): Promise<Entities.EntityValue> {
     findOptions.allowSelection = true;
-    findOptions.multipleSelection = false;
-    return findInternal(findOptions).then(array=> array == null ? null : array[0]);
+    return findInternal(findOptions, false).then(array=> array == null ? null : array[0]);
 }
 
 export enum RequestType {
@@ -101,7 +98,7 @@ export enum RequestType {
     FullScreen
 }
 
-function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
+function findInternal(findOptions: FindOptions, multipleSelection : boolean): Promise<Array<Entities.EntityValue>> {
     return SF.ajaxPost({
         url: findOptions.openFinderUrl || SF.Urls.partialFind,
         data: requestDataForOpenFinder(findOptions, false)
@@ -118,22 +115,34 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                     return Promise.resolve(true);
 
                 return getFor(findOptions.prefix).then(sc=> {
-
                     items = sc.selectedItems();
-                    if (items.length == 0) {
-                        SF.Notify.info(lang.signum.noElementsSelected);
+                    if (items.length == 0 || items.length > 1 && !multipleSelection)
                         return false;
-                    }
-
-                    if (items.length > 1 && !findOptions.multipleSelection) {
-                        SF.Notify.info(lang.signum.onlyOneElement);
-                        return false;
-                    }
 
                     return true;
                 });
+            }, div=> {
+                getFor(findOptions.prefix).then(sc=> {
+                    updateOkButton(okButtonId, 0, multipleSelection); 
+                    sc.selectionChanged = selected => updateOkButton(okButtonId, selected.length, multipleSelection); 
+                }); 
             }).then(pair => pair.button.id == okButtonId ? items : null);
+    });
+}
+
+function updateOkButton(okButtonId: string, sel: number, multipleSelection : boolean) {
+    var okButon = $("#" + okButtonId);
+    if (sel == 0 || sel > 1 && !multipleSelection) {
+        okButon.attr("disabled", "disabled");
+        okButon.parent().tooltip({
+            title: sel == 0 ? lang.signum.noElementsSelected : lang.signum.selectOnlyOneElement,
+            placement: "top"
         });
+    }
+    else {
+        okButon.removeAttr("disabled");
+        okButon.parent().tooltip("destroy");
+    }
 }
 
 export function explore(findOptions: FindOptions): Promise<void> {
@@ -220,6 +229,7 @@ export class SearchControl {
     options: FindOptions;
 
     creating: () => void;
+    selectionChanged: (selected: Entities.EntityValue[]) => void;
 
     constructor(element: JQuery, _options: FindOptions) {
         element.data("SF-control", this);
@@ -272,11 +282,8 @@ export class SearchControl {
         var $tblResults = self.element.find(".sf-search-results-container");
 
         if (this.options.allowOrder) {
-            $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
-                if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
-                    return;
-                }
-                self.newSortOrder($(e.target).closest("th"), e.shiftKey);
+            $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
+                self.newSortOrder($(this), e.shiftKey);
                 self.search();
                 return false;
             });
@@ -403,6 +410,9 @@ export class SearchControl {
             btn.attr("disabled", "disabled");
         else
             btn.removeAttr("disabled");
+
+        if (this.selectionChanged)
+            this.selectionChanged(this.selectedItems());
     }
 
     ctxMenuInDropdown() {
@@ -556,7 +566,7 @@ export class SearchControl {
 
         requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
         requestData["elems"] = $(this.pf(this.keys.elems)).val();
-        requestData["page"] = page;
+        requestData["page"] = page || 1;
         requestData["allowSelection"] = this.options.allowSelection;
         requestData["navigate"] = this.options.navigate;
         requestData["filters"] = this.filterBuilder.serializeFilters();
@@ -628,28 +638,6 @@ export class SearchControl {
         return SearchControl.liteKeys(this.selectedItems());
     }
 
-    hasSelectedItems(onSuccess: (item: Array<Entities.EntityValue>) => void) {
-        var items = this.selectedItems();
-        if (items.length == 0) {
-            SF.Notify.info(lang.signum.noElementsSelected);
-            return;
-        }
-        onSuccess(items);
-    }
-
-    hasSelectedItem(onSuccess: (item: Entities.EntityValue) => void) {
-        var items = this.selectedItems();
-        if (items.length == 0) {
-            SF.Notify.info(lang.signum.noElementsSelected);
-            return;
-        }
-        else if (items.length > 1) {
-            SF.Notify.info(lang.signum.onlyOneElement);
-            return;
-        }
-        onSuccess(items[0]);
-    }
-
     selectedKeys() {
         return this.selectedItems().map(function (item) { return item.runtimeInfo.key(); }).join(',');
     }
@@ -688,7 +676,7 @@ export class SearchControl {
             throw "Adding columns is not allowed";
         }
 
-        var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
+        var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.options.prefix, "tokenBuilder"));
         if (SF.isEmpty(tokenName)) {
             return;
         }
@@ -739,13 +727,13 @@ export class SearchControl {
     createMoveColumnDragDrop() {
 
         var rowsSelector = ".sf-search-results th:not(.sf-th-entity):not(.sf-th-selection)";
-        var current : HTMLTableHeaderCellElement = null;
+        var current: HTMLTableHeaderCellElement = null;
         this.element.on("dragstart", rowsSelector, function (e: JQueryEventObject) {
             var de = <DragEvent><Event>e.originalEvent;
             de.dataTransfer.effectAllowed = "move";
-            de.dataTransfer.setData("Text", $(this).attr("data-column-name")); 
+            de.dataTransfer.setData("Text", $(this).attr("data-column-name"));
             current = this;
-        });  
+        });
 
 
         function dragClass(offsetX: number, width: number) {
@@ -760,7 +748,7 @@ export class SearchControl {
 
             return null;
         }
-    
+
         var onDragOver = function (e: JQueryEventObject) {
             if (e.preventDefault) e.preventDefault();
 
@@ -872,10 +860,11 @@ export class SearchControl {
                 var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
                     Navigator.navigate(runtimeInfo, false);
+                else {
+                    var requestData = this.requestDataForSearchPopupCreate();
 
-                var requestData = this.requestDataForSearchPopupCreate();
-
-                Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+                }
             });
     }
 
@@ -983,21 +972,25 @@ export class FilterBuilder {
         if (!$button)
             return;
 
-        var hiddenId = $button.attr("id") + "temp";
-        if (typeof disablingMessage != "undefined") {
-            $button.attr("disabled", "disabled").attr("title", disablingMessage);
+        if (disablingMessage) {
+            $button.attr("disabled", "disabled");
+            $button.parent().tooltip({
+                title: disablingMessage,
+                placement: "bottom"
+            });
             $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
         }
         else {
             var self = this;
-            $button.removeAttr("disabled").attr("title", "");
+            $button.removeAttr("disabled");
+            $button.parent().tooltip("destroy");
             $button.unbind('click').bind('click', enableCallback);
         }
     }
 
 
     addFilterClicked() {
-        var tokenName = QueryTokenBuilder.constructTokenName(this.prefix);
+        var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.prefix, "tokenBuilder"));
         if (SF.isEmpty(tokenName)) {
             return;
         }

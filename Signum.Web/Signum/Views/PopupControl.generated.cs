@@ -72,7 +72,7 @@ WriteAttribute("id", Tuple.Create(" id=\"", 224), Tuple.Create("\"", 257)
 , 229), false)
 );
 
-WriteLiteral(" class=\"sf-popup-control modal fade modal-lg\"");
+WriteLiteral(" class=\"sf-popup-control modal fade\"");
 
 WriteLiteral(" tabindex=\"-1\"");
 
@@ -84,7 +84,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 8 "..\..\Signum\Views\PopupControl.cshtml"
-                                                                                                                                               Write(Model.Prefix);
+                                                                                                                                      Write(Model.Prefix);
 
             
             #line default
@@ -93,7 +93,7 @@ WriteLiteral("\"");
 
 WriteLiteral(">\r\n    <div");
 
-WriteLiteral(" class=\"modal-dialog\"");
+WriteLiteral(" class=\"modal-dialog modal-lg\"");
 
 WriteLiteral(">\r\n        <div");
 

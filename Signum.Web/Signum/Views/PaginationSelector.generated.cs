@@ -184,7 +184,7 @@ WriteLiteral("\r\n            </span>\r\n");
             #line hidden
 WriteLiteral("    </div>\r\n    <div");
 
-WriteLiteral(" class=\"sf-pagination-center\"");
+WriteLiteral(" class=\"sf-pagination-center form-inline form-xs\"");
 
 WriteLiteral(">\r\n");
 
@@ -281,24 +281,24 @@ WriteLiteral("            <input");
 
 WriteLiteral(" type=\"hidden\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3552), Tuple.Create("\"", 3583)
+WriteAttribute("id", Tuple.Create(" id=\"", 3572), Tuple.Create("\"", 3603)
             
             #line 75 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3557), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
+, Tuple.Create(Tuple.Create("", 3577), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
             
             #line default
             #line hidden
-, 3557), false)
+, 3577), false)
 );
 
-WriteAttribute("value", Tuple.Create(" value=\"", 3584), Tuple.Create("\"", 3613)
+WriteAttribute("value", Tuple.Create(" value=\"", 3604), Tuple.Create("\"", 3633)
             
             #line 75 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3592), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
+, Tuple.Create(Tuple.Create("", 3612), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
             
             #line default
             #line hidden
-, 3592), false)
+, 3612), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -309,14 +309,14 @@ WriteLiteral(" class=\"pagination\"");
 
 WriteLiteral(">\r\n                <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3675), Tuple.Create("\"", 3733)
+WriteAttribute("class", Tuple.Create(" class=\"", 3695), Tuple.Create("\"", 3753)
             
             #line 77 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3683), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 3703), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
             
             #line default
             #line hidden
-, 3683), false)
+, 3703), false)
 );
 
 WriteLiteral(" ><a");
@@ -557,14 +557,14 @@ WriteLiteral("</a></li> \r\n");
             #line hidden
 WriteLiteral("\r\n                <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 4978), Tuple.Create("\"", 5055)
+WriteAttribute("class", Tuple.Create(" class=\"", 4998), Tuple.Create("\"", 5075)
             
             #line 111 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 4986), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 5006), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
             
             #line default
             #line hidden
-, 4986), false)
+, 5006), false)
 );
 
 WriteLiteral("><a");

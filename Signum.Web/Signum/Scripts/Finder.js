@@ -49,15 +49,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function findMany(findOptions) {
         findOptions.allowSelection = true;
-        findOptions.multipleSelection = true;
-        return findInternal(findOptions);
+        return findInternal(findOptions, true);
     }
     exports.findMany = findMany;
 
     function find(findOptions) {
         findOptions.allowSelection = true;
-        findOptions.multipleSelection = false;
-        return findInternal(findOptions).then(function (array) {
+        return findInternal(findOptions, false).then(function (array) {
             return array == null ? null : array[0];
         });
     }
@@ -70,7 +68,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     })(exports.RequestType || (exports.RequestType = {}));
     var RequestType = exports.RequestType;
 
-    function findInternal(findOptions) {
+    function findInternal(findOptions, multipleSelection) {
         return SF.ajaxPost({
             url: findOptions.openFinderUrl || SF.Urls.partialFind,
             data: exports.requestDataForOpenFinder(findOptions, false)
@@ -86,22 +84,36 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                 return exports.getFor(findOptions.prefix).then(function (sc) {
                     items = sc.selectedItems();
-                    if (items.length == 0) {
-                        SF.Notify.info(lang.signum.noElementsSelected);
+                    if (items.length == 0 || items.length > 1 && !multipleSelection)
                         return false;
-                    }
-
-                    if (items.length > 1 && !findOptions.multipleSelection) {
-                        SF.Notify.info(lang.signum.onlyOneElement);
-                        return false;
-                    }
 
                     return true;
+                });
+            }, function (div) {
+                exports.getFor(findOptions.prefix).then(function (sc) {
+                    updateOkButton(okButtonId, 0, multipleSelection);
+                    sc.selectionChanged = function (selected) {
+                        return updateOkButton(okButtonId, selected.length, multipleSelection);
+                    };
                 });
             }).then(function (pair) {
                 return pair.button.id == okButtonId ? items : null;
             });
         });
+    }
+
+    function updateOkButton(okButtonId, sel, multipleSelection) {
+        var okButon = $("#" + okButtonId);
+        if (sel == 0 || sel > 1 && !multipleSelection) {
+            okButon.attr("disabled", "disabled");
+            okButon.parent().tooltip({
+                title: sel == 0 ? lang.signum.noElementsSelected : lang.signum.selectOnlyOneElement,
+                placement: "top"
+            });
+        } else {
+            okButon.removeAttr("disabled");
+            okButon.parent().tooltip("destroy");
+        }
     }
 
     function explore(findOptions) {
@@ -239,11 +251,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $tblResults = self.element.find(".sf-search-results-container");
 
             if (this.options.allowOrder) {
-                $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
-                    if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
-                        return;
-                    }
-                    self.newSortOrder($(e.target).closest("th"), e.shiftKey);
+                $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
+                    self.newSortOrder($(this), e.shiftKey);
                     self.search();
                     return false;
                 });
@@ -367,6 +376,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 btn.attr("disabled", "disabled");
             else
                 btn.removeAttr("disabled");
+
+            if (this.selectionChanged)
+                this.selectionChanged(this.selectedItems());
         };
 
         SearchControl.prototype.ctxMenuInDropdown = function () {
@@ -527,7 +539,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
             requestData["elems"] = $(this.pf(this.keys.elems)).val();
-            requestData["page"] = page;
+            requestData["page"] = page || 1;
             requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
             requestData["filters"] = this.filterBuilder.serializeFilters();
@@ -596,27 +608,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return SearchControl.liteKeys(this.selectedItems());
         };
 
-        SearchControl.prototype.hasSelectedItems = function (onSuccess) {
-            var items = this.selectedItems();
-            if (items.length == 0) {
-                SF.Notify.info(lang.signum.noElementsSelected);
-                return;
-            }
-            onSuccess(items);
-        };
-
-        SearchControl.prototype.hasSelectedItem = function (onSuccess) {
-            var items = this.selectedItems();
-            if (items.length == 0) {
-                SF.Notify.info(lang.signum.noElementsSelected);
-                return;
-            } else if (items.length > 1) {
-                SF.Notify.info(lang.signum.onlyOneElement);
-                return;
-            }
-            onSuccess(items[0]);
-        };
-
         SearchControl.prototype.selectedKeys = function () {
             return this.selectedItems().map(function (item) {
                 return item.runtimeInfo.key();
@@ -656,7 +647,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 throw "Adding columns is not allowed";
             }
 
-            var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
+            var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.options.prefix, "tokenBuilder"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }
@@ -836,10 +827,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
                         Navigator.navigate(runtimeInfo, false);
+                    else {
+                        var requestData = _this.requestDataForSearchPopupCreate();
 
-                    var requestData = _this.requestDataForSearchPopupCreate();
-
-                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+                    }
                 });
         };
 
@@ -956,22 +948,26 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (!$button)
                 return;
 
-            var hiddenId = $button.attr("id") + "temp";
-            if (typeof disablingMessage != "undefined") {
-                $button.attr("disabled", "disabled").attr("title", disablingMessage);
+            if (disablingMessage) {
+                $button.attr("disabled", "disabled");
+                $button.parent().tooltip({
+                    title: disablingMessage,
+                    placement: "bottom"
+                });
                 $button.unbind('click').bind('click', function (e) {
                     e.preventDefault();
                     return false;
                 });
             } else {
                 var self = this;
-                $button.removeAttr("disabled").attr("title", "");
+                $button.removeAttr("disabled");
+                $button.parent().tooltip("destroy");
                 $button.unbind('click').bind('click', enableCallback);
             }
         };
 
         FilterBuilder.prototype.addFilterClicked = function () {
-            var tokenName = QueryTokenBuilder.constructTokenName(this.prefix);
+            var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.prefix, "tokenBuilder"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }

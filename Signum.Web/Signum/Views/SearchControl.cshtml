@@ -59,6 +59,13 @@
         }
         <button class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")" >@SearchMessage.Search.NiceToString()</button>
 
+        @if (findOptions.Create)
+        {
+            <a class="sf-query-button btn btn-default sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.CreateNew0.NiceToString(implementations.IsByAll ? EntityBase.ImplementedByAllKey : implementations.Types.CommaOr(a=>a.NiceName()))" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
+                <span class="glyphicon glyphicon-plus"></span>
+            </a>
+        }
+
         <div class="btn-group">
             <button class="sf-query-button sf-tm-selectedbtn btn btn-default dropdown-toggle" data-toggle="dropdown" id="@Model.Compose("btnSelected")" disabled="disabled">
                 @JavascriptMessage.Selected
@@ -80,12 +87,6 @@
            Prefix = Model.Prefix
        }).ToStringButton(Html)
 
-        @if (findOptions.Create)
-        {
-            <a class="sf-query-button btn btn-default pull-right sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.Create.NiceToString()" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
-                <span class="glyphicon glyphicon-plus"></span>
-            </a>
-        }
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -124,8 +125,6 @@
                 <tr>
                     <td colspan="@columnsCount">@JavascriptMessage.searchForResults.NiceToString()</td>
                 </tr>
-
-
             </tbody>
         </table>
     </div>

@@ -118,7 +118,6 @@ Lose changes?")]
     public enum SearchMessage
     {
         ChooseTheDisplayNameOfTheNewColumn,
-        CreateNew,
         Field,
         [Description("Add column")]
         AddColumn,
@@ -158,6 +157,8 @@ Lose changes?")]
         _01of2Results,
         Search,
         Create,
+        [Description("Create new {0}")]
+        CreateNew0,
         [Description("All")]
         SearchControl_Pagination_All,
         SelectAnElement,
@@ -247,8 +248,8 @@ Lose changes?")]
         noElementsSelected,
         [Description("Seach for results")]
         searchForResults,
-        [Description("You can select only one element")]
-        onlyOneElement,
+        [Description("Select only one element")]
+        selectOnlyOneElement,
         [Description("There are errors in the entity, you want to continue?")]
         popupErrors,
         [Description("There are errors in the entity")]

@@ -25,13 +25,12 @@ namespace Signum.Web
         public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryTokenBuilderSettings settings)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            var id = context.Compose("ddlTokenContainer");
-            using (sb.Surround(new HtmlTag("span").Id(id).Class("token-builder")))
+            using (sb.Surround(new HtmlTag("span").Id(context.Prefix).Class("token-builder")))
             {
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
 
-            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "QueryTokenBuilder.init", id,
+            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "QueryTokenBuilder.init", context.Prefix,
                 Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, settings.RequestExtraJSonData).ToString()
                 + "</script>")); 
         
