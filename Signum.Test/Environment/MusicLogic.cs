@@ -69,7 +69,7 @@ namespace Signum.Test.Environment
                         a.LastAward,
                     });
 
-                dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => typeof(AlbumDN).NiceName(), "Albums");
+                dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => typeof(AlbumDN).NicePluralName(), "Albums");
 
                 dqm.RegisterQuery(typeof(BandDN), ()=> 
                     from a in Database.Query<BandDN>()
