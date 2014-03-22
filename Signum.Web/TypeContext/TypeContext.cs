@@ -57,7 +57,7 @@ namespace Signum.Web
 
         public static readonly Context Default = new Context(null, null)
         {
-            FormGroupStyle = FormGroupStyle.Horizontal,
+            FormGroupStyle = FormGroupStyle.LabelColumns,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
         };
@@ -162,7 +162,7 @@ namespace Signum.Web
         None,
         Basic,
         SrOnly,
-        Horizontal,
+        LabelColumns,
     }
 
     #region TypeContext

@@ -70,12 +70,12 @@ namespace Signum.Web
 
                 if(context.FormGroupStyle == FormGroupStyle.SrOnly)
                     lbl.Class("sr-only");
-                else if(context.FormGroupStyle == FormGroupStyle.Horizontal)
+                else if(context.FormGroupStyle == FormGroupStyle.LabelColumns)
                     lbl.Class("control-label").Class(context.LabelColumns.ToString());
 
                 sb.AddLine(lbl);
 
-                using (context.FormGroupStyle == FormGroupStyle.Horizontal ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
+                using (context.FormGroupStyle == FormGroupStyle.LabelColumns ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
                 {
                     sb.AddLine(value);
                 }
