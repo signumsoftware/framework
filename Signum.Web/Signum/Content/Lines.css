@@ -80,6 +80,20 @@ fieldset.sf-repeater-element > legend
     width: auto;
 }
 
+.form-inline .sf-repeater-element
+{
+    padding: 4px 10px;
+    margin: 0px 0px 8px 0px;
+}
+
+.form-inline .sf-repeater-element legend
+{
+    float: left;
+    margin-left: -6px;
+    margin-right: 10px;
+    border: 0px;
+}
+
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li
@@ -142,4 +156,36 @@ ul.nav-tabs
 .move-up:hover
 {
     color:#9900E0;
+}
+
+
+/*form xs*/
+
+.form-xs .form-control
+{
+    width: auto;
+    padding: 0px 3px;
+    height: 20px;
+}
+
+.form-xs .input-group .btn,
+.form-xs .input-group .input-group-addon
+{
+    padding: 0px 3px;
+    height: 20px;
+}
+
+/*form sm*/
+
+.form-sm .form-control
+{
+    width: auto;
+    padding: 3px 6px;
+    height: 30px;
+}
+
+.form-sm .input-group .btn,
+.form-sm .input-group .input-group-addon
+{
+    padding: 1px 6px;
 }

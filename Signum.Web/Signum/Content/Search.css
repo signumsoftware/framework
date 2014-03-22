@@ -23,15 +23,6 @@ th.drag-right
 
 /*Pagination*/
 
-.sf-pagination-size.form-control
-{
-    padding: 1px;
-    width: auto;
-    display: inline;
-    height: 24px;
-    font-size: inherit;
-}
-
 .sf-pagination-center
 {
     text-align: center;
@@ -139,18 +130,7 @@ div.sf-filters-list table.table
     width:auto;
 }
 
-.sf-filters-list .form-control
-{
-    width: auto;
-    padding: 1px 3px;
-    height: auto;
-}
 
-.sf-filters-list .input-group .btn,
-.sf-filters-list .input-group .input-group-addon
-{
-    padding: 1px 6px;
-}
 
 .caret.caret-reversed
 {
