@@ -148,14 +148,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
     exports.hasError = "has-error";
     function cleanHasError($element) {
-        $element.closest(".form-group").removeClass(exports.hasError);
+        exports.errorElement($element).removeClass(exports.hasError);
     }
     exports.cleanHasError = cleanHasError;
 
     function setHasError($element) {
-        $element.closest(".form-group").addClass(exports.hasError);
+        exports.errorElement($element).addClass(exports.hasError);
     }
     exports.setHasError = setHasError;
+
+    function errorElement($element) {
+        var formGroup = $element.closest(".form-group");
+        if (formGroup.length)
+            return formGroup;
+
+        return $element;
+    }
+    exports.errorElement = errorElement;
 
     //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
     function setPathErrors(valOptions, prefix, errorsArray) {
@@ -174,7 +183,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                 ul.append(partialErrors);
             }
             if (currPrefix.length < valOptions.prefix.length)
-                exports.setHasError($("#" + currPrefix));
+                exports.setHasError($('#' + currPrefix));
         });
     }
 

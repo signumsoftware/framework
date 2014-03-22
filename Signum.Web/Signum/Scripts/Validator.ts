@@ -59,8 +59,6 @@ function constructRequestData(valOptions: ValidationOptions): FormObject {
 
     var formValues = getFormValues(valOptions.prefix, "prefix");
 
-
-
     if (valOptions.rootType)
         formValues["rootType"] = valOptions.rootType
 
@@ -172,13 +170,20 @@ export function showErrors(valOptions: ValidationOptions, modelState: ModelState
 
 export var hasError = "has-error";
 export function cleanHasError($element: JQuery) {
-    $element.closest(".form-group").removeClass(hasError)
+    errorElement($element).removeClass(hasError)
 }
 
 export function setHasError($element: JQuery) {
-    $element.closest(".form-group").addClass(hasError)
+    errorElement($element).addClass(hasError)
 }
 
+export function errorElement($element: JQuery) {
+    var formGroup = $element.closest(".form-group"); 
+    if (formGroup.length)
+        return formGroup; 
+
+    return $element;
+}
 
 
 //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
@@ -198,7 +203,7 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
             ul.append(partialErrors);
         }
         if (currPrefix.length < valOptions.prefix.length)
-            setHasError($("#" + currPrefix));
+            setHasError($('#' + currPrefix));
 
     });
 }
