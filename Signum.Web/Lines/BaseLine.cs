@@ -31,6 +31,7 @@ namespace Signum.Web
         }
 
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
+        public readonly RouteValueDictionary FormGroupHtmlProps = new RouteValueDictionary();
 
         bool visible = true;
         public bool Visible

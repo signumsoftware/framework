@@ -63,14 +63,16 @@ namespace Signum.Web
             if (context.FormGroupStyle == FormGroupStyle.None)
                 return value;
 
+            var attrs = context is BaseLine ? ((BaseLine)context).FormGroupHtmlProps : null;
+
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Class("form-group")))
+            using (sb.Surround(new HtmlTag("div").Class("form-group").Attrs(attrs)))
             {
                 var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 
-                if(context.FormGroupStyle == FormGroupStyle.SrOnly)
+                if (context.FormGroupStyle == FormGroupStyle.SrOnly)
                     lbl.Class("sr-only");
-                else if(context.FormGroupStyle == FormGroupStyle.LabelColumns)
+                else if (context.FormGroupStyle == FormGroupStyle.LabelColumns)
                     lbl.Class("control-label").Class(context.LabelColumns.ToString());
 
                 sb.AddLine(lbl);
@@ -94,7 +96,7 @@ namespace Signum.Web
             return new Disposable(() =>
             {
                 writer.Write(div.ToHtml(TagRenderMode.EndTag));
-            }); 
+            });
         }
 
         public static IDisposable FormHorizontal(this HtmlHelper html)
@@ -235,7 +237,7 @@ namespace Signum.Web
         {
             var encoded = HttpUtility.HtmlEncode(text);
 
-            if(values == null)
+            if (values == null)
                 return new MvcHtmlString(encoded);
 
             return new MvcHtmlString(string.Format(encoded,
