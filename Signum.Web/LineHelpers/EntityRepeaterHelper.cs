@@ -18,55 +18,55 @@ namespace Signum.Web
 {
     public static class EntityRepeaterHelper
     {
-        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityRepeater entityRepeater)
+        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityRepeater repeater)
         {
-            if (!entityRepeater.Visible || entityRepeater.HideIfNull && entityRepeater.UntypedValue == null)
+            if (!repeater.Visible || repeater.HideIfNull && repeater.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("fieldset", entityRepeater.Prefix).Class("SF-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container")))
             {
-                sb.AddLine(helper.Hidden(entityRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
+                sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("hidden")).Class("hide")))
+                using (sb.Surround(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
                 {
                 }
 
                 using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityRepeater.Compose("header"))))
+                using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
                 {
-                    sb.AddLine(new HtmlTag("span").SetInnerText(entityRepeater.LabelText).ToHtml());
+                    sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityRepeater.Compose("shownButton")).Class("pull-right")))
+                    using (sb.Surround(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {
-                        sb.AddLine(EntityButtonHelper.Create(helper, entityRepeater, btn: false));
-                        sb.AddLine(EntityButtonHelper.Find(helper, entityRepeater, btn: false));
+                        sb.AddLine(EntityButtonHelper.Create(helper, repeater, btn: false));
+                        sb.AddLine(EntityButtonHelper.Find(helper, repeater, btn: false));
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div").Id(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                using (sb.Surround(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
-                    if (entityRepeater.UntypedValue != null)
+                    if (repeater.UntypedValue != null)
                     {
-                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityRepeater.Parent))
-                            sb.Add(InternalRepeaterElement(helper, itemTC, entityRepeater));
+                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)repeater.Parent))
+                            sb.Add(InternalRepeaterElement(helper, itemTC, repeater));
                     }
                 }
 
 
-                if (entityRepeater.ElementType.IsEmbeddedEntity())
+                if (repeater.ElementType.IsEmbeddedEntity())
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater), null));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), null));
                 }
 
-                sb.AddLine(entityRepeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
+                sb.AddLine(repeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
             }
 
             return sb.ToHtml();
         }
 
-        private static MvcHtmlString InternalRepeaterElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityRepeater entityRepeater)
+        private static MvcHtmlString InternalRepeaterElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityRepeater repeater)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
@@ -74,20 +74,20 @@ namespace Signum.Web
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
-                    if (entityRepeater.Remove)
-                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, entityRepeater, btn: false, elementType: "a"));
+                    if (repeater.Remove)
+                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));
 
-                    if (entityRepeater.Reorder)
+                    if (repeater.Reorder)
                     {
-                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityRepeater, btn: false, elementType: "a", isVertical: true));
-                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityRepeater, btn: false, elementType: "a", isVertical: true));
+                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
+                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
                     }
                 }
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, entityRepeater));
+                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, repeater));
             }
 
             return sb.ToHtml();
@@ -103,22 +103,22 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityRepeater el = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            EntityRepeater repeater = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
+            EntityBaseHelper.ConfigureEntityBase(repeater, typeof(S).CleanType());
 
-            Common.FireCommonTasks(el);
+            Common.FireCommonTasks(repeater);
 
             if (settingsModifier != null)
-                settingsModifier(el);
+                settingsModifier(repeater);
 
-            var result = helper.InternalEntityRepeater<S>(el);
+            var result = helper.InternalEntityRepeater<S>(repeater);
 
-            var vo = el.ViewOverrides;
+            var vo = repeater.ViewOverrides;
             if (vo == null)
                 return result;
 
-            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
+            return vo.OnSurroundLine(repeater.PropertyRoute, helper, tc, result);
         }
     }
 }
