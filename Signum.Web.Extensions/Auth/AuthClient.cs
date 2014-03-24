@@ -84,7 +84,7 @@ namespace Signum.Web.Auth
 
                 if (property)
                 {
-                    Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
+                    Common.CommonTask += TaskAuthorizeProperties;
                     Mapping.CanChange += Mapping_CanChange;
                 }
 
