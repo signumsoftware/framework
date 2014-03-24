@@ -5,6 +5,6 @@
 @using (var tc = Html.TypeContext<CountUserQueryElementDN>())
 {
     @Html.ValueLine(tc, cuq => cuq.Label)
-    @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.ReadOnly = true)
+    @Html.EntityLine(tc, cuq => cuq.UserQuery, el=>el.FormGroupHtmlProps.Add("style", "max-width:300px"))
     @Html.ValueLine(tc, cuq => cuq.Href)
 }

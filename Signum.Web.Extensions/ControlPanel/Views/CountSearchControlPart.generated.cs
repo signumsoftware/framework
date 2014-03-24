@@ -68,13 +68,23 @@ namespace Signum.Web.Extensions.ControlPanel.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/CountSearchControlPart.cshtml")]
-    public partial class CountSearchControlPart : System.Web.Mvc.WebViewPage<PanelPartDN>
+    public partial class CountSearchControlPart : System.Web.Mvc.WebViewPage<dynamic>
     {
         public CountSearchControlPart()
         {
         }
         public override void Execute()
         {
+WriteLiteral("\r\n");
+
+            
+            #line 8 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+ using(var tc = Html.TypeContext<CountSearchControlPartDN>())
+{
+
+            
+            #line default
+            #line hidden
 WriteLiteral("<div");
 
 WriteLiteral(" class=\"sf-cp-count-uq-list\"");
@@ -82,14 +92,14 @@ WriteLiteral(" class=\"sf-cp-count-uq-list\"");
 WriteLiteral(">\r\n");
 
             
-            #line 10 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+            #line 11 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
-     foreach (CountUserQueryElementDN uq in ((CountSearchControlPartDN)Model.Content).UserQueries)
+            #line 11 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+     foreach (CountUserQueryElementDN uq in tc.Value.UserQueries)
     {
         object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
         FindOptions fo = new FindOptions(queryName)
@@ -102,22 +112,28 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 18 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+            #line 19 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
    Write(Html.CountSearchControl(uq.UserQuery, fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.WriteQueryName = WriteQueryName.FormGroup; csc.QueryLabelText = uq.Label; }));
 
             
             #line default
             #line hidden
             
-            #line 18 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+            #line 19 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
                                                                                                                                                                                      
     }
 
             
             #line default
             #line hidden
-WriteLiteral("</div>");
+WriteLiteral("</div>\r\n");
 
+            
+            #line 22 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+}
+            
+            #line default
+            #line hidden
         }
     }
 }

@@ -3,14 +3,15 @@
 @using Signum.Web.ControlPanel
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reports
-@model PanelPartDN
 
-@{ var linkList = ((LinkListPartDN)Model.Content).Links; }
-<ul class="sf-cp-link-list">
-    @foreach (LinkElement link in linkList)
-    {
-        <li>
-            @Html.Href(link.Link, link.Label)
-        </li>
-    }
-</ul>
+@using (var llp = Html.TypeContext<LinkListPartDN>())
+{
+    <ul class="sf-cp-link-list">
+        @foreach (LinkElementDN link in Model.Value.Links)
+        {
+            <li>
+                @Html.Href(link.Link, link.Label)
+            </li>
+        }
+    </ul>
+}

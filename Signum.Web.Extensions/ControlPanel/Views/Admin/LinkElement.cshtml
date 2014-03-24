@@ -4,10 +4,6 @@
 
 @using (var tc = Html.TypeContext<LinkElementDN>())
 {
-    tc.FormGroupStyle = FormGroupStyle.None;
-    using (Html.FormInline())
-    {
-        @Html.ValueLine(tc, l => l.Label)
-        @Html.ValueLine(tc, l => l.Link)
-    }
+    @Html.ValueLine(tc, l => l.Label)
+    @Html.ValueLine(tc, l => l.Link)
 }

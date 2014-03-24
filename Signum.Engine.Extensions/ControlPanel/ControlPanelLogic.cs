@@ -50,7 +50,7 @@ namespace Signum.Engine.ControlPanel
                         Entity = cp,
                         cp.DisplayName,
                         cp.EntityType,
-                        cp.Related,
+                        Related = cp.Owner,
                     });
 
                 dqm.RegisterQuery(typeof(LinkListPartDN), () =>
@@ -125,7 +125,7 @@ namespace Signum.Engine.ControlPanel
             {
                 new Construct(ControlPanelOperation.Create)
                 {
-                    Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
+                    Construct = (_) => new ControlPanelDN { Owner = UserQueryUtils.DefaultRelated() }
                 }.Register();
 
                 new Execute(ControlPanelOperation.Save)
@@ -171,10 +171,10 @@ namespace Signum.Engine.ControlPanel
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
-            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Owner, typeof(UserDN));
 
             TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => uq.Related.RefersTo(UserDN.Current));
+                uq => uq.Owner.RefersTo(UserDN.Current));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  cscp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(cscp)));
@@ -188,10 +188,10 @@ namespace Signum.Engine.ControlPanel
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
-            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Owner, typeof(RoleDN));
 
             TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));

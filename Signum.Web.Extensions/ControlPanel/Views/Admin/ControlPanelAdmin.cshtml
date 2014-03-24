@@ -2,28 +2,46 @@
 @using Signum.Web.ControlPanel
 @using System.Reflection
 
-@Html.ScriptCss("~/ControlPanel/Content/FlowTable.css",
-                "~/ControlPanel/Content/ControlPanel.css")
+@Html.ScriptCss("~/ControlPanel/Content/ControlPanel.css")
 
-<div>
-    @using (var tc = Html.TypeContext<ControlPanelDN>())
+
+@using (var tc = Html.TypeContext<ControlPanelDN>())
+{
+    using (var sc = tc.SubContext())
     {
-        @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
-        @Html.ValueLine(tc, cp => cp.DisplayName)
-        @Html.ValueLine(tc, cp => cp.HomePagePriority)
-        @Html.ValueLine(tc, cp => cp.NumberOfColumns)
-        
-        @Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); })
-
-        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
-        <div class="clearall"></div>   
+        sc.FormGroupStyle = FormGroupStyle.Basic;
+    
+    <div class="form-vertical">
+        <div class="row">
+            <div class="col-sm-8">
+                @Html.ValueLine(sc, cp => cp.DisplayName)
+            </div>
+            <div class="col-sm-2">
+                @Html.ValueLine(sc, cp => cp.HomePagePriority)
+            </div>
+             <div class="col-sm-2">
+                @Html.ValueLine(sc, cp => cp.AutorefreshPeriod)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                @Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false)
+            </div>
+            <div class="col-sm-6">
+                @Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); })
+            </div>
+        </div>
+    </div>
+    
     }
-</div>
+    
+    @Html.GridRepater(tc, cp => cp.Parts, grid =>
+        {
+            grid.PartialViewName = ControlPanelClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
+            grid.AttachFunction = new JsLineFunction(ControlPanelClient.Module, "attachGridControl",
+               Url.Action("AddNewPart", "ControlPanel"),
+               ControlPanelClient.PanelPartViews.Keys.Select(t => t.ToChooserOption()).ToArray());
+        });
+}
 
-<script type="text/javascript">
-    $(function () {
-        require(["@ControlPanelClient.FlowTableModule"], function (FlowTable) {
-            FlowTable.init($("#sfCpAdminContainer"));
-        }); 
-    });
-</script>
+

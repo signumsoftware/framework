@@ -1,27 +1,82 @@
-﻿#sfCpContainer
+﻿.rule
 {
-    width: 100%;
-}
-#sfCpContainer .sf-ftbl-part-container
-{
-    padding: 10px; 
+    background-color: #eee;
+    border-radius: 4px;
 }
 
-#sfCpAdminContainer .ui-draggable-dragging
+.ruleItem
 {
-    cursor: default !important;    
+    height: 16px;
+    background-color: #ddd; 
+    border-radius: 4px;
 }
 
-.sf-cp-link-list li
+.sf-grid-element .panel
 {
-    padding: 5px 0 5px 5px;
+    margin-bottom: 0px;
+    overflow-x:hidden;
 }
-.sf-cp-count-uq-list .sf-label-line
+
+.sf-grid-element .panel-heading .form-control
 {
-    text-align: left;
-    padding: 5px 0 5px 5px;    
+    width: auto;
 }
-.sf-cp-count-uq-list .sf-field
+
+.sf-grid-element .panel-heading
 {
-    min-width: 135px;    
+    cursor:move;
+}
+
+.sf-rightHandle
+{
+    width: 5px;
+    right: 13px; /*15 - 5/2*/
+    cursor: e-resize;
+    top: 6px;
+    bottom: 6px;
+    border-left: 1px solid #e8e8e8;
+    border-right: 1px solid #e8e8e8;
+    position: absolute;
+    display: block;
+}
+
+.sf-leftHandle
+{
+    width: 5px;
+    left: 13px; /*15 - 5/2*/
+    cursor: e-resize;
+    top: 6px;
+    bottom: 6px;
+    border-left: 1px solid #e8e8e8;
+    border-right: 1px solid #e8e8e8;
+    position: absolute;
+    display: block;
+}
+
+
+.sf-dragging .separator-row
+{
+    background-color: #eee;
+}
+
+.sf-dragging .separator-row.sf-over
+{
+    background-color: #aaa;
+}
+
+.separator-row
+{
+    height: 20px;
+}
+
+fieldset.SF-grid-repeater-field
+{
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/*Preview*/
+
+div.row-control-panel {
+    margin-bottom: 30px;
 }

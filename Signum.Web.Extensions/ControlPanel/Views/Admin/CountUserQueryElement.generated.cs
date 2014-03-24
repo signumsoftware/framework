@@ -83,14 +83,14 @@ Write(Html.ValueLine(tc, cuq => cuq.Label));
             #line hidden
             
             #line 8 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
-Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.ReadOnly = true));
+Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el=>el.FormGroupHtmlProps.Add("style", "max-width:300px")));
 
             
             #line default
             #line hidden
             
             #line 8 "..\..\ControlPanel\Views\Admin\CountUserQueryElement.cshtml"
-                                                                        
+                                                                                                         
     
             
             #line default

@@ -9,11 +9,12 @@ using Signum.Entities.Chart;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Xml.Linq;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.ControlPanel
 {
     [Serializable]
-    public class PanelPartDN : EmbeddedEntity
+    public class PanelPartDN : EmbeddedEntity, IGridEntity
     {
         string title;
         public string Title
@@ -29,13 +30,28 @@ namespace Signum.Entities.ControlPanel
             get { return row; }
             set { Set(ref row, value, () => Row); }
         }
-
-        int column;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
-        public int Column
+       
+        int startColumn;
+        [NumberBetweenValidator(0, 11)]
+        public int StartColumn
         {
-            get { return column; }
-            set { Set(ref column, value, () => Column); }
+            get { return startColumn; }
+            set { Set(ref startColumn, value, () => StartColumn); }
+        }
+
+        int columns;
+        [NumberBetweenValidator(1, 12)]
+        public int Columns
+        {
+            get { return columns; }
+            set { Set(ref columns, value, () => Columns); }
+        }
+
+        PanelStyle style;
+        public PanelStyle Style
+        {
+            get { return style; }
+            set { Set(ref style, value, () => Style); }
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
@@ -66,8 +82,8 @@ namespace Signum.Entities.ControlPanel
         {
             return new PanelPartDN
             {
-                Column = Column,
-                Row = Row,
+                Columns = Columns,
+                StartColumn = StartColumn,
                 Content = content.Clone(),
                 Title = Title
             };
@@ -75,15 +91,16 @@ namespace Signum.Entities.ControlPanel
 
         internal void NotifyRowColumn()
         {
-            Notify(() => Row);
-            Notify(() => Column);
+            Notify(() => StartColumn);
+            Notify(() => Columns);
         }
 
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Part",
                 new XAttribute("Row", Row),
-                new XAttribute("Column", Column),
+                new XAttribute("StartColumn", StartColumn),
+                new XAttribute("Columns", Columns),
                 Title == null ? null : new XAttribute("Title", Title),
                 Content.ToXml(ctx));
         }
@@ -91,10 +108,32 @@ namespace Signum.Entities.ControlPanel
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
             Row = int.Parse(x.Attribute("Row").Value);
-            Column = int.Parse(x.Attribute("Column").Value);
+            StartColumn = int.Parse(x.Attribute("StartColumn").Value);
+            Columns = int.Parse(x.Attribute("Columns").Value);
             Title = x.Attribute("Title").TryCC(a => a.Value);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
+
+        internal Interval<int> ColumnInterval()
+        {
+            return new Interval<int>(this.StartColumn, this.StartColumn + this.Columns);
+        }
+    }
+
+    public enum PanelStyle
+    {
+        Default,
+        Primary,
+        Info,
+        Warning,
+        Danger
+    }
+
+    public interface IGridEntity
+    {
+        int Row { get; set; }
+        int StartColumn { get; set; }
+        int Columns { get; set; }
     }
 
     public interface IPartDN : IIdentifiable

@@ -28,31 +28,25 @@ namespace Signum.Web.Extensions.ControlPanel.Views.Admin
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
+    #line 1 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
     using Signum.Entities.ControlPanel;
-    
-    #line default
-    #line hidden
-    
-    #line 3 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
-    using Signum.Entities.Reports;
     
     #line default
     #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 2 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
+    #line 2 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
     using Signum.Web.ControlPanel;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/LinkElement.cshtml")]
-    public partial class LinkElement : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/LinkListPart.cshtml")]
+    public partial class LinkListPart : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public LinkElement()
+        public LinkListPart()
         {
         }
         public override void Execute()
@@ -60,37 +54,28 @@ namespace Signum.Web.Extensions.ControlPanel.Views.Admin
 WriteLiteral("\r\n");
 
             
-            #line 5 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
- using (var tc = Html.TypeContext<LinkElementDN>())
+            #line 4 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
+ using (var tc = Html.TypeContext<LinkListPartDN>())
 {
+    tc.FormGroupStyle = FormGroupStyle.None;
+    tc.PlaceholderLabels = true;
+    using (Html.FormInline())
+    {
     
             
             #line default
             #line hidden
             
-            #line 7 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
-Write(Html.ValueLine(tc, l => l.Label));
+            #line 10 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
+Write(Html.EntityRepeater(tc, p => p.Links));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
-                                     
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
-Write(Html.ValueLine(tc, l => l.Link));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\ControlPanel\Views\Admin\LinkElement.cshtml"
-                                    
+            #line 10 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
+                                          
+    }
 }
             
             #line default

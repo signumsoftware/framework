@@ -4,10 +4,11 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reports
 @using Signum.Web.UserQueries
-@model PanelPartDN
 
+@using(var tc = Html.TypeContext<CountSearchControlPartDN>())
+{
 <div class="sf-cp-count-uq-list">
-    @foreach (CountUserQueryElement uq in ((CountSearchControlPartDN)Model.Content).UserQueries)
+    @foreach (CountUserQueryElementDN uq in tc.Value.UserQueries)
     {
         object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
         FindOptions fo = new FindOptions(queryName)
@@ -18,3 +19,4 @@
         @Html.CountSearchControl(uq.UserQuery, fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.WriteQueryName = WriteQueryName.FormGroup; csc.QueryLabelText = uq.Label; })
     }
 </div>
+}

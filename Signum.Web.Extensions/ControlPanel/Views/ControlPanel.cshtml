@@ -4,29 +4,53 @@
 
 @section head
 {
-    @Html.ScriptCss("~/ControlPanel/Content/FlowTable.css",
-                    "~/ControlPanel/Content/ControlPanel.css")
-
-    <script type="text/javascript">
-        $(function () {
-            setTimeout(function () {
-                window.location.href = window.location.href;
-            }, @ControlPanelClient.RefreshMilliseconds);
-        });
-    </script>
+    @Html.ScriptCss("~/ControlPanel/Content/ControlPanel.css")
 }
 
 @using (Html.BeginForm("DoPostBack", "Signum", "POST"))
 {
     ControlPanelDN cp = (ControlPanelDN)Model;
-    <h1>
-        @if(Navigator.IsNavigable(cp, null, isSearchEntity: true))
+    <h2>
+        @if (Navigator.IsNavigable(cp, null, isSearchEntity: true))
         { 
-        <a href="@Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
-        }else{
+            <a href="@Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
+        }
+        else
+        {
             @cp.DisplayName
         }
-    </h1>
-    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
-    <div class="clearall"></div>   
+    </h2>
+    
+    
+        if (!cp.Parts.IsNullOrEmpty())
+        {
+            foreach (var gr in cp.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
+            {
+                var lastEnd = 0;
+    <div class="row row-control-panel">
+        @foreach (var part in gr)
+        {
+            var offset = part.StartColumn - lastEnd;
+            <div class="part-control-panel col-sm-@part.Columns @(offset == 0 ? null : "col-sm-offset-" + offset)">
+                @Html.Partial(ControlPanelClient.ViewPrefix.Formato("PanelPartView"), part)
+
+            </div>
+            lastEnd = part.StartColumn + part.Columns;
+        }
+    </div>
+            }
+        }
+
+        if (cp.AutoRefreshPeriod != null)
+        {
+    <script type="text/javascript">
+        $(function () {
+            setTimeout(function () {
+                window.location.href = window.location.href;
+            }, @(cp.AutoRefreshPeriod.Value * 1000));
+        });
+    </script>
+        }
 }
+
+

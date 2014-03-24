@@ -3,5 +3,10 @@
 
 @using (var tc = Html.TypeContext<LinkListPartDN>())
 {
+    tc.FormGroupStyle = FormGroupStyle.None;
+    tc.PlaceholderLabels = true;
+    using (Html.FormInline())
+    {
     @Html.EntityRepeater(tc, p => p.Links)
+    }
 }

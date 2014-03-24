@@ -20,12 +20,10 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelClient
     {
-        public static long RefreshMilliseconds = 300000; //5 minutes
-
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/ControlPanel";
-        public static string FlowTableModule = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/FlowTable";
+        public static string GridRepeater = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/GridRepeater";
 
         public struct PartViews
         {
@@ -66,6 +64,7 @@ namespace Signum.Web.ControlPanel
                     new EmbeddedEntitySettings<PanelPartDN>(),
                     
                     new EntitySettings<UserChartPartDN>(),
+
                     new EntitySettings<UserQueryPartDN>(),
 
                     new EntitySettings<CountSearchControlPartDN>(),
@@ -76,22 +75,7 @@ namespace Signum.Web.ControlPanel
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite() });
-
-                ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
-                {
-                    return new ToolBarButton[]
-                    {
-                        new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
-                            Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            Enabled = !panel.IsNew,
-                            Tooltip = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            OnClick = new JsFunction(Module, "createNewPart", ctx.Prefix, ctx.Url.Action((ControlPanelController a)=>a.AddNewPart()), PanelPartViews.Keys.Select(t=>t.ToChooserOption()).ToArray())
-                        }
-                    };
-                });
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Owner = UserDN.Current.ToLite() });
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {

@@ -4,5 +4,10 @@
 
 @using (var tc = Html.TypeContext<CountSearchControlPartDN>())
 {
+    tc.FormGroupStyle = FormGroupStyle.SrOnly;
+    tc.PlaceholderLabels = true;
+    using (Html.FormInline())
+    {
     @Html.EntityRepeater(tc, p => p.UserQueries)
+    }
 }
