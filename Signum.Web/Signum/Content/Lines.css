@@ -158,6 +158,11 @@ ul.nav-tabs
     color:#9900E0;
 }
 
+/*has-error*/
+
+.has-error {
+    border-color: #a94442;
+}
 
 /*form xs*/
 
@@ -188,4 +193,27 @@ ul.nav-tabs
 .form-sm .input-group .input-group-addon
 {
     padding: 1px 6px;
+}
+
+/*form-inline*/
+
+.form-horizontal .form-inline .form-group
+{
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+/*form-vertical*/
+.form-vertical .form-group > label
+{
+    float: none;
+    padding-top: 0;
+    text-align: start;
+    width: auto;
+}
+
+.form-vertical .form-group
+{
+    margin-left: 0;
+    margin-right: 0;
 }
