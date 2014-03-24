@@ -146,6 +146,8 @@ WriteAttribute("id", Tuple.Create(" id=\"", 687), Tuple.Create("\"", 722)
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
 
+WriteLiteral(" href=\"#\"");
+
 WriteLiteral(">\r\n                        <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
@@ -209,14 +211,14 @@ WriteLiteral(" class=\"btn-group\"");
 
 WriteLiteral(">\r\n                        <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1422), Tuple.Create("\"", 1450)
+WriteAttribute("id", Tuple.Create(" id=\"", 1431), Tuple.Create("\"", 1459)
             
             #line 31 "..\..\Signum\Views\SearchPopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1427), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+, Tuple.Create(Tuple.Create("", 1436), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 1427), false)
+, 1436), false)
 );
 
 WriteLiteral(" class=\"btn btn-primary sf-entity-button sf-close-button sf-ok-button\"");
@@ -236,14 +238,14 @@ WriteLiteral(" class=\"btn-group\"");
 
 WriteLiteral(">\r\n                        <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1673), Tuple.Create("\"", 1705)
+WriteAttribute("id", Tuple.Create(" id=\"", 1682), Tuple.Create("\"", 1714)
             
             #line 34 "..\..\Signum\Views\SearchPopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1678), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
+, Tuple.Create(Tuple.Create("", 1687), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnCancel")
             
             #line default
             #line hidden
-, 1678), false)
+, 1687), false)
 );
 
 WriteLiteral(" class=\"btn btn-default sf-entity-button sf-close-button sf-cancel-button\"");

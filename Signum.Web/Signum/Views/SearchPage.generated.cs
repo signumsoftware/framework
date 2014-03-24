@@ -80,6 +80,8 @@ WriteAttribute("id", Tuple.Create(" id=\"", 166), Tuple.Create("\"", 201)
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
 
+WriteLiteral(" href=\"#\"");
+
 WriteLiteral(">\r\n                            <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
