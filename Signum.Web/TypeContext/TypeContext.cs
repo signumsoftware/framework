@@ -60,6 +60,7 @@ namespace Signum.Web
             FormGroupStyle = FormGroupStyle.LabelColumns,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
+            PlaceholderLabels = false,
         };
 
         FormGroupStyle? formGroupStyle;
@@ -69,21 +70,29 @@ namespace Signum.Web
             set { formGroupStyle = value; }
         }
 
+        bool? placeholderLabels;
+        public bool PlaceholderLabels
+        {
+            get { return placeholderLabels ?? Parent.PlaceholderLabels; ; }
+            set { placeholderLabels = value; }
+        }
+
         BsColumn labelColummns;
         public BsColumn LabelColumns
         {
             get { return labelColummns ?? Parent.LabelColumns; }
             set 
             { 
-                labelColummns = value; 
-                valueColummns = value == null? null : value.Inverse();
+                labelColummns = value;
+                ValueColumns = value == null ? null : value.Inverse();
             }
         }
 
-        BsColumn valueColummns;
+        BsColumn valueColumns;
         public BsColumn ValueColumns
         {
-            get { return valueColummns ?? Parent.ValueColumns; }
+            get { return valueColumns ?? Parent.ValueColumns; }
+            set { valueColumns = value; }
         }
 
         bool? readOnly; 
@@ -154,6 +163,26 @@ namespace Signum.Web
         public override string ToString()
         {
             return catchedString;
+        }
+
+        public static BsColumn operator +(BsColumn a, BsColumn b)
+        {
+            return new BsColumn(
+                (short?)(a.xs + b.xs),
+                (short?)(a.sm + b.sm),
+                (short?)(a.md + b.md),
+                (short?)(a.lg + b.lg)
+                ); 
+        }
+
+        public static BsColumn operator -(BsColumn a, BsColumn b)
+        {
+            return new BsColumn(
+                (short?)(a.xs - b.xs),
+                (short?)(a.sm - b.sm),
+                (short?)(a.md - b.md),
+                (short?)(a.lg - b.lg)
+                );
         }
     }
 

@@ -23,6 +23,9 @@ namespace Signum.Web
         {
             if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
             {
+                if (valueLine.PlaceholderLabels && !valueLine.ValueHtmlProps.ContainsKey("placeholder"))
+                    valueLine.ValueHtmlProps["placeholder"] = valueLine.LabelText;
+
                 var value = InternalValue(helper, valueLine);
 
                 return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);

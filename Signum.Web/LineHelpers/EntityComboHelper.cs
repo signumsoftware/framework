@@ -117,6 +117,9 @@ namespace Signum.Web
                 entityCombo.ComboHtmlProperties.Add("size", Math.Min(entityCombo.Size, items.Count - 1));
             }
 
+            if (entityCombo.PlaceholderLabels && !entityCombo.ComboHtmlProperties.ContainsKey("placeholder"))
+                entityCombo.ComboHtmlProperties.Add("placeholder", entityCombo.LabelText);
+
             return helper.DropDownList(
                     entityCombo.Compose(EntityComboKeys.Combo),
                     items,

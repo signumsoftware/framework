@@ -120,6 +120,9 @@ namespace Signum.Web
                 { "autocomplete", "off" }, 
             };
 
+            if (entityLine.PlaceholderLabels)
+                htmlAttr.Add("placeholder", entityLine.LabelText);
+
             return helper.TextBox(
                 entityLine.Compose(EntityBaseKeys.ToStr),
                 null,
