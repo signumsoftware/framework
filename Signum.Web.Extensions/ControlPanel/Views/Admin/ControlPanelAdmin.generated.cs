@@ -90,7 +90,7 @@ WriteLiteral(" class=\"row\"");
 
 WriteLiteral(">\r\n            <div");
 
-WriteLiteral(" class=\"col-sm-8\"");
+WriteLiteral(" class=\"col-sm-6\"");
 
 WriteLiteral(">\r\n");
 
@@ -105,7 +105,7 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </div>\r\n            <div");
 
-WriteLiteral(" class=\"col-sm-2\"");
+WriteLiteral(" class=\"col-sm-3\"");
 
 WriteLiteral(">\r\n");
 
@@ -120,7 +120,7 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </div>\r\n             <div");
 
-WriteLiteral(" class=\"col-sm-2\"");
+WriteLiteral(" class=\"col-sm-3\"");
 
 WriteLiteral(">\r\n");
 
