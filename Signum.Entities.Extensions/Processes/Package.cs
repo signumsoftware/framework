@@ -21,6 +21,21 @@ namespace Signum.Entities.Processes
             set { SetToStr(ref name, value, () => Name); }
         }
 
+        [SqlDbType(Size = int.MaxValue)]
+        string operationArguments;
+        public string OperationArguments
+        {
+            get { return operationArguments; }
+            private set { Set(ref operationArguments, value, () => OperationArguments); }
+        }
+
+        [HiddenProperty]
+        public object[] OperationArgs
+        {
+            get { return OperationArguments.HasText() ? (object[])Serialization.FromString(OperationArguments) : null;}
+            set { OperationArguments = value == null ? null : Serialization.ToString(value); }
+        }
+
         public override string ToString()
         {
             return "Package {0}".Formato(Name);
