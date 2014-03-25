@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Soap;
 
 namespace Signum.Utilities
 {
     public static class Serialization
     {
+        //Binary
         public static byte[] ToBytes(object graph)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -18,7 +20,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static void ToFile(object graph, string fileName)
+        public static void ToBinaryFile(object graph, string fileName)
         {
             using (FileStream fs = File.OpenWrite(fileName))
             {
@@ -26,19 +28,55 @@ namespace Signum.Utilities
             }
         }
 
-        public static object FromBytes(byte[] array)
+        public static object FromBytes(byte[] bytes)
         {
-            using (MemoryStream ms = new MemoryStream(array))
+            using (MemoryStream ms = new MemoryStream(bytes))
             {
                 return new BinaryFormatter().Deserialize(ms);
             }
         }
 
-        public static object FromFile(string fileName)
+        public static object FromBinaryFile(string fileName)
         {
             using (FileStream fs = File.OpenRead(fileName))
             {
                 return new BinaryFormatter().Deserialize(fs);
+            }
+        }
+
+
+
+        //SOAP
+        public static string ToString(object graph)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                new SoapFormatter().Serialize(ms, graph);
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
+
+        public static void ToStringFile(object graph, string fileName)
+        {
+            using (FileStream fs = File.OpenWrite(fileName))
+            {
+                new SoapFormatter().Serialize(fs, graph);
+            }
+        }
+
+        public static object FromString(string str)
+        {
+            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(str)))
+            {
+                return new SoapFormatter().Deserialize(ms);
+            }
+        }
+
+        public static object FromStringFile(string fileName)
+        {
+            using (FileStream fs = File.OpenRead(fileName))
+            {
+                return new SoapFormatter().Deserialize(fs);
             }
         }
     }
