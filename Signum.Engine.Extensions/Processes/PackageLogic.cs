@@ -180,6 +180,8 @@ namespace Signum.Engine.Processes
 
             Enum operationKey = package.Operation.ToEnum();
 
+            var args = package.OperationArgs;
+
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 OperationType operationType = OperationLogic.OperationType(line.Target.GetType(), operationKey);
@@ -187,14 +189,14 @@ namespace Signum.Engine.Processes
                 switch (operationType)
                 {
                     case OperationType.Execute:
-                        OperationLogic.Execute(line.Target, operationKey);
+                        OperationLogic.Execute(line.Target, operationKey, args);
                         break;
                     case OperationType.Delete:
-                        OperationLogic.Delete(line.Target, operationKey);
+                        OperationLogic.Delete(line.Target, operationKey, args);
                         break;
                     case OperationType.ConstructorFrom:
                         {
-                            var result = OperationLogic.ConstructFrom<IdentifiableEntity>(line.Target, operationKey);
+                            var result = OperationLogic.ConstructFrom<IdentifiableEntity>(line.Target, operationKey, args);
                             line.Result = result.ToLite();
                         }
                         break;
@@ -212,6 +214,8 @@ namespace Signum.Engine.Processes
     {
         public Enum OperationKey { get; private set; }
 
+        public Func<PackageDN, PackageLineDN, object[]> OperationArgs;
+
         public PackageDeleteAlgorithm(Enum operationKey)
         {
             if (operationKey == null)
@@ -224,9 +228,11 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
+            var args = package.OperationArgs;
+
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                line.Target.Delete(OperationKey);
+                line.Target.Delete(OperationKey, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
@@ -241,7 +247,7 @@ namespace Signum.Engine.Processes
         public PackageExecuteAlgorithm(Enum operationKey)
         {
             if(operationKey == null)
-                throw new ArgumentNullException("operatonKey");
+                throw new ArgumentNullException("operationKey");
 
             this.OperationKey = operationKey;
         }
@@ -250,9 +256,11 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
+            var args = package.OperationArgs;
+
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                line.Target.Execute(OperationKey);
+                line.Target.Execute(OperationKey, args);
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
             });
@@ -274,9 +282,11 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
+            var args = package.OperationArgs;
+
             executingProcess.ForEachLine(package.Lines(), line =>
             {
-                var result = line.Target.ConstructFrom<T>(OperationKey);
+                var result = line.Target.ConstructFrom<T>(OperationKey, args);
                 if (result.IsNew)
                     result.Save();
 
