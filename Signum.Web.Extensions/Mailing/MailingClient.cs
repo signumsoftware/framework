@@ -127,7 +127,7 @@ namespace Signum.Web.Mailing
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                        new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter"), AvoidValidateRequest = true},
                         new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                     });
 
