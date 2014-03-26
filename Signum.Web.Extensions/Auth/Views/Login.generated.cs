@@ -240,11 +240,13 @@ WriteLiteral(" type=\"submit\"");
 
 WriteLiteral(" class=\"btn btn-default\"");
 
+WriteLiteral(" id=\"login\"");
+
 WriteLiteral(">");
 
             
             #line 44 "..\..\Auth\Views\Login.cshtml"
-                                                             Write(AuthMessage.Login.NiceToString());
+                                                                        Write(AuthMessage.Login.NiceToString());
 
             
             #line default

@@ -210,7 +210,7 @@ WriteLiteral("        <td>\r\n");
             #line hidden
             
             #line 37 "..\..\Chart\Views\ChartColumn.cshtml"
-             if (tc.Value.GroupByEnabled)
+             if (tc.Value.GroupByVisible)
             {
                 var groupCheck = new HtmlTag("input")
                     .IdName(tc.Compose("group"))

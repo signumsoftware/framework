@@ -40,6 +40,8 @@ namespace Signum.Web.Alerts
         {
             var ident = (IdentifiableEntity)ctx.Entity;
 
+            var url = RouteHelper.New().Action((AlertController ac) => ac.AlertsCount());
+
             var alertList = new[]
             {
                 new { Count = CountAlerts(ident.ToLite(), "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
@@ -49,7 +51,7 @@ namespace Signum.Web.Alerts
 
             var items = alertList.Select(a => new MenuItem
             {
-                OnClick = new JsFunction(AlertClient.Module, "exploreAlerts", ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts")),
+                OnClick = new JsFunction(AlertClient.Module, "exploreAlerts", ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts"), url),
                 CssClass = "sf-alert-view",
                 Html = 
                 new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()).ToHtml().Concat(
@@ -61,7 +63,7 @@ namespace Signum.Web.Alerts
             items.Add(new MenuItem
             {
                 CssClass = "sf-alert-create",
-                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity)),
+                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity), url),
                 Text = AlertMessage.CreateAlert.NiceToString(),
             }); 
 
@@ -92,6 +94,7 @@ namespace Signum.Web.Alerts
             {
                 Title = AlertMessage.Alerts.NiceToString(),
                 IconClass = "glyphicon glyphicon-bell",
+                Class = "sf-alerts-toggler",
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "alertsWidget"),
                 Active = alertList.Any(a => a.Count > 0),
                 Html = label.ToHtml(),

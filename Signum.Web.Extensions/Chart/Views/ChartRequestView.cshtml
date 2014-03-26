@@ -34,6 +34,7 @@
     <div>
         @{
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+            ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey: false);
             Html.RenderPartial(Navigator.Manager.FilterBuilderView);
         }
 

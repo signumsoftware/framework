@@ -22,7 +22,6 @@ namespace Signum.Windows.ControlPanels
             obj.SetValue(ColumnProperty, value);
         }
 
-
         public static readonly DependencyProperty RowProperty =
             DependencyProperty.RegisterAttached("Row", typeof(int), typeof(StackColumnPanel), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsParentArrange));
         public static int GetRow(DependencyObject obj)

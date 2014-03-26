@@ -124,6 +124,7 @@ namespace Signum.Entities.ControlPanel
     {
         Default,
         Primary,
+        Success,
         Info,
         Warning,
         Danger

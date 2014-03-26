@@ -71,12 +71,12 @@ namespace Signum.Web.Selenium
 
         public string MenuOptionLocator(string menuId, string optionId)
         {
-            return "jq=#{0}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button#{1}".Formato(menuId, optionId);
+            return "jq=a#{0}".Formato(optionId);
         }
 
         public string MenuOptionLocatorByAttr(string menuId, string optionLocator)
         {
-            return "jq=#{0}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button[{1}]".Formato(menuId, optionLocator);
+            return "jq=a[{0}]".Formato(optionLocator);
         }
 
         public NormalPage<UserChartDN> NewUserChart()
@@ -112,20 +112,6 @@ namespace Signum.Web.Selenium
             searchControl.Selenium.Click("jq=#qbChartNew");
             searchControl.Selenium.WaitForPageToLoad();
             return new ChartPageProxy(searchControl.Selenium);
-        }
-
-        public static LineContainer<PanelPartDN> CreateNewPart<T>(this ILineContainer<ControlPanelDN> controlPanel, int index)
-        {
-            controlPanel.Selenium.EntityButtonClick("CreatePart");
-
-            ChooserPopup sp = new ChooserPopup(controlPanel.Selenium);
-            controlPanel.Selenium.WaitElementPresent(sp.PopupVisibleLocator);
-            sp.Choose<T>();
-            var repeater = controlPanel.EntityRepeater(a => a.Parts);
-            var result = repeater.Details<PanelPartDN>(index);
-            controlPanel.Selenium.WaitElementPresent(result.Prefix + "_sfRuntimeInfo");
-
-            return result;
         }
     }
 }

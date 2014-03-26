@@ -36,19 +36,21 @@ namespace Signum.Web.Notes
             }.ToJS(ctx.Prefix, "New");
 
 
+            var url = RouteHelper.New().Action((NoteController ac) => ac.NotesCount());
+
             List<IMenuItem> items = new List<IMenuItem>()
             {
                 new MenuItem
                 {
                      CssClass = "sf-note-view",
-                     OnClick = new JsFunction(NoteClient.Module, "explore", ctx.Prefix, findOptions),
+                     OnClick = new JsFunction(NoteClient.Module, "explore", ctx.Prefix, findOptions, url),
                      Text = NoteMessage.ViewNotes.NiceToString(),
                 },
 
                 new MenuItem
                 {
                     CssClass = "sf-note-create",
-                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity)),
+                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity), url),
                     Text = NoteMessage.CreateNote.NiceToString()
                 },
             }; 
@@ -61,7 +63,7 @@ namespace Signum.Web.Notes
                 Title = NoteMessage.Notes.NiceToString(),
                 IconClass = "glyphicon glyphicon-comment",
                 Active = count > 0,
-                Class = "sf-notes-toggler" + (count > 0 ? " sf-widget-toggler-active" : null),
+                Class = "sf-notes-toggler",
                 Html = new HtmlTag("span").Class("sf-widget-count").SetInnerText(count.ToString()),
                 Items = items
             };

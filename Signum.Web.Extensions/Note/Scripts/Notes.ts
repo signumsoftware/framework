@@ -5,20 +5,22 @@ import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-export function explore(prefix: string, options: Finder.FindOptions){
-    Finder.explore(options).then(() => updateNotes(prefix));
+export function explore(prefix: string, options: Finder.FindOptions, urlUpdate: string){
+    Finder.explore(options)
+        .then(() => updateNotes(prefix, urlUpdate));
 }
 
-export function createNote(prefix: string, operationKey: string) {
-    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(() => updateNotes(prefix));
+export function createNote(prefix: string, operationKey: string, urlUpdate: string) {
+    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true })
+        .then(() => updateNotes(prefix, urlUpdate));
 }
 
 
-export function updateNotes(prefix) {
-    var widget = $("#" + SF.compose(prefix, "notesWidget") + " ul")
+export function updateNotes(prefix : string, urlUpdate: string) {
+    var widget = $("#" + SF.compose(prefix, "notesWidget"))
 
     SF.ajaxPost({
-        url: widget.data("url"),
+        url: urlUpdate,
         data: { key: Entities.RuntimeInfo.getFromPrefix(prefix).key() },
     }).then(txt=> widget.parent().find(".sf-widget-count").text(txt));
 }

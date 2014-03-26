@@ -74,65 +74,69 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sbg = new HtmlStringBuilder();
 
-            sbg.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/Files.css") }).ToHtmlSelf());
-
-            if (value != null)
-                sbg.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-            fileLine.ValueHtmlProps.AddCssClass("form-control");
-
-            bool hasEntity = value != null && value.FileName.HasText();
-
-            sbg.AddLine(helper.HiddenRuntimeInfo(fileLine));
-
-
-            using (sbg.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
+            using (sbg.Surround(new HtmlTag("div").Id(fileLine.Prefix).Class("sf-field SF-control-container")))
             {
-                HtmlStringBuilder sb = new HtmlStringBuilder();
+                sbg.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/Files.css") }).ToHtmlSelf());
 
-                if (fileLine.Download != DownloadBehaviour.None)
+                if (value != null)
+                    sbg.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
+
+                fileLine.ValueHtmlProps.AddCssClass("form-control");
+
+                bool hasEntity = value != null && value.FileName.HasText();
+
+                using (sbg.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
                 {
-                    sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
-                        value.TryCC(f => f.FileName),
-                        hasEntity ? FilesClient.GetDownloadPath(value) : null,
-                        "Download",
-                        "form-control",
-                        fileLine.Download == DownloadBehaviour.View ? null :
-                        new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName) } }));
+                    HtmlStringBuilder sb = new HtmlStringBuilder();
+                    using (sb.Surround(new HtmlTag("div", fileLine.Compose("inputGroup")).Class("input-group")))
+                    {
+                        if (fileLine.Download != DownloadBehaviour.None)
+                        {
+                            sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
+                                value.TryCC(f => f.FileName),
+                                hasEntity ? FilesClient.GetDownloadPath(value) : null,
+                                "Download",
+                                "form-control",
+                                fileLine.Download == DownloadBehaviour.View ? null :
+                                new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName) } }));
+                        }
+                        else
+                        {
+                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "form-control", null));
+                        }
+
+                        if (fileLine.Type.IsEmbeddedEntity())
+                            sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
+                        
+                        using (sb.Surround(new HtmlTag("span", fileLine.Compose("shownButton")).Class("input-group-btn")))
+                        {
+                            sb.AddLine(EntityButtonHelper.Remove(helper, fileLine, btn: true));
+                        }
+                    }
+
+                    sbg.AddLine(helper.FormGroup(fileLine,
+                        fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr),
+                        fileLine.LabelText, sb.ToHtml()));
                 }
-                else
+
+                using (sbg.Surround(new HtmlTag("div", fileLine.Compose("DivNew"))
+                    .Class("sf-file-line-new")
+                    .Attr("style", "display:" + (hasEntity ? "none" : "block"))))
                 {
-                    sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "form-control", null));
+
+                    HtmlStringBuilder sb = new HtmlStringBuilder();
+                    sb.AddLine(helper.HiddenRuntimeInfo(fileLine));
+                    sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='form-control'/>".Formato(fileLine.SFControlThen("onChanged()"), fileLine.Compose(FileLineKeys.File))));
+                    sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
+
+
+                    sbg.AddLine(helper.FormGroup(fileLine,
+                        fileLine.Compose(FileLineKeys.File),
+                        fileLine.LabelText, sb.ToHtml()));
                 }
 
-                if (fileLine.Type.IsEmbeddedEntity())
-                    sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
-
-                sb.AddLine(EntityButtonHelper.Remove(helper, fileLine, btn: true));
-
-                sbg.AddLine(helper.FormGroup(fileLine,
-                    fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr),
-                    fileLine.LabelText, sb.ToHtml()));
+                sbg.AddLine(fileLine.ConstructorScript(FilesClient.Module, "FileLine"));
             }
-
-            using (sbg.Surround(new HtmlTag("div", fileLine.Compose("DivNew"))
-                .Class("sf-file-line-new")
-                .Attr("style", "display:" + (hasEntity ? "none" : "block"))))
-            {
-
-                HtmlStringBuilder sb = new HtmlStringBuilder();
-
-
-                sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='form-control'/>".Formato(fileLine.SFControlThen("onChanged()"), fileLine.Compose(FileLineKeys.File))));
-                sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
-
-
-                sbg.AddLine(helper.FormGroup(fileLine,
-                    fileLine.Compose(FileLineKeys.File),
-                    fileLine.LabelText, sb.ToHtml()));
-            }
-
-            sbg.AddLine(fileLine.ConstructorScript(FilesClient.Module, "FileLine"));
 
             return sbg.ToHtml();
         }

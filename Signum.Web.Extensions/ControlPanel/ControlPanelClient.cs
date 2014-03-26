@@ -80,7 +80,7 @@ namespace Signum.Web.ControlPanel
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
                     !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:
-                     new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
+                     new QuickLinkAction(ControlPanelMessage.Preview, RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
                 });
            
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>

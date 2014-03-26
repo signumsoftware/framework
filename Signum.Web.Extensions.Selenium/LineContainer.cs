@@ -293,25 +293,23 @@ namespace Signum.Web.Selenium
             this.Route = PropertyRoute.Root(typeof(T));
         }
 
-        public string ButtonLocator(string buttonId)
+        public string ContainerLocator()
         {
-            return "jq=#divNormalControl #{0}.sf-entity-button".Formato(buttonId);
+            return "jq=#divMainPage";
         }
 
         public void Dispose()
         {
         }
 
-       
-
         public bool HasId()
         {
-            return Selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]");
+            return Selenium.IsElementPresent("jq=#divMainPage[data-isnew=false]");
         }
 
         public string Title()
         {
-            return Selenium.GetEval("window.$('#divNormalControl > div > .sf-entity-title').html()");
+            return Selenium.GetEval("window.$('#divMainPage > h3 > .sf-entity-title').html()");
         }
 
         public RuntimeInfoProxy RuntimeInfo()

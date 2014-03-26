@@ -78,16 +78,16 @@ namespace Signum.Web.Selenium
             return selenium;
         }
 
+
         private static void StartSelenium(ISelenium selenium)
         {
-            bool starting = true;
             int attempts = 0;
-            while (starting)
+            while (true)
             {
                 try
                 {
                     selenium.Start();
-                    starting = false;
+                    return;
                 }
                 catch (Exception)
                 {

@@ -34,7 +34,7 @@
         @if(tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
         {
         <td>
-            @if (tc.Value.GroupByEnabled)
+            @if (tc.Value.GroupByVisible)
             {
                 var groupCheck = new HtmlTag("input")
                     .IdName(tc.Compose("group"))
