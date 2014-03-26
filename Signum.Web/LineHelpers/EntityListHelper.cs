@@ -89,7 +89,6 @@ namespace Signum.Web
 
             sbOptions.Add(new HtmlTag("option")
                     .Id(itemTC.Compose(EntityBaseKeys.ToStr))
-                    .Class("form-control")
                     .Class("sf-entity-list-option")
                     .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
                     .SetInnerText(itemTC.Value.TryToString())

@@ -45,6 +45,7 @@ namespace Signum.Web
                 .Id(Id)
                 .Class("btn")
                 .Class("btn-" + Style.ToString().ToLower())
+                .Class("sf-entity-button")
                 .Class(CssClass)
                 .Attrs(HtmlProps);
 
@@ -147,8 +148,7 @@ namespace Signum.Web
                 if (OnClick != null)
                     a.Attr("onclick", OnClick.ToString());
 
-                if (Href.HasText())
-                    a.Attr("href", Href);
+                a.Attr("href", Href.DefaultText("#"));
             }
             else
                 a.Attr("disabled", "disabled");

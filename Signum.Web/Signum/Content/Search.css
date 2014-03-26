@@ -1,4 +1,9 @@
-﻿.sf-search-footer div
+﻿.sf-search-footer
+{
+    min-height: 50px;
+}
+
+.sf-search-footer div
 {
     float: left;
     width: 33%;
@@ -81,7 +86,7 @@ span.token-builder > select.form-control
     width: auto;
     display: inline;
     height: 30px;
-    padding: 2px;
+    padding: 4px;
     margin: 2px 0px;
 }
 

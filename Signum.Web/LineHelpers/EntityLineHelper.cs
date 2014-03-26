@@ -47,26 +47,26 @@ namespace Signum.Web
                  }
 
                  using (sb.Surround(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
-                {
-                    if (entityLine.UntypedValue == null)
-                        sb.AddLine(AutocompleteTextBox(helper, entityLine));
-                    else
-                        sb.AddLine(LinkOrSpan(helper, entityLine));
+                 {
+                     if (entityLine.UntypedValue == null)
+                         sb.AddLine(AutocompleteTextBox(helper, entityLine));
+                     else
+                         sb.AddLine(LinkOrSpan(helper, entityLine));
 
-                    using (sb.Surround(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
-                    {
-                        if (entityLine.UntypedValue == null)
-                        {
-                            sb.AddLine(EntityButtonHelper.Create(helper, entityLine, btn: true));
-                            sb.AddLine(EntityButtonHelper.Find(helper, entityLine, btn: true));
-                        }
-                        else
-                        {
-                            sb.AddLine(EntityButtonHelper.View(helper, entityLine, btn: true));
-                            sb.AddLine(EntityButtonHelper.Remove(helper, entityLine, btn: true));
-                        }
-                    }
-                }
+                     using (sb.Surround(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
+                     {
+                         if (entityLine.UntypedValue == null)
+                         {
+                             sb.AddLine(EntityButtonHelper.Create(helper, entityLine, btn: true));
+                             sb.AddLine(EntityButtonHelper.Find(helper, entityLine, btn: true));
+                         }
+                         else
+                         {
+                             sb.AddLine(EntityButtonHelper.View(helper, entityLine, btn: true));
+                             sb.AddLine(EntityButtonHelper.Remove(helper, entityLine, btn: true));
+                         }
+                     }
+                 }
 
                 if (entityLine.Type.IsEmbeddedEntity())
                 {

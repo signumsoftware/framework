@@ -212,7 +212,7 @@ module SF {
             menu.css({
                 left: e.pageX,
                 top: e.pageY,
-                zIndex: '101',
+                zIndex: 9999,
                 display: "block",
                 position: 'absolute'
             });

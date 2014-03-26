@@ -353,7 +353,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody);
         });
 
-        var modalDiv = exports.createBootstrapModal({ titleText: title, body: modalBody, titleClose: true });
+        var modalDiv = exports.createBootstrapModal({ titleText: title, prefix: prefix, body: modalBody, titleClose: true });
 
         var option;
         return exports.openModal(modalDiv, function (button) {
@@ -366,7 +366,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.chooser = chooser;
 
     function createBootstrapModal(options) {
-        var result = $('<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog">' + '<div class="modal-dialog modal-sm" >' + '<div class="modal-content">' + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '') + '<div class="modal-body"></div>' + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '') + '</div>' + '</div>' + '</div>');
+        var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + SF.compose(options.prefix, "panelPopup") + '">' + '<div class="modal-dialog modal-sm" >' + '<div class="modal-content">' + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '') + '<div class="modal-body"></div>' + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '') + '</div>' + '</div>' + '</div>');
 
         if (options.titleClose)
             result.find(".modal-header").append('<button type="button" class="close sf-close-button" aria-hidden="true">×</button>');

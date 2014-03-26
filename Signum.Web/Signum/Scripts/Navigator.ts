@@ -382,7 +382,7 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
     options.forEach(o=> $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>')
         .data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody));
 
-    var modalDiv = createBootstrapModal({ titleText: title, body: modalBody, titleClose: true });
+    var modalDiv = createBootstrapModal({ titleText: title,  prefix: prefix, body: modalBody, titleClose: true });
 
     var option : T; 
     return openModal(modalDiv,
@@ -392,6 +392,8 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
 
 export interface BootstrapModalOptions
 {
+    prefix : string;
+
     title?: JQuery;
     titleText?: string;
     titleClose?: boolean;
@@ -404,7 +406,7 @@ export interface BootstrapModalOptions
 }
 
 export function createBootstrapModal(options: BootstrapModalOptions) : JQuery {
-    var result = $('<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog">'
+    var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + SF.compose(options.prefix, "panelPopup") + '">'
         + '<div class="modal-dialog modal-sm" >'
         + '<div class="modal-content">'
 

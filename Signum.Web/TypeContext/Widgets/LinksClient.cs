@@ -125,6 +125,7 @@ namespace Signum.Web
         public bool IsVisible { get; set; }
         public string Text { get; set; }
         public double Order { get; set; }
+        public string Name { get; set; }
 
         public QuickLink()
         {
@@ -132,7 +133,7 @@ namespace Signum.Web
 
         public MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            return new HtmlTag("li").InnerHtml(Execute());
+            return new HtmlTag("li").Class("sf-quick-link").Attr("data-name", Name).InnerHtml(Execute());
         }
 
         public abstract MvcHtmlString Execute();
@@ -141,11 +142,18 @@ namespace Signum.Web
     public class QuickLinkAction : QuickLink
     {
         public string Url { get; set; }
-        
-        public QuickLinkAction(string text, string url)
+
+
+        public QuickLinkAction(Enum nameAndText, string url): this
+            (url, nameAndText.ToString(), nameAndText.NiceToString())
+        {
+        }
+
+        public QuickLinkAction(string name, string text, string url)
         {
             Text = text;
             Url = url;
+            Name = name; 
             IsVisible = true;
         }
 
@@ -164,6 +172,7 @@ namespace Signum.Web
             FindOptions = findOptions;
             IsVisible = Navigator.IsFindable(findOptions.QueryName);
             Text = QueryUtils.GetNiceName(findOptions.QueryName);
+            Name = Navigator.ResolveWebQueryName(findOptions.QueryName);
         }
 
         public QuickLinkFind(object queryName, string columnName, object value, bool hideColumn) :
@@ -202,6 +211,7 @@ namespace Signum.Web
             lite = liteEntity;
             IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearchEntity: false);
             Text = lite.EntityType.NiceName();
+            Name = Navigator.ResolveWebTypeName(liteEntity.EntityType);
         }
 
         public override MvcHtmlString Execute()

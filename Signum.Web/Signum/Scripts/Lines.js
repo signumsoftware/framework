@@ -103,6 +103,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityBase.prototype.notifyChanges = function () {
             SF.setHasChanges(this.element);
+
+            this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
         };
 
         EntityBase.prototype.remove_click = function () {
@@ -255,8 +257,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 name: "autocmplete",
                 displayKey: "toStr",
                 templates: {
-                    suggestions: function (item) {
-                        return $("<div>").append($("p").attr("data-type", item.runtimeInfo.type).attr("data-id", item.runtimeInfo.id).text(item.toStr)).html();
+                    suggestion: function (item) {
+                        return $("<div>").append($("<p>").attr("data-type", item.runtimeInfo.type).attr("data-id", item.runtimeInfo.id).text(item.toStr)).html();
                     }
                 },
                 source: function (query, response) {
@@ -686,6 +688,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.setPosIndex(itemPrevPrefix, prevNewIndex + 1);
 
             $item.insertBefore($itemPrev);
+
+            this.notifyChanges();
         };
 
         EntityListBase.prototype.moveDown = function (itemPrefix) {
@@ -704,6 +708,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.setPosIndex(itemNextPrefix, nextNewIndex - 1);
 
             $item.insertAfter($itemNext);
+
+            this.notifyChanges();
         };
 
         EntityListBase.prototype.getPosIndex = function (itemPrefix) {
@@ -1036,8 +1042,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
         EntityTabRepeater.prototype._create = function () {
             _super.prototype._create.call(this);
-
-            $(this.pf(EntityTabRepeater.key_tabsContainer)).tab();
         };
 
         EntityTabRepeater.prototype.itemSuffix = function () {
@@ -1049,7 +1053,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityTabRepeater.prototype.removeEntitySpecific = function (itemPrefix) {
-            $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)).remove();
+            var li = $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem));
+
+            if (li.next().length)
+                li.next().find("a").tab("show");
+            else if (li.prev().length)
+                li.prev().find("a").tab("show");
+
+            li.remove();
             $("#" + SF.compose(itemPrefix, EntityBase.key_entity)).remove();
         };
 
@@ -1062,7 +1073,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $(this.pf(EntityTabRepeater.key_tabsContainer)).append(entity);
 
-            header.tab("show");
+            header.find("a").tab("show");
         };
 
         EntityTabRepeater.prototype.getRepeaterCall = function () {

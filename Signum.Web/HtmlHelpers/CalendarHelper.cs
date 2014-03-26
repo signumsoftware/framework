@@ -170,7 +170,7 @@ namespace Signum.Web
         private static HtmlTag AttachDatePicker(HtmlTag tag, CultureInfo culture, string jsFormat)
         {
             return tag.Attr("data-provide", "datepicker")
-               .Attr("data-language", culture.TwoLetterISOLanguageName)
+               .Attr("data-date-language", culture.TwoLetterISOLanguageName)
                .Attr("data-date-autoclose", "true")
                .Attr("data-date-format", jsFormat)
                .Attr("data-date-today-btn", "linked")

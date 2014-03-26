@@ -732,7 +732,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }
 
                 $(this).removeClass("drag-left drag-right");
-                $(this).addClass(dragClass(de.offsetX, $(this).width()));
+                $(this).addClass(dragClass(de.pageX - $(this).offset().left, $(this).width()));
 
                 de.dataTransfer.dropEffect = "move";
             };
@@ -745,36 +745,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var me = this;
             this.element.on("drop", rowsSelector, function (e) {
+                if (e.preventDefault)
+                    e.preventDefault();
+
                 $(this).removeClass("drag-left drag-right");
 
                 var de = e.originalEvent;
 
-                var result = dragClass(de.offsetX, $(this).width());
+                var result = dragClass(de.pageX - $(this).offset().left, $(this).width());
 
                 if (result)
                     me.moveColumn($(current), $(this), result == "drag-left");
             });
-            //$draggables = $draggables || $(this.pf("tblResults") + " ");
-            //$droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
-            //$draggables.draggable({
-            //    revert: "invalid",
-            //    axis: "x",
-            //    opacity: 0.5,
-            //    distance: 8,
-            //    cursor: "move"
-            //});
-            //$draggables.removeAttr("style"); //remove relative positioning
-            //var self = this;
-            //$droppables.droppable({
-            //    hoverClass: "sf-header-droppable-active",
-            //    tolerance: "pointer",
-            //    drop: function (event, ui) {
-            //        var $dragged = ui.draggable;
-            //        var $targetPlaceholder = $(this); //droppable
-            //        var $targetCol = $targetPlaceholder.closest("th");
-            //        self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
-            //    }
-            //});
         };
 
         SearchControl.prototype.removeColumn = function ($th) {
@@ -899,6 +881,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix = prefix;
             this.webQueryName = webQueryName;
             this.url = url;
+            this.newSubTokensComboAdded(this.element.find("#" + SF.compose(prefix, "tokenBuilder") + " select:first"));
+
             this.element.on("sf-new-subtokens-combo", function (event) {
                 var args = [];
                 for (var _i = 0; _i < (arguments.length - 1); _i++) {
@@ -933,15 +917,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         self.addColumnClicked();
                     });
                 }
-                return;
+            } else {
+                this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
+                    self.addFilterClicked();
+                });
+                this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
+                    self.addColumnClicked();
+                });
             }
-
-            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
-                self.addFilterClicked();
-            });
-            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
-                self.addColumnClicked();
-            });
         };
 
         FilterBuilder.prototype.changeButtonState = function ($button, disablingMessage, enableCallback) {

@@ -143,6 +143,8 @@ export class EntityBase {
 
     notifyChanges() {
         SF.setHasChanges(this.element);
+
+        this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
     }
 
     remove_click(): Promise<void> {
@@ -294,8 +296,8 @@ export class EntityBase {
             name: "autocmplete",
             displayKey: "toStr",
             templates: {
-                suggestions: (item: Entities.EntityValue) => $("<div>").append(
-                    $("p")
+                suggestion: (item: Entities.EntityValue) => $("<div>").append(
+                    $("<p>")
                         .attr("data-type", item.runtimeInfo.type)
                         .attr("data-id", item.runtimeInfo.id)
                         .text(item.toStr)).html()
@@ -736,6 +738,8 @@ export class EntityListBase extends EntityBase {
         this.setPosIndex(itemPrevPrefix, prevNewIndex + 1);
 
         $item.insertBefore($itemPrev);
+
+        this.notifyChanges();
     }
 
     moveDown(itemPrefix: string) {
@@ -755,6 +759,8 @@ export class EntityListBase extends EntityBase {
         this.setPosIndex(itemNextPrefix, nextNewIndex - 1);
 
         $item.insertAfter($itemNext);
+
+        this.notifyChanges();
     }
 
     getPosIndex(itemPrefix: string) {
@@ -1072,8 +1078,6 @@ export class EntityTabRepeater extends EntityRepeater {
 
     _create() {
         super._create();
-
-        $(this.pf(EntityTabRepeater.key_tabsContainer)).tab();
     }
 
     itemSuffix() {
@@ -1086,7 +1090,14 @@ export class EntityTabRepeater extends EntityRepeater {
     }
 
     removeEntitySpecific(itemPrefix: string) {
-        $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)).remove();
+        var li = $("#" + SF.compose(itemPrefix, EntityTabRepeater.key_repeaterItem)); 
+
+        if (li.next().length)
+            li.next().find("a").tab("show");
+        else if (li.prev().length)
+            li.prev().find("a").tab("show");
+
+        li.remove();
         $("#" + SF.compose(itemPrefix, EntityBase.key_entity)).remove();
     }
 
@@ -1110,7 +1121,7 @@ export class EntityTabRepeater extends EntityRepeater {
 
         $(this.pf(EntityTabRepeater.key_tabsContainer)).append(entity);
 
-        header.tab("show");
+        header.find("a").tab("show");
     }
 
     getRepeaterCall() {
