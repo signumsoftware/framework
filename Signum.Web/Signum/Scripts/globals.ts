@@ -6,10 +6,3 @@
 /// <reference path="../Headers/bootstrap/bootstrap.timepicker.d.ts"/>
 
 /// <reference path="SF.UI.ts"/>
-
-
-/* 
-
-/// <reference path="../Headers/bootstrap/typeahead.d.ts"/>
-
-*/
