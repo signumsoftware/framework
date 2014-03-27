@@ -25,11 +25,12 @@ namespace Signum.Web.Chart
 
             html = html.Concat(Icon());
 
-            html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(result.UserChart, null)))
-                .InnerHtml(html);
-                
             return html;
+        }
+
+        public override string GetUrl(UserChartOmniboxResult result)
+        {
+            return RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(result.UserChart, null)); 
         }
 
         public override MvcHtmlString Icon()

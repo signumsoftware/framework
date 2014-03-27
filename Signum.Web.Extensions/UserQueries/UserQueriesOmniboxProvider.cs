@@ -24,12 +24,13 @@ namespace Signum.Web.UserQueries
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
             html = html.Concat(Icon());
-
-            html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery, null, null)))
-                .InnerHtml(html);
                 
             return html;
+        }
+
+        public override string GetUrl(UserQueryOmniboxResult result)
+        {
+            return RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery, null, null));
         }
 
         public override MvcHtmlString Icon()

@@ -25,11 +25,14 @@ namespace Signum.Web.ControlPanel
 
             html = html.Concat(Icon());
 
-            html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(result.ControlPanel, null)))
-                .InnerHtml(html);
+
                 
             return html;
+        }
+
+        public override string GetUrl(ControlPanelOmniboxResult result)
+        {
+            return RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(result.ControlPanel, null));
         }
 
         public override MvcHtmlString Icon()

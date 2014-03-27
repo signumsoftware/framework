@@ -51,12 +51,15 @@ namespace Signum.Web.Omnibox
 
             html = html.Concat(Icon());
 
-            if (result.Lite != null)
-                html = new HtmlTag("a")
-                    .Attr("href", Navigator.NavigateRoute(result.Lite))
-                    .InnerHtml(html).ToHtml();
-
             return html;
+        }
+
+        public override string GetUrl(EntityOmniboxResult result)
+        {
+            if (result.Lite == null)
+                return null;
+
+            return Navigator.NavigateRoute(result.Lite);
         }
 
         public override MvcHtmlString Icon()
