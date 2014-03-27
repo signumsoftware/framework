@@ -4,6 +4,5 @@
 /// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.datepicker.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.timepicker.d.ts"/>
-/// <reference path="../Headers/bootstrap/typeahead.d.ts"/>
 /// <reference path="SF.UI.ts"/>
 //# sourceMappingURL=globals.js.map

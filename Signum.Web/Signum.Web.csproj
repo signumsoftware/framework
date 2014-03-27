@@ -258,7 +258,7 @@
     <Content Include="Signum\Headers\bootstrap\bootstrap.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.datepicker.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.timepicker.d.ts" />
-    <Content Include="Signum\Headers\bootstrap\typeahead.d.ts" />
+    <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />

@@ -290,19 +290,6 @@ export class EntityBase {
 
         var handler : number;
         var auto = $txt.typeahead({
-            hint: false,
-            highlight: true,
-        }, {
-            name: "autocmplete",
-            displayKey: "toStr",
-            templates: {
-                suggestion: (item: Entities.EntityValue) => $("<div>").append(
-                    $("<p>")
-                        .attr("data-type", item.runtimeInfo.type)
-                        .attr("data-id", item.runtimeInfo.id)
-                        .text(item.toStr)).html()
-            },
-
             source: (query, response) => {
                 if (handler)
                     clearTimeout(handler);
@@ -312,11 +299,17 @@ export class EntityBase {
                         .then(entities=> response(entities));
                 }, 300);
             },
-        });
 
-        $txt.on("typeahead:selected", (event: JQueryEventObject, val: Entities.EntityValue, name: string) => {
-            this.onAutocompleteSelected(val);
-        }); 
+            sorter: items => items,
+            matcher: item => true,
+            highlighter: (item: Entities.EntityValue) => $("<div>").append(
+                $("<span>")
+                    .attr("data-type", item.runtimeInfo.type)
+                    .attr("data-id", item.runtimeInfo.id)
+                    .text(item.toStr)).html(),
+
+            updater : (val: Entities.EntityValue) => this.onAutocompleteSelected(val)
+        });
     }
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
@@ -376,19 +369,6 @@ export class EntityLine extends EntityBase {
                 term => ({ types: this.options.types.join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
-
-            var inputGroup = this.shownButton.parent();
-
-            var typeahead = $txt.parent();
-
-            var parts = typeahead.children().addClass("typeahead-parts").detach();
-
-            if (typeahead.parent().hasClass("hide"))
-                parts.appendTo(typeahead.parent());
-            else
-                parts.insertBefore(this.shownButton);
-
-            typeahead.remove();
         }
     }
 
@@ -408,8 +388,8 @@ export class EntityLine extends EntityBase {
         $(this.pf(Entities.Keys.toStr)).val('');
 
         this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
-        this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
-        this.visible($(this.pf(Entities.Keys.toStr) + ":not(.typeahead-parts)"), entityValue == null); //embedded entities is alone
+        this.visible($(this.pf("") + "ul.typeahead.dropdown-menu"), entityValue == null);
+        this.visible($(this.pf(Entities.Keys.toStr)), entityValue == null);
     }
 
     visible(element : JQuery, visible: boolean) {
@@ -1257,7 +1237,7 @@ export class EntityStrip extends EntityList {
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
         this.addEntity(entityValue, this.getNextPrefix());
-        $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").typeahead('val', '');
+        $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").val('');
     }
 }
 

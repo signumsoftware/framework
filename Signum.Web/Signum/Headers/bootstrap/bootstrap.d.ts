@@ -57,6 +57,16 @@ interface CarouselOptions {
     pause?: string;
 }
 
+interface TypeaheadOptions {
+    source?: (query: string, cb: (items: any[]) => void) => void;
+    items?: number;
+    minLength?: number;
+    matcher?: (item: any) => boolean;
+    sorter?: (items: any[]) => any[];
+    updater?: (item: any) => any;
+    highlighter?: (item: any) => string;
+}
+
 interface AffixOptions {
     offset?: any;
 }
@@ -94,6 +104,10 @@ interface JQuery {
     carousel(command: string): JQuery;
 
     affix(options?: AffixOptions): JQuery;
+
+    typeahead(options?: TypeaheadOptions): JQuery;
+    typeahead(methodName: 'destroy'): JQuery;
+    typeahead(methodName: string): any;
 }
 
 declare module "bootstrap" {

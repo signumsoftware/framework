@@ -251,16 +251,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var handler;
             var auto = $txt.typeahead({
-                hint: false,
-                highlight: true
-            }, {
-                name: "autocmplete",
-                displayKey: "toStr",
-                templates: {
-                    suggestion: function (item) {
-                        return $("<div>").append($("<p>").attr("data-type", item.runtimeInfo.type).attr("data-id", item.runtimeInfo.id).text(item.toStr)).html();
-                    }
-                },
                 source: function (query, response) {
                     if (handler)
                         clearTimeout(handler);
@@ -270,11 +260,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                             return response(entities);
                         });
                     }, 300);
+                },
+                sorter: function (items) {
+                    return items;
+                },
+                matcher: function (item) {
+                    return true;
+                },
+                highlighter: function (item) {
+                    return $("<div>").append($("<span>").attr("data-type", item.runtimeInfo.type).attr("data-id", item.runtimeInfo.id).text(item.toStr)).html();
+                },
+                updater: function (val) {
+                    return _this.onAutocompleteSelected(val);
                 }
-            });
-
-            $txt.on("typeahead:selected", function (event, val, name) {
-                _this.onAutocompleteSelected(val);
             });
         };
 
@@ -328,19 +326,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
 
                 this.setupAutocomplete($txt);
-
-                var inputGroup = this.shownButton.parent();
-
-                var typeahead = $txt.parent();
-
-                var parts = typeahead.children().addClass("typeahead-parts").detach();
-
-                if (typeahead.parent().hasClass("hide"))
-                    parts.appendTo(typeahead.parent());
-                else
-                    parts.insertBefore(this.shownButton);
-
-                typeahead.remove();
             }
         };
 
@@ -360,8 +345,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(this.pf(Entities.Keys.toStr)).val('');
 
             this.visible($(this.pf(Entities.Keys.link)), entityValue != null);
-            this.visible($(this.pf(Entities.Keys.toStr)).parent().children(".typeahead-parts"), entityValue == null);
-            this.visible($(this.pf(Entities.Keys.toStr) + ":not(.typeahead-parts)"), entityValue == null); //embedded entities is alone
+            this.visible($(this.pf("") + "ul.typeahead.dropdown-menu"), entityValue == null);
+            this.visible($(this.pf(Entities.Keys.toStr)), entityValue == null);
         };
 
         EntityLine.prototype.visible = function (element, visible) {
@@ -1189,7 +1174,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityStrip.prototype.onAutocompleteSelected = function (entityValue) {
             this.addEntity(entityValue, this.getNextPrefix());
-            $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").typeahead('val', '');
+            $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").val('');
         };
         EntityStrip.key_itemsContainer = "sfItemsContainer";
         EntityStrip.key_stripItem = "sfStripItem";
