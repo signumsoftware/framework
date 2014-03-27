@@ -27,18 +27,20 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (WebMenuItem menu in menuITems)
             {
-                menu.Write(sb, currentUrl, 0);
+                if (menu.Visible)
+                    menu.Write(sb, currentUrl, 0);
             }
             return sb.ToHtml();
         }
     }
+
 
     public class WebMenuItem
     {
         List<WebMenuItem> children;
         public List<WebMenuItem> Children
         {
-            get { return children ?? (children  = new List<WebMenuItem>()); }
+            get { return children ?? (children = new List<WebMenuItem>()); }
             set { children = value; }
         }
       
@@ -95,18 +97,20 @@ namespace Signum.Web
             set { visible = value; }
         }
 
-        public string Class { get; set; }           //is applied to link
+        public string Class { get; set; } //is applied to link
 
      
         public void Write(HtmlStringBuilder sb, string currentUrl, int depth)
         {
-            if (!Visible)
-                return;
+            if (!this.Visible)
+                throw new InvalidOperationException("Invisible menu");
 
             bool isActive = this.Link != null && this.Link.ToString() == currentUrl ||
                 children.HasItems() && children.Any(a => a.Link != null && a.Link.ToString() == currentUrl);
 
-            using (sb.Surround(new HtmlTag("li").Class(isActive ? "active" : null).Class(this.children.HasItems() ? "dropdown" : null)))
+            bool isHeader = IsHeader(depth);
+
+            using (sb.Surround(new HtmlTag("li").Class(isActive ? "active" : null).Class(isHeader ? "dropdown-header" : this.children.HasItems() ? "dropdown" : null)))
             {
                 if (Link != null)
                 {
@@ -128,7 +132,7 @@ namespace Signum.Web
                         sb.AddLine(tbA.ToHtml());
                     }
                 }
-                else if (this.children.HasItems())
+                else if (this.children.HasItems() && !isHeader)
                 {
                     using (sb.Surround(new HtmlTag("a").Attr("href", "#")
                         .Class("dropdown-toggle")
@@ -147,17 +151,42 @@ namespace Signum.Web
                 else
                     sb.AddLine(new HtmlTag("span").SetInnerText(Text));
 
-                if (this.children.HasItems())
+                if (this.children.HasItems() && !isHeader)
                 {
                     using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
                     {
+                        bool lastHeader = false;
                         foreach (WebMenuItem menu in this.children)
                         {
-                            menu.Write(sb, currentUrl, depth + 1);
+                            if (menu.Visible)
+                            {
+                                if(lastHeader)
+                                    sb.AddLine(new HtmlTag("li").Class("divider")); 
+
+                                menu.Write(sb, currentUrl, depth + 1);
+
+                                lastHeader = menu.IsHeader(depth + 1);
+                            }
                         }
                     }
                 }
             }
+
+            if (isHeader)
+            {
+                foreach (WebMenuItem menu in this.children)
+                {
+                    if (menu.Visible)
+                        menu.Write(sb, currentUrl, depth + 1);
+                }
+
+               
+            }
+        }
+
+        private bool IsHeader(int depth)
+        {
+            return this.children.HasItems() && depth >= 1;
         }
     }
 }
