@@ -45,11 +45,11 @@ namespace Signum.Entities.UserQueries
             set { Set(ref entityType, value, () => EntityType); }
         }
 
-        Lite<IdentifiableEntity> related;
-        public Lite<IdentifiableEntity> Related
+        Lite<IdentifiableEntity> owner;
+        public Lite<IdentifiableEntity> Owner
         {
-            get { return related; }
-            set { Set(ref related, value, () => Related); }
+            get { return owner; }
+            set { Set(ref owner, value, () => Owner); }
         }
 
         [NotNullable]
@@ -210,7 +210,7 @@ namespace Signum.Entities.UserQueries
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                Related == null ? null : new XAttribute("Related", Related.Key()),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
@@ -225,7 +225,7 @@ namespace Signum.Entities.UserQueries
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
-            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            Owner = element.Attribute("Owner").TryCC(a => Lite.Parse(a.Value));
             WithoutFilters = element.Attribute("WithoutFilters").TryCS(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage").TryCS(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode").TryCS(a => a.Value.ToEnum<PaginationMode>());
@@ -631,7 +631,7 @@ namespace Signum.Entities.UserQueries
             {
                 Query = query,
                 WithoutFilters = withoutFilters,
-                Related = DefaultRelated(),
+                Owner = DefaultRelated(),
                 Filters = withoutFilters ? new MList<QueryFilterDN>() : request.Filters.Select(f => new QueryFilterDN
                 {
                     Token = new QueryTokenDN(f.Token),

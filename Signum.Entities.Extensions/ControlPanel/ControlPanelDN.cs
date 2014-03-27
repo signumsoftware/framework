@@ -181,7 +181,7 @@ namespace Signum.Entities.ControlPanel
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                Owner == null ? null : new XAttribute("Related", Owner.Key()),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 HomePagePriority == null ? null : new XAttribute("HomePagePriority", HomePagePriority.Value.ToString()),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
         }
@@ -191,7 +191,7 @@ namespace Signum.Entities.ControlPanel
         {
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Related").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
+            Owner = element.Attribute("Owner").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
             HomePagePriority = element.Attribute("HomePagePriority").TryCS(a => int.Parse(a.Value));
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
 

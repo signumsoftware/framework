@@ -14,7 +14,7 @@
     object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
     ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
     
-    @Html.EntityLine(e, f => f.Related, el => el.Create = false)
+    @Html.EntityLine(e, f => f.Owner, el => el.Create = false)
     
     using (var query = e.SubContext(f => f.Query))
     {

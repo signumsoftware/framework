@@ -51,11 +51,11 @@ namespace Signum.Entities.Chart
             set { Set(ref entityType, value, () => EntityType); }
         }
 
-        Lite<IdentifiableEntity> related;
-        public Lite<IdentifiableEntity> Related
+        Lite<IdentifiableEntity> owner;
+        public Lite<IdentifiableEntity> Owner
         {
-            get { return related; }
-            set { Set(ref related, value, () => Related); }
+            get { return owner; }
+            set { Set(ref owner, value, () => Owner); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -210,7 +210,7 @@ namespace Signum.Entities.Chart
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
-                Related == null ? null : new XAttribute("Related", Related.Key()),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", ChartScript.Name),
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
@@ -223,7 +223,7 @@ namespace Signum.Entities.Chart
             DisplayName = element.Attribute("DisplayName").Value;
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EntityType = element.Attribute("EntityType").TryCC(a => Lite.Parse<TypeDN>(a.Value));
-            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            Owner = element.Attribute("Owner").TryCC(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
             Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));

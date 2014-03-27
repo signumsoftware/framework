@@ -249,14 +249,14 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 43 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.EntityLine(uc, tc => tc.Related, el => el.Create = false));
+   Write(Html.EntityLine(uc, tc => tc.Owner, el => el.Create = false));
 
             
             #line default
             #line hidden
             
             #line 43 "..\..\Chart\Views\UserChart.cshtml"
-                                                                       
+                                                                     
         
             
             #line default
@@ -370,14 +370,14 @@ WriteLiteral("\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2877), Tuple.Create("\"", 2920)
+WriteAttribute("id", Tuple.Create(" id=\"", 2875), Tuple.Create("\"", 2918)
             
             #line 65 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 2882), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 2880), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2882), false)
+, 2880), false)
 );
 
 WriteLiteral(">\r\n");

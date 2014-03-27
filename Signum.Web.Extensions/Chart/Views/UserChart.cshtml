@@ -40,7 +40,7 @@
                 Html.Span(null, query.Value.Name, "form-control-static"))
         }
     
-        @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
+        @Html.EntityLine(uc, tc => tc.Owner, el => el.Create = false)
         @Html.ValueLine(uc, tc => tc.DisplayName)
         
         var entityTypePrefix = uc.SubContext(a => a.EntityType).Prefix;

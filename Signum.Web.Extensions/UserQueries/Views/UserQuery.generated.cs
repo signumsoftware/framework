@@ -92,14 +92,14 @@ WriteLiteral("\r\n\r\n");
             #line hidden
             
             #line 17 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.EntityLine(e, f => f.Related, el => el.Create = false));
+Write(Html.EntityLine(e, f => f.Owner, el => el.Create = false));
 
             
             #line default
             #line hidden
             
             #line 17 "..\..\UserQueries\Views\UserQuery.cshtml"
-                                                                
+                                                              
     
     using (var query = e.SubContext(f => f.Query))
     {
