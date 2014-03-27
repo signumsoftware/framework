@@ -111,7 +111,7 @@ WriteLiteral(">\r\n                <label");
 
 WriteLiteral(" for=\"username\"");
 
-WriteLiteral(" class=\"col-md-offset-2 col-sm-2 control-label\"");
+WriteLiteral(" class=\"col-sm-offset-2 col-sm-2 control-label\"");
 
 WriteLiteral(">");
 
@@ -156,7 +156,7 @@ WriteLiteral(">\r\n                <label");
 
 WriteLiteral(" for=\"password\"");
 
-WriteLiteral(" class=\"col-md-offset-2 col-sm-2 control-label\"");
+WriteLiteral(" class=\"col-sm-offset-2 col-sm-2 control-label\"");
 
 WriteLiteral(">");
 

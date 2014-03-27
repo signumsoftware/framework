@@ -17,14 +17,14 @@
     {
         <div class="form-horizontal">
             <div class="form-group">
-                <label for="username" class="col-md-offset-2 col-sm-2 control-label">@AuthMessage.Username.NiceToString()</label>
+                <label for="username" class="col-sm-offset-2 col-sm-2 control-label">@AuthMessage.Username.NiceToString()</label>
                 <div class="col-sm-4">
                     @Html.TextBox("username", null, new { @class = "form-control", placeholder = AuthMessage.Username.NiceToString() })
                     @Html.ValidationMessage("username")
                 </div>
             </div>
             <div class="form-group">
-                <label for="password" class="col-md-offset-2 col-sm-2 control-label">@AuthMessage.Password.NiceToString()</label>
+                <label for="password" class="col-sm-offset-2 col-sm-2 control-label">@AuthMessage.Password.NiceToString()</label>
                 <div class="col-sm-4">
                     @Html.Password("password", null, new { @class = "form-control", placeholder = AuthMessage.Password.NiceToString() })
                     @Html.ValidationMessage("password")
