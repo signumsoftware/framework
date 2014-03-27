@@ -63,7 +63,7 @@ interface TypeaheadOptions {
     minLength?: number;
     matcher?: (item: any) => boolean;
     sorter?: (items: any[]) => any[];
-    updater?: (item: any) => any;
+    updater?: (item: any, e : Event) => any;
     highlighter?: (item: any) => string;
 }
 
