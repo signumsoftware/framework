@@ -29,17 +29,14 @@ export function initialize(omniboxId: string, url: string) {
         sorter: items => items,
         matcher: item => true,
         highlighter: item => item.label,
-        updater: item  => {
-            if (event.keyCode == 9) {
-                $omnibox.val(item.cleanText);
-            }
-            else if (item.url) {
-                if (event.ctrlKey)
+        updater: (item, e)  => {
+            if (item.url) {
+                if ((<MouseEvent>e).ctrlKey)
                     window.open(item.url);
                 else
                     window.location.assign(item.url);
             }
-            event.preventDefault();
+            e.preventDefault();
             return item.cleanText;
         },
     });

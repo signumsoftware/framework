@@ -33,16 +33,14 @@ define(["require", "exports"], function(require, exports) {
             highlighter: function (item) {
                 return item.label;
             },
-            updater: function (item) {
-                if (event.keyCode == 9) {
-                    $omnibox.val(item.cleanText);
-                } else if (item.url) {
-                    if (event.ctrlKey)
+            updater: function (item, e) {
+                if (item.url) {
+                    if (e.ctrlKey)
                         window.open(item.url);
                     else
                         window.location.assign(item.url);
                 }
-                event.preventDefault();
+                e.preventDefault();
                 return item.cleanText;
             }
         });
