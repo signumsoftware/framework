@@ -204,8 +204,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                 codeMirrorInstance.on("change", function (instance, change) {
                     var cmValue = instance.getValue();
                     ckEditorInstance.element.setValue(cmValue);
-                    ckEditorInstance.setData(cmValue);
-                    ckEditorInstance.fire('dataReady');
+                    // ckEditorInstance.setData(cmValue);
+                    // ckEditorInstance.fire('dataReady');
                 });
 
                 codeMirrorInstance.on("focus", function () {
