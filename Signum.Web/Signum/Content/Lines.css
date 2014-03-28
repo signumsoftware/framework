@@ -10,7 +10,6 @@
     max-width: 140px;
     float: left;
     margin-right: 5px;
-    margin-bottom: 5px;
 } 
 
 /* Buttons */
@@ -216,4 +215,11 @@ ul.nav-tabs
 {
     margin-left: 0;
     margin-right: 0;
+}
+
+.form-vertical .form-control 
+{
+    display: block;
+    width: 100%;
+    vertical-align: baseline;
 }
