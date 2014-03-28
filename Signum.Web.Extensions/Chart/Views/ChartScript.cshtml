@@ -8,22 +8,25 @@
 {
     var imageRoute = cc.Compose("ImageIco");
     
-    <div class="col-sm-1">
-        @if (cc.Value.Icon != null && !cc.Value.Icon.IsNew)
-        {
-            <div class="col-sm-6">
-                <img id="@imageRoute" src="@Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))" />
-            </div>
-        }
-    </div>
-    <div class="col-sm-11">
-        @Html.ValueLine(cc, c => c.Name)
-        @Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
+   
+    <div class="row">
+        <div class="col-sm-11">
+            @Html.ValueLine(cc, c => c.Name)
+            @Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
     {
         a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
         a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);
     })
-        @Html.ValueLine(cc, c => c.GroupBy)
+            @Html.ValueLine(cc, c => c.GroupBy)
+        </div>
+        <div class="col-sm-1">
+            @if (cc.Value.Icon != null && !cc.Value.Icon.IsNew)
+            {
+                <div class="col-sm-6">
+                    <img id="@imageRoute" src="@Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))" />
+                </div>
+            }
+        </div>
     </div>
     
     <div class="sf-chartscript-columns">

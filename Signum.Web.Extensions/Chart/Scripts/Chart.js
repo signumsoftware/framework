@@ -6,9 +6,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3", "colorbrewer"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, d3, colorbrewer) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
     ChartUtils;
-
     colorbrewer;
 
     function openChart(prefix, url) {

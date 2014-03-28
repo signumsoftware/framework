@@ -8,6 +8,22 @@
     "~/Libs/CodeMirror/addon/dialog/dialog.css",
     "~/Libs/CodeMirror/addon/display/fullscreen.css",
     "~/Libs/CodeMirror/addon/hint/show-hint.css")
+    <style type="text/css">
+      .CodeMirror {
+        border: 1px solid #eee;
+      }
+      
+      span.CodeMirror-matchhighlight 
+      { 
+          background: #efefef
+      }
+      .CodeMirror-focused span.CodeMirror-matchhighlight 
+      { 
+          background: #efe7ff !important 
+      }
+      
+      .exceptionLine {background: #FFFF00 !important;}
+    </style>
     <pre style="color: Green; overflow-wrap: inherit;">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //var data = { 
@@ -42,7 +58,7 @@
             "Libs/CodeMirror/addon/search/match-highlighter",
             "Libs/CodeMirror/addon/search/search",
             "Libs/CodeMirror/addon/search/searchcursor",
-        ], function (ChartScript) {
-            ChartScript.init($("#@(Model.Compose("Script"))"));
+        ], function (ChartScript, CodeMirror) {
+            ChartScript.init($("#@(Model.Compose("Script"))"), CodeMirror);
         }); 
     </script>

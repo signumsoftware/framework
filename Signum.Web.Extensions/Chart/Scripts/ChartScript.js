@@ -4,6 +4,7 @@ define(["require", "exports"], function(require, exports) {
         var changedDelay;
 
         var editor = CodeMirror.fromTextArea($textArea[0], {
+            highlightSelectionMatches: true,
             lineNumbers: true,
             matchBrackets: true,
             mode: "javascript",
@@ -20,10 +21,6 @@ define(["require", "exports"], function(require, exports) {
                         cm.setOption("fullScreen", false);
                 }
             }
-        });
-
-        editor.on("cursorActivity", function () {
-            editor.matchHighlight("CodeMirror-matchhighlight");
         });
 
         editor.on("change", function () {
@@ -46,9 +43,9 @@ define(["require", "exports"], function(require, exports) {
             if (number != null) {
                 clearTimeout(exceptionDelay);
                 if (hlLine != null)
-                    editor.setLineClass(hlLine, null, null);
+                    editor.removeLineClass(hlLine, null, null);
                 if (number != -1)
-                    hlLine = editor.setLineClass(number - 1, null, "exceptionLine");
+                    hlLine = editor.addLineClass(number - 1, null, "exceptionLine");
             }
         }
 

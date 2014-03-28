@@ -43,18 +43,6 @@ module ChartUtils {
 
             return result.toString();
         };
-
-        value.valueOf = function () {
-            var key = (this.key !== undefined ? this.key : this);
-
-            if (key === null || key === undefined)
-                return "null";
-
-            if (typeof (key) == 'string' && key.indexOf('/Date(') == 0)
-                return new Date(parseInt(key.substr(6))).valueOf();
-
-            return key;
-        };
     }
 
     export function getClickKeys(row, columns) {

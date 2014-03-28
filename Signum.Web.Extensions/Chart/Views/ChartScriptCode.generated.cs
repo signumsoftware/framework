@@ -74,7 +74,27 @@ Write(Html.ScriptCss(
             
             #line default
             #line hidden
-WriteLiteral("\r\n    <pre");
+WriteLiteral("\r\n    <style");
+
+WriteLiteral(" type=\"text/css\"");
+
+WriteLiteral(@">
+      .CodeMirror {
+        border: 1px solid #eee;
+      }
+      
+      span.CodeMirror-matchhighlight 
+      { 
+          background: #efefef
+      }
+      .CodeMirror-focused span.CodeMirror-matchhighlight 
+      { 
+          background: #efe7ff !important 
+      }
+      
+      .exceptionLine {background: #FFFF00 !important;}
+    </style>
+    <pre");
 
 WriteLiteral(" style=\"color: Green; overflow-wrap: inherit;\"");
 
@@ -100,7 +120,7 @@ WriteLiteral(@">
 WriteLiteral("    ");
 
             
-            #line 28 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 44 "..\..\Chart\Views\ChartScriptCode.cshtml"
 Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.FormGroupStyle = FormGroupStyle.None; }));
 
             
@@ -109,7 +129,7 @@ Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineT
 WriteLiteral("\r\n \r\n    <script>\r\n        require([\"");
 
             
-            #line 31 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 47 "..\..\Chart\Views\ChartScriptCode.cshtml"
              Write(ChartClient.ModuleScript);
 
             
@@ -129,17 +149,17 @@ WriteLiteral(@""",
             ""Libs/CodeMirror/addon/search/match-highlighter"",
             ""Libs/CodeMirror/addon/search/search"",
             ""Libs/CodeMirror/addon/search/searchcursor"",
-        ], function (ChartScript) {
+        ], function (ChartScript, CodeMirror) {
             ChartScript.init($(""#");
 
             
-            #line 46 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 62 "..\..\Chart\Views\ChartScriptCode.cshtml"
                              Write(Model.Compose("Script"));
 
             
             #line default
             #line hidden
-WriteLiteral("\"));\r\n        }); \r\n    </script>\r\n");
+WriteLiteral("\"), CodeMirror);\r\n        }); \r\n    </script>\r\n");
 
         }
     }
