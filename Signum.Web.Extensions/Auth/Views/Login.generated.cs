@@ -59,7 +59,7 @@ WriteLiteral(" class=\"container\"");
 
 WriteLiteral(">\r\n    <div");
 
-WriteLiteral(" class=\"col-md-offset-4\"");
+WriteLiteral(" class=\"col-sm-offset-4\"");
 
 WriteLiteral(">\r\n        <h2>Login</h2>\r\n        <p>\r\n");
 
