@@ -66,63 +66,17 @@ namespace Signum.Web.Extensions.Chart.Views
             
             #line 6 "..\..\Chart\Views\ChartScriptCode.cshtml"
 Write(Html.ScriptCss(
-    "~/Content/CodeMirror/codemirror.css",
-    "~/Content/CodeMirror/dialog.css",
-    "~/Content/CodeMirror/simple-hint.css"));
+    "~/Libs/CodeMirror/lib/codemirror.css",
+    "~/Libs/CodeMirror/addon/dialog/dialog.css",
+    "~/Libs/CodeMirror/addon/display/fullscreen.css",
+    "~/Libs/CodeMirror/addon/hint/show-hint.css"));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
+WriteLiteral("\r\n    <pre");
 
-            
-            #line 10 "..\..\Chart\Views\ChartScriptCode.cshtml"
-Write(Html.ScriptsJs(
-        "~/Scripts/CodeMirror/codemirror.js",
-        "~/Scripts/CodeMirror/javascript.js",
-        "~/Scripts/CodeMirror/formatting.js",
-        "~/Scripts/CodeMirror/searchcursor.js",
-        "~/Scripts/CodeMirror/show-hint.js",
-        "~/Scripts/CodeMirror/javascript-hint.js",
-        "~/Scripts/CodeMirror/match-highlighter.js",
-        "~/Scripts/CodeMirror/search.js",
-        "~/Scripts/CodeMirror/dialog.js",
-        "~/Scripts/CodeMirror/fullscreen.js"
-        ));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    <style");
-
-WriteLiteral(" type=\"text/css\"");
-
-WriteLiteral(@">
-      .CodeMirror {
-        border: 1px solid #eee;
-      }
-      
-      span.CodeMirror-matchhighlight 
-      { 
-          background: #efefef
-      }
-      .CodeMirror-focused span.CodeMirror-matchhighlight 
-      { 
-          background: #efe7ff !important 
-      }
-      
-      .exceptionLine {background: #FFFF00 !important;}
-      
-     .CodeMirror-fullscreen {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          height: auto;
-          z-index: 9;
-        }
-    </style>
-    <pre");
-
-WriteLiteral(" style=\"color: Green\"");
+WriteLiteral(" style=\"color: Green; overflow-wrap: inherit;\"");
 
 WriteLiteral(@">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
@@ -146,7 +100,7 @@ WriteLiteral(@">
 WriteLiteral("    ");
 
             
-            #line 62 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 28 "..\..\Chart\Views\ChartScriptCode.cshtml"
 Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.FormGroupStyle = FormGroupStyle.None; }));
 
             
@@ -155,16 +109,31 @@ Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineT
 WriteLiteral("\r\n \r\n    <script>\r\n        require([\"");
 
             
-            #line 65 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 31 "..\..\Chart\Views\ChartScriptCode.cshtml"
              Write(ChartClient.ModuleScript);
 
             
             #line default
             #line hidden
-WriteLiteral("\"], function (ChartScript) {\r\n            ChartScript.init($(\"#");
+WriteLiteral(@""",
+            ""Libs/CodeMirror/lib/codemirror"",
+            ""Libs/CodeMirror/mode/javascript/javascript"",
+            ""Libs/CodeMirror/addon/comment/comment"",
+            ""Libs/CodeMirror/addon/comment/continuecomment"",
+            ""Libs/CodeMirror/addon/dialog/dialog"",
+            ""Libs/CodeMirror/addon/display/fullscreen"",
+            ""Libs/CodeMirror/addon/edit/closebrackets"",
+            ""Libs/CodeMirror/addon/edit/matchbrackets"",
+            ""Libs/CodeMirror/addon/hint/show-hint"",
+            ""Libs/CodeMirror/addon/hint/javascript-hint"",
+            ""Libs/CodeMirror/addon/search/match-highlighter"",
+            ""Libs/CodeMirror/addon/search/search"",
+            ""Libs/CodeMirror/addon/search/searchcursor"",
+        ], function (ChartScript) {
+            ChartScript.init($(""#");
 
             
-            #line 66 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 46 "..\..\Chart\Views\ChartScriptCode.cshtml"
                              Write(Model.Compose("Script"));
 
             

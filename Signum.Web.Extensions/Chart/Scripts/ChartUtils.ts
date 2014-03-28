@@ -285,3 +285,8 @@ module D3 {
 declare module "ChartUtils" {
     export = ChartUtils;
 }
+
+
+declare module "colorbrewer" {
+
+}

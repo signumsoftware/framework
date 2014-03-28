@@ -1,8 +1,6 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 define(["require", "exports"], function(require, exports) {
-    
-
-    function init($textArea) {
+    function init($textArea, CodeMirror) {
         var changedDelay;
 
         var editor = CodeMirror.fromTextArea($textArea[0], {
@@ -21,16 +19,18 @@ define(["require", "exports"], function(require, exports) {
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
                 }
-            },
-            onCursorActivity: function () {
-                editor.matchHighlight("CodeMirror-matchhighlight");
-            },
-            onChange: function () {
-                editor.save();
-                if (opener != null && opener != undefined) {
-                    clearTimeout(changedDelay);
-                    changedDelay = setTimeout(updatePreview, 150);
-                }
+            }
+        });
+
+        editor.on("cursorActivity", function () {
+            editor.matchHighlight("CodeMirror-matchhighlight");
+        });
+
+        editor.on("change", function () {
+            editor.save();
+            if (opener != null && opener != undefined) {
+                clearTimeout(changedDelay);
+                changedDelay = setTimeout(updatePreview, 150);
             }
         });
 

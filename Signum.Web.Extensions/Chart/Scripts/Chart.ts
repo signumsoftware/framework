@@ -1,5 +1,4 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 /// <reference path="ChartUtils.ts"/>
 
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
@@ -10,6 +9,10 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 import ChartUtils = require("ChartUtils"); ChartUtils;
 import d3 = require("d3")
+
+import colorbrewer = require("colorbrewer")
+
+colorbrewer 
 
 export function openChart(prefix: string, url: string) {
     Finder.getFor(prefix).then(sc=>

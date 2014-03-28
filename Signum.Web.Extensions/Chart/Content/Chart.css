@@ -1,12 +1,17 @@
-﻿.sf-chartscript-columns .sf-line-detail-field
+﻿.sf-chartscript-columns .sf-repeater-element > legend
 {
-    border:none;
-    padding:0px;
+    float:right;
 }
 
-.sf-chartscript-columns .sf-repeater-element legend
+div.chart-column-parameters > fieldset
 {
-    float:left;
+    padding: 2px 10px;
+    margin: 2px;
+}
+
+div.chart-column-parameters > fieldset > legend
+{
+    font-size: 17px;
 }
 
 @media (min-width: 1200px)
@@ -78,41 +83,7 @@
     background-color: #81bffc;    
 }
 
-/*
-.sf-chart-tokens table
-{
-    width: 100%;    
-}
-.sf-chart-tokens td, .sf-chart-tokens th 
-{
-    text-align: left;
-    vertical-align: middle;   
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 5px;
-}
-.sf-chart-tokens th.sf-chart-token-narrow
-{  
-    padding-right: 20px;
-}
-.sf-chart-tokens th.sf-chart-token-wide
-{
-    width: 100%;    
-    padding-right: 5px;
-}
-.sf-chart-tokens td
-{
-    padding-right: 5px;    
-}
-.sf-chart-token td
-{
-    border-top: 1px solid #AAA;     
-}
-.sf-chart-token td:first-child
-{
-    font-weight: bold;    
-}
-*/
+
 
 .sf-chart-token-config td
 {
