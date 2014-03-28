@@ -291,11 +291,13 @@ namespace Signum.Web.Selenium
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
+            var prefix = this.PrefixUnderscore + "Temp";
+
             Selenium.Click(CreateButtonLocator);
 
-            Selenium.WaitForPageToLoad();
+            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, prefix));
 
-            return new PopupControl<T>(Selenium, Prefix);
+            return new PopupControl<T>(Selenium, prefix);
         }
 
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
@@ -309,8 +311,6 @@ namespace Signum.Web.Selenium
                 throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
 
             ChooserPopup.ChooseButton(Selenium, Prefix, typeof(T));
-
-            Selenium.WaitForPageToLoad();
 
             return new PopupControl<T>(Selenium, Prefix);
         }
