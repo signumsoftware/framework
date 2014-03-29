@@ -145,7 +145,7 @@ namespace Signum.Web
 
 
         public QuickLinkAction(Enum nameAndText, string url): this
-            (url, nameAndText.ToString(), nameAndText.NiceToString())
+            (nameAndText.ToString(), nameAndText.NiceToString(), url)
         {
         }
 
