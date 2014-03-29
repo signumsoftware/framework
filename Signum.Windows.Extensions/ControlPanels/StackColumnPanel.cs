@@ -7,19 +7,29 @@ using System.Windows;
 
 namespace Signum.Windows.ControlPanels
 {
-    
+
     public class StackColumnPanel : Panel
     {
-        public static readonly DependencyProperty ColumnProperty =
-            DependencyProperty.RegisterAttached("Column", typeof(int), typeof(StackColumnPanel), new FrameworkPropertyMetadata(0,FrameworkPropertyMetadataOptions.AffectsParentArrange));
-        public static int GetColumn(DependencyObject obj)
+        public static readonly DependencyProperty StartColumnProperty =
+            DependencyProperty.RegisterAttached("StartColumn", typeof(int), typeof(StackColumnPanel), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsParentArrange));
+        public static int GetStartColumn(DependencyObject obj)
         {
-            return (int)obj.GetValue(ColumnProperty);
+            return (int)obj.GetValue(StartColumnProperty);
+        }
+        public static void SetStartColumn(DependencyObject obj, int value)
+        {
+            obj.SetValue(StartColumnProperty, value);
         }
 
-        public static void SetColumn(DependencyObject obj, int value)
+        public static readonly DependencyProperty ColumnsProperty =
+            DependencyProperty.RegisterAttached("Columns", typeof(int), typeof(StackColumnPanel), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsParentArrange));
+        public static int GetColumns(DependencyObject obj)
         {
-            obj.SetValue(ColumnProperty, value);
+            return (int)obj.GetValue(ColumnsProperty);
+        }
+        public static void SetColumns(DependencyObject obj, int value)
+        {
+            obj.SetValue(ColumnsProperty, value);
         }
 
         public static readonly DependencyProperty RowProperty =
@@ -28,7 +38,6 @@ namespace Signum.Windows.ControlPanels
         {
             return (int)obj.GetValue(RowProperty);
         }
-
         public static void SetRow(DependencyObject obj, int value)
         {
             obj.SetValue(RowProperty, value);
@@ -36,15 +45,17 @@ namespace Signum.Windows.ControlPanels
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            foreach (UIElement item in this.InternalChildren)
+            foreach (UIElement item in this.InternalChildren.Cast<UIElement>())
             {
-                item.Measure(availableSize);
+                var cols = GetColumns(item);
+
+                item.Measure(new Size((availableSize.Width / 12) * cols, availableSize.Height));
             }
 
             Size maxSize = this.InternalChildren.Cast<UIElement>()
-                .GroupBy(a => GetColumn(a))
-                .Select(gr => new Size(gr.Max(a => a.DesiredSize.Width), gr.Sum(a => a.DesiredSize.Height)))
-                .Aggregate(new Size(), (ac, size) => new Size(ac.Width + size.Width, Math.Max(ac.Height, size.Height)));
+                .GroupBy(e => GetRow(e))
+                .Select(gr => new Size(gr.Max(a => a.DesiredSize.Width / Math.Max(1, GetColumns(a)) * 12), gr.Sum(a => a.DesiredSize.Height)))
+                .Aggregate(new Size(), (ac, size) => new Size(Math.Max(ac.Width, size.Width), ac.Height + size.Height));
 
             return maxSize;
         }
@@ -52,26 +63,26 @@ namespace Signum.Windows.ControlPanels
         protected override Size ArrangeOverride(Size finalSize)
         {
             var groups = this.InternalChildren.Cast<UIElement>()
-               .GroupBy(a => GetColumn(a))
+               .GroupBy(a => GetRow(a))
                .OrderBy(a => a.Key).ToList();
 
-            var colWidh = finalSize.Width / groups.Count;
-
-            double xPos = 0;
+            double yPos = 0;
             foreach (var gr in groups)
             {
-                double yPos = 0;
-
-                foreach (var item in gr.OrderBy(a=>GetRow(a)))
+                double maxRowHeight = 0;
+                foreach (var item in gr)
                 {
-                    item.Arrange(new Rect(
-                        new Point(xPos, yPos), 
-                        new Size(colWidh, item.DesiredSize.Height)));
+                    var cols = GetColumns(item);
+                    var startCol = GetStartColumn(item);
 
-                    yPos += item.DesiredSize.Height;
+                    item.Arrange(new Rect(
+                        new Point((finalSize.Width / 12) * startCol, yPos),
+                        new Size((finalSize.Width / 12) * cols, item.DesiredSize.Height)));
+
+                    maxRowHeight = Math.Max(maxRowHeight, item.DesiredSize.Height);
                 }
 
-                xPos += colWidh;
+                yPos += maxRowHeight;
             }
 
             return finalSize;

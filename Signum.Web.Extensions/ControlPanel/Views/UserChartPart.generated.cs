@@ -222,29 +222,28 @@ WriteLiteral("\r\n            </div>\r\n            <script");
 
 WriteLiteral(" type=\"text/javascript\"");
 
-WriteLiteral(">\r\n                var findOptions = ");
+WriteLiteral(">\r\n                require([\"");
 
             
             #line 38 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                              Write(MvcHtmlString.Create(uc.ToJS().ToString()));
+                     Write(ChartClient.Module);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                 require([\"");
+WriteLiteral("\"], function (Chart) {\r\n                     var findOptions = ");
 
             
             #line 39 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                      Write(ChartClient.Module);
+                                   Write(MvcHtmlString.Create(uc.ToJS().ToString()));
 
             
             #line default
             #line hidden
-WriteLiteral("\"], function (Chart) {\r\n                     var chartBuilder = new Chart.ChartBu" +
-"ilder($(\'#");
+WriteLiteral(";\r\n\r\n                     var chartBuilder = new Chart.ChartBuilder($(\'#");
 
             
-            #line 40 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 41 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                                               Write(containerId);
 
             
@@ -253,7 +252,7 @@ WriteLiteral("\"], function (Chart) {\r\n                     var chartBuilder =
 WriteLiteral("\'), $.extend({ prefix: \'");
 
             
-            #line 40 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 41 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                                                                                   Write(crc.Prefix);
 
             
@@ -262,13 +261,13 @@ WriteLiteral("\'), $.extend({ prefix: \'");
 WriteLiteral("\' }, findOptions));\r\n\r\n");
 
             
-            #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 43 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                      
             
             #line default
             #line hidden
             
-            #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 43 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                       if (!tc.Value.ShowData)
                      {
 
@@ -277,12 +276,12 @@ WriteLiteral("\' }, findOptions));\r\n\r\n");
             #line hidden
 WriteLiteral("                         ");
 
-WriteLiteral("\r\n                     chartBuilder.reDraw();\r\n                     ");
+WriteLiteral("\r\n                     chartBuilder.reDraw();\r\n                        ");
 
 WriteLiteral("\r\n");
 
             
-            #line 47 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 48 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                      }
 
             
@@ -290,35 +289,35 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("                 });\r\n            </script>\r\n        </div>\r\n        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2205), Tuple.Create("\"", 2242)
+WriteAttribute("id", Tuple.Create(" id=\"", 2215), Tuple.Create("\"", 2252)
             
-            #line 51 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2210), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
+            #line 52 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 2220), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
             
             #line default
             #line hidden
-, 2210), false)
+, 2220), false)
 );
 
 WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"sf-chart-container\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2289), Tuple.Create("\"", 2344)
-, Tuple.Create(Tuple.Create("", 2297), Tuple.Create("display:", 2297), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2299), Tuple.Create("\"", 2354)
+, Tuple.Create(Tuple.Create("", 2307), Tuple.Create("display:", 2307), true)
             
-            #line 52 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2305), Tuple.Create<System.Object, System.Int32>(tc.Value.ShowData ? "none" : "block"
+            #line 53 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 2315), Tuple.Create<System.Object, System.Int32>(tc.Value.ShowData ? "none" : "block"
             
             #line default
             #line hidden
-, 2305), false)
+, 2315), false)
 );
 
 WriteLiteral(" \r\n                    data-open-url=\"");
 
             
-            #line 53 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 54 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.Prefix)));
 
             
@@ -329,7 +328,7 @@ WriteLiteral("\"");
 WriteLiteral(" \r\n                    data-fullscreen-url=\"");
 
             
-            #line 54 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 55 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                      Write(Url.Action<ChartController>(cc => cc.FullScreen(crc.Prefix)));
 
             
@@ -340,7 +339,7 @@ WriteLiteral("\"");
 WriteLiteral("\r\n                    data-json=\"");
 
             
-            #line 55 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 56 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                           Write(Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString());
 
             
@@ -351,8 +350,7 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 59 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-    
+            #line 60 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                      if (tc.Value.ShowData)
                      {
                          ViewData[ViewDataKeys.Results] = resultTable;

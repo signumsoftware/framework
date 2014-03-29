@@ -179,7 +179,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 31 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-         foreach (var part in gr)
+         foreach (var part in gr.OrderBy(a=>a.StartColumn))
         {
             var offset = part.StartColumn - lastEnd;
 
@@ -188,23 +188,23 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 923), Tuple.Create("\"", 1020)
-, Tuple.Create(Tuple.Create("", 931), Tuple.Create("part-control-panel", 931), true)
-, Tuple.Create(Tuple.Create(" ", 949), Tuple.Create("col-sm-", 950), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 949), Tuple.Create("\"", 1046)
+, Tuple.Create(Tuple.Create("", 957), Tuple.Create("part-control-panel", 957), true)
+, Tuple.Create(Tuple.Create(" ", 975), Tuple.Create("col-sm-", 976), true)
             
             #line 34 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 957), Tuple.Create<System.Object, System.Int32>(part.Columns
+, Tuple.Create(Tuple.Create("", 983), Tuple.Create<System.Object, System.Int32>(part.Columns
             
             #line default
             #line hidden
-, 957), false)
+, 983), false)
             
             #line 34 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-, Tuple.Create(Tuple.Create(" ", 970), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
+, Tuple.Create(Tuple.Create(" ", 996), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
             
             #line default
             #line hidden
-, 971), false)
+, 997), false)
 );
 
 WriteLiteral(">\r\n");

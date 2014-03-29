@@ -28,7 +28,7 @@
             {
                 var lastEnd = 0;
     <div class="row row-control-panel">
-        @foreach (var part in gr)
+        @foreach (var part in gr.OrderBy(a=>a.StartColumn))
         {
             var offset = part.StartColumn - lastEnd;
             <div class="part-control-panel col-sm-@part.Columns @(offset == 0 ? null : "col-sm-offset-" + offset)">

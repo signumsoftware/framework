@@ -8,31 +8,32 @@
              xmlns:secp="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-        <ItemsControl ItemsSource="{Binding Parts}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <swcp:StackColumnPanel/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemContainerStyle>
-                <Style TargetType="{x:Type ContentPresenter}">
-                    <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
-                    <Setter Property="swcp:StackColumnPanel.Row" Value="{Binding Row}"/>
-                </Style>
-            </ItemsControl.ItemContainerStyle>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type secp:PanelPartDN}">
-                    <GroupBox Style="{StaticResource EntityGroupBox}" Margin="8" Loaded="GroupBox_Loaded">                      
-                        <GroupBox.Header>
-                            <TextBlock Text="{Binding}" x:Name="tb"/>
-                        </GroupBox.Header>
-                        <ContentControl Content="{Binding Content}">
-                            <ContentControl.ContentTemplateSelector>
-                                <swcp:ControlPanelViewDataTemplateSelector/>
-                            </ContentControl.ContentTemplateSelector>
-                        </ContentControl>
-                    </GroupBox>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+    <ItemsControl ItemsSource="{Binding Parts}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <swcp:StackColumnPanel/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemContainerStyle>
+            <Style TargetType="{x:Type ContentPresenter}">
+                <Setter Property="swcp:StackColumnPanel.StartColumn" Value="{Binding StartColumn}"/>
+                <Setter Property="swcp:StackColumnPanel.Columns" Value="{Binding Columns}"/>
+                <Setter Property="swcp:StackColumnPanel.Row" Value="{Binding Row}"/>
+            </Style>
+        </ItemsControl.ItemContainerStyle>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type secp:PanelPartDN}">
+                <GroupBox Style="{StaticResource EntityGroupBox}" Margin="8" Loaded="GroupBox_Loaded">
+                    <GroupBox.Header>
+                        <TextBlock Text="{Binding}" x:Name="tb"/>
+                    </GroupBox.Header>
+                    <ContentControl Content="{Binding Content}">
+                        <ContentControl.ContentTemplateSelector>
+                            <swcp:ControlPanelViewDataTemplateSelector/>
+                        </ContentControl.ContentTemplateSelector>
+                    </ContentControl>
+                </GroupBox>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
 </UserControl>

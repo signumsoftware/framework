@@ -35,15 +35,16 @@
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>
             <script type="text/javascript">
-                var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()))
-                 require(["@ChartClient.Module"], function (Chart) {
+                require(["@ChartClient.Module"], function (Chart) {
+                     var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()));
+
                      var chartBuilder = new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.Prefix' }, findOptions));
 
                      @if (!tc.Value.ShowData)
                      {
                          <text>
                      chartBuilder.reDraw();
-                     </text>
+                        </text>
                      }
                  });
             </script>
@@ -56,7 +57,6 @@
             </div>
         </div>
     </div>
-    
                      if (tc.Value.ShowData)
                      {
                          ViewData[ViewDataKeys.Results] = resultTable;
