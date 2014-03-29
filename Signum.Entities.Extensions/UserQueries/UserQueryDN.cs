@@ -430,12 +430,8 @@ namespace Signum.Entities.UserQueries
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? token.TryCC(t => t.TryToken).TryCC(tt => tt.NiceName()); }
-            set
-            {
-                var name = value == Token.TryCC(t => t.TryToken).TryCC(tt => tt.NiceName()) ? null : value;
-                Set(ref displayName, name, () => DisplayName);
-            }
+            get { return displayName.DefaultText(null); }
+            set { Set(ref displayName, value, () => DisplayName); }
         }
 
         int index;
@@ -654,7 +650,13 @@ namespace Signum.Entities.UserQueries
         {
             var ideal = (from cd in qd.Columns
                          where !cd.IsEntity
-                         select new Column(cd, qd.QueryName)).ToList();
+                         select cd).ToList();
+
+            foreach (var item in current)
+            {
+                if(item.Token.NiceName() == item.DisplayName)
+                    item.DisplayName = null;
+            }
 
             if (current.Count < ideal.Count)
             {
@@ -662,10 +664,10 @@ namespace Signum.Entities.UserQueries
                 int j = 0;
                 for (int i = 0; i < ideal.Count; i++)
                 {
-                    if (j < current.Count && current[j].Equals(ideal[i]))
+                    if (j < current.Count && current[j].Similar(ideal[i]))
                         j++;
                     else
-                        toRemove.Add(ideal[i]);
+                        toRemove.Add(new Column(ideal[i], qd.QueryName));
                 }
 
                 if (toRemove.Count + current.Count == ideal.Count)
@@ -673,7 +675,7 @@ namespace Signum.Entities.UserQueries
             }
             else
             {
-                if (current.Zip(ideal).All(t => t.Item1.Equals(t.Item2)))
+                if (current.Zip(ideal).All(t => t.Item1.Similar(t.Item2)))
                     return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN
                     {
                         Token = new QueryTokenDN(c.Token),
@@ -688,6 +690,12 @@ namespace Signum.Entities.UserQueries
                 DisplayName = c.DisplayName
             }).ToMList());
         }
+
+        static bool Similar(this Column column, ColumnDescription other)
+        {
+            return column.Token is ColumnToken && ((ColumnToken)column.Token).Column.Name == other.Name && column.DisplayName == null;
+        }
+
     }
 
     public enum UserQueryMessage

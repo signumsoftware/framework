@@ -64,25 +64,26 @@ namespace Signum.Web.UserQueries
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
-                            .CreateProperty(a=>a.DisplayName)
                             .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .CreateProperty(a=>a.DisplayName)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
-                            .CreateProperty(a=>a.OrderType)
                             .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .CreateProperty(a=>a.OrderType)
+                            
                     },
                 });
 
