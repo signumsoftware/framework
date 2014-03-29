@@ -34,6 +34,9 @@ define(["require", "exports"], function(require, exports) {
                 return item.label;
             },
             updater: function (item, e) {
+                if (e.keyCode && e.keyCode == 9)
+                    return item.cleanText;
+
                 if (item.url) {
                     if (e.ctrlKey)
                         window.open(item.url);

@@ -29,7 +29,10 @@ export function initialize(omniboxId: string, url: string) {
         sorter: items => items,
         matcher: item => true,
         highlighter: item => item.label,
-        updater: (item, e)  => {
+        updater: (item, e) => {
+            if ((<any>e).keyCode && (<any>e).keyCode == 9) //Tab
+                return item.cleanText;
+
             if (item.url) {
                 if ((<MouseEvent>e).ctrlKey)
                     window.open(item.url);
