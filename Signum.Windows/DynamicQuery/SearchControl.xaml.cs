@@ -401,6 +401,8 @@ namespace Signum.Windows
                 }
             }
 
+            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString(entityColumn.Implementations.Value.IsByAll ? "[All]" : entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
                            Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
