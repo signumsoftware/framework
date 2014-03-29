@@ -131,10 +131,11 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 var colName = m.Groups["token"].Value;
-                var displayCapture = m.Groups["name"].Captures;
-                string displayName = displayCapture.Count > 0 ? FindOptionsModelBinder.DecodeValue(m.Groups["name"].Value) : colName;
+                string displayName = m.Groups["name"].Success ? FindOptionsModelBinder.DecodeValue(m.Groups["name"].Value) : null;
 
-                return new Column(QueryUtils.Parse(colName, description, canAggregate), displayName);
+                var token = QueryUtils.Parse(colName, description, canAggregate);
+
+                return new Column(token, displayName ?? token.NiceName());
             }).ToList();
         }
     }
