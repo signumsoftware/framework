@@ -395,6 +395,46 @@ WriteLiteral("\r\n        </div>\r\n");
 
             
             #line 68 "..\..\Chart\Views\UserChart.cshtml"
+        
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <script");
+
+WriteLiteral(" type=\"text/javascript\"");
+
+WriteLiteral(">\r\n            $(function(){\r\n                require([\"");
+
+            
+            #line 71 "..\..\Chart\Views\UserChart.cshtml"
+                     Write(ChartClient.Module);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"], function(Chart) {\r\n                    new Chart.ChartBuilder($(\"#");
+
+            
+            #line 72 "..\..\Chart\Views\UserChart.cshtml"
+                                          Write(uc.Compose("sfChartBuilderContainer"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"), ");
+
+            
+            #line 72 "..\..\Chart\Views\UserChart.cshtml"
+                                                                                    Write(MvcHtmlString.Create(uc.Value.ToJS().ToString()));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(").ready();\r\n                });\r\n            });\r\n        </script>\r\n");
+
+            
+            #line 76 "..\..\Chart\Views\UserChart.cshtml"
     }
 
             
