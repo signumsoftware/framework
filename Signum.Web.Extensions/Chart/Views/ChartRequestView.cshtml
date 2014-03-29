@@ -43,8 +43,10 @@
         @Html.Partial(ChartClient.ChartBuilderView, Model.Value)
     </div>
     <script type="text/javascript">
-        var findOptions = @(MvcHtmlString.Create(Model.Value.ToJS().ToString()))
-        require(["@ChartClient.Module"], function (Chart) { new Chart.ChartBuilder($('#@Model.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@Model.Prefix' }, findOptions)); }); 
+        require(["@ChartClient.Module"], function (Chart) {
+            var findOptions = @(MvcHtmlString.Create(Model.Value.ToJS().ToString()));
+            new Chart.ChartBuilder($('#@Model.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@Model.Prefix' }, findOptions));
+        }); 
     </script>
     <div class="sf-query-button-bar">
         <button type="submit" class="sf-query-button sf-chart-draw btn btn-primary" data-icon="ui-icon-refresh" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.Prefix)))">@ChartMessage.Chart_Draw.NiceToString()</button>

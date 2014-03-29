@@ -61,6 +61,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Framework\Dependencies\Json.Net\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -1026,7 +1029,7 @@
     <EmbeddedResource Include="Chart\Html\d3.v3.min.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Chart\Html\jquery-1.11.0.js" />
+    <EmbeddedResource Include="Chart\Html\jquery-1.11.0.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
