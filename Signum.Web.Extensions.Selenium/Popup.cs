@@ -140,7 +140,7 @@ namespace Signum.Web.Selenium
         public static void ChooseButton(ISelenium Selenium, string prefix, string value)
         {
             Selenium.Click("jq=#" + Popup.PopupId(prefix) + " button[data-value='" + value + "']");
-            Selenium.WaitElementDisapear(Popup.PopupId(prefix));
+            Selenium.Wait(() => !IsChooser(Selenium, prefix));
         }
     }
 
