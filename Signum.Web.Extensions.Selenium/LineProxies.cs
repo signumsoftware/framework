@@ -256,11 +256,15 @@ namespace Signum.Web.Selenium
             WaitChanges(() =>
             {
                 Selenium.Type(autoCompleteLocator, lite.Id.ToString());
-                Selenium.FireEvent(autoCompleteLocator, "input");
+                Selenium.FireEvent(autoCompleteLocator, "keyup");
 
-                Selenium.WaitElementPresent("jq=.tt-dataset-autocmplete:visible");
-                string locator = "jq=.tt-dataset-autocmplete:visible p[data-type='{0}'][data-id={1}]".Formato(TypeLogic.GetCleanName(lite.EntityType), lite.Id);
-                Selenium.Click(locator);
+                var listLocator = "jq=ul.typeahead.dropdown-menu:visible";
+
+                Selenium.WaitElementPresent(listLocator);
+                string itemLocator = listLocator + " span[data-type='{0}'][data-id={1}]".Formato(TypeLogic.GetCleanName(lite.EntityType), lite.Id);
+
+                Selenium.MouseOver(itemLocator);
+                Selenium.Click(itemLocator);
 
             }, "autocomplete selection");
         }
