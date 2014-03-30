@@ -1086,16 +1086,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
 
                 this.setupAutocomplete($txt);
-
-                var inputGroup = this.shownButton.parent();
-
-                var typeahead = $txt.parent();
-
-                var parts = typeahead.children().addClass("typeahead-parts").detach();
-
-                parts.insertBefore(this.shownButton);
-
-                typeahead.remove();
             }
         };
 
