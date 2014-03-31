@@ -13,20 +13,16 @@
 @using (var cpt = Html.TypeContext<ChartPaletteModel>())
 {
     @Html.HiddenRuntimeInfo(cpt, cp => cp.Type)
-    <table class="sf-search-results sf-chart-color-table">
+    <table class="table" style="width:auto">
         <thead>
             <tr>
-                <th class="ui-state-default">
-                    Color
+                <th>Color
                 </th>
-                <th class="ui-state-default">
-                    Hex
+                <th>Hex
                 </th>
-                <th class="ui-state-default">
-                    Id
+                <th>Id
                 </th>
-                <th class="ui-state-default">
-                    Text
+                <th>Text
                 </th>
             </tr>
         </thead>
@@ -39,7 +35,11 @@
                         </div>
                     </td>
                     <td>
-                        #@Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.TryCC(c => c.ToColor().ToHtml().Substring(1)), new { maxlength = 6, size = 6, @class = "sf-chart-color-input" })
+                        <div class="input-group">
+                            <span class="input-group-addon">#</span>
+                            @Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.TryCC(c => c.ToColor().ToHtml().Substring(1)),
+                              new { maxlength = 6, size = 6, @class = "sf-chart-color-input form-control" })
+                        </div>
                         @Html.HiddenRuntimeInfo(clc, cl => cl.Related)
                     </td>
                     <td>
@@ -52,4 +52,8 @@
             }
         </tbody>
     </table>
+      
+    <script>
+        @(new JsFunction(ChartColorClient.Module, "init"))
+    </script>
 }

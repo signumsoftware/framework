@@ -53,9 +53,9 @@ namespace Signum.Engine.Chart
 
             dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
 
-            double[] bright = dic.Count < 18 ? new double[] { .60 } :
-                            dic.Count < 72 ? new double[] { .90, .60 } :
-                            new double[] { .90, .60, .30 };
+            double[] bright = dic.Count < 18 ? new double[] { 1 } :
+                            dic.Count < 72 ? new double[] { 1, .60 } :
+                            new double[] { 1, .60, .30 };
 
 
 
