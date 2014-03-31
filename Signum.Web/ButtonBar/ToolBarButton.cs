@@ -158,7 +158,7 @@ namespace Signum.Web
             if (Tooltip.HasText())
             {
                 result.Attr("data-toggle", "tooltip");
-                result.Attr("data-placement", "bottom");
+                result.Attr("data-placement", "left");
                 result.Attr("title", Tooltip);
             }
 
