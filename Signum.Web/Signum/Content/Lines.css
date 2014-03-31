@@ -223,6 +223,13 @@ ul.nav-tabs
     width: 100%;
     vertical-align: baseline;
 }
+
+/* table non-fluid*/
+
+.table-nonfluid {
+   width: auto;
+}
+
 /* disabled menu items*/
 
 ul.dropdown-menu > li > a[disabled],
