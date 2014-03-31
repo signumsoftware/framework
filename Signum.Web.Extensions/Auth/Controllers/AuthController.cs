@@ -197,20 +197,26 @@ namespace Signum.Web.Auth
 
             using (AuthLogic.Disable())
             {
-                var user = ResetPasswordRequestLogic.GetUserByEmail(email);
-                Func<ResetPasswordRequestDN, string> url = (ResetPasswordRequestDN rpr) => HttpContext.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Action<AuthController>(ac => ac.ResetPasswordCode(email, rpr.Code));
-                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, url);
+                UserDN user = ResetPasswordRequestLogic.GetUserByEmail(email);
+
+                if(user == null)
+                {
+                    ModelState.AddModelError("email", AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
+                    return View(AuthClient.ResetPasswordView);
+                }
+
+                ResetPasswordRequestDN rpr = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+                string url = HttpContext.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Action<AuthController>(ac => ac.ResetPasswordCode(email, rpr.Code));
+                new ResetPasswordRequestMail { Entity = rpr, Url = url }.SendMailAsync();
             }
 
-            ViewData["email"] = email;
+            TempData["email"] = email;
             return RedirectToAction("ResetPasswordSend");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSend()
         {
-            ViewData["Message"] = AuthMessage.ResetPasswordCodeHasBeenSent.NiceToString().Formato(ViewData["email"]);
-
             return View(AuthClient.ResetPasswordSendView);
         }
 
