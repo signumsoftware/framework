@@ -9,13 +9,13 @@
     @Model.Index.ToString())
 </h2>
 @Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy(false))
-@Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(Model.FullIndex()))
+@Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(Model.FullIndex()), new  { @class = "btn btn-default pull-right" })
 <br />
 <h3>Breakdown</h3>
 <div class="sf-profiler-chart" data-detail-url="@Url.Action("HeavyRoute", "Profiler")">
 </div>
 <br />
-<table class="sf-search-results">
+<table class="table table-nonfluid">
     <tr>
         <th>Role
         </th>
@@ -34,11 +34,7 @@
 <br />
 <h3>Aditional Data</h3>
 <div>
-    <pre>
-    <code>
-        @Model.AdditionalData
-    </code>
-    </pre>
+    <pre><code>@Model.AdditionalData</code></pre>
 </div>
 <br />
 <h3>StackTrace</h3>
@@ -48,7 +44,7 @@
 }
 else
 {
-    <table class="sf-search-results">
+    <table class="table table-condensed">
         <thead>
             <tr>
                 <th>Type

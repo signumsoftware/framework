@@ -4,63 +4,73 @@
     .task
     {
         border-bottom: 1px solid #ddd;
+        list-style: none;
     }
-    .task .processName
-    {
-        font-size: 150%;
-    }
-    
-    .task .numTimes
-    {
-        color: #666;
-    }
-    .task .max, .task .med, .task .min, .task .last
-    {
-        display: block;
-        height: 10px;
-        float: left;
-        margin-right: 10px;
-        margin-left: 0px;
-    }
-    
-    .task .max
-    {
-        background: #b22222;
-    }
-    .task .med
-    {
-        background: #ff7722;
-    }
-    .task .min
-    {
-        background: #ffd700;
-    }
-    .task .last
-    {
-        background: #b27aff repeat-x;
-    }
+
+        .task .processName
+        {
+            font-size: 150%;
+        }
+
+        .task .numTimes
+        {
+            color: #666;
+        }
+
+        .task .max, .task .med, .task .min, .task .last
+        {
+            display: block;
+            height: 10px;
+            float: left;
+            margin-right: 10px;
+            margin-left: 0px;
+        }
+
+        .task .max
+        {
+            background: #b22222;
+        }
+
+        .task .med
+        {
+            background: #ff7722;
+        }
+
+        .task .min
+        {
+            background: #ffd700;
+        }
+
+        .task .last
+        {
+            background: #b27aff repeat-x;
+        }
+
     .leftBorder
     {
         border-left: 1px solid #eee;
     }
+
     #tasks
     {
         width: 1200px;
     }
-    
-    #tasks .left
-    {
-        float: left;
-    }    
-    
+
+        #tasks .left
+        {
+            float: left;
+        }
+
     .sf-search-results .percentile0
     {
         background-color: #99CCFF;
     }
+
     .sf-search-results .percentile1
     {
         background-color: #fff;
     }
+
     .sf-search-results .percentile2
     {
         background-color: #FFCCCC;
@@ -70,21 +80,22 @@
 @{
     ViewBag.Title = "Times";
 }
-@Html.ActionLink("Clear", "ClearTimes")
+<h3>Times</h3>
+@Html.ActionLink("Clear", (Signum.Web.Profiler.ProfilerController a) => a.ClearTimes(), new { @class = "btn btn-default" })
 <ul id="tasks">
     @{ 
-       int maxWitdh = 600;
-       long maxValue = maxWitdh;
-       if (TimeTracker.IdentifiedElapseds.Count > 0)
-       {
-           maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).FirstEx().Value.MaxTime;
-       }
+        int maxWitdh = 600;
+        long maxValue = maxWitdh;
+        if (TimeTracker.IdentifiedElapseds.Count > 0)
+        {
+            maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).FirstEx().Value.MaxTime;
+        }
 
-       double ratio = 1;
-       if (maxValue != 0) 
-       { 
-           ratio = maxWitdh / (double)maxValue;
-       }
+        double ratio = 1;
+        if (maxValue != 0)
+        {
+            ratio = maxWitdh / (double)maxValue;
+        }
     }
     @foreach (KeyValuePair<string, TimeTrackerEntry> pair in TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.Average))
     {
@@ -115,8 +126,7 @@
                             @if (pair.Value.Count == 1)
                             {
                                 <tr>
-                                    <td width="40">
-                                        Single:
+                                    <td width="40">Single:
                                     </td>
                                     <td class="leftBorder">
                                         <span class="med" style="width:@((int)(pair.Value.Average * ratio))px"></span>@pair.Value.LastTime
@@ -127,8 +137,7 @@
                             else
                             {
                                 <tr>
-                                    <td width="40">
-                                        Max
+                                    <td width="40">Max
                                     </td>
                                     <td class="leftBorder">
                                         <span class="max" style="width:@((int)(pair.Value.MaxTime * ratio))px"></span>@pair.Value.MaxTime
@@ -136,8 +145,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td width="40">
-                                        Average
+                                    <td width="40">Average
                                     </td>
                                     <td class="leftBorder">
                                         <span class="med" style="width:@((int)(pair.Value.Average * ratio))px"></span>@pair.Value.Average
@@ -145,8 +153,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td width="40">
-                                        Min
+                                    <td width="40">Min
                                     </td>
                                     <td class="leftBorder">
                                         <span class="min" style="width:@((int)(pair.Value.MinTime * ratio))px"></span>@pair.Value.MinTime
@@ -154,8 +161,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td width="40">
-                                        Last
+                                    <td width="40">Last
                                     </td>
                                     <td class="leftBorder">
                                         <span class="last" style="width:@((int)(pair.Value.LastTime * ratio))px"></span>@pair.Value.LastTime

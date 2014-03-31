@@ -5,18 +5,24 @@
     bool orderByTime = ViewBag.OrderByTime;
 }
 <h2>@ViewData[ViewDataKeys.Title]</h2>
-<div>
-    @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
-       @Html.ActionLink(orderByTime ?  "Order by ID": "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))
+<div class="row">
+    <div class="col-sm-6">
+        @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+        <div>
+              @Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))
     @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
-    @Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null))
-    @using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
-    {
-        <input type="file" name="xmlFile" />
-        <input type="submit" value="Upload" class="sf-button" />
-    }
-</div>
+        </div>
+    </div>
 
+    <div class="col-sm-6" style="text-align:right">
+        @Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null), new { @class = "btn btn-default" })
+        @using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
+        {
+            <input type="file" name="xmlFile" style="display:inline"/>
+            <input type="submit" value="Upload" class="btn btn-default" />
+        }
+    </div>
+</div>
 
 @if (Model != null)
 {
@@ -32,6 +38,6 @@
 <script language="javascript">
 
     $(function () {
-         @(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
+        @(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
     });
 </script>
