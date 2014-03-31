@@ -24,13 +24,31 @@ namespace Signum.Web
     {
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html)
         {
-            return new HtmlTag("div", "sfGlobalValidationSummary")
-            .ToHtml();
+            return new HtmlTag("div", "sfGlobalValidationSummary").ToHtml();
         }
 
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
             return new HtmlTag("div", context.Compose("sfGlobalValidationSummary")).ToHtml();
+        }
+
+        public static MvcHtmlString ValudationSummaryStatic(this HtmlHelper html)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div", "sfGlobalValidationSummary")))
+            {
+                if (html.ViewData.ModelState.Any(x => x.Value.Errors.Any()))
+                {
+                    using (sb.Surround(new HtmlTag("ul").Class("validaton-summary alert alert-danger")))
+                    {
+                        foreach (var str in html.ViewData.ModelState.SelectMany(a => a.Value.Errors))
+                        {
+                            sb.Add(new HtmlTag("li").SetInnerText(str.ErrorMessage));
+                        }
+                    }
+                }
+            }
+            return sb.ToHtml();
         }
 
         public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)

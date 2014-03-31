@@ -424,14 +424,14 @@ DECLARE @sql nvarchar(255)
 
 declare cur cursor fast_forward for 
 select distinct cu.constraint_schema, cu.table_name, cu.constraint_name 
-from {0}information_schema.table_constraints tc 
-join {0}information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
-join {0}information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
+from information_schema.table_constraints tc 
+join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
+join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
 open cur 
     fetch next from cur into @schema, @tbl, @constraint 
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'ALTER TABLE {0}[' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl, @constraint 
     end 
@@ -444,12 +444,12 @@ DECLARE @sql nvarchar(255)
  
 declare cur cursor fast_forward for 
 select distinct table_schema, table_name
-from {0}information_schema.tables where table_type = 'BASE TABLE'
+from information_schema.tables where table_type = 'BASE TABLE'
 open cur 
     fetch next from cur into @schema, @tbl
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP TABLE {0}[' + @schema + '].[' + @tbl + '];'
+        select @sql = 'DROP TABLE [' + @schema + '].[' + @tbl + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl
     end 
@@ -462,12 +462,12 @@ DECLARE @sql nvarchar(255)
 
 declare cur cursor fast_forward for 
 select distinct table_schema, table_name
-from {0}information_schema.tables where table_type = 'VIEW'
+from information_schema.tables where table_type = 'VIEW'
 open cur 
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW {0}[' + @schema + '].[' + @view + '];'
+        select @sql = 'DROP VIEW [' + @schema + '].[' + @view + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @view
     end 
@@ -480,12 +480,12 @@ DECLARE @sql nvarchar(255)
 
 declare cur cursor fast_forward for 
 select routine_schema, routine_name, routine_type
-from {0}information_schema.routines
+from information_schema.routines
 open cur 
     fetch next from cur into @schema, @proc, @type
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP '+ @type +' {0}[' + @schema + '].[' + @proc + '];'
+        select @sql = 'DROP '+ @type +' [' + @schema + '].[' + @proc + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @proc, @type
     end 
@@ -494,13 +494,19 @@ deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
-            var name = databaseName == null ? null : databaseName.ToString() + ".";
-
             return SqlPreCommand.Combine(Spacing.Double,
-                new SqlPreCommandSimple(RemoveAllProceduresScript.Formato(name)),
-                new SqlPreCommandSimple(RemoveAllViewsScript.Formato(name)),
-                new SqlPreCommandSimple(RemoveAllConstraintsScript.Formato(name)),
-                new SqlPreCommandSimple(RemoveAllTablesScript.Formato(name)));
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)));
+        }
+
+        static string Use(DatabaseName databaseName, string script)
+        {
+            if (databaseName == null)
+                return script;
+
+            return "use " + databaseName + "\r\n" + script; 
         }
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)

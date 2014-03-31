@@ -1140,16 +1140,6 @@ export class EntityStrip extends EntityList {
                 term => ({ types: this.options.types.join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
-
-            var inputGroup = this.shownButton.parent();
-
-            var typeahead = $txt.parent();
-
-            var parts = typeahead.children().addClass("typeahead-parts").detach();
-
-            parts.insertBefore(this.shownButton);
-
-            typeahead.remove();
         }
     }
 

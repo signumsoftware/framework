@@ -212,7 +212,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.openPopup = openPopup;
 
     function markCells(prefix) {
-        $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
+        $("tr.active").addClass("sf-entity-ctxmenu-success");
         exports.notifyExecuted();
     }
     exports.markCells = markCells;

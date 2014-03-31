@@ -52,9 +52,6 @@ namespace Signum.Web
                                 { "autocomplete", "off" }, 
                             };
 
-                            if (entityStrip.AutocompleteUrl.HasText())
-                                htmlAttr.Add("data-url", entityStrip.AutocompleteUrl);
-
                             sb.AddLine(helper.TextBox(
                                 entityStrip.Compose(EntityBaseKeys.ToStr),
                                 null,

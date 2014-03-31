@@ -55,14 +55,16 @@ namespace Signum.Web
             if (Html != null)
                 a.InnerHtml(Html);
 
-            if (Href.HasText())
-                a.Attr("href", Href);
-
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled && (OnClick != null || Href.HasText()))
-                a.Attr("onclick", OnClick.ToString());
+            if (Enabled)
+            {
+                if (OnClick != null)
+                    a.Attr("onclick", OnClick.ToString());
+
+                a.Attr("href", Href.DefaultText("#"));
+            }
             else
                 a.Attr("disabled", "disabled");
 
@@ -158,7 +160,7 @@ namespace Signum.Web
             if (Tooltip.HasText())
             {
                 result.Attr("data-toggle", "tooltip");
-                result.Attr("data-placement", "bottom");
+                result.Attr("data-placement", "left");
                 result.Attr("title", Tooltip);
             }
 

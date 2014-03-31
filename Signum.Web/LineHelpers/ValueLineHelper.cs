@@ -108,7 +108,11 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
-                return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
+
+                if (valueLine.UnitText.HasText())
+                    return new HtmlTag("p").Id(valueLine.Compose(StaticValue)).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
+                else
+                    return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))

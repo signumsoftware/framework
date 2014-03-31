@@ -1,27 +1,26 @@
 ﻿@using Signum.Entities.Basics
 @using (var e = Html.TypeContext<ExceptionDN>())
 {
-    <table>
-        <tr>
-            <td>
-                @Html.ValueLine(e, f => f.Environment)
-                @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
-                @Html.EntityLine(e, f => f.User)
-                @Html.ValueLine(e, f => f.Version)
-                @Html.ValueLine(e, f => f.ThreadId)
-                @Html.ValueLine(e, f => f.MachineName)
-                @Html.ValueLine(e, f => f.ApplicationName)
-            </td>
-            <td>
-                @Html.ValueLine(e, f => f.ActionName)
-                @Html.ValueLine(e, f => f.ControllerName)
-                @Html.ValueLine(e, f => f.UserHostAddress)
-                @Html.ValueLine(e, f => f.UserHostName)
-                @Html.ValueLine(e, f => f.UserAgent)
-            </td>
-        </tr>
-    </table>
-    
+    e.LabelColumns = new BsColumn(4);
+    <div class="ro2">
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.Environment)
+            @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
+            @Html.EntityLine(e, f => f.User)
+            @Html.ValueLine(e, f => f.Version)
+            @Html.ValueLine(e, f => f.ThreadId)
+            @Html.ValueLine(e, f => f.MachineName)
+            @Html.ValueLine(e, f => f.ApplicationName)
+        </div>
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.ActionName)
+            @Html.ValueLine(e, f => f.ControllerName)
+            @Html.ValueLine(e, f => f.UserHostAddress)
+            @Html.ValueLine(e, f => f.UserHostName)
+            @Html.ValueLine(e, f => f.UserAgent)
+        </div>
+    </div>
+    e.LabelColumns = new BsColumn(2);
     @Html.ValueLine(e, f => f.RequestUrl)
     @Html.ValueLine(e, f => f.UrlReferer)
     
