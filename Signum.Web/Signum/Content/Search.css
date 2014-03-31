@@ -231,3 +231,9 @@ tr.sf-entity-ctxmenu-success
     opacity: .5;
 }
 
+/*Count search*/
+
+.count-search
+{
+    margin-right: 4px;
+}

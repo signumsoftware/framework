@@ -29,17 +29,10 @@ namespace Signum.Web
     {
         public bool Navigate { get; set; }
         public string PopupViewPrefix { get; set; }
-        public WriteQueryName WriteQueryName { get; set; }
         public string QueryLabelText { get; set; }
         public string Href { get; set; }
     }
 
-    public enum WriteQueryName
-    {
-        No,
-        Span,
-        FormGroup
-    }
 
     public static class SearchControlHelper
     {
@@ -76,12 +69,10 @@ namespace Signum.Web
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier)
-        {
-            var options = new CountSearchControl();
-            if (settingsModifier != null)
-                settingsModifier(options);
+       
 
+        private static MvcHtmlString CountSearchControlInternal(FindOptions findOptions, Web.CountSearchControl options)
+        {
             findOptions.SearchOnLoad = true;
 
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
@@ -91,47 +82,63 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (options.WriteQueryName == WriteQueryName.Span)
-                sb.Add(new HtmlTag("span")
-                    .Class("count-search")
-                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .SetInnerText(options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName)));
-
             if (options.Navigate)
             {
                 sb.Add(new HtmlTag("a")
-                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .Class("count-search").Class(count > 0 ? "count-with-results badge" : "count-no-results")
                     .Attr("href", options.Href.HasText() ? options.Href : findOptions.ToString())
                     .SetInnerText(count.ToString()));
             }
             else
             {
                 sb.Add(new HtmlTag("span")
-                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .SetInnerText(options.WriteQueryName == WriteQueryName.Span ? " (" + count.ToString() + ")" : count.ToString()));
+                    .Class("count-search").Class(count > 0 ? "count-with-results badge" : "count-no-results")
+                    .SetInnerText(count.ToString()));
             }
 
             if (options.PopupViewPrefix != null)
             {
-                var htmlAttr = new Dictionary<string, object>
-                {
-                    { "onclick", new JsFunction(JsFunction.FinderModule, "explore", findOptions.ToJS(options.PopupViewPrefix)) },
-                    { "data-icon", "ui-icon-circle-arrow-e" },
-                    { "data-text", false}
-                };
-
-                sb.Add(helper.Href(options.PopupViewPrefix + "csbtnView",
-                      EntityControlMessage.View.NiceToString(),
-                      "",
-                      EntityControlMessage.View.NiceToString(),
-                      "sf-line-button sf-view",
-                      htmlAttr));
+                sb.Add(new HtmlTag("a", options.PopupViewPrefix + "csbtnView")
+                  .Class("sf-line-button sf-view")
+                  .Attr("title", EntityControlMessage.View.NiceToString())
+                  .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", findOptions.ToJS(options.PopupViewPrefix)).ToString())
+                  .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right")));
             }
 
-            if (options.WriteQueryName == WriteQueryName.FormGroup)
-                return helper.FormGroup(new Context(null, null), null, options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
-
             return sb.ToHtml();
+        }
+
+
+        public static MvcHtmlString CountSearchControlSpan(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier = null)
+        {
+            var options = new CountSearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
+
+            return "{0} ({1})".FormatHtml(
+            options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
+            CountSearchControlInternal(findOptions, options));
+        }
+
+        public static MvcHtmlString CountSearchControlValue(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier)
+        {
+            var options = new CountSearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
+
+            return CountSearchControlInternal(findOptions, options);
+        }
+
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, Context context,  FindOptions findOptions, Action<CountSearchControl> settingsModifier)
+        {
+            var options = new CountSearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
+
+            var val  = CountSearchControlInternal(findOptions, options); 
+
+            return helper.FormGroup(context, null, options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
+                   new HtmlTag("p").Class("form-control-static").InnerHtml(val));
         }
 
         public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
