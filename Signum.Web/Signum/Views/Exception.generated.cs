@@ -49,28 +49,37 @@ namespace Signum.Web.Views
             #line 2 "..\..\Signum\Views\Exception.cshtml"
  using (var e = Html.TypeContext<ExceptionDN>())
 {
+    e.LabelColumns = new BsColumn(4);
 
             
             #line default
             #line hidden
-WriteLiteral("    <table>\r\n        <tr>\r\n            <td>\r\n");
+WriteLiteral("    <div");
 
-WriteLiteral("                ");
+WriteLiteral(" class=\"ro2\"");
+
+WriteLiteral(">\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-6\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
 
             
             #line 7 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.Environment));
+       Write(Html.ValueLine(e, f => f.Environment));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 8 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.CreationDate));
+       Write(Html.ValueLine(e, f => f.CreationDate));
 
             
             #line default
@@ -79,153 +88,157 @@ WriteLiteral("<text>(</text>");
 
             
             #line 8 "..\..\Signum\Views\Exception.cshtml"
-                                                                Write(e.Value.CreationDate.ToUserInterface().ToAgoString());
+                                                            Write(e.Value.CreationDate.ToUserInterface().ToAgoString());
 
             
             #line default
             #line hidden
 WriteLiteral("<text>)</text>\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 9 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.EntityLine(e, f => f.User));
+       Write(Html.EntityLine(e, f => f.User));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 10 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.Version));
+       Write(Html.ValueLine(e, f => f.Version));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 11 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.ThreadId));
+       Write(Html.ValueLine(e, f => f.ThreadId));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 12 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.MachineName));
+       Write(Html.ValueLine(e, f => f.MachineName));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 13 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.ApplicationName));
+       Write(Html.ValueLine(e, f => f.ApplicationName));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </td>\r\n            <td>\r\n");
+WriteLiteral("\r\n        </div>\r\n        <div");
 
-WriteLiteral("                ");
+WriteLiteral(" class=\"col-sm-6\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
 
             
             #line 16 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.ActionName));
+       Write(Html.ValueLine(e, f => f.ActionName));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 17 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.ControllerName));
+       Write(Html.ValueLine(e, f => f.ControllerName));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 18 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.UserHostAddress));
+       Write(Html.ValueLine(e, f => f.UserHostAddress));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 19 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.UserHostName));
+       Write(Html.ValueLine(e, f => f.UserHostName));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("            ");
 
             
             #line 20 "..\..\Signum\Views\Exception.cshtml"
-           Write(Html.ValueLine(e, f => f.UserAgent));
+       Write(Html.ValueLine(e, f => f.UserAgent));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </td>\r\n        </tr>\r\n    </table>\r\n");
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
 
+            
+            #line 23 "..\..\Signum\Views\Exception.cshtml"
+    e.LabelColumns = new BsColumn(2);
+    
+            
+            #line default
+            #line hidden
             
             #line 24 "..\..\Signum\Views\Exception.cshtml"
-    
-    
-            
-            #line default
-            #line hidden
-            
-            #line 25 "..\..\Signum\Views\Exception.cshtml"
 Write(Html.ValueLine(e, f => f.RequestUrl));
 
             
             #line default
             #line hidden
             
-            #line 25 "..\..\Signum\Views\Exception.cshtml"
+            #line 24 "..\..\Signum\Views\Exception.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Signum\Views\Exception.cshtml"
+            #line 25 "..\..\Signum\Views\Exception.cshtml"
 Write(Html.ValueLine(e, f => f.UrlReferer));
 
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Signum\Views\Exception.cshtml"
+            #line 25 "..\..\Signum\Views\Exception.cshtml"
                                          
     
 
@@ -237,7 +250,7 @@ WriteLiteral("    <h3>QueryString</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 29 "..\..\Signum\Views\Exception.cshtml"
+            #line 28 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.QueryString);
 
             
@@ -246,7 +259,7 @@ WriteLiteral("    <pre><code>");
 WriteLiteral("</code></pre>\r\n");
 
             
-            #line 30 "..\..\Signum\Views\Exception.cshtml"
+            #line 29 "..\..\Signum\Views\Exception.cshtml"
     
 
             
@@ -257,7 +270,7 @@ WriteLiteral("    <h3>Form</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 32 "..\..\Signum\Views\Exception.cshtml"
+            #line 31 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.Form);
 
             
@@ -266,7 +279,7 @@ WriteLiteral("    <pre><code>");
 WriteLiteral("</code></pre>\r\n");
 
             
-            #line 33 "..\..\Signum\Views\Exception.cshtml"
+            #line 32 "..\..\Signum\Views\Exception.cshtml"
 
 
             
@@ -277,7 +290,7 @@ WriteLiteral("    <h3>Session</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 35 "..\..\Signum\Views\Exception.cshtml"
+            #line 34 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.Session);
 
             
@@ -286,7 +299,7 @@ WriteLiteral("    <pre><code>");
 WriteLiteral("</code></pre>\r\n");
 
             
-            #line 36 "..\..\Signum\Views\Exception.cshtml"
+            #line 35 "..\..\Signum\Views\Exception.cshtml"
 
 
             
@@ -299,7 +312,7 @@ WriteLiteral(" style=\"color: rgb(139,0,0)\"");
 WriteLiteral(">");
 
             
-            #line 37 "..\..\Signum\Views\Exception.cshtml"
+            #line 36 "..\..\Signum\Views\Exception.cshtml"
                                Write(e.Value.ExceptionType);
 
             
@@ -310,7 +323,7 @@ WriteLiteral("</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 38 "..\..\Signum\Views\Exception.cshtml"
+            #line 37 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.ExceptionMessage);
 
             
@@ -323,7 +336,7 @@ WriteLiteral("    <h3>StackTrace</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 40 "..\..\Signum\Views\Exception.cshtml"
+            #line 39 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.StackTrace);
 
             
@@ -336,7 +349,7 @@ WriteLiteral("    <h3>Data</h3>\r\n");
 WriteLiteral("    <pre><code>");
 
             
-            #line 42 "..\..\Signum\Views\Exception.cshtml"
+            #line 41 "..\..\Signum\Views\Exception.cshtml"
           Write(e.Value.Data);
 
             
@@ -345,7 +358,7 @@ WriteLiteral("    <pre><code>");
 WriteLiteral("</code></pre>\r\n");
 
             
-            #line 43 "..\..\Signum\Views\Exception.cshtml"
+            #line 42 "..\..\Signum\Views\Exception.cshtml"
 }
             
             #line default
