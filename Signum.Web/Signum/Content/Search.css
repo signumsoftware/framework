@@ -215,7 +215,6 @@ div.sf-filters-list table.table
 }
 
 
-
 /* check box */
 
 input[type=checkbox].sf-td-selection,
@@ -224,3 +223,11 @@ th.sf-th-selection > input[type=checkbox]
     width: 16px;
     height: 16px;
 }
+
+/* sf-entity-ctxmenu-success */
+
+tr.sf-entity-ctxmenu-success
+{
+    opacity: .5;
+}
+

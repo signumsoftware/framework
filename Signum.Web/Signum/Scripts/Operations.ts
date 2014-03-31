@@ -213,7 +213,7 @@ export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
 }
 
 export function markCells(prefix: string) {
-    $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
+    $("tr.active").addClass("sf-entity-ctxmenu-success");
     notifyExecuted();
 }
 
