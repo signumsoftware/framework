@@ -10,17 +10,26 @@ input[type=checkbox].form-control
     margin-top: 9px;
 }
 
-.input-group.date, .input-group.time
 label > input[type=checkbox]
 {
     margin: 0px;
     vertical-align: middle;
 } 
+
+.input-group.date
 {
     max-width: 140px;
     float: left;
     margin-right: 5px;
+}
+
+.input-group.time
+{
+    max-width: 100px;
+    float: left;
+    margin-right: 5px;
 } 
+ 
 
 /* Buttons */
 .btn.btn-default.sf-line-button,
