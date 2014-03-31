@@ -264,6 +264,37 @@ var SF;
         Blocker.wrap = wrap;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
+
+    function onVisible(element, callback) {
+        if (element.length == 0)
+            throw Error("element is empty");
+
+        var pane = element.closest(".tab-pane");
+        if (pane.length) {
+            var id = pane[0].id;
+
+            if (pane.hasClass("active") || !id) {
+                callback(element);
+                return;
+            }
+
+            var tab = pane.parent().parent().find("a[data-toggle=tab][href=#" + id + "]");
+
+            if (!tab.length) {
+                callback(element);
+                return;
+            }
+
+            tab.on("shown.bs.tab", function (e) {
+                if (callback)
+                    callback(element);
+                callback = null;
+            });
+        } else {
+            callback(element);
+        }
+    }
+    SF.onVisible = onVisible;
 })(SF || (SF = {}));
 
 once("removeKeyPress", function () {

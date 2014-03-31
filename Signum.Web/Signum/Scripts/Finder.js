@@ -848,27 +848,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.searchOnLoad = function () {
-            var btnSearchId = SF.compose(this.options.prefix, "qbSearch");
-            var $button = $("#" + btnSearchId);
-            var self = this;
-            var makeSearch = function () {
-                if (!self.searchOnLoadFinished) {
-                    $button.click();
-                    self.searchOnLoadFinished = true;
-                }
-            };
+            var _this = this;
+            var $button = $("#" + SF.compose(this.options.prefix, "qbSearch"));
 
-            var $tabContainer = $button.closest(".sf-tabs");
-            if ($tabContainer.length == 0 || this.element.is(":visible")) {
-                makeSearch();
-            } else {
-                var self = this;
-                $tabContainer.bind("tabsactivate", function (evt, ui) {
-                    if ($(ui.newPanel).find(self.element).length > 0) {
-                        makeSearch();
-                    }
-                });
-            }
+            SF.onVisible($button, function () {
+                if (!_this.searchOnLoadFinished) {
+                    $button.click();
+                    _this.searchOnLoadFinished = true;
+                }
+            });
         };
         return SearchControl;
     })();
