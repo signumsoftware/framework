@@ -29,16 +29,6 @@ namespace Signum.Web.UserQueries
             return helper.SearchControl(userQuery, findOptions, context);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, Action<CountSearchControl> settinsModifier)
-        {
-            if (findOptions == null)
-                throw new ArgumentNullException("findOptions");
-
-            findOptions.ApplyUserQuery(userQuery);
-
-            return helper.CountSearchControl(findOptions, settinsModifier);
-        }
-
         public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryTokenBuilderSettings settings)
         {
             if (ctx.Value.TryCC(qt => qt.ParseException) != null)

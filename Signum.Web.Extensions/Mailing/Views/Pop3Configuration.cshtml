@@ -14,9 +14,9 @@
 
     if (!sc.Value.IsNew)
     {
-    @Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
+    @Html.CountSearchControl(sc, new FindOptions(typeof(Pop3ReceptionDN))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
-    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.FormGroup; });
+    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); });
     }
 }
