@@ -64,279 +64,322 @@ WriteLiteral("\r\n\r\n");
             #line 5 "..\..\Processes\Views\Process.cshtml"
  using (var e = Html.TypeContext<ProcessDN>())
 {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.State, f => f.ReadOnly = true));
+    e.LabelColumns = new BsColumn(4);
 
             
             #line default
             #line hidden
-            
-            #line 7 "..\..\Processes\Views\Process.cshtml"
-                                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Processes\Views\Process.cshtml"
-Write(Html.EntityLine(e, f => f.Algorithm));
+WriteLiteral("    <div");
 
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Processes\Views\Process.cshtml"
-                                         
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Processes\Views\Process.cshtml"
-Write(Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true));
+WriteLiteral(" class=\"row\"");
 
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Processes\Views\Process.cshtml"
-                                                               
-    
-            
-            #line default
-            #line hidden
+WriteLiteral(">\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-6\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
+
             
             #line 10 "..\..\Processes\Views\Process.cshtml"
-Write(Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true));
+       Write(Html.ValueLine(e, f => f.State, f => f.ReadOnly = true));
 
             
             #line default
             #line hidden
-            
-            #line 10 "..\..\Processes\Views\Process.cshtml"
-                                                            
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 11 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.MachineName));
+       Write(Html.EntityLine(e, f => f.Algorithm));
 
             
             #line default
             #line hidden
-            
-            #line 11 "..\..\Processes\Views\Process.cshtml"
-                                          
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 12 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.ApplicationName));
+       Write(Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true));
 
             
             #line default
             #line hidden
-            
-            #line 12 "..\..\Processes\Views\Process.cshtml"
-                                              
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 13 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.CreationDate));
+       Write(Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true));
 
             
             #line default
             #line hidden
-            
-            #line 13 "..\..\Processes\Views\Process.cshtml"
-                                           
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 14 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+       Write(Html.ValueLine(e, f => f.MachineName));
 
             
             #line default
             #line hidden
-            
-            #line 14 "..\..\Processes\Views\Process.cshtml"
-                                                                                            
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 15 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+       Write(Html.ValueLine(e, f => f.ApplicationName));
 
             
             #line default
             #line hidden
-            
-            #line 15 "..\..\Processes\Views\Process.cshtml"
-                                                                                                
-    
-            
-            #line default
-            #line hidden
-            
-            #line 16 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+WriteLiteral("\r\n        </div>\r\n");
 
             
-            #line default
-            #line hidden
-            
-            #line 16 "..\..\Processes\Views\Process.cshtml"
-                                                                                           
-    
+            #line 17 "..\..\Processes\Views\Process.cshtml"
+        
             
             #line default
             #line hidden
             
             #line 17 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+          e.LabelColumns = new BsColumn(5); 
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        <div");
 
-            
-            #line default
-            #line hidden
-            
-            #line 17 "..\..\Processes\Views\Process.cshtml"
-                                                                                               
-    
-            
-            #line default
-            #line hidden
-            
-            #line 18 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+WriteLiteral(" class=\"col-sm-6\"");
 
-            
-            #line default
-            #line hidden
-            
-            #line 18 "..\..\Processes\Views\Process.cshtml"
-                                                                                             
-    
-            
-            #line default
-            #line hidden
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
+
             
             #line 19 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+       Write(Html.ValueLine(e, f => f.CreationDate));
 
             
             #line default
             #line hidden
-            
-            #line 19 "..\..\Processes\Views\Process.cshtml"
-                                                                                            
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 20 "..\..\Processes\Views\Process.cshtml"
-Write(Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+       Write(Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
-            
-            #line 20 "..\..\Processes\Views\Process.cshtml"
-                                                                                              
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
             
             #line 21 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 22 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 23 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 24 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 25 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 26 "..\..\Processes\Views\Process.cshtml"
+       Write(Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 29 "..\..\Processes\Views\Process.cshtml"
+          e.LabelColumns = new BsColumn(3);
+    
+    
+            
+            #line default
+            #line hidden
+            
+            #line 31 "..\..\Processes\Views\Process.cshtml"
 Write(Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 21 "..\..\Processes\Views\Process.cshtml"
+            #line 31 "..\..\Processes\Views\Process.cshtml"
                                                                                            
 
     
-            
-            #line default
-            #line hidden
-            
-            #line 23 "..\..\Processes\Views\Process.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
-{
-    csc.PopupViewPrefix = e.Compose("errors");
-    csc.WriteQueryName = WriteQueryName.FormGroup;
-}));
 
             
             #line default
             #line hidden
-            
-            #line 27 "..\..\Processes\Views\Process.cshtml"
-  
+WriteLiteral("    <h4>");
 
-      if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
-      {
+            
+            #line 34 "..\..\Processes\Views\Process.cshtml"
+   Write(Html.PropertyNiceName(() => e.Value.Progress));
 
             
             #line default
             #line hidden
-WriteLiteral("    ");
+WriteLiteral("</h4>\r\n");
 
-WriteLiteral("Progress:\r\n");
+            
+            #line 35 "..\..\Processes\Views\Process.cshtml"
+    
+          var val = ((double?)e.Value.Progress) * 100 ??
+                ((e.Value.State == ProcessState.Queued ||
+                e.Value.State == ProcessState.Suspended ||
+                e.Value.State == ProcessState.Finished ||
+                e.Value.State == ProcessState.Error) ? 100 : 0);
 
-WriteLiteral("    <br />\r\n");
+          var progressContainerClass =
+              e.Value.State == ProcessState.Executing ||
+              e.Value.State == ProcessState.Queued ||
+              e.Value.State == ProcessState.Suspending ? "progress-striped active" : "";
 
-WriteLiteral("    <br />\r\n");
+          var progressClass =
+              e.Value.State == ProcessState.Queued ? "progress-bar-info" :
+              e.Value.State == ProcessState.Executing ? "" :
+              e.Value.State == ProcessState.Finished ? "progress-bar-success" :
+              e.Value.State == ProcessState.Suspending ||
+              e.Value.State == ProcessState.Suspended ? "progress-bar-warning" :
+              e.Value.State == ProcessState.Error ? "progress-bar-danger" :
+              "";
+    
 
+            
+            #line default
+            #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" class=\"progressContainer\"");
+WriteAttribute("class", Tuple.Create(" class=\"", 2804), Tuple.Create("\"", 2844)
+, Tuple.Create(Tuple.Create("", 2812), Tuple.Create("progress", 2812), true)
+            
+            #line 56 "..\..\Processes\Views\Process.cshtml"
+, Tuple.Create(Tuple.Create(" ", 2820), Tuple.Create<System.Object, System.Int32>(progressContainerClass
+            
+            #line default
+            #line hidden
+, 2821), false)
+);
 
 WriteLiteral(">\r\n        <div");
 
-WriteLiteral(" class=\"progressBar\"");
-
-WriteLiteral(" id=\"progressBar\"");
-
-WriteAttribute("style", Tuple.Create(" style=\"", 1740), Tuple.Create("\"", 1817)
-, Tuple.Create(Tuple.Create("", 1748), Tuple.Create("height:", 1748), true)
-, Tuple.Create(Tuple.Create(" ", 1755), Tuple.Create("100%;", 1756), true)
-, Tuple.Create(Tuple.Create(" ", 1761), Tuple.Create("width:", 1762), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2860), Tuple.Create("\"", 2895)
+, Tuple.Create(Tuple.Create("", 2868), Tuple.Create("progress-bar", 2868), true)
             
-            #line 35 "..\..\Processes\Views\Process.cshtml"
-, Tuple.Create(Tuple.Create(" ", 1768), Tuple.Create<System.Object, System.Int32>(Math.Round((double?)e.Value.Progress ?? 0, 0)
+            #line 57 "..\..\Processes\Views\Process.cshtml"
+, Tuple.Create(Tuple.Create(" ", 2880), Tuple.Create<System.Object, System.Int32>(progressClass
             
             #line default
             #line hidden
-, 1769), false)
-, Tuple.Create(Tuple.Create("", 1815), Tuple.Create("%;", 1815), true)
+, 2881), false)
 );
 
-WriteLiteral(">\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("  role=\"progressbar\"");
+
+WriteLiteral(" id=\"progressBar\"");
+
+WriteAttribute("aria-valuenow", Tuple.Create("  aria-valuenow=\"", 2933), Tuple.Create("\"", 2954)
+            
+            #line 57 "..\..\Processes\Views\Process.cshtml"
+                      , Tuple.Create(Tuple.Create("", 2950), Tuple.Create<System.Object, System.Int32>(val
+            
+            #line default
+            #line hidden
+, 2950), false)
+);
+
+WriteLiteral(" aria-valuemin=\"0\"");
+
+WriteLiteral(" aria-valuemax=\"100\"");
+
+WriteAttribute("style", Tuple.Create(" style=\"", 2993), Tuple.Create("\"", 3013)
+, Tuple.Create(Tuple.Create("", 3001), Tuple.Create("width:", 3001), true)
+            
+            #line 57 "..\..\Processes\Views\Process.cshtml"
+                                                                               , Tuple.Create(Tuple.Create(" ", 3007), Tuple.Create<System.Object, System.Int32>(val
+            
+            #line default
+            #line hidden
+, 3008), false)
+, Tuple.Create(Tuple.Create("", 3012), Tuple.Create("%", 3012), true)
+);
+
+WriteLiteral(">\r\n            <span");
+
+WriteLiteral(" class=\"sr-only\"");
+
+WriteLiteral(">45% Complete</span>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 38 "..\..\Processes\Views\Process.cshtml"
-
+            #line 61 "..\..\Processes\Views\Process.cshtml"
+    
+          if (e.Value.State == ProcessState.Executing)
+          {
 
             
             #line default
@@ -350,8 +393,8 @@ WriteLiteral(">\r\n        $(function () {\r\n");
 WriteLiteral("            ");
 
             
-            #line 41 "..\..\Processes\Views\Process.cshtml"
-        Write(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")));
+            #line 66 "..\..\Processes\Views\Process.cshtml"
+        Write(new JsFunction(ProcessesClient.Module, "refreshProgress", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")));
 
             
             #line default
@@ -359,10 +402,53 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        })\r\n    </script>\r\n");
 
             
-            #line 44 "..\..\Processes\Views\Process.cshtml"
-      }
+            #line 69 "..\..\Processes\Views\Process.cshtml"
+          }
+          else if (e.Value.State == ProcessState.Queued)
+          {
 
+            
+            #line default
+            #line hidden
+WriteLiteral("    <script");
 
+WriteLiteral(" type=\"text/javascript\"");
+
+WriteLiteral(">\r\n        $(function () {\r\n");
+
+WriteLiteral("            ");
+
+            
+            #line 74 "..\..\Processes\Views\Process.cshtml"
+        Write(new JsFunction(ProcessesClient.Module, "refreshPage", e.Prefix));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        })\r\n    </script>\r\n");
+
+            
+            #line 77 "..\..\Processes\Views\Process.cshtml"
+          }
+
+          e.LabelColumns = new BsColumn(3);
+    
+            
+            #line default
+            #line hidden
+            
+            #line 80 "..\..\Processes\Views\Process.cshtml"
+Write(Html.CountSearchControl(e, new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
+        {
+            csc.PopupViewPrefix = e.Compose("errors");
+        }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 83 "..\..\Processes\Views\Process.cshtml"
+          
 }
 
             

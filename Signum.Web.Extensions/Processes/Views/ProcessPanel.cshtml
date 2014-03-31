@@ -3,18 +3,16 @@
 @using Signum.Web.Processes
 @model ProcessLogicState
 <div id="processMainDiv">
-    <h2>@ViewData[ViewDataKeys.Title]</h2>
+    <h2>ProcessLogic state</h2>
     <div>
-        <a href="@Url.Action((ProcessController pc) => pc.Stop())" class="sf-button" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">
-            Stop </a>
-        <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">
-                Start </a>
+        <a href="@Url.Action((ProcessController pc) => pc.Stop())" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">Stop </a>
+        <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button btn btn-default"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">Start </a>
     </div>
 
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
     <script>
         $(function () {
-             @(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())))
+            @(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())))
         });
     </script>
 </div>

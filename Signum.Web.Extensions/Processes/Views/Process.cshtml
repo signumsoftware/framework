@@ -4,44 +4,81 @@
 
 @using (var e = Html.TypeContext<ProcessDN>())
 {
-    @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Algorithm)
-    @Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.MachineName)
-    @Html.ValueLine(e, f => f.ApplicationName)
-    @Html.ValueLine(e, f => f.CreationDate)
-    @Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
-
-    @Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
-{
-    csc.PopupViewPrefix = e.Compose("errors");
-    csc.WriteQueryName = WriteQueryName.FormGroup;
-})
-
-      if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
-      {
-    @:Progress:
-    <br />
-    <br />
-    <div class="progressContainer">
-        <div class="progressBar" id="progressBar" style="height: 100%; width: @Math.Round((double?)e.Value.Progress ?? 0, 0)%;">
+    e.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
+            @Html.EntityLine(e, f => f.Algorithm)
+            @Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true)
+            @Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true)
+            @Html.ValueLine(e, f => f.MachineName)
+            @Html.ValueLine(e, f => f.ApplicationName)
+        </div>
+        @{e.LabelColumns = new BsColumn(5); }
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.CreationDate)
+            @Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+            @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
         </div>
     </div>
+          e.LabelColumns = new BsColumn(3);
+    
+    @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
 
+    
+    <h4>@Html.PropertyNiceName(() => e.Value.Progress)</h4>
+    
+          var val = ((double?)e.Value.Progress) * 100 ??
+                ((e.Value.State == ProcessState.Queued ||
+                e.Value.State == ProcessState.Suspended ||
+                e.Value.State == ProcessState.Finished ||
+                e.Value.State == ProcessState.Error) ? 100 : 0);
+
+          var progressContainerClass =
+              e.Value.State == ProcessState.Executing ||
+              e.Value.State == ProcessState.Queued ||
+              e.Value.State == ProcessState.Suspending ? "progress-striped active" : "";
+
+          var progressClass =
+              e.Value.State == ProcessState.Queued ? "progress-bar-info" :
+              e.Value.State == ProcessState.Executing ? "" :
+              e.Value.State == ProcessState.Finished ? "progress-bar-success" :
+              e.Value.State == ProcessState.Suspending ||
+              e.Value.State == ProcessState.Suspended ? "progress-bar-warning" :
+              e.Value.State == ProcessState.Error ? "progress-bar-danger" :
+              "";
+    
+    <div class="progress @progressContainerClass">
+        <div class="progress-bar @progressClass"  role="progressbar" id="progressBar"  aria-valuenow="@val" aria-valuemin="0" aria-valuemax="100" style="width: @val%">
+            <span class="sr-only">45% Complete</span>
+        </div>
+    </div>
+    
+          if (e.Value.State == ProcessState.Executing)
+          {
     <script type="text/javascript">
         $(function () {
-            @(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
+            @(new JsFunction(ProcessesClient.Module, "refreshProgress", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
         })
     </script>
-      }
+          }
+          else if (e.Value.State == ProcessState.Queued)
+          {
+    <script type="text/javascript">
+        $(function () {
+            @(new JsFunction(ProcessesClient.Module, "refreshPage", e.Prefix))
+        })
+    </script>
+          }
 
-
+          e.LabelColumns = new BsColumn(3);
+    @Html.CountSearchControl(e, new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
+        {
+            csc.PopupViewPrefix = e.Compose("errors");
+        })
 }
