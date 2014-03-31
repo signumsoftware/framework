@@ -9,7 +9,7 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 export function saveNew(options: Operations.EntityOperationOptions, url: string) {
     options.controllerUrl = url;
-
+    options.avoidValidate = true;
     Operations.executeDefault(options); 
 }
 
