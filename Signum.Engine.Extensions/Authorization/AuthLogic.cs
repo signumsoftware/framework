@@ -144,8 +144,7 @@ namespace Signum.Engine.Authorization
                         e.UserName,
                         e.Email,
                         e.Role,
-                        e.PasswordNeverExpires,
-                        e.PasswordSetDate,
+                        e.State,
                         e.Related,
                     });
 

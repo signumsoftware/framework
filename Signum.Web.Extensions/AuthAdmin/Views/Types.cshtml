@@ -79,9 +79,10 @@
                     </div>
                     @if (!item.Value.AvailableConditions.IsNullOrEmpty())
                     {
-                        <a title="@AuthMessage.AuthAdmin_AddCondition.NiceToString()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-create sf-auth-condition-button" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
-                            <span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span>
-                        </a>
+                        
+                        <a title="@AuthMessage.AuthAdmin_AddCondition.NiceToString()" class="sf-line-button sf-create sf-auth-condition-button" 
+                            style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
+                            <span class="glyphicon glyphicon-plus"></span></a>
                         
                         <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")" />
                     }
@@ -168,9 +169,8 @@
                     </div>
                     <div class="sf-auth-tree @(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
-                    <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
-                        <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
-                    </a>
+                    <a class="sf-line-button sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
+                        <span class="glyphicon glyphicon-remove"></span></a>
                     <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     @Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
@@ -201,7 +201,6 @@
                 <td colspan="@(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0))"></td>
             </tr>
                 }
-
             }
         }
     </table>

@@ -55,59 +55,49 @@ WriteLiteral(" type=\"text/javascript\"");
 
 WriteLiteral(">\r\n    $(function () { $(\"#username\").focus(); });\r\n</script>\r\n<br />\r\n<div");
 
-WriteLiteral(" class=\"container\"");
-
-WriteLiteral(">\r\n    <div");
-
 WriteLiteral(" class=\"col-sm-offset-4\"");
 
-WriteLiteral(">\r\n        <h2>Login</h2>\r\n        <p>\r\n");
+WriteLiteral(">\r\n    <h2>Login</h2>\r\n    <p>\r\n");
 
-WriteLiteral("            ");
+WriteLiteral("        ");
 
             
-            #line 12 "..\..\Auth\Views\Login.cshtml"
-       Write(AuthMessage.IntroduceYourUserNameAndPassword.NiceToString());
+            #line 11 "..\..\Auth\Views\Login.cshtml"
+   Write(AuthMessage.IntroduceYourUserNameAndPassword.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </p>\r\n    </div>\r\n");
+WriteLiteral("\r\n    </p>\r\n");
 
 WriteLiteral("    ");
 
             
+            #line 13 "..\..\Auth\Views\Login.cshtml"
+Write(Html.ValudationSummaryStatic());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n</div>\r\n");
+
+            
             #line 15 "..\..\Auth\Views\Login.cshtml"
-Write(Html.ValidationSummary());
+ using (Html.BeginForm())
+{
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 16 "..\..\Auth\Views\Login.cshtml"
-    
-            
-            #line default
-            #line hidden
-            
-            #line 16 "..\..\Auth\Views\Login.cshtml"
-     using (Html.BeginForm())
-    {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <div");
+WriteLiteral("    <div");
 
 WriteLiteral(" class=\"form-horizontal\"");
 
-WriteLiteral(">\r\n            <div");
+WriteLiteral(">\r\n        <div");
 
 WriteLiteral(" class=\"form-group\"");
 
-WriteLiteral(">\r\n                <label");
+WriteLiteral(">\r\n            <label");
 
 WriteLiteral(" for=\"username\"");
 
@@ -116,43 +106,32 @@ WriteLiteral(" class=\"col-sm-offset-2 col-sm-2 control-label\"");
 WriteLiteral(">");
 
             
-            #line 20 "..\..\Auth\Views\Login.cshtml"
-                                                                                Write(AuthMessage.Username.NiceToString());
+            #line 19 "..\..\Auth\Views\Login.cshtml"
+                                                                            Write(AuthMessage.Username.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</label>\r\n                <div");
+WriteLiteral("</label>\r\n            <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                    ");
+WriteLiteral("                ");
 
             
-            #line 22 "..\..\Auth\Views\Login.cshtml"
-               Write(Html.TextBox("username", null, new { @class = "form-control", placeholder = AuthMessage.Username.NiceToString() }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("                    ");
-
-            
-            #line 23 "..\..\Auth\Views\Login.cshtml"
-               Write(Html.ValidationMessage("username"));
+            #line 21 "..\..\Auth\Views\Login.cshtml"
+           Write(Html.TextBox("username", null, new { @class = "form-control", placeholder = AuthMessage.Username.NiceToString() }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </div>\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n            </div>\r\n        </div>\r\n        <div");
 
 WriteLiteral(" class=\"form-group\"");
 
-WriteLiteral(">\r\n                <label");
+WriteLiteral(">\r\n            <label");
 
 WriteLiteral(" for=\"password\"");
 
@@ -161,57 +140,46 @@ WriteLiteral(" class=\"col-sm-offset-2 col-sm-2 control-label\"");
 WriteLiteral(">");
 
             
-            #line 27 "..\..\Auth\Views\Login.cshtml"
-                                                                                Write(AuthMessage.Password.NiceToString());
+            #line 25 "..\..\Auth\Views\Login.cshtml"
+                                                                            Write(AuthMessage.Password.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</label>\r\n                <div");
+WriteLiteral("</label>\r\n            <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                    ");
+WriteLiteral("                ");
 
             
-            #line 29 "..\..\Auth\Views\Login.cshtml"
-               Write(Html.Password("password", null, new { @class = "form-control", placeholder = AuthMessage.Password.NiceToString() }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("                    ");
-
-            
-            #line 30 "..\..\Auth\Views\Login.cshtml"
-               Write(Html.ValidationMessage("password"));
+            #line 27 "..\..\Auth\Views\Login.cshtml"
+           Write(Html.Password("password", null, new { @class = "form-control", placeholder = AuthMessage.Password.NiceToString() }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </div>\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n            </div>\r\n        </div>\r\n        <div");
 
 WriteLiteral(" class=\"form-group\"");
 
-WriteLiteral(">\r\n                <div");
+WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"col-sm-offset-4 col-sm-6\"");
 
-WriteLiteral(">\r\n                    <div");
+WriteLiteral(">\r\n                <div");
 
 WriteLiteral(" class=\"checkbox\"");
 
-WriteLiteral(">\r\n                        <label>\r\n");
+WriteLiteral(">\r\n                    <label>\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                        ");
 
             
-            #line 37 "..\..\Auth\Views\Login.cshtml"
-                       Write(Html.CheckBox("rememberMe"));
+            #line 34 "..\..\Auth\Views\Login.cshtml"
+                   Write(Html.CheckBox("rememberMe"));
 
             
             #line default
@@ -219,22 +187,22 @@ WriteLiteral("                            ");
 WriteLiteral(" ");
 
             
-            #line 37 "..\..\Auth\Views\Login.cshtml"
-                                                    Write(AuthMessage.RememberMe.NiceToString());
+            #line 34 "..\..\Auth\Views\Login.cshtml"
+                                                Write(AuthMessage.RememberMe.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </label>\r\n                    </div>\r\n                <" +
-"/div>\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n                    </label>\r\n                </div>\r\n            </div>\r\n     " +
+"   </div>\r\n        <div");
 
 WriteLiteral(" class=\"form-group\"");
 
-WriteLiteral(">\r\n                <div");
+WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"col-sm-offset-4 col-sm-6\"");
 
-WriteLiteral(">\r\n                    <button");
+WriteLiteral(">\r\n                <button");
 
 WriteLiteral(" type=\"submit\"");
 
@@ -245,8 +213,8 @@ WriteLiteral(" id=\"login\"");
 WriteLiteral(">");
 
             
-            #line 44 "..\..\Auth\Views\Login.cshtml"
-                                                                        Write(AuthMessage.Login.NiceToString());
+            #line 41 "..\..\Auth\Views\Login.cshtml"
+                                                                    Write(AuthMessage.Login.NiceToString());
 
             
             #line default
@@ -254,83 +222,81 @@ WriteLiteral(">");
 WriteLiteral("</button>\r\n");
 
             
-            #line 45 "..\..\Auth\Views\Login.cshtml"
-                     
+            #line 42 "..\..\Auth\Views\Login.cshtml"
+                
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Auth\Views\Login.cshtml"
-                      if (AuthClient.ResetPasswordStarted)
-                    {
+            #line 42 "..\..\Auth\Views\Login.cshtml"
+                 if (AuthClient.ResetPasswordStarted)
+                {
 
             
             #line default
             #line hidden
-WriteLiteral("                        <div");
+WriteLiteral("                    <div");
 
 WriteLiteral(" id=\"sf-login-reset-password\"");
 
 WriteLiteral(">");
 
             
-            #line 47 "..\..\Auth\Views\Login.cshtml"
-                                                     Write(Html.ActionLink(AuthMessage.IHaveForgottenMyPassword.NiceToString(), "resetPassword", "auth"));
+            #line 44 "..\..\Auth\Views\Login.cshtml"
+                                                 Write(Html.ActionLink(AuthMessage.IHaveForgottenMyPassword.NiceToString(), "resetPassword", "auth"));
 
             
             #line default
             #line hidden
 WriteLiteral("</div>\r\n");
+
+            
+            #line 45 "..\..\Auth\Views\Login.cshtml"
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </div>\r\n        </div>\r\n");
 
             
             #line 48 "..\..\Auth\Views\Login.cshtml"
-                    }
+        
+            
+            #line default
+            #line hidden
+            
+            #line 48 "..\..\Auth\Views\Login.cshtml"
+         if (ViewData.ContainsKey("referrer"))
+        { 
+            
+            
+            #line default
+            #line hidden
+            
+            #line 50 "..\..\Auth\Views\Login.cshtml"
+       Write(Html.Hidden("referrer", ViewData["referrer"]));
 
             
             #line default
             #line hidden
-WriteLiteral("                </div>\r\n            </div>\r\n");
+            
+            #line 50 "..\..\Auth\Views\Login.cshtml"
+                                                           
+        }
 
             
-            #line 51 "..\..\Auth\Views\Login.cshtml"
-            
-            
             #line default
             #line hidden
-            
-            #line 51 "..\..\Auth\Views\Login.cshtml"
-             if (ViewData.ContainsKey("referrer"))
-            { 
-                
-            
-            #line default
-            #line hidden
+WriteLiteral("    </div>\r\n");
+
             
             #line 53 "..\..\Auth\Views\Login.cshtml"
-           Write(Html.Hidden("referrer", ViewData["referrer"]));
+}
 
             
             #line default
             #line hidden
-            
-            #line 53 "..\..\Auth\Views\Login.cshtml"
-                                                               
-            }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        </div>\r\n");
-
-            
-            #line 56 "..\..\Auth\Views\Login.cshtml"
-    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</div>\r\n");
-
         }
     }
 }
