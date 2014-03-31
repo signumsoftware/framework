@@ -21,17 +21,18 @@ namespace Signum.Web
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
-            {
-                if (valueLine.PlaceholderLabels && !valueLine.ValueHtmlProps.ContainsKey("placeholder"))
-                    valueLine.ValueHtmlProps["placeholder"] = valueLine.LabelText;
+            if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
+                return MvcHtmlString.Empty;
 
-                var value = InternalValue(helper, valueLine);
+            if (valueLine.PlaceholderLabels && !valueLine.ValueHtmlProps.ContainsKey("placeholder"))
+                valueLine.ValueHtmlProps["placeholder"] = valueLine.LabelText;
 
-                return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
-            }
+            var value = InternalValue(helper, valueLine);
 
-            return MvcHtmlString.Empty;
+            if (valueLine.InlineCheckbox)
+                return new HtmlTag("label").InnerHtml("{0} {1}".FormatHtml(value, valueLine.LabelText)).ToHtml();
+
+            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
         }
 
         private static MvcHtmlString InternalValue(HtmlHelper helper, ValueLine valueLine)
@@ -161,7 +162,8 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
 
             bool? value = (bool?)valueLine.UntypedValue;
-            valueLine.ValueHtmlProps.AddCssClass("form-control");
+            if (!valueLine.InlineCheckbox)
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.CheckBox(valueLine.Prefix, value ?? false, valueLine.ValueHtmlProps);
         }
 

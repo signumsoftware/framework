@@ -19,9 +19,6 @@ namespace Signum.Web
                 
         public List<SelectListItem> EnumComboItems { get; set; }
 
-        public string RadioButtonLabelTrue = EntityControlMessage.Yes.NiceToString();
-        public string RadioButtonLabelFalse = EntityControlMessage.No.NiceToString();
-
         public bool WriteHiddenOnReadonly { get; set; }
 
         public ValueLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
@@ -53,5 +50,7 @@ namespace Signum.Web
 
             return items;
         }
+
+        public bool InlineCheckbox { get; set; }
     }
 }

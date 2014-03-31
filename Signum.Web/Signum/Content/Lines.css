@@ -1,11 +1,21 @@
-﻿input[type=checkbox].form-control
+﻿
+input[type=checkbox]
 {
     width: 16px;
     height: 16px;
+}
+
+input[type=checkbox].form-control
+{
     margin-top: 9px;
 }
 
 .input-group.date, .input-group.time
+label > input[type=checkbox]
+{
+    margin: 0px;
+    vertical-align: middle;
+} 
 {
     max-width: 140px;
     float: left;
