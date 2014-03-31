@@ -127,3 +127,8 @@ div.chart-column-parameters > fieldset > legend
 .sf-chart-control .sf-query-fullscreen {
     float: none;
 }
+
+
+.sf-chart-color-input.form-control {
+    width: auto !important;
+}
