@@ -307,28 +307,37 @@ WriteLiteral("\r\n");
 
             
             #line 72 "..\..\Signum\Views\SearchResults.cshtml"
-   
+  
     ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
+
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n<tr");
+WriteLiteral("    <tr");
 
 WriteLiteral(" class=\"extract\"");
 
-WriteLiteral(">\r\n    <td>\r\n");
+WriteLiteral(">\r\n        <td>\r\n");
 
-WriteLiteral("        ");
+WriteLiteral("            ");
 
             
             #line 77 "..\..\Signum\Views\SearchResults.cshtml"
-   Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
+       Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </td>\r\n</tr>\r\n");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n");
+
+            
+            #line 80 "..\..\Signum\Views\SearchResults.cshtml"
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
 
         }
     }

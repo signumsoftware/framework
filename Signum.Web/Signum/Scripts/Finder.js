@@ -21,14 +21,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     })(exports.FilterOperation || (exports.FilterOperation = {}));
     var FilterOperation = exports.FilterOperation;
 
-    (function (FilterMode) {
-        FilterMode[FilterMode["Visible"] = 0] = "Visible";
-        FilterMode[FilterMode["Hidden"] = 1] = "Hidden";
-        FilterMode[FilterMode["AlwaysHidden"] = 2] = "AlwaysHidden";
-        FilterMode[FilterMode["OnlyResults"] = 3] = "OnlyResults";
-    })(exports.FilterMode || (exports.FilterMode = {}));
-    var FilterMode = exports.FilterMode;
-
     (function (OrderType) {
         OrderType[OrderType["Ascending"] = 0] = "Ascending";
         OrderType[OrderType["Descending"] = 1] = "Descending";
@@ -142,8 +134,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (findOptions.searchOnLoad == true) {
             requestData["searchOnLoad"] = findOptions.searchOnLoad;
         }
-        if (findOptions.filterMode != null) {
-            requestData["filterMode"] = findOptions.filterMode;
+        if (findOptions.showHeader == false) {
+            requestData["showHeader"] = findOptions.showHeader;
+        }
+        if (findOptions.showFilters == false) {
+            requestData["showFilters"] = findOptions.showFilters;
+        }
+        if (findOptions.showFilterButton == false) {
+            requestData["showFilterButton"] = findOptions.showFilterButton;
+        }
+        if (findOptions.showFooter == false) {
+            requestData["showFooter"] = findOptions.showFooter;
         }
         if (!findOptions.create) {
             requestData["create"] = findOptions.create;
@@ -218,7 +219,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 create: true,
                 elems: null,
                 selectedItemsContextMenu: true,
-                filterMode: "Visible",
+                showHeader: true,
+                showFilters: true,
+                showFilterButton: true,
+                showFooter: true,
+                showContextMenu: true,
                 filters: null,
                 navigate: true,
                 openFinderUrl: null,
@@ -258,7 +263,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
             }
 
-            if (this.options.allowChangeColumns || (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */)) {
+            if (this.options.allowChangeColumns || this.options.showContextMenu) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     self.headerContextMenu(e);
                     return false;
@@ -269,7 +274,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 this.createMoveColumnDragDrop();
             }
 
-            if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
+            if (this.options.showContextMenu) {
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
                     var $td = $(this).closest("td");
 
@@ -293,7 +298,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
             }
 
-            if (this.options.filterMode != 3 /* OnlyResults */) {
+            if (this.options.showFooter) {
                 this.element.on("click", ".sf-search-footer ul.pagination a", function () {
                     self.search(parseInt($(this).attr("data-page")));
                 });
@@ -305,7 +310,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         self.search();
                     }
                 });
+            }
 
+            if (this.options.showContextMenu) {
                 $tblResults.on("change", ".sf-td-selection", function () {
                     self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
                 });
@@ -402,7 +409,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $th = $(e.target).closest("th");
             var menu = SF.ContextMenu.createContextMenu(e);
 
-            if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
+            if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
                 menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter-header").click(function () {
                     return _this.quickFilterHeader($th);
                 })));
@@ -422,7 +429,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $td = $(e.target).closest("td");
             var $menu = SF.ContextMenu.createContextMenu(e);
 
-            if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
+            if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
                 $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(function () {
                     return _this.quickFilterCell($td);
                 })));
@@ -545,7 +552,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             requestData["filters"] = this.filterBuilder.serializeFilters();
 
             if (type != 2 /* FullScreen */)
-                requestData["filterMode"] = this.options.filterMode;
+                requestData["showFooter"] = this.options.showFooter;
 
             requestData["orders"] = this.serializeOrders();
             requestData["columns"] = this.serializeColumns();

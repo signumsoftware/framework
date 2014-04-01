@@ -69,11 +69,12 @@
     </tr>
 }
 
-@{ 
+@{
     ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
+
+    <tr class="extract">
+        <td>
+            @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+        </td>
+    </tr>
 }
-<tr class="extract">
-    <td>
-        @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
-    </td>
-</tr>

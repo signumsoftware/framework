@@ -88,7 +88,14 @@ namespace Signum.Web
             this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
             this.ColumnOptions.Add(new ColumnOption(parentColumn));
             this.SearchOnLoad = true;
-            this.FilterMode = FilterMode.Hidden;
+            this.ShowFilters = false;
+        }
+
+        public FindOptions RemovePagination()
+        {
+            this.ShowFooter = false;
+            this.Pagination = new Pagination.All();
+            return this;
         }
 
         bool? allowChangeColumns;
@@ -114,19 +121,39 @@ namespace Signum.Web
             set { allowOrder = value; }
         }
 
-        FilterMode filterMode = FilterMode.Visible;
-        public FilterMode FilterMode
+        bool showHeader = true;
+        public bool ShowHeader
         {
-            get { return filterMode; }
-            set
-            {
-                this.filterMode = value;
-                if (value == FilterMode.OnlyResults)
-                {
-                    SearchOnLoad = true;
-                    AllowSelection = false;
-                }
-            }
+            get { return showHeader; }
+            set { showHeader = value; }
+        }
+
+        bool showFilters = true;
+        public bool ShowFilters
+        {
+            get { return showFilters; }
+            set { showFilters = value; }
+        }
+
+        bool showFilterButton = true;
+        public bool ShowFilterButton
+        {
+            get { return showFilterButton; }
+            set { showFilterButton = value; }
+        }
+
+        bool showFooter = true;
+        public bool ShowFooter
+        {
+            get { return showFooter; }
+            set { showFooter = value; }
+        }
+
+        bool showContextMenu = true;
+        public bool ShowContextMenu
+        {
+            get { return showContextMenu; }
+            set { showContextMenu = value; }
         }
 
         bool create = true;
@@ -171,7 +198,11 @@ namespace Signum.Web
                 !AllowSelection ? "allowSelection=false" : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
                 !AllowOrder ? "allowOrder=false" : null,
-                FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
+                !showHeader ? "showHeader=false" : null,
+                !showFilters ? "showFilters=false" : null,
+                !showFilterButton ? "showFilterButton=false" : null,
+                !showFooter ? "showFooter=false" : null,
+                !showContextMenu ? "showContextMenu=false" : null,
                 (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";")) : null,
                 (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";")) : null,
                 (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";")) : null, 
@@ -209,7 +240,11 @@ namespace Signum.Web
             if (!SelectedItemsContextMenu) op.Add("selectedItemsContextMenu", false);
             if (!AllowChangeColumns) op.Add("allowChangeColumns", false);
             if (!AllowOrder) op.Add("allowOrder", false);
-            if (FilterMode != Web.FilterMode.Visible) op.Add("filterMode", FilterMode.ToString());
+            if (!showHeader) op.Add("showHeader", false);
+            if (!showFilters) op.Add("showFilters", false);
+            if (!showFilterButton) op.Add("showFilterButton", false);
+            if (!showFooter) op.Add("showFooter", false);
+            if (!showContextMenu) op.Add("showContextMenu", false);
             if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => f.ToJS())));
             if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => oo.ToJS()  )));
             if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(co => co.ToJS() )));
@@ -416,8 +451,7 @@ namespace Signum.Web
     {
         Visible,
         Hidden,
-        AlwaysHidden,
-        OnlyResults
+        AlwaysHidden
     }
 
     public class ColumnOption

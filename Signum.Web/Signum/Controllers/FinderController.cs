@@ -55,9 +55,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
+        public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Navigator.Search(this, queryRequest, allowSelection, navigate, filterMode, prefix);
+            return Navigator.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
         }
 
         [HttpPost]

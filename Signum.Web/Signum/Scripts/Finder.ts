@@ -14,7 +14,11 @@ export interface FindOptions {
     create?: boolean;
     elems?: number;
     selectedItemsContextMenu?: boolean;
-    filterMode?: FilterMode;
+    showHeader?: boolean;
+    showFilters?: boolean;
+    showFilterButton?: boolean;
+    showFooter?: boolean;
+    showContextMenu?: boolean;
     filters?: FilterOption[];
     navigate?: boolean;
     openFinderUrl?: boolean;
@@ -46,13 +50,6 @@ export enum FilterOperation {
     NotEndsWith,
     NotLike,
     IsIn,
-}
-
-export enum FilterMode {
-    Visible,
-    Hidden,
-    AlwaysHidden,
-    OnlyResults,
 }
 
 
@@ -98,7 +95,7 @@ export enum RequestType {
     FullScreen
 }
 
-function findInternal(findOptions: FindOptions, multipleSelection : boolean): Promise<Array<Entities.EntityValue>> {
+function findInternal(findOptions: FindOptions, multipleSelection: boolean): Promise<Array<Entities.EntityValue>> {
     return SF.ajaxPost({
         url: findOptions.openFinderUrl || SF.Urls.partialFind,
         data: requestDataForOpenFinder(findOptions, false)
@@ -122,15 +119,15 @@ function findInternal(findOptions: FindOptions, multipleSelection : boolean): Pr
                     return true;
                 });
             }, div=> {
-                getFor(findOptions.prefix).then(sc=> {
-                    updateOkButton(okButtonId, 0, multipleSelection); 
-                    sc.selectionChanged = selected => updateOkButton(okButtonId, selected.length, multipleSelection); 
-                }); 
-            }).then(pair => pair.button.id == okButtonId ? items : null);
-    });
+                    getFor(findOptions.prefix).then(sc=> {
+                        updateOkButton(okButtonId, 0, multipleSelection);
+                        sc.selectionChanged = selected => updateOkButton(okButtonId, selected.length, multipleSelection);
+                    });
+                }).then(pair => pair.button.id == okButtonId ? items : null);
+        });
 }
 
-function updateOkButton(okButtonId: string, sel: number, multipleSelection : boolean) {
+function updateOkButton(okButtonId: string, sel: number, multipleSelection: boolean) {
     var okButon = $("#" + okButtonId);
     if (sel == 0 || sel > 1 && !multipleSelection) {
         okButon.attr("disabled", "disabled");
@@ -167,8 +164,17 @@ export function requestDataForOpenFinder(findOptions: FindOptions, isExplore: bo
     if (findOptions.searchOnLoad == true) {
         requestData["searchOnLoad"] = findOptions.searchOnLoad;
     }
-    if (findOptions.filterMode != null) {
-        requestData["filterMode"] = findOptions.filterMode;
+    if (findOptions.showHeader == false) {
+        requestData["showHeader"] = findOptions.showHeader;
+    }
+    if (findOptions.showFilters == false) {
+        requestData["showFilters"] = findOptions.showFilters;
+    }
+    if (findOptions.showFilterButton == false) {
+        requestData["showFilterButton"] = findOptions.showFilterButton;
+    }
+    if (findOptions.showFooter == false) {
+        requestData["showFooter"] = findOptions.showFooter;
     }
     if (!findOptions.create) {
         requestData["create"] = findOptions.create;
@@ -246,7 +252,11 @@ export class SearchControl {
             create: true,
             elems: null,
             selectedItemsContextMenu: true,
-            filterMode: "Visible",
+            showHeader: true,
+            showFilters: true,
+            showFilterButton: true,
+            showFooter: true,
+            showContextMenu: true,
             filters: null,
             navigate: true,
             openFinderUrl: null,
@@ -289,7 +299,7 @@ export class SearchControl {
             });
         }
 
-        if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults)) {
+        if (this.options.allowChangeColumns || this.options.showContextMenu) {
             $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                 self.headerContextMenu(e);
                 return false;
@@ -301,7 +311,7 @@ export class SearchControl {
             this.createMoveColumnDragDrop();
         }
 
-        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
+        if (this.options.showContextMenu) {
             $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
 
                 var $td = $(this).closest("td");
@@ -328,7 +338,7 @@ export class SearchControl {
 
         }
 
-        if (this.options.filterMode != FilterMode.OnlyResults) {
+        if (this.options.showFooter) {
             this.element.on("click", ".sf-search-footer ul.pagination a", function () {
                 self.search(parseInt($(this).attr("data-page")));
             });
@@ -341,7 +351,9 @@ export class SearchControl {
                     self.search();
                 }
             });
+        }
 
+        if (this.options.showContextMenu) {
             $tblResults.on("change", ".sf-td-selection", function () {
                 self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
             });
@@ -436,7 +448,7 @@ export class SearchControl {
         var $th = $(e.target).closest("th");
         var menu = SF.ContextMenu.createContextMenu(e);
 
-        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
+        if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
             menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter-header").click(() => this.quickFilterHeader($th))));
         }
 
@@ -452,7 +464,7 @@ export class SearchControl {
         var $td = $(e.target).closest("td");
         var $menu = SF.ContextMenu.createContextMenu(e);
 
-        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
+        if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
             $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(() => this.quickFilterCell($td))));
             $menu.append($("<li class='divider'></li>"));
         }
@@ -572,7 +584,7 @@ export class SearchControl {
         requestData["filters"] = this.filterBuilder.serializeFilters();
 
         if (type != RequestType.FullScreen)
-            requestData["filterMode"] = this.options.filterMode;
+            requestData["showFooter"] = this.options.showFooter;
 
         requestData["orders"] = this.serializeOrders();
         requestData["columns"] = this.serializeColumns();
@@ -895,7 +907,7 @@ export class FilterBuilder {
         public webQueryName: string,
         public url: string) {
 
-        this.newSubTokensComboAdded(this.element.find("#" + SF.compose(prefix, "tokenBuilder") +" select:first"));
+        this.newSubTokensComboAdded(this.element.find("#" + SF.compose(prefix, "tokenBuilder") + " select:first"));
 
         this.element.on("sf-new-subtokens-combo", (event, ...args) => {
             this.newSubTokensComboAdded($("#" + args[0]));

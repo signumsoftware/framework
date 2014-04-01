@@ -7,12 +7,10 @@
     Pagination pagination = (Pagination)ViewData[ViewDataKeys.Pagination];
     var paginate = pagination as Pagination.Paginate;
 
-    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
-
     ResultTable resultTable = (ResultTable)ViewData[ViewDataKeys.Results];
 }
 
-<div class="sf-search-footer" style="@(filterMode == FilterMode.OnlyResults ? "display:none" : null)">
+<div class="sf-search-footer" style="display:@(((bool)ViewData[ViewDataKeys.ShowFooter])? "block": "none")">
     <div class="sf-pagination-left">
         @if (resultTable != null)
         {

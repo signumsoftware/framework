@@ -59,8 +59,20 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("allowOrder"))
                 fo.AllowOrder = bool.Parse(parameters["allowOrder"]);
 
-            if (parameters.AllKeys.Contains("filterMode"))
-                fo.FilterMode = parameters["filterMode"].ToEnum<FilterMode>();
+            if (parameters.AllKeys.Contains("showHeader"))
+                fo.ShowHeader =  bool.Parse(parameters["showHeader"]);
+
+            if (parameters.AllKeys.Contains("showFilters"))
+                fo.ShowFilters = bool.Parse(parameters["showFilters"]);
+
+            if (parameters.AllKeys.Contains("showFilterButton"))
+                fo.ShowFilterButton = bool.Parse(parameters["showFilterButton"]);
+
+            if (parameters.AllKeys.Contains("showFooter"))
+                fo.ShowFooter = bool.Parse(parameters["showFooter"]);
+
+            if (parameters.AllKeys.Contains("showContextMenu"))
+                fo.ShowContextMenu = bool.Parse(parameters["showContextMenu"]);
 
             if (parameters.AllKeys.Contains("columnMode"))
                 fo.ColumnOptionsMode = parameters["columnMode"].ToEnum<ColumnOptionsMode>();

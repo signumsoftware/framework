@@ -32,14 +32,13 @@
 
 
     @{
-        bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
-        bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
+        bool filtersAlwaysHidden = !findOptions.ShowFilters && !findOptions.ShowFilterButton;
     }
 
     <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
         @{
             ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-            ViewData[ViewDataKeys.FiltersVisible] = filtersVisible;
+            ViewData[ViewDataKeys.FiltersVisible] = findOptions.ShowFilters;
             ViewData[ViewDataKeys.ShowAddColumn] = string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns;
             Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
         }
@@ -48,12 +47,12 @@
 
 
 
-    <div class="sf-query-button-bar" style="@(findOptions.FilterMode != FilterMode.OnlyResults ? null : "display:none")">
+    <div class="sf-query-button-bar" style="@(findOptions.ShowHeader ? null : "display:none")">
         @if (!filtersAlwaysHidden)
         {
-            <a  class="sf-query-button sf-filters-header btn btn-default @(filtersVisible ? "active" : "")"
+            <a  class="sf-query-button sf-filters-header btn btn-default @(findOptions.ShowFilters ? "active" : "")"
             onclick="@JsFunction.SFControlThen(prefix, "toggleFilters()")"
-            title="@(filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString())">
+            title="@(findOptions.ShowFilters ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString())">
                 <span class="glyphicon glyphicon glyphicon-filter"></span>
             </a>
         }
@@ -61,21 +60,25 @@
 
         @if (findOptions.Create)
         {
-            <a class="sf-query-button btn btn-default sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.CreateNew0.NiceToString(implementations.IsByAll ? EntityBase.ImplementedByAllKey : implementations.Types.CommaOr(a=>a.NiceName()))" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
+            <a class="sf-query-button btn btn-default sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.CreateNew0.NiceToString(implementations.IsByAll ? EntityBase.ImplementedByAllKey : implementations.Types.CommaOr(a => a.NiceName()))" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">
                 <span class="glyphicon glyphicon-plus"></span>
             </a>
         }
 
-        <div class="btn-group">
-            <button class="sf-query-button sf-tm-selected btn btn btn-default dropdown-toggle" data-toggle="dropdown" id="@Model.Compose("btnSelected")" disabled="disabled">
-                @JavascriptMessage.Selected
-                (<span id="@Model.Compose("btnSelectedSpan")">0</span>)
+        @if (findOptions.ShowContextMenu)
+        {
+
+            <div class="btn-group">
+                <button class="sf-query-button sf-tm-selected btn btn btn-default dropdown-toggle" data-toggle="dropdown" id="@Model.Compose("btnSelected")" disabled="disabled">
+                    @JavascriptMessage.Selected
+                    (<span id="@Model.Compose("btnSelectedSpan")">0</span>)
                 <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" id="@Model.Compose("btnSelectedDropDown")">
-                <li>hi there!</li>
-            </ul>
-        </div>
+                </button>
+                <ul class="dropdown-menu" id="@Model.Compose("btnSelectedDropDown")">
+                    <li>hi there!</li>
+                </ul>
+            </div>
+        }
 
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
@@ -88,11 +91,6 @@
        }).ToStringButton(Html)
 
     </div>
-    @if (findOptions.FilterMode != FilterMode.OnlyResults)
-    {
-        <div class="clearall">
-        </div>
-    }
     <div id="@Model.Compose("divResults")" class="sf-search-results-container table-responsive">
         <table id="@Model.Compose("tblResults")" class="sf-search-results  table table-hover  table-condensed">
             <thead>
@@ -128,11 +126,12 @@
             </tbody>
         </table>
     </div>
-    @{ 
+
+    @{
+        ViewData[ViewDataKeys.ShowFooter] = findOptions.ShowFooter;
         ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
-        ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
+        @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
     }
-    @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
 </div>
 <script type="text/javascript">
     require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});

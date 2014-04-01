@@ -182,7 +182,7 @@ namespace Signum.Web
                 SearchOnLoad = true,
                 ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
                 ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
-                FilterMode = FilterMode.Hidden,
+                ShowFilters = false,
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption(columnName, value),

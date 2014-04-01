@@ -189,9 +189,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Manager.Search(controller, request, allowSelection, navigate, filterMode, new Context(null, prefix));
+            return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
         }
 
         public static string SearchTitle(object queryName)
@@ -846,7 +846,7 @@ namespace Signum.Web
                 return QueryUtils.GetNiceName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, Context context)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
@@ -857,7 +857,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.AllowSelection] = allowSelection;
             controller.ViewData[ViewDataKeys.Navigate] = navigate;
-            controller.ViewData[ViewDataKeys.FilterMode] = filterMode;
+            controller.ViewData[ViewDataKeys.ShowFooter] = showFooter;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
