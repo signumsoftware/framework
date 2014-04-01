@@ -104,7 +104,7 @@ WriteLiteral(">\r\n");
         object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
         FindOptions fo = new FindOptions(queryName)
         {
-            FilterMode = FilterMode.Hidden
+            ShowFilters = false
         };
 
         fo.ApplyUserQuery(uq.UserQuery);

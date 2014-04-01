@@ -6,13 +6,6 @@
 
 <fieldset>
     <legend>Lines</legend>
-    @Html.SearchControl(
-      new FindOptions()
-      {
-          QueryName = typeof(EmailMessageDN),
-          FilterOptions = { new FilterOption("Package", e.Value) },
-          SearchOnLoad = true,
-          FilterMode = FilterMode.Hidden
-      }, e)
+    @Html.SearchControl(new FindOptions(typeof(EmailMessageDN), "Package", e.Value), e)
 </fieldset>
 }

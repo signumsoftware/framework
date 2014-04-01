@@ -109,7 +109,7 @@ namespace Signum.Web.Alerts
                 QueryName = typeof(AlertDN),
                 Create = false,
                 SearchOnLoad = true,
-                FilterMode = FilterMode.Hidden,
+                ShowFilters = false,
                 FilterOptions = 
                 { 
                     new FilterOption("Target", ident.ToLite()),

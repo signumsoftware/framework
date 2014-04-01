@@ -3,10 +3,7 @@
 
 @using (var sc = Html.TypeContext<EmailAttachmentDN>())
 {
-    using (Html.FormInline())
-    {
-        sc.FormGroupStyle = FormGroupStyle.Inline;
+    sc.FormGroupStyle = FormGroupStyle.SrOnly;
     @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; })
     @Html.ValueLine(sc, c => c.Type)
-    }
 }

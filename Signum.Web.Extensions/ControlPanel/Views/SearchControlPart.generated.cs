@@ -86,7 +86,8 @@ WriteLiteral("\r\n");
     
     FindOptions fo = new FindOptions(queryName)
     {
-        FilterMode = FilterMode.OnlyResults,
+        ShowHeader = false,
+        ShowFooter = false,
         AllowSelection = false
     };
 
@@ -95,14 +96,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 19 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
+            #line 20 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
 Write(Html.SearchControl(uq, fo, new Context(null, Model.Prefix)));
 
             
             #line default
             #line hidden
             
-            #line 19 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
+            #line 20 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
                                                                 ;
 }
             

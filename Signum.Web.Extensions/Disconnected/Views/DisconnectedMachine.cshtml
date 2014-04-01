@@ -13,16 +13,10 @@
     {
         <fieldset>
             <legend>Last Imports</legend>
-            @Html.SearchControl(
-      new FindOptions()
-      {
-          QueryName = typeof(DisconnectedImportDN),
-          FilterOptions = { new FilterOption("Machine", dc.Value) },
+            @Html.SearchControl(new FindOptions(typeof(DisconnectedImportDN), "Machine", dc.Value)
+       {
           OrderOptions = { new OrderOption("CreationDate", OrderType.Descending) },
-          SearchOnLoad = true,
-          FilterMode = FilterMode.Hidden
       }, dc)
         </fieldset>
     }
-
 }

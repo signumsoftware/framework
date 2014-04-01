@@ -57,38 +57,35 @@ WriteLiteral("\r\n");
             #line 4 "..\..\Mailing\Views\EmailAttachment.cshtml"
  using (var sc = Html.TypeContext<EmailAttachmentDN>())
 {
-    using (Html.FormInline())
-    {
-        sc.FormGroupStyle = FormGroupStyle.SrOnly;
+    sc.FormGroupStyle = FormGroupStyle.SrOnly;
     
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailAttachment.cshtml"
+            #line 7 "..\..\Mailing\Views\EmailAttachment.cshtml"
 Write(Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; }));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailAttachment.cshtml"
+            #line 7 "..\..\Mailing\Views\EmailAttachment.cshtml"
                                                                                                                                    
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailAttachment.cshtml"
+            #line 8 "..\..\Mailing\Views\EmailAttachment.cshtml"
 Write(Html.ValueLine(sc, c => c.Type));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailAttachment.cshtml"
+            #line 8 "..\..\Mailing\Views\EmailAttachment.cshtml"
                                     
-    }
 }
 
             
