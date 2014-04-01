@@ -115,7 +115,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            return "{0} ({1})".FormatHtml(
+            return "{0} {1}".FormatHtml(
             options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
             CountSearchControlInternal(findOptions, options));
         }
