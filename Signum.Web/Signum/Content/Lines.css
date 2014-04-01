@@ -14,22 +14,24 @@ label > input[type=checkbox]
 {
     margin: 0px;
     vertical-align: middle;
-} 
+}
+
+date-time .input-group.date,
+date-time .input-group.time
+{
+    float: left;
+    margin-right: 5px;
+}
 
 .input-group.date
 {
     max-width: 140px;
-    float: left;
-    margin-right: 5px;
 }
 
 .input-group.time
 {
     max-width: 100px;
-    float: left;
-    margin-right: 5px;
 } 
- 
 
 /* Buttons */
 .btn.btn-default.sf-line-button,
@@ -98,17 +100,25 @@ fieldset.sf-repeater-element > legend
     width: auto;
 }
 
-.form-inline .sf-repeater-element
+.repeater-inline .sf-repeater-element
 {
     padding: 4px 10px;
     margin: 0px 0px 8px 0px;
 }
 
-.form-inline .sf-repeater-element legend
+.repeater-inline .sf-repeater-element legend
 {
     float: left;
     margin-left: -6px;
     margin-right: 10px;
+    border: 0px;
+}
+
+.repeater-inline.repeater-right .sf-repeater-element legend
+{
+    float: right;
+    margin-left: 6px;
+    margin-right: -10px;
     border: 0px;
 }
 
@@ -190,12 +200,23 @@ ul.nav-tabs
     height: 20px;
 }
 
+.form-xs input[type=checkbox].form-control
+{
+    height: 16px;
+}
+
 .form-xs .input-group .btn,
 .form-xs .input-group .input-group-addon
 {
     padding: 0px 3px;
     height: 20px;
 }
+
+.form-sm .form-group 
+{
+    margin-bottom: 2px;
+}
+
 
 /*form sm*/
 
@@ -205,11 +226,22 @@ ul.nav-tabs
     height: 30px;
 }
 
+.form-sm input[type=checkbox].form-control
+{
+    height: 16px;
+}
+
 .form-sm .input-group .btn,
 .form-sm .input-group .input-group-addon
 {
-    padding: 1px 6px;
+    padding: 4px 6px;
 }
+
+.form-sm .form-group 
+{
+    margin-bottom: 5px;
+}
+
 
 /*form-inline*/
 
@@ -234,7 +266,7 @@ ul.nav-tabs
     margin-right: 0;
 }
 
-.form-vertical .form-control 
+.form-vertical .form-control
 {
     display: block;
     width: 100%;

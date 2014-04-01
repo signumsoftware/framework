@@ -124,7 +124,7 @@ namespace Signum.Web
                 return helper.TimePicker(name, formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", name)))
+            using (sb.Surround(new HtmlTag("div", name).Class("date-time")))
             {
                 sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
                 sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
