@@ -76,6 +76,13 @@ namespace Signum.Web
             return new HtmlTag("p").Id(controlId).SetInnerText(text).Class("form-control-static").Attrs(htmlProps).ToHtml();
         }
 
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, Func<object, HelperResult> value)
+        {
+            StringWriter writer = new StringWriter();
+            value(null).WriteTo(writer);
+            return FormGroup(html, context, controlId, label, MvcHtmlString.Create(writer.ToString()));
+        }
+
         public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, MvcHtmlString value)
         {
             if (context.FormGroupStyle == FormGroupStyle.None)
@@ -103,6 +110,8 @@ namespace Signum.Web
 
             return sb.ToHtml();
         }
+
+      
 
         public static IDisposable FormInline(this HtmlHelper html)
         {
