@@ -16,8 +16,8 @@ label > input[type=checkbox]
     vertical-align: middle;
 }
 
-date-time .input-group.date,
-date-time .input-group.time
+.date-time .input-group.date,
+.date-time .input-group.time
 {
     float: left;
     margin-right: 5px;
