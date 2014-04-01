@@ -262,7 +262,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         }
 
         fixHeight();
-        setInterval(fixHeight, 500);
+        $(window).resize(function () {
+            setTimeout(fixHeight, 500);
+        });
     }
     exports.activateIFrame = activateIFrame;
 

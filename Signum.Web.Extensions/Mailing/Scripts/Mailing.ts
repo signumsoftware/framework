@@ -263,7 +263,9 @@ export function activateIFrame($iframe: JQuery) {
     }
 
     fixHeight();
-    setInterval(fixHeight, 500);
+    $(window).resize(function () {
+        setTimeout(fixHeight, 500);
+    });
 }
 
 
