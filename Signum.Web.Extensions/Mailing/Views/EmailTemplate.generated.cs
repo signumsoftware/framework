@@ -296,20 +296,12 @@ WriteLiteral("></div>\r\n");
             #line 41 "..\..\Mailing\Views\EmailTemplate.cshtml"
                                               
 
-
+            
             
             #line default
             #line hidden
-WriteLiteral("        <div");
-
-WriteLiteral(" class=\"sf-email-replacements-container sf-tabs-repeater\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("            ");
-
             
-            #line 44 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 43 "..\..\Mailing\Views\EmailTemplate.cshtml"
        Write(Html.EntityTabRepeater(ec, e => e.Messages, er =>
        {
            er.PreserveViewData = true;
@@ -318,10 +310,9 @@ WriteLiteral("            ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </div>\r\n");
-
             
-            #line 49 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 46 "..\..\Mailing\Views\EmailTemplate.cshtml"
+         
     }
 }
 
@@ -333,7 +324,7 @@ WriteLiteral("\r\n<script>\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 54 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
     Write(new JsFunction(MailingClient.Module, "initReplacements"));
 
             

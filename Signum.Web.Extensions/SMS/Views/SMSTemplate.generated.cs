@@ -295,14 +295,14 @@ WriteLiteral(" class=\"sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1439), Tuple.Create("\"", 1480)
+WriteAttribute("value", Tuple.Create(" value=\"", 1438), Tuple.Create("\"", 1479)
             
             #line 39 "..\..\SMS\Views\SMSTemplate.cshtml"
-, Tuple.Create(Tuple.Create("", 1447), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+, Tuple.Create(Tuple.Create("", 1446), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1447), false)
+, 1446), false)
 );
 
 WriteLiteral(" />\r\n    </div>\r\n");
@@ -310,20 +310,12 @@ WriteLiteral(" />\r\n    </div>\r\n");
             
             #line 41 "..\..\SMS\Views\SMSTemplate.cshtml"
     
-
+        
             
             #line default
             #line hidden
-WriteLiteral("    <div");
-
-WriteLiteral(" class=\"sf-tabs-repeater sf-sms-template-messages\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
             
-            #line 43 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 42 "..\..\SMS\Views\SMSTemplate.cshtml"
    Write(Html.EntityTabRepeater(tc, e => e.Messages, er =>
         {
             er.PreserveViewData = true;
@@ -332,10 +324,9 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n");
-
             
-            #line 48 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 45 "..\..\SMS\Views\SMSTemplate.cshtml"
+          
     
 
             
@@ -346,7 +337,7 @@ WriteLiteral("    <script>\r\n");
 WriteLiteral("    ");
 
             
-            #line 50 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 48 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(new JsFunction(SMSClient.Module, "init", 
     Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
     Url.Action<SMSController>(s => s.GetDictionaries())));
@@ -357,7 +348,7 @@ Write(new JsFunction(SMSClient.Module, "init",
 WriteLiteral("\r\n</script>\r\n");
 
             
-            #line 54 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 52 "..\..\SMS\Views\SMSTemplate.cshtml"
 }
 
             
