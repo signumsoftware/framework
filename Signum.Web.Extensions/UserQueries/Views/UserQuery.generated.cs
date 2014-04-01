@@ -246,7 +246,7 @@ Write(Html.ValueLine(e, f => f.WithoutFilters));
             #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" class=\"form-inline form-sm sf-filters-list \"");
+WriteLiteral(" class=\"repeater-inline form-inline form-sm sf-filters-list \"");
 
 WriteLiteral(">\r\n");
 
@@ -284,7 +284,7 @@ Write(Html.ValueLine(e, f => f.ColumnsMode));
             #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" class=\"form-inline form-sm sf-filters-list\"");
+WriteLiteral(" class=\"repeater-inline form-inline form-sm sf-filters-list\"");
 
 WriteLiteral(">\r\n");
 
@@ -308,7 +308,7 @@ WriteLiteral("\r\n    </div>\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" class=\"form-inline form-sm sf-filters-list\"");
+WriteLiteral(" class=\"repeater-inline form-inline form-sm sf-filters-list\"");
 
 WriteLiteral(">\r\n");
 

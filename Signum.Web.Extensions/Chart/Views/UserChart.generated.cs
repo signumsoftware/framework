@@ -322,7 +322,7 @@ WriteLiteral("\r\n        </p>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteLiteral(" class=\"form-inline form-sm sf-filters-list \"");
+WriteLiteral(" class=\"repeater-inline form-inline form-sm sf-filters-list \"");
 
 WriteLiteral(">\r\n");
 
@@ -346,7 +346,7 @@ WriteLiteral("\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteLiteral(" class=\"form-inline form-sm sf-filters-list\"");
+WriteLiteral(" class=\"repeater-inline form-inline form-sm sf-filters-list\"");
 
 WriteLiteral(">\r\n");
 
@@ -370,14 +370,14 @@ WriteLiteral("\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2875), Tuple.Create("\"", 2918)
+WriteAttribute("id", Tuple.Create(" id=\"", 2907), Tuple.Create("\"", 2950)
             
             #line 65 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 2880), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 2912), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2880), false)
+, 2912), false)
 );
 
 WriteLiteral(">\r\n");

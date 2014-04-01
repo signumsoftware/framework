@@ -54,11 +54,11 @@
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
 
-        <div class="form-inline form-sm sf-filters-list ">
+        <div class="repeater-inline form-inline form-sm sf-filters-list ">
             @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
         </div>
 
-        <div class="form-inline form-sm sf-filters-list">
+        <div class="repeater-inline form-inline form-sm sf-filters-list">
             @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
         </div>
 

@@ -44,16 +44,16 @@
     </p>
     @Html.ValueLine(e, f => f.WithoutFilters)
 
-    <div class="form-inline form-sm sf-filters-list ">
+    <div class="repeater-inline form-inline form-sm sf-filters-list ">
         @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     </div>
 
     @Html.ValueLine(e, f => f.ColumnsMode)
-    <div class="form-inline form-sm sf-filters-list">
+    <div class="repeater-inline form-inline form-sm sf-filters-list">
         @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
     </div>
     
-    <div class="form-inline form-sm sf-filters-list">
+    <div class="repeater-inline form-inline form-sm sf-filters-list">
         @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
     </div>
     @Html.ValueLine(e, f => f.PaginationMode)
