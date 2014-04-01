@@ -29,6 +29,7 @@ namespace Signum.Web
             this.tabs.Add(tab);
         }
 
+
         public void Tab(string id, string title, MvcHtmlString body)
         {
             this.tabs.Add(new Tab(id, title) { Body = new HelperResult(writer => writer.Write(body)) });
@@ -38,6 +39,7 @@ namespace Signum.Web
         {
             this.tabs.Add(new Tab(id, title) { Body = body(null) });
         }
+
 
         public void Tab(string id, MvcHtmlString title, MvcHtmlString body)
         {
@@ -49,10 +51,17 @@ namespace Signum.Web
             this.tabs.Add(new Tab(id, title) { Body = body(null) });
         }
 
+
+        public void Tab(string id, Func<object, HelperResult> title, MvcHtmlString body)
+        {
+            this.tabs.Add(new Tab(id) { Title = title(null), Body = new HelperResult(writer => writer.Write(body)) });
+        }
+
         public void Tab(string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
         {
             this.tabs.Add(new Tab(id) { Title = title(null), Body = body(null) });
         }
+
 
         public void Dispose()
         {
