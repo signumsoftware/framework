@@ -826,7 +826,7 @@ var SF;
             return promise().then(function (val) {
                 disable();
                 return val;
-            }).catch(function (err) {
+            })['catch'](function (err) {
                 disable();
                 throw err;
                 return null;

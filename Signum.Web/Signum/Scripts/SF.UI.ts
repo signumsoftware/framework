@@ -870,7 +870,7 @@ module SF {
 
             return promise()
                 .then(val=> { disable(); return val; })
-                .catch(err=> { disable(); throw err; return <T>null; }); //Typescript bug?
+                ['catch'](err=> { disable(); throw err; return <T>null; }); //Typescript bug?
         }
     }
 
