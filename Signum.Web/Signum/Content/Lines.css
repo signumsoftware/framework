@@ -33,12 +33,19 @@ label > input[type=checkbox]
     max-width: 100px;
 } 
 
-/* Buttons */
-.btn.btn-default.sf-line-button,
+
 .sf-entity-line-entity
 {
     background: transparent;
+    overflow: hidden;
 }
+
+/* Buttons */
+.btn.btn-default.sf-line-button
+{
+    background: transparent;
+}
+
 
 .sf-line-button
 {
