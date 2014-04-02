@@ -74,7 +74,7 @@ namespace Signum.Web
             MappingRepository<decimal?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
             MappingRepository<DateTime?>.Mapping = GetValue(ctx =>
             {
-                var input = ctx.HasInput ? ctx.Input : ctx.Inputs["Date"] + " " + ctx.Inputs["Time"];
+                var input = ctx.HasInput ? ctx.Input : " ".CombineIfNotEmpty(ctx.Inputs["Date"], ctx.Inputs["Time"]);
                 return input.HasText() ? DateTime.Parse(input).FromUserInterface() : (DateTime?)null;
             });
             MappingRepository<Guid?>.Mapping = GetValueNullable(ctx => Guid.Parse(ctx.Input));
