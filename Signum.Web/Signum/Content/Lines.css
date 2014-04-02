@@ -299,3 +299,12 @@ ul.dropdown-menu > li > a.disabled
     opacity: .65;
 }
 
+/*Override absurd width for md popups */
+@media (min-width: 768px)
+{
+    .modal-dialog
+    {
+        width: 730px;
+        margin: 30px auto;
+    }
+}
