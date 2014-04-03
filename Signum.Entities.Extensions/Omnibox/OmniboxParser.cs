@@ -35,6 +35,7 @@ namespace Signum.Entities.Omnibox
 @"(?<entity>[a-zA-Z_][a-zA-Z0-9_]*;\d+)|
 (?<space>\s+)|
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
+(?<ident>\[[a-zA-Z_][a-zA-Z0-9_]*\])|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
 (?<comparer>(" + FilterValueConverter.OperationRegex + @"))|
