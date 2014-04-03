@@ -355,7 +355,7 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     string text = m.Groups["text"].Value;
 
-                    byte[] bytes = m.Groups["cod"].Value == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text);
+                    byte[] bytes = m.Groups["cod"].Value.ToUpper() == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text);
 
                     var result = Encoding.GetEncoding(m.Groups["enc"].Value.ToLower()).GetString(bytes);
 
