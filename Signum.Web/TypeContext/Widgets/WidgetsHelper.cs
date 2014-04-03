@@ -61,7 +61,7 @@ namespace Signum.Web
                 {
                     foreach (var mi in Items)
                     {
-                        sb.AddLine(mi.ToHtml(helper));
+                        sb.AddLine(mi.ToHtml());
                     }
                 }
             }

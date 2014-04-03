@@ -131,7 +131,7 @@ namespace Signum.Web
         {
         }
 
-        public MvcHtmlString ToHtml(HtmlHelper helper)
+        public MvcHtmlString ToHtml()
         {
             return new HtmlTag("li").Class("sf-quick-link").Attr("data-name", Name).InnerHtml(Execute());
         }

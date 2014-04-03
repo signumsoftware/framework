@@ -104,7 +104,7 @@ namespace Signum.Web
 
     public interface IMenuItem 
     {
-        MvcHtmlString ToHtml(HtmlHelper helper);
+        MvcHtmlString ToHtml();
     }
 
     public class MenuItem : IMenuItem
@@ -128,7 +128,7 @@ namespace Signum.Web
             HtmlProps = new Dictionary<string, object>(0);
         }
 
-        public MvcHtmlString ToHtml(HtmlHelper helper)
+        public MvcHtmlString ToHtml()
         {
             var a = new HtmlTag("a")
                .Id(Id)
