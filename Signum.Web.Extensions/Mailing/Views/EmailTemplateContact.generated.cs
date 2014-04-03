@@ -67,37 +67,69 @@ namespace Signum.Web.Extensions.Mailing.Views
             #line 5 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
  using (var tc = Html.TypeContext<EmailTemplateContactDN>())
 {
-    using (Html.FormInline())
+    
+    using(var sc = tc.SubContext())
     {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.EmailAddress));
+        sc.LabelColumns = new BsColumn(4);
 
             
             #line default
             #line hidden
+WriteLiteral("        <div");
+
+WriteLiteral(" class=\"row\"");
+
+WriteLiteral(">\r\n            <div");
+
+WriteLiteral(" class=\"col-sm-2\"");
+
+WriteLiteral(" style=\"text-align: right;padding: 8px;\"");
+
+WriteLiteral(">\r\n                <label>");
+
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.DisplayName));
+            #line 13 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+                  Write(Html.PropertyNiceName((EmailTemplateDN e)=>e.From));
 
             
             #line default
             #line hidden
+WriteLiteral("</label>\r\n            </div>\r\n            <div");
+
+WriteLiteral(" class=\"col-sm-5\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                   ");
+
             
-            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                           
+            #line 16 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+              Write(Html.ValueLine(sc, c => c.EmailAddress));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </div>\r\n            <div");
+
+WriteLiteral(" class=\"col-sm-5\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                  ");
+
+            
+            #line 19 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+             Write(Html.ValueLine(sc, c => c.DisplayName));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </div>\r\n        </div>\r\n");
+
+            
+            #line 22 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
     }
+    
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
     {
     
@@ -105,7 +137,7 @@ Write(Html.ValueLine(tc, c => c.DisplayName));
             #line default
             #line hidden
             
-            #line 14 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 26 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
 Write(Html.FormGroup(qtTc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, MailingClient.GetQueryTokenBuilderSettings(
         (QueryDescription)ViewData[ViewDataKeys.QueryDescription]))));
 
@@ -113,7 +145,7 @@ Write(Html.FormGroup(qtTc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, M
             #line default
             #line hidden
             
-            #line 15 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
                                                                     
     }
 }

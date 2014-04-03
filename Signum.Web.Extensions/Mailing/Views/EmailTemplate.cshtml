@@ -7,48 +7,66 @@
 
 @using (var ec = Html.TypeContext<EmailTemplateDN>())
 {
-    <div style="float: left">
+    ec.LabelColumns = new BsColumn(3);
+    <div class="col-sm-8">
         @Html.ValueLine(ec, e => e.Name)
         @Html.EntityCombo(ec, e => e.SystemEmail)
         @Html.EntityLine(ec, e => e.Query)
         @Html.EntityLine(ec, e => e.SmtpConfiguration)
-        @Html.ValueLine(ec, e => e.EditableMessage)
-        @Html.ValueLine(ec, e => e.DisableAuthorization)
+        <div class="row">
+            <div class="col-sm-4">
+                @Html.ValueLine(ec, e => e.EditableMessage, vl => vl.InlineCheckbox = true)
+            </div>
+            <div class="col-sm-4">
+                @Html.ValueLine(ec, e => e.DisableAuthorization, vl => vl.InlineCheckbox = true)
+            </div>
+            <div class="col-sm-4">
+                @Html.ValueLine(ec, e => e.SendDifferentMessages, vl => vl.InlineCheckbox = true)
+            </div>
+        </div>
     </div>
     
     if (!ec.Value.IsNew)
     {
-    <fieldset style="float: left">
-        <legend>Active</legend>
-        @Html.ValueLine(ec, e => e.Active)
-        @Html.ValueLine(ec, e => e.StartDate)
-        @Html.ValueLine(ec, e => e.EndDate)
-    </fieldset>
+
+        using (var sc = ec.SubContext())
+        {
+            sc.FormGroupStyle = FormGroupStyle.Basic;
+    <div class="col-sm-4 form-vertical">
+        <fieldset>
+            <legend>Active</legend>
+            @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
+            @Html.ValueLine(sc, e => e.StartDate)
+            @Html.ValueLine(sc, e => e.EndDate)
+        </fieldset>
+    </div>
+        }
     }
-    
-    <div class="clearall"></div>
-        
+    ec.LabelColumns = new BsColumn(2);
     if (ec.Value.Query != null)
     {
         object queryName = QueryLogic.ToQueryName(ec.Value.Query.Key);
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
         
-        @Html.ValueLine(ec, e => e.SendDifferentMessages)
-        @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
+    @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
+    <div class="repeater-inline">
         @Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true)
-    
-        @Html.EntityLine(ec, e => e.MasterTemplate)
-        @Html.ValueLine(ec, e => e.IsBodyHtml)
+    </div>
+    @Html.EntityLine(ec, e => e.MasterTemplate)
+    @Html.ValueLine(ec, e => e.IsBodyHtml)
 
-            @Html.EntityTabRepeater(ec, e => e.Messages, er =>
+    <div class="sf-email-replacements-container">
+        @Html.EntityTabRepeater(ec, e => e.Messages, er =>
        {
            er.PreserveViewData = true;
        })
+
+    </div>
     }
 }
 
 <script>
     $(function () {
-        @(new JsFunction(MailingClient.Module, "initReplacements"))
-    });
+            @(new JsFunction(MailingClient.Module, "initReplacements"))
+        });
 </script>

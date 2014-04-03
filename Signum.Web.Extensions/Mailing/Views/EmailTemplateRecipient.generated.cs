@@ -61,51 +61,70 @@ namespace Signum.Web.Extensions.Mailing.Views
             #line 4 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
  using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
 {
-    using (Html.FormInline())
+    using (var sc = tc.SubContext())
     {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-Write(Html.ValueLine(tc, c => c.Kind));
+        sc.LabelColumns = new BsColumn(4);
 
             
             #line default
             #line hidden
+WriteLiteral("    <div");
+
+WriteLiteral(" class=\"row\"");
+
+WriteLiteral(">\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-2\"");
+
+WriteLiteral(" style=\"text-align: right;\"");
+
+WriteLiteral(">\r\n            <label>\r\n");
+
+WriteLiteral("                ");
+
             
-            #line 8 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-                                    
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-Write(Html.ValueLine(tc, c => c.EmailAddress));
+            #line 12 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+           Write(Html.ValueLine(tc, c => c.Kind, vl => vl.FormGroupStyle = FormGroupStyle.None));
 
             
             #line default
             #line hidden
+WriteLiteral("\r\n            </label>\r\n        </div>\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-5\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
+
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-Write(Html.ValueLine(tc, c => c.DisplayName));
+            #line 16 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+       Write(Html.ValueLine(sc, c => c.EmailAddress));
 
             
             #line default
             #line hidden
+WriteLiteral("\r\n        </div>\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-5\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
+
             
-            #line 10 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-                                           
+            #line 19 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+       Write(Html.ValueLine(sc, c => c.DisplayName));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 22 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
     }
+
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
     {
     
@@ -113,7 +132,7 @@ Write(Html.ValueLine(tc, c => c.DisplayName));
             #line default
             #line hidden
             
-            #line 14 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 26 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
 Write(Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, SearchControlHelper.GetQueryTokenBuilderSettings(
             (QueryDescription)ViewData[ViewDataKeys.QueryDescription]))));
 
@@ -121,7 +140,7 @@ Write(Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, Sea
             #line default
             #line hidden
             
-            #line 15 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
                                                                         
     }
 }
