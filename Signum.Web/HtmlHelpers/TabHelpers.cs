@@ -32,34 +32,34 @@ namespace Signum.Web
 
         public void Tab(string id, string title, MvcHtmlString body)
         {
-            this.tabs.Add(new Tab(id, title) { Body = new HelperResult(writer => writer.Write(body)) });
+            this.tabs.Add(new Tab(id, title, body));
         }
 
         public void Tab(string id, string title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id, title) { Body = body(null) });
+            this.tabs.Add(new Tab(id, title, body(null)));
         }
 
 
         public void Tab(string id, MvcHtmlString title, MvcHtmlString body)
         {
-            this.tabs.Add(new Tab(id, title) { Body = new HelperResult(writer => writer.Write(body)) });
+            this.tabs.Add(new Tab(id, title, body));
         }
 
         public void Tab(string id, MvcHtmlString title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id, title) { Body = body(null) });
+            this.tabs.Add(new Tab(id, title, body(null)));
         }
 
 
         public void Tab(string id, Func<object, HelperResult> title, MvcHtmlString body)
         {
-            this.tabs.Add(new Tab(id) { Title = title(null), Body = new HelperResult(writer => writer.Write(body)) });
+            this.tabs.Add(new Tab(id, title(null), body));
         }
 
         public void Tab(string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id) { Title = title(null), Body = body(null) });
+            this.tabs.Add(new Tab(id, title(null), body(null)));
         }
 
 
@@ -102,19 +102,37 @@ namespace Signum.Web
         public HelperResult Title;
         public HelperResult Body; 
 
-        public Tab(string id) 
+        public Tab(string id, string title, MvcHtmlString body)
+            :this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, string title, HelperResult body)
+            : this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), body)
+        {
+        }
+
+
+        public Tab(string id, MvcHtmlString title, MvcHtmlString body)
+            : this(id, new HelperResult(writer => writer.Write(title)), new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, MvcHtmlString title, HelperResult body)
+            : this(id, new HelperResult(writer => writer.Write(title)), body)
+        {
+        }
+
+        public Tab(string id, HelperResult title, MvcHtmlString body)
+            : this(id, title, new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, HelperResult title, HelperResult body)
         {
             this.Id = id;
-        }
-
-        public Tab(string id, MvcHtmlString title) : this(id) 
-        {
-            this.Title = new HelperResult(writer => writer.Write(title));
-        }
-
-        public Tab(string id, string title)
-            : this(id, new MvcHtmlString(HttpUtility.HtmlEncode(title)))
-        {
+            this.Title = title;
+            this.Body = body;
         }
     }
 }

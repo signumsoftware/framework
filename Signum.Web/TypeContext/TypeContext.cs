@@ -349,24 +349,24 @@ namespace Signum.Web
 
     public class ViewOverrides : IViewOverrides
     {
-        Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> beforeFieldset;
-        public ViewOverrides BeforeTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
+        public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> BeforeTabDictionary;
+        public ViewOverrides BeforeTab<T>(string id, Func<HtmlHelper, TypeContext<T>, Tab> constructor) where T:IdentifiableEntity
         {
-            if (beforeFieldset == null)
-                beforeFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
+            if (BeforeTabDictionary == null)
+                BeforeTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
 
-            beforeFieldset.Add(id, constructor);
+            BeforeTabDictionary[id] = BeforeTabDictionary.TryGetC(id) + new Func<HtmlHelper, TypeContext, Tab>((html, tc) => constructor(html, (TypeContext<T>)tc));
 
             return this;
         }
 
-        Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> afterFieldset;
-        public ViewOverrides AfterTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
+        public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> AfterTabDictionary;
+        public ViewOverrides AfterTab<T>(string id, Func<HtmlHelper, TypeContext, Tab> constructor) where T : IdentifiableEntity
         {
-            if (afterFieldset == null)
-                afterFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
+            if (AfterTabDictionary == null)
+                AfterTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
 
-            afterFieldset.Add(id, constructor);
+            AfterTabDictionary[id] = AfterTabDictionary.TryGetC(id) + new Func<HtmlHelper, TypeContext, Tab>((html, tc) => constructor(html, (TypeContext<T>)tc));
 
             return this;
         }
@@ -375,31 +375,35 @@ namespace Signum.Web
         {
             List<Tab> newTabs = new List<Tab>();
 
-            var before = beforeFieldset.TryGetC(containerId);
-            if(before != null)
-                Expand(before(helper, context), helper, context, newTabs); 
+            var before = BeforeTabDictionary.TryGetC(containerId);
+            if (before != null)
+                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                    Expand(b(helper, context), helper, context, newTabs);
 
-            foreach (var item in newTabs)
+            foreach (var item in tabs)
                 Expand(item, helper, context, newTabs);
 
-            var after = afterFieldset.TryGetC(containerId);
+            var after = AfterTabDictionary.TryGetC(containerId);
             if (after != null)
-                Expand(after(helper, context), helper, context, newTabs); 
+                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                    Expand(a(helper, context), helper, context, newTabs);
 
             return newTabs;
         }
 
         void Expand(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
         {
-            var before = beforeFieldset.TryGetC(item.Id);
+            var before = BeforeTabDictionary.TryGetC(item.Id);
             if (before != null)
-                Expand(before(helper, context), helper, context, newTabs);
+                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                    Expand(b(helper, context), helper, context, newTabs);
 
             newTabs.Add(item);
 
-            var after = afterFieldset.TryGetC(item.Id);
+            var after = AfterTabDictionary.TryGetC(item.Id);
             if (after != null)
-                Expand(after(helper, context), helper, context, newTabs);
+                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                    Expand(a(helper, context), helper, context, newTabs);
         }
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
@@ -414,7 +418,7 @@ namespace Signum.Web
             if (beforeLine == null)
                 beforeLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
 
-            beforeLine.Add(propertyRoute, constructor);
+            beforeLine[propertyRoute] = beforeLine.TryGetC(propertyRoute) + constructor;
 
             return this; 
         }
@@ -432,7 +436,7 @@ namespace Signum.Web
             if (afterLine == null)
                 afterLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
 
-            afterLine.Add(propertyRoute, constructor);
+            afterLine[propertyRoute] = afterLine.TryGetC(propertyRoute) + constructor;
 
             return this;
         }
@@ -442,11 +446,13 @@ namespace Signum.Web
         {
             var before = beforeLine.TryGetC(propertyRoute);
             if (before != null)
-                result = before(helper, tc).Concat(result);
+                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                    result = b(helper, tc).Concat(result);
 
             var after = afterLine.TryGetC(propertyRoute);
             if (after != null)
-                result = result.Concat(after(helper, tc));
+                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                    result = result.Concat(a(helper, tc));
 
             return result;
         }
