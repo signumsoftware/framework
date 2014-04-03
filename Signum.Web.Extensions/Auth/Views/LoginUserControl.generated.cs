@@ -51,14 +51,17 @@ namespace Signum.Web.Extensions.Auth.Views
             #line hidden
             
             #line 3 "..\..\Auth\Views\LoginUserControl.cshtml"
-Write(Html.ActionLink(AuthMessage.Logout.NiceToString() + " " + UserDN.Current, "Logout" , "Auth", null, new { @class = "sf-logout" }));
+Write(Html.ActionLink(AuthMessage.Logout.NiceToString() + " " + UserDN.Current, "Logout" , "Auth", null, new Dictionary<string, object> { 
+        {"class", "sf-logout"},
+        {"data-user", UserDN.Current.UserName },
+    }));
 
             
             #line default
             #line hidden
             
-            #line 3 "..\..\Auth\Views\LoginUserControl.cshtml"
-                                                                                                                                     
+            #line 6 "..\..\Auth\Views\LoginUserControl.cshtml"
+      ;
 }
 else
 { 
@@ -67,14 +70,14 @@ else
             #line default
             #line hidden
             
-            #line 7 "..\..\Auth\Views\LoginUserControl.cshtml"
+            #line 10 "..\..\Auth\Views\LoginUserControl.cshtml"
 Write(Html.ActionLink(AuthMessage.Login.NiceToString(), "Login", "Auth", null, new { @class = "sf-login" }));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Auth\Views\LoginUserControl.cshtml"
+            #line 10 "..\..\Auth\Views\LoginUserControl.cshtml"
                                                                                                           
 }
 
