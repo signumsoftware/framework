@@ -24,7 +24,7 @@ using Signum.Entities.Basics;
 using System.Net.Mime;
 using System.Threading;
 
-namespace Signum.Engine.Mailing
+namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
