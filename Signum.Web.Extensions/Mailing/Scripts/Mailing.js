@@ -110,14 +110,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     function changeButtonState($button, disablingMessage) {
         var hiddenId = $button.attr("id") + "temp";
         if (typeof disablingMessage != "undefined") {
-            $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+            $button.attr("disabled", "disabled").attr("title", disablingMessage);
             $button.unbind('click').bind('click', function (e) {
                 e.preventDefault();
                 return false;
             });
         } else {
             var self = this;
-            $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+            $button.attr("disabled", null).attr("title", "");
             $button.unbind('click');
         }
     }
@@ -252,8 +252,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             }).reduce(function (a, b) {
                 return a + b;
             }, 0) + 100;
-
-            newHeight = Math.min(newHeight, 2000);
 
             if (Math.abs(currHeight - newHeight) > 100) {
                 $iframe.css("height", newHeight);
