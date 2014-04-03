@@ -13,12 +13,12 @@ export interface FindOptions {
     columns?: ColumnOption[];
     create?: boolean;
     elems?: number;
-    selectedItemsContextMenu?: boolean;
     showHeader?: boolean;
     showFilters?: boolean;
     showFilterButton?: boolean;
     showFooter?: boolean;
     showContextMenu?: boolean;
+    selectedItemsContextMenu?: boolean;
     filters?: FilterOption[];
     navigate?: boolean;
     openFinderUrl?: boolean;
