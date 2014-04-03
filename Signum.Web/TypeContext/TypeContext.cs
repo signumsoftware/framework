@@ -31,12 +31,12 @@ namespace Signum.Web
             if(parent == null)
             {
                 this.Parent = Default;
-                this.Prefix = prefix; 
+                this.Prefix = prefix ?? ""; 
             }
             else
             {
                 this.Parent = parent;
-                this.Prefix = parent.Compose(prefix); 
+                this.Prefix = parent.Compose(prefix) ?? ""; 
             }
         }
 

@@ -93,8 +93,7 @@ namespace Signum.Web.Controllers
             if (items.IsNullOrEmpty())
                 return Content("");
 
-            var helper = CreateHtmlHelper(this);
-            var sb = new HtmlStringBuilder(items.Select(mi => mi.ToHtml(helper)));
+            var sb = new HtmlStringBuilder(items.Select(mi => mi.ToHtml()));
             sb.Add(new MvcHtmlString(@"<script>$(function(){ $('[data-toggle=""tooltip""]').tooltip({}); });</script>"));
             return Content(sb.ToHtml().ToString());
         }

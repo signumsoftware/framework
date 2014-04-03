@@ -41,7 +41,7 @@ namespace Signum.Web
                 {
                     if (Items != null)
                         foreach (var ci in Items)
-                            sb.Add(ci.ToHtml(helper));
+                            sb.Add(ci.ToHtml());
                 }
             }
 
@@ -51,7 +51,7 @@ namespace Signum.Web
 
     public class MenuItemSeparator : IMenuItem
     {
-        public MvcHtmlString ToHtml(HtmlHelper helper)
+        public MvcHtmlString ToHtml()
         {
             return new HtmlTag("li").Class("divider").ToHtml();
         }
@@ -65,7 +65,7 @@ namespace Signum.Web
             this.Text = text;
         }
 
-        public MvcHtmlString ToHtml(HtmlHelper helper)
+        public MvcHtmlString ToHtml()
         {
             return new HtmlTag("li").Class("dropdown-header").SetInnerText(this.Text).ToHtml();
         }

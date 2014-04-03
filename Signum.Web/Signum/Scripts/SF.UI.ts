@@ -200,7 +200,7 @@ module SF {
             $("#sfContextMenu").hide();
         }
 
-        export function createContextMenu(e : JQueryEventObject) {
+        export function createContextMenu(e: { pageX: number; pageY: number }) {
 
             var menu = $("#sfContextMenu");
 
