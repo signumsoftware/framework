@@ -72,20 +72,6 @@ Write(Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attac
             
             #line 7 "..\..\Mailing\Views\EmailAttachment.cshtml"
                                                                                                                                    
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\EmailAttachment.cshtml"
-Write(Html.ValueLine(sc, c => c.Type));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\EmailAttachment.cshtml"
-                                    
 }
 
             

@@ -2,11 +2,20 @@
 
 @using (var sc = Html.TypeContext<EmailRecipientDN>())
 {
-    using (Html.FieldInline())
-    {
-    @Html.ValueLine(sc, c => c.Kind)
-    @Html.EntityLine(sc, c => c.EmailOwner)
-    @Html.ValueLine(sc, c => c.EmailAddress, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
-    @Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
-    }
+    sc.PlaceholderLabels = true;
+    sc.FormGroupStyle = FormGroupStyle.SrOnly;
+    <div class="row form-vertical">
+        <div class="col-sm-1">
+            @Html.ValueLine(sc, c => c.Kind)
+        </div>
+        <div class="col-sm-4">
+            @Html.EntityLine(sc, ea => ea.EmailOwner)
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(sc, c => c.EmailAddress)
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
+        </div>
+    </div>
 }
