@@ -62,8 +62,7 @@ namespace Signum.Web
                         }
                 }
 
-                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-                if (repeater.ElementType.IsEmbeddedEntity())
+                if (repeater.ElementType.IsEmbeddedEntity() && !repeater.ReadOnly)
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), templateTC.Value.ToString()));

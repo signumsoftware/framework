@@ -65,7 +65,7 @@ namespace Signum.Web
                         sb.AddLine(EntityBaseHelper.RenderContent(helper, (TypeContext)entityDetail.Parent, RenderContentMode.Content, entityDetail));
                 }
 
-                if (entityDetail.Type.IsEmbeddedEntity())
+                if (entityDetail.Type.IsEmbeddedEntity() && !entityDetail.ReadOnly)
                 {
                     TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail), null));
