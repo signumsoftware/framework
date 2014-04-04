@@ -158,15 +158,8 @@ namespace Signum.Engine.Mailing.Pop3
             if (string.IsNullOrEmpty(message.Subject))
                 message.Subject = GetHeaderValue(message.Headers, "subject");
 
-            try
-            {
-                message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
-            }
-            catch
-            {
-                message.From = new MailAddress("error@error.com");
-            }
-
+            message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
+          
             FillAddressesCollection(message.CC, message.Headers["cc"]);
             FillAddressesCollection(message.To, message.Headers["to"]);
             FillAddressesCollection(message.Bcc, message.Headers["bcc"]);
@@ -191,18 +184,11 @@ namespace Signum.Engine.Mailing.Pop3
             if (string.IsNullOrEmpty(addressHeader))
                 return;
 
-            foreach (var email in addressHeader.Split(','))
-            {
-                MailAddress address;
+            var cleanAddress = Regex.Replace(addressHeader, "\"[^\"]*\"", str => str.Value.Replace(',', '.'));
 
-                try
-                {
-                    address = new MailAddress(email);
-                }
-                catch
-                {
-                    address = new MailAddress("error@error.com");
-                }
+            foreach (var email in cleanAddress.Split(','))
+            {
+                MailAddress address = new MailAddress(email);
 
                 addresses.Add(address);
             }
