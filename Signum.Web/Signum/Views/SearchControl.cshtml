@@ -32,7 +32,7 @@
 
 
     @{
-        bool filtersAlwaysHidden = !findOptions.ShowFilters && !findOptions.ShowFilterButton;
+        bool filtersAlwaysHidden = !findOptions.ShowHeader || !findOptions.ShowFilters && !findOptions.ShowFilterButton;
     }
 
     <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
