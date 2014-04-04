@@ -582,6 +582,7 @@ export class EntityListBase extends EntityBase {
     }
 
     setEntity(entityValue: Entities.EntityValue, itemPrefix?: string) {
+
         if (entityValue == null)
             throw new Error("entityValue is mandatory on setEntityItem");
 
@@ -602,7 +603,7 @@ export class EntityListBase extends EntityBase {
     }
 
     create_click(): Promise<string> {
-        var itemPrefix = this.getNextPrefix();
+        var itemPrefix = this.reserveNextPrefix();
         return this.onCreating(itemPrefix).then(entity => {
             if (entity) {
                 this.addEntity(entity, itemPrefix);
@@ -610,7 +611,9 @@ export class EntityListBase extends EntityBase {
             }
 
             return null;
-        });
+        }).then(
+            prefix => { this.freeReservedPrefix(itemPrefix); return prefix; },
+            error => { this.freeReservedPrefix(itemPrefix); throw error; return ""; });
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
@@ -668,15 +671,32 @@ export class EntityListBase extends EntityBase {
         return this.getPrefixes().map(p=> Entities.RuntimeInfo.getFromPrefix(p));
     }
 
-    getNextPrefix(inc: number = 0): string {
+    reservedPrefixes: string[] = []; 
 
-        var indices = this.getItems().toArray()
-            .map((e: HTMLElement) => parseInt(e.id.after(this.options.prefix + "_").before("_" + this.itemSuffix())));
+    reserveNextPrefix(): string {
 
-        var next: number = indices.length == 0 ? inc :
-            (Math.max.apply(null, indices) + 1 + inc);
+        var currentPrefixes = this.getItems().toArray().map((e: HTMLElement) => e.id.before("_" + this.itemSuffix()));
 
-        return SF.compose(this.options.prefix, next.toString());
+        for (var i = 0; ; i++)
+        {
+            var newPrefix = this.options.prefix + "_" + i;
+
+            if (this.reservedPrefixes.indexOf(newPrefix) == -1 &&
+                currentPrefixes.indexOf(newPrefix) == -1) {
+
+                this.reservedPrefixes.push(newPrefix);
+
+                return newPrefix;
+            }
+        }
+    }
+
+    freeReservedPrefix(itemPrefix : string) {
+        var index = this.reservedPrefixes.indexOf(itemPrefix);
+        if (index == -1)
+            throw Error("itemPrefix not reserved: " + itemPrefix);
+
+        return this.reservedPrefixes.splice(index, 1);
     }
 
     getLastPosIndex(): number {
@@ -700,12 +720,14 @@ export class EntityListBase extends EntityBase {
     }
 
     find_click(): Promise<string> {
+
+        var prefixes = [];
+
         return this.onFindingMany(this.options.prefix).then(result => {
             if (result) {
-                var prefixes = [];
 
                 result.forEach(ev=> {
-                    var pr = this.getNextPrefix();
+                    var pr = this.reserveNextPrefix();
                     prefixes.push(pr);
                     this.addEntity(ev, pr);
                 });
@@ -714,7 +736,9 @@ export class EntityListBase extends EntityBase {
             }
 
             return null;
-        });
+        }).then(
+            prefix => { prefixes.forEach(this.freeReservedPrefix); return prefix; },
+            error => { prefixes.forEach(this.freeReservedPrefix); throw error; return ""; });
     }
 
     onFinding(prefix: string): Promise<Entities.EntityValue> {
@@ -1081,13 +1105,17 @@ export class EntityRepeater extends EntityListBase {
                     return;
 
                 return Promise.all(result
-                    .map((e, i) => ({ entity: e, prefix: this.getNextPrefix(i) }))
-                    .map(t => {
-                        var promise = t.entity.isLoaded() ? Promise.resolve(<Entities.EntityHtml>t.entity) :
-                            Navigator.requestPartialView(new Entities.EntityHtml(t.prefix, t.entity.runtimeInfo), this.defaultViewOptions())
+                    .map(e => {
+                        var itemPrefix = this.reserveNextPrefix();
 
-                        return promise.then(ev=> { this.addEntity(ev, t.prefix); return t.prefix; });
-                    })).then(result => result.join(","));
+                        var promise = e.isLoaded() ? Promise.resolve(<Entities.EntityHtml>e) :
+                            Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), this.defaultViewOptions())
+
+                        return promise.then(
+                            ev=> { this.addEntity(ev, itemPrefix); this.freeReservedPrefix(itemPrefix); return itemPrefix; },
+                            error => this.freeReservedPrefix(itemPrefix));
+                    }))
+                    .then(result => result.join(","));
             });
     }
 
@@ -1280,8 +1308,10 @@ export class EntityStrip extends EntityList {
     }
 
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
-        this.addEntity(entityValue, this.getNextPrefix());
+        var prefix = this.reserveNextPrefix();
+        this.addEntity(entityValue, prefix);
         $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").val('');
+        this.freeReservedPrefix(prefix);
     }
 }
 

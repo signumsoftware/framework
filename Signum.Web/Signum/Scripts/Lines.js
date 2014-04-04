@@ -487,6 +487,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         __extends(EntityListBase, _super);
         function EntityListBase(element, options) {
             _super.call(this, element, options);
+            this.reservedPrefixes = [];
         }
         EntityListBase.prototype.runtimeInfo = function (itemPrefix) {
             return $("#" + SF.compose(itemPrefix, Entities.Keys.runtimeInfo));
@@ -549,7 +550,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityListBase.prototype.create_click = function () {
             var _this = this;
-            var itemPrefix = this.getNextPrefix();
+            var itemPrefix = this.reserveNextPrefix();
             return this.onCreating(itemPrefix).then(function (entity) {
                 if (entity) {
                     _this.addEntity(entity, itemPrefix);
@@ -557,6 +558,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }
 
                 return null;
+            }).then(function (prefix) {
+                _this.freeReservedPrefix(itemPrefix);
+                return prefix;
+            }, function (error) {
+                _this.freeReservedPrefix(itemPrefix);
+                throw error;
+                return "";
             });
         };
 
@@ -619,16 +627,29 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        EntityListBase.prototype.getNextPrefix = function (inc) {
+        EntityListBase.prototype.reserveNextPrefix = function () {
             var _this = this;
-            if (typeof inc === "undefined") { inc = 0; }
-            var indices = this.getItems().toArray().map(function (e) {
-                return parseInt(e.id.after(_this.options.prefix + "_").before("_" + _this.itemSuffix()));
+            var currentPrefixes = this.getItems().toArray().map(function (e) {
+                return e.id.before("_" + _this.itemSuffix());
             });
 
-            var next = indices.length == 0 ? inc : (Math.max.apply(null, indices) + 1 + inc);
+            for (var i = 0; ; i++) {
+                var newPrefix = this.options.prefix + "_" + i;
 
-            return SF.compose(this.options.prefix, next.toString());
+                if (this.reservedPrefixes.indexOf(newPrefix) == -1 && currentPrefixes.indexOf(newPrefix) == -1) {
+                    this.reservedPrefixes.push(newPrefix);
+
+                    return newPrefix;
+                }
+            }
+        };
+
+        EntityListBase.prototype.freeReservedPrefix = function (itemPrefix) {
+            var index = this.reservedPrefixes.indexOf(itemPrefix);
+            if (index == -1)
+                throw Error("itemPrefix not reserved: " + itemPrefix);
+
+            return this.reservedPrefixes.splice(index, 1);
         };
 
         EntityListBase.prototype.getLastPosIndex = function () {
@@ -653,12 +674,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityListBase.prototype.find_click = function () {
             var _this = this;
+            var prefixes = [];
+
             return this.onFindingMany(this.options.prefix).then(function (result) {
                 if (result) {
-                    var prefixes = [];
-
                     result.forEach(function (ev) {
-                        var pr = _this.getNextPrefix();
+                        var pr = _this.reserveNextPrefix();
                         prefixes.push(pr);
                         _this.addEntity(ev, pr);
                     });
@@ -667,6 +688,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }
 
                 return null;
+            }).then(function (prefix) {
+                prefixes.forEach(_this.freeReservedPrefix);
+                return prefix;
+            }, function (error) {
+                prefixes.forEach(_this.freeReservedPrefix);
+                throw error;
+                return "";
             });
         };
 
@@ -1040,14 +1068,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (!result)
                     return;
 
-                return Promise.all(result.map(function (e, i) {
-                    return ({ entity: e, prefix: _this.getNextPrefix(i) });
-                }).map(function (t) {
-                    var promise = t.entity.isLoaded() ? Promise.resolve(t.entity) : Navigator.requestPartialView(new Entities.EntityHtml(t.prefix, t.entity.runtimeInfo), _this.defaultViewOptions());
+                return Promise.all(result.map(function (e) {
+                    var itemPrefix = _this.reserveNextPrefix();
+
+                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions());
 
                     return promise.then(function (ev) {
-                        _this.addEntity(ev, t.prefix);
-                        return t.prefix;
+                        _this.addEntity(ev, itemPrefix);
+                        _this.freeReservedPrefix(itemPrefix);
+                        return itemPrefix;
+                    }, function (error) {
+                        return _this.freeReservedPrefix(itemPrefix);
                     });
                 })).then(function (result) {
                     return result.join(",");
@@ -1218,8 +1249,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityStrip.prototype.onAutocompleteSelected = function (entityValue) {
-            this.addEntity(entityValue, this.getNextPrefix());
+            var prefix = this.reserveNextPrefix();
+            this.addEntity(entityValue, prefix);
             $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete").val('');
+            this.freeReservedPrefix(prefix);
         };
         EntityStrip.key_itemsContainer = "sfItemsContainer";
         EntityStrip.key_stripItem = "sfStripItem";

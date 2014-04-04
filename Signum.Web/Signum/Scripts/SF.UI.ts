@@ -188,7 +188,6 @@ once("disableTextSelect", () =>
         });
     }));
 
-
 module SF {
 
     export module ContextMenu {
