@@ -62,7 +62,7 @@ namespace Signum.Web
                         }
                 }
 
-                if (repeater.ElementType.IsEmbeddedEntity() && !repeater.ReadOnly)
+                if (repeater.ElementType.IsEmbeddedEntity() && repeater.Create)
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), templateTC.Value.ToString()));

@@ -66,7 +66,7 @@ namespace Signum.Web
                     }
                 }
 
-                if (entityStrip.ElementType.IsEmbeddedEntity() && !entityStrip.ReadOnly)
+                if (entityStrip.ElementType.IsEmbeddedEntity() && entityStrip.Create)
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true), null));
