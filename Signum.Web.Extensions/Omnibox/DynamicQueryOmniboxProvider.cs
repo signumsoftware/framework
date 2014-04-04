@@ -97,6 +97,9 @@ namespace Signum.Web.Omnibox
                 }
             }
 
+            if (findOptions.FilterOptions.Any())
+                findOptions.SearchOnLoad = true;
+
             return findOptions.ToString();
         }
         
