@@ -59,23 +59,29 @@ WriteLiteral("\r\n");
 {
     tc.FormGroupStyle = FormGroupStyle.None;
     tc.PlaceholderLabels = true;
-    using (Html.FormInline())
-    {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
-Write(Html.EntityRepeater(tc, p => p.Links));
 
             
             #line default
             #line hidden
+WriteLiteral("    <div");
+
+WriteLiteral(" class=\"form-inline repeater-inline\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("          ");
+
             
-            #line 10 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
-                                          
-    }
+            #line 9 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
+     Write(Html.EntityRepeater(tc, p => p.Links));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n    </div>\r\n");
+
+            
+            #line 11 "..\..\ControlPanel\Views\Admin\LinkListPart.cshtml"
 }
             
             #line default

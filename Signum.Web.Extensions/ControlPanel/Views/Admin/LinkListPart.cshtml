@@ -5,8 +5,7 @@
 {
     tc.FormGroupStyle = FormGroupStyle.None;
     tc.PlaceholderLabels = true;
-    using (Html.FormInline())
-    {
-    @Html.EntityRepeater(tc, p => p.Links)
-    }
+    <div class="form-inline repeater-inline">
+          @Html.EntityRepeater(tc, p => p.Links)
+    </div>
 }

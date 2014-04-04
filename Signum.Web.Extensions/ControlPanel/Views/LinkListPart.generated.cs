@@ -105,7 +105,7 @@ WriteLiteral("                ");
 
             
             #line 13 "..\..\ControlPanel\Views\LinkListPart.cshtml"
-           Write(Html.Href(link.Link, link.Label));
+           Write(Html.Href(link.Link, link.Label.DefaultText(link.Link)));
 
             
             #line default

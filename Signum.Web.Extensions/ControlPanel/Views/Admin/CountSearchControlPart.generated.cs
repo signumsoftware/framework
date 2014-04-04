@@ -65,23 +65,30 @@ WriteLiteral("\r\n");
 {
     tc.FormGroupStyle = FormGroupStyle.SrOnly;
     tc.PlaceholderLabels = true;
-    using (Html.FormInline())
-    {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 11 "..\..\ControlPanel\Views\Admin\CountSearchControlPart.cshtml"
-Write(Html.EntityRepeater(tc, p => p.UserQueries));
+  
 
             
             #line default
             #line hidden
+WriteLiteral("    <div");
+
+WriteLiteral(" class=\"form-inline repeater-inline\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("        ");
+
             
             #line 11 "..\..\ControlPanel\Views\Admin\CountSearchControlPart.cshtml"
-                                                
-    }
+   Write(Html.EntityRepeater(tc, p => p.UserQueries));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n    </div>\r\n");
+
+            
+            #line 13 "..\..\ControlPanel\Views\Admin\CountSearchControlPart.cshtml"
 }
 
             
