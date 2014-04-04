@@ -34,7 +34,7 @@ export function initialize(omniboxId: string, url: string) {
                 return item.cleanText;
 
             if (item.url) {
-                if ((<MouseEvent>e).ctrlKey)
+                if ((<MouseEvent>e).ctrlKey || (<MouseEvent>e).which == 2)
                     window.open(item.url);
                 else
                     window.location.assign(item.url);

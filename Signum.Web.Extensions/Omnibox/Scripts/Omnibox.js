@@ -38,7 +38,7 @@ define(["require", "exports"], function(require, exports) {
                     return item.cleanText;
 
                 if (item.url) {
-                    if (e.ctrlKey)
+                    if (e.ctrlKey || e.which == 2)
                         window.open(item.url);
                     else
                         window.location.assign(item.url);
