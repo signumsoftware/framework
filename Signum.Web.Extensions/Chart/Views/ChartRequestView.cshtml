@@ -54,7 +54,7 @@
         @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.Prefix, (Lite<UserChartDN>)ViewData["UserChart"]).ToStringButton(Html)
     </div>
     <br />
-    <div id="@Model.Compose("divResults")">
+    <div id="@Model.Compose("divResults")" class="sf-search-results-container">
         @{ Html.RenderPartial(ChartClient.ChartResultsView); }
     </div>
 </div>

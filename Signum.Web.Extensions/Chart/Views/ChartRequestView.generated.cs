@@ -360,6 +360,8 @@ WriteAttribute("id", Tuple.Create(" id=\"", 2955), Tuple.Create("\"", 2988)
 , 2960), false)
 );
 
+WriteLiteral(" class=\"sf-search-results-container\"");
+
 WriteLiteral(">\r\n");
 
             
