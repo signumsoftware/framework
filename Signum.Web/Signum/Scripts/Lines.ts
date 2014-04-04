@@ -147,10 +147,14 @@ export class EntityBase {
         this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
     }
 
-    remove_click(): Promise<void> {
+    remove_click(): Promise<string> {
         return this.onRemove(this.options.prefix).then(result=> {
-            if (result)
+            if (result) {
                 this.setEntity(null);
+                return this.options.prefix;
+            }
+
+            return null;
         });
     }
 
@@ -161,10 +165,14 @@ export class EntityBase {
         return Promise.resolve(true);
     }
 
-    create_click(): Promise<void> {
+    create_click(): Promise<string> {
         return this.onCreating(this.options.prefix).then(result => {
-            if (result)
+            if (result) {
                 this.setEntity(result);
+                return this.options.prefix;
+            }
+
+            return null;
         });
     }
 
@@ -207,14 +215,18 @@ export class EntityBase {
         return result;
     }
 
-    view_click(): Promise<void> {
+    view_click(): Promise<string> {
         var entityHtml = this.extractEntityHtml();
 
         return this.onViewing(entityHtml).then(result=> {
-            if (result)
+            if (result) {
                 this.setEntity(result);
-            else
+                return this.options.prefix;
+            }
+            else {
                 this.setEntity(entityHtml); //previous entity passed by reference
+                return null;
+            }
         });
     }
 
@@ -225,10 +237,14 @@ export class EntityBase {
         return Navigator.viewPopup(entityHtml, this.defaultViewOptions());
     }
 
-    find_click(): Promise<void> {
+    find_click(): Promise<string> {
         return this.onFinding(this.options.prefix).then(result => {
-            if (result)
+            if (result) {
                 this.setEntity(result);
+                return this.options.prefix;
+            }
+
+            return null;
         });
     }
 
@@ -484,7 +500,7 @@ export class EntityLineDetail extends EntityBase {
         });
     }
 
-    find_click(): Promise<void> {
+    find_click(): Promise<string> {
         return this.onFinding(this.options.prefix).then(result => {
             if (result == null)
                 return null;
@@ -494,8 +510,12 @@ export class EntityLineDetail extends EntityBase {
 
             return Navigator.requestPartialView(new Entities.EntityHtml(this.options.prefix, result.runtimeInfo), this.defaultViewOptions());
         }).then(result => {
-                if (result)
+                if (result) {
                     this.setEntity(result);
+                    return this.options.prefix;
+                }
+
+                return null;
             });
     }
 }
@@ -581,11 +601,15 @@ export class EntityListBase extends EntityBase {
         }
     }
 
-    create_click(): Promise<void> {
+    create_click(): Promise<string> {
         var itemPrefix = this.getNextPrefix();
         return this.onCreating(itemPrefix).then(entity => {
-            if (entity)
+            if (entity) {
                 this.addEntity(entity, itemPrefix);
+                return itemPrefix;
+            }
+
+            return null;
         });
     }
 
@@ -675,10 +699,21 @@ export class EntityListBase extends EntityBase {
         return SF.isEmpty(this.options.maxElements) || this.getItems().length < this.options.maxElements;
     }
 
-    find_click(): Promise<void> {
+    find_click(): Promise<string> {
         return this.onFindingMany(this.options.prefix).then(result => {
-            if (result)
-                result.forEach(ev=> this.addEntity(ev, this.getNextPrefix()));
+            if (result) {
+                var prefixes = [];
+
+                result.forEach(ev=> {
+                    var pr = this.getNextPrefix();
+                    prefixes.push(pr);
+                    this.addEntity(ev, pr);
+                });
+
+                return prefixes.join(",");
+            }
+
+            return null;
         });
     }
 
@@ -794,16 +829,20 @@ export class EntityList extends EntityListBase {
         return $(this.pf(EntityList.key_list) + " > option");
     }
 
-    view_click(): Promise<void> {
+    view_click(): Promise<string> {
         var selectedItemPrefix = this.selectedItemPrefix();
 
         var entityHtml = this.extractEntityHtml(selectedItemPrefix);
 
         return this.onViewing(entityHtml).then(result=> {
-            if (result)
+            if (result) {
                 this.setEntity(result, selectedItemPrefix);
-            else
+                return selectedItemPrefix;
+            }
+            else {
                 this.setEntity(entityHtml, selectedItemPrefix); //previous entity passed by reference
+                return null;
+            }
         });
     }
 
@@ -848,7 +887,7 @@ export class EntityList extends EntityListBase {
             .appendTo(select);
     }
 
-    remove_click(): Promise<void> {
+    remove_click(): Promise<string> {
         var selectedItemPrefix = this.selectedItemPrefix();
         return this.onRemove(selectedItemPrefix).then(result=> {
             if (result) {
@@ -860,7 +899,11 @@ export class EntityList extends EntityListBase {
 
                 next.attr("selected", "selected");
                 this.selection_Changed();
+
+                return selectedItemPrefix;
             }
+
+            return null;
         });
     }
 
@@ -893,16 +936,16 @@ export class EntityListDetail extends EntityList {
         this.stageCurrentSelected();
     }
 
-    remove_click() {
-        return super.remove_click().then(() => this.stageCurrentSelected())
+    remove_click(): Promise<string>  {
+        return super.remove_click().then(result => { this.stageCurrentSelected(); return result })
     }
 
     create_click() {
-        return super.create_click().then(() => this.stageCurrentSelected())
+        return super.create_click().then(result => { this.stageCurrentSelected(); return result; });
     }
 
     find_click() {
-        return super.find_click().then(() => this.stageCurrentSelected())
+        return super.find_click().then(result => { this.stageCurrentSelected(); return result; })
     }
 
     stageCurrentSelected() {
@@ -1002,12 +1045,15 @@ export class EntityRepeater extends EntityListBase {
         return "$('#" + this.options.prefix + "').data('SF-control')";
     }
 
-    remove_click(): Promise<void> { throw new Error("remove_click is deprecated in EntityRepeater"); }
+    remove_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    removeItem_click(itemPrefix: string): Promise<void> {
+    removeItem_click(itemPrefix: string): Promise<string> {
         return this.onRemove(itemPrefix).then(result=> {
-            if (result)
+            if (result) {
                 this.removeEntity(itemPrefix);
+                return itemPrefix;
+            }
+            return null;
         });
     }
 
@@ -1028,20 +1074,20 @@ export class EntityRepeater extends EntityListBase {
         });
     }
 
-    find_click(): Promise<void> {
+    find_click(): Promise<string> {
         return this.onFindingMany(this.options.prefix)
             .then(result => {
                 if (!result)
                     return;
 
-                Promise.all(result
+                return Promise.all(result
                     .map((e, i) => ({ entity: e, prefix: this.getNextPrefix(i) }))
                     .map(t => {
                         var promise = t.entity.isLoaded() ? Promise.resolve(<Entities.EntityHtml>t.entity) :
                             Navigator.requestPartialView(new Entities.EntityHtml(t.prefix, t.entity.runtimeInfo), this.defaultViewOptions())
 
-                        return promise.then(ev=> this.addEntity(ev, t.prefix));
-                    }));
+                        return promise.then(ev=> { this.addEntity(ev, t.prefix); return t.prefix; });
+                    })).then(result => result.join(","));
             });
     }
 
@@ -1195,25 +1241,33 @@ export class EntityStrip extends EntityList {
         return "$('#" + this.options.prefix + "').data('SF-control')";
     }
 
-    remove_click(): Promise<void> { throw new Error("remove_click is deprecated in EntityRepeater"); }
+    remove_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    removeItem_click(itemPrefix: string): Promise<void> {
+    removeItem_click(itemPrefix: string): Promise<string> {
         return this.onRemove(itemPrefix).then(result=> {
-            if (result)
+            if (result) {
                 this.removeEntity(itemPrefix);
+                return itemPrefix;
+            }
+
+            return null;
         });
     }
 
-    view_click(): Promise<void> { throw new Error("remove_click is deprecated in EntityRepeater"); }
+    view_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    viewItem_click(itemPrefix: string): Promise<void> {
+    viewItem_click(itemPrefix: string): Promise<string> {
         var entityHtml = this.extractEntityHtml(itemPrefix);
 
         return this.onViewing(entityHtml).then(result=> {
-            if (result)
+            if (result) {
                 this.setEntity(result, itemPrefix);
-            else
+                return itemPrefix;
+            }
+            else {
                 this.setEntity(entityHtml, itemPrefix); //previous entity passed by reference
+                return null;
+            }
         });
     }
 

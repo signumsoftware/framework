@@ -110,8 +110,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.remove_click = function () {
             var _this = this;
             return this.onRemove(this.options.prefix).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(null);
+                    return _this.options.prefix;
+                }
+
+                return null;
             });
         };
 
@@ -125,8 +129,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.create_click = function () {
             var _this = this;
             return this.onCreating(this.options.prefix).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result);
+                    return _this.options.prefix;
+                }
+
+                return null;
             });
         };
 
@@ -175,10 +183,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var entityHtml = this.extractEntityHtml();
 
             return this.onViewing(entityHtml).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result);
-                else
+                    return _this.options.prefix;
+                } else {
                     _this.setEntity(entityHtml); //previous entity passed by reference
+                    return null;
+                }
             });
         };
 
@@ -192,8 +203,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.find_click = function () {
             var _this = this;
             return this.onFinding(this.options.prefix).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result);
+                    return _this.options.prefix;
+                }
+
+                return null;
             });
         };
 
@@ -456,8 +471,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                 return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, result.runtimeInfo), _this.defaultViewOptions());
             }).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result);
+                    return _this.options.prefix;
+                }
+
+                return null;
             });
         };
         return EntityLineDetail;
@@ -532,8 +551,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var itemPrefix = this.getNextPrefix();
             return this.onCreating(itemPrefix).then(function (entity) {
-                if (entity)
+                if (entity) {
                     _this.addEntity(entity, itemPrefix);
+                    return itemPrefix;
+                }
+
+                return null;
             });
         };
 
@@ -631,10 +654,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityListBase.prototype.find_click = function () {
             var _this = this;
             return this.onFindingMany(this.options.prefix).then(function (result) {
-                if (result)
+                if (result) {
+                    var prefixes = [];
+
                     result.forEach(function (ev) {
-                        return _this.addEntity(ev, _this.getNextPrefix());
+                        var pr = _this.getNextPrefix();
+                        prefixes.push(pr);
+                        _this.addEntity(ev, pr);
                     });
+
+                    return prefixes.join(",");
+                }
+
+                return null;
             });
         };
 
@@ -762,10 +794,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var entityHtml = this.extractEntityHtml(selectedItemPrefix);
 
             return this.onViewing(entityHtml).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result, selectedItemPrefix);
-                else
+                    return selectedItemPrefix;
+                } else {
                     _this.setEntity(entityHtml, selectedItemPrefix); //previous entity passed by reference
+                    return null;
+                }
             });
         };
 
@@ -815,7 +850,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                     next.attr("selected", "selected");
                     _this.selection_Changed();
+
+                    return selectedItemPrefix;
                 }
+
+                return null;
             });
         };
 
@@ -850,22 +889,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityListDetail.prototype.remove_click = function () {
             var _this = this;
-            return _super.prototype.remove_click.call(this).then(function () {
-                return _this.stageCurrentSelected();
+            return _super.prototype.remove_click.call(this).then(function (result) {
+                _this.stageCurrentSelected();
+                return result;
             });
         };
 
         EntityListDetail.prototype.create_click = function () {
             var _this = this;
-            return _super.prototype.create_click.call(this).then(function () {
-                return _this.stageCurrentSelected();
+            return _super.prototype.create_click.call(this).then(function (result) {
+                _this.stageCurrentSelected();
+                return result;
             });
         };
 
         EntityListDetail.prototype.find_click = function () {
             var _this = this;
-            return _super.prototype.find_click.call(this).then(function () {
-                return _this.stageCurrentSelected();
+            return _super.prototype.find_click.call(this).then(function (result) {
+                _this.stageCurrentSelected();
+                return result;
             });
         };
 
@@ -966,8 +1008,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityRepeater.prototype.removeItem_click = function (itemPrefix) {
             var _this = this;
             return this.onRemove(itemPrefix).then(function (result) {
-                if (result)
+                if (result) {
                     _this.removeEntity(itemPrefix);
+                    return itemPrefix;
+                }
+                return null;
             });
         };
 
@@ -995,15 +1040,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (!result)
                     return;
 
-                Promise.all(result.map(function (e, i) {
+                return Promise.all(result.map(function (e, i) {
                     return ({ entity: e, prefix: _this.getNextPrefix(i) });
                 }).map(function (t) {
                     var promise = t.entity.isLoaded() ? Promise.resolve(t.entity) : Navigator.requestPartialView(new Entities.EntityHtml(t.prefix, t.entity.runtimeInfo), _this.defaultViewOptions());
 
                     return promise.then(function (ev) {
-                        return _this.addEntity(ev, t.prefix);
+                        _this.addEntity(ev, t.prefix);
+                        return t.prefix;
                     });
-                }));
+                })).then(function (result) {
+                    return result.join(",");
+                });
             });
         };
 
@@ -1133,8 +1181,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityStrip.prototype.removeItem_click = function (itemPrefix) {
             var _this = this;
             return this.onRemove(itemPrefix).then(function (result) {
-                if (result)
+                if (result) {
                     _this.removeEntity(itemPrefix);
+                    return itemPrefix;
+                }
+
+                return null;
             });
         };
 
@@ -1147,10 +1199,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var entityHtml = this.extractEntityHtml(itemPrefix);
 
             return this.onViewing(entityHtml).then(function (result) {
-                if (result)
+                if (result) {
                     _this.setEntity(result, itemPrefix);
-                else
+                    return itemPrefix;
+                } else {
                     _this.setEntity(entityHtml, itemPrefix); //previous entity passed by reference
+                    return null;
+                }
             });
         };
 
