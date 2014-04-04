@@ -142,6 +142,7 @@ namespace Signum.Web
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
                     Implementations = null,
+                    Autocomplete = false,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
                 el.FormGroupStyle = FormGroupStyle.None;
