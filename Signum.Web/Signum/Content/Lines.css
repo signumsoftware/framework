@@ -219,11 +219,41 @@ ul.nav-tabs
     height: 20px;
 }
 
-.form-sm .form-group 
+.form-xs .form-group 
 {
-    margin-bottom: 2px;
+    margin-bottom: 6px;
 }
 
+
+.form-horizontal.form-xs .control-label, 
+.form-horizontal.form-xs .radio, 
+.form-horizontal.form-xs .checkbox, 
+.form-horizontal.form-xs .radio-inline, 
+.form-horizontal.form-xs .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
+
+.form-horizontal .form-xs .control-label, 
+.form-horizontal .form-xs .radio, 
+.form-horizontal .form-xs .checkbox, 
+.form-horizontal .form-xs .radio-inline, 
+.form-horizontal .form-xs .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
+
+.form-xs .form-horizontal .control-label, 
+.form-xs .form-horizontal .radio, 
+.form-xs .form-horizontal .checkbox, 
+.form-xs .form-horizontal .radio-inline, 
+.form-xs .form-horizontal .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
 
 /*form sm*/
 
@@ -249,6 +279,35 @@ ul.nav-tabs
     margin-bottom: 5px;
 }
 
+.form-horizontal.form-sm .control-label, 
+.form-horizontal.form-sm .radio, 
+.form-horizontal.form-sm .checkbox, 
+.form-horizontal.form-sm .radio-inline, 
+.form-horizontal.form-sm .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
+
+.form-horizontal .form-sm .control-label, 
+.form-horizontal .form-sm .radio, 
+.form-horizontal .form-sm .checkbox, 
+.form-horizontal .form-sm .radio-inline, 
+.form-horizontal .form-sm .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
+
+.form-sm .form-horizontal .control-label, 
+.form-sm .form-horizontal .radio, 
+.form-sm .form-horizontal .checkbox, 
+.form-sm .form-horizontal .radio-inline, 
+.form-sm .form-horizontal .checkbox-inline {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
 
 /*form-inline*/
 
@@ -302,7 +361,7 @@ ul.dropdown-menu > li > a.disabled
 /*Override absurd width for popups on sm*/
 @media (min-width: 768px)
 {
-    .modal-dialog
+    .modal-dialog:not(.modal-dialog)
     {
         min-width: 730px;
     }
