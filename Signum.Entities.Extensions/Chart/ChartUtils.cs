@@ -255,8 +255,8 @@ namespace Signum.Entities.Chart
                     Lite<IdentifiableEntity> l = (Lite<IdentifiableEntity>)r[columnIndex];
                     return new
                     {
-                        key = l.TryCC(li => li.Key()),
-                        toStr = l.TryCC(li => li.ToString()),
+                        key = l.Try(li => li.Key()),
+                        toStr = l.Try(li => li.ToString()),
                         color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
                     };
                 };
@@ -271,7 +271,7 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e == null ? (int?)null : Convert.ToInt32(e),
-                        toStr = e.TryCC(en => en.NiceToString()),
+                        toStr = e.Try(en => en.NiceToString()),
                         color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
                     };
                 };

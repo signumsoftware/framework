@@ -138,7 +138,7 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
-                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).TryCC(l => l.Retrieve())
+                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())
                 }.Register();
 
                 new Graph<ITaskDN>.Execute(TaskOperation.ExecuteAsync)

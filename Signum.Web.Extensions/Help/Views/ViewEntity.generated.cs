@@ -280,7 +280,7 @@ WriteLiteral("    ");
 
             
             #line 54 "..\..\Help\Views\ViewEntity.cshtml"
-     if (eh.Queries.TryCS(queries => queries.Count > 0) != null)
+     if (eh.Queries.Try(queries => queries.Count > 0) != null)
     {
 
             

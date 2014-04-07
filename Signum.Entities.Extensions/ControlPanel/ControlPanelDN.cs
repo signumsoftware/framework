@@ -190,9 +190,9 @@ namespace Signum.Entities.ControlPanel
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
-            HomePagePriority = element.Attribute("HomePagePriority").TryCS(a => int.Parse(a.Value));
+            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner").Try(a => Lite.Parse<IdentifiableEntity>(a.Value));
+            HomePagePriority = element.Attribute("HomePagePriority").Try(a => int.Parse(a.Value));
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
 
         }

@@ -91,7 +91,7 @@ namespace Signum.Web.Processes
                                 Prefix = ctx.Prefix,
                                 QueryName = ctx.QueryName,
                                 Entities = ctx.Lites,
-                                OperationSettings = os.TryCC(s => s.ContextualFromMany),
+                                OperationSettings = os.Try(s => s.ContextualFromMany),
                                 CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :

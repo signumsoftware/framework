@@ -238,7 +238,7 @@ namespace Signum.Web.Chart
             {
                 vl.ValueLineType = ValueLineType.Combo;
 
-                var token = column.Token.TryCC(t => t.Token);
+                var token = column.Token.Try(t => t.Token);
 
                 var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(token)).ToList();
                 vl.ReadOnly = compatible.Count <= 1;

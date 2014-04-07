@@ -126,7 +126,7 @@ namespace Signum.Engine.Processes
 
             Task.Factory.StartNew(() =>
             {
-                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.TryCC(s => s.Database); 
+                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.Try(s => s.Database); 
 
                 using (AuthLogic.Disable())
                 {

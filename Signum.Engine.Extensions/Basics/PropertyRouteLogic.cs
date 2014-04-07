@@ -57,7 +57,7 @@ namespace Signum.Engine.Basics
             var retrieve = Database.Query<PropertyRouteDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
-            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
+            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDo(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
         }
 
         public static List<PropertyRouteDN> GenerateProperties(Type type, TypeDN typeDN)
@@ -80,7 +80,7 @@ namespace Signum.Engine.Basics
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();
-            return Database.Query<PropertyRouteDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
+            return Database.Query<PropertyRouteDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDo(pi => pi.Route = route) ??
                  new PropertyRouteDN
                  {
                      Route = route,

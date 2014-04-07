@@ -141,7 +141,7 @@ namespace Signum.Entities.Chart
 
         public List<QueryToken> AllTokens()
         {
-            var allTokens = Columns.Select(a => a.Token.TryCC(t => t.Token)).ToList();
+            var allTokens = Columns.Select(a => a.Token.Try(t => t.Token)).ToList();
 
             if (Filters != null)
                 allTokens.AddRange(Filters.Select(a => a.Token));

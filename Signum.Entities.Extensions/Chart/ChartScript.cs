@@ -205,7 +205,7 @@ namespace Signum.Entities.Chart
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
 
-            var newFile = script.Element("Icon").TryCC(icon => new FileDN
+            var newFile = script.Element("Icon").Try(icon => new FileDN
             {
                 FileName = icon.Attribute("FileName").Value,
                 BinaryFile = Convert.FromBase64String(icon.Nodes().OfType<XCData>().Single().Value),
@@ -382,9 +382,9 @@ namespace Signum.Entities.Chart
                 IsGroupKey = IsGroupKey,
                 ColumnType = ColumnType,
                 IsOptional = IsOptional,
-                Parameter1 = Parameter1.TryCC(p => p.Clone()),
-                Parameter2 = Parameter2.TryCC(p => p.Clone()),
-                Parameter3 = Parameter3.TryCC(p => p.Clone()),
+                Parameter1 = Parameter1.Try(p => p.Clone()),
+                Parameter2 = Parameter2.Try(p => p.Clone()),
+                Parameter3 = Parameter3.Try(p => p.Clone()),
             };
         }
     }

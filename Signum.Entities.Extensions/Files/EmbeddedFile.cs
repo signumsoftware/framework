@@ -76,7 +76,7 @@ namespace Signum.Entities.Files
         
         public override string ToString()
         {
-            return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".Formato(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         

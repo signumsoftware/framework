@@ -93,20 +93,20 @@ namespace Signum.Web.Files
                         if (fileLine.Download != DownloadBehaviour.None)
                         {
                             sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
-                                value.TryCC(f => f.FileName),
+                                value.Try(f => f.FileName),
                                 hasEntity ? FilesClient.GetDownloadPath(value) : null,
                                 "Download",
                                 "form-control",
                                 fileLine.Download == DownloadBehaviour.View ? null :
-                                new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName) } }));
+                                new Dictionary<string, object> { { "download", value.Try(f => f.FileName) } }));
                         }
                         else
                         {
-                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "form-control", null));
+                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.Try(f => f.FileName) ?? "", "form-control", null));
                         }
 
                         if (fileLine.Type.IsEmbeddedEntity())
-                            sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
+                            sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.Try(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
                         
                         using (sb.Surround(new HtmlTag("span", fileLine.Compose("shownButton")).Class("input-group-btn")))
                         {

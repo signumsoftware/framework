@@ -322,7 +322,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 72 "..\..\Translation\Views\ViewInstance.cshtml"
-                       Write(Html.TextArea(ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString(), trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" }));
+                       Write(Html.TextArea(ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString(), trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" }));
 
             
             #line default

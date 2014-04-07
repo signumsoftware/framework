@@ -35,7 +35,7 @@ namespace Signum.Web.Files
         {
             Type type = typeof(FilePathDN);
             FilePathDN entity = null;
-            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).Try(e => e.IdOrNull))
             {
                 if (sfId.HasValue)
                     entity = Database.Retrieve<FilePathDN>(sfId.Value);

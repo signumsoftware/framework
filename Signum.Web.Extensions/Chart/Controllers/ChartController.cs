@@ -76,7 +76,7 @@ namespace Signum.Web.Chart
         {
             string lastToken = Request["lastTokenChanged"];
             
-            var request = this.ExtractChartRequestCtx(lastToken.TryCS(int.Parse)).Value;   
+            var request = this.ExtractChartRequestCtx(lastToken.Try(int.Parse)).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             

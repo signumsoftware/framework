@@ -109,7 +109,7 @@ WriteLiteral("            ");
 
             
             #line 15 "..\..\Chart\Views\ChartScript.cshtml"
-       Write(Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a =>
+       Write(Html.FileLine(cc, c => c.Icon.Try(i => i.Retrieve()), a =>
     {
         a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
         a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);

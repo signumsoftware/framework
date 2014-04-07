@@ -37,7 +37,7 @@
                     <td>
                         <div class="input-group">
                             <span class="input-group-addon">#</span>
-                            @Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.TryCC(c => c.ToColor().ToHtml().Substring(1)),
+                            @Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.Try(c => c.ToColor().ToHtml().Substring(1)),
                               new { maxlength = 6, size = 6, @class = "sf-chart-color-input form-control" })
                         </div>
                         @Html.HiddenRuntimeInfo(clc, cl => cl.Related)

@@ -110,7 +110,7 @@ namespace Signum.Entities.ControlPanel
             Row = int.Parse(x.Attribute("Row").Value);
             StartColumn = int.Parse(x.Attribute("StartColumn").Value);
             Columns = int.Parse(x.Attribute("Columns").Value);
-            Title = x.Attribute("Title").TryCC(a => a.Value);
+            Title = x.Attribute("Title").Try(a => a.Value);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -286,7 +286,7 @@ namespace Signum.Entities.ControlPanel
         string label;
         public string Label
         {
-            get { return label ?? UserQuery.TryCC(uq => uq.DisplayName); }
+            get { return label ?? UserQuery.Try(uq => uq.DisplayName); }
             set { Set(ref label, value, () => Label); }
         }
 
@@ -324,8 +324,8 @@ namespace Signum.Entities.ControlPanel
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Label = element.Attribute("Label").TryCC(a => a.Value);
-            Href = element.Attribute("Href").TryCC(a => a.Value);
+            Label = element.Attribute("Label").Try(a => a.Value);
+            Href = element.Attribute("Href").Try(a => a.Value);
             UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }

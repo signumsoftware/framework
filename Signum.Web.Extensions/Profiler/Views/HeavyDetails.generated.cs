@@ -61,7 +61,7 @@ WriteLiteral("<h2>Profiler Entry (\r\n");
             #line hidden
             
             #line 5 "..\..\Profiler\Views\HeavyDetails.cshtml"
-     foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
+     foreach (var e in Model.Follow(a => a.Parent).Skip(1).Reverse())
     {
         
             
@@ -243,7 +243,7 @@ WriteLiteral(">");
 
             
             #line 69 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                                  Write(frame.GetMethod().DeclaringType.TryCC(t => t.TypeName()));
+                                                  Write(frame.GetMethod().DeclaringType.Try(t => t.TypeName()));
 
             
             #line default
@@ -320,7 +320,7 @@ WriteLiteral("\r\n");
             
             #line 85 "..\..\Profiler\Views\HeavyDetails.cshtml"
    
-    var fullTree = Model.FollowC(e => e.Parent).ToList();
+    var fullTree = Model.Follow(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 
 
             

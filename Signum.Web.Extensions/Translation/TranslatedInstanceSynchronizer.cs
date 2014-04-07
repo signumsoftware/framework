@@ -38,7 +38,7 @@ namespace Signum.Web.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).TryCC(a=>a.TranslatedText)
+                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a=>a.TranslatedText)
                               where str.HasItems()
                               select new
                               {

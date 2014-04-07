@@ -182,7 +182,7 @@ WriteLiteral("                            ");
 
             
             #line 40 "..\..\Chart\Views\ChartPalette.cshtml"
-                       Write(Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.TryCC(c => c.ToColor().ToHtml().Substring(1)),
+                       Write(Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.Try(c => c.ToColor().ToHtml().Substring(1)),
                               new { maxlength = 6, size = 6, @class = "sf-chart-color-input form-control" }));
 
             

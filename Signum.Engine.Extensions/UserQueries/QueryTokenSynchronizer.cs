@@ -18,7 +18,7 @@ namespace Signum.Engine.UserQueries
     {
         static void Remember(Replacements replacements, string tokenString, QueryToken token)
         {
-            List<QueryToken> tokenList = token.FollowC(a => a.Parent).Reverse().ToList();
+            List<QueryToken> tokenList = token.Follow(a => a.Parent).Reverse().ToList();
 
             string[] oldParts = tokenString.Split('.');
             string[] newParts = token.FullKey().Split('.');
@@ -380,7 +380,7 @@ namespace Signum.Engine.UserQueries
 
                 int startingIndex = 0;
 
-                SafeConsole.WriteLineColor(ConsoleColor.Cyan, "  " + token.TryCC(a => a.FullKey()));
+                SafeConsole.WriteLineColor(ConsoleColor.Cyan, "  " + token.Try(a => a.FullKey()));
 
                 bool isRoot = token == null;
 
