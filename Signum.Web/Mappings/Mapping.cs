@@ -388,7 +388,7 @@ namespace Signum.Web
             if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
             {
                 if (!DisambiguateRuntimeInfo)
-                    return RuntimeInfo.FromFormValue(strRuntimeInfo).TryCC(ri => ri.EntityType);
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo).Try(ri => ri.EntityType);
                 else
                 {
                     RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
@@ -396,11 +396,11 @@ namespace Signum.Web
                         .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
                         .FirstEx();
 
-                    return runtimeInfo.TryCC(ri => ri.EntityType);
+                    return runtimeInfo.Try(ri => ri.EntityType);
                 }
             }
             else
-                return ctx.Value.TryCC(t => t.GetType());
+                return ctx.Value.Try(t => t.GetType());
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue =
@@ -904,7 +904,7 @@ namespace Signum.Web
 
             var indexPrefixes = ctx.Inputs.IndexPrefixes();
 
-            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).Try(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.Prefix, index), null, route, ctx);
 
@@ -940,7 +940,7 @@ namespace Signum.Web
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new[] { ';' })[0]).ToInt();
+                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).Try(s => s.Split(new[] { ';' })[0]).ToInt();
 
                     if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                         itemCtx.Value = oldList[oldIndex.Value];

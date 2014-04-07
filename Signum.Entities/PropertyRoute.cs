@@ -26,7 +26,7 @@ namespace Signum.Entities
         {
             get
             {
-                return this.FollowC(a => a.Parent).Select(a =>
+                return this.Follow(a => a.Parent).Select(a =>
                     a.PropertyRouteType == Entities.PropertyRouteType.Mixin ? a.type :
                     a.FieldInfo ?? (MemberInfo)a.PropertyInfo).Reverse().Skip(1).ToArray();
             }
@@ -34,7 +34,7 @@ namespace Signum.Entities
 
         public PropertyInfo[] Properties
         {
-            get { return this.FollowC(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
+            get { return this.Follow(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
         }
 
         public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
@@ -149,14 +149,14 @@ namespace Signum.Entities
                 PropertyRouteType = PropertyRouteType.FieldOrProperty;
                 if (fieldOrProperty is PropertyInfo)
                 {
-                    if (!parent.Type.FollowC(a => a.BaseType).Contains(fieldOrProperty.DeclaringType))
+                    if (!parent.Type.Follow(a => a.BaseType).Contains(fieldOrProperty.DeclaringType))
                     {
                         var pi = (PropertyInfo)fieldOrProperty;
 
                         if (!parent.Type.GetInterfaces().Contains(fieldOrProperty.DeclaringType))
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
 
-                        var otherProperty = parent.Type.FollowC(a => a.BaseType)
+                        var otherProperty = parent.Type.Follow(a => a.BaseType)
                             .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance, null, null, new Type[0], null)).NotNull().FirstEx();
 
                         if (otherProperty == null)

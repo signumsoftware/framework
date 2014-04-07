@@ -297,8 +297,8 @@ namespace Signum.Engine.Maps
                 get { return dict.TryGetC(level); }
                 set
                 {
-                    int current = dict.TryGetC(level).TryCS(d => d.GetInvocationList().Length) ?? 0;
-                    int @new = value.TryCS(d => d.GetInvocationList().Length) ?? 0;
+                    int current = dict.TryGetC(level).Try(d => d.GetInvocationList().Length) ?? 0;
+                    int @new = value.Try(d => d.GetInvocationList().Length) ?? 0;
 
                     if (Math.Abs(current - @new) > 1)
                         throw new InvalidOperationException("add or remove just one event handler each time");
@@ -494,7 +494,7 @@ namespace Signum.Engine.Maps
                 return implementations.Value;
 
             var ss = Schema.Current.Settings;
-            if (route.FollowC(r => r.Parent)
+            if (route.Follow(r => r.Parent)
                 .TakeWhile(t => t.PropertyRouteType != PropertyRouteType.Root)
                 .SelectMany(r => ss.FieldAttributes(r))
                 .Any(a => a is IgnoreAttribute))
@@ -552,7 +552,7 @@ namespace Signum.Engine.Maps
 
         public List<DatabaseName> DatabaseNames()
         {
-            return GetDatabaseTables().Select(a => a.Name.Schema.TryCC(s => s.Database)).Distinct().ToList();
+            return GetDatabaseTables().Select(a => a.Name.Schema.Try(s => s.Database)).Distinct().ToList();
         }
 
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()

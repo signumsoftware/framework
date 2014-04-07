@@ -29,7 +29,7 @@ namespace Signum.Web
             if (parameters.AllKeys.Any(name => !name.HasText()))
                 throw new Exception("Incorrect URL: " + controllerContext.HttpContext.Request.Url.ToString());
 
-            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
+            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").Try(vp => vp.RawValue);
             if (rawValue == null)
                 return null;
 

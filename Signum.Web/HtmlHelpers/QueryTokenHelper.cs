@@ -39,7 +39,7 @@ namespace Signum.Web
 
         public static MvcHtmlString QueryTokenBuilderOptions(this HtmlHelper helper, QueryToken queryToken, Context context, QueryTokenBuilderSettings settings)
         {
-            var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
+            var tokenPath = queryToken.Follow(qt => qt.Parent).Reverse().NotNull().ToList();
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 

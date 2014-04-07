@@ -339,13 +339,13 @@ namespace Signum.Engine.Operations
             return new OperationInfo
             {
                 Key = oper.Key,
-                Lite = (oper as IEntityOperation).TryCS(eo => eo.Lite),
+                Lite = (oper as IEntityOperation).Try(eo => eo.Lite),
                 Returns = oper.Returns,
                 OperationType = oper.OperationType,
                 ReturnType = oper.ReturnType,
-                HasStates = (oper as IGraphHasFromStatesOperation).TryCS(eo => eo.HasFromStates) ?? false,
-                HasCanExecute = (oper as IEntityOperation).TryCS(eo => eo.HasCanExecute) ?? false,
-                AllowsNew = (oper as IEntityOperation).TryCS(eo => eo.AllowsNew) ?? false,
+                HasStates = (oper as IGraphHasFromStatesOperation).Try(eo => eo.HasFromStates) ?? false,
+                HasCanExecute = (oper as IEntityOperation).Try(eo => eo.HasCanExecute) ?? false,
+                AllowsNew = (oper as IEntityOperation).Try(eo => eo.AllowsNew) ?? false,
             };
         }
 

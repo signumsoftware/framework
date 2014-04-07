@@ -410,7 +410,7 @@ namespace Signum.Entities
             var type = target.GetType();
             list.Add(new Member("Type", type, typeof(Type)));
 
-            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
+            foreach (var t in type.Follow(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
             {
                 foreach (var fi in t.GetFields(flags).Where(fi => fi.Name != "mixin").OrderBy(f => f.MetadataToken))
                 {

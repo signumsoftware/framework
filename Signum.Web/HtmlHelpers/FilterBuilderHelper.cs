@@ -49,7 +49,7 @@ namespace Signum.Web
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
-                    foreach (var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
+                    foreach (var t in filterOptions.Token.Follow(tok => tok.Parent).Reverse())
                     {
                         sb.AddLine(new HtmlTag("span")
                             .Class("sf-filter-token")

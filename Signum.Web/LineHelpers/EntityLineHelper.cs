@@ -91,7 +91,7 @@ namespace Signum.Web
 
             if (entityLine.Navigate)
             {
-                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ?? (entityLine.UntypedValue as IIdentifiable).TryCC(i => i.ToLite(i.IsNew));
+                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ?? (entityLine.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
 
                 return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         lite.TryToString(),

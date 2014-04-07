@@ -142,7 +142,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return exp;
             }
 
-            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object.TryCC(c => c.Type), m.Method);
+            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object.Try(c => c.Type), m.Method);
             if (lambdaExpression != null)
             {
                 Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
@@ -175,7 +175,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            LambdaExpression lambda = GetFieldExpansion(m.Expression.TryCC(c => c.Type), pi);
+            LambdaExpression lambda = GetFieldExpansion(m.Expression.Try(c => c.Type), pi);
             if (lambda == null)
                 return null;
 
@@ -222,7 +222,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
 
-            string name = efa.TryCC(a => a.Name) ?? mi.Name + "Expression";
+            string name = efa.Try(a => a.Name) ?? mi.Name + "Expression";
             Type type = mi.DeclaringType;
 
             FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);

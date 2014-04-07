@@ -84,7 +84,7 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
             {
-                var lite = (itemTC.UntypedValue as Lite<IIdentifiable>) ?? (itemTC.UntypedValue as IIdentifiable).TryCC(i => i.ToLite(i.IsNew));
+                var lite = (itemTC.UntypedValue as Lite<IIdentifiable>) ?? (itemTC.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
 
                 if (lite != null && !lite.IsNew && entityStrip.Navigate)
                 {

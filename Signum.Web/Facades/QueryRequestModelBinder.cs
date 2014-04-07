@@ -30,7 +30,7 @@ namespace Signum.Web
                 throw new Exception("Incorrect URL: " + controllerContext.HttpContext.Request.Url.ToString());
 
             string webQueryName = "";
-            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
+            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").Try(vp => vp.RawValue);
             if (rawValue.GetType() == typeof(string[]))
                 webQueryName = ((string[])rawValue)[0];
             else

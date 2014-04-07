@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitColumn(ColumnExpression column)
         {
             return map.TryGetC(column.Alias)
-                    .TryCC(d => d.GetOrThrow(column.Name, "Reference to undefined column {0}")) ?? column;
+                    .Try(d => d.GetOrThrow(column.Name, "Reference to undefined column {0}")) ?? column;
         }
     }
 }

@@ -305,7 +305,7 @@ namespace Signum.Web
         PropertyInfo[] properties;
 
         public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute propertyRoute)
-            : base(value, parent.ThrowIfNullC(""), properties.ToString(a => a.Name, Separator), propertyRoute)
+            : base(value, parent.ThrowIfNull(""), properties.ToString(a => a.Name, Separator), propertyRoute)
         {
             this.properties = properties;
         }

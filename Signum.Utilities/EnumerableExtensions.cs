@@ -595,7 +595,7 @@ namespace Signum.Utilities
             foreach (var item in collection)
             {
                 for (int i = 0; i < members.Count; i++)
-                    result[i, j] = members[i].Getter(item).TryCC(a => a.ToString()) ?? "";
+                    result[i, j] = members[i].Getter(item).Try(a => a.ToString()) ?? "";
                 j++;
             }
 
@@ -613,7 +613,7 @@ namespace Signum.Utilities
             foreach (DataRow row in table.Rows)
             {
                 for (int i = 0; i < table.Columns.Count; i++)
-                    result[i, j] = row[i].TryCC(a => a.ToString()) ?? "";
+                    result[i, j] = row[i].Try(a => a.ToString()) ?? "";
                 j++;
             }
 

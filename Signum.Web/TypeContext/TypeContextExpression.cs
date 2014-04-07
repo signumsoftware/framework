@@ -148,8 +148,6 @@ namespace Signum.Web
             return base.VisitUnary(u);
         }
 
-        static string[] tryies = new string[] { "TryCC", "TryCS", "TrySS", "TrySC" };
-
         static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IIdentifiable> lite) => lite.Entity);
         
         static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
@@ -169,7 +167,7 @@ namespace Signum.Web
                     tce.Route.Add(piEntity), obj);
             }
 
-            if (m.Method.DeclaringType == typeof(Extensions) && tryies.Contains(m.Method.Name))
+            if (m.Method.DeclaringType == typeof(Extensions) && m.Method.Name == "Try")
             {
                 var tce = Cast(Visit(m.Arguments[0]));
                 var lambda = (LambdaExpression)m.Arguments[1];
