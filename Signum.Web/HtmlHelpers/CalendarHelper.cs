@@ -90,6 +90,9 @@ namespace Signum.Web
 
         private static string Customize(string format, DateTimeFormatInfo info)
         {
+            if (format == null)
+                return info.ShortDatePattern + " " + info.ShortTimePattern;
+
             switch (format)
             {
                 case "d": return info.ShortDatePattern;
