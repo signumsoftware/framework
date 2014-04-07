@@ -337,21 +337,24 @@ namespace Signum.Engine.Mailing.Pop3
         {
             const RegexOptions options = RegexOptions.IgnoreCase | RegexOptions.Multiline;
 
+            const string pattern = @"=\?(?<enc>[^?]*)?\?(?<cod>Q|B)\?(?<text>.*?)\?=";
+
             foreach (string key in headers.AllKeys)
             {
+
                 //strip qp encoding information from the header if present
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?(?<enc>[^?]*)?\?(?<cod>Q|B)\?(?<text>.*?)\?=", m =>
+                headers[key] = Regex.Replace(headers[key].ToString(), "(" + pattern + ")+", mm =>
                 {
-                    string text = m.Groups["text"].Value;
+                    var list = Regex.Matches(mm.Value, pattern, options).Cast<Match>().ToList();
 
-                    byte[] bytes = m.Groups["cod"].Value.ToUpper() == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text);
+                    var cod = list.Select(m=> m.Groups["cod"].Value.ToUpper()).Distinct().SingleEx(); 
 
-                    var result = Encoding.GetEncoding(m.Groups["enc"].Value.ToLower()).GetString(bytes);
+                    var bytes = list.Select(m=> m.Groups["text"].Value)
+                        .SelectMany(text=>cod == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text))
+                        .ToArray();
 
-                    //string result2 = Attachment.CreateAttachmentFromString("", m.Value).Name;
-
-                    //if (result != result2)
-                    //    throw new InvalidOperationException();
+                    var enc = list.Select(m => m.Groups["enc"].Value.ToLower()).Distinct().SingleEx();
+                    var result = Encoding.GetEncoding(enc).GetString(bytes);
 
                     return result;
                 }
