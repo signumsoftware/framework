@@ -14,7 +14,8 @@
     {
         ShowHeader = false,
         ShowFooter = false,
-        AllowSelection = false
+        AllowSelection = false,
+        SearchOnLoad = true,
     };
 
     @Html.SearchControl(uq, fo, new Context(null, Model.Prefix));

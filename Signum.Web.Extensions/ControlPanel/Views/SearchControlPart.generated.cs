@@ -88,7 +88,8 @@ WriteLiteral("\r\n");
     {
         ShowHeader = false,
         ShowFooter = false,
-        AllowSelection = false
+        AllowSelection = false,
+        SearchOnLoad = true,
     };
 
     
@@ -96,14 +97,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 20 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
+            #line 21 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
 Write(Html.SearchControl(uq, fo, new Context(null, Model.Prefix)));
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
+            #line 21 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
                                                                 ;
 }
             

@@ -87,7 +87,7 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteLiteral(" class=\"sf-cp-count-uq-list form-sm form-horizontal\"");
+WriteLiteral(" class=\"sf-cp-count-uq-list\"");
 
 WriteLiteral(">\r\n");
 
@@ -108,20 +108,25 @@ WriteLiteral(">\r\n");
             };
 
             fo.ApplyUserQuery(uq.UserQuery);
-            
-            
-            #line default
-            #line hidden
-            
-            #line 20 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
-       Write(Html.CountSearchControl(tc, fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.QueryLabelText = uq.Label.DefaultText(null); }));
 
             
             #line default
             #line hidden
+WriteLiteral("            <p>\r\n");
+
+WriteLiteral("                ");
+
             
-            #line 20 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
-                                                                                                                                                  
+            #line 21 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+           Write(Html.CountSearchControlSpan(fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.QueryLabelText = uq.Label.DefaultText(uq.UserQuery.ToString()); }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </p>\r\n");
+
+            
+            #line 23 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
         }
 
             
@@ -130,7 +135,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 23 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
+            #line 25 "..\..\ControlPanel\Views\CountSearchControlPart.cshtml"
 }
             
             #line default
