@@ -55,7 +55,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                 string contentTransferEncoding = headers["content-transfer-encoding"];
 
-                ContentType contentType = FindContentType(headers);
+                ContentType contentType = FindContentType(headers, req);
 
                 if (contentType.MediaType != null && contentType.MediaType.StartsWith("multipart/"))
                 {
@@ -300,14 +300,17 @@ namespace Signum.Engine.Mailing.Pop3
             return string.Empty;
         }
 
-        static ContentType FindContentType(NameValueCollection headers)
+        static ContentType FindContentType(NameValueCollection headers, Request req)
         {
-            ContentType result = new ContentType();
             var ct = headers["content-type"];
             if (ct == null)
-                return result;
+            {
+                return req == Request.LinkedResource ?  
+                    new ContentType():
+                    new ContentType( "text/plain");
+            }
 
-            result = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
+            ContentType result = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
 
             var m = Regex.Match(ct, @"name\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
             if(m.Success)
