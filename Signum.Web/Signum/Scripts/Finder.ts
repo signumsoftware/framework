@@ -1037,8 +1037,11 @@ export class FilterBuilder {
         var date = $filter.find("#" + SF.compose(id, "Date"));
         var time = $filter.find("#" + SF.compose(id, "Time"));
 
-        if (date.length && time.length)
-            return SearchControl.encodeCSV(date.val() + " " + time.val());
+        if (date.length && time.length) {
+            var dateVal = date.val();
+            var timeVal = time.val();
+            return SearchControl.encodeCSV(dateVal && timeVal ? (dateVal + " " + timeVal) : null);
+        }
 
         if (eleme.is("input:checkbox"))
             return (<HTMLInputElement> eleme[0]).checked;
