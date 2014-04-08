@@ -347,14 +347,20 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     var list = Regex.Matches(mm.Value, pattern, options).Cast<Match>().ToList();
 
-                    var cod = list.Select(m=> m.Groups["cod"].Value.ToUpper()).Distinct().SingleEx(); 
+                    var groups = list.GroupWhenChange(m => new
+                    {
+                        cod = m.Groups["cod"].Value.ToUpper(),
+                        end = m.Groups["enc"].Value.ToLower(),
+                    });
 
-                    var bytes = list.Select(m=> m.Groups["text"].Value)
-                        .SelectMany(text=>cod == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text))
+                    var result = groups.ToString(gr =>
+                    {
+                        var bytes = gr.Select(m => m.Groups["text"].Value)
+                        .SelectMany(text => gr.Key.cod == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text))
                         .ToArray();
 
-                    var enc = list.Select(m => m.Groups["enc"].Value.ToLower()).Distinct().SingleEx();
-                    var result = Encoding.GetEncoding(enc).GetString(bytes);
+                        return Encoding.GetEncoding(gr.Key.end).GetString(bytes);
+                    }, "");
 
                     return result;
                 }
