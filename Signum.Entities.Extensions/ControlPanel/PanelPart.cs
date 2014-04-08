@@ -20,7 +20,7 @@ namespace Signum.Entities.ControlPanel
         public string Title
         {
             get { return title; }
-            set { Set(ref title, value, () => Title); }
+            set { Set(ref title, value); }
         }
 
         int row;
@@ -28,7 +28,7 @@ namespace Signum.Entities.ControlPanel
         public int Row
         {
             get { return row; }
-            set { Set(ref row, value, () => Row); }
+            set { Set(ref row, value); }
         }
        
         int startColumn;
@@ -36,7 +36,7 @@ namespace Signum.Entities.ControlPanel
         public int StartColumn
         {
             get { return startColumn; }
-            set { Set(ref startColumn, value, () => StartColumn); }
+            set { Set(ref startColumn, value); }
         }
 
         int columns;
@@ -44,14 +44,14 @@ namespace Signum.Entities.ControlPanel
         public int Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         PanelStyle style;
         public PanelStyle Style
         {
             get { return style; }
-            set { Set(ref style, value, () => Style); }
+            set { Set(ref style, value); }
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
@@ -59,7 +59,7 @@ namespace Signum.Entities.ControlPanel
         public IPartDN Content
         {
             get { return content; }
-            set { Set(ref content, value, () => Content); }
+            set { Set(ref content, value); }
         }
 
         public override string ToString()
@@ -155,7 +155,7 @@ namespace Signum.Entities.ControlPanel
         public UserQueryDN UserQuery
         {
             get { return userQuery; }
-            set { Set(ref userQuery, value, () => UserQuery); }
+            set { Set(ref userQuery, value); }
         }
 
         public override string ToString()
@@ -197,14 +197,14 @@ namespace Signum.Entities.ControlPanel
         public UserChartDN UserChart
         {
             get { return userChart; }
-            set { Set(ref userChart, value, () => UserChart); }
+            set { Set(ref userChart, value); }
         }
 
         bool showData = false;
         public bool ShowData
         {
             get { return showData; }
-            set { Set(ref showData, value, () => ShowData); }
+            set { Set(ref showData, value); }
         }
 
         public override string ToString()
@@ -247,7 +247,7 @@ namespace Signum.Entities.ControlPanel
         public MList<CountUserQueryElementDN> UserQueries
         {
             get { return userQueries; }
-            set { Set(ref userQueries, value, () => UserQueries); }
+            set { Set(ref userQueries, value); }
         }
 
         public override string ToString()
@@ -287,7 +287,7 @@ namespace Signum.Entities.ControlPanel
         public string Label
         {
             get { return label ?? UserQuery.Try(uq => uq.DisplayName); }
-            set { Set(ref label, value, () => Label); }
+            set { Set(ref label, value); }
         }
 
         UserQueryDN userQuery;
@@ -295,14 +295,14 @@ namespace Signum.Entities.ControlPanel
         public UserQueryDN UserQuery
         {
             get { return userQuery; }
-            set { Set(ref userQuery, value, () => UserQuery); }
+            set { Set(ref userQuery, value); }
         }
 
         string href;
         public string Href
         {
             get { return href; }
-            set { Set(ref href, value, () => Href); }
+            set { Set(ref href, value); }
         }
         public CountUserQueryElementDN Clone()
         {
@@ -338,7 +338,7 @@ namespace Signum.Entities.ControlPanel
         public MList<LinkElementDN> Links
         {
             get { return links; }
-            set { Set(ref links, value, () => Links); }
+            set { Set(ref links, value); }
         }
 
         public override string ToString()
@@ -380,7 +380,7 @@ namespace Signum.Entities.ControlPanel
         public string Label
         {
             get { return label; }
-            set { Set(ref label, value, () => Label); }
+            set { Set(ref label, value); }
         }
 
         string link;
@@ -388,7 +388,7 @@ namespace Signum.Entities.ControlPanel
         public string Link
         {
             get { return link; }
-            set { Set(ref link, value, () => Link); }
+            set { Set(ref link, value); }
         }
 
         public LinkElementDN Clone()

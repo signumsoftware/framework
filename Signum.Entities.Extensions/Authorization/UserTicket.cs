@@ -21,7 +21,7 @@ namespace Signum.Entities.Authorization
         public Lite<UserDN> User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
         [NotNullable, SqlDbType(Size = 38)]
@@ -30,14 +30,14 @@ namespace Signum.Entities.Authorization
         public string Ticket
         {
             get { return ticket; }
-            set { Set(ref ticket, value, () => Ticket); }
+            set { Set(ref ticket, value); }
         }
 
         DateTime connectionDate;
         public DateTime ConnectionDate
         {
             get { return connectionDate; }
-            set { Set(ref connectionDate, value, () => ConnectionDate); }
+            set { Set(ref connectionDate, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -45,7 +45,7 @@ namespace Signum.Entities.Authorization
         public string Device
         {
             get { return device; }
-            set { Set(ref device, value, () => Device); }
+            set { Set(ref device, value); }
         }
 
         public string StringTicket()

@@ -15,7 +15,7 @@ namespace Signum.Entities.Translation
         public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
+            set { Set(ref cultureInfo, value); }
         }
 
         [NotNullable, SqlDbType(Size = 200)]
@@ -24,7 +24,7 @@ namespace Signum.Entities.Translation
         public string WrongTranslation
         {
             get { return wrongTranslation; }
-            set { Set(ref wrongTranslation, value, () => WrongTranslation); }
+            set { Set(ref wrongTranslation, value); }
         }
 
         [NotNullable, SqlDbType(Size = 200)]
@@ -33,7 +33,7 @@ namespace Signum.Entities.Translation
         public string RightTranslation
         {
             get { return rightTranslation; }
-            set { Set(ref rightTranslation, value, () => RightTranslation); }
+            set { Set(ref rightTranslation, value); }
         }
     }
 

@@ -28,21 +28,21 @@ namespace Signum.Entities.ControlPanel
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value, () => EntityType); }
+            set { Set(ref entityType, value); }
         }
 
         Lite<IdentifiableEntity> owner;
         public Lite<IdentifiableEntity> Owner
         {
             get { return owner; }
-            set { Set(ref owner, value, () => Owner); }
+            set { Set(ref owner, value); }
         }
 
         int? homePagePriority;
         public int? HomePagePriority
         {
             get { return homePagePriority; }
-            set { Set(ref homePagePriority, value, () => HomePagePriority); }
+            set { Set(ref homePagePriority, value); }
         }
 
         int? autoRefreshPeriod;
@@ -50,7 +50,7 @@ namespace Signum.Entities.ControlPanel
         public int? AutoRefreshPeriod
         {
             get { return autoRefreshPeriod; }
-            set { Set(ref autoRefreshPeriod, value, () => AutoRefreshPeriod); }
+            set { Set(ref autoRefreshPeriod, value); }
         }
 
         string displayName;
@@ -58,7 +58,7 @@ namespace Signum.Entities.ControlPanel
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
@@ -67,7 +67,7 @@ namespace Signum.Entities.ControlPanel
         public MList<PanelPartDN> Parts
         {
             get { return parts; }
-            set { Set(ref parts, value, () => Parts); }
+            set { Set(ref parts, value); }
         }
 
         [UniqueIndex]
@@ -75,7 +75,7 @@ namespace Signum.Entities.ControlPanel
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         static Expression<Func<ControlPanelDN, IPartDN, bool>> ContainsContentExpression =

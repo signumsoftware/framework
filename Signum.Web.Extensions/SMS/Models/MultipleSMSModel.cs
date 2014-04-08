@@ -14,7 +14,7 @@ namespace Signum.Web.Extensions.SMS.Models
         public string Message
         {
             get { return message; }
-            set { Set(ref message, value, () => Message); }
+            set { Set(ref message, value); }
         }
 
         string from;
@@ -22,7 +22,7 @@ namespace Signum.Web.Extensions.SMS.Models
         public string From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
     }
 }

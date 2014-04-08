@@ -35,21 +35,21 @@ namespace Signum.Entities.UserQueries
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
 
         Lite<TypeDN> entityType;
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value, () => EntityType); }
+            set { Set(ref entityType, value); }
         }
 
         Lite<IdentifiableEntity> owner;
         public Lite<IdentifiableEntity> Owner
         {
             get { return owner; }
-            set { Set(ref owner, value, () => Owner); }
+            set { Set(ref owner, value); }
         }
 
         [NotNullable]
@@ -58,7 +58,7 @@ namespace Signum.Entities.UserQueries
         public string DisplayName
         {
             get { return displayName; }
-            set { SetToStr(ref displayName, value, () => DisplayName); }
+            set { SetToStr(ref displayName, value); }
         }
 
         bool withoutFilters;
@@ -67,7 +67,7 @@ namespace Signum.Entities.UserQueries
             get { return withoutFilters; }
             set
             {
-                if (Set(ref withoutFilters, value, () => WithoutFilters) && withoutFilters)
+                if (Set(ref withoutFilters, value) && withoutFilters)
                     filters.Clear();
             }
         }
@@ -77,7 +77,7 @@ namespace Signum.Entities.UserQueries
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }
-            set { Set(ref filters, value, () => Filters); }
+            set { Set(ref filters, value); }
         }
 
         [NotNullable]
@@ -85,14 +85,14 @@ namespace Signum.Entities.UserQueries
         public MList<QueryOrderDN> Orders
         {
             get { return orders; }
-            set { Set(ref orders, value, () => Orders); }
+            set { Set(ref orders, value); }
         }
 
         ColumnOptionsMode columnsMode;
         public ColumnOptionsMode ColumnsMode
         {
             get { return columnsMode; }
-            set { Set(ref columnsMode, value, () => ColumnsMode); }
+            set { Set(ref columnsMode, value); }
         }
 
         [NotNullable]
@@ -100,14 +100,14 @@ namespace Signum.Entities.UserQueries
         public MList<QueryColumnDN>  Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
         {
             get { return paginationMode; }
-            set { if (Set(ref paginationMode, value, () => PaginationMode)) Notify(() => ShouldHaveElements); }
+            set { if (Set(ref paginationMode, value)) Notify(() => ShouldHaveElements); }
         }
 
         int? elementsPerPage;
@@ -115,7 +115,7 @@ namespace Signum.Entities.UserQueries
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
-            set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
+            set { Set(ref elementsPerPage, value); }
         }
 
         [UniqueIndex]
@@ -123,7 +123,7 @@ namespace Signum.Entities.UserQueries
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -363,7 +363,7 @@ namespace Signum.Entities.UserQueries
         public QueryTokenDN Token
         {
             get { return token; }
-            set { Set(ref token, value, () => Token); }
+            set { Set(ref token, value); }
         }
 
 
@@ -371,14 +371,14 @@ namespace Signum.Entities.UserQueries
         public OrderType OrderType
         {
             get { return orderType; }
-            set { Set(ref orderType, value, () => OrderType); }
+            set { Set(ref orderType, value); }
         }
 
         int index;
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
 
         public XElement ToXml(IToXmlContext ctx)
@@ -424,21 +424,21 @@ namespace Signum.Entities.UserQueries
         public QueryTokenDN Token
         {
             get { return token; }
-            set { Set(ref token, value, () => Token); }
+            set { Set(ref token, value); }
         }
 
         string displayName;
         public string DisplayName
         {
             get { return displayName.DefaultText(null); }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         int index;
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
 
         public XElement ToXml(IToXmlContext ctx)
@@ -489,7 +489,7 @@ namespace Signum.Entities.UserQueries
             get { return token; }
             set
             {
-                if (Set(ref token, value, () => Token))
+                if (Set(ref token, value))
                 {
                     Notify(() => Operation);
                     Notify(() => ValueString);
@@ -501,7 +501,7 @@ namespace Signum.Entities.UserQueries
         public FilterOperation Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, () => Operation); }
+            set { Set(ref operation, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -510,7 +510,7 @@ namespace Signum.Entities.UserQueries
         public string ValueString
         {
             get { return valueString; }
-            set { SetToStr(ref valueString, value, () => ValueString); }
+            set { SetToStr(ref valueString, value); }
         }
 
         [Ignore]
@@ -525,7 +525,7 @@ namespace Signum.Entities.UserQueries
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
 
         public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)

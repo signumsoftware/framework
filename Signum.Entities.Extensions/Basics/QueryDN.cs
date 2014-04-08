@@ -19,7 +19,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -28,7 +28,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            set { SetToStr(ref key, value, () => Key); }
+            set { SetToStr(ref key, value); }
         }
 
         static readonly Expression<Func<QueryDN, string>> ToStringExpression = e => e.name;

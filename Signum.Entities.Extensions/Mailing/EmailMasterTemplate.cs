@@ -21,7 +21,7 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [NotifyCollectionChanged]
@@ -29,7 +29,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailMasterTemplateMessageDN> Messages
         {
             get { return messages; }
-            set { Set(ref messages, value, () => Messages); }
+            set { Set(ref messages, value); }
         }
 
         [Ignore]
@@ -105,7 +105,7 @@ namespace Signum.Entities.Mailing
         public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
+            set { Set(ref cultureInfo, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -114,7 +114,7 @@ namespace Signum.Entities.Mailing
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, () => Text); }
+            set { Set(ref text, value); }
         }
 
         public override string ToString()

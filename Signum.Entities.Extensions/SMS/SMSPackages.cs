@@ -35,7 +35,7 @@ namespace Signum.Entities.SMS
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         static Expression<Func<SMSPackageDN, string>> ToStringExpression = e => e.Name;

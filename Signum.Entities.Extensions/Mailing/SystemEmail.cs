@@ -15,7 +15,7 @@ namespace Signum.Entities.Mailing
         public string FullClassName
         {
             get { return fullClassName; }
-            set { Set(ref fullClassName, value, () => FullClassName); }
+            set { Set(ref fullClassName, value); }
         }
 
         static readonly Expression<Func<SystemEmailDN, string>> ToStringExpression = e => e.fullClassName;

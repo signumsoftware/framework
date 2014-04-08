@@ -51,7 +51,7 @@ namespace Signum.Entities.Chart
             get { return chartScript; }
             set
             {
-                if (Set(ref chartScript, value, () => ChartScript))
+                if (Set(ref chartScript, value))
                 {
                     var newQuery = chartScript.SyncronizeColumns(this, changeParameters: true);
                     NotifyAllColumns();
@@ -75,7 +75,7 @@ namespace Signum.Entities.Chart
                         return;
                 }
 
-                if (Set(ref groupResults, value, () => GroupResults))
+                if (Set(ref groupResults, value))
                 {
                     NotifyAllColumns();
                     InvalidateResults(true);
@@ -88,7 +88,7 @@ namespace Signum.Entities.Chart
         public MList<ChartColumnDN> Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         void NotifyAllColumns()
@@ -121,7 +121,7 @@ namespace Signum.Entities.Chart
         public bool NeedNewQuery
         {
             get { return needNewQuery; }
-            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
+            set { Set(ref needNewQuery, value); }
         }
 
 
@@ -129,14 +129,14 @@ namespace Signum.Entities.Chart
         public List<Filter> Filters
         {
             get { return filters; }
-            set { Set(ref filters, value, () => Filters); }
+            set { Set(ref filters, value); }
         }
 
         List<Order> orders = new List<Order>();
         public List<Order> Orders
         {
             get { return orders; }
-            set { Set(ref orders, value, () => Orders); }
+            set { Set(ref orders, value); }
         }
 
         public List<QueryToken> AllTokens()

@@ -23,7 +23,7 @@ namespace Signum.Entities.Files
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [NotNullable, SqlDbType(Size = 500)]
@@ -32,7 +32,7 @@ namespace Signum.Entities.Files
         public string PhysicalPrefix
         {
             get { return physicalPrefix; }
-            set { Set(ref physicalPrefix, value, () => PhysicalPrefix); }
+            set { Set(ref physicalPrefix, value); }
         }
 
 
@@ -58,14 +58,14 @@ namespace Signum.Entities.Files
         public string WebPrefix
         {
             get { return webPrefix; }
-            set { Set(ref webPrefix, value, () => WebPrefix); }
+            set { Set(ref webPrefix, value); }
         }
 
         bool active = true;
         public bool Active
         {
             get { return active; }
-            set { Set(ref active, value, () => Active); }
+            set { Set(ref active, value); }
         }
 
         [NotNullable]
@@ -73,7 +73,7 @@ namespace Signum.Entities.Files
         public MList<FileTypeDN> FileTypes
         {
             get { return fileTypes; }
-            set { Set(ref fileTypes, value, () => FileTypes); }
+            set { Set(ref fileTypes, value); }
         }
 
         static readonly Expression<Func<FileRepositoryDN, string>> ToStringExpression = e => e.name;

@@ -20,7 +20,7 @@ namespace Signum.Entities.Chart
         public string Name
         {
             get { return name; }
-            set { Set(ref name, value, () => Name); }
+            set { Set(ref name, value); }
         }
 
         ChartParameterType type;
@@ -29,7 +29,7 @@ namespace Signum.Entities.Chart
             get { return type; }
             set
             {
-                if (Set(ref type, value, () => Type))
+                if (Set(ref type, value))
                 {
                     ValueDefinition = null;
                 }
@@ -44,7 +44,7 @@ namespace Signum.Entities.Chart
             get { return valueDefinition; }
             set
             {
-                if (Set(ref valueDefinition, value, () => ValueDefinition))
+                if (Set(ref valueDefinition, value))
                 {
                     enumValues = null;
                     numberInterval = null;

@@ -15,21 +15,21 @@ namespace Signum.Entities.Mailing
         public CultureInfoDN DefaultCulture
         {
             get { return defaultCulture; }
-            set { Set(ref defaultCulture, value, () => DefaultCulture); }
+            set { Set(ref defaultCulture, value); }
         }
 
         string urlLeft;
         public string UrlLeft
         {
             get { return urlLeft; }
-            set { Set(ref urlLeft, value, () => UrlLeft); }
+            set { Set(ref urlLeft, value); }
         }
 
         bool sendEmails;
         public bool SendEmails
         {
             get { return sendEmails; }
-            set { Set(ref sendEmails, value, () => SendEmails); }
+            set { Set(ref sendEmails, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -38,7 +38,7 @@ namespace Signum.Entities.Mailing
         public string OverrideEmailAddress
         {
             get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
+            set { Set(ref overrideEmailAddress, value); }
         }
     }
 }

@@ -14,21 +14,21 @@ namespace Signum.Entities.Extensions.Scheduler
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         DateTime date;
         public DateTime Date
         {
             get { return date; }
-            set { Set(ref date, value, () => Date); }
+            set { Set(ref date, value); }
         }
 
         TypeEvent globalEvent;
         public TypeEvent GlobalEvent
         {
             get { return globalEvent; }
-            set { Set(ref globalEvent, value, () => GlobalEvent); }
+            set { Set(ref globalEvent, value); }
         }
 
     }

@@ -41,21 +41,21 @@ namespace Signum.Entities.Chart
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
 
         Lite<TypeDN> entityType;
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value, () => EntityType); }
+            set { Set(ref entityType, value); }
         }
 
         Lite<IdentifiableEntity> owner;
         public Lite<IdentifiableEntity> Owner
         {
             get { return owner; }
-            set { Set(ref owner, value, () => Owner); }
+            set { Set(ref owner, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         [NotNullable]
@@ -75,7 +75,7 @@ namespace Signum.Entities.Chart
             get { return chartScript; }
             set
             {
-                if (Set(ref chartScript, value, () => ChartScript))
+                if (Set(ref chartScript, value))
                 {
                     chartScript.SyncronizeColumns(this, changeParameters: true);
                     NotifyAllColumns();
@@ -89,7 +89,7 @@ namespace Signum.Entities.Chart
             get { return groupResults; }
             set
             {
-                if (Set(ref groupResults, value, () => GroupResults))
+                if (Set(ref groupResults, value))
                 {
                     NotifyAllColumns();
                 }
@@ -101,7 +101,7 @@ namespace Signum.Entities.Chart
         public MList<ChartColumnDN> Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         void NotifyAllColumns()
@@ -117,7 +117,7 @@ namespace Signum.Entities.Chart
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }
-            set { Set(ref filters, value, () => Filters); }
+            set { Set(ref filters, value); }
         }
 
         [NotNullable]
@@ -125,7 +125,7 @@ namespace Signum.Entities.Chart
         public MList<QueryOrderDN> Orders
         {
             get { return orders; }
-            set { Set(ref orders, value, () => Orders); }
+            set { Set(ref orders, value); }
         }
 
         [UniqueIndex]
@@ -133,7 +133,7 @@ namespace Signum.Entities.Chart
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         static readonly Expression<Func<UserChartDN, string>> ToStringExpression = e => e.displayName;

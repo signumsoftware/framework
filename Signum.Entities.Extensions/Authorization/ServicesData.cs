@@ -70,7 +70,7 @@ namespace Signum.Entities.Authorization
         public Lite<RoleDN> Role
         {
             get { return role; }
-            internal set { Set(ref role, value, () => Role); }
+            internal set { Set(ref role, value); }
         }
 
         MergeStrategy mergeStrategy;
@@ -78,7 +78,7 @@ namespace Signum.Entities.Authorization
         public MergeStrategy MergeStrategy
         {
             get { return mergeStrategy; }
-            set { Set(ref mergeStrategy, value, () => MergeStrategy); }
+            set { Set(ref mergeStrategy, value); }
         }
 
         [NotNullable]
@@ -87,7 +87,7 @@ namespace Signum.Entities.Authorization
         public MList<Lite<RoleDN>> SubRoles
         {
             get { return subRoles; }
-            set { Set(ref subRoles, value, () => SubRoles); }
+            set { Set(ref subRoles, value); }
         }
 
         public string Strategy
@@ -106,7 +106,7 @@ namespace Signum.Entities.Authorization
         public TypeDN Type
         {
             get { return type; }
-            internal set { Set(ref type, value, () => Type); }
+            internal set { Set(ref type, value); }
         }
 
         [NotNullable]
@@ -114,7 +114,7 @@ namespace Signum.Entities.Authorization
         public MList<T> Rules
         {
             get { return rules; }
-            set { Set(ref rules, value, () => Rules); }
+            set { Set(ref rules, value); }
         }
     }
 
@@ -135,7 +135,7 @@ namespace Signum.Entities.Authorization
             get { return allowed; }
             set
             {
-                if (Set(ref allowed, value, () => Allowed))
+                if (Set(ref allowed, value))
                 {
                     Notify();
                 }
@@ -156,7 +156,7 @@ namespace Signum.Entities.Authorization
         public R Resource
         {
             get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
+            set { Set(ref resource, value); }
         }
 
         public override string ToString()
@@ -182,28 +182,28 @@ namespace Signum.Entities.Authorization
         public AuthThumbnail? Properties
         {
             get { return properties; }
-            set { Set(ref properties, value, () => Properties); }
+            set { Set(ref properties, value); }
         }
 
         AuthThumbnail? operations;
         public AuthThumbnail? Operations
         {
             get { return operations; }
-            set { Set(ref operations, value, () => Operations); }
+            set { Set(ref operations, value); }
         }
 
         AuthThumbnail? queries;
         public AuthThumbnail? Queries
         {
             get { return queries; }
-            set { Set(ref queries, value, () => Queries); }
+            set { Set(ref queries, value); }
         }
 
         ReadOnlyCollection<Enum> availableConditions;
         public ReadOnlyCollection<Enum> AvailableConditions
         {
             get { return availableConditions; }
-            set { Set(ref availableConditions, value, () => AvailableConditions); }
+            set { Set(ref availableConditions, value); }
         }
     }
 
@@ -330,14 +330,14 @@ namespace Signum.Entities.Authorization
         public Enum ConditionName
         {
             get { return conditionName; }
-            set { Set(ref conditionName, value, () => ConditionName); }
+            set { Set(ref conditionName, value); }
         }
 
         TypeAllowed allowed;
         public TypeAllowed Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
+            set { Set(ref allowed, value); }
         }
 
         public bool Equals(TypeConditionRule other)
@@ -362,7 +362,7 @@ namespace Signum.Entities.Authorization
         public A[] CoercedValues
         {
             get { return coercedValues; }
-            internal set { Set(ref coercedValues, value, () => CoercedValues); }
+            internal set { Set(ref coercedValues, value); }
         }
     }
 

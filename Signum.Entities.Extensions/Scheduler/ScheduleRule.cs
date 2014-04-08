@@ -37,7 +37,7 @@ namespace Signum.Entities.Scheduler
         public int EachMinutes
         {
             get { return eachMinutes; }
-            set { Set(ref eachMinutes, value, () => EachMinutes); }
+            set { Set(ref eachMinutes, value); }
         }
 
         public override string ToString()
@@ -79,7 +79,7 @@ namespace Signum.Entities.Scheduler
         public int EachHours
         {
             get { return eachHours; }
-            set { Set(ref eachHours, value, () => EachHours); }
+            set { Set(ref eachHours, value); }
         }
 
         public override string ToString()
@@ -109,7 +109,7 @@ namespace Signum.Entities.Scheduler
         public DateTime StartingOn
         {
             get { return startingOn; }
-            set { Set(ref startingOn, value, () => StartingOn); }
+            set { Set(ref startingOn, value); }
         }
 
         public abstract DateTime Next();
@@ -151,7 +151,7 @@ namespace Signum.Entities.Scheduler
         public DayOfWeek DayOfTheWeek
         {
             get { return dayOfTheWeek; }
-            set { SetToStr(ref dayOfTheWeek, value, () => DayOfTheWeek); }
+            set { SetToStr(ref dayOfTheWeek, value); }
         }
 
         public override string ToString()
@@ -181,21 +181,21 @@ namespace Signum.Entities.Scheduler
         public bool Monday
         {
             get { return monday; }
-            set { SetToStr(ref monday, value, () => Monday); }
+            set { SetToStr(ref monday, value); }
         }
 
         bool tuesday;
         public bool Tuesday
         {
             get { return tuesday; }
-            set { SetToStr(ref tuesday, value, () => Tuesday); }
+            set { SetToStr(ref tuesday, value); }
         }
 
         bool wednesday;
         public bool Wednesday
         {
             get { return wednesday; }
-            set { SetToStr(ref wednesday, value, () => Wednesday); }
+            set { SetToStr(ref wednesday, value); }
         }
 
         bool thursday;
@@ -203,28 +203,28 @@ namespace Signum.Entities.Scheduler
         {
 
             get { return thursday; }
-            set { SetToStr(ref thursday, value, () => Thursday); }
+            set { SetToStr(ref thursday, value); }
         }
 
         bool friday;
         public bool Friday
         {
             get { return friday; }
-            set { SetToStr(ref friday, value, () => Friday); }
+            set { SetToStr(ref friday, value); }
         }
 
         bool saturday;
         public bool Saturday
         {
             get { return saturday; }
-            set { SetToStr(ref saturday, value, () => Saturday); }
+            set { SetToStr(ref saturday, value); }
         }
 
         bool sunday;
         public bool Sunday
         {
             get { return sunday; }
-            set { SetToStr(ref sunday, value, () => Sunday); }
+            set { SetToStr(ref sunday, value); }
         }
 
         HolidayCalendarDN calendar;
@@ -233,7 +233,7 @@ namespace Signum.Entities.Scheduler
             get { return calendar; }
             set
             {
-                if (Set(ref calendar, value, () => Calendar))
+                if (Set(ref calendar, value))
                     Holiday = calendar == null ? (bool?)null : false;
             }
         }
@@ -242,7 +242,7 @@ namespace Signum.Entities.Scheduler
         public bool? Holiday
         {
             get { return holiday; }
-            set { SetToStr(ref holiday, value, () => Holiday); }
+            set { SetToStr(ref holiday, value); }
         }
 
         public override DateTime Next()

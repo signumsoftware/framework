@@ -23,7 +23,7 @@ namespace Signum.Entities.SMS
         public Lite<SMSTemplateDN> Template
         {
             get { return template; }
-            set { Set(ref template, value, () => Template); }
+            set { Set(ref template, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -32,14 +32,14 @@ namespace Signum.Entities.SMS
         public string Message
         {
             get { return message; }
-            set { Set(ref message, value, () => Message); }
+            set { Set(ref message, value); }
         }
 
         bool editableMessage = true;
         public bool EditableMessage
         {
             get { return editableMessage; }
-            set { Set(ref editableMessage, value, () => EditableMessage); }
+            set { Set(ref editableMessage, value); }
         }
 
         string from;
@@ -47,7 +47,7 @@ namespace Signum.Entities.SMS
         public string From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
 
         DateTime? sendDate;
@@ -55,14 +55,14 @@ namespace Signum.Entities.SMS
         public DateTime? SendDate
         {
             get { return sendDate; }
-            set { Set(ref sendDate, value, () => SendDate); }
+            set { Set(ref sendDate, value); }
         }
 
         SMSMessageState state = SMSMessageState.Created;
         public SMSMessageState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -71,7 +71,7 @@ namespace Signum.Entities.SMS
         public string DestinationNumber
         {
             get { return destinationNumber; }
-            set { Set(ref destinationNumber, value, () => DestinationNumber); }
+            set { Set(ref destinationNumber, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -80,21 +80,21 @@ namespace Signum.Entities.SMS
         public string MessageID
         {
             get { return messageID; }
-            set { Set(ref messageID, value, () => MessageID); }
+            set { Set(ref messageID, value); }
         }
 
         bool certified;
         public bool Certified
         {
             get { return certified; }
-            set { Set(ref certified, value, () => Certified); }
+            set { Set(ref certified, value); }
         }
 
         Lite<SMSSendPackageDN> sendpackage;
         public Lite<SMSSendPackageDN> SendPackage
         {
             get { return sendpackage; }
-            set { Set(ref sendpackage, value, () => SendPackage); }
+            set { Set(ref sendpackage, value); }
         }
 
         Lite<SMSUpdatePackageDN> updatePackage;
@@ -103,7 +103,7 @@ namespace Signum.Entities.SMS
             get { return updatePackage; }
             set
             {
-                if(Set(ref updatePackage, value, () => UpdatePackage))
+                if(Set(ref updatePackage, value))
                     UpdatePackageProcessed = false;
             }
         }
@@ -112,7 +112,7 @@ namespace Signum.Entities.SMS
         public bool UpdatePackageProcessed
         {
             get { return updatePackageProcessed; }
-            set { Set(ref updatePackageProcessed, value, () => UpdatePackageProcessed); }
+            set { Set(ref updatePackageProcessed, value); }
         }
 
         [ImplementedBy()]
@@ -120,14 +120,14 @@ namespace Signum.Entities.SMS
         public Lite<IdentifiableEntity> Referred
         {
             get { return referred; }
-            set { Set(ref referred, value, () => Referred); }
+            set { Set(ref referred, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         public override string ToString()

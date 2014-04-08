@@ -62,7 +62,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, () => FileName); }
+            set { SetToStr(ref fileName, value); }
         }
 
         [NotNullable]
@@ -71,7 +71,7 @@ namespace Signum.Entities.Files
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { SetToStr(ref binaryFile, value, () => BinaryFile); }
+            set { SetToStr(ref binaryFile, value); }
         }
         
         public override string ToString()

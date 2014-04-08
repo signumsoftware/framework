@@ -27,21 +27,21 @@ namespace Signum.Entities.Translation
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         string nativeName;
         public string NativeName
         {
             get { return nativeName; }
-            private set { Set(ref nativeName, value, () => NativeName); }
+            private set { Set(ref nativeName, value); }
         }
 
         string englishName;
         public string EnglishName
         {
             get { return englishName; }
-            private set { Set(ref englishName, value, () => EnglishName); }
+            private set { Set(ref englishName, value); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

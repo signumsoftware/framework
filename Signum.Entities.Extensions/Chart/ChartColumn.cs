@@ -56,7 +56,7 @@ namespace Signum.Entities.Chart
             get { return token; }
             set
             {
-                if (Set(ref token, value, () => Token))
+                if (Set(ref token, value))
                     TokenChanged();
             }
         }
@@ -68,7 +68,7 @@ namespace Signum.Entities.Chart
             set
             {
                 var name = value == Token.Try(t => t.Token.Try(tt => tt.NiceName())) ? null : value;
-                Set(ref displayName, name, () => DisplayName);
+                Set(ref displayName, name);
             }
         }
 
@@ -78,7 +78,7 @@ namespace Signum.Entities.Chart
         public string Parameter1
         {
             get { return parameter1; }
-            set { if (Set(ref parameter1, value, () => Parameter1))NotifyChange(false); }
+            set { if (Set(ref parameter1, value))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -87,7 +87,7 @@ namespace Signum.Entities.Chart
         public string Parameter2
         {
             get { return parameter2; }
-            set { if (Set(ref parameter2, value, () => Parameter2))NotifyChange(false); }
+            set { if (Set(ref parameter2, value))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -96,14 +96,14 @@ namespace Signum.Entities.Chart
         public string Parameter3
         {
             get { return parameter3; }
-            set { if (Set(ref parameter3, value, () => Parameter3))NotifyChange(false); }
+            set { if (Set(ref parameter3, value))NotifyChange(false); }
         }
 
         int index;
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
       
         [Ignore]

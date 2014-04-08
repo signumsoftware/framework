@@ -20,7 +20,7 @@ namespace Signum.Entities.Translation
         public Lite<IUserDN> User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
         [NotNullable]
@@ -29,7 +29,7 @@ namespace Signum.Entities.Translation
         public MList<TranslatorUserCultureDN> Cultures
         {
             get { return cultures; }
-            set { Set(ref cultures, value, () => Cultures); }
+            set { Set(ref cultures, value); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -60,14 +60,14 @@ namespace Signum.Entities.Translation
         public CultureInfoDN Culture
         {
             get { return culture; }
-            set { Set(ref culture, value, () => Culture); }
+            set { Set(ref culture, value); }
         }
 
         TranslatedCultureAction action;
         public TranslatedCultureAction Action
         {
             get { return action; }
-            set { Set(ref action, value, () => Action); }
+            set { Set(ref action, value); }
         }
     }
 
