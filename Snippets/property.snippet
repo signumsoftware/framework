@@ -2,10 +2,10 @@
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
 	<CodeSnippet Format="1.0.0">
 		<Header>
-			<Title>Propiedad</Title>
-			<Shortcut>propiedad</Shortcut>
-			<Description>Propiedad normal en cualquier clase</Description>
-			<Author>Olmo</Author>
+			<Title>Property</Title>
+			<Shortcut>propery</Shortcut>
+			<Description>Full property with a field</Description>
+			<Author>Signum Software</Author>
 			<SnippetTypes>
 				<SnippetType>Expansion</SnippetType>
 			</SnippetTypes>
@@ -14,28 +14,28 @@
 			<Declarations>
 				<Literal>
 					<ID>type</ID>
-					<ToolTip>Property type</ToolTip>
+					<ToolTip>Property and field type</ToolTip>
 					<Default>int</Default>
 				</Literal>
 				<Literal>
-					<ID>campo</ID>
-					<ToolTip>Campo</ToolTip>
+					<ID>field</ID>
+					<ToolTip>Field</ToolTip>
 					<Default>bla</Default>
 					<Function></Function>
 				</Literal>
 				<Literal>
-					<ID>propiedad</ID>
-					<ToolTip>Propiedad</ToolTip>
+					<ID>property</ID>
+					<ToolTip>Property</ToolTip>
 					<Default>Bla</Default>
 					<Function></Function>
 				</Literal>
 			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[$type$ $campo$;
-        public $type$ $propiedad$
+				<![CDATA[$type$ $field$;
+        public $type$ $property$
         {
-            get { return $campo$; }
-            set { this.$campo$ = value; }
+            get { return $field$; }
+            set { this.$field$ = value; }
         }$end$]]>
 			</Code>
 		</Snippet>
