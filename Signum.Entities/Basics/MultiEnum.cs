@@ -16,7 +16,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            internal set { Set(ref key, value, () => Key); }
+            internal set { Set(ref key, value); }
         }
 
         static readonly Expression<Func<MultiEnumDN, string>> ToStringExpression = e => e.key;

@@ -15,7 +15,7 @@ namespace Signum.Entities.Basics
         public Lite<IIdentifiable> Target
         {
             get { return target; }
-            set { Set(ref target, value, () => Target); }
+            set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
@@ -23,7 +23,7 @@ namespace Signum.Entities.Basics
         public Lite<IIdentifiable> Origin
         {
             get { return origin; }
-            set { Set(ref origin, value, () => Origin); }
+            set { Set(ref origin, value); }
         }
 
         OperationDN operation;
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
         public OperationDN Operation
         {
             get { return operation; }
-            set { SetToStr(ref operation, value, () => Operation); }
+            set { SetToStr(ref operation, value); }
         }
 
         Lite<IUserDN> user;
@@ -39,21 +39,21 @@ namespace Signum.Entities.Basics
         public Lite<IUserDN> User
         {
             get { return user; }
-            set { SetToStr(ref user, value, () => User); }
+            set { SetToStr(ref user, value); }
         }
 
         DateTime start;
         public DateTime Start
         {
             get { return start; }
-            set { SetToStr(ref start, value, () => Start); }
+            set { SetToStr(ref start, value); }
         }
 
         DateTime? end;
         public DateTime? End
         {
             get { return end; }
-            set { Set(ref end, value, () => End); }
+            set { Set(ref end, value); }
         }
 
 
@@ -68,7 +68,7 @@ namespace Signum.Entities.Basics
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         public override string ToString()

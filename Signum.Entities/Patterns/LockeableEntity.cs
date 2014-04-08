@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Utilities;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities.Patterns
 {
@@ -17,29 +18,29 @@ namespace Signum.Entities.Patterns
             get { return locked; }
             set
             {
-                if (UnsafeSet(ref locked, value, () => Locked))
+                if (UnsafeSet(ref locked, value))
                     ItemLockedChanged(Locked);
             }
         }
 
-        protected bool UnsafeSet<T>(ref T field, T value, Expression<Func<T>> property)
-        { 
-            return base.Set<T>(ref field, value, property);
+        protected bool UnsafeSet<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        {
+            return base.Set<T>(ref field, value, automaticPropertyName);
         }
 
         protected virtual void ItemLockedChanged(bool locked)
         {
         }
 
-        protected override bool Set<T>(ref T field, T value, Expression<Func<T>> property)
+        protected override bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
             if (this.locked)
                 throw new ApplicationException(EntityMessage.AttemptToModifyLockedEntity0.NiceToString().Formato(this.ToString()));
-            
-            return base.Set<T>(ref field, value, property);
+
+            return base.Set<T>(ref field, value, automaticPropertyName);
         }
 
         public IDisposable AllowTemporalUnlock()

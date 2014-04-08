@@ -21,7 +21,7 @@ namespace Signum.Test.Environment
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value, () => Text); }
+            set { SetToStr(ref text, value); }
         }
 
         [ImplementedByAll]
@@ -29,7 +29,7 @@ namespace Signum.Test.Environment
         public IIdentifiable Target
         {
             get { return target; }
-            set { Set(ref target, value, () => Target); }
+            set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
@@ -37,14 +37,14 @@ namespace Signum.Test.Environment
         public Lite<IIdentifiable> OtherTarget
         {
             get { return otherTarget; }
-            set { Set(ref otherTarget, value, () => OtherTarget); }
+            set { Set(ref otherTarget, value); }
         }
 
         DateTime creationTime;
         public DateTime CreationTime
         {
             get { return creationTime; }
-            set { Set(ref creationTime, value, () => CreationTime); }
+            set { Set(ref creationTime, value); }
         }
 
         public override string ToString()
@@ -64,7 +64,7 @@ namespace Signum.Test.Environment
         public MList<ArtistDN> Colaborators
         {
             get { return colaborators; }
-            set { Set(ref colaborators, value, () => Colaborators); }
+            set { Set(ref colaborators, value); }
         }
     }
 
@@ -94,28 +94,28 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         bool dead;
         public bool Dead
         {
             get { return dead; }
-            set { Set(ref dead, value, () => Dead); }
+            set { Set(ref dead, value); }
         }
 
         Sex sex;
         public Sex Sex
         {
             get { return sex; }
-            set { Set(ref sex, value, () => Sex); }
+            set { Set(ref sex, value); }
         }
 
         Status? status;
         public Status? Status
         {
             get { return status; }
-            set { Set(ref status, value, () => Status); }
+            set { Set(ref status, value); }
         }
 
 
@@ -130,7 +130,7 @@ namespace Signum.Test.Environment
         public AwardDN LastAward
         {
             get { return lastAward; }
-            set { Set(ref lastAward, value, () => LastAward); }
+            set { Set(ref lastAward, value); }
         }
 
         static Expression<Func<ArtistDN, IEnumerable<Lite<IdentifiableEntity>>>> FriendsCovariantExpression =
@@ -145,7 +145,7 @@ namespace Signum.Test.Environment
         public MList<Lite<ArtistDN>> Friends
         {
             get { return friends; }
-            set { Set(ref friends, value, () => Friends); }
+            set { Set(ref friends, value); }
         }
 
         static Expression<Func<ArtistDN, string>> FullNameExpression =
@@ -197,7 +197,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [NotNullable]
@@ -205,7 +205,7 @@ namespace Signum.Test.Environment
         public MList<ArtistDN> Members
         {
             get { return members; }
-            set { Set(ref members, value, () => Members); }
+            set { Set(ref members, value); }
         }
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
@@ -213,7 +213,7 @@ namespace Signum.Test.Environment
         public AwardDN LastAward
         {
             get { return lastAward; }
-            set { Set(ref lastAward, value, () => LastAward); }
+            set { Set(ref lastAward, value); }
         }
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN)), NotNullable]
@@ -221,7 +221,7 @@ namespace Signum.Test.Environment
         public MList<AwardDN> OtherAwards 
         {
             get { return otherAwards; }
-            set { Set(ref otherAwards, value, () => OtherAwards); }
+            set { Set(ref otherAwards, value); }
         }
 
         static Expression<Func<BandDN, string>> FullNameExpression =
@@ -257,7 +257,7 @@ namespace Signum.Test.Environment
         public int Year
         {
             get { return year; }
-            set { Set(ref year, value, () => Year); }
+            set { Set(ref year, value); }
         }
 
         [NotNullable, SqlDbType( Size = 100)]
@@ -266,14 +266,14 @@ namespace Signum.Test.Environment
         public string Category
         {
             get { return category; }
-            set { Set(ref category, value, () => Category); }
+            set { Set(ref category, value); }
         }
 
         AwardResult result;
         public AwardResult Result
         {
             get { return result; }
-            set { Set(ref result, value, () => Result); }
+            set { Set(ref result, value); }
         }
     }
 
@@ -313,21 +313,21 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         CountryDN country;
         public CountryDN Country
         {
             get { return country; }
-            set { Set(ref country, value, () => Country); }
+            set { Set(ref country, value); }
         }
 
         Lite<LabelDN> owner;
         public Lite<LabelDN> Owner
         {
             get { return owner; }
-            set { Set(ref owner, value, () => Owner); }
+            set { Set(ref owner, value); }
         }
 
         [UniqueIndex]
@@ -335,7 +335,7 @@ namespace Signum.Test.Environment
         public SqlHierarchyId Node
         {
             get { return node; }
-            set { Set(ref node, value, () => Node); }
+            set { Set(ref node, value); }
         }
 
         static Expression<Func<LabelDN, string>> ToStringExpression = a => a.name;
@@ -359,7 +359,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         public override string ToString()
@@ -377,7 +377,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         int year;
@@ -385,7 +385,7 @@ namespace Signum.Test.Environment
         public int Year
         {
             get { return year; }
-            set { Set(ref year, value, () => Year); }
+            set { Set(ref year, value); }
         }
 
         [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
@@ -394,7 +394,7 @@ namespace Signum.Test.Environment
         public IAuthorDN Author
         {
             get { return author; }
-            set { Set(ref author, value, () => Author); }
+            set { Set(ref author, value); }
         }
 
         [NotNullable]
@@ -402,28 +402,28 @@ namespace Signum.Test.Environment
         public MList<SongDN> Songs
         {
             get { return songs; }
-            set { Set(ref songs, value, () => Songs); }
+            set { Set(ref songs, value); }
         }
 
         SongDN bonusTrack;
         public SongDN BonusTrack
         {
             get { return bonusTrack; }
-            set { Set(ref bonusTrack, value, () => BonusTrack); }
+            set { Set(ref bonusTrack, value); }
         }
 
         LabelDN label;
         public LabelDN Label
         {
             get { return label; }
-            set { Set(ref label, value, () => Label); }
+            set { Set(ref label, value); }
         }
 
         AlbumState state;
         public AlbumState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
@@ -461,7 +461,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         TimeSpan? duration;
@@ -470,7 +470,7 @@ namespace Signum.Test.Environment
             get { return duration; }
             set
             {
-                if (Set(ref duration, value, () => Duration))
+                if (Set(ref duration, value))
                     seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
             }
         }
@@ -479,7 +479,7 @@ namespace Signum.Test.Environment
         public int? Seconds
         {
             get { return seconds; }
-            set { Set(ref seconds, value, () => Seconds); }
+            set { Set(ref seconds, value); }
         }
 
         static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
@@ -497,7 +497,7 @@ namespace Signum.Test.Environment
         public Lite<IAuthorDN> Author
         {
             get { return author; }
-            set { Set(ref author, value, () => Author); }
+            set { Set(ref author, value); }
         }
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(PersonalAwardDN), typeof(AmericanMusicAwardDN))]
@@ -505,14 +505,14 @@ namespace Signum.Test.Environment
         public Lite<AwardDN> Award
         {
             get { return award; }
-            set { Set(ref award, value, () => Award); }
+            set { Set(ref award, value); }
         }
 
         int year;
         public int Year
         {
             get { return year; }
-            set { Set(ref year, value, () => Year); }
+            set { Set(ref year, value); }
         }
     }
 
@@ -523,7 +523,7 @@ namespace Signum.Test.Environment
         public EmbeddedConfigDN EmbeddedConfig
         {
             get { return embeddedConfig; }
-            set { Set(ref embeddedConfig, value, () => EmbeddedConfig); }
+            set { Set(ref embeddedConfig, value); }
         }
     }
 
@@ -540,7 +540,7 @@ namespace Signum.Test.Environment
         public MList<Lite<GrammyAwardDN>> Awards
         {
             get { return awards; }
-            set { Set(ref awards, value, () => Awards); }
+            set { Set(ref awards, value); }
         }
     }
 

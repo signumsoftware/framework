@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
         public DateTime CreationDate
         {
             get { return creationDate; }
-            private set { Set(ref creationDate, value, () => CreationDate); }
+            private set { Set(ref creationDate, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -40,7 +40,7 @@ namespace Signum.Entities.Basics
         public string ExceptionType
         {
             get { return exceptionType; }
-            set { Set(ref exceptionType, value, () => ExceptionType); }
+            set { Set(ref exceptionType, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -50,7 +50,7 @@ namespace Signum.Entities.Basics
             get { return exceptionMessage; }
             set
             {
-                if (Set(ref exceptionMessage, value, () => ExceptionMessage))
+                if (Set(ref exceptionMessage, value))
                 {
                     ExceptionMessageHash = value == null ? 0 : value.GetHashCode();
                 }
@@ -61,7 +61,7 @@ namespace Signum.Entities.Basics
         public int ExceptionMessageHash
         {
             get { return exceptionMessageHash; }
-            private set { Set(ref exceptionMessageHash, value, () => ExceptionMessageHash); }
+            private set { Set(ref exceptionMessageHash, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -72,7 +72,7 @@ namespace Signum.Entities.Basics
             get { return stackTrace; }
             set
             {
-                if (Set(ref stackTrace, value, () => StackTrace))
+                if (Set(ref stackTrace, value))
                 {
                     StackTraceHash = value == null ? 0 : value.GetHashCode();
                 }
@@ -83,21 +83,21 @@ namespace Signum.Entities.Basics
         public int StackTraceHash
         {
             get { return stackTraceHash; }
-            private set { Set(ref stackTraceHash, value, () => StackTraceHash); }
+            private set { Set(ref stackTraceHash, value); }
         }
 
         int threadId;
         public int ThreadId
         {
             get { return threadId; }
-            set { Set(ref threadId, value, () => ThreadId); }
+            set { Set(ref threadId, value); }
         }
 
         Lite<IUserDN> user;
         public Lite<IUserDN> User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -106,7 +106,7 @@ namespace Signum.Entities.Basics
         public string Environment
         {
             get { return environment; }
-            set { Set(ref environment, value, () => Environment); }
+            set { Set(ref environment, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -115,7 +115,7 @@ namespace Signum.Entities.Basics
         public string Version
         {
             get { return version; }
-            set { Set(ref version, value, () => Version); }
+            set { Set(ref version, value); }
         }
 
         [SqlDbType(Size = 300)]
@@ -124,7 +124,7 @@ namespace Signum.Entities.Basics
         public string UserAgent
         {
             get { return userAgent; }
-            set { Set(ref userAgent, value, () => UserAgent); }
+            set { Set(ref userAgent, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -132,7 +132,7 @@ namespace Signum.Entities.Basics
         public string RequestUrl
         {
             get { return requestUrl; }
-            set { Set(ref requestUrl, value, () => RequestUrl); }
+            set { Set(ref requestUrl, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -141,7 +141,7 @@ namespace Signum.Entities.Basics
         public string ControllerName
         {
             get { return controllerName; }
-            set { Set(ref controllerName, value, () => ControllerName); }
+            set { Set(ref controllerName, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -150,7 +150,7 @@ namespace Signum.Entities.Basics
         public string ActionName
         {
             get { return actionName; }
-            set { Set(ref actionName, value, () => ActionName); }
+            set { Set(ref actionName, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -158,7 +158,7 @@ namespace Signum.Entities.Basics
         public string UrlReferer
         {
             get { return urlReferer; }
-            set { Set(ref urlReferer, value, () => UrlReferer); }
+            set { Set(ref urlReferer, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -167,7 +167,7 @@ namespace Signum.Entities.Basics
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -176,7 +176,7 @@ namespace Signum.Entities.Basics
         public string ApplicationName
         {
             get { return applicationName; }
-            set { Set(ref applicationName, value, () => ApplicationName); }
+            set { Set(ref applicationName, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -185,7 +185,7 @@ namespace Signum.Entities.Basics
         public string UserHostAddress
         {
             get { return userHostAddress; }
-            set { Set(ref userHostAddress, value, () => UserHostAddress); }
+            set { Set(ref userHostAddress, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -194,7 +194,7 @@ namespace Signum.Entities.Basics
         public string UserHostName
         {
             get { return userHostName; }
-            set { Set(ref userHostName, value, () => UserHostName); }
+            set { Set(ref userHostName, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -202,7 +202,7 @@ namespace Signum.Entities.Basics
         public string Form
         {
             get { return form; }
-            set { Set(ref form, value, () => Form); }
+            set { Set(ref form, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -210,7 +210,7 @@ namespace Signum.Entities.Basics
         public string QueryString
         {
             get { return queryString; }
-            set { Set(ref queryString, value, () => QueryString); }
+            set { Set(ref queryString, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -218,7 +218,7 @@ namespace Signum.Entities.Basics
         public string Session
         {
             get { return session; }
-            set { Set(ref session, value, () => Session); }
+            set { Set(ref session, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -226,7 +226,7 @@ namespace Signum.Entities.Basics
         public string Data
         {
             get { return data; }
-            set { Set(ref data, value, () => Data); }
+            set { Set(ref data, value); }
         }
 
         public override string ToString()

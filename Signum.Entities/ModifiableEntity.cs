@@ -18,18 +18,21 @@ using System.Threading;
 using System.Collections;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
-        protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
+        internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
+            PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags);
 
             INotifyCollectionChanged col = field as INotifyCollectionChanged;
             if (col != null)
@@ -101,9 +104,9 @@ namespace Signum.Entities
             }
         }
 
-        protected bool SetToStr<T>(ref T field, T value, Expression<Func<T>> property)
+        protected bool SetToStr<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
-            if (this.Set(ref field, value, property))
+            if (this.Set(ref field, value, automaticPropertyName))
             {
                 NotifyToString();
                 return true;
