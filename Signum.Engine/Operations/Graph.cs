@@ -17,8 +17,8 @@ namespace Signum.Engine.Operations
     {
         public class Construct : _Construct<T>, IConstructOperation
         {
-            protected readonly Enum key;
-            Enum IOperation.Key { get { return key; } }
+            protected readonly ConstructSymbol<T> Symbol;
+            OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
             bool IOperation.Returns { get { return true; } }
@@ -28,9 +28,9 @@ namespace Signum.Engine.Operations
             public bool Lite { get { return false; } }
 
 
-            public Construct(Enum key)
+            public Construct(ConstructSymbol<T> symbol)
             {
-                this.key = key;
+                this.Symbol = symbol;
             }
 
             public void OverrideConstruct(Overrider<Func<object[], T>> overrider)
@@ -40,9 +40,9 @@ namespace Signum.Engine.Operations
 
             IIdentifiable IConstructOperation.Construct(params object[] args)
             {
-                using (HeavyProfiler.Log("Construct", () => OperationDN.UniqueKey(key)))
+                using (HeavyProfiler.Log("Construct", () => Symbol.Operation.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     using (OperationLogic.AllowSave<T>())
                     {
@@ -52,7 +52,7 @@ namespace Signum.Engine.Operations
                             {
                                 OperationLogDN log = new OperationLogDN
                                 {
-                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Operation = Symbol.Operation,
                                     Start = TimeZoneManager.Now,
                                     User = UserHolder.Current.ToLite()
                                 };
@@ -95,20 +95,20 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(key));
+                    throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Symbol.Operation));
             }
 
             public override string ToString()
             {
-                return "{0} Construct {1}".Formato(key, typeof(T));
+                return "{0} Construct {1}".Formato(Symbol.Operation, typeof(T));
             }
         }
 
         public class ConstructFrom<F> : IConstructorFromOperation
             where F : class, IIdentifiable
         {
-            protected readonly Enum key;
-            Enum IOperation.Key { get { return key; } }
+            protected readonly ConstructFromSymbol<F, T> Symbol;
+            OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
 
@@ -137,9 +137,9 @@ namespace Signum.Engine.Operations
                 this.Construct = overrider(this.Construct);
             }
 
-            public ConstructFrom(Enum key)
+            public ConstructFrom(ConstructFromSymbol<F, T> symbol)
             {
-                this.key = key;
+                this.Symbol = symbol;
                 this.Lite = true;
             }
 
@@ -161,9 +161,9 @@ namespace Signum.Engine.Operations
 
             IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
             {
-                using (HeavyProfiler.Log("ConstructFrom", () => OperationDN.UniqueKey(key)))
+                using (HeavyProfiler.Log("ConstructFrom", () => Symbol.Operation.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     string error = OnCanConstruct(entity);
                     if (error != null)
@@ -178,7 +178,7 @@ namespace Signum.Engine.Operations
                             {
                                 OperationLogDN log = new OperationLogDN
                                 {
-                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Operation = Symbol.Operation,
                                     Start = TimeZoneManager.Now,
                                     User = UserHolder.Current.ToLite(),
                                     Origin = entity.ToLiteFat(),
@@ -226,12 +226,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(key));
+                    throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(Symbol.Operation));
             }
 
             public override string ToString()
             {
-                return "{0} ConstructFrom {1} -> {2}".Formato(key, typeof(F), typeof(T));
+                return "{0} ConstructFrom {1} -> {2}".Formato(Symbol.Operation, typeof(F), typeof(T));
             }
 
         }
@@ -239,8 +239,8 @@ namespace Signum.Engine.Operations
         public class ConstructFromMany<F> : IConstructorFromManyOperation
             where F : class, IIdentifiable
         {
-            protected readonly Enum key;
-            Enum IOperation.Key { get { return key; } }
+            protected readonly ConstructFromManySymbol<F, T> Symbol;
+            OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
 
@@ -254,16 +254,16 @@ namespace Signum.Engine.Operations
                 this.Construct = overrider(this.Construct);
             }
 
-            public ConstructFromMany(Enum key)
+            public ConstructFromMany(ConstructFromManySymbol<F, T> symbol)
             {
-                this.key = key;
+                this.Symbol = symbol;
             }
 
             IIdentifiable IConstructorFromManyOperation.Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] args)
             {
-                using (HeavyProfiler.Log("ConstructFromMany", () => OperationDN.UniqueKey(key)))
+                using (HeavyProfiler.Log("ConstructFromMany", () => Symbol.Operation.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     using (OperationLogic.AllowSave<F>())
                     using (OperationLogic.AllowSave<T>())
@@ -274,7 +274,7 @@ namespace Signum.Engine.Operations
                             {
                                 OperationLogDN log = new OperationLogDN
                                 {
-                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Operation = Symbol.Operation,
                                     Start = TimeZoneManager.Now,
                                     User = UserHolder.Current.ToLite()
                                 };
@@ -322,20 +322,20 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(key));
+                    throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} ConstructFromMany {1} -> {2}".Formato(key, typeof(F), typeof(T));
+                return "{0} ConstructFromMany {1} -> {2}".Formato(Symbol, typeof(F), typeof(T));
             }
 
         }
 
         public class Execute : _Execute<T>, IExecuteOperation
         {
-            protected readonly Enum key;
-            Enum IOperation.Key { get { return key; } }
+            protected readonly ExecuteSymbol<T> Symbol;
+            OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Execute; } }
             public bool Lite { get; set; }
@@ -360,9 +360,9 @@ namespace Signum.Engine.Operations
                 this.Execute = overrider(this.Execute);
             }
 
-            public Execute(Enum key)
+            public Execute(ExecuteSymbol<T> symbol)
             {
-                this.key = key;
+                this.Symbol = symbol;
                 this.Lite = true;
             }
 
@@ -384,9 +384,9 @@ namespace Signum.Engine.Operations
 
             void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
             {
-                using (HeavyProfiler.Log("Execute", () => OperationDN.UniqueKey(key)))
+                using (HeavyProfiler.Log("Execute", () => Symbol.Operation.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     string error = OnCanExecute((T)entity);
                     if (error != null)
@@ -394,7 +394,7 @@ namespace Signum.Engine.Operations
 
                     OperationLogDN log = new OperationLogDN
                     {
-                        Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                        Operation = Symbol.Operation,
                         Start = TimeZoneManager.Now,
                         User = UserHolder.Current.ToLite()
                     };
@@ -469,19 +469,19 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Execute == null)
-                    throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(key));
+                    throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} Execute on {1}".Formato(key, typeof(T));
+                return "{0} Execute on {1}".Formato(Symbol, typeof(T));
             }
         }
 
         public class Delete : _Delete<T>, IDeleteOperation
         {
-            protected readonly Enum key;
-            Enum IOperation.Key { get { return key; } }
+            protected readonly DeleteSymbol<T> Symbol;
+            OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Delete; } }
             public bool Lite { get; set; }
@@ -506,9 +506,9 @@ namespace Signum.Engine.Operations
                 this.Delete = overrider(this.Delete);
             }
 
-            public Delete(Enum key)
+            public Delete(DeleteSymbol<T> symbol)
             {
-                this.key = key;
+                this.Symbol = symbol;
                 this.Lite = true;
             }
 
@@ -530,9 +530,9 @@ namespace Signum.Engine.Operations
 
             void IDeleteOperation.Delete(IIdentifiable entity, params object[] parameters)
             {
-                using (HeavyProfiler.Log("Delete", () => OperationDN.UniqueKey(key)))
+                using (HeavyProfiler.Log("Delete", () => Symbol.Operation.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     string error = OnCanDelete((T)entity);
                     if (error != null)
@@ -540,7 +540,7 @@ namespace Signum.Engine.Operations
 
                     OperationLogDN log = new OperationLogDN
                     {
-                        Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                        Operation = Symbol.Operation,
                         Start = TimeZoneManager.Now,
                         User = UserHolder.Current.ToLite()
                     };
@@ -607,12 +607,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Delete == null)
-                    throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(key));
+                    throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(Symbol.Operation));
             }
 
             public override string ToString()
             {
-                return "{0} Delete {1}".Formato(key, typeof(T));
+                return "{0} Delete {1}".Formato(Symbol.Operation, typeof(T));
             }
         }
     }

@@ -158,7 +158,7 @@
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaSynchronizer.cs" />
-    <Compile Include="Basics\MultiEnumLogic.cs" />
+    <Compile Include="Basics\SymbolLogic.cs" />
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\GraphState.cs" />
     <Compile Include="Operations\Internal.cs" />

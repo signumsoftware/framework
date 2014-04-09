@@ -197,6 +197,11 @@ namespace Signum.Utilities
             return a.ToString().NiceName();
         }
 
+        public static string NiceName(this FieldInfo fi)
+        {
+            return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
+        }
+
         public static string NiceName(this PropertyInfo pi)
         {
             return GetMemberNiceName(pi) ??
