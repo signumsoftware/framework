@@ -25,7 +25,7 @@ namespace Signum.Entities.Scheduler
             set { Set(ref user, value); }
         }
 
-        [ImplementedBy(typeof(SimpleTaskDN))]
+        [ImplementedBy(typeof(SimpleTaskSymbol))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task

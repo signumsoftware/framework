@@ -45,8 +45,8 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageOperationDN : PackageDN
     {
-        OperationDN operation;
-        public OperationDN Operation
+        OperationSymbol operation;
+        public OperationSymbol Operation
         {
             get { return operation; }
             set { SetToStr(ref operation, value); }

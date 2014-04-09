@@ -397,11 +397,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationSymbol).NiceName(), Role);
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRuleCoerced<OperationDN, OperationAllowed> { } 
+    public class OperationAllowedRule : AllowedRuleCoerced<OperationSymbol, OperationAllowed> { } 
 
 
     [Serializable]
@@ -409,9 +409,9 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionSymbol).NiceName(), Role);
         }
     }
     [Serializable]
-    public class PermissionAllowedRule : AllowedRule<PermissionDN, bool> { } 
+    public class PermissionAllowedRule : AllowedRule<PermissionSymbol, bool> { } 
 }

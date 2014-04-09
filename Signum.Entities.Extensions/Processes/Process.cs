@@ -12,13 +12,19 @@ using System.ComponentModel;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class ProcessAlgorithmDN : MultiEnumDN
+    [Serializable]
+    public class ProcessAlgorithmSymbol : Symbol
     {
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public ProcessAlgorithmSymbol([CallerMemberName]string memberName = null) : 
+            base(new StackFrame(1, false), memberName)
+        {
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
@@ -26,14 +32,14 @@ namespace Signum.Entities.Processes
     {
         internal ProcessDN() { }
 
-        public ProcessDN(ProcessAlgorithmDN process)
+        public ProcessDN(ProcessAlgorithmSymbol process)
         {
             this.algorithm = process;
         }
 
-        ProcessAlgorithmDN algorithm;
+        ProcessAlgorithmSymbol algorithm;
         [NotNullValidator]
-        public ProcessAlgorithmDN Algorithm
+        public ProcessAlgorithmSymbol Algorithm
         {
             get { return algorithm; }
         }

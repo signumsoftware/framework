@@ -52,10 +52,10 @@ namespace Signum.Entities.Authorization
     public class RuleQueryDN : RuleDN<QueryDN, bool> { }
 
     [Serializable]
-    public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
+    public class RulePermissionDN : RuleDN<PermissionSymbol, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
+    public class RuleOperationDN : RuleDN<OperationSymbol, OperationAllowed> { }
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
@@ -89,9 +89,9 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN>
     {
-        TypeConditionNameDN condition;
+        TypeConditionSymbol condition;
         [NotNullValidator]
-        public TypeConditionNameDN Condition
+        public TypeConditionSymbol Condition
         {
             get { return condition; }
             set { Set(ref condition, value); }

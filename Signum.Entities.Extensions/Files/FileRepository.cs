@@ -6,12 +6,19 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class FileTypeDN : MultiEnumDN
+    [Serializable]
+    public class FileTypeSymbol : Symbol
     {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public FileTypeSymbol([CallerMemberName]string memberName = null) : 
+            base(new StackFrame(1, false), memberName)
+        {
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
@@ -69,8 +76,8 @@ namespace Signum.Entities.Files
         }
 
         [NotNullable]
-        MList<FileTypeDN> fileTypes = new MList<FileTypeDN>();
-        public MList<FileTypeDN> FileTypes
+        MList<FileTypeSymbol> fileTypes = new MList<FileTypeSymbol>();
+        public MList<FileTypeSymbol> FileTypes
         {
             get { return fileTypes; }
             set { Set(ref fileTypes, value); }

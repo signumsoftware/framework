@@ -193,7 +193,7 @@ namespace Signum.Engine.Authorization
 
         public static Dictionary<Enum, OperationAllowed> AllowedOperations()
         {
-            return OperationLogic.AllKeys().ToDictionary(k => k, k => cache.GetAllowed(RoleDN.Current.ToLite(), k));
+            return OperationLogic.AllSymbols().ToDictionary(k => k, k => cache.GetAllowed(RoleDN.Current.ToLite(), k));
         }
 
         static readonly Variable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");

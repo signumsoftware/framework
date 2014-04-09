@@ -17,24 +17,19 @@ namespace Signum.Entities.Files
     {
         public FilePathDN() { }
 
-        public FilePathDN(FileTypeDN fileType)
+        public FilePathDN(FileTypeSymbol fileType)
         {
-            this.FileType = fileType;
+            this.fileType = fileType;
         }
 
-        public FilePathDN(Enum fileType)
-        {
-            this.fileTypeEnum = fileType;
-        }
-
-        public FilePathDN(Enum fileType, string path)
+        public FilePathDN(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
             this.FileName = Path.GetFileName(path);
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
-        public FilePathDN(Enum fileType, string fileName, byte[] fileData)
+        public FilePathDN(FileTypeSymbol fileType, string fileName, byte[] fileData)
             : this(fileType)
         {
             this.FileName = fileName;
@@ -83,21 +78,9 @@ namespace Signum.Entities.Files
             internal set { Set(ref sufix, value); }
         }
 
-        [Ignore]
-        Enum fileTypeEnum;
-        public Enum FileTypeEnum
-        {
-            get { return fileTypeEnum; }
-        }
-
-        public void SetFileTypeEnum(Enum ftEnum)
-        {
-            fileTypeEnum = ftEnum;
-        }
-
         [NotNullable]
-        FileTypeDN fileType;
-        public FileTypeDN FileType
+        FileTypeSymbol fileType;
+        public FileTypeSymbol FileType
         {
             get { return fileType; }
             internal set { Set(ref fileType, value); }
