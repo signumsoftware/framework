@@ -225,6 +225,20 @@ namespace Signum.Engine
 
         #region Exists
 
+        public static bool Exists<T>(this Lite<T> lite)
+            where T : IdentifiableEntity
+        {
+            try
+            {
+                return lite.InDB().Any();
+            }
+            catch (Exception e)
+            {
+                e.Data["lite"] = lite;
+                throw;
+            }
+        }
+
         static GenericInvoker<Func<int, bool>> giExist = new GenericInvoker<Func<int, bool>>(id => Exists<IdentifiableEntity>(id));
         public static bool Exists<T>(int id)
             where T : IdentifiableEntity
