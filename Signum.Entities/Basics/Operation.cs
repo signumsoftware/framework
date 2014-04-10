@@ -136,7 +136,7 @@ namespace Signum.Entities
     {
     }
 
-    public interface ExecuteSymbol<out T> : IOperationSymbolContainer
+    public interface ExecuteSymbol<in T> : IOperationSymbolContainer
         where T : class, IIdentifiable
     {
     }

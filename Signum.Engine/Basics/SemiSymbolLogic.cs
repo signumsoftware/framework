@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities.Basics;
-using Signum.Engine.Maps;
-using Signum.Utilities;
 using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
+using System.Text;
+using Signum.Engine.Maps;
 using Signum.Entities;
-using Signum.Engine.DynamicQuery;
+using Signum.Entities.Basics;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 
-namespace Signum.Engine
+namespace Signum.Engine.Extensions.Basics
 {
-   
-    public static class SymbolLogic<T>
-        where T: Symbol
+    public static class SemiSymbolLogic<T>
+        where T : SemiSymbol
     {
         static ResetLazy<Dictionary<string, T>> lazy;
-        static Func<IEnumerable<T>> getSymbols;
+        static Func<IEnumerable<T>> getSemiSymbols;
 
-        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
+        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
         {
-            if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
+            if (sb.NotDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>();
 
@@ -29,22 +28,23 @@ namespace Signum.Engine
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
 
-                SymbolLogic<T>.getSymbols = getSymbols;
+                SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
                 lazy = sb.GlobalLazy(() =>
-                {   
-                    var symbols = getSymbols();
+                {
+                    var symbols =  CreateSemiSymbols();
 
                     EnumerableExtensions.JoinStrict(
-                         Database.RetrieveAll<T>(),
+                         Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
                          symbols,
                          c => c.Key,
                          s => s.Key,
-                         (c, s) => 
+                         (c, s) =>
                          {
                              c.id = s.id;
-                             c.IsNew = false; 
-                             c.Modified = ModifiedState.Sealed; 
-                             return c; 
+                             c.Name = s.Name;
+                             c.IsNew = false;
+                             c.Modified = ModifiedState.Sealed;
+                             return c;
                          }
                     , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
 
@@ -52,22 +52,38 @@ namespace Signum.Engine
 
                 }, new InvalidateWith(typeof(T)));
 
-                SymbolManager.SymbolDeserialized.Register((T s) =>
+                SemiSymbolManager.SemiSymbolDeserialized.Register((T s) =>
                 {
-                    s.id = lazy.Value.GetOrThrow(s.Key).id;
+                    if (s.Key == null)
+                        return;
+
+                    var cached = lazy.Value.GetOrThrow(s.Key);
+                    s.id = cached.id;
+                    s.Name= cached.Name;
                     s.IsNew = false;
                     s.Modified = ModifiedState.Sealed;
                 });
             }
         }
-      
+
         static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();
 
-            IEnumerable<T> should = getSymbols(); 
+            IEnumerable<T> should = CreateSemiSymbols();
 
             return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+        }
+
+        private static IEnumerable<T> CreateSemiSymbols()
+        {
+            IEnumerable<T> should = getSemiSymbols().ToList();
+
+            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
+                foreach (var item in should)
+                    item.Name = item.NiceToString();
+
+            return should;
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
@@ -75,17 +91,18 @@ namespace Signum.Engine
             Table table = Schema.Current.Table<T>();
 
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
-            IEnumerable<T> should = getSymbols();
+            IEnumerable<T> should = CreateSemiSymbols();
 
             return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
                 should.ToDictionary(s => s.Key),
-                current.ToDictionary(c => c.Key),
+                current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
                 (k, s) => table.InsertSqlSync(s),
                 (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
                     var originalName = c.Key;
                     c.Key = s.Key;
+                    c.Name = s.Name;
                     return table.UpdateSqlSync(c, comment: c.Key);
                 }, Spacing.Double);
         }
@@ -95,24 +112,14 @@ namespace Signum.Engine
         static Dictionary<string, T> AssertStarted()
         {
             if (lazy == null)
-                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SymbolLogic<T>).TypeName()));
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SemiSymbolLogic<T>).TypeName()));
 
             return lazy.Value;
         }
 
-        public static ICollection<T> Symbols
+        public static ICollection<T> SemiSymbols
         {
             get { return AssertStarted().Values; }
-        }
-
-        public static T TryToSymbol(string key)
-        {
-            return AssertStarted().TryGetC(key);
-        }
-
-        public static HashSet<string> AllUniqueKeys()
-        {
-            return AssertStarted().Select(a => a.Key).ToHashSet();
         }
     }
 }

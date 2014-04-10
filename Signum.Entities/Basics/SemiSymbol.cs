@@ -4,26 +4,23 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
-using Signum.Entities.Basics;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 
-namespace Signum.Entities
+namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public abstract class Symbol : IdentifiableEntity
+    public abstract class SemiSymbol : IdentifiableEntity
     {
-        public Symbol() { }
-      
+        public SemiSymbol() { }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="frame">Inheritors should use new StackFrame(1, false) and add [MethodImpl(MethodImplOptions.NoInlining)]</param>
         /// <param name="fieldName">Inheritors should use [CallerMemberName]</param>
-        public Symbol(StackFrame frame, string fieldName)
+        public void MakeSymbol(StackFrame frame, string fieldName)
         {
             var mi = frame.GetMethod();
 
@@ -54,9 +51,9 @@ namespace Signum.Entities
         }
 
 
-        [NotNullable, SqlDbType(Size = 200), UniqueIndex]
+        [SqlDbType(Size = 200), UniqueIndex(AllowMultipleNulls=true)]
         string key;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200)]
         public string Key
         {
             get { return key; }
@@ -66,14 +63,7 @@ namespace Signum.Entities
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            SymbolManager.SymbolDeserialized.Invoke(this);
-        }
-
-
-        static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
+            SemiSymbolManager.SemiSymbolDeserialized.Invoke(this);
         }
 
         public override bool Equals(object obj)
@@ -89,19 +79,47 @@ namespace Signum.Entities
         }
 
 
-        public string NiceToString()
+        internal string NiceToString()
         {
             return this.FieldInfo.NiceName();
         }
+
+        static SemiSymbol()
+        {
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsSymbolContainer;
+            DescriptionManager.Invalidate();
+        }
+
+        static DescriptionOptions? DescriptionManager_IsSymbolContainer(Type t)
+        {
+            return t.IsAbstract && t.IsSealed &&
+                t.GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Any(a => typeof(SemiSymbol).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Name
+        {
+            get { return name; }
+            set { Set(ref name, value); }
+        }
+
+        static Expression<Func<SemiSymbol, string>> ToStringExpression = e => e.Name;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
-    public class SymbolManager
+    public class SemiSymbolManager
     {
-        public static Polymorphic<Action<Symbol>> SymbolDeserialized = new Polymorphic<Action<Symbol>>();
+        public static Polymorphic<Action<SemiSymbol>> SemiSymbolDeserialized = new Polymorphic<Action<SemiSymbol>>();
 
-        static SymbolManager()
+        static SemiSymbolManager()
         {
-            SymbolDeserialized.Register((Symbol s) =>
+            SemiSymbolDeserialized.Register((SemiSymbol s) =>
             {
                 throw new InvalidOperationException(@"Symbols require that the id are set before accesing the database. 
 If your curent AppDomain won't access the database (like a Windows application), call SymbolManager.AvoidSetIdOnDeserialized()");
@@ -110,7 +128,7 @@ If your curent AppDomain won't access the database (like a Windows application),
 
         public static void AvoidSetIdOnDeserialized()
         {
-            SymbolDeserialized.Register((Symbol s) =>
+            SemiSymbolDeserialized.Register((SemiSymbol s) =>
             {
             });
         }

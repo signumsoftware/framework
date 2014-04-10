@@ -85,6 +85,7 @@
     <Compile Include="Basics\IUserDN.cs" />
     <Compile Include="Basics\Operation.cs" />
     <Compile Include="Basics\OperationLog.cs" />
+    <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="CallerInfoAttributes.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
