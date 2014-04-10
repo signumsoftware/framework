@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using Signum.Entities.Chart;
 using Signum.Utilities.Reflection;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -198,17 +199,17 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    public enum ControlPanelPermission
+    public static class ControlPanelPermission
     {
-        ViewControlPanel,
+        public static readonly PermissionSymbol ViewControlPanel = new PermissionSymbol();
     }
 
-    public enum ControlPanelOperation
+    public static class ControlPanelOperation
     {
-        Create,
-        Save,
-        Clone,
-        Delete,
+        public static readonly ConstructSymbol<ControlPanelDN> Create = OperationSymbol.Construct<ControlPanelDN>();
+        public static readonly ExecuteSymbol<ControlPanelDN> Save = OperationSymbol.Execute<ControlPanelDN>();
+        public static readonly ConstructFromSymbol<ControlPanelDN, ControlPanelDN> Clone = OperationSymbol.ConstructFrom<ControlPanelDN, ControlPanelDN>();
+        public static readonly DeleteSymbol<ControlPanelDN> Delete = OperationSymbol.Delete<ControlPanelDN>();
     }
 
     public enum ControlPanelMessage

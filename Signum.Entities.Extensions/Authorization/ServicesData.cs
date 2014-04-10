@@ -199,8 +199,8 @@ namespace Signum.Entities.Authorization
             set { Set(ref queries, value); }
         }
 
-        ReadOnlyCollection<Enum> availableConditions;
-        public ReadOnlyCollection<Enum> AvailableConditions
+        ReadOnlyCollection<TypeConditionSymbol> availableConditions;
+        public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions
         {
             get { return availableConditions; }
             set { Set(ref availableConditions, value); }
@@ -320,14 +320,14 @@ namespace Signum.Entities.Authorization
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
-        public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
+        public TypeConditionRule(TypeConditionSymbol conditionName, TypeAllowed allowed)
         {
             this.conditionName = conditionName;
             this.allowed = allowed;
         }
 
-        Enum conditionName;
-        public Enum ConditionName
+        TypeConditionSymbol conditionName;
+        public TypeConditionSymbol ConditionName
         {
             get { return conditionName; }
             set { Set(ref conditionName, value); }

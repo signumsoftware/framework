@@ -570,7 +570,7 @@ namespace Signum.Engine.Authorization
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionDN
                 {
                     Allowed = a.Allowed,
-                    Condition = a.ConditionName.ToEntity<TypeConditionNameDN>()
+                    Condition = a.ConditionName
                 }).ToMList()
             };
         }
@@ -578,7 +578,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeDN rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
-                rule.Conditions.Select(c => new TypeConditionRule(c.Condition.ToEnum(), c.Allowed)).ToReadOnly());
+                rule.Conditions.Select(c => new TypeConditionRule(c.Condition, c.Allowed)).ToReadOnly());
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements arg)
@@ -588,7 +588,7 @@ namespace Signum.Engine.Authorization
                          select new { rt.Resource, c.Condition, rt.Role }).ToList();
 
             var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
-                .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition.ToEnum()))
+                .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition))
                 .ToList();
 
             return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeDN rt) => rt.Conditions)

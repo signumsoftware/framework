@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Processes;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
@@ -78,16 +79,16 @@ namespace Signum.Entities.Scheduler
         LastExecution
     }
 
-    public enum TaskOperation
+    public static class TaskOperation
     {
-        ExecuteSync,
-        ExecuteAsync,
+        public static readonly ExecuteSymbol<ScheduledTaskDN> ExecuteSync = OperationSymbol.Execute<ScheduledTaskDN>();
+        public static readonly ExecuteSymbol<ScheduledTaskDN> ExecuteAsync = OperationSymbol.Execute<ScheduledTaskDN>();
     }
 
 
-    public enum SchedulerPermission
+    public static class SchedulerPermission
     {
-        ViewSchedulerPanel,
+        public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
     }
 
     public interface ITaskDN : IIdentifiable

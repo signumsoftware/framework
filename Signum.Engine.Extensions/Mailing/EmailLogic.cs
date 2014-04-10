@@ -214,7 +214,7 @@ namespace Signum.Engine.Mailing
 
             list.SaveList();
 
-            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, package);
+            var process = ProcessLogic.Create(EmailMessageProcess.SendEmails, package);
 
             process.Execute(ProcessOperation.Execute);
 

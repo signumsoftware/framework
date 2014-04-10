@@ -144,18 +144,18 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum NewsletterProcess
+    public static class NewsletterProcess
     {
-        SendNewsletter,
+        public static readonly ProcessAlgorithmSymbol SendNewsletter = new ProcessAlgorithmSymbol();
     }
 
-    public enum NewsletterOperation
+    public static class NewsletterOperation
     {
-        Save,
-        Send,
-        AddRecipients,
-        RemoveRecipients,
-        Clone,
+        public static readonly ExecuteSymbol<NewsletterDN> Save = OperationSymbol.Execute<NewsletterDN>();
+        public static readonly ExecuteSymbol<NewsletterDN> Send = OperationSymbol.Execute<NewsletterDN>();
+        public static readonly ExecuteSymbol<NewsletterDN> AddRecipients = OperationSymbol.Execute<NewsletterDN>();
+        public static readonly ExecuteSymbol<NewsletterDN> RemoveRecipients = OperationSymbol.Execute<NewsletterDN>();
+        public static readonly ConstructFromSymbol<NewsletterDN, NewsletterDN> Clone = OperationSymbol.ConstructFrom<NewsletterDN, NewsletterDN>();
     }
 
     public enum NewsletterState

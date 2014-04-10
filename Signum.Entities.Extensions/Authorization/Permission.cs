@@ -21,8 +21,8 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    public enum BasicPermission
+    public static class BasicPermission
     {
-        AdminRules,
+        public static readonly PermissionSymbol AdminRules = new PermissionSymbol();
     }
 }

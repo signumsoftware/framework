@@ -72,7 +72,7 @@ namespace Signum.Engine.Notes
                         t.Key,
                     });
 
-                MultiOptionalEnumLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
+                SymbolLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
 
                 new Graph<NoteTypeDN>.Execute(NoteTypeOperation.Save)
                 {
@@ -97,13 +97,8 @@ namespace Signum.Engine.Notes
             SystemNoteTypes.Add(noteType);
         }
 
-        public static NoteTypeDN GetAlertType(Enum noteType)
-        {
-            return MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType);
-        }
 
-
-        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, Enum noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, NoteTypeDN noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -114,7 +109,7 @@ namespace Signum.Engine.Notes
                 Text = text,
                 Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
-                NoteType = MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType)
+                NoteType = noteType
             }.Execute(NoteOperation.Save);
         }
     }

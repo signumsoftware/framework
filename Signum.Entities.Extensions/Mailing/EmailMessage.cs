@@ -507,14 +507,14 @@ namespace Signum.Entities.Mailing
         public static readonly ProcessAlgorithmSymbol SendEmails = new ProcessAlgorithmSymbol();
     }
 
-    public enum EmailMessageOperation
+    public static class EmailMessageOperation
     {
-        Send,
-        ReSend,
-        ReSendEmails,
-        CreateMail,
-        CreateMailFromTemplate,
-        Delete,
+        public static readonly ExecuteSymbol<EmailMessageDN> Send = OperationSymbol.Execute<EmailMessageDN>();
+        public static readonly ConstructFromSymbol<EmailMessageDN, EmailMessageDN> ReSend = OperationSymbol.ConstructFrom<EmailMessageDN, EmailMessageDN>();
+        public static readonly ConstructFromManySymbol<EmailMessageDN, ProcessDN> ReSendEmails = OperationSymbol.ConstructFromMany<EmailMessageDN, ProcessDN>();
+        public static readonly ConstructSymbol<EmailMessageDN> CreateMail = OperationSymbol.Construct<EmailMessageDN>();
+        public static readonly ConstructFromSymbol<EmailTemplateDN, EmailMessageDN> CreateMailFromTemplate = OperationSymbol.ConstructFrom<EmailTemplateDN, EmailMessageDN>();
+        public static readonly DeleteSymbol<EmailMessageDN> Delete = OperationSymbol.Delete<EmailMessageDN>();
     }
 
     public enum EmailMessageMessage

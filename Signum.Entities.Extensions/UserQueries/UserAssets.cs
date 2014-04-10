@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.ControlPanel;
@@ -81,9 +82,9 @@ namespace Signum.Entities.UserQueries
         SucessfullyImported,
     }
 
-    public enum UserAssetPermission
+    public static class UserAssetPermission
     {
-        UserAssetsToXML,
+        public static readonly PermissionSymbol UserAssetsToXML = new PermissionSymbol();
     }
 
     public interface IToXmlContext

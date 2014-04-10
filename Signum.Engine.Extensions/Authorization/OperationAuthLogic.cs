@@ -51,7 +51,7 @@ namespace Signum.Engine.Authorization
 
                     replacements.AskForReplacements(
                         x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
-                        SymbolLogic<OperationSymbol>.AllUniqueQueys(),
+                        SymbolLogic<OperationSymbol>.AllUniqueKeys(),
                         replacementKey);
 
                     return cache.ImportXml(x, "Operations", "Operation", roles,
@@ -113,16 +113,16 @@ namespace Signum.Engine.Authorization
                     else
                     {
                         var ops = operations[type];
-                        if (ta.MaxUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.Key, inUserInterface: true)))
+                        if (ta.MaxUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.OperationSymbol, inUserInterface: true)))
                         {
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no save operation is allowed".Formato(type.Name, ta));
                             var only = ops.Only();
                             if (only != null)
                             {
                                 SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
-                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(OperationSymbol.UniqueKey(only.Key), r)))
+                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(only.OperationSymbol.Key, r)))
                                 {
-                                    Manual.SetAllowed(r, only.Key, OperationAllowed.Allow);
+                                    Manual.SetAllowed(r, only.OperationSymbol, OperationAllowed.Allow);
                                     SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
                                 }
                                 else
@@ -142,13 +142,13 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => a.Key.ToEntity<OperationSymbol>());
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => a.OperationSymbol);
             var result = new OperationRulePack { Role = role, Type = typeDN, };
 
             cache.GetRules(result, resources);
 
             var coercer = OperationCoercer.Instance.GetCoerceValue(role);
-            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(r.Resource.ToEnum(), a).Equals(a)).ToArray());
+            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(r.Resource, a).Equals(a)).ToArray());
             
             return result;
         }
@@ -156,9 +156,9 @@ namespace Signum.Engine.Authorization
         public static void SetOperationRules(OperationRulePack rules)
         {
             var keys = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[rules.Type])
-                .Select(a => OperationSymbol.UniqueKey(a.Key)).ToArray();
+                .Select(a => a.OperationSymbol).ToHashSet();
 
-            cache.SetRules(rules, r => keys.Contains(r.Key));
+            cache.SetRules(rules, r => keys.Contains(r));
         }
 
         public static bool GetOperationAllowed(Lite<RoleDN> role, OperationSymbol operationKey, bool inUserInterface)
@@ -188,7 +188,7 @@ namespace Signum.Engine.Authorization
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
-            return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.Key)).Collapse();
+            return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.OperationSymbol)).Collapse();
         }
 
         public static Dictionary<OperationSymbol, OperationAllowed> AllowedOperations()

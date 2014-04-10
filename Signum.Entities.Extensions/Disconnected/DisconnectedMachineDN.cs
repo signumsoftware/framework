@@ -72,11 +72,11 @@ namespace Signum.Entities.Disconnected
         Fixed,
     }
 
-    public enum DisconnectedMachineOperation
+    public static class DisconnectedMachineOperation
     {
-        Save,
-        UnsafeUnlock,
-        FixImport,
+        public static readonly ExecuteSymbol<DisconnectedMachineDN> Save = OperationSymbol.Execute<DisconnectedMachineDN>();
+        public static readonly ExecuteSymbol<DisconnectedMachineDN> UnsafeUnlock = OperationSymbol.Execute<DisconnectedMachineDN>();
+        public static readonly ConstructFromSymbol<DisconnectedMachineDN, DisconnectedImportDN> FixImport = OperationSymbol.ConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>();
     }
 
     [Serializable]

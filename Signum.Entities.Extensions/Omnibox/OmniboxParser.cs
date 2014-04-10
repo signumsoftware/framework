@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -262,8 +262,8 @@ namespace Signum.Entities.Omnibox
         Entity,
     }
 
-    public enum OmniboxPermission
+    public static class OmniboxPermission
     {
-        OmniboxInAssemblyLanguage,
+        public static readonly PermissionSymbol OmniboxInAssemblyLanguage = new PermissionSymbol();
     }
 }

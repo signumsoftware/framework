@@ -271,12 +271,6 @@ namespace Signum.Engine.Processes
             }
         }
 
-
-        public static ProcessDN Create(ProcessAlgorithmSymbol processAlgorithm, IProcessDataDN processData, IProcessSessionDN session = null)
-        {
-            return processAlgorithm.Create(processData, session);
-        }
-
         public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IProcessSessionDN session = null)
         {
             if (session == null)

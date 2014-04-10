@@ -143,12 +143,7 @@ namespace Signum.Engine.Processes
             }); 
         }
 
-        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
-        {
-            return CreatePackageOperation(entities, operationKey.ToEntity<OperationDN>());
-        }
-
-        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
@@ -156,19 +151,19 @@ namespace Signum.Engine.Processes
             }.CreateLines(entities));
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum conditionName)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            TypeConditionLogic.Register<UserProcessSessionDN>(conditionName,
+            TypeConditionLogic.Register<UserProcessSessionDN>(typeCondition,
                se => se.User.RefersTo(UserDN.Current));
 
-            TypeConditionLogic.Register<ProcessDN>(conditionName,
-                pe => ((UserProcessSessionDN)pe.Session).InCondition(conditionName));
+            TypeConditionLogic.Register<ProcessDN>(typeCondition,
+                pe => ((UserProcessSessionDN)pe.Session).InCondition(typeCondition));
 
-            TypeConditionLogic.Register<PackageOperationDN>(conditionName,
-                po => Database.Query<ProcessDN>().WhereCondition(conditionName).Any(pe => pe.Data == po));
+            TypeConditionLogic.Register<PackageOperationDN>(typeCondition,
+                po => Database.Query<ProcessDN>().WhereCondition(typeCondition).Any(pe => pe.Data == po));
 
-            TypeConditionLogic.Register<PackageLineDN>(conditionName,
-                pl => ((PackageOperationDN)pl.Package.Entity).InCondition(conditionName));
+            TypeConditionLogic.Register<PackageLineDN>(typeCondition,
+                pl => ((PackageOperationDN)pl.Package.Entity).InCondition(typeCondition));
         }
     }
 
@@ -178,25 +173,25 @@ namespace Signum.Engine.Processes
         {
             PackageOperationDN package = (PackageOperationDN)executingProcess.Data;
 
-            Enum operationKey = package.Operation.ToEnum();
+            OperationSymbol operationSymbol = package.Operation;
 
             var args = package.OperationArgs;
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                OperationType operationType = OperationLogic.OperationType(line.Target.GetType(), operationKey);
+                OperationType operationType = OperationLogic.OperationType(line.Target.GetType(), operationSymbol);
 
                 switch (operationType)
                 {
                     case OperationType.Execute:
-                        OperationLogic.Execute(line.Target, operationKey, args);
+                        OperationLogic.ServiceExecute(line.Target, operationSymbol, args);
                         break;
                     case OperationType.Delete:
-                        OperationLogic.Delete(line.Target, operationKey, args);
+                        OperationLogic.ServiceDelete(line.Target, operationSymbol, args);
                         break;
                     case OperationType.ConstructorFrom:
                         {
-                            var result = OperationLogic.ConstructFrom<IdentifiableEntity>(line.Target, operationKey, args);
+                            var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args);
                             line.Result = result.ToLite();
                         }
                         break;
@@ -212,16 +207,16 @@ namespace Signum.Engine.Processes
 
     public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
     {
-        public Enum OperationKey { get; private set; }
+        public DeleteSymbol<T> DeleteSymbol { get; private set; }
 
         public Func<PackageDN, PackageLineDN, object[]> OperationArgs;
 
-        public PackageDeleteAlgorithm(Enum operationKey)
+        public PackageDeleteAlgorithm(DeleteSymbol<T> deleteSymbol)
         {
-            if (operationKey == null)
+            if (deleteSymbol == null)
                 throw new ArgumentNullException("operatonKey");
 
-            this.OperationKey = operationKey;
+            this.DeleteSymbol = deleteSymbol;
         }
 
         public virtual void Execute(ExecutingProcess executingProcess)
@@ -232,7 +227,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                line.Target.Delete(OperationKey, args);
+                ((T)(IIdentifiable)line.Target).Delete<T>(DeleteSymbol, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();

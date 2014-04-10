@@ -24,7 +24,7 @@ namespace Signum.Engine.Help
         public Type Type;
         public string Description;
         public Dictionary<string, PropertyHelp> Properties;
-        public Dictionary<Enum, OperationHelp> Operations;
+        public Dictionary<OperationSymbol, OperationHelp> Operations;
         public Dictionary<object, QueryHelp> Queries
         {
             get { return HelpLogic.State.Value.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key); }
@@ -47,8 +47,8 @@ namespace Signum.Engine.Help
 
                 Operations = OperationLogic.GetAllOperationInfos(type)
                             .ToDictionary(
-                                oi => oi.Key,
-                                oi => new OperationHelp(oi.Key, HelpGenerator.GetOperationHelp(type, oi))),
+                                oi => oi.OperationSymbol,
+                                oi => new OperationHelp(oi.OperationSymbol, HelpGenerator.GetOperationHelp(type, oi))),
 
            
             };
@@ -75,7 +75,7 @@ namespace Signum.Engine.Help
                        ) : null,
                        opers.Any() ? new XElement(_Operations,
                            Operations.Select(o => new XElement(_Operation, 
-                               new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),
+                               new XAttribute(_Key, o.Key),
                                o.Value.UserDescription))
                        ) : null
                    )
@@ -106,7 +106,7 @@ namespace Signum.Engine.Help
             if (os != null)
             {
                 string errorMessage = "loading property {0} on Entity file (" + FileName + ")";
-                var ops = Operations.SelectDictionary(OperationDN.UniqueKey, v => v);
+                var ops = Operations.SelectDictionary(s => s.Key, v => v);
                 foreach (var item in os.Elements(_Operation))
                 {
                     ops.GetOrThrow(item.Attribute(_Key).Value, errorMessage).UserDescription = item.Value;
@@ -141,7 +141,7 @@ namespace Signum.Engine.Help
                     Console.WriteLine("  Property {0}: {1}".Formato(action, prop));
                 });
 
-            HelpTools.SynchronizeElements(loadedEntity, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
+            HelpTools.SynchronizeElements(loadedEntity, _Operations, _Operation, _Key, created.Operations.SelectDictionary(os=>os.Key, v => v), "Operations of {0}".Formato(type.Name),
                 (oh, op) => oh.UserDescription = syncContent(op.Value),
                 (action, op) =>
                 {
@@ -273,16 +273,16 @@ namespace Signum.Engine.Help
 
             //Operations (key)
             if (Operations != null)
-                foreach (var p in Operations)
+                foreach (var kvp in Operations)
                 {
-                    m = regex.Match(p.Key.NiceToString().RemoveDiacritics());
+                    m = regex.Match(kvp.Key.NiceToString().RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Operation, p.Key.NiceToString(), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
+                        yield return new SearchResult(TypeSearchResult.Operation, kvp.Key.NiceToString(), kvp.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#o-" + kvp.Key.Key.Replace('.', '_'));
                     else
                     {
-                        m = regex.Match(p.Value.ToString().RemoveDiacritics());
+                        m = regex.Match(kvp.Value.ToString().RemoveDiacritics());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.OperationDescription, p.Key.NiceToString(), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
+                            yield return new SearchResult(TypeSearchResult.OperationDescription, kvp.Key.NiceToString(), Extract(kvp.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#o-" + kvp.Key.Key.Replace('.', '_'));
                     }
                 }
         }
@@ -356,13 +356,13 @@ namespace Signum.Engine.Help
 
     public class OperationHelp
     {
-        public OperationHelp(Enum operationKey, string info)
+        public OperationHelp(OperationSymbol operationSymbol, string info)
         {
-            this.OperationKey = operationKey;
+            this.OperationSymbol = operationSymbol;
             this.Info = info;
         }
 
-        public Enum OperationKey { get; set; }
+        public OperationSymbol OperationSymbol { get; set; }
         public string Info { get; private set; }
         public string UserDescription;
 

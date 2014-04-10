@@ -264,14 +264,14 @@ namespace Signum.Entities.Processes
         Error,
     }
 
-    public enum ProcessOperation
+    public static class ProcessOperation
     {
-        Plan,
-        Save,
-        Cancel,
-        Execute,
-        Suspend,
-        Retry,
+        public static readonly ExecuteSymbol<ProcessDN> Plan = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ExecuteSymbol<ProcessDN> Save = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ExecuteSymbol<ProcessDN> Cancel = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ExecuteSymbol<ProcessDN> Execute = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ExecuteSymbol<ProcessDN> Suspend = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ExecuteSymbol<ProcessDN> Retry = OperationSymbol.Execute<ProcessDN>();
     }
 
     public static class ProcessPermission

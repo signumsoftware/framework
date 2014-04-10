@@ -12,7 +12,7 @@ namespace Signum.Entities.SMS
 {
     public static class SMSProviderOperation
     {
-        public static readonly ExecuteSymbol<SMSMessageDN> SendSMSMessage = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ConstructFromManySymbol<IdentifiableEntity, SMSMessageDN> SendSMSMessage = OperationSymbol.ConstructFromMany<IdentifiableEntity, SMSMessageDN>();
         public static readonly ExecuteSymbol<SMSMessageDN> SendSMSMessagesFromTemplate = OperationSymbol.Execute<SMSMessageDN>();
     }
 

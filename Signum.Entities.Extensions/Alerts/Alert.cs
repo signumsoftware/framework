@@ -173,21 +173,12 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeDN : SemiSymbol
     {
-        static AlertTypeDN()
-        {
-            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
-            DescriptionManager.Invalidate();
-        }
-
-        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
-        {
-            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
-        }
+    
     }
 
-    public enum AlertTypeOperation
+    public static class AlertTypeOperation
     {
-        Save,
+        public static readonly ExecuteSymbol<AlertTypeDN> Save = OperationSymbol.Execute<AlertTypeDN>();
     }
 
     public enum AlertMessage

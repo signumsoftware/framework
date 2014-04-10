@@ -644,7 +644,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 case CacheType.Semi: return Color.Pink;
             }
 
-            if (typeof(MultiEnumDN).IsAssignableFrom(type))
+            if (typeof(Symbol).IsAssignableFrom(type))
                 return Color.Orange;
 
             if (cacheHint != null && cacheHint(type))

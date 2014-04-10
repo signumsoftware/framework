@@ -78,10 +78,10 @@ namespace Signum.Entities.Translation
     }
 
 
-    public enum TranslatorOperation
+    public static class TranslatorUserOperation
     {
-        Save,
-        Delete,
+        public static readonly ExecuteSymbol<TranslatorUserDN> Save = OperationSymbol.Execute<TranslatorUserDN>();
+        public static readonly DeleteSymbol<TranslatorUserDN> Delete = OperationSymbol.Delete<TranslatorUserDN>();
     }
 
     public enum TranslationMessage

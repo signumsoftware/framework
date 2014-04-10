@@ -102,19 +102,19 @@ namespace Signum.Engine.UserQueries
                     select er.ToLite()).ToList();
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
+            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
-        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
+            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
