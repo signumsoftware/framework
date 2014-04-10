@@ -25,8 +25,8 @@ namespace Signum.Windows.Operations
         {
             MenuItem miResult = new MenuItem()
             {
-                Header = coc.OperationSettings.TryCC(f => f.Text) ?? coc.OperationInfo.Key.NiceToString(),
-                Icon = coc.OperationSettings.TryCC(f => f.Icon.ToSmallImage()),
+                Header = coc.OperationSettings.Try(f => f.Text) ?? coc.OperationInfo.OperationSymbol.NiceToString(),
+                Icon = coc.OperationSettings.Try(f => f.Icon.ToSmallImage()),
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
@@ -53,14 +53,14 @@ namespace Signum.Windows.Operations
                     switch (coc.OperationInfo.OperationType)
                     {
                         case OperationType.Execute:
-                            Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.Key)); 
+                            Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.OperationSymbol)); 
                             break;
-                        case OperationType.Delete: 
-                            Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.Key));
+                        case OperationType.Delete:
+                            Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.OperationSymbol));
                             break;
                         case OperationType.ConstructorFrom:
                             {
-                                var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.Key));
+                                var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol));
                                 if (Navigator.IsNavigable(result, true))
                                     Navigator.Navigate(result);
                                 break;

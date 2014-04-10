@@ -14,14 +14,14 @@ namespace Signum.Windows.Operations
 {
     public abstract class OperationSettings
     {
-        public Enum Key { get; set; }
+        public OperationSymbol OperationSymbol { get; set; }
         public string Text { get; set; }
         public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
 
-        public OperationSettings(Enum key)
+        public OperationSettings(OperationSymbol operationSymbol)
         {
-            this.Key = key;
+            this.OperationSymbol = operationSymbol;
         }
 
     }
@@ -58,11 +58,11 @@ namespace Signum.Windows.Operations
 
         public EntityOperationGroup Group { get; set; }
 
-        public EntityOperationSettings(Enum key)
-            : base(key)
+        public EntityOperationSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
-            Contextual = new ContextualOperationSettings(key);
-            ContextualFromMany = new ContextualOperationSettings(key); 
+            Contextual = new ContextualOperationSettings(operationSymbol);
+            ContextualFromMany = new ContextualOperationSettings(operationSymbol); 
         }
     }
 
@@ -82,10 +82,10 @@ namespace Signum.Windows.Operations
     public class ConstructorSettings : OperationSettings
     {
         public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
-        public Func<OperationInfo, bool> IsVisible { get; set; } 
+        public Func<OperationInfo, bool> IsVisible { get; set; }
 
-        public ConstructorSettings(Enum key)
-            : base(key)
+        public ConstructorSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
         }
     }
@@ -96,8 +96,8 @@ namespace Signum.Windows.Operations
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public double Order { get; set; }
 
-        public ContextualOperationSettings(Enum key)
-            : base(key)
+        public ContextualOperationSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
         }
     }

@@ -249,7 +249,7 @@ namespace Signum.Windows
 
         void RefreshEnabled()
         {
-            buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).TryCS(ei => !ei.IsNew) ?? false;
+            buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).Try(ei => !ei.IsNew) ?? false;
         }
 
         private void Reload_Click(object sender, RoutedEventArgs e)

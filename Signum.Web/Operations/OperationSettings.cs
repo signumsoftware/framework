@@ -18,20 +18,20 @@ namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(Enum key)
+        public OperationSettings(OperationSymbol operationSymbol)
         {
-            this.Key = key; 
+            this.OperationSymbol = operationSymbol; 
         }
 
-        public Enum Key { get; private set; }
+        public OperationSymbol OperationSymbol { get; private set; }
 
         public string Text { get; set; }
     }
 
     public class ConstructorSettings : OperationSettings
     {
-        public ConstructorSettings(Enum operationKey)
-            : base(operationKey)
+        public ConstructorSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
         }
 
@@ -62,11 +62,11 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings Contextual { get; private set; }
         public double Order { get; set; }
 
-        public EntityOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public EntityOperationSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
-            this.Contextual = new ContextualOperationSettings(operationKey);
-            this.ContextualFromMany = new ContextualOperationSettings(operationKey); 
+            this.Contextual = new ContextualOperationSettings(operationSymbol);
+            this.ContextualFromMany = new ContextualOperationSettings(operationSymbol); 
         }
 
         static EntityOperationSettings()
@@ -87,8 +87,8 @@ namespace Signum.Web.Operations
 
     public class ContextualOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public ContextualOperationSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
         {
         }
 

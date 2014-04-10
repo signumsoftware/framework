@@ -244,7 +244,7 @@ namespace Signum.Utilities
         }
 
 
-        public static T ThrowIfNullS<T>(this T? t, Func<string> message)
+        public static T ThrowIfNull<T>(this T? t, Func<string> message)
          where T : struct
         {
             if (t == null)
@@ -252,7 +252,7 @@ namespace Signum.Utilities
             return t.Value;
         }
 
-        public static T ThrowIfNullC<T>(this T t, Func<string> message)
+        public static T ThrowIfNull<T>(this T t, Func<string> message)
             where T : class
         {
             if (t == null)

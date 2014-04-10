@@ -114,5 +114,10 @@ namespace Signum.Engine
         {
             return AssertStarted().Select(a => a.Key).ToHashSet();
         }
+
+        public static T ToSymbol(string key)
+        {
+            return AssertStarted().GetOrThrow(key);
+        }
     }
 }

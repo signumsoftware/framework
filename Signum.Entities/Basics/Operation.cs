@@ -112,6 +112,14 @@ namespace Signum.Entities
                 internal set { this.operation = value; }
             }
         }
+
+        public static string NotDefinedForMessage(OperationSymbol operation, IEnumerable<Type> notDefined)
+        {
+            if (notDefined.Any())
+                return "{0} is not defined for {1}".Formato(operation.NiceToString(), notDefined.CommaAnd(a => a.NiceName()));
+
+            return null;
+        }
     }
 
     public interface IOperationSymbolContainer
