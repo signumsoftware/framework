@@ -19,20 +19,11 @@ namespace Signum.Engine
         static ResetLazy<Dictionary<string, T>> lazy;
         static Func<IEnumerable<T>> getSymbols;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IEnumerable<T>> getSymbols)
+        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
         {
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>();
-
-                dqm.RegisterQuery(typeof(T), () =>
-                  from lo in Database.Query<T>()
-                  select new
-                  {
-                      Entity = lo,
-                      lo.Id,
-                      lo.Key,
-                  });
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
@@ -112,6 +103,16 @@ namespace Signum.Engine
         public static ICollection<T> Symbols
         {
             get { return AssertStarted().Values; }
+        }
+
+        public static T TryToSymbol(string key)
+        {
+            return AssertStarted().TryGetC(key);
+        }
+
+        public static HashSet<string> AllUniqueQueys()
+        {
+            return AssertStarted().Select(a => a.Key).ToHashSet();
         }
     }
 }

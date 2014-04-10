@@ -118,7 +118,16 @@ namespace Signum.Engine.Operations
             {
                 sb.Include<OperationLogDN>();
 
-                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
+                SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
+
+                dqm.RegisterQuery(typeof(OperationSymbol), () =>
+                    from os in Database.Query<OperationSymbol>()
+                    select new
+                    {
+                        Entity = os,
+                        os.Id,
+                        os.Key
+                    });
 
                 dqm.RegisterQuery(typeof(OperationLogDN), () =>
                     from lo in Database.Query<OperationLogDN>()
@@ -357,8 +366,9 @@ namespace Signum.Engine.Operations
 
 
         #region Execute
-        public static T Execute<T>(this T entity, ExecuteSymbol<T> symbol, params object[] args)
-           where T : class, IIdentifiable
+        public static T Execute<T, B>(this T entity, ExecuteSymbol<B> symbol, params object[] args)
+            where T : class, IIdentifiable, B
+            where B : class, IIdentifiable
         {
             var op = Find<IExecuteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Execute(entity, args);

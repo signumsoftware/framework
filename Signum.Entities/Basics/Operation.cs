@@ -20,14 +20,14 @@ namespace Signum.Entities
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public ConstructSymbol<T> Construct<T>([CallerMemberName]string memberName = null)
+        public static ConstructSymbol<T> Construct<T>([CallerMemberName]string memberName = null)
             where T : class, IIdentifiable
         {
             return new ConstructOperationImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public ConstructFromSymbol<F, T> ConstructFrom<F, T>([CallerMemberName]string memberName = null)
+        public static ConstructFromSymbol<F, T> ConstructFrom<F, T>([CallerMemberName]string memberName = null)
             where F : class,  IIdentifiable
             where T : class,  IIdentifiable
         {
@@ -35,7 +35,7 @@ namespace Signum.Entities
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public ConstructFromManySymbol<F, T> ConstructFromMany<F, T>([CallerMemberName]string memberName = null)
+        public static ConstructFromManySymbol<F, T> ConstructFromMany<F, T>([CallerMemberName]string memberName = null)
             where F : class, IIdentifiable
             where T : class,  IIdentifiable
         {
@@ -43,14 +43,14 @@ namespace Signum.Entities
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
+        public static ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
             where T : class,  IIdentifiable
         {
             return new ExecuteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
+        public static DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
             where T : class, IIdentifiable
         {
             return new DeleteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
@@ -136,7 +136,7 @@ namespace Signum.Entities
     {
     }
 
-    public interface ExecuteSymbol<in T> : IOperationSymbolContainer
+    public interface ExecuteSymbol<out T> : IOperationSymbolContainer
         where T : class, IIdentifiable
     {
     }

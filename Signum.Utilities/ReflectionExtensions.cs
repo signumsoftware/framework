@@ -136,5 +136,10 @@ namespace Signum.Utilities
             return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, propertyInfo.PropertyType, arguments, null);
         }
+
+        public static bool IsStaticClass(this Type type)
+        {
+            return type.IsAbstract && type.IsSealed;
+        }
     }
 }
