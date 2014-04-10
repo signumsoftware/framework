@@ -98,10 +98,10 @@ namespace Signum.Entities.Mailing
 
     }
 
-    public enum Pop3ConfigurationOperation
+    public static class Pop3ConfigurationOperation
     {
-        Save,
-        ReceiveEmails
+        public static readonly ExecuteSymbol<Pop3ConfigurationDN> Save = OperationSymbol.Execute<Pop3ConfigurationDN>();
+        public static readonly ExecuteSymbol<Pop3ConfigurationDN> ReceiveEmails = OperationSymbol.Execute<Pop3ConfigurationDN>();
     }
 
     public enum Pop3ConfigurationAction

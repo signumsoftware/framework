@@ -16,13 +16,13 @@ using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
-    public enum EmailTemplateOperation
+    public static class EmailTemplateOperation
     {
-        CreateEmailTemplateFromSystemEmail,
-        Create,
-        Save,
-        Enable,
-        Disable
+        public static readonly ConstructFromSymbol<SystemEmailDN, EmailTemplateDN> CreateEmailTemplateFromSystemEmail = OperationSymbol.ConstructFrom<SystemEmailDN, EmailTemplateDN>();
+        public static readonly ConstructSymbol<EmailTemplateDN> Create = OperationSymbol.Construct<EmailTemplateDN>();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Save = OperationSymbol.Execute<EmailTemplateDN>();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Enable = OperationSymbol.Execute<EmailTemplateDN>();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Disable = OperationSymbol.Execute<EmailTemplateDN>();
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]

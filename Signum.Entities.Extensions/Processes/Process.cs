@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -274,9 +274,9 @@ namespace Signum.Entities.Processes
         Retry,
     }
 
-    public enum ProcessPermission
+    public static class ProcessPermission
     {
-        ViewProcessPanel
+        public static readonly PermissionSymbol ViewProcessPanel = new PermissionSymbol();
     }
 
     public enum ProcessMessage
@@ -322,10 +322,4 @@ namespace Signum.Entities.Processes
             set { Set(ref exception, value); }
         }
     }
-
-    public enum ProcessExceptionOperation
-    {
-        Save
-    }
-
 }

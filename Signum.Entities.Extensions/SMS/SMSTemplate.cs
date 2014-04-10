@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -178,12 +178,12 @@ namespace Signum.Entities.SMS
         Modified
     }
 
-    public enum SMSTemplateOperation
+    public static class SMSTemplateOperation
     {
-        Create,
-        Save,
-        Disable,
-        Enable
+        public static readonly ConstructSymbol<SMSTemplateDN> Create = OperationSymbol.Construct<SMSTemplateDN>();
+        public static readonly ExecuteSymbol<SMSTemplateDN> Save = OperationSymbol.Execute<SMSTemplateDN>();
+        public static readonly ExecuteSymbol<SMSTemplateDN> Disable = OperationSymbol.Execute<SMSTemplateDN>();
+        public static readonly ExecuteSymbol<SMSTemplateDN> Enable = OperationSymbol.Execute<SMSTemplateDN>();
     }
 
     public enum MessageLengthExceeded

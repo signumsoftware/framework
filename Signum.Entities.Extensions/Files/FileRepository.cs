@@ -92,8 +92,8 @@ namespace Signum.Entities.Files
         }
     }
 
-    public enum FileRepositoryOperation
-    { 
-        Save
+    public static class FileRepositoryOperation
+    {
+        public static readonly ExecuteSymbol<FileRepositoryDN> Save = OperationSymbol.Execute<FileRepositoryDN>();
     }
 }

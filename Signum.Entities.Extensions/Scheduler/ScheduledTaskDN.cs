@@ -66,9 +66,9 @@ namespace Signum.Entities.Scheduler
         public const string None = "none";
     }
 
-    public enum ScheduledTaskOperation
-    { 
-        Save
+    public static class ScheduledTaskOperation
+    {
+        public static readonly ExecuteSymbol<ScheduledTaskDN> Save = OperationSymbol.Execute<ScheduledTaskDN>();
     }
 
     public enum TaskMessage

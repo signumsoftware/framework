@@ -298,11 +298,11 @@ namespace Signum.Entities.Chart
         }
     }
 
-    public enum ChartScriptOperation
+    public static class ChartScriptOperation
     {
-        Save,
-        Clone,
-        Delete
+        public static readonly ExecuteSymbol<ChartScriptDN> Save = OperationSymbol.Execute<ChartScriptDN>();
+        public static readonly ConstructFromSymbol<ChartScriptDN, ChartScriptDN> Clone = OperationSymbol.ConstructFrom<ChartScriptDN, ChartScriptDN>();
+        public static readonly DeleteSymbol<ChartScriptDN> Delete = OperationSymbol.Delete<ChartScriptDN>();
     }
 
     public enum GroupByChart

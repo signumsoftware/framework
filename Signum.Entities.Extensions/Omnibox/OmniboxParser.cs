@@ -10,6 +10,7 @@ using System.Threading;
 using Signum.Entities.UserQueries;
 using System.Collections.Concurrent;
 using System.Globalization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Omnibox
 {
@@ -136,7 +137,7 @@ namespace Signum.Entities.Omnibox
     public abstract class OmniboxManager
     {
         public abstract bool AllowedType(Type type);
-        public abstract bool AllowedPermission(Enum permission);
+        public abstract bool AllowedPermission(PermissionSymbol permission);
         public abstract bool AllowedQuery(object queryName);
 
         public abstract QueryDescription GetDescription(object queryName);

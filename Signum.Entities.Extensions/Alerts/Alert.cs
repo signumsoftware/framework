@@ -161,13 +161,13 @@ namespace Signum.Entities.Alerts
         Future,
     }
 
-    public enum AlertOperation
+    public static class AlertOperation
     {
-        CreateAlertFromEntity,
-        SaveNew,
-        Save,
-        Attend,
-        Unattend
+        public static readonly ConstructFromSymbol<IdentifiableEntity, AlertDN> CreateAlertFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> SaveNew = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Save = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Attend = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Unattend = OperationSymbol.Execute<AlertDN>();
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]

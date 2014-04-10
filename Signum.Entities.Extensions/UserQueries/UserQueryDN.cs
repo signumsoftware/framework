@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -248,15 +248,15 @@ namespace Signum.Entities.UserQueries
         }
     }
 
-    public enum UserQueryPermission
+    public static class UserQueryPermission
     {
-        ViewUserQuery
+        public static readonly PermissionSymbol ViewUserQuery = new PermissionSymbol();
     }
 
-    public enum UserQueryOperation
-    { 
-        Save, 
-        Delete
+    public static class UserQueryOperation
+    {
+        public static readonly ExecuteSymbol<UserQueryDN> Save = OperationSymbol.Execute<UserQueryDN>();
+        public static readonly DeleteSymbol<UserQueryDN> Delete = OperationSymbol.Delete<UserQueryDN>();
     }
 
     [Serializable]

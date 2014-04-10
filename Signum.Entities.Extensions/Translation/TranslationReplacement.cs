@@ -37,9 +37,9 @@ namespace Signum.Entities.Translation
         }
     }
 
-    public enum TranslationReplacementOperation
+    public static class TranslationReplacementOperation
     {
-        Save,
-        Delete
+        public static readonly ExecuteSymbol<TranslationReplacementDN> Save = OperationSymbol.Execute<TranslationReplacementDN>();
+        public static readonly DeleteSymbol<TranslationReplacementDN> Delete = OperationSymbol.Delete<TranslationReplacementDN>();
     }
 }

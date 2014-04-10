@@ -233,9 +233,9 @@ namespace Signum.Entities.Chart
         }
     }
 
-    public enum UserChartOperation
-    { 
-        Save,
-        Delete
+    public static class UserChartOperation
+    {
+        public static readonly ExecuteSymbol<UserChartDN> Save = OperationSymbol.Execute<UserChartDN>();
+        public static readonly DeleteSymbol<UserChartDN> Delete = OperationSymbol.Delete<UserChartDN>();
     }
 }

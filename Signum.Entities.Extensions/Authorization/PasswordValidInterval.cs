@@ -30,9 +30,9 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    public enum PasswordExpiresIntervalOperation
-    { 
-        Save
+    public static class PasswordExpiresIntervalOperation
+    {
+        public static readonly ExecuteSymbol<PasswordExpiresIntervalDN> Save = OperationSymbol.Execute<PasswordExpiresIntervalDN>();
     }
 
     [Serializable]

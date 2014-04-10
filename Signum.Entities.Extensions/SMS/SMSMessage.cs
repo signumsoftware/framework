@@ -10,10 +10,10 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
-    public enum SMSProviderOperation
+    public static class SMSProviderOperation
     {
-        SendSMSMessage,
-        SendSMSMessagesFromTemplate
+        public static readonly ExecuteSymbol<SMSMessageDN> SendSMSMessage = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ExecuteSymbol<SMSMessageDN> SendSMSMessagesFromTemplate = OperationSymbol.Execute<SMSMessageDN>();
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
@@ -144,19 +144,19 @@ namespace Signum.Entities.SMS
         Failed,
     }
 
-    public enum SMSMessageOperation
+    public static class SMSMessageOperation
     {
-        Send,
-        UpdateStatus,
-        CreateUpdateStatusPackage,
-        CreateSMSFromSMSTemplate,
-        CreateSMSWithTemplateFromEntity,
-        CreateSMSFromEntity
+        public static readonly ExecuteSymbol<SMSMessageDN> Send = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ExecuteSymbol<SMSMessageDN> UpdateStatus = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ExecuteSymbol<SMSMessageDN> CreateUpdateStatusPackage = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ConstructFromSymbol<SMSTemplateDN, SMSMessageDN> CreateSMSFromSMSTemplate = OperationSymbol.ConstructFrom<SMSTemplateDN, SMSMessageDN>();
+        public static readonly ConstructFromSymbol<IdentifiableEntity, SMSMessageDN> CreateSMSWithTemplateFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, SMSMessageDN>();
+        public static readonly ConstructFromSymbol<IdentifiableEntity, SMSMessageDN> CreateSMSFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, SMSMessageDN>();
     }
 
-    public enum SMSMessageProcess
+    public static class SMSMessageProcess
     {
-        Send,
-        UpdateStatus
+        public static readonly ProcessAlgorithmSymbol Send = new ProcessAlgorithmSymbol();
+        public static readonly ProcessAlgorithmSymbol UpdateStatus = new ProcessAlgorithmSymbol();
     }
 }

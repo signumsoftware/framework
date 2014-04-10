@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
 using System.Reflection;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Translation
 {
@@ -83,14 +84,14 @@ namespace Signum.Entities.Translation
         }
     }
 
-    public enum CultureInfoOperation
+    public static class CultureInfoOperation
     {
-        Save
+        public static readonly ExecuteSymbol<CultureInfoDN> Save = OperationSymbol.Execute<CultureInfoDN>();
     }
 
-    public enum TranslationPermission
+    public static class TranslationPermission
     {
-        TranslateCode,
-        TranslateInstances
+        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
+        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
     }
 }

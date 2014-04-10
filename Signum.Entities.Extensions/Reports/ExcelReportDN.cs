@@ -47,10 +47,10 @@ namespace Signum.Entities.Reports
         }
     }
 
-    public enum ExcelReportOperation
-    { 
-        Save,
-        Delete
+    public static class ExcelReportOperation
+    {
+        public static readonly ExecuteSymbol<ExcelReportDN> Save = OperationSymbol.Execute<ExcelReportDN>();
+        public static readonly DeleteSymbol<ExcelReportDN> Delete = OperationSymbol.Delete<ExcelReportDN>();
     }
 
     public enum ExcelMessage

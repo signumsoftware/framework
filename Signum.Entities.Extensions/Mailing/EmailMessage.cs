@@ -459,16 +459,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailSenderOperation
-    {
-        Save
-    }
-
-    public enum EmailRecipientOperation
-    {
-        Save
-    }
-
     public enum EmailMessageState
     {
         Created,
@@ -512,9 +502,9 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailMessageProcesses
+    public static class EmailMessageProcess
     {
-        SendEmails
+        public static readonly ProcessAlgorithmSymbol SendEmails = new ProcessAlgorithmSymbol();
     }
 
     public enum EmailMessageOperation
@@ -557,9 +547,9 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailFileType
+    public static class EmailFileType
     {
-        Attachment
+        public static readonly FileTypeSymbol Attachment = new FileTypeSymbol();
     }
 }
 

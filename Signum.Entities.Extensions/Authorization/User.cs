@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -153,14 +153,14 @@ namespace Signum.Entities.Authorization
         Disabled,
     }
 
-    public enum UserOperation
+    public static class UserOperation
     {
-        Create,
-        SaveNew,
-        Save,
-        Enable,
-        Disable,
-        SetPassword
+        public static readonly ConstructSymbol<UserDN> Create = OperationSymbol.Construct<UserDN>();
+        public static readonly ExecuteSymbol<UserDN> SaveNew = OperationSymbol.Execute<UserDN>();
+        public static readonly ExecuteSymbol<UserDN> Save = OperationSymbol.Execute<UserDN>();
+        public static readonly ExecuteSymbol<UserDN> Enable = OperationSymbol.Execute<UserDN>();
+        public static readonly ExecuteSymbol<UserDN> Disable = OperationSymbol.Execute<UserDN>();
+        public static readonly ExecuteSymbol<UserDN> SetPassword = OperationSymbol.Execute<UserDN>();
     }
 
     [Serializable]

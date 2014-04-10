@@ -108,9 +108,9 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum SmtpConfigurationOperation
+    public static class SmtpConfigurationOperation
     {
-        Save
+        public static readonly ExecuteSymbol<SmtpConfigurationDN> Save = OperationSymbol.Execute<SmtpConfigurationDN>();
     }
 
     [Serializable]
@@ -140,7 +140,7 @@ namespace Signum.Entities.Mailing
     }
 
     public enum CertFileType
-    { 
+    {
         CertFile,
         SignedFile
     }

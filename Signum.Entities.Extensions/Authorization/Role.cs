@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,7 +53,7 @@ namespace Signum.Entities.Authorization
                 if (roles.Any())
                     return null;
 
-                return "Ø -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
+                return "ï¿½ -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
             }
         }
 
@@ -87,10 +87,10 @@ namespace Signum.Entities.Authorization
         RolesReferedBy
     }
 
-    public enum RoleOperation
+    public static class RoleOperation
     {
-        Save,
-        Delete
+        public static readonly ExecuteSymbol<RoleDN> Save = OperationSymbol.Execute<RoleDN>();
+        public static readonly DeleteSymbol<RoleDN> Delete = OperationSymbol.Delete<RoleDN>();
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]

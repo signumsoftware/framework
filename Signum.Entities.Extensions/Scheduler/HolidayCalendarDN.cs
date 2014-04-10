@@ -63,9 +63,9 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    public enum CalendarOperation
-    { 
-        Save
+    public static class HolidayCalendarOperation
+    {
+        public static readonly ExecuteSymbol<HolidayCalendarDN> Save = OperationSymbol.Execute<HolidayCalendarDN>();
     }
 
     [Serializable]

@@ -75,10 +75,10 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailMasterTemplateOperation
+    public static class EmailMasterTemplateOperation
     {
-        Create,
-        Save
+        public static readonly ConstructSymbol<EmailMasterTemplateDN> Create = OperationSymbol.Construct<EmailMasterTemplateDN>();
+        public static readonly ExecuteSymbol<EmailMasterTemplateDN> Save = OperationSymbol.Execute<EmailMasterTemplateDN>();
     }
 
     [Serializable]
