@@ -20,8 +20,8 @@ namespace Signum.Engine.Authorization
 
     public static class PermissionAuthLogic
     {
-        static List<Enum> permissions = new List<Enum>();
-        public static void RegisterPermissions(params Enum[] type)
+        static List<PermissionSymbol> permissions = new List<PermissionSymbol>();
+        public static void RegisterPermissions(params PermissionSymbol[] type)
         {
             permissions.AddRange(type.NotNull()); 
         }
@@ -30,21 +30,21 @@ namespace Signum.Engine.Authorization
         {
             foreach (var t in types.NotNull())
             {
-                if (!t.IsEnum)
-                    throw new ArgumentException("{0} is not an Enum".Formato(t.Name));
+                if (!t.IsStaticClass())
+                    throw new ArgumentException("{0} is not a static class".Formato(t.Name));
 
-                permissions.AddRange(Enum.GetValues(t).Cast<Enum>()); 
+                permissions.AddRange(t.GetFields(BindingFlags.Public | BindingFlags.Static).Select(fi => fi.GetValue(null)).Cast<PermissionSymbol>());
             }
         }
 
-        public static IEnumerable<Enum> RegisteredPermission
+        public static IEnumerable<PermissionSymbol> RegisteredPermission
         {
             get { return permissions; }
         }
 
-        static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool> cache;
+        static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache;
 
-        public static IManualAuth<Enum, bool> Manual { get { return cache; } }
+        public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -59,62 +59,62 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertStarted(sb);
 
-                sb.Include<PermissionDN>();
+                sb.Include<PermissionSymbol>();
 
-                MultiEnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
+                SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
 
-                cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
-                    MultiEnumExtensions.ToEnum<PermissionDN>,
-                    MultiEnumExtensions.ToEntity<PermissionDN>,
+                cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
+                    s=>s,
+                    s=>s,
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 
                 RegisterPermissions(BasicPermission.AdminRules);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", PermissionDN.UniqueKey, b => b.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    string replacementKey = typeof(PermissionDN).Name;
+                    string replacementKey = typeof(PermissionSymbol).Name;
 
                     replacements.AskForReplacements(
                         x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
-                        MultiEnumLogic<PermissionDN>.AllUniqueKeys.ToHashSet(),
+                        SymbolLogic<PermissionSymbol>.Symbols.Select(s=>s.Key).ToHashSet(),
                         replacementKey);
 
                     return cache.ImportXml(x, "Permissions", "Permission", roles,
-                        s => MultiEnumLogic<PermissionDN>.TryToEntity(replacements.Apply(replacementKey, s)), bool.Parse);
+                        s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), bool.Parse);
                 };
             }
         }
- 
-        public static void Authorize(this Enum permissionKey)
+
+        public static void Authorize(this PermissionSymbol permissionSymbol)
         {
-            if (!IsAuthorized(permissionKey))
-                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
+            if (!IsAuthorized(permissionSymbol))
+                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionSymbol));
         }
 
-        public static string IsAuthorizedString(this Enum permissionKey)
+        public static string IsAuthorizedString(this PermissionSymbol permissionSymbol)
         {
-            if (!IsAuthorized(permissionKey))
-                return "Permission '{0}' is denied".Formato(permissionKey);
+            if (!IsAuthorized(permissionSymbol))
+                return "Permission '{0}' is denied".Formato(permissionSymbol);
 
             return null;
         }
 
-        public static bool IsAuthorized(this Enum permissionKey)
+        public static bool IsAuthorized(this PermissionSymbol permissionSymbol)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), permissionKey);
+            return cache.GetAllowed(RoleDN.Current.ToLite(), permissionSymbol);
         }
 
-        public static bool IsAuthorized(this Enum permissionKey, Lite<RoleDN> role)
+        public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleDN> role)
         {
-            return cache.GetAllowed(role, permissionKey);
+            return cache.GetAllowed(role, permissionSymbol);
         }
 
-        public static DefaultDictionary<Enum, bool> ServicePermissionRules()
+        public static DefaultDictionary<PermissionSymbol, bool> ServicePermissionRules()
         {
             return cache.GetDefaultDictionary();
         }
@@ -122,7 +122,7 @@ namespace Signum.Engine.Authorization
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
         {
             var result = new PermissionRulePack { Role = roleLite };
-            cache.GetRules(result, MultiEnumLogic<PermissionDN>.AllEntities());
+            cache.GetRules(result, SymbolLogic<PermissionSymbol>.Symbols);
             return result;
         }
 
@@ -133,9 +133,9 @@ namespace Signum.Engine.Authorization
     }
 
 
-    class PermissionMerger : IMerger<Enum, bool>
+    class PermissionMerger : IMerger<PermissionSymbol, bool>
     {
-        public bool Merge(Enum key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
+        public bool Merge(PermissionSymbol key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
         {
             if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
                 return baseValues.Any(a => a.Value);
@@ -143,9 +143,9 @@ namespace Signum.Engine.Authorization
                 return baseValues.All(a => a.Value);
         }
 
-        public Func<Enum, bool> MergeDefault(Lite<RoleDN> role)
+        public Func<PermissionSymbol, bool> MergeDefault(Lite<RoleDN> role)
         {
-            return new ConstantFunction<Enum, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
+            return new ConstantFunction<PermissionSymbol, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
         }
     }
 }

@@ -100,7 +100,7 @@ namespace Signum.Entities.Notes
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class NoteTypeDN : MultiOptionalEnumDN
+    public class NoteTypeDN : SemiSymbol
     {
 
     }

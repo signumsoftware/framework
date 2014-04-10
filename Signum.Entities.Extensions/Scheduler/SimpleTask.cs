@@ -15,6 +15,8 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class SimpleTaskSymbol : Symbol, ITaskDN
     {
+        private SimpleTaskSymbol() { } 
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public SimpleTaskSymbol([CallerMemberName]string memberName = null) :
             base(new StackFrame(1, false), memberName)

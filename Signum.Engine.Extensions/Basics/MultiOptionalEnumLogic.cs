@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -11,46 +12,52 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Extensions.Basics
 {
-    public static class MultiOptionalEnumLogic<T> where T: MultiOptionalEnumDN, new()
+    public static class SemiSymbolLogic<T>
+        where T : SemiSymbol
     {
-        public static HashSet<Enum> Keys { get; set; }
-        static Dictionary<Enum, T> toEntity;
-        static Dictionary<string, Enum> toEnum;
-        static Func<HashSet<Enum>> getKeys;
+        static ResetLazy<Dictionary<string, T>> lazy;
+        static Func<IEnumerable<T>> getSemiSymbols;
 
-        public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
+        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
         {
-            if (sb.NotDefined(typeof(MultiOptionalEnumLogic<T>).GetMethod("Start")))
+            if (sb.NotDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>();
 
-                MultiOptionalEnumLogic<T>.getKeys = getKeys;
-
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
-            }
-        }
 
-        static void Schema_Initializing()
-        {
-            using (new EntityCache(EntityCacheType.ForceNewSealed))
-            {
-                Keys = getKeys();
+                SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
+                lazy = sb.GlobalLazy(() =>
+                {
+                    var symbols =  CreateSemiSymbols();
 
-                var joinResult = EnumerableExtensions.JoinStrict(
-                     Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
-                     Keys,
-                     a => a.Key,
-                     k => MultiEnumDN.UniqueKey(k),
-                     (a, k) => new { a, k });
+                    EnumerableExtensions.JoinStrict(
+                         Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
+                         symbols,
+                         c => c.Key,
+                         s => s.Key,
+                         (c, s) =>
+                         {
+                             c.id = s.id;
+                             c.Name = s.Name;
+                             c.IsNew = false;
+                             c.Modified = ModifiedState.Sealed;
+                             return c;
+                         }
+                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
 
-                if (joinResult.Missing.Count != 0)
-                    throw new InvalidOperationException("Error loading {0}\r\n Lacking: {1}".Formato(typeof(T).Name, joinResult.Missing.ToString(", ")));
+                    return symbols.ToDictionary(a => a.Key);
 
-                toEntity = joinResult.Result.ToDictionary(p => p.k, p => p.a);
+                }, new InvalidateWith(typeof(T)));
 
-                toEnum = toEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
+                SymbolManager.SymbolDeserialized.Register((T s) =>
+                {
+                    s.id = lazy.Value.GetOrThrow(s.Key).id;
+                    s.IsNew = false;
+                    s.Modified = ModifiedState.Sealed;
+                });
             }
         }
 
@@ -58,9 +65,20 @@ namespace Signum.Engine.Extensions.Basics
         {
             Table table = Schema.Current.Table<T>();
 
-            List<T> should = GenerateEntities();
+            IEnumerable<T> should = CreateSemiSymbols();
 
             return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+        }
+
+        private static IEnumerable<T> CreateSemiSymbols()
+        {
+            IEnumerable<T> should = getSemiSymbols().ToList();
+
+            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
+                foreach (var item in should)
+                    item.Name = item.NiceToString();
+
+            return should;
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
@@ -68,97 +86,35 @@ namespace Signum.Engine.Extensions.Basics
             Table table = Schema.Current.Table<T>();
 
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
-            List<T> should = GenerateEntities();
+            IEnumerable<T> should = CreateSemiSymbols();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements,
-                typeof(T).Name,
+            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
                 should.ToDictionary(s => s.Key),
                 current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
                 (k, s) => table.InsertSqlSync(s),
                 (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
-                    if (c.Name != s.Name || c.Key != s.Key)
-                    {
-                        c.Key = null;
-                        c.Name = s.Name;
-                        c.Key = s.Key;
-                    }
-                    return table.UpdateSqlSync(c);
+                    var originalName = c.Key;
+                    c.Key = s.Key;
+                    c.Name = s.Name;
+                    return table.UpdateSqlSync(c, comment: c.Key);
                 }, Spacing.Double);
         }
 
 
 
-        static List<T> GenerateEntities()
+        static Dictionary<string, T> AssertStarted()
         {
-            return getKeys().Select(k => new T
-            {
-                Name = k.NiceToString(),
-                Key = MultiEnumDN.UniqueKey(k),
-            }).ToList();
+            if (lazy == null)
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SymbolLogic<T>).TypeName()));
+
+            return lazy.Value;
         }
 
-        public static T ToEntity(Enum key)
+        public static ICollection<T> SemiSymbols
         {
-            AssertInitialized();
-
-            return toEntity.GetOrThrow(key);
-        }
-
-        private static void AssertInitialized()
-        {
-            if (Keys == null)
-                throw new InvalidOperationException("{0} is not initialized. Consider calling Schema.InitializeUntil(InitLevel.Level0SyncEntities)"
-                    .Formato(typeof(MultiOptionalEnumLogic<T>).TypeName()));
-        }
-
-        public static T ToEntity(string keyName)
-        {
-            return ToEntity(ToEnum(keyName));
-        }
-
-        public static T TryToEntity(Enum key)
-        {
-            AssertInitialized();
-
-            return toEntity.TryGetC(key);
-        }
-
-        public static T TryToEntity(string keyName)
-        {
-            Enum en = TryToEnum(keyName);
-
-            if (en == null)
-                return null;
-
-            return TryToEntity(en);
-        }
-
-        public static Enum ToEnum(T entity)
-        {
-            return ToEnum(entity.Key);
-        }
-
-        public static Enum ToEnum(string keyName)
-        {
-            AssertInitialized();
-
-            return toEnum.GetOrThrow(keyName);
-        }
-
-        public static Enum TryToEnum(string keyName)
-        {
-            AssertInitialized();
-
-            return toEnum.TryGetC(keyName);
-        }
-
-        internal static IEnumerable<T> AllEntities()
-        {
-            AssertInitialized();
-
-            return toEntity.Values;
+            get { return AssertStarted().Values; }
         }
     }
 }

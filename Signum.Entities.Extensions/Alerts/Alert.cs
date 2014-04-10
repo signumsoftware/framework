@@ -171,7 +171,7 @@ namespace Signum.Entities.Alerts
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class AlertTypeDN : MultiOptionalEnumDN
+    public class AlertTypeDN : SemiSymbol
     {
         static AlertTypeDN()
         {

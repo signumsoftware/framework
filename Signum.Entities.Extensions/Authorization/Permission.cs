@@ -12,6 +12,8 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class PermissionSymbol : Symbol
     {
+        private PermissionSymbol() { } 
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public PermissionSymbol([CallerMemberName]string memberName = null) : 
             base(new StackFrame(1, false), memberName)
