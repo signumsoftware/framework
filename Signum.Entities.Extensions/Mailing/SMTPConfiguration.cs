@@ -16,7 +16,7 @@ namespace Signum.Entities.Mailing
         public bool IsDefault
         {
             get { return isDefault; }
-            set { Set(ref isDefault, value, () => IsDefault); }
+            set { Set(ref isDefault, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -25,14 +25,14 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         int port = 25;
         public int Port
         {
             get { return port; }
-            set { Set(ref port, value, () => Port); }
+            set { Set(ref port, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -41,7 +41,7 @@ namespace Signum.Entities.Mailing
         public string Host
         {
             get { return host; }
-            set { Set(ref host, value, () => Host); }
+            set { Set(ref host, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -50,7 +50,7 @@ namespace Signum.Entities.Mailing
         public string Username
         {
             get { return username; }
-            set { Set(ref username, value, () => Username); }
+            set { Set(ref username, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -59,21 +59,21 @@ namespace Signum.Entities.Mailing
         public string Password
         {
             get { return password; }
-            set { Set(ref password, value, () => Password); }
+            set { Set(ref password, value); }
         }
 
         bool useDefaultCredentials = true;
         public bool UseDefaultCredentials
         {
             get { return useDefaultCredentials; }
-            set { Set(ref useDefaultCredentials, value, () => UseDefaultCredentials); }
+            set { Set(ref useDefaultCredentials, value); }
         }
 
         EmailAddressDN defaultFrom;
         public EmailAddressDN DefaultFrom
         {
             get { return defaultFrom; }
-            set { Set(ref defaultFrom, value, () => DefaultFrom); }
+            set { Set(ref defaultFrom, value); }
         }
 
         [NotNullable]
@@ -82,14 +82,14 @@ namespace Signum.Entities.Mailing
         public MList<EmailRecipientDN> AditionalRecipients
         {
             get { return aditionalRecipients; }
-            set { Set(ref aditionalRecipients, value, () => AditionalRecipients); }
+            set { Set(ref aditionalRecipients, value); }
         }
 
         bool enableSSL;
         public bool EnableSSL
         {
             get { return enableSSL; }
-            set { Set(ref enableSSL, value, () => EnableSSL); }
+            set { Set(ref enableSSL, value); }
         }
 
         [NotNullable]
@@ -97,7 +97,7 @@ namespace Signum.Entities.Mailing
         public MList<ClientCertificationFileDN> ClientCertificationFiles
         {
             get { return clientCertificationFiles; }
-            set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
+            set { Set(ref clientCertificationFiles, value); }
         }
 
         static readonly Expression<Func<SmtpConfigurationDN, string>> ToStringExpression = e => e.name;
@@ -122,14 +122,14 @@ namespace Signum.Entities.Mailing
         public string FullFilePath
         {
             get { return fullFilePath; }
-            set { Set(ref fullFilePath, value, () => FullFilePath); }
+            set { Set(ref fullFilePath, value); }
         }
 
         CertFileType certFileType;
         public CertFileType CertFileType
         {
             get { return certFileType; }
-            set { Set(ref certFileType, value, () => CertFileType); }
+            set { Set(ref certFileType, value); }
         }
 
         static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.fullFilePath;

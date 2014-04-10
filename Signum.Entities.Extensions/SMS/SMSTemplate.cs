@@ -23,28 +23,28 @@ namespace Signum.Entities.SMS
         public string Name
         {
             get { return name; }
-            set { Set(ref name, value, () => Name); }
+            set { Set(ref name, value); }
         }
 
         bool certified;
         public bool Certified
         {
             get { return certified; }
-            set { Set(ref certified, value, () => Certified); }
+            set { Set(ref certified, value); }
         }
 
         bool editableMessage = AllowEditMessages;
         public bool EditableMessage
         {
             get { return editableMessage; }
-            set { Set(ref editableMessage, value, () => EditableMessage); }
+            set { Set(ref editableMessage, value); }
         }
 
         TypeDN associatedType;
         public TypeDN AssociatedType
         {
             get { return associatedType; }
-            set { Set(ref associatedType, value, () => AssociatedType); }
+            set { Set(ref associatedType, value); }
         }
 
         [NotifyCollectionChanged]
@@ -52,7 +52,7 @@ namespace Signum.Entities.SMS
         public MList<SMSTemplateMessageDN> Messages
         {
             get { return messages; }
-            set { Set(ref messages, value, () => Messages); }
+            set { Set(ref messages, value); }
         }
 
         string from;
@@ -60,35 +60,35 @@ namespace Signum.Entities.SMS
         public string From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
 
         MessageLengthExceeded messageLengthExceeded = MessageLengthExceeded.NotAllowed;
         public MessageLengthExceeded MessageLengthExceeded
         {
             get { return messageLengthExceeded; }
-            set { Set(ref messageLengthExceeded, value, () => MessageLengthExceeded); }
+            set { Set(ref messageLengthExceeded, value); }
         }
 
         bool removeNoSMSCharacters = true;
         public bool RemoveNoSMSCharacters
         {
             get { return removeNoSMSCharacters; }
-            set { Set(ref removeNoSMSCharacters, value, () => RemoveNoSMSCharacters); }
+            set { Set(ref removeNoSMSCharacters, value); }
         }
 
         SMSTemplateState state = SMSTemplateState.Created;
         public SMSTemplateState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         bool active;
         public bool Active
         {
             get { return active; }
-            set { Set(ref active, value, () => Active); }
+            set { Set(ref active, value); }
         }
 
         DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
@@ -96,7 +96,7 @@ namespace Signum.Entities.SMS
         public DateTime StartDate
         {
             get { return startDate; }
-            set { Set(ref startDate, value, () => StartDate); }
+            set { Set(ref startDate, value); }
         }
 
         DateTime? endDate;
@@ -104,7 +104,7 @@ namespace Signum.Entities.SMS
         public DateTime? EndDate
         {
             get { return endDate; }
-            set { Set(ref endDate, value, () => EndDate); }
+            set { Set(ref endDate, value); }
         }
 
         static Expression<Func<SMSTemplateDN, bool>> IsActiveNowExpression =
@@ -119,7 +119,7 @@ namespace Signum.Entities.SMS
         public IIdentifiable AdditionalData
         {
             get { return additionalData; }
-            set { Set(ref additionalData, value, () => AdditionalData); }
+            set { Set(ref additionalData, value); }
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
@@ -217,7 +217,7 @@ namespace Signum.Entities.SMS
         public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
+            set { Set(ref cultureInfo, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -226,7 +226,7 @@ namespace Signum.Entities.SMS
         public string Message
         {
             get { return message; }
-            set { Set(ref message, value, () => Message); }
+            set { Set(ref message, value); }
         }
 
         public override string ToString()

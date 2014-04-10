@@ -235,7 +235,7 @@ namespace Signum.Engine.Mailing
                 variables = variables.Previous;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
-                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.TryCC(p => p.GetType()))));
+                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.Try(p => p.GetType()))));
                     return null;
                 }
                 return n;

@@ -273,7 +273,7 @@ WriteLiteral(">\r\n");
                             {
                                 var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
 
-                                var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                                var list = gd.Try(a => a.Pronoms).EmptyIfNull()
                                  .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
 
                                 if (locType.Gender == null)

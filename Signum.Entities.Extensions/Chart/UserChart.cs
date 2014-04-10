@@ -41,21 +41,21 @@ namespace Signum.Entities.Chart
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
 
         Lite<TypeDN> entityType;
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value, () => EntityType); }
+            set { Set(ref entityType, value); }
         }
 
-        Lite<IdentifiableEntity> related;
-        public Lite<IdentifiableEntity> Related
+        Lite<IdentifiableEntity> owner;
+        public Lite<IdentifiableEntity> Owner
         {
-            get { return related; }
-            set { Set(ref related, value, () => Related); }
+            get { return owner; }
+            set { Set(ref owner, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         [NotNullable]
@@ -75,7 +75,7 @@ namespace Signum.Entities.Chart
             get { return chartScript; }
             set
             {
-                if (Set(ref chartScript, value, () => ChartScript))
+                if (Set(ref chartScript, value))
                 {
                     chartScript.SyncronizeColumns(this, changeParameters: true);
                     NotifyAllColumns();
@@ -89,7 +89,7 @@ namespace Signum.Entities.Chart
             get { return groupResults; }
             set
             {
-                if (Set(ref groupResults, value, () => GroupResults))
+                if (Set(ref groupResults, value))
                 {
                     NotifyAllColumns();
                 }
@@ -101,7 +101,7 @@ namespace Signum.Entities.Chart
         public MList<ChartColumnDN> Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         void NotifyAllColumns()
@@ -117,7 +117,7 @@ namespace Signum.Entities.Chart
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }
-            set { Set(ref filters, value, () => Filters); }
+            set { Set(ref filters, value); }
         }
 
         [NotNullable]
@@ -125,7 +125,7 @@ namespace Signum.Entities.Chart
         public MList<QueryOrderDN> Orders
         {
             get { return orders; }
-            set { Set(ref orders, value, () => Orders); }
+            set { Set(ref orders, value); }
         }
 
         [UniqueIndex]
@@ -133,7 +133,7 @@ namespace Signum.Entities.Chart
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         static readonly Expression<Func<UserChartDN, string>> ToStringExpression = e => e.displayName;
@@ -210,7 +210,7 @@ namespace Signum.Entities.Chart
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
-                Related == null ? null : new XAttribute("Related", Related.Key()),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", ChartScript.Name),
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
@@ -222,13 +222,13 @@ namespace Signum.Entities.Chart
         {
             DisplayName = element.Attribute("DisplayName").Value;
             Query = ctx.GetQuery(element.Attribute("Query").Value);
-            EntityType = element.Attribute("EntityType").TryCC(a => Lite.Parse<TypeDN>(a.Value));
-            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            EntityType = element.Attribute("EntityType").Try(a => Lite.Parse<TypeDN>(a.Value));
+            Owner = element.Attribute("Owner").Try(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
-            Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
-            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
     }

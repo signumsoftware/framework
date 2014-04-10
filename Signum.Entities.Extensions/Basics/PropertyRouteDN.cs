@@ -27,7 +27,7 @@ namespace Signum.Entities.Basics
         public string Path
         {
             get { return path; }
-            set { SetToStr(ref path, value, () => Path); }
+            set { SetToStr(ref path, value); }
         }
 
         TypeDN type;
@@ -35,7 +35,7 @@ namespace Signum.Entities.Basics
         public TypeDN Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         static readonly Expression<Func<PropertyRouteDN, string>> ToStringExpression = e => e.path;

@@ -10,13 +10,10 @@
 {
     var userChart = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
 
-    using (var style = e.SubContext())
-    {
-        style.OnlyValue = true;
-    <div style="float: left">
-        @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
+    e.FormGroupStyle = FormGroupStyle.None;
+
+    @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
         (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults, isKey: false))
-    </div>
-    @Html.ValueLine(style, f => f.OrderType)
-    }
+
+    @Html.ValueLine(e, f => f.OrderType)
 }

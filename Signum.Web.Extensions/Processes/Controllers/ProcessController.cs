@@ -28,7 +28,7 @@ namespace Signum.Web.Processes
         public JsonNetResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessDN>().Where(pe =>
-                    pe.Id == id && pe.State != ProcessState.Error).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 1;
+                    pe.Id == id && pe.State == ProcessState.Executing).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 1;
 
             return this.JsonNet(progress);
         }

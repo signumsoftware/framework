@@ -16,6 +16,7 @@ export interface FileLineOptions extends Lines.EntityBaseOptions {
     asyncUpload?: boolean;
     dragAndDrop?: boolean;
     download: DownloadBehaviour;
+    fileType: string;
 }
 
 export interface FileAsyncUploadResult {
@@ -77,7 +78,7 @@ export class FileLine extends Lines.EntityBase {
         xhr.setRequestHeader("X-FileName", fileName);
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
         xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
-        xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
+        xhr.setRequestHeader("X-sfFileType", this.options.fileType);
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
         var self = this;

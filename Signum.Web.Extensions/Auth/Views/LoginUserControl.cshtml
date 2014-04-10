@@ -1,7 +1,9 @@
 ﻿@if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser) )
-{
-    @:Usuario: <span class="sf-auth-username">@UserDN.Current</span>
-    <span class="sf-auth-separator"> | </span>@Html.ActionLink(AuthMessage.Logout.NiceToString(), "Logout", "Auth", null, new { @class = "sf-logout" })
+{   
+    @Html.ActionLink(AuthMessage.Logout.NiceToString() + " " + UserDN.Current, "Logout" , "Auth", null, new Dictionary<string, object> { 
+        {"class", "sf-logout"},
+        {"data-user", UserDN.Current.UserName },
+    });
 }
 else
 { 

@@ -27,14 +27,14 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, () => FileName); }
+            set { SetToStr(ref fileName, value); }
         }
 
         string hash;
         public string Hash
         {
             get { return hash; }
-            private set { Set(ref hash, value, () => Hash); }
+            private set { Set(ref hash, value); }
         }
 
         byte[] binaryFile;
@@ -43,14 +43,14 @@ namespace Signum.Entities.Files
             get { return binaryFile; }
             set
             {
-                if (Set(ref binaryFile, value, () => BinaryFile))
+                if (Set(ref binaryFile, value))
                     Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
             }
         }
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".Formato(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         public Uri WebPath

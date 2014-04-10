@@ -71,8 +71,8 @@ namespace Signum.Web.AuthAdmin
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
-                         types ? new QuickLinkAction(AuthAdminMessage.TypeRules.NiceToString(), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
-                         permissions ? new QuickLinkAction(AuthAdminMessage.PermissionRules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
+                         types ? new QuickLinkAction(AuthAdminMessage.TypeRules, RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
+                         permissions ? new QuickLinkAction(AuthAdminMessage.PermissionRules, RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
@@ -142,13 +142,13 @@ namespace Signum.Web.AuthAdmin
         private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
             where T : ModifiableEntity
         {
-            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) =>
-                new[] { new ToolBarButton { 
-                    OnClick =  embedded?
-                    new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
-                    new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
+            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] {  new ToolBarButton 
+                { 
                     Text = AuthMessage.Save.NiceToString(),
-                    DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
+                    Style = BootstrapStyle.Primary,
+                    OnClick =  embedded?
+                      new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
+                      new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
                 }});
         }
 

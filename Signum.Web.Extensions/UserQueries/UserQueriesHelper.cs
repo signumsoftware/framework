@@ -29,19 +29,9 @@ namespace Signum.Web.UserQueries
             return helper.SearchControl(userQuery, findOptions, context);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, Action<CountSearchControl> settinsModifier)
-        {
-            if (findOptions == null)
-                throw new ArgumentNullException("findOptions");
-
-            findOptions.ApplyUserQuery(userQuery);
-
-            return helper.CountSearchControl(findOptions, settinsModifier);
-        }
-
         public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryTokenBuilderSettings settings)
         {
-            if (ctx.Value.TryCC(qt => qt.ParseException) != null)
+            if (ctx.Value.Try(qt => qt.ParseException) != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(ctx.Value.ParseException.Message).ToHtml());
@@ -51,7 +41,7 @@ namespace Signum.Web.UserQueries
             }
             else
             {
-                return helper.QueryTokenBuilder(ctx.Value.TryCC(ct => ct.Token), ctx, settings);
+                return helper.QueryTokenBuilder(ctx.Value.Try(ct => ct.Token), ctx, settings);
             }
         }
 

@@ -24,14 +24,14 @@ namespace Signum.Entities.Chart
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         Lite<FileDN> icon;
         public Lite<FileDN> Icon
         {
             get { return icon; }
-            set { Set(ref icon, value, () => Icon); }
+            set { Set(ref icon, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -40,14 +40,14 @@ namespace Signum.Entities.Chart
         public string Script
         {
             get { return script; }
-            set { Set(ref script, value, () => Script); }
+            set { Set(ref script, value); }
         }
 
         GroupByChart groupBy;
         public GroupByChart GroupBy
         {
             get { return groupBy; }
-            set { Set(ref groupBy, value, () => GroupBy); }
+            set { Set(ref groupBy, value); }
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
@@ -55,7 +55,7 @@ namespace Signum.Entities.Chart
         public MList<ChartScriptColumnDN> Columns
         {
             get { return columns; }
-            set { Set(ref columns, value, () => Columns); }
+            set { Set(ref columns, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
         public string ColumnsStructure
         {
             get { return columnsStructure; }
-            set { Set(ref columnsStructure, value, () => ColumnsStructure); }
+            set { Set(ref columnsStructure, value); }
         }
 
         static Expression<Func<ChartScriptDN, string>> ToStringExpression = e => e.name;
@@ -205,7 +205,7 @@ namespace Signum.Entities.Chart
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
 
-            var newFile = script.Element("Icon").TryCC(icon => new FileDN
+            var newFile = script.Element("Icon").Try(icon => new FileDN
             {
                 FileName = icon.Attribute("FileName").Value,
                 BinaryFile = Convert.FromBase64String(icon.Nodes().OfType<XCData>().Single().Value),
@@ -319,7 +319,7 @@ namespace Signum.Entities.Chart
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
 
         [NotNullable, SqlDbType(Size = 80)]
@@ -328,14 +328,14 @@ namespace Signum.Entities.Chart
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         bool isOptional;
         public bool IsOptional
         {
             get { return isOptional; }
-            set { Set(ref isOptional, value, () => IsOptional); }
+            set { Set(ref isOptional, value); }
         }
      
         [ForceForeignKeyAttribute]
@@ -343,35 +343,35 @@ namespace Signum.Entities.Chart
         public ChartColumnType ColumnType
         {
             get { return columnType; }
-            set { Set(ref columnType, value, () => ColumnType); }
+            set { Set(ref columnType, value); }
         }
 
         bool isGroupKey;
         public bool IsGroupKey
         {
             get { return isGroupKey; }
-            set { Set(ref isGroupKey, value, () => IsGroupKey); }
+            set { Set(ref isGroupKey, value); }
         }
 
         ChartScriptParameterDN parameter1;
         public ChartScriptParameterDN Parameter1
         {
             get { return parameter1; }
-            set { Set(ref parameter1, value, () => Parameter1); }
+            set { Set(ref parameter1, value); }
         }
 
         ChartScriptParameterDN parameter2;
         public ChartScriptParameterDN Parameter2
         {
             get { return parameter2; }
-            set { Set(ref parameter2, value, () => Parameter2); }
+            set { Set(ref parameter2, value); }
         }
 
         ChartScriptParameterDN parameter3;
         public ChartScriptParameterDN Parameter3
         {
             get { return parameter3; }
-            set { Set(ref parameter3, value, () => Parameter3); }
+            set { Set(ref parameter3, value); }
         }
 
         internal ChartScriptColumnDN Clone()
@@ -382,9 +382,9 @@ namespace Signum.Entities.Chart
                 IsGroupKey = IsGroupKey,
                 ColumnType = ColumnType,
                 IsOptional = IsOptional,
-                Parameter1 = Parameter1.TryCC(p => p.Clone()),
-                Parameter2 = Parameter2.TryCC(p => p.Clone()),
-                Parameter3 = Parameter3.TryCC(p => p.Clone()),
+                Parameter1 = Parameter1.Try(p => p.Clone()),
+                Parameter2 = Parameter2.Try(p => p.Clone()),
+                Parameter3 = Parameter3.Try(p => p.Clone()),
             };
         }
     }

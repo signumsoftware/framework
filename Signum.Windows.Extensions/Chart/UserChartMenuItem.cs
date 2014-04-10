@@ -63,7 +63,7 @@ namespace Signum.Windows.Chart
                 Inlines = 
                 { 
                     new Run(
-                    current == null ? ChartMessage.MyCharts.NiceToString() : current.DisplayName), 
+                    current == null ? typeof(UserChartDN).NicePluralName() : current.DisplayName), 
                     UserCharts == null || UserCharts.Count==0 ? (Inline)new Run():  new Bold(new Run(" (" + UserCharts.Count + ")")) 
                 }
             };
@@ -189,9 +189,11 @@ namespace Signum.Windows.Chart
             e.Handled = true;
 
             var d = Dispatcher;
+            var desc = Description;
+
             Navigator.Navigate(CurrentUserChart, new NavigateOptions()
             {
-                View = () => new UserChart { QueryDescription = Description },
+                View = () => new UserChart { QueryDescription = desc },
                 Closed = (s, args) => d.Invoke(() => Initialize())
             });
         }

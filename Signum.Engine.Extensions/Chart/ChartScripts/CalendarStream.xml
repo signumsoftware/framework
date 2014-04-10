@@ -18,9 +18,6 @@
     week = d3.time.format("%U"),
     format = d3.time.format("%Y-%m-%d");
    
-  var minValue = d3.min(data.rows, function(r){return r.c1.valueOf() });
-  var maxValue = d3.max(data.rows, function(r){return r.c1.valueOf() });
-  
   var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
 
   var colorQuantizer = d3.scale.quantize()
@@ -30,9 +27,9 @@
   var color = function(v){return colorQuantizer(scaleFunc(v)); }
   
   
-  var minDate = new Date(d3.min(data.rows, function(r){return r.c0.valueOf() }));
-  var maxDate = new Date(d3.max(data.rows, function(r){return r.c0.valueOf() }));
-   
+  var minDate = d3.min(data.rows, function(r){return new Date(r.c0) });
+  var maxDate = d3.max(data.rows, function(r){return new Date(r.c0) });
+ 
   var numDaysX = 53;
   var numDaysY = ((maxDate.getFullYear() - minDate.getFullYear() + 1) * (7 + 1));
   
@@ -41,8 +38,6 @@
   var cellSizeX = (width - 20)  / (horizontal? numDaysX: numDaysY);
   var cellSizeY = (height - 20) / (horizontal? numDaysY: numDaysX);
   var cellSize = Math.min(cellSizeX, cellSizeY);
-  
-  
   
   var yRule = rule({
     _1: '*',
@@ -76,29 +71,29 @@
     .text(String);
 
   var groups = d3.nest()
-    .key(function(r) { return r.c0.valueOf(); })
+    .key(function(r) { return r.c0.key; })
     .rollup(function(r) { return r[0]; })
     .map(data.rows);
-   
+   debugger
   
   var rect = svg.selectAll("rect.day")
-     .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+     .data(function(d) { return d3.time.days.utc(new Date(Date.UTC(d, 0, 1)), new Date(Date.UTC(d + 1, 0, 1))); })
      .enter().append("rect")
      .attr("stroke","#ccc")
      .attr("fill",function(d) {   
-       var r = groups[d.valueOf()];
+       var r = groups[d.toJSON().beforeLast(".")];
        return r == undefined ? "#fff":color(r.c1.key);})
      .attr("width", cellSize)
      .attr("height", cellSize)
      .attr("x", function(d) { return (horizontal? week(d): day(d)) * cellSize; })
      .attr("y", function(d) { return (horizontal? (6-day(d)): week(d)) * cellSize; })
      .attr('data-click', function(d) { 
-       var r = groups[d.valueOf()];
+       var r = groups[d.toJSON().beforeLast(".")];
        return r == undefined? undefined: getClickKeys(r, data.columns); 
      })
      .append("title")
     	.text(function(d) { 
-          var r = groups[d.valueOf()];
+          var r = groups[d.toJSON().beforeLast(".")];
           return format(d) + (r == undefined ? "": ("("+r.c1.key+")"));
         });
   

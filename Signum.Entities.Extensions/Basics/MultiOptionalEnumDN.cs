@@ -21,7 +21,7 @@ namespace Signum.Entities.Basics
                 if (key != null)
                     throw new ApplicationException("This alert type is protected");
 
-                SetToStr(ref name, value, () => Name);
+                SetToStr(ref name, value);
             }
         }
 
@@ -30,7 +30,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            set { Set(ref key, value, () => Key); }
+            set { Set(ref key, value); }
         }
 
         static readonly Expression<Func<MultiOptionalEnumDN, string>> ToStringExpression = e => e.name;

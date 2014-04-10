@@ -41,7 +41,7 @@ namespace Signum.Entities.Authorization
         public string UserName
         {
             get { return userName; }
-            set { SetToStr(ref userName, value, () => UserName); }
+            set { SetToStr(ref userName, value); }
         }
 
         [NotNullable]
@@ -52,7 +52,7 @@ namespace Signum.Entities.Authorization
             get { return passwordHash; }
             set
             {
-                if (Set(ref passwordHash, value, () => PasswordHash))
+                if (Set(ref passwordHash, value))
                     PasswordSetDate = TimeZoneManager.Now.TrimToSeconds();
             }
         }
@@ -61,21 +61,21 @@ namespace Signum.Entities.Authorization
         public DateTime PasswordSetDate
         {
             get { return passwordSetDate; }
-            private set { Set(ref passwordSetDate, value, () => PasswordSetDate); }
+            private set { Set(ref passwordSetDate, value); }
         }
 
         bool passwordNeverExpires;
         public bool PasswordNeverExpires
         {
             get { return passwordNeverExpires; }
-            set { Set(ref passwordNeverExpires, value, () => PasswordNeverExpires); }
+            set { Set(ref passwordNeverExpires, value); }
         }
        
         IIdentifiable related;
         public IIdentifiable Related
         {
             get { return related; }
-            set { Set(ref related, value, () => Related); }
+            set { Set(ref related, value); }
         }
 
         RoleDN role;
@@ -83,7 +83,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, () => Role); }
+            set { Set(ref role, value); }
         }
 
         string email;
@@ -91,28 +91,28 @@ namespace Signum.Entities.Authorization
         public string Email
         {
             get { return email; }
-            set { Set(ref email, value, () => Email); }
+            set { Set(ref email, value); }
         }
 
         CultureInfoDN cultureInfo;
         public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
+            set { Set(ref cultureInfo, value); }
         }
 
         DateTime? anulationDate;
         public DateTime? AnulationDate
         {
             get { return anulationDate; }
-            set { Set(ref anulationDate, value, () => AnulationDate); }
+            set { Set(ref anulationDate, value); }
         }
 
         UserState state = UserState.New;
         public UserState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

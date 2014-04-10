@@ -42,13 +42,8 @@ namespace Signum.Engine.Chart
         {
             IDynamicQueryCore core = DynamicQueryManager.Current.TryGetQuery(request.QueryName).Core.Value;
 
-            if (core.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(AutoDynamicQueryCore<>))))
-            {
-                using (ExecutionMode.UserInterface())
-                    return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
-            }
-
-            throw new NotImplementedException(); 
+            using (ExecutionMode.UserInterface())
+                return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
         }
 
         static GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>> miExecuteChart =

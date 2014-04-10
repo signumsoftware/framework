@@ -23,21 +23,21 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         NewsletterState state = NewsletterState.Created;
         public NewsletterState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         Lite<SmtpConfigurationDN> smtpConfig = DefaultSmtpConfig;
         public Lite<SmtpConfigurationDN> SmtpConfig
         {
             get { return smtpConfig; }
-            set { Set(ref smtpConfig, value, () => SmtpConfig); }
+            set { Set(ref smtpConfig, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -46,7 +46,7 @@ namespace Signum.Entities.Mailing
         public string From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -55,7 +55,7 @@ namespace Signum.Entities.Mailing
         public string DisplayFrom
         {
             get { return displayFrom; }
-            set { Set(ref displayFrom, value, () => DisplayFrom); }
+            set { Set(ref displayFrom, value); }
         }
 
         [SqlDbType(Size = 300)]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Mailing
         public string Subject
         {
             get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
+            set { Set(ref subject, value); }
         }
 
         [Ignore]
@@ -76,7 +76,7 @@ namespace Signum.Entities.Mailing
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, () => Text); }
+            set { Set(ref text, value); }
         }
 
         [Ignore]
@@ -107,7 +107,7 @@ namespace Signum.Entities.Mailing
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
     }
 
@@ -118,7 +118,7 @@ namespace Signum.Entities.Mailing
         public bool Sent
         {
             get { return sent; }
-            set { Set(ref sent, value, () => Sent); }
+            set { Set(ref sent, value); }
         }
 
         DateTime? sendDate;
@@ -126,21 +126,21 @@ namespace Signum.Entities.Mailing
         public DateTime? SendDate
         {
             get { return sendDate; }
-            set { Set(ref sendDate, value, () => SendDate); }
+            set { Set(ref sendDate, value); }
         }
 
         Lite<IEmailOwnerDN> recipient;
         public Lite<IEmailOwnerDN> Recipient
         {
             get { return recipient; }
-            set { Set(ref recipient, value, () => Recipient); }
+            set { Set(ref recipient, value); }
         }
 
         Lite<NewsletterDN> newsletter;
         public Lite<NewsletterDN> Newsletter
         {
             get { return newsletter; }
-            set { Set(ref newsletter, value, () => Newsletter); }
+            set { Set(ref newsletter, value); }
         }
     }
 

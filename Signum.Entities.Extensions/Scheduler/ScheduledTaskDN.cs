@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
         public IScheduleRuleDN Rule
         {
             get { return rule; }
-            set { SetToStr(ref rule, value, () => Rule); }
+            set { SetToStr(ref rule, value); }
         }
 
         [ImplementedBy(typeof(SimpleTaskDN))]
@@ -30,14 +30,14 @@ namespace Signum.Entities.Scheduler
         public ITaskDN Task
         {
             get { return task; }
-            set { SetToStr(ref task, value, () => Task); }
+            set { SetToStr(ref task, value); }
         }
 
         bool suspended;
         public bool Suspended
         {
             get { return suspended; }
-            set { Set(ref suspended, value, () => Suspended); }
+            set { Set(ref suspended, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -46,7 +46,7 @@ namespace Signum.Entities.Scheduler
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -55,7 +55,7 @@ namespace Signum.Entities.Scheduler
         public string ApplicationName
         {
             get { return applicationName; }
-            set { Set(ref applicationName, value, () => ApplicationName); }
+            set { Set(ref applicationName, value); }
         }
 
         public override string ToString()

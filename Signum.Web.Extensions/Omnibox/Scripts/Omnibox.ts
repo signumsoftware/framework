@@ -1,59 +1,46 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
-export function initialize(omniboxId: string, autocompleteOptions?: any) {
-    autocompleteOptions = autocompleteOptions || {};
+export function initialize(omniboxId: string, url: string) {
+    var $omnibox = $("#" + omniboxId);
 
-    var $omnibox = $("#" + omniboxId); 
+    var handler: number;
+    var lastXhr: JQueryXHR; //To avoid previous requests results to be shown
+    $omnibox.typeahead({
 
-    var lastXhr :JQueryXHR; //To avoid previous requests results to be shown
-    $omnibox.autocomplete($.extend({
-        delay: 0,
-        minLength: 1,
-        source: function (request, response) {
-            if (lastXhr)
-                lastXhr.abort();
-            lastXhr = $.ajax({
-                url: $omnibox.attr("data-url"),
-                data: { text: request.term },
-                sfNotify: false,
-                success: function (data) {
-                    lastXhr = null;
-                    response($.map(data, function (item) {
-                            return {
-                            label: item.label,
-                            cleanText: item.cleanText,
-                            value: item
-                        }
-                        }));
-                }
+        source: function (query, response) {
+
+            if (handler)
+                clearTimeout(handler);
+
+            handler = setTimeout(() => {
+                if (lastXhr)
+                    lastXhr.abort();
+                lastXhr = $.ajax({
+                    url: url,
+                    data: { text: query },
+                    sfNotify: false,
+                    success: function (data) {
+                        lastXhr = null;
+                        response(data);
+                    }
+                });
             });
         },
-        select: function (event, ui) {
-            if (event.keyCode == 9) {
-                $omnibox.val(ui.item.cleanText);
-            }
-            else {
-                var url = $(ui.item.label).attr("href");
-                if (event.ctrlKey || event.which == 2) {
-                    window.open(url);
-                }
-                else {
-                    window.location.assign(url);
-                }
-            }
-            event.preventDefault();
-            return false;
-        },
-        focus: function (event, ui) {
-            return false;
-        }
-    }, autocompleteOptions));
+        sorter: items => items,
+        matcher: item => true,
+        highlighter: item => item.label,
+        updater: (item, e) => {
+            if ((<any>e).keyCode && (<any>e).keyCode == 9) //Tab
+                return item.cleanText;
 
-    $omnibox.data("ui-autocomplete")._renderItem = function (ul, item) {
-        return $("<li></li>")
-            .data("ui-autocomplete-item", item)
-            .append(item.label)
-            .appendTo(ul);
-    };
+            if (item.url) {
+                if ((<MouseEvent>e).ctrlKey || (<MouseEvent>e).which == 2)
+                    window.open(item.url);
+                else
+                    window.location.assign(item.url);
+            }
+            e.preventDefault();
+            return item.cleanText;
+        },
+    });
 }

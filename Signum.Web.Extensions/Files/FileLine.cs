@@ -75,7 +75,16 @@ namespace Signum.Web.Files
                 result.Add("uploadDroppedUrl", UploadDroppedUrl);
             if (!DragAndDrop)
                 result.Add("dragAndDrop", false);
-            result.Add("download", (int)Download); 
+            result.Add("download", (int)Download);
+
+            if (this.Type.CleanType() == typeof(FilePathDN) && !this.ReadOnly)
+            {
+                if (FileType == null)
+                    throw new ArgumentException("FileType is mandatory for FilePathDN (FileLine {0})".Formato(Prefix));
+
+                result.Add("fileType", MultiEnumDN.UniqueKey(FileType));
+            }       
+
             return result;
         }
 

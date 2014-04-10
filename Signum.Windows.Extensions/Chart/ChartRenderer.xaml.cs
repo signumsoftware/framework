@@ -169,7 +169,7 @@ namespace Signum.Windows.Chart
 
             var jsonData = ChartUtils.DataJson(Request, ResultTable);
 
-            var json = new JavaScriptSerializer().Serialize(jsonData);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(jsonData);
 
             if (webBrowserLoaded)
                 WebBroserInvoke(script, json);

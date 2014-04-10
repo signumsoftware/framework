@@ -14,7 +14,7 @@ namespace Signum.Entities.SMS
         public CultureInfoDN DefaultCulture
         {
             get { return defaultCulture; }
-            set { Set(ref defaultCulture, value, () => DefaultCulture); }
+            set { Set(ref defaultCulture, value); }
         }
     }
 }

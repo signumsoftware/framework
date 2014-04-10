@@ -5,8 +5,6 @@
 @model ProcessLogicState
 <div id="processMainDiv">
     <br />
-    <h2>ProcessLogic state</h2>
-
     State: <strong>
         @if (Model.Running)
         {
@@ -25,7 +23,7 @@
     <br />
     NextPlannedExecution: @(Model.NextPlannedExecution.TryToString() ?? "-None-")
     <br />
-    <table class="sf-search-results sf-stats-table">
+    <table class="table">
         <thead>
             <tr>
                 <th>Process
@@ -76,7 +74,7 @@
     @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
-    FilterMode = Signum.Web.FilterMode.Hidden,
+    ShowFilters = false,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
 }, new Context(null, "sc"))

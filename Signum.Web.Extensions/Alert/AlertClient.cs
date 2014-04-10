@@ -17,6 +17,8 @@ namespace Signum.Web.Alerts
 
         public static string Module = "Extensions/Signum.Web.Extensions/Alert/Scripts/Alerts";
 
+        public static Type[] Types;
+
         public static void Start(params Type[] types)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -29,9 +31,9 @@ namespace Signum.Web.Alerts
                     new EntitySettings<AlertTypeDN> { PartialViewName = _ => ViewPrefix.Formato("AlertType") },
                 });
 
-                WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) =>
-                    SupportAlerts(entity, types) ? AlertWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
-                    null;
+                Types = types;
+
+                WidgetsHelper.GetWidget += WidgetsHelper_GetWidget;
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
@@ -42,16 +44,19 @@ namespace Signum.Web.Alerts
             }
         }
 
-        static bool SupportAlerts(ModifiableEntity entity, params Type[] tipos)
+        public static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
         {
-            IdentifiableEntity ie = entity as IdentifiableEntity;
+            IdentifiableEntity ie = ctx.Entity as IdentifiableEntity;
             if (ie == null || ie.IsNew)
-                return false;
+                return null;
 
-            if (!tipos.Contains(ie.GetType()))
-                return false;
+            if (!Types.Contains(ie.GetType()))
+                return null;
 
-            return Navigator.IsFindable(typeof(AlertDN));
+            if (!Navigator.IsFindable(typeof(AlertDN)))
+                return null;
+
+            return AlertWidgetHelper.CreateWidget(ctx);
         }
     }
 }

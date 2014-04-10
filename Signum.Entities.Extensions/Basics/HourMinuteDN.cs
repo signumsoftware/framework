@@ -16,7 +16,7 @@ namespace Signum.Entities
         public int Hour
         {
             get { return hour; }
-            set { SetToStr(ref hour, value, () => Hour); }
+            set { SetToStr(ref hour, value); }
         }
 
         int minute = 0;
@@ -24,7 +24,7 @@ namespace Signum.Entities
         public int Minute
         {
             get { return minute; }
-            set { SetToStr(ref minute, value, () => Minute); }
+            set { SetToStr(ref minute, value); }
         }
 
         public TimeSpan ToTimeSpan()

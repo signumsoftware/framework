@@ -44,10 +44,6 @@
     <Member Name="IncorrectPassword" Description="Incorrect password" />
     <Member Name="IntroduceYourUserNameAndPassword" Description="Introduce your username and password" />
     <Member Name="InvalidUsernameOrPassword" Description="Invalid username or password" />
-    <Member Name="New" Description="New:" />
-    <Member Name="Password" Description="Password:" />
-    <Member Name="Repeat" Description="Repeat:" />
-    <Member Name="UserName" Description="Username:" />
     <Member Name="UserName_Watermark" Description="user" />
     <Member Name="LoginEnter" Description="Login" />
     <Member Name="NewPassword" Description="New password" />

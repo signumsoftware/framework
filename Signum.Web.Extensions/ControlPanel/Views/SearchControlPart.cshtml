@@ -4,16 +4,19 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.UserQueries
 @using Signum.Web.UserQueries
-@model PanelPartDN
 
-@{ 
-    UserQueryDN uq = ((UserQueryPartDN)Model.Content).UserQuery;
+@using (var tc = Html.TypeContext<UserQueryPartDN>())
+{
+    UserQueryDN uq = tc.Value.UserQuery;
     object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    
     FindOptions fo = new FindOptions(queryName)
     {
-        FilterMode = FilterMode.OnlyResults,
-        AllowSelection = false
+        ShowHeader = false,
+        ShowFooter = false,
+        AllowSelection = false,
+        SearchOnLoad = true,
     };
 
-    @Html.SearchControl(uq, fo, new Context(null, "r{0}c{1}".Formato(Model.Row, Model.Column)));
+    @Html.SearchControl(uq, fo, new Context(null, Model.Prefix));
 }

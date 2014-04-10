@@ -8,6 +8,7 @@
 @using Signum.Web.Mailing
 @using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
+    ec.LabelColumns = new BsColumn(1);
     <div class="sf-email-template-message">
         <input type="hidden" class="sf-tab-title" value="@(ec.Value.CultureInfo.TryToString())" />
         @Html.EntityCombo(ec, e => e.CultureInfo, vl =>
@@ -16,19 +17,21 @@
         })
         <div class="sf-template-message-insert-container">
             @Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription]))
-            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.Prefix" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
-            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.Prefix" data-block="if" value="if" />
-            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.Prefix" data-block="foreach" value="foreach" />
-            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@ec.Prefix" data-block="any" value="any" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-basic"  value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-if" data-block="if" value="if" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-block="foreach" value="foreach" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-any" data-block="any" value="any" />
         </div>
         @Html.ValueLine(ec, e => e.Subject, vl =>
         {
+            vl.FormGroupStyle = FormGroupStyle.None;
+            vl.PlaceholderLabels = true;
             vl.LabelHtmlProps["style"] = "width:100px";
-            vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject";
+            vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject form-control";
         })
         @Html.ValueLine(ec, e => e.Text, vl =>
         {
-            vl.LabelVisible = false;
+            vl.FormGroupStyle = FormGroupStyle.None;
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
             vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";

@@ -155,7 +155,7 @@ WriteLiteral("        ");
             #line 23 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
    Write(Html.ValueLine(ec, e => e.Text, vl =>
         {
-            vl.LabelVisible = false;
+            vl.FormGroupStyle = FormGroupStyle.None;
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
             vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";

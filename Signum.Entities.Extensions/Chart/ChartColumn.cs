@@ -44,10 +44,10 @@ namespace Signum.Entities.Chart
 
         public void SetDefaultParameters()
         {
-            var t = token.TryCC(tk => tk.Token);
-            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(t));
-            Parameter2 = scriptColumn.Parameter2.TryCC(a => a.DefaultValue(t));
-            Parameter3 = scriptColumn.Parameter3.TryCC(a => a.DefaultValue(t));
+            var t = token.Try(tk => tk.Token);
+            Parameter1 = scriptColumn.Parameter1.Try(a => a.DefaultValue(t));
+            Parameter2 = scriptColumn.Parameter2.Try(a => a.DefaultValue(t));
+            Parameter3 = scriptColumn.Parameter3.Try(a => a.DefaultValue(t));
         }
 
         QueryTokenDN token;
@@ -56,7 +56,7 @@ namespace Signum.Entities.Chart
             get { return token; }
             set
             {
-                if (Set(ref token, value, () => Token))
+                if (Set(ref token, value))
                     TokenChanged();
             }
         }
@@ -64,11 +64,11 @@ namespace Signum.Entities.Chart
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())); }
+            get { return displayName ?? Token.Try(t => t.Token.Try(tt => tt.NiceName())); }
             set
             {
-                var name = value == Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())) ? null : value;
-                Set(ref displayName, name, () => DisplayName);
+                var name = value == Token.Try(t => t.Token.Try(tt => tt.NiceName())) ? null : value;
+                Set(ref displayName, name);
             }
         }
 
@@ -78,7 +78,7 @@ namespace Signum.Entities.Chart
         public string Parameter1
         {
             get { return parameter1; }
-            set { if (Set(ref parameter1, value, () => Parameter1))NotifyChange(false); }
+            set { if (Set(ref parameter1, value))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -87,7 +87,7 @@ namespace Signum.Entities.Chart
         public string Parameter2
         {
             get { return parameter2; }
-            set { if (Set(ref parameter2, value, () => Parameter2))NotifyChange(false); }
+            set { if (Set(ref parameter2, value))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -96,14 +96,14 @@ namespace Signum.Entities.Chart
         public string Parameter3
         {
             get { return parameter3; }
-            set { if (Set(ref parameter3, value, () => Parameter3))NotifyChange(false); }
+            set { if (Set(ref parameter3, value))NotifyChange(false); }
         }
 
         int index;
         public int Index
         {
             get { return index; }
-            set { Set(ref index, value, () => Index); }
+            set { Set(ref index, value); }
         }
       
         [Ignore]
@@ -225,14 +225,14 @@ namespace Signum.Entities.Chart
                 return null;
 
             if (parameter == null && description != null)
-                return description.DefaultValue(Token.TryCC(t => t.Token));
+                return description.DefaultValue(Token.Try(t => t.Token));
 
             return parameter;
         }
 
         public string GetTitle()
         {
-            var unit = Token.TryCC(a=>a.Token.Unit);
+            var unit = Token.Try(a=>a.Token.Unit);
 
             return DisplayName + (unit.HasText() ? " ({0})".Formato(unit) : null);
         }
@@ -265,11 +265,11 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = element.Attribute("Token").TryCC(a => new QueryTokenDN(a.Value));
-            DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
-            Parameter1 = element.Attribute("Parameter1").TryCC(a => a.Value);
-            Parameter2 = element.Attribute("Parameter2").TryCC(a => a.Value);
-            Parameter3 = element.Attribute("Parameter3").TryCC(a => a.Value);
+            Token = element.Attribute("Token").Try(a => new QueryTokenDN(a.Value));
+            DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
+            Parameter1 = element.Attribute("Parameter1").Try(a => a.Value);
+            Parameter2 = element.Attribute("Parameter2").Try(a => a.Value);
+            Parameter3 = element.Attribute("Parameter3").Try(a => a.Value);
         }
 
         public override string ToString()

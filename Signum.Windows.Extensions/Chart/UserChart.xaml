@@ -10,7 +10,7 @@
     <StackPanel>
         <m:EntityLine m:Common.Route="Query" m:Common.IsReadOnly="True" />
         <m:ValueLine m:Common.Route="DisplayName"/>
-        <m:EntityLine m:Common.Route="Related"  />
+        <m:EntityLine m:Common.Route="Owner"  />
         <m:EntityLine m:Common.Route="EntityType" AutoCompleting="EntityType_AutoCompleting" Find="False" />
         <TextBox Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}" IsReadOnly="True" x:Name="tbCurrentEntity" BorderThickness="0" Background="{x:Null}"/>
         <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" MinHeight="100">

@@ -16,7 +16,7 @@ namespace Signum.Entities.Disconnected
         public DateTime CreationDate
         {
             get { return creationDate; }
-            private set { Set(ref creationDate, value, () => CreationDate); }
+            private set { Set(ref creationDate, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -25,28 +25,28 @@ namespace Signum.Entities.Disconnected
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         DisconnectedMachineState state;
         public DisconnectedMachineState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         int seedMin;
         public int SeedMin
         {
             get { return seedMin; }
-            set { Set(ref seedMin, value, () => SeedMin); }
+            set { Set(ref seedMin, value); }
         }
 
         int seedMax;
         public int SeedMax
         {
             get { return seedMax; }
-            set { Set(ref seedMax, value, () => SeedMax); }
+            set { Set(ref seedMax, value); }
         }
 
         static Expression<Func<DisconnectedMachineDN, string>> ToStringExpression = e => e.machineName;
@@ -88,14 +88,14 @@ namespace Signum.Entities.Disconnected
         public long? LastOnlineTicks
         {
             get { return lastOnlineTicks; }
-            set { Set(ref lastOnlineTicks, value, () => LastOnlineTicks); }
+            set { Set(ref lastOnlineTicks, value); }
         }
 
         Lite<DisconnectedMachineDN> disconnectedMachine;
         public Lite<DisconnectedMachineDN> DisconnectedMachine
         {
             get { return disconnectedMachine; }
-            set { Set(ref disconnectedMachine, value, () => DisconnectedMachine); }
+            set { Set(ref disconnectedMachine, value); }
         }
     }
 

@@ -12,21 +12,21 @@ namespace Signum.Entities.Authorization
         public decimal Days
         {
             get { return days; }
-            set { Set(ref days, value, () => Days); }
+            set { Set(ref days, value); }
         }
 
         decimal daysWarning;
         public decimal DaysWarning
         {
             get { return daysWarning; }
-            set { Set(ref daysWarning, value, () => DaysWarning); }
+            set { Set(ref daysWarning, value); }
         }
 
         bool enabled;
         public bool Enabled
         {
             get { return enabled; }
-            set { Set(ref enabled, value, () => Enabled); }
+            set { Set(ref enabled, value); }
         }
     }
 

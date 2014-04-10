@@ -27,12 +27,15 @@ namespace Signum.Web.Chart
 
             html = html.Concat(Icon());
             
-            if (result.QueryNameMatch != null)
-                html = new HtmlTag("a")
-                    .Attr("href", RouteHelper.New().Action("Index", "Chart", new { webQueryName = Navigator.ResolveWebQueryName(result.QueryName) }))
-                    .InnerHtml(html);
-                
             return html;
+        }
+
+        public override string GetUrl(ChartOmniboxResult result)
+        {
+            if (result.QueryNameMatch != null)
+                return RouteHelper.New().Action("Index", "Chart", new { webQueryName = Navigator.ResolveWebQueryName(result.QueryName) });
+
+            return null;
         }
 
         public override MvcHtmlString Icon()

@@ -4,21 +4,10 @@
 @using Signum.Web.Chart
 @model TypeContext<ChartScriptDN>
 @Html.ScriptCss(
-    "~/Content/CodeMirror/codemirror.css",
-    "~/Content/CodeMirror/dialog.css",
-    "~/Content/CodeMirror/simple-hint.css")
-@Html.ScriptsJs(
-        "~/Scripts/CodeMirror/codemirror.js",
-        "~/Scripts/CodeMirror/javascript.js",
-        "~/Scripts/CodeMirror/formatting.js",
-        "~/Scripts/CodeMirror/searchcursor.js",
-        "~/Scripts/CodeMirror/show-hint.js",
-        "~/Scripts/CodeMirror/javascript-hint.js",
-        "~/Scripts/CodeMirror/match-highlighter.js",
-        "~/Scripts/CodeMirror/search.js",
-        "~/Scripts/CodeMirror/dialog.js",
-        "~/Scripts/CodeMirror/fullscreen.js"
-        )
+    "~/Libs/CodeMirror/lib/codemirror.css",
+    "~/Libs/CodeMirror/addon/dialog/dialog.css",
+    "~/Libs/CodeMirror/addon/display/fullscreen.css",
+    "~/Libs/CodeMirror/addon/hint/show-hint.css")
     <style type="text/css">
       .CodeMirror {
         border: 1px solid #eee;
@@ -30,19 +19,12 @@
       }
       .CodeMirror-focused span.CodeMirror-matchhighlight 
       { 
-          background: #efe7ff; !important 
+          background: #efe7ff !important 
       }
       
       .exceptionLine {background: #FFFF00 !important;}
-      
-     .CodeMirror-fullscreen {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          height: auto;
-          z-index: 9;
-        }
     </style>
-    <pre style="color: Green">
+    <pre style="color: Green; overflow-wrap: inherit;">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //var data = { 
 //              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
@@ -59,10 +41,24 @@
 // use 'debugger' keyword or just throw JSON.stringify(myVariable)
 // All yours!...
  </pre>
-    @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; })
+    @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.FormGroupStyle = FormGroupStyle.None; })
  
     <script>
-        require(["@ChartClient.ModuleScript"], function (ChartScript) {
-            ChartScript.init($("#@(Model.Compose("Script"))"));
+        require(["@ChartClient.ModuleScript",
+            "Libs/CodeMirror/lib/codemirror",
+            "Libs/CodeMirror/mode/javascript/javascript",
+            "Libs/CodeMirror/addon/comment/comment",
+            "Libs/CodeMirror/addon/comment/continuecomment",
+            "Libs/CodeMirror/addon/dialog/dialog",
+            "Libs/CodeMirror/addon/display/fullscreen",
+            "Libs/CodeMirror/addon/edit/closebrackets",
+            "Libs/CodeMirror/addon/edit/matchbrackets",
+            "Libs/CodeMirror/addon/hint/show-hint",
+            "Libs/CodeMirror/addon/hint/javascript-hint",
+            "Libs/CodeMirror/addon/search/match-highlighter",
+            "Libs/CodeMirror/addon/search/search",
+            "Libs/CodeMirror/addon/search/searchcursor",
+        ], function (ChartScript, CodeMirror) {
+            ChartScript.init($("#@(Model.Compose("Script"))"), CodeMirror);
         }); 
     </script>

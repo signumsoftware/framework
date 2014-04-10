@@ -349,7 +349,7 @@ namespace Signum.Engine.SMS
                                 select new Combination
                                 {
                                     Name = m.Groups["name"].Value,
-                                    Value = t.GetProperty(m.Groups["name"].Value).TryCC(fi => fi.GetValue(o, null)).TryToString()
+                                    Value = t.GetProperty(m.Groups["name"].Value).Try(fi => fi.GetValue(o, null)).TryToString()
                                 }).ToList();
 
             return CombineText(template, templateMessage, combinations);

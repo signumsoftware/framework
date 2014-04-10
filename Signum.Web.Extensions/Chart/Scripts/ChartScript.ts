@@ -1,7 +1,5 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 
-declare var CodeMirror: any;
-
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
@@ -9,11 +7,12 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 import Files = require("Extensions/Signum.Web.Extensions/Files/Scripts/Files")
 
-export function init($textArea: JQuery) {
+export function init($textArea: JQuery, CodeMirror: any) {
 
     var changedDelay;
 
     var editor = CodeMirror.fromTextArea($textArea[0], {
+        highlightSelectionMatches: true,
         lineNumbers: true,
         matchBrackets: true,
         mode: "javascript",
@@ -28,19 +27,16 @@ export function init($textArea: JQuery) {
             "Esc": function (cm) {
                 if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
             }
-        },
-        onCursorActivity: function () {
-            editor.matchHighlight("CodeMirror-matchhighlight");
-        },
-        onChange: function () {
-            editor.save();
-            if (opener != null && opener != undefined) {
-                clearTimeout(changedDelay);
-                changedDelay = setTimeout(updatePreview, 150);
-            }
         }
     });
 
+    editor.on("change", function () {
+        editor.save();
+        if (opener != null && opener != undefined) {
+            clearTimeout(changedDelay);
+            changedDelay = setTimeout(updatePreview, 150);
+        }
+    });
 
     function updatePreview() {
         opener.changeTextArea($textArea.val(), $("#sfRuntimeInfo").val());
@@ -54,9 +50,9 @@ export function init($textArea: JQuery) {
         if (number != null) {
             clearTimeout(exceptionDelay);
             if (hlLine != null)
-                editor.setLineClass(hlLine, null, null);
+                editor.removeLineClass(hlLine, null, null);
             if (number != -1)
-                hlLine = editor.setLineClass(number - 1, null, "exceptionLine");
+                hlLine = editor.addLineClass(number - 1, null, "exceptionLine");
         }
     }
 

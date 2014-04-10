@@ -113,7 +113,7 @@
     <Member Name="NotAuthorizedToRetrieve0" Description="No autorizado para recuperar '{0}'" />
     <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
     <Member Name="NotUserLogged" Description="Ningún usuario logado" />
-    <Member Name="Password" Description="Contraseña:" />
+    <Member Name="Password" Description="Contraseña" />
     <Member Name="PasswordChanged" Description="Contraseña cambiada" />
     <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado con éxito" />
@@ -127,7 +127,6 @@
     <Member Name="RememberMe" Description="Recordarme" />
     <Member Name="ResetPassword" Description="Restablecer contraseña" />
     <Member Name="ResetPasswordCode" Description="Código para restablecer la contraseña" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Se ha enviado a su cuenta de correo un código para restablecer su contraseña" />
     <Member Name="ResetPasswordSuccess" Description="Su contraseña ha sido modificada con éxito" />
     <Member Name="Save" Description="Guardar" />
     <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="El código de confirmación proporcionado es inválido" />

@@ -1,5 +1,4 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 /// <reference path="ChartUtils.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -7,8 +6,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, d3) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
     ChartUtils;
+    colorbrewer;
 
     function openChart(prefix, url) {
         Finder.getFor(prefix).then(function (sc) {
@@ -74,7 +74,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $(document).on("click", ".sf-chart-img", function () {
                 var $this = $(this);
-                $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
+                $this.closest(".sf-chart-type").find(".sf-chart-type-value").val($this.attr("data-related"));
 
                 var $resultsContainer = self.$chartControl.find(".sf-search-results-container");
                 if ($this.hasClass("sf-chart-img-equiv")) {
@@ -111,23 +111,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(document).on("click", ".sf-chart-draw", function (e) {
                 e.preventDefault();
                 var $this = $(this);
-                $.ajax({
+                SF.ajaxPost({
                     url: $this.attr("data-url"),
-                    data: self.requestData(),
-                    success: function (result) {
-                        if (typeof result === "object") {
-                            if (typeof result.ModelState != "undefined") {
-                                var modelState = result.ModelState;
-                                Validator.showErrors({}, modelState);
-                                SF.Notify.error(lang.signum.error, 2000);
-                            }
-                        } else {
-                            Validator.showErrors({}, null);
-                            self.$chartControl.find(".sf-search-results-container").html(result);
-                            SF.triggerNewContent(self.$chartControl.find(".sf-search-results-container"));
-                            self.initOrders();
-                            self.reDraw();
+                    data: self.requestData()
+                }).then(function (result) {
+                    if (typeof result === "object") {
+                        if (typeof result.ModelState != "undefined") {
+                            var modelState = result.ModelState;
+                            Validator.showErrors({}, modelState);
+                            SF.Notify.error(lang.signum.error, 2000);
                         }
+                    } else {
+                        Validator.showErrors({}, null);
+                        self.$chartControl.find(".sf-search-results-container").html(result);
+                        self.initOrders();
+                        self.reDraw();
                     }
                 });
             });
@@ -183,14 +181,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var self = this;
             $.ajax({
                 url: $chartBuilder.attr("data-url"),
-                data: data,
-                success: function (result) {
-                    $chartBuilder.replaceWith(result);
-                    SF.triggerNewContent(self.$chartControl.find(".sf-chart-builder"));
-                    if (self.reDrawOnUpdateBuilder) {
-                        self.reDraw();
-                        self.reDrawOnUpdateBuilder = false;
-                    }
+                data: data
+            }).then(function (result) {
+                $chartBuilder.replaceWith(result);
+                if (self.reDrawOnUpdateBuilder) {
+                    self.reDraw();
+                    self.reDrawOnUpdateBuilder = false;
                 }
             });
         };
@@ -320,13 +316,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         ChartBuilder.prototype.initOrders = function () {
             var self = this;
-            $(this.pf("tblResults") + " th").mousedown(function (e) {
-                this.onselectstart = function () {
-                    return false;
-                };
-                return false;
-            }).click(function (e) {
-                self.newSortOrder($(e.target), e.shiftKey);
+            $(this.pf("tblResults")).on("click", "th", function (e) {
+                self.newSortOrder($(this), e.shiftKey);
                 self.$chartControl.find(".sf-chart-draw").click();
                 return false;
             });

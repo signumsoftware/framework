@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
         public Lite<IdentifiableEntity> Related
         {
             get { return related; }
-            set { SetToStr(ref related, value, () => Related); }
+            set { SetToStr(ref related, value); }
         }
 
         [NotNullable]
@@ -26,7 +26,7 @@ namespace Signum.Entities.Chart
         public ColorDN Color
         {
             get { return color; }
-            set { SetToStr(ref color, value, () => Color); }
+            set { SetToStr(ref color, value); }
         }
 
         public override string ToString()
@@ -47,7 +47,7 @@ namespace Signum.Entities.Chart
         public TypeDN Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         [NotNullable]
@@ -55,7 +55,7 @@ namespace Signum.Entities.Chart
         public MList<ChartColorDN> Colors
         {
             get { return colors; }
-            set { Set(ref colors, value, () => Colors); }
+            set { Set(ref colors, value); }
         }
 
         public override string ToString()

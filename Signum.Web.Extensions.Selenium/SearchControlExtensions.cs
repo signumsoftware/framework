@@ -13,24 +13,24 @@ namespace Signum.Web.Selenium
     {
         public static SearchPopupProxy AdministerExcelReports(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("tmExcel", "qbReportAdminister"));
+            sc.Selenium.Click(sc.MenuOptionLocator("qbReportAdminister"));
             return new SearchPopupProxy(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static PopupControl<ExcelReportDN> CreateExcelReport(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("tmExcel", "qbReportCreate"));
+            sc.Selenium.Click(sc.MenuOptionLocator("qbReportCreate"));
             return new PopupControl<ExcelReportDN>(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static string ExcelReportLocator(this SearchControlProxy sc, string title)
         {
-            return sc.MenuOptionLocatorByAttr("tmExcel", "title='{0}'".Formato(title));
+            return sc.MenuOptionLocatorByAttr("title='{0}'".Formato(title));
         }
 
         public static NormalPage<UserQueryDN> NewUserQuery(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("tmUserQueries", "qbUserQueryNew"));
+            sc.Selenium.Click(sc.MenuOptionLocator("qbUserQueryNew"));
             sc.Selenium.WaitForPageToLoad();
 
             return new NormalPage<UserQueryDN>(sc.Selenium); 
@@ -38,7 +38,7 @@ namespace Signum.Web.Selenium
 
         public static NormalPage<UserQueryDN> EditUserQuery(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("tmUserQueries", "qbUserQueryEdit"));
+            sc.Selenium.Click(sc.MenuOptionLocator("qbUserQueryEdit"));
             sc.Selenium.WaitForPageToLoad();
 
             return new NormalPage<UserQueryDN>(sc.Selenium);
@@ -46,13 +46,13 @@ namespace Signum.Web.Selenium
 
         public static string UserQueryLocator(this SearchControlProxy sc, string title)
         {
-            return sc.MenuOptionLocatorByAttr("tmUserQueries", "title='{0}'".Formato(title));
+            return sc.MenuOptionLocatorByAttr("title='{0}'".Formato(title));
         }
 
         public static void UserQueryLocatorClick(this SearchControlProxy sc, string title)
         {
             sc.Selenium.Click(sc.UserQueryLocator(title));
-            sc.Selenium.WaitElementPresent(sc.MenuOptionLocator("tmUserQueries", "qbUserQueryEdit"));
+            sc.Selenium.WaitElementPresent(sc.MenuOptionLocator("qbUserQueryEdit"));
         }
     }
 }

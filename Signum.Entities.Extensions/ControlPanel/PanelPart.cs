@@ -9,17 +9,18 @@ using Signum.Entities.Chart;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Xml.Linq;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.ControlPanel
 {
     [Serializable]
-    public class PanelPartDN : EmbeddedEntity
+    public class PanelPartDN : EmbeddedEntity, IGridEntity
     {
         string title;
         public string Title
         {
             get { return title; }
-            set { Set(ref title, value, () => Title); }
+            set { Set(ref title, value); }
         }
 
         int row;
@@ -27,15 +28,30 @@ namespace Signum.Entities.ControlPanel
         public int Row
         {
             get { return row; }
-            set { Set(ref row, value, () => Row); }
+            set { Set(ref row, value); }
         }
 
-        int column;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
-        public int Column
+        int startColumn;
+        [NumberBetweenValidator(0, 11)]
+        public int StartColumn
         {
-            get { return column; }
-            set { Set(ref column, value, () => Column); }
+            get { return startColumn; }
+            set { Set(ref startColumn, value); }
+        }
+
+        int columns;
+        [NumberBetweenValidator(1, 12)]
+        public int Columns
+        {
+            get { return columns; }
+            set { Set(ref columns, value); }
+        }
+
+        PanelStyle style;
+        public PanelStyle Style
+        {
+            get { return style; }
+            set { Set(ref style, value); }
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
@@ -43,7 +59,7 @@ namespace Signum.Entities.ControlPanel
         public IPartDN Content
         {
             get { return content; }
-            set { Set(ref content, value, () => Content); }
+            set { Set(ref content, value); }
         }
 
         public override string ToString()
@@ -56,7 +72,7 @@ namespace Signum.Entities.ControlPanel
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
-                    return  ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
+                    return ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
@@ -66,8 +82,8 @@ namespace Signum.Entities.ControlPanel
         {
             return new PanelPartDN
             {
-                Column = Column,
-                Row = Row,
+                Columns = Columns,
+                StartColumn = StartColumn,
                 Content = content.Clone(),
                 Title = Title
             };
@@ -75,15 +91,16 @@ namespace Signum.Entities.ControlPanel
 
         internal void NotifyRowColumn()
         {
-            Notify(() => Row);
-            Notify(() => Column);
+            Notify(() => StartColumn);
+            Notify(() => Columns);
         }
 
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Part",
                 new XAttribute("Row", Row),
-                new XAttribute("Column", Column),
+                new XAttribute("StartColumn", StartColumn),
+                new XAttribute("Columns", Columns),
                 Title == null ? null : new XAttribute("Title", Title),
                 Content.ToXml(ctx));
         }
@@ -91,10 +108,33 @@ namespace Signum.Entities.ControlPanel
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
             Row = int.Parse(x.Attribute("Row").Value);
-            Column = int.Parse(x.Attribute("Column").Value);
-            Title = x.Attribute("Title").TryCC(a => a.Value);
+            StartColumn = int.Parse(x.Attribute("StartColumn").Value);
+            Columns = int.Parse(x.Attribute("Columns").Value);
+            Title = x.Attribute("Title").Try(a => a.Value);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
+
+        internal Interval<int> ColumnInterval()
+        {
+            return new Interval<int>(this.StartColumn, this.StartColumn + this.Columns);
+        }
+    }
+
+    public enum PanelStyle
+    {
+        Default,
+        Primary,
+        Success,
+        Info,
+        Warning,
+        Danger
+    }
+
+    public interface IGridEntity
+    {
+        int Row { get; set; }
+        int StartColumn { get; set; }
+        int Columns { get; set; }
     }
 
     public interface IPartDN : IIdentifiable
@@ -115,7 +155,7 @@ namespace Signum.Entities.ControlPanel
         public UserQueryDN UserQuery
         {
             get { return userQuery; }
-            set { Set(ref userQuery, value, () => UserQuery); }
+            set { Set(ref userQuery, value); }
         }
 
         public override string ToString()
@@ -144,7 +184,7 @@ namespace Signum.Entities.ControlPanel
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));          
+            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
 
@@ -157,14 +197,14 @@ namespace Signum.Entities.ControlPanel
         public UserChartDN UserChart
         {
             get { return userChart; }
-            set { Set(ref userChart, value, () => UserChart); }
+            set { Set(ref userChart, value); }
         }
 
         bool showData = false;
         public bool ShowData
         {
             get { return showData; }
-            set { Set(ref showData, value, () => ShowData); }
+            set { Set(ref showData, value); }
         }
 
         public override string ToString()
@@ -203,11 +243,11 @@ namespace Signum.Entities.ControlPanel
     public class CountSearchControlPartDN : Entity, IPartDN
     {
         [NotNullable]
-        MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
-        public MList<CountUserQueryElement> UserQueries
+        MList<CountUserQueryElementDN> userQueries = new MList<CountUserQueryElementDN>();
+        public MList<CountUserQueryElementDN> UserQueries
         {
             get { return userQueries; }
-            set { Set(ref userQueries, value, () => UserQueries); }
+            set { Set(ref userQueries, value); }
         }
 
         public override string ToString()
@@ -224,7 +264,7 @@ namespace Signum.Entities.ControlPanel
         {
             return new CountSearchControlPartDN
             {
-                UserQueries = this.UserQueries.Select(e=>e.Clone()).ToMList(),
+                UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
             };
         }
 
@@ -241,13 +281,13 @@ namespace Signum.Entities.ControlPanel
     }
 
     [Serializable]
-    public class CountUserQueryElement : EmbeddedEntity
+    public class CountUserQueryElementDN : EmbeddedEntity
     {
         string label;
         public string Label
         {
-            get { return label ?? UserQuery.TryCC(uq => uq.DisplayName); }
-            set { Set(ref label, value, () => Label); }
+            get { return label ?? UserQuery.Try(uq => uq.DisplayName); }
+            set { Set(ref label, value); }
         }
 
         UserQueryDN userQuery;
@@ -255,18 +295,18 @@ namespace Signum.Entities.ControlPanel
         public UserQueryDN UserQuery
         {
             get { return userQuery; }
-            set { Set(ref userQuery, value, () => UserQuery); }
+            set { Set(ref userQuery, value); }
         }
 
         string href;
         public string Href
         {
             get { return href; }
-            set { Set(ref href, value, () => Href); }
+            set { Set(ref href, value); }
         }
-        public CountUserQueryElement Clone()
+        public CountUserQueryElementDN Clone()
         {
-            return new CountUserQueryElement
+            return new CountUserQueryElementDN
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -284,8 +324,8 @@ namespace Signum.Entities.ControlPanel
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Label = element.Attribute("Label").TryCC(a => a.Value);
-            Href = element.Attribute("Href").TryCC(a => a.Value);
+            Label = element.Attribute("Label").Try(a => a.Value);
+            Href = element.Attribute("Href").Try(a => a.Value);
             UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
@@ -294,16 +334,16 @@ namespace Signum.Entities.ControlPanel
     public class LinkListPartDN : Entity, IPartDN
     {
         [NotNullable]
-        MList<LinkElement> links = new MList<LinkElement>();
-        public MList<LinkElement> Links
+        MList<LinkElementDN> links = new MList<LinkElementDN>();
+        public MList<LinkElementDN> Links
         {
             get { return links; }
-            set { Set(ref links, value, () => Links); }
+            set { Set(ref links, value); }
         }
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
+            return "{0} {1}".Formato(links.Count, typeof(LinkElementDN).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -333,27 +373,28 @@ namespace Signum.Entities.ControlPanel
     }
 
     [Serializable]
-    public class LinkElement : EmbeddedEntity
+    public class LinkElementDN : EmbeddedEntity
     {
         string label;
         [NotNullValidator]
         public string Label
         {
             get { return label; }
-            set { Set(ref label, value, () => Label); }
+            set { Set(ref label, value); }
         }
 
+        [SqlDbType(Size = int.MaxValue)]
         string link;
         [URLValidator, NotNullValidator]
         public string Link
         {
             get { return link; }
-            set { Set(ref link, value, () => Link); }
+            set { Set(ref link, value); }
         }
 
-        public LinkElement Clone()
+        public LinkElementDN Clone()
         {
-            return new LinkElement
+            return new LinkElementDN
             {
                 Label = this.Label,
                 Link = this.Link

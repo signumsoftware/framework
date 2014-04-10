@@ -62,7 +62,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, () => FileName); }
+            set { SetToStr(ref fileName, value); }
         }
 
         [NotNullable]
@@ -71,12 +71,12 @@ namespace Signum.Entities.Files
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { SetToStr(ref binaryFile, value, () => BinaryFile); }
+            set { SetToStr(ref binaryFile, value); }
         }
         
         public override string ToString()
         {
-            return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".Formato(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         

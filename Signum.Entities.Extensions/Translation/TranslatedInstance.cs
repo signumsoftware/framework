@@ -16,7 +16,7 @@ namespace Signum.Entities.Translation
         public CultureInfoDN Culture
         {
             get { return culture; }
-            set { Set(ref culture, value, () => Culture); }
+            set { Set(ref culture, value); }
         }
 
         [ImplementedByAll]
@@ -25,7 +25,7 @@ namespace Signum.Entities.Translation
         public Lite<IdentifiableEntity> Instance
         {
             get { return instance; }
-            set { Set(ref instance, value, () => Instance); }
+            set { Set(ref instance, value); }
         }
 
         [NotNullable]
@@ -34,7 +34,7 @@ namespace Signum.Entities.Translation
         public PropertyRouteDN PropertyRoute
         {
             get { return propertyRoute; }
-            set { Set(ref propertyRoute, value, () => PropertyRoute); }
+            set { Set(ref propertyRoute, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -43,7 +43,7 @@ namespace Signum.Entities.Translation
         public string TranslatedText
         {
             get { return translatedText; }
-            set { Set(ref translatedText, value, () => TranslatedText); }
+            set { Set(ref translatedText, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -52,7 +52,7 @@ namespace Signum.Entities.Translation
         public string OriginalText
         {
             get { return originalText; }
-            set { Set(ref originalText, value, () => OriginalText); }
+            set { Set(ref originalText, value); }
         }
 
         public override string ToString()

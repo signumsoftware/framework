@@ -90,7 +90,7 @@ namespace Signum.Engine.Help
 
             XElement element = HelpLogic.LoadAndValidate(FileName).Element(_Entity);
 
-            Description = element.Element(_Description).TryCC(d => d.Value);
+            Description = element.Element(_Description).Try(d => d.Value);
 
             var ps = element.Element(_Properties);
             if (ps != null)
@@ -131,7 +131,7 @@ namespace Signum.Engine.Help
                 }
             };
 
-            created.Description = syncContent(loadedEntity.Element(_Description).TryCC(a => a.Value));
+            created.Description = syncContent(loadedEntity.Element(_Description).Try(a => a.Value));
 
             HelpTools.SynchronizeElements(loadedEntity, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
                 (ph, elem) => ph.UserDescription = syncContent(elem.Value),
@@ -322,7 +322,7 @@ namespace Signum.Engine.Help
             if (document.Root.Name != _Entity)
                 throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Entity));
 
-            var result = document.Root.Attribute(_FullName).TryCC(a => a.Value);
+            var result = document.Root.Attribute(_FullName).Try(a => a.Value);
 
             if (string.IsNullOrEmpty(result))
                 throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _FullName));

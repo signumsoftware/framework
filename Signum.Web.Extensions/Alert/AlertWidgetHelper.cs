@@ -36,105 +36,87 @@ namespace Signum.Web.Alerts
             });
         }
 
-        public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
+        public static Widget CreateWidget(WidgetContext ctx)
         {
-            if (identifiable == null || identifiable.IsNew || identifiable is AlertDN)
-                return null;         
+            var ident = (IdentifiableEntity)ctx.Entity;
+
+            var url = RouteHelper.New().Action((AlertController ac) => ac.AlertsCount());
 
             var alertList = new[]
             {
-                new { Count = CountAlerts(identifiable.ToLite(), "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
-                new { Count = CountAlerts(identifiable.ToLite(), "Alerted"), Property = "Alerted", AlertClass = "sf-alert-alerted", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
-                new { Count = CountAlerts(identifiable.ToLite(), "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
+                new { Count = CountAlerts(ident.ToLite(), "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
+                new { Count = CountAlerts(ident.ToLite(), "Alerted"), Property = "Alerted", AlertClass = "sf-alert-alerted", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
+                new { Count = CountAlerts(ident.ToLite(), "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 
-            var options = new FindOptions
+            var items = alertList.Select(a => new MenuItem
+            {
+                OnClick = new JsFunction(AlertClient.Module, "exploreAlerts", ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts"), url),
+                CssClass = "sf-alert-view",
+                Html = 
+                new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()).ToHtml().Concat(
+                new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))
+            }).Cast<IMenuItem>().ToList();
+
+            items.Add(new MenuItemSeparator());
+
+            items.Add(new MenuItem
+            {
+                CssClass = "sf-alert-create",
+                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity), url),
+                Text = AlertMessage.CreateAlert.NiceToString(),
+            }); 
+
+            HtmlStringBuilder label = new HtmlStringBuilder();
+            int count = alertList.Length;
+            for(int i = 0; i < count; i++)
+            {
+                var a = alertList[i];
+                    
+                label.Add(new HtmlTag("span")
+                    .Class("sf-widget-count")
+                    .Class(a.AlertClass)
+                    .Class(a.Count > 0 ? "sf-alert-active" : null)
+                    .SetInnerText(a.Count.ToString())
+                    .Attr("title", a.Title)
+                    .ToHtml());
+
+                if (i < count - 1)
+                {
+                    label.Add(new HtmlTag("span")
+                        .Class("sf-alerts-count-separator")
+                        .SetInnerText(" - ")
+                        .ToHtml());
+                }
+            }
+
+            return new Widget
+            {
+                Title = AlertMessage.Alerts.NiceToString(),
+                IconClass = "glyphicon glyphicon-bell",
+                Class = "sf-alerts-toggler",
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "alertsWidget"),
+                Active = alertList.Any(a => a.Count > 0),
+                Html = label.ToHtml(),
+                Items = items,
+            };
+        }
+
+        private static FindOptions GetFindOptions(IdentifiableEntity ident, string property)
+        {
+            return new FindOptions
             {
                 QueryName = typeof(AlertDN),
                 Create = false,
                 SearchOnLoad = true,
-                FilterMode = FilterMode.Hidden,
+                ShowFilters = false,
                 FilterOptions = 
                 { 
-                    new FilterOption("Target", identifiable.ToLite()),
-                    //new FilterOption("Entity." + fieldToFilter, true),
+                    new FilterOption("Target", ident.ToLite()),
+                    new FilterOption("Entity." + property, true),
                 },
                 ColumnOptions = { new ColumnOption("Target") },
                 ColumnOptionsMode = ColumnOptionsMode.Remove,
-            }.ToJS(TypeContextUtilities.Compose(prefix, "New"));
-
-            HtmlStringBuilder content = new HtmlStringBuilder();
-
-            using (content.Surround(new HtmlTag("ul")
-                .Attr("data-url",RouteHelper.New().Action((AlertController ac)=>ac.AlertsCount()))
-                .Attr("data-findOptions", options.ToString())
-                .Class("sf-menu-button sf-widget-content sf-alerts")))
-            {
-                foreach (var a in alertList)
-                {
-                    using (content.Surround(new HtmlTag("li").Class("sf-alert")))
-                    {
-                        content.AddLine(new HtmlTag("a")
-                            .Class("sf-alert-view")
-                            .Attr("onclick", new JsFunction(AlertClient.Module, "exploreAlerts", prefix, a.Property).ToString())
-                            .InnerHtml(
-                            new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()),
-                            new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))
-                            .ToHtml());
-                    }
-                }
-
-                content.Add(new HtmlTag("hr").ToHtmlSelf());
-
-                using (content.Surround(new HtmlTag("li").Class("sf-alert")))
-                {
-                    content.AddLine(new HtmlTag("a")
-                       .Class("sf-alert-create")
-                       .Attr("onclick", new JsFunction(AlertClient.Module, "createAlert", prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity)).ToString())
-                       .InnerHtml(AlertMessage.CreateAlert.NiceToString().EncodeHtml())
-                       .ToHtml());
-                }
-            }
-
-            HtmlStringBuilder label = new HtmlStringBuilder();
-            var toggler = new HtmlTag("a")
-                .Class("sf-widget-toggler sf-alerts-toggler")
-                .Attr("title", AlertMessage.Alerts.NiceToString());
-            using (label.Surround(toggler))
-            {
-                label.Add(new HtmlTag("span")
-                    .Class("ui-icon ui-icon-calendar")
-                    .InnerHtml(NoteMessage.Notes.NiceToString().EncodeHtml())
-                    .ToHtml());
-
-                int count = alertList.Length;
-                for(int i = 0; i < count; i++)
-                {
-                    var a = alertList[i];
-                    
-                    label.Add(new HtmlTag("span")
-                        .Class("sf-widget-count")
-                        .Class(a.AlertClass)
-                        .Class(a.Count > 0 ? "sf-alert-active" : null)
-                        .SetInnerText(a.Count.ToString())
-                        .Attr("title", a.Title)
-                        .ToHtml());
-
-                    if (i < count - 1)
-                    {
-                        label.Add(new HtmlTag("span")
-                            .Class("sf-alerts-count-separator")
-                            .SetInnerText(" - ")
-                            .ToHtml());
-                    }
-                }
-            }
-
-            return new WidgetItem
-            {
-                Id = TypeContextUtilities.Compose(prefix, "alertsWidget"),
-                Label = label.ToHtml(),
-                Content = content.ToHtml()
             };
         }
     }

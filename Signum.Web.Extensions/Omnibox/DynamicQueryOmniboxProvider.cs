@@ -70,6 +70,20 @@ namespace Signum.Web.Omnibox
                         html = html.Concat(ColoredSpan(DynamicQueryOmniboxResultGenerator.ToStringValue(item.Value), "gray"));
                 }
 
+                            
+            } 
+
+            html = html.Concat(Icon());
+
+            return html;
+        }
+
+        public override string GetUrl(DynamicQueryOmniboxResult result)
+        {
+            FindOptions findOptions = new FindOptions(result.QueryName);
+
+            foreach (var item in result.Filters)
+            {
                 if (item.QueryToken != null && item.Operation != null && item.Value != DynamicQueryOmniboxResultGenerator.UnknownValue)
                 {
                     if (findOptions.FilterOptions == null)
@@ -79,17 +93,14 @@ namespace Signum.Web.Omnibox
                     if (item.Operation != null)
                         filter.Operation = item.Operation.Value;
 
-                    findOptions.FilterOptions.Add(filter);    
-                }                
-            } 
+                    findOptions.FilterOptions.Add(filter);
+                }
+            }
 
-            html = html.Concat(Icon());
+            if (findOptions.FilterOptions.Any())
+                findOptions.SearchOnLoad = true;
 
-            html = new HtmlTag("a")
-                    .Attr("href", findOptions.ToString())
-                    .InnerHtml(html).ToHtml();
-
-            return html;
+            return findOptions.ToString();
         }
         
         public override MvcHtmlString Icon()

@@ -104,18 +104,18 @@ namespace Signum.Engine.UserQueries
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(UserDN));
+            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(UserDN));
 
             TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
-                uq => uq.Related.RefersTo(UserDN.Current));
+                uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
+            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(RoleDN));
 
             TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
         public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)

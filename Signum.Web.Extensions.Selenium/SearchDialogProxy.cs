@@ -33,6 +33,8 @@ namespace Signum.Web.Selenium
             this.SearchControl.Results.SelectRow(lite);
 
             this.OkWaitClosed();
+
+            this.Dispose();
         }
 
         public void SelectByPosition(int rowIndex)
@@ -42,6 +44,8 @@ namespace Signum.Web.Selenium
             this.SearchControl.Results.SelectRow(rowIndex);
 
             this.OkWaitClosed();
+
+            this.Dispose();
         }
 
         public void SelectByPositionOrderById(int rowIndex)
@@ -51,6 +55,8 @@ namespace Signum.Web.Selenium
             this.SearchControl.Results.SelectRow(rowIndex);
 
             this.OkWaitClosed();
+
+            this.Dispose();
         }
 
         public void SelectById(int id)
@@ -60,6 +66,8 @@ namespace Signum.Web.Selenium
             this.Results.SelectRow(0);
 
             this.OkWaitClosed();
+
+            this.Dispose();
         }
 
         public void SelectByPosition(params int[] rowIndexes)
@@ -70,6 +78,8 @@ namespace Signum.Web.Selenium
                 this.SearchControl.Results.SelectRow(index);
 
             this.OkWaitClosed();
+
+            this.Dispose();
         }
      
         public PopupControl<T> Create<T>() where T : ModifiableEntity
@@ -223,7 +233,7 @@ namespace Signum.Web.Selenium
             {
                 Selenium.AssertElementPresent(AddColumnButtonLocator);
 
-                return Selenium.IsElementPresent(AddColumnButtonLocator + ":not(.ui-button-disabled)");
+                return Selenium.IsElementPresent(AddColumnButtonLocator + ":not([disabled])");
             }
         }
 
@@ -235,14 +245,15 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementPresent(Results.HeaderCellLocator(token));
         }
 
-        public FilterOptionProxy AddQuickFilter(int rowIndex, int columnIndex)
+
+        public FilterOptionProxy AddQuickFilter(int rowIndex, string token)
         {
             var newFilterIndex = Filters.NewFilterIndex();
 
-            string cellLocator = Results.CellLocator(rowIndex, columnIndex);
-            Selenium.ContextMenu(cellLocator);
+            string cellLocator = Results.CellLocator(rowIndex, token);
+            Selenium.ContextMenuAt(cellLocator, "0,0");
 
-            string quickFilterLocator = "{0} .sf-quickfilter > span".Formato(cellLocator);
+            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter";
             Selenium.WaitElementPresent(quickFilterLocator);
             Selenium.Click(quickFilterLocator);
 
@@ -251,14 +262,14 @@ namespace Signum.Web.Selenium
             return filter;
         }
 
-        public FilterOptionProxy AddQuickFilter(int columnIndex)
+        public FilterOptionProxy AddQuickFilter(string token)
         {
             var newFilterIndex = Filters.NewFilterIndex();
 
-            string cellLocator = Results.HeaderCellLocator(columnIndex);
-            Selenium.ContextMenu(cellLocator);
+            string cellLocator = Results.HeaderCellLocator(token);
+            Selenium.ContextMenuAt(cellLocator, "0,0");
 
-            string quickFilterLocator = "{0} .sf-quickfilter-header > span".Formato(cellLocator);
+            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter-header".Formato(cellLocator);
             Selenium.WaitElementPresent(quickFilterLocator);
             Selenium.Click(quickFilterLocator);
 
@@ -309,15 +320,19 @@ namespace Signum.Web.Selenium
             get { return QueryButtonLocator(PrefixUnderscore + "qbSearchCreate"); }
         }
 
-
-        public string MenuOptionLocator(string menuId, string optionId)
+        public bool HasMultiplyMessage
         {
-            return "jq=#{0}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button#{1}".Formato(menuId, optionId);
+            get { return Selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-td-multiply".Formato(PrefixUnderscore)); }
         }
 
-        public string MenuOptionLocatorByAttr(string menuId, string optionLocator)
+        public string MenuOptionLocator(string optionId)
         {
-            return "jq=#{0}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button[{1}]".Formato(menuId, optionLocator);
+            return "jq=#{0}sfSearchControl a#{1}".Formato(PrefixUnderscore, optionId);
+        }
+
+        public string MenuOptionLocatorByAttr(string optionLocator)
+        {
+            return "jq=#{0}sfSearchControl a[{1}]".Formato(PrefixUnderscore, optionLocator);
         }
     }
 
@@ -331,7 +346,7 @@ namespace Signum.Web.Selenium
         {
             this.Selenium = selenium;
             this.PrefixUnderscore = PrefixUnderscore;
-            this.QueryTokenBuilder = new QueryTokenBuilderProxy(this.Selenium, PrefixUnderscore);
+            this.QueryTokenBuilder = new QueryTokenBuilderProxy(this.Selenium, PrefixUnderscore + "tokenBuilder_");
         }
 
         public int NumFilters()
@@ -379,7 +394,7 @@ namespace Signum.Web.Selenium
             {
                 Selenium.AssertElementPresent(AddFilterButtonLocator);
 
-                return Selenium.IsElementPresent(AddFilterButtonLocator + ":not(.ui-button-disabled)");
+                return Selenium.IsElementPresent(AddFilterButtonLocator + ":not([disabled])");
             }
         }
 
@@ -473,9 +488,7 @@ namespace Signum.Web.Selenium
 
         public string RowLocator(int rowIndex)
         {
-            int index = rowIndex + (HasMultiplyMessage ? 1 : 0);
-
-            return RowsLocator + ":nth-child({0})".Formato(index + 1); 
+            return RowsLocator + ":nth-child({0})".Formato(rowIndex + 1); 
         }
 
         public string RowLocator(Lite<IIdentifiable> lite)
@@ -483,9 +496,16 @@ namespace Signum.Web.Selenium
             return "{0}[data-entity='{1}']".Formato(RowsLocator, lite.Key());
         }
 
-        public string CellLocator(int rowIndex, int columnIndex)
+        public string CellLocator(int rowIndex, string token)
         {
-            return RowLocator(rowIndex) + "> td:nth-child({0})".Formato(columnIndex + 1);
+            var tokens = this.GetColumnTokens();
+
+            var index = tokens.IndexOf(token);
+
+            if (index == null)
+                throw new InvalidOperationException("Token {0} not found between {1}".Formato(token, tokens.CommaAnd()));
+
+            return RowLocator(rowIndex) + "> td:nth-child({0})".Formato(index + 1);
         }
 
         public string RowSelectorLocator(int rowIndex)
@@ -509,11 +529,6 @@ namespace Signum.Web.Selenium
             Selenium.Click(RowLocator(lite) + " .sf-td-selection");
         }
 
-        public bool HasMultiplyMessage
-        {
-            get { return Selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-tr-multiply".Formato(PrefixUnderscore)); }
-        }
-
         public bool HasFooter
         {
             get { return Selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-search-footer".Formato(PrefixUnderscore)); }
@@ -524,59 +539,17 @@ namespace Signum.Web.Selenium
             get { return "jq=#{0}tblResults > thead > tr > th".Formato(PrefixUnderscore); }
         }
 
-        public string HeaderCellLocator(int columnIndex)
+        public string[] GetColumnTokens()
         {
-            return HeaderLocator + ":nth-child({0})".Formato(columnIndex + 1);
-        }
+            var array = Selenium.GetEval("window.$('#" + PrefixUnderscore + "tblResults > thead > tr > th')" +
+                ".toArray().map(function(e){ return  $(e).hasClass('sf-th-entity')? 'Entity' : $(e).attr('data-column-name'); }).join(',')");
 
+            return array.Split(',');
+        }
      
-        public ResultTableProxy OrderBy(int columnIndex)
-        {
-            OrderBy(columnIndex, OrderType.Ascending);
-
-            return this;
-        }
-
-        public ResultTableProxy OrderByDescending(int columnIndex)
-        {
-            OrderBy(columnIndex, OrderType.Descending);
-
-            return this;
-        }
-
-        public ResultTableProxy ThenBy(int columnIndex)
-        {
-            OrderBy(columnIndex, OrderType.Ascending, thenBy: true);
-
-            return this;
-        }
-
-        public ResultTableProxy ThenByDescending(int columnIndex)
-        {
-            OrderBy(columnIndex, OrderType.Descending, thenBy: true);
-
-            return this;
-        }
-
-        void OrderBy(int columnIndex, OrderType orderType, bool thenBy = false)
-        {
-            do
-            {
-                WaitSearchCompleted(() =>
-                {
-                    if (thenBy)
-                        Selenium.ShiftKeyDown();
-                    Selenium.Click(HeaderCellLocator(columnIndex));
-                    if (thenBy)
-                        Selenium.ShiftKeyUp();
-                });
-            }
-            while (!Selenium.IsElementPresent(HeaderCellLocator(columnIndex) + "." + CssClass(orderType)));
-        }
-
         public string HeaderCellLocator(string token)
         {
-            return HeaderLocator + ":has(input[type=hidden][value='{0}'])".Formato(token);
+            return HeaderLocator + "[data-column-name='{0}']".Formato(token);
         }
 
         public ResultTableProxy OrderBy(string token)
@@ -620,22 +593,20 @@ namespace Signum.Web.Selenium
                         Selenium.ShiftKeyUp();
                 });
             }
-            while (!Selenium.IsElementPresent(HeaderCellLocator(token) + "." + CssClass(orderType)));
+            while (!Selenium.IsElementPresent(HeaderCellLocator(token) + SortSpan(orderType)));
         }
 
         public bool HasColumn(string token)
         {
-            return Selenium.IsElementPresent("{0} > :hidden[value='{1}']".Formato(HeaderLocator, token));
+            return Selenium.IsElementPresent(HeaderCellLocator(token));
         }
 
-        public void RemoveColumn(int columnIndex)
+        public void RemoveColumn(string token)
         {
-            int numberOfColumnsBeforeDeleting = -1 ;
-            string lastHeaderSelector = HeaderCellLocator(numberOfColumnsBeforeDeleting);
-            string headerSelector = HeaderCellLocator(columnIndex);
-            Selenium.ContextMenu(headerSelector);
-            Selenium.Click("{0} .sf-remove-column > span".Formato(headerSelector));
-            Selenium.WaitElementDisapear(lastHeaderSelector);
+            string headerSelector = HeaderCellLocator(token);
+            Selenium.ContextMenuAt(headerSelector, "0,0");
+            Selenium.Click("jq=#sfContextMenu .sf-remove-header");
+            Selenium.WaitElementDisapear(headerSelector);
         }
 
         public string EntityLinkLocator(Lite<IIdentifiable> lite, bool allowSelection = true)
@@ -664,7 +635,7 @@ namespace Signum.Web.Selenium
 
         public EntityContextMenuProxy EntityContextMenu(int rowIndex)
         {
-            Selenium.ContextMenu(CellLocator(rowIndex, 1));
+            Selenium.ContextMenuAt(CellLocator(rowIndex, "Entity"), "0,0");
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
 
@@ -700,35 +671,33 @@ namespace Signum.Web.Selenium
             return Lite.Parse(result);
         }
 
-        public bool IsHeaderMarkedSorted(int columnIndex)
+        public bool IsHeaderMarkedSorted(string token)
         {
-            return IsHeaderMarkedSorted(columnIndex, OrderType.Ascending) ||
-                IsHeaderMarkedSorted(columnIndex, OrderType.Descending);
+            return IsHeaderMarkedSorted(token, OrderType.Ascending) ||
+                IsHeaderMarkedSorted(token, OrderType.Descending);
         }
         
 
-        public bool IsHeaderMarkedSorted(int columnIndex, OrderType orderType)
+        public bool IsHeaderMarkedSorted(string token, OrderType orderType)
         {
-            return Selenium.IsElementPresent("{0}.{1}".Formato(
-                HeaderCellLocator(columnIndex),
-                CssClass(orderType)));
+            return Selenium.IsElementPresent(HeaderCellLocator(token) + SortSpan(orderType));
         }
 
-        private static string CssClass(OrderType orderType)
+        private static string SortSpan(OrderType orderType)
         {
-            return orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up";
+            return " span.sf-header-sort." + (orderType == OrderType.Ascending ? "asc" : "desc");
         }
 
-        public bool IsElementInCell(int rowIndex, int columnIndex, string selector)
+        public bool IsElementInCell(int rowIndex, string token, string selector)
         {
-            return Selenium.IsElementPresent(CellLocator(rowIndex, columnIndex) + " " + selector);
+            return Selenium.IsElementPresent(CellLocator(rowIndex, token) + " " + selector);
         }
 
-        public void EditColumnName(int columnIndex, string newName)
+        public void EditColumnName(string token, string newName)
         {
-            string headerSelector = this.HeaderCellLocator(columnIndex);
-            Selenium.ContextMenu(headerSelector);
-            Selenium.Click("{0} .sf-edit-column > span".Formato(headerSelector));
+            string headerSelector = this.HeaderCellLocator(token);
+            Selenium.ContextMenuAt(headerSelector, "0,0");
+            Selenium.Click("jq=#sfContextMenu .sf-edit-header");
 
             using (var popup = new Popup(Selenium, this.PrefixUnderscore + "newName"))
             {   
@@ -741,32 +710,29 @@ namespace Signum.Web.Selenium
         }
 
 
-        public void MoveLeft(int columnIndex)
-        {
-            MoveColumn(columnIndex, left: true);
-        }
+        //public void MoveAfter(string srcToken, string targetToken)
+        //{
+        //    MoveColumn(srcToken, targetToken, after: true );
+        //}
 
-        public void MoveRight(int columnIndex)
-        {
-            MoveColumn(columnIndex, left: false);
-        }
-        
-        void MoveColumn(int columnIndex, bool left)
-        {
-            string headerSelector = HeaderCellLocator(columnIndex);
+        //public void MoveBefore(string srcToken, string targetToken)
+        //{
+        //    MoveColumn(srcToken, targetToken, after: false);
+        //}
 
-            string columnName = Selenium.GetEval("window.$('{0} input[type=hidden]').val()".Formato(headerSelector.RemoveStart(3)));
-            
-            string targetSelector = left ?
-                "{0} .sf-header-droppable-left".Formato(HeaderCellLocator(columnIndex - 1)) :
-                "{0} .sf-header-droppable-right".Formato(HeaderCellLocator(columnIndex + 1));
+        //void MoveColumn(string srcToken, string targetToken, bool after)
+        //{
+        //    string srcLocator = HeaderCellLocator(srcToken);
+        //    string targetLocator = HeaderCellLocator(targetToken);
 
-            Selenium.DragAndDropToObject(headerSelector, targetSelector);
+        //    decimal srcX = Selenium.GetElementPositionLeft(srcLocator);
+        //    decimal targetX = Selenium.GetElementPositionLeft(targetLocator);
+        //    decimal targetWidth = Selenium.GetElementWidth(targetLocator);
 
-            Selenium.WaitElementPresent("{0}:has(input[type=hidden][value='{1}'])".Formato(
-                HeaderCellLocator(left ? (columnIndex - 1) : (columnIndex + 1)),
-                columnName));
-        }
+        //    decimal dx = (targetX - srcX) + (after ? (targetWidth - 5) : 5);
+
+        //    Selenium.DragAndDrop(srcLocator, dx.ToString("+00;-00;+00") + ",+0");
+        //}
     }
 
     public class EntityContextMenuProxy
@@ -784,20 +750,20 @@ namespace Signum.Web.Selenium
             get 
             {
                 if (IsContext)
-                    return "{0} td:nth-child({1}) .sf-search-ctxmenu:visible".Formato(resultTable.RowsLocator, 1 + 1);
+                    return "jq=#sfContextMenu:visible";
                 else
-                    return "jq=#{0}sfTmSelected .sf-menu-button:visible".Formato(resultTable.PrefixUnderscore);
+                    return "jq=#{0}btnSelectedDropDown:visible".Formato(resultTable.PrefixUnderscore);
             }
         }
 
-        public void QuickLinkClick(int quickLinkIndex)
+        public void QuickLinkClick(string title)
         {
-            resultTable.Selenium.Click("{0} .sf-search-ctxmenu-quicklinks .sf-search-ctxitem a:nth-child({1})".Formato(EntityContextMenuLocator, quickLinkIndex + 1));
+            resultTable.Selenium.Click("{0} li.sf-quick-link[data-name='{1}'] > a".Formato(EntityContextMenuLocator, title));
         }
 
-        public SearchPopupProxy QuickLinkClickSearch(int quickLinkIndex)
+        public SearchPopupProxy QuickLinkClickSearch(string title)
         {
-            QuickLinkClick(quickLinkIndex);
+            QuickLinkClick(title);
             var result = new SearchPopupProxy(resultTable.Selenium, resultTable.PrefixUnderscore + "New");
             resultTable.Selenium.WaitElementPresent(result.PopupVisibleLocator);
             resultTable.Selenium.WaitSearchCompleted();
@@ -834,12 +800,12 @@ namespace Signum.Web.Selenium
 
         public string MenuItemLocator(string itemId)
         {
-            return "{0} li.sf-search-ctxitem a#{1}".Formato(EntityContextMenuLocator, itemId);
+            return "{0} li a#{1}".Formato(EntityContextMenuLocator, itemId);
         }
 
         public bool IsDisabled(string itemId)
         {
-            return resultTable.Selenium.IsElementPresent(MenuItemLocator(itemId) + ".sf-disabled");
+            return resultTable.Selenium.IsElementPresent(MenuItemLocator(itemId) + "[disabled]");
         }
 
         public bool IsDisabled(Enum operationKey)

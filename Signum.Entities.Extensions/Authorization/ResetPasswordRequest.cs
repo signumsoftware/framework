@@ -13,7 +13,7 @@ namespace Signum.Entities.Authorization
         public string Code
         {
             get { return code; }
-            set { Set(ref code, value, () => Code); }
+            set { Set(ref code, value); }
         }
 
         UserDN user;
@@ -21,14 +21,14 @@ namespace Signum.Entities.Authorization
         public UserDN User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
         DateTime requestDate;
         public DateTime RequestDate
         {
             get { return requestDate; }
-            set { Set(ref requestDate, value, () => RequestDate); }
+            set { Set(ref requestDate, value); }
         }
     }
 }

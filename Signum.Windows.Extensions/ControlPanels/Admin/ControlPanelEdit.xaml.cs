@@ -43,15 +43,17 @@ namespace Signum.Windows.ControlPanels.Admin
             if (type == null)
                 return null;
 
-            var lastColumn = 0.To(Panel.NumberOfColumns).WithMin(c => Panel.Parts.Count(p => p.Column == c));
+            throw new NotImplementedException();
 
-            return new PanelPartDN
-            {
-                Column = lastColumn,
-                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
-                Content = (IPartDN)Constructor.Construct(type, this),
-                Title = null,
-            };
+            //var lastColumn = 0.To(Panel.NumberOfRows).WithMin(c => Panel.Parts.Count(p => p.Columns == c));
+
+            //return new PanelPartDN
+            //{
+            //    Columns = lastColumn,
+            //    Offset = (Panel.Parts.Where(a => a.Columns == lastColumn).Max(a => (int?)a.Offset + 1) ?? 0),
+            //    Content = (IPartDN)Constructor.Construct(type, this),
+            //    Title = null,
+            //};
         }
 
         IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)

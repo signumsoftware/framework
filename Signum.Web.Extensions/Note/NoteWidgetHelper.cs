@@ -20,72 +20,53 @@ namespace Signum.Web.Notes
             });
         }
 
-        public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
+        public static Widget CreateWidget(WidgetContext ctx)
         {
-            if (identifiable == null || identifiable.IsNew || identifiable is NoteDN)
-                return null;
+            var ident = (IdentifiableEntity)ctx.Entity;
 
             var findOptions = new FindOptions
-                {
-                    QueryName = typeof(NoteDN),
-                    Create = false,
-                    SearchOnLoad = true,
-                    FilterMode = FilterMode.AlwaysHidden,
-                    FilterOptions = { new FilterOption("Target", identifiable.ToLite()) },
-                    ColumnOptions = { new ColumnOption("Target") },
-                    ColumnOptionsMode = ColumnOptionsMode.Remove,
-                }.ToJS(prefix, "New"); 
-         
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul")
-                .Attr("data-url", RouteHelper.New().Action((NoteController ac) => ac.NotesCount()))
-                .Class("sf-menu-button sf-widget-content sf-notes")))
             {
-                using (content.Surround(new HtmlTag("li").Class("sf-note")))
-                {
-                    content.AddLine(new HtmlTag("a")
-                        .Class("sf-note-view")
-                        .Attr("onclick", new JsFunction(NoteClient.Module, "explore", prefix, findOptions).ToString())
-                        .InnerHtml(NoteMessage.ViewNotes.NiceToString().EncodeHtml())
-                        .ToHtml());
-                }
+                QueryName = typeof(NoteDN),
+                Create = false,
+                SearchOnLoad = true,
+                ShowFilters = false,
+                ShowFilterButton = false,
+                FilterOptions = { new FilterOption("Target", ident.ToLite()) },
+                ColumnOptions = { new ColumnOption("Target") },
+                ColumnOptionsMode = ColumnOptionsMode.Remove,
+            }.ToJS(ctx.Prefix, "New");
 
-                using (content.Surround(new HtmlTag("li").Class("sf-note")))
-                {
-                    content.AddLine(new HtmlTag("a")
-                       .Class("sf-note-create")
-                       .Attr("onclick", new JsFunction(NoteClient.Module, "createNote", prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity)).ToString())
-                       .InnerHtml(NoteMessage.CreateNote.NiceToString().EncodeHtml())
-                       .ToHtml());
-                }
-            }
 
-            int count = CountNotes(identifiable.ToLite());
+            var url = RouteHelper.New().Action((NoteController ac) => ac.NotesCount());
 
-            HtmlStringBuilder label = new HtmlStringBuilder();
-            
-            var toggler = new HtmlTag("a")
-                .Class("sf-widget-toggler sf-notes-toggler").Class(count > 0 ? "sf-widget-toggler-active" : null)
-                .Attr("title", NoteMessage.Notes.NiceToString());
-            
-            using (label.Surround(toggler))
+            List<IMenuItem> items = new List<IMenuItem>()
             {
-                label.Add(new HtmlTag("span")
-                    .Class("ui-icon ui-icon-pin-w")
-                    .InnerHtml(NoteMessage.Notes.NiceToString().EncodeHtml())
-                    .ToHtml());
-                                
-                label.Add(new HtmlTag("span")
-                    .Class("sf-widget-count")
-                    .SetInnerText(count.ToString())
-                    .ToHtml());
-            }
+                new MenuItem
+                {
+                     CssClass = "sf-note-view",
+                     OnClick = new JsFunction(NoteClient.Module, "explore", ctx.Prefix, findOptions, url),
+                     Text = NoteMessage.ViewNotes.NiceToString(),
+                },
 
-            return new WidgetItem
+                new MenuItem
+                {
+                    CssClass = "sf-note-create",
+                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity), url),
+                    Text = NoteMessage.CreateNote.NiceToString()
+                },
+            }; 
+
+            int count = CountNotes(ident.ToLite());
+
+            return new Widget
             {
-                Id = TypeContextUtilities.Compose(prefix, "notesWidget"),
-                Label = label.ToHtml(),
-                Content = content.ToHtml()
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "notesWidget"),
+                Title = NoteMessage.Notes.NiceToString(),
+                IconClass = "glyphicon glyphicon-comment",
+                Active = count > 0,
+                Class = "sf-notes-toggler",
+                Html = new HtmlTag("span").Class("sf-widget-count").SetInnerText(count.ToString()),
+                Items = items
             };
         }
     }

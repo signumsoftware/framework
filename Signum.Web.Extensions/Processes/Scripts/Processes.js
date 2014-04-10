@@ -36,19 +36,26 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Navigator", "
     }
     exports.initControlPanel = initControlPanel;
 
-    function refreshUpdate(idProcess, prefix, getProgressUrl) {
+    function refreshPage(prefix) {
         setTimeout(function () {
-            $.post(getProgressUrl, { id: idProcess }, function (data) {
-                $("#progressBar").width(data * 100 + '%');
+            return Navigator.requestAndReload(prefix);
+        }, 500);
+    }
+    exports.refreshPage = refreshPage;
+
+    function refreshProgress(idProcess, prefix, getProgressUrl) {
+        setTimeout(function () {
+            return $.post(getProgressUrl, { id: idProcess }, function (data) {
+                $("#progressBar").width(data * 100 + '%').attr("aria-valuenow", data * 100);
                 if (data < 1) {
-                    exports.refreshUpdate(idProcess, prefix, getProgressUrl);
+                    exports.refreshProgress(idProcess, prefix, getProgressUrl);
                 } else {
                     Navigator.requestAndReload(prefix);
                 }
             });
-        }, 2000);
+        }, 500);
     }
-    exports.refreshUpdate = refreshUpdate;
+    exports.refreshProgress = refreshProgress;
 
     function processFromMany(options) {
         options.controllerUrl = SF.Urls.processFromMany;

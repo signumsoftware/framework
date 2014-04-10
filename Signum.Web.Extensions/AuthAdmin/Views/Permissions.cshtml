@@ -3,13 +3,14 @@
 <script type="text/javascript">
     require(["@AuthAdminClient.Module"], function (AuthAdmin) {
         AuthAdmin.coloredRadios($(document));
-    }); 
+    });
 </script>
 @using (var tc = Html.TypeContext<PermissionRulePack>())
 {
-    @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.Strategy)
-
+    <div class="form-compact">
+        @Html.EntityLine(tc, f => f.Role)
+        @Html.ValueLine(tc, f => f.Strategy)
+    </div>
     <table class="sf-auth-rules">
         <thead>
             <tr>

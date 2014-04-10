@@ -15,7 +15,7 @@
     <StackPanel>
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
         <m:ValueLine m:Common.Route="DisplayName" />
-        <m:EntityLine m:Common.Route="Related"  />
+        <m:EntityLine m:Common.Route="Owner"  />
         <m:ValueLine m:Common.Route="WithoutFilters"/>
         <m:EntityLine m:Common.Route="EntityType" AutoCompleting="EntityType_AutoCompleting" Find="False" />
         <TextBox Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}" IsReadOnly="True" x:Name="tbCurrentEntity" BorderThickness="0" Background="{x:Null}"/>

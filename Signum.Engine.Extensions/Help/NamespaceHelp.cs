@@ -38,7 +38,7 @@ namespace Signum.Engine.Help
                 return this;
 
             XElement ns = XDocument.Load(FileName).Element(_Namespace);
-            Description = ns.Element(_Description).TryCC(a => a.Value);
+            Description = ns.Element(_Description).Try(a => a.Value);
 
             return this;
         }
@@ -48,7 +48,7 @@ namespace Signum.Engine.Help
             if (document.Root.Name != _Namespace)
                 throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Namespace));
 
-            var result = document.Root.Attribute(_Name).TryCC(a => a.Value);
+            var result = document.Root.Attribute(_Name).Try(a => a.Value);
 
             if (string.IsNullOrEmpty(result))
                 throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _Name));
@@ -92,7 +92,7 @@ namespace Signum.Engine.Help
             XElement loadedNs = loadedDoc.Element(_Namespace);
 
             var created = NamespaceHelp.Create(nameSpace);
-            created.Description = syncContent(loadedNs.Element(_Description).TryCC(a => a.Value));
+            created.Description = syncContent(loadedNs.Element(_Description).Try(a => a.Value));
 
             if (fileName != created.FileName)
             {

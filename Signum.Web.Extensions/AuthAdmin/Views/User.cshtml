@@ -4,19 +4,23 @@
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
-        @Html.Field(AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
+    @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordKey), AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
             Html.Password(e.Compose(UserMapping.NewPasswordKey), "").Concat(
             Html.ValidationMessage(e.Compose(UserMapping.NewPasswordKey)) ?? MvcHtmlString.Empty))
-    
-        @Html.Field(AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
+
+    @Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(),
             Html.Password(e.Compose(UserMapping.NewPasswordBisKey), "").Concat(
             Html.ValidationMessage(e.Compose(UserMapping.NewPasswordBisKey)) ?? MvcHtmlString.Empty))
     }
-    @Html.ValueLine(e, f => f.PasswordNeverExpires)
-    @Html.ValueLine(e, f => f.PasswordSetDate)
+
+   
+    @Html.EntityLine(e, f => f.Role)
+    @Html.EntityLine(e, f => f.Related)
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
     @Html.EntityCombo(e, f => f.CultureInfo)
-    @Html.EntityLine(e, f => f.Role)
-    @Html.EntityLine(e, f => f.Related)
+
+    @Html.ValueLine(e, f => f.PasswordNeverExpires, a => a.LabelColumns = new BsColumn(3))
+    @Html.ValueLine(e, f => f.PasswordSetDate, a => a.LabelColumns = new BsColumn(3))
+
 }

@@ -17,14 +17,14 @@ namespace Signum.Entities.Mailing
         public bool Active
         {
             get { return active; }
-            set { Set(ref active, value, () => Active); }
+            set { Set(ref active, value); }
         }
 
         int port = 110;
         public int Port
         {
             get { return port; }
-            set { Set(ref port, value, () => Port); }
+            set { Set(ref port, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -33,7 +33,7 @@ namespace Signum.Entities.Mailing
         public string Host
         {
             get { return host; }
-            set { Set(ref host, value, () => Host); }
+            set { Set(ref host, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -42,7 +42,7 @@ namespace Signum.Entities.Mailing
         public string Username
         {
             get { return username; }
-            set { Set(ref username, value, () => Username); }
+            set { Set(ref username, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -51,7 +51,7 @@ namespace Signum.Entities.Mailing
         public string Password
         {
             get { return password; }
-            set { Set(ref password, value, () => Password); }
+            set { Set(ref password, value); }
         }
 
         bool enableSSL;
@@ -60,7 +60,7 @@ namespace Signum.Entities.Mailing
             get { return enableSSL; }
             set
             {
-                if (Set(ref enableSSL, value, () => EnableSSL))
+                if (Set(ref enableSSL, value))
                 {
                     Port = enableSSL ? 995 : 110;
                 }
@@ -72,7 +72,7 @@ namespace Signum.Entities.Mailing
         public int ReadTimeout
         {
             get { return readTimeout; }
-            set { Set(ref readTimeout, value, () => ReadTimeout); }
+            set { Set(ref readTimeout, value); }
         }
 
         int? deleteMessagesAfter = 14;
@@ -80,7 +80,7 @@ namespace Signum.Entities.Mailing
         public int? DeleteMessagesAfter
         {
             get { return deleteMessagesAfter; }
-            set { Set(ref deleteMessagesAfter, value, () => DeleteMessagesAfter); }
+            set { Set(ref deleteMessagesAfter, value); }
         }
 
         [NotNullable]
@@ -88,7 +88,7 @@ namespace Signum.Entities.Mailing
         public MList<ClientCertificationFileDN> ClientCertificationFiles
         {
             get { return clientCertificationFiles; }
-            set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
+            set { Set(ref clientCertificationFiles, value); }
         }
 
         public override string ToString()
@@ -118,35 +118,35 @@ namespace Signum.Entities.Mailing
         public Lite<Pop3ConfigurationDN> Pop3Configuration
         {
             get { return pop3Configuration; }
-            set { Set(ref pop3Configuration, value, () => Pop3Configuration); }
+            set { Set(ref pop3Configuration, value); }
         }
 
         DateTime startDate;
         public DateTime StartDate
         {
             get { return startDate; }
-            set { Set(ref startDate, value, () => StartDate); }
+            set { Set(ref startDate, value); }
         }
 
         DateTime? endDate;
         public DateTime? EndDate
         {
             get { return endDate; }
-            set { Set(ref endDate, value, () => EndDate); }
+            set { Set(ref endDate, value); }
         }
 
         int newEmails;
         public int NewEmails
         {
             get { return newEmails; }
-            set { Set(ref newEmails, value, () => NewEmails); }
+            set { Set(ref newEmails, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
     }
 
@@ -160,7 +160,7 @@ namespace Signum.Entities.Mailing
         public Lite<Pop3ReceptionDN> Reception
         {
             get { return reception; }
-            set { Set(ref reception, value, () => Reception); }
+            set { Set(ref reception, value); }
         }
 
         [NotNullable, UniqueIndex]
@@ -169,7 +169,7 @@ namespace Signum.Entities.Mailing
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
     }
 }

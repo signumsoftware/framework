@@ -61,74 +61,65 @@ WriteLiteral("<div");
 
 WriteLiteral(" id=\"processMainDiv\"");
 
-WriteLiteral(">\r\n    <h2>");
+WriteLiteral(">\r\n    <h2>ProcessLogic state</h2>\r\n    <div>\r\n        <a");
 
-            
-            #line 6 "..\..\Processes\Views\ProcessPanel.cshtml"
-   Write(ViewData[ViewDataKeys.Title]);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</h2>\r\n    <div>\r\n        <a");
-
-WriteAttribute("href", Tuple.Create(" href=\"", 220), Tuple.Create("\"", 275)
+WriteAttribute("href", Tuple.Create(" href=\"", 209), Tuple.Create("\"", 264)
             
             #line 8 "..\..\Processes\Views\ProcessPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 227), Tuple.Create<System.Object, System.Int32>(Url.Action((ProcessController pc) => pc.Stop())
+, Tuple.Create(Tuple.Create("", 216), Tuple.Create<System.Object, System.Int32>(Url.Action((ProcessController pc) => pc.Stop())
             
             #line default
             #line hidden
-, 227), false)
+, 216), false)
 );
 
-WriteLiteral(" class=\"sf-button\"");
+WriteLiteral(" class=\"sf-button btn btn-default active\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 294), Tuple.Create("\"", 350)
+WriteAttribute("style", Tuple.Create(" style=\"", 306), Tuple.Create("\"", 362)
             
             #line 8 "..\..\Processes\Views\ProcessPanel.cshtml"
-              , Tuple.Create(Tuple.Create("", 302), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
+                                     , Tuple.Create(Tuple.Create("", 314), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 302), false)
-, Tuple.Create(Tuple.Create("", 340), Tuple.Create(";color:red", 340), true)
+, 314), false)
+, Tuple.Create(Tuple.Create("", 352), Tuple.Create(";color:red", 352), true)
 );
 
 WriteLiteral(" id=\"sfProcessDisable\"");
 
-WriteLiteral(">\r\n            Stop </a>\r\n        <a");
+WriteLiteral(">Stop </a>\r\n        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 409), Tuple.Create("\"", 465)
+WriteAttribute("href", Tuple.Create(" href=\"", 407), Tuple.Create("\"", 463)
             
-            #line 10 "..\..\Processes\Views\ProcessPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 416), Tuple.Create<System.Object, System.Int32>(Url.Action((ProcessController pc) => pc.Start())
+            #line 9 "..\..\Processes\Views\ProcessPanel.cshtml"
+, Tuple.Create(Tuple.Create("", 414), Tuple.Create<System.Object, System.Int32>(Url.Action((ProcessController pc) => pc.Start())
             
             #line default
             #line hidden
-, 416), false)
+, 414), false)
 );
 
-WriteLiteral(" class=\"sf-button\"");
+WriteLiteral(" class=\"sf-button btn btn-default\"");
 
-WriteAttribute("style", Tuple.Create("  style=\"", 484), Tuple.Create("\"", 532)
+WriteAttribute("style", Tuple.Create("  style=\"", 498), Tuple.Create("\"", 546)
             
-            #line 10 "..\..\Processes\Views\ProcessPanel.cshtml"
-                , Tuple.Create(Tuple.Create("", 493), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
+            #line 9 "..\..\Processes\Views\ProcessPanel.cshtml"
+                                , Tuple.Create(Tuple.Create("", 507), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 493), false)
+, 507), false)
 );
 
 WriteLiteral(" id=\"sfProcessEnable\"");
 
-WriteLiteral(">\r\n                Start </a>\r\n    </div>\r\n\r\n");
+WriteLiteral(">Start </a>\r\n    </div>\r\n\r\n");
 
 WriteLiteral("    ");
 
             
-            #line 14 "..\..\Processes\Views\ProcessPanel.cshtml"
+            #line 12 "..\..\Processes\Views\ProcessPanel.cshtml"
 Write(Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable")));
 
             
@@ -136,11 +127,11 @@ Write(Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable")));
             #line hidden
 WriteLiteral("\r\n    <script>\r\n        $(function () {\r\n");
 
-WriteLiteral("             ");
+WriteLiteral("            ");
 
             
-            #line 17 "..\..\Processes\Views\ProcessPanel.cshtml"
-         Write(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())));
+            #line 15 "..\..\Processes\Views\ProcessPanel.cshtml"
+        Write(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())));
 
             
             #line default

@@ -9,24 +9,30 @@
 @using Signum.Engine.Authorization;
 @using Signum.Entities.Authorization;
 @using Signum.Web.UserQueries;
-@helper ColorLink(Type type)
-    {
-        var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
+
+
+@helper ColorLink(TypeContext tc, Type type)
+{
+    var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
         
-    @Html.Field(ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
-                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
-                          (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
+    @Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
+                    Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
+                                    (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)), new { @class = "form-control-static" }));
 }
+
 @using (var tc = Html.TypeContext<ChartColumnDN>())
 {
+
     if (tc.Value == null)
     {
         tc.Value = new ChartColumnDN();
     }
     
     <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
-        <td>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
-        </td>
+        <th>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
+        </th>
+        @if(tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
+        {
         <td>
             @if (tc.Value.GroupByVisible)
             {
@@ -50,10 +56,11 @@
                 @Html.Hidden(tc.Compose("group"), groupResults)
             }
         </td>
+        }
         <td>
             <div class="sf-query-token">
-                @Html.QueryTokenDNBuilder(tc.SubContext(a=>a.Token), ChartClient.GetQueryTokenBuilderSettings(
-                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],  
+                @Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
+                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],
                 tc.Value.ParentChart.GroupResults, tc.Value.IsGroupKey == true))
             </div>
             <a class="sf-chart-token-config-trigger">@ChartMessage.Chart_ToggleInfo.NiceToString()</a>
@@ -63,42 +70,48 @@
    
     
     <tr class="sf-chart-token-config" style="display: none">
-        <td>
-        </td>
-        <td colspan="2">
-            @using (Html.FieldInline())
-            { 
-                @Html.ValueLine(tc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")
-                @Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1))
-                @Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2))
-                @Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3))
-                if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
+        <td />
+        @if(tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional){
+        <td />
+        }
+        <td colspan="1">
+            <div class="form-inline form-sm">
+                @using (var sc = tc.SubContext())
                 {
-                    var type = tc.Value.Token.Token.Type.CleanType();
-
-                    if (type.UnNullify().IsEnum)
+                    sc.FormGroupStyle = FormGroupStyle.Basic;
+                    
+                    @Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")
+                    @Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1))
+                    @Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2))
+                    @Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3))
+                    if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                     {
-                @ColorLink(type.UnNullify());
-                    }
-                    else
-                    {
-                        var imp = tc.Value.Token.Token.GetImplementations();
+                        var type = sc.Value.Token.Token.Type.CleanType();
 
-                        if (imp != null && !imp.Value.IsByAll)
+                        if (type.UnNullify().IsEnum)
                         {
-                            foreach (var item in imp.Value.Types.Iterate())
+                    @ColorLink(sc, type.UnNullify());
+                        }
+                        else
+                        {
+                            var imp = sc.Value.Token.Token.GetImplementations();
+
+                            if (imp != null && !imp.Value.IsByAll)
                             {
-                                if (!item.IsFirst)
+                                foreach (var item in imp.Value.Types.Iterate())
                                 {
-                <text> | </text>
-                                }
+                                    if (!item.IsFirst)
+                                    {
+                    <text> | </text>
+                                    }
                                 
-                @ColorLink(item.Value);
+                    @ColorLink(sc, item.Value);
+                                }
                             }
                         }
                     }
                 }
-            }
+            </div>
         </td>
     </tr>
 }
