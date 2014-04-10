@@ -16,7 +16,7 @@ namespace Signum.Entities
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public abstract class Symbol : IdentifiableEntity
     {
-        private Symbol() { }
+        public Symbol() { }
       
         /// <summary>
         /// 

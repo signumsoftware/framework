@@ -12,6 +12,8 @@ namespace Signum.Entities
     [Serializable]
     public class OperationSymbol : Symbol
     {
+        private OperationSymbol() { } 
+
         private OperationSymbol(StackFrame frame, string memberName)
             : base(frame, memberName)
         {
@@ -19,43 +21,43 @@ namespace Signum.Entities
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public ConstructSymbol<T> Construct<T>([CallerMemberName]string memberName = null)
-            where T : IIdentifiable
+            where T : class, IIdentifiable
         {
             return new ConstructOperationImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public ConstructFromSymbol<F, T> ConstructFrom<F, T>([CallerMemberName]string memberName = null)
-            where F : IIdentifiable
-            where T : IIdentifiable
+            where F : class,  IIdentifiable
+            where T : class,  IIdentifiable
         {
             return new ConstructFromSymbolImp<F, T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public ConstructFromManySymbol<F, T> ConstructFromMany<F, T>([CallerMemberName]string memberName = null)
-            where F : IIdentifiable
-            where T : IIdentifiable
+            where F : class, IIdentifiable
+            where T : class,  IIdentifiable
         {
             return new ConstructFromManySymbolImp<F, T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
-            where T : IIdentifiable
+            where T : class,  IIdentifiable
         {
             return new ExecuteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
-            where T : IIdentifiable
+            where T : class, IIdentifiable
         {
             return new DeleteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         class ConstructOperationImp<T> :ConstructSymbol<T>
-               where T : IIdentifiable
+               where T : class, IIdentifiable
         {
             OperationSymbol operation;
             public OperationSymbol Operation
@@ -66,8 +68,8 @@ namespace Signum.Entities
         }
 
         class ConstructFromSymbolImp<F, T> : ConstructFromSymbol<F, T>
-            where F : IIdentifiable
-            where T : IIdentifiable
+            where F : class, IIdentifiable
+            where T : class, IIdentifiable
         {           
             OperationSymbol operation;
             public OperationSymbol Operation
@@ -78,8 +80,8 @@ namespace Signum.Entities
         }
 
         class ConstructFromManySymbolImp<F, T> : ConstructFromManySymbol<F, T>
-            where F : IIdentifiable
-            where T : IIdentifiable
+            where F : class, IIdentifiable
+            where T : class, IIdentifiable
         {
             OperationSymbol operation;
             public OperationSymbol Operation
@@ -90,7 +92,7 @@ namespace Signum.Entities
         }
 
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
-            where T : IIdentifiable
+          where T : class, IIdentifiable
         {
             OperationSymbol operation;
             public OperationSymbol Operation
@@ -101,7 +103,7 @@ namespace Signum.Entities
         }
 
         class DeleteSymbolImp<T> : DeleteSymbol<T>
-            where T : IIdentifiable
+          where T : class, IIdentifiable
         {
             OperationSymbol operation;
             public OperationSymbol Operation
@@ -118,29 +120,29 @@ namespace Signum.Entities
     }
 
     public interface ConstructSymbol<out T> : IOperationSymbolContainer
-        where T : IIdentifiable
+        where T : class, IIdentifiable
     {
     }
 
     public interface ConstructFromSymbol<in F, out T> : IOperationSymbolContainer
-        where F : IIdentifiable
-        where T : IIdentifiable
+        where F : class, IIdentifiable
+        where T : class, IIdentifiable
     {
     }
 
     public interface ConstructFromManySymbol<in F, out T> : IOperationSymbolContainer
-        where F : IIdentifiable
-        where T : IIdentifiable
+        where F : class, IIdentifiable
+        where T : class, IIdentifiable
     {
     }
 
     public interface ExecuteSymbol<in T> : IOperationSymbolContainer
-        where T : IIdentifiable
+        where T : class, IIdentifiable
     {
     }
 
     public interface DeleteSymbol<in T> : IOperationSymbolContainer
-        where T : IIdentifiable
+        where T : class, IIdentifiable
     {
     }
 

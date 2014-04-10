@@ -16,7 +16,7 @@ namespace Signum.Engine
     public static class SymbolLogic<T>
         where T: Symbol
     {
-        static ResetLazy<Dictionary<T, T>> lazy;
+        static ResetLazy<Dictionary<string, T>> lazy;
         static Func<IEnumerable<T>> getSymbols;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IEnumerable<T>> getSymbols)
@@ -48,14 +48,25 @@ namespace Signum.Engine
                          symbols,
                          c => c.Key,
                          s => s.Key,
-                         (c, s) => { c.id = s.id; c.IsNew = false; c.Modified = ModifiedState.Sealed; return c; }
-                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name));  
- 
-                    return symbols;
+                         (c, s) => 
+                         {
+                             c.id = s.id;
+                             c.IsNew = false; 
+                             c.Modified = ModifiedState.Sealed; 
+                             return c; 
+                         }
+                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
+
+                    return symbols.ToDictionary(a => a.Key);
 
                 }, new InvalidateWith(typeof(T)));
 
-                SymbolManager.SymbolDeserialized.Register((T symbol) => lazy.Value.Contains();
+                SymbolManager.SymbolDeserialized.Register((T s) =>
+                {
+                    s.id = lazy.Value.GetOrThrow(s.Key).id;
+                    s.IsNew = false;
+                    s.Modified = ModifiedState.Sealed;
+                });
             }
         }
       
@@ -90,7 +101,7 @@ namespace Signum.Engine
 
 
 
-        static Dictionary<T, T> AssertStarted()
+        static Dictionary<string, T> AssertStarted()
         {
             if (lazy == null)
                 throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SymbolLogic<T>).TypeName()));
@@ -100,7 +111,7 @@ namespace Signum.Engine
 
         public static ICollection<T> Symbols
         {
-            get { return AssertStarted().Keys; }
+            get { return AssertStarted().Values; }
         }
     }
 }
