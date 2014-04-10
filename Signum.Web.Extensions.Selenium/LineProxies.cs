@@ -88,7 +88,7 @@ namespace Signum.Web.Selenium
 
         public string CreateLocator
         {
-            get { return "jq=#{0}_btnCreate".Formato(Prefix); }
+            get { return "jq=#{0}_btnCreate:visible".Formato(Prefix); }
         }
 
         public void Create()
@@ -123,7 +123,7 @@ namespace Signum.Web.Selenium
 
         public string ViewLocator
         {
-            get { return "jq=#{0}_btnView".Formato(Prefix); }
+            get { return "jq=#{0}_btnView:visible".Formato(Prefix); }
         }
 
         protected PopupControl<T> ViewPopup<T>(int? index) where T : ModifiableEntity
@@ -137,12 +137,12 @@ namespace Signum.Web.Selenium
 
         public string FindLocator
         {
-            get { return "jq=#{0}_btnFind".Formato(Prefix); }
+            get { return "jq=#{0}_btnFind:visible".Formato(Prefix); }
         }
 
         public string RemoveLocator
         {
-            get { return "jq=#{0}_btnRemove".Formato(Prefix); }
+            get { return "jq=#{0}_btnRemove:visible".Formato(Prefix); }
         }
 
         public void Remove()
