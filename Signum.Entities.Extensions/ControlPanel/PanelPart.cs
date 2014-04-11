@@ -30,7 +30,7 @@ namespace Signum.Entities.ControlPanel
             get { return row; }
             set { Set(ref row, value); }
         }
-       
+
         int startColumn;
         [NumberBetweenValidator(0, 11)]
         public int StartColumn
@@ -72,7 +72,7 @@ namespace Signum.Entities.ControlPanel
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
-                    return  ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
+                    return ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
@@ -184,7 +184,7 @@ namespace Signum.Entities.ControlPanel
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));          
+            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
 
@@ -264,7 +264,7 @@ namespace Signum.Entities.ControlPanel
         {
             return new CountSearchControlPartDN
             {
-                UserQueries = this.UserQueries.Select(e=>e.Clone()).ToMList(),
+                UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
             };
         }
 
@@ -383,6 +383,7 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref label, value); }
         }
 
+        [SqlDbType(Size = int.MaxValue)]
         string link;
         [URLValidator, NotNullValidator]
         public string Link
