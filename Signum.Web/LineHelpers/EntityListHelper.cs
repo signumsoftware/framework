@@ -106,6 +106,11 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             EntityList el = new EntityList(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
@@ -117,7 +122,6 @@ namespace Signum.Web
 
             var result = helper.InternalEntityList<S>(el);
 
-            var vo = el.ViewOverrides;
             if (vo == null)
                 return result;
 

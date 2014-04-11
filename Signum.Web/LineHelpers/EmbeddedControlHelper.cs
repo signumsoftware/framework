@@ -30,6 +30,11 @@ namespace Signum.Web
         {
             TypeContext context = TypeContextUtilities.CleanTypeContext(Common.WalkExpression(tc, property));
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return  vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             var ec = new EmbeddedControl();
             
             if (settingsModifier != null)
@@ -42,7 +47,7 @@ namespace Signum.Web
 
                 viewName = es.OnPartialViewName((ModifiableEntity)context.UntypedValue);
 
-                context.ViewOverrides = es.ViewOverrides;
+                context.ViewOverrides = es.GetViewOverrides();
             }
 
             ViewDataDictionary vdd = new ViewDataDictionary(context);
@@ -50,8 +55,6 @@ namespace Signum.Web
                 vdd.AddRange(ec.ViewData);
 
             var result = helper.Partial(viewName, vdd); 
-
-            var vo = tc.ViewOverrides; 
 
             if (vo == null)
                 return result;

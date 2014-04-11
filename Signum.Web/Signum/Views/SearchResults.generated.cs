@@ -156,12 +156,10 @@ WriteLiteral(">\r\n");
             
             #line default
             #line hidden
-WriteLiteral("            <td>\r\n");
-
-WriteLiteral("                ");
+WriteLiteral("            <td>");
 
             
-            #line 38 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 37 "..\..\Signum\Views\SearchResults.cshtml"
            Write(Html.CheckBox(
                     Model.Compose("rowSelection", row.Index.ToString()),
                         new
@@ -173,10 +171,10 @@ WriteLiteral("                ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </td>\r\n");
+WriteLiteral("</td>\r\n");
 
             
-            #line 46 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 44 "..\..\Signum\Views\SearchResults.cshtml"
         }
 
             
@@ -185,28 +183,26 @@ WriteLiteral("\r\n            </td>\r\n");
 WriteLiteral("        ");
 
             
-            #line 47 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 45 "..\..\Signum\Views\SearchResults.cshtml"
          if (navigable)
         {
 
             
             #line default
             #line hidden
-WriteLiteral("            <td>\r\n");
-
-WriteLiteral("                ");
+WriteLiteral("            <td>");
 
             
-            #line 50 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 47 "..\..\Signum\Views\SearchResults.cshtml"
            Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </td>\r\n");
+WriteLiteral("</td>\r\n");
 
             
-            #line 52 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 48 "..\..\Signum\Views\SearchResults.cshtml"
         }
 
             
@@ -215,7 +211,7 @@ WriteLiteral("\r\n            </td>\r\n");
 WriteLiteral("        ");
 
             
-            #line 53 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 49 "..\..\Signum\Views\SearchResults.cshtml"
          foreach (var col in queryResult.Columns)
         {
             var value = row[col];
@@ -228,27 +224,25 @@ WriteLiteral("        ");
 WriteLiteral("            <td ");
 
             
-            #line 58 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 54 "..\..\Signum\Views\SearchResults.cshtml"
            Write(ft.WriteDataAttribute(value));
 
             
             #line default
             #line hidden
-WriteLiteral(">\r\n");
-
-WriteLiteral("                ");
+WriteLiteral(">");
 
             
-            #line 59 "..\..\Signum\Views\SearchResults.cshtml"
-           Write(ft.Formatter(Html, value));
+            #line 54 "..\..\Signum\Views\SearchResults.cshtml"
+                                         Write(ft.Formatter(Html, value));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </td>\r\n");
+WriteLiteral("</td>\r\n");
 
             
-            #line 61 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 55 "..\..\Signum\Views\SearchResults.cshtml"
         }
 
             
@@ -257,7 +251,7 @@ WriteLiteral("\r\n            </td>\r\n");
 WriteLiteral("    </tr>\r\n");
 
             
-            #line 63 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 57 "..\..\Signum\Views\SearchResults.cshtml"
 }
 
             
@@ -266,7 +260,7 @@ WriteLiteral("    </tr>\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 65 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 59 "..\..\Signum\Views\SearchResults.cshtml"
  if (queryResult.Rows.IsNullOrEmpty())
 {
 
@@ -275,20 +269,20 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <tr>\r\n        <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2471), Tuple.Create("\"", 2494)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2375), Tuple.Create("\"", 2398)
             
-            #line 68 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 2481), Tuple.Create<System.Object, System.Int32>(columnsCount
+            #line 62 "..\..\Signum\Views\SearchResults.cshtml"
+, Tuple.Create(Tuple.Create("", 2385), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 2481), false)
+, 2385), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 68 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 62 "..\..\Signum\Views\SearchResults.cshtml"
                                Write(SearchMessage.NoResultsFound.NiceToString());
 
             
@@ -297,7 +291,7 @@ WriteLiteral(">");
 WriteLiteral("</td>\r\n    </tr>\r\n");
 
             
-            #line 70 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 64 "..\..\Signum\Views\SearchResults.cshtml"
 }
 
             
@@ -306,7 +300,7 @@ WriteLiteral("</td>\r\n    </tr>\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 72 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 66 "..\..\Signum\Views\SearchResults.cshtml"
   
     ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
 
@@ -323,7 +317,7 @@ WriteLiteral(">\r\n        <td>\r\n");
 WriteLiteral("            ");
 
             
-            #line 77 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 71 "..\..\Signum\Views\SearchResults.cshtml"
        Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
 
             
@@ -332,7 +326,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </td>\r\n    </tr>\r\n");
 
             
-            #line 80 "..\..\Signum\Views\SearchResults.cshtml"
+            #line 74 "..\..\Signum\Views\SearchResults.cshtml"
 
             
             #line default

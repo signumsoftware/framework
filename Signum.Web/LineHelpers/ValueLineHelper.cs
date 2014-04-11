@@ -181,6 +181,11 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             Common.FireCommonTasks(vl);
@@ -190,7 +195,6 @@ namespace Signum.Web
 
             var result = helper.InternalValueLine(vl);
 
-            var vo = vl.ViewOverrides;
             if (vo == null)
                 return result;
 

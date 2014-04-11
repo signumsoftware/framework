@@ -14,6 +14,11 @@ table.sf-search-results > thead
     white-space:nowrap;
 }
 
+table.sf-search-results tr td
+{
+    white-space: pre-wrap;
+}
+
 .sf-query-button-bar
 {
     margin-bottom: 10px;
