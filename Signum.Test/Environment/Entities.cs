@@ -445,11 +445,11 @@ namespace Signum.Test.Environment
     {
         public static readonly ExecuteSymbol<AlbumDN> Save = OperationSymbol.Execute<AlbumDN>();
         public static readonly ExecuteSymbol<AlbumDN> Modify = OperationSymbol.Execute<AlbumDN>();
-        public static readonly ConstructFromSymbol<BandDN, AlbumDN> CreateAlbumFromBand = OperationSymbol.ConstructFrom<BandDN, AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.From<BandDN> CreateAlbumFromBand = OperationSymbol.Construct<AlbumDN>.From<BandDN>();
         public static readonly DeleteSymbol<AlbumDN> Delete = OperationSymbol.Delete<AlbumDN>();
-        public static readonly ConstructFromSymbol<AlbumDN, AlbumDN> Clone = OperationSymbol.ConstructFrom<AlbumDN, AlbumDN>();
-        public static readonly ConstructFromManySymbol<AlbumDN, AlbumDN> CreateGreatestHitsAlbum = OperationSymbol.ConstructFromMany<AlbumDN, AlbumDN>();
-        public static readonly ConstructFromManySymbol<AlbumDN, AlbumDN> CreateEmptyGreatestHitsAlbum = OperationSymbol.ConstructFromMany<AlbumDN, AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.From<AlbumDN> Clone = OperationSymbol.Construct<AlbumDN>.From<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
     }
 
     [Serializable]

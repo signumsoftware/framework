@@ -18,9 +18,9 @@ namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(OperationSymbol operationSymbol)
+        public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.OperationSymbol = operationSymbol; 
+            this.OperationSymbol = symbol.Operation; 
         }
 
         public OperationSymbol OperationSymbol { get; private set; }
@@ -30,8 +30,8 @@ namespace Signum.Web.Operations
 
     public class ConstructorSettings : OperationSettings
     {
-        public ConstructorSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public ConstructorSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 
@@ -62,11 +62,11 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings Contextual { get; private set; }
         public double Order { get; set; }
 
-        public EntityOperationSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public EntityOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
-            this.Contextual = new ContextualOperationSettings(operationSymbol);
-            this.ContextualFromMany = new ContextualOperationSettings(operationSymbol); 
+            this.Contextual = new ContextualOperationSettings(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings(symbol); 
         }
 
         static EntityOperationSettings()
@@ -87,8 +87,8 @@ namespace Signum.Web.Operations
 
     public class ContextualOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public ContextualOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 

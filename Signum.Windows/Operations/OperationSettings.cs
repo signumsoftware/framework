@@ -19,9 +19,9 @@ namespace Signum.Windows.Operations
         public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
 
-        public OperationSettings(OperationSymbol operationSymbol)
+        public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.OperationSymbol = operationSymbol;
+            this.OperationSymbol = symbol.Operation;
         }
 
     }
@@ -58,11 +58,11 @@ namespace Signum.Windows.Operations
 
         public EntityOperationGroup Group { get; set; }
 
-        public EntityOperationSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public EntityOperationSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
-            Contextual = new ContextualOperationSettings(operationSymbol);
-            ContextualFromMany = new ContextualOperationSettings(operationSymbol); 
+            Contextual = new ContextualOperationSettings(symbolContainer);
+            ContextualFromMany = new ContextualOperationSettings(symbolContainer); 
         }
     }
 
@@ -84,8 +84,8 @@ namespace Signum.Windows.Operations
         public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
         public Func<OperationInfo, bool> IsVisible { get; set; }
 
-        public ConstructorSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public ConstructorSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
         }
     }
@@ -96,8 +96,8 @@ namespace Signum.Windows.Operations
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public double Order { get; set; }
 
-        public ContextualOperationSettings(OperationSymbol operationSymbol)
-            : base(operationSymbol)
+        public ContextualOperationSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
         }
     }

@@ -50,7 +50,7 @@ namespace Signum.Engine.Operations
                 set { toState = value; }
             }
 
-            public Construct(ConstructSymbol<T> symbol)
+            public Construct(ConstructSymbol<T>.Simple symbol)
                 : base(symbol)
             {
             }
@@ -87,7 +87,7 @@ namespace Signum.Engine.Operations
                 set { toState = value; }
             }
 
-            public ConstructFrom(ConstructFromSymbol<F,T> symbol)
+            public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
                 : base(symbol)
             {
             }
@@ -125,7 +125,7 @@ namespace Signum.Engine.Operations
                 set { toState = value; }
             }
 
-            public ConstructFromMany(ConstructFromManySymbol<F,T> symbol)
+            public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
                 : base(symbol)
             {
             }

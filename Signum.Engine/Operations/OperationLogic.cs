@@ -382,8 +382,9 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)(IIdentifiable)entity;
         }
 
-        public static T ExecuteLite<T>(this Lite<T> lite, ExecuteSymbol<T> symbol, params object[] args)
-            where T : class, IIdentifiable
+        public static T ExecuteLite<T, B>(this Lite<T> lite, ExecuteSymbol<B> symbol, params object[] args)
+            where T : class, IIdentifiable, B
+            where B : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
             var op = Find<IExecuteOperation>(lite.EntityType, symbol.Operation).AssertLite();
@@ -400,8 +401,9 @@ namespace Signum.Engine.Operations
         }
 
 
-        public static string CanExecute<T>(this T entity, ExecuteSymbol<T> symbol)
-           where T : class, IIdentifiable
+        public static string CanExecute<T, B>(this T entity, ExecuteSymbol<B> symbol)
+            where T : class, IIdentifiable, B
+            where B : class, IIdentifiable
         {
             var op = Find<IEntityOperation>(entity.GetType(), symbol.Operation);
             return op.CanExecute(entity);
@@ -416,8 +418,9 @@ namespace Signum.Engine.Operations
 
         #region Delete
 
-        public static void Delete<T>(this Lite<IIdentifiable> lite, DeleteSymbol<T> symbol, params object[] args)
-            where T: IdentifiableEntity
+        public static void Delete<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
+            where T : class, IIdentifiable, B
+            where B : class, IIdentifiable
         {
             IIdentifiable entity = lite.RetrieveAndForget();
             var op = Find<IDeleteOperation>(lite.EntityType, symbol.Operation);
@@ -431,8 +434,9 @@ namespace Signum.Engine.Operations
             op.Delete(entity, args);
         }
 
-        public static void Delete<T>(this IIdentifiable entity, DeleteSymbol<T> symbol, params object[] args)
-            where T : IdentifiableEntity
+        public static void Delete<T, B>(this T entity, DeleteSymbol<B> symbol, params object[] args)
+            where T : class, IIdentifiable, B
+            where B : class, IIdentifiable
         {
             var op = Find<IDeleteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Delete(entity, args);
@@ -452,7 +456,7 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)op.Construct(args);
         }
 
-        public static T Construct<T>(ConstructSymbol<T> symbol, params object[] args)
+        public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)
             where T : class, IIdentifiable
         {
             var op = Find<IConstructOperation>(typeof(T), symbol.Operation);
@@ -462,9 +466,10 @@ namespace Signum.Engine.Operations
 
         #region ConstructFrom
 
-        public static T ConstructFrom<F, T>(this F entity, ConstructFromSymbol<F,T> symbol, params object[] args)
-            where F : class, IIdentifiable
+        public static T ConstructFrom<F, FB, T>(this F entity, ConstructSymbol<T>.From<FB> symbol, params object[] args)
             where T : class, IIdentifiable
+            where F : class, IIdentifiable
+            where FB : class, IIdentifiable, F
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(object)entity);
             return (T)op.Construct(entity, args);
@@ -476,9 +481,10 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)op.Construct(entity, args);
         }
 
-        public static T ConstructFromLite<F, T>(this Lite<IIdentifiable> lite, ConstructFromSymbol<F, T> symbol, params object[] args)
-           where F : class, IIdentifiable
-           where T : class, IIdentifiable
+        public static T ConstructFromLite<F, FB, T>(this Lite<F> lite, ConstructSymbol<T>.From<FB> symbol, params object[] args)
+            where F : class, IIdentifiable
+            where FB : class, IIdentifiable, F
+            where T : class, IIdentifiable
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Operation).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
@@ -497,8 +503,9 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationSymbol).Construct(lites, args);
         }
 
-        public static T ConstructFromMany<F, T>(List<Lite<F>> lites, ConstructFromManySymbol<F, T> symbol, params object[] args)
+        public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable, F
             where F : class, IIdentifiable
         {
             return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), symbol.Operation).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);

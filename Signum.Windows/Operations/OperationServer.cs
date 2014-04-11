@@ -30,32 +30,32 @@ namespace Signum.Windows
             Server.Execute((IOperationServer s) => s.Delete(lite, symbol.Operation, args)); 
         }
 
-        public static T Construct<T>(ConstructSymbol<T> symbol, params object[] args)
+        public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)
             where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.Construct(typeof(T), symbol.Operation, args)); 
         }
 
-        public static T ConstructFrom<F, B, T>(this F entity, ConstructFromSymbol<B, T> symbol, params object[] args)
-            where T : class, IIdentifiable
+        public static T ConstructFrom<F, B, T>(this F entity, ConstructSymbol<T>.From<B> symbol, params object[] args)
             where F : class, IIdentifiable
             where B : class, IIdentifiable, F
+            where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFrom(entity, symbol.Operation, args)); 
         }
 
-        public static T ConstructFromLite<F, B, T>(this Lite<F> lite, ConstructFromSymbol<B, T> symbol, params object[] args)
-            where T : class, IIdentifiable
+        public static T ConstructFromLite<F, B, T>(this Lite<F> lite, ConstructSymbol<T>.From<B> symbol, params object[] args)
             where F : class, IIdentifiable
             where B : class, IIdentifiable, F
+            where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromLite(lite, symbol.Operation, args)); 
         }
 
-        public static T ConstructFromMany<F, B, T>(List<Lite<F>> lites, ConstructFromManySymbol<B, T> symbol, params object[] args)
-            where T : class, IIdentifiable
+        public static T ConstructFromMany<F, B, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<B> symbol, params object[] args)
             where F : class, IIdentifiable
             where B : class, IIdentifiable, F
+            where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromMany(lites, typeof(F), symbol.Operation, args)); 
         }

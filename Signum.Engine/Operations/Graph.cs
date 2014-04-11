@@ -17,7 +17,7 @@ namespace Signum.Engine.Operations
     {
         public class Construct : _Construct<T>, IConstructOperation
         {
-            protected readonly ConstructSymbol<T> Symbol;
+            protected readonly ConstructSymbol<T>.Simple Symbol;
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
@@ -28,7 +28,7 @@ namespace Signum.Engine.Operations
             public bool Lite { get { return false; } }
 
 
-            public Construct(ConstructSymbol<T> symbol)
+            public Construct(ConstructSymbol<T>.Simple symbol)
             {
                 this.Symbol = symbol;
             }
@@ -107,7 +107,7 @@ namespace Signum.Engine.Operations
         public class ConstructFrom<F> : IConstructorFromOperation
             where F : class, IIdentifiable
         {
-            protected readonly ConstructFromSymbol<F, T> Symbol;
+            protected readonly ConstructSymbol<T>.From<F> Symbol;
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
@@ -137,7 +137,7 @@ namespace Signum.Engine.Operations
                 this.Construct = overrider(this.Construct);
             }
 
-            public ConstructFrom(ConstructFromSymbol<F, T> symbol)
+            public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
             {
                 this.Symbol = symbol;
                 this.Lite = true;
@@ -239,7 +239,7 @@ namespace Signum.Engine.Operations
         public class ConstructFromMany<F> : IConstructorFromManyOperation
             where F : class, IIdentifiable
         {
-            protected readonly ConstructFromManySymbol<F, T> Symbol;
+            protected readonly ConstructSymbol<T>.FromMany<F> Symbol;
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Operation; } }
             Type IOperation.Type { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
@@ -254,7 +254,7 @@ namespace Signum.Engine.Operations
                 this.Construct = overrider(this.Construct);
             }
 
-            public ConstructFromMany(ConstructFromManySymbol<F, T> symbol)
+            public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
             {
                 this.Symbol = symbol;
             }
