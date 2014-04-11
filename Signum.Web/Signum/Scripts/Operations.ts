@@ -55,7 +55,6 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
 }
 
 export function executeDefaultContextual(options: OperationOptions): Promise<void> {
-    Finder.removeOverlay();
 
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
@@ -104,11 +103,8 @@ export function constructFromAjax(options: EntityOperationOptions, newPrefix?: s
 }
 
 export function constructFromDefaultContextual(options: OperationOptions, newPrefix?: string): Promise<void> {
-  
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
-
-    Finder.removeOverlay();
 
     return constructFromAjaxContextual(options).then(eHtml=> {
         markCells(options.prefix);
@@ -164,8 +160,6 @@ export function deleteDefaultContextual(options: OperationOptions): Promise<any>
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
 
-    Finder.removeOverlay();
-
     return deleteAjaxContextual(options).then(result=> {
         markCells(options.prefix);
     });
@@ -188,8 +182,6 @@ export function constructFromManyDefault(options: OperationOptions, newPrefix?: 
 
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
-
-    Finder.removeOverlay();
 
     return constructFromManyAjax(options).then(eHtml=> {
         markCells(options.prefix);
@@ -221,7 +213,7 @@ export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
 }
 
 export function markCells(prefix: string) {
-    $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
+    $("tr.active").addClass("sf-entity-ctxmenu-success");
     notifyExecuted();
 }
 
@@ -328,7 +320,7 @@ export function validateAndSubmit(options: EntityOperationOptions) {
 
 export function submit(options: EntityOperationOptions) {
 
-    var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl")
+    var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divMainControl")
 
     var $form = mainControl.closest("form");
     $form.append(SF.hiddenInput('isLite', options.isLite) +

@@ -71,7 +71,7 @@ namespace Signum.Engine.DynamicQuery
                 case PropertyRouteType.Root:
                     return null;
                 case PropertyRouteType.FieldOrProperty:
-                    return routes.Select(pr => pr.SimplifyNoRoot().PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+                    return routes.Select(pr => pr.SimplifyNoRoot().PropertyInfo.SingleAttribute<UnitAttribute>().Try(u => u.UnitName)).Distinct().Only();
                 case PropertyRouteType.MListItems:
                     return null;
             }

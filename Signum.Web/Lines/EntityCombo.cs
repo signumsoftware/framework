@@ -26,7 +26,6 @@ namespace Signum.Web
     {
         public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();
         
-        public bool Preload { get; set; }
         public IEnumerable<Lite<IIdentifiable>> Data { get; set; }
         public int Size { get; set; }
 
@@ -34,7 +33,6 @@ namespace Signum.Web
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             Size = 0;
-            Preload = true;
             View = false;
             Create = false;
             Remove = false;

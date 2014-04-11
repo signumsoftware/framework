@@ -17,19 +17,18 @@ using Signum.Entities.Basics;
 
 namespace Signum.Web
 {
-    public delegate void CommonTask(BaseLine eb);
-
     public static class Common
     {
-        public static event CommonTask CommonTask;
+        public static event Action<BaseLine> CommonTask;
 
         static Common()
         {
-            CommonTask += new CommonTask(TaskSetLabelText);
-            CommonTask += new CommonTask(TaskSetFormatText);
+            CommonTask += TaskSetLabelText;
+            CommonTask += TaskSetFormatText;
+            CommonTask += TaskSetUnitText;
             //CommonTask += new CommonTask(TaskSetImplementations);
-            CommonTask += new CommonTask(TaskSetReadOnly);
-            CommonTask += new CommonTask(TaskSetHtmlProperties);
+            CommonTask += TaskSetReadOnly;
+            CommonTask += TaskSetHtmlProperties;
         }
 
         public static void FireCommonTasks(BaseLine eb)

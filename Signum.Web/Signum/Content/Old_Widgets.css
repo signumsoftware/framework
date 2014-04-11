@@ -1,0 +1,68 @@
+﻿.sf-widgets-container
+{
+    float: right;    
+}
+.sf-widget
+{
+    display: inline-block;
+    position: relative; 
+    border-left: solid 1px #AAA;
+}
+.sf-widget-content
+{
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+}
+.sf-widget-toggler
+{
+    vertical-align: top;    
+    line-height: 20px;
+    height: 20px;
+    text-align: left !important;
+    display: block;
+    padding: 0 2px;
+    cursor: pointer;
+}
+.sf-widget-toggler:hover,.sf-widget-toggler:hover
+{
+    text-decoration: none;    
+}
+.sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count
+{
+    display: inline-block;
+    vertical-align: top;
+}
+.sf-widget-toggler .ui-icon 
+{
+    margin-top: 2px;
+}
+.sf-widget-toggler .sf-widget-count 
+{
+    margin-top: 1px \0/;
+}
+a.sf-widget-toggler-active
+{
+    color:#000;
+} 
+
+.sf-alerts-count-separator
+{
+    vertical-align: top;    
+}
+.sf-widget-count
+{
+    margin-left: 2px;
+}
+.sf-alert-warned.sf-alert-active
+{
+    color: Red;    
+}
+.sf-alert-attended.sf-alert-active, .sf-alert-future.sf-alert-active
+{
+    color: Black;    
+}
+
+.ui-state-highlight a
+{
+    color: auto !important;    
+}

@@ -9,7 +9,7 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class Column : IEquatable<Column>
+    public class Column
     {
         string displayName;
         public string DisplayName
@@ -41,12 +41,6 @@ namespace Signum.Entities.DynamicQuery
         public override string ToString()
         {
             return "{0} '{1}'".Formato(Token.FullKey(), DisplayName);
-        }
-
-        public bool Equals(Column other)
-        {
-            return Token.Equals(other.Token) &&
-                DisplayName == other.DisplayName;
         }
 
         public override bool Equals(object obj)

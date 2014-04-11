@@ -90,7 +90,7 @@ namespace Signum.Engine
             {
                 string name = replacements.Apply(Replacements.KeyTables, objectName.ToString());
 
-                return model.TryGetC(name).TryCC(a => a.Name) ?? objectName;
+                return model.TryGetC(name).Try(a => a.Name) ?? objectName;
             };
 
             Func<DiffTable, DiffIndex, Index, bool> columnsChanged = (dif, dix, mix) =>
@@ -130,7 +130,7 @@ namespace Signum.Engine
                     var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         null,
                         (i, dix) => dix.IsControlledIndex || dix.Columns.Any(removedColums.Contains)  ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => (mix as UniqueIndex).Try(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
                     return changes;
@@ -226,7 +226,7 @@ namespace Signum.Engine
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
+                        (i, mix, dix) => (mix as UniqueIndex).Try(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                             mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
                         Spacing.Simple);
 
@@ -261,7 +261,7 @@ namespace Signum.Engine
                     if (oldIx.ViewName != null || (newIx is UniqueIndex) && ((UniqueIndex)newIx).ViewName != null)
                         return false;
 
-                    var news = newIx.Columns.Select(c => diff.Colums.TryGetC(c.Name).TryCC(d => d.Name)).NotNull().ToHashSet();
+                    var news = newIx.Columns.Select(c => diff.Colums.TryGetC(c.Name).Try(d => d.Name)).NotNull().ToHashSet();
 
                     if (!news.SetEquals(oldIx.Columns))
                         return false;

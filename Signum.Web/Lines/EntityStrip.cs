@@ -58,6 +58,7 @@ namespace Signum.Web
             if (AutocompleteUrl.HasText())
                 result.Add("autoCompleteUrl", AutocompleteUrl);
 
+            result.Add("vertical", Vertical);
             return result;
         }
     }

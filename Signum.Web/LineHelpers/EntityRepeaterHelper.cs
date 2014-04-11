@@ -18,76 +18,83 @@ namespace Signum.Web
 {
     public static class EntityRepeaterHelper
     {
-        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityRepeater entityRepeater)
+        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityRepeater repeater)
         {
-            if (!entityRepeater.Visible || entityRepeater.HideIfNull && entityRepeater.UntypedValue == null)
+            if (!repeater.Visible || repeater.HideIfNull && repeater.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.Prefix).Class("sf-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container")))
             {
+                sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
+
+                using (sb.Surround(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
+                {
+                }
+
                 using (sb.Surround(new HtmlTag("legend")))
+                using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
                 {
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
+                    sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater, hidden: false));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater, hidden: false));
-                }
-
-                sb.AddLine(helper.Hidden(entityRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
-
-                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-                if (entityRepeater.ElementType.IsEmbeddedEntity())
-                {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater), null));
-                }
-
-                using (sb.Surround(new HtmlTag("div").Id(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
-                {
-                    if (entityRepeater.UntypedValue != null)
+                    using (sb.Surround(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {
-                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityRepeater.Parent))
-                            sb.Add(InternalRepeaterElement(helper, itemTC, entityRepeater));
+                        sb.AddLine(EntityButtonHelper.Create(helper, repeater, btn: false));
+                        sb.AddLine(EntityButtonHelper.Find(helper, repeater, btn: false));
                     }
                 }
-            }
 
-            sb.AddLine(entityRepeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
+                using (sb.Surround(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                {
+                    if (repeater.UntypedValue != null)
+                    {
+                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)repeater.Parent))
+                            sb.Add(InternalRepeaterElement(helper, itemTC, repeater));
+                    }
+                }
+
+
+                if (repeater.ElementType.IsEmbeddedEntity() && repeater.Create)
+                {
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), null));
+                }
+
+                sb.AddLine(repeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
+            }
 
             return sb.ToHtml();
         }
 
-        private static MvcHtmlString InternalRepeaterElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityRepeater entityRepeater)
+        private static MvcHtmlString InternalRepeaterElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityRepeater repeater)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Id(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            using (sb.Surround(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
-                { 
-                    if (entityRepeater.Remove)
-                        sb.AddLine(EntityListBaseHelper.RemoveButtonItem(helper, itemTC, entityRepeater));
+                {
+                    if (repeater.Remove)
+                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));
 
-                    if (entityRepeater.Reorder)
+                    if (repeater.Reorder)
                     {
-                        sb.AddLine(EntityListBaseHelper.MoveUpButtonItem(helper, itemTC, entityRepeater, true));
-                        sb.AddLine(EntityListBaseHelper.MoveDownButtonItem(helper, itemTC, entityRepeater, true));
+                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
+                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
                     }
                 }
 
-                sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, entityRepeater));
+                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, repeater));
             }
 
             return sb.ToHtml();
         }
 
         public static MvcHtmlString EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
-            where S : Modifiable 
+            where S : Modifiable
         {
             return helper.EntityRepeater(tc, property, null);
         }
@@ -96,22 +103,26 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityRepeater el = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            var vo = tc.ViewOverrides;
 
-            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
 
-            Common.FireCommonTasks(el);
+            EntityRepeater repeater = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+
+            EntityBaseHelper.ConfigureEntityBase(repeater, typeof(S).CleanType());
+
+            Common.FireCommonTasks(repeater);
 
             if (settingsModifier != null)
-                settingsModifier(el);
+                settingsModifier(repeater);
 
-            var result = helper.InternalEntityRepeater<S>(el);
+            var result = helper.InternalEntityRepeater<S>(repeater);
 
-            var vo = el.ViewOverrides;
             if (vo == null)
                 return result;
 
-            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
+            return vo.OnSurroundLine(repeater.PropertyRoute, helper, tc, result);
         }
     }
 }

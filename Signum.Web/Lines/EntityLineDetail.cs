@@ -18,13 +18,9 @@ namespace Signum.Web
 {
     public class EntityLineDetail : EntityBase
     {
-        public string DefaultDetailDiv { get; private set; }
-        public string DetailDiv { get; set; }
-
         public EntityLineDetail(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
-            DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);
             View = false;
             LabelClass = "sf-label-detail-line";
         }
@@ -40,8 +36,6 @@ namespace Signum.Web
         protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            if (DetailDiv.HasText())
-                result.Add("detailDiv", DetailDiv);
             return result;
         }
     }

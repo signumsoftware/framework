@@ -18,10 +18,6 @@ namespace Signum.Web
         public string UnitText { get; set; }
                 
         public List<SelectListItem> EnumComboItems { get; set; }
-        public DatePickerOptions DatePickerOptions { get; set; }
-
-        public string RadioButtonLabelTrue = EntityControlMessage.Yes.NiceToString();
-        public string RadioButtonLabelFalse = EntityControlMessage.No.NiceToString();
 
         public bool WriteHiddenOnReadonly { get; set; }
 
@@ -54,5 +50,7 @@ namespace Signum.Web
 
             return items;
         }
+
+        public bool InlineCheckbox { get; set; }
     }
 }

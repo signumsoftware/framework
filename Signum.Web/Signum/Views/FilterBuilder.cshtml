@@ -10,41 +10,31 @@
 }
 
 
-<div id="@Model.Compose("tblFilterBuilder")" class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
-    <div class="ui-widget-header ui-corner-top sf-filters-body">
-        @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
+<div id="@Model.Compose("tblFilterBuilder")" class="panel panel-default sf-filters form-xs" @(filtersVisible ? "" : "style=display:none")>
+    <div class="panel-heading sf-filters-body">
+        @Html.QueryTokenBuilder(null, new Context(Model, "tokenBuilder"), (QueryTokenBuilderSettings)ViewData[ViewDataKeys.QueryTokenSettings] ?? SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
 
-        @Html.Href(
-                            Model.Compose("btnAddFilter"),
-                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-filter sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-s" }
-                            })
+        <div class="btn-group">
+            <a id="@Model.Compose("btnAddFilter")" class="sf-query-button sf-add-filter btn btn-default btn-sm" title="@SearchMessage.AddFilter.NiceToString()">
+                <span class="glyphicon glyphicon-arrow-down"></span>
+                @SearchMessage.AddFilter.NiceToString()
+            </a>
+        </div>
 
         @if (showAddColumn)
         {
-            @Html.Href(
-                            Model.Compose("btnAddColumn"),
-                            SearchMessage.FilterBuilder_AddColumn.NiceToString(),
-                            "",
-                            JavascriptMessage.selectToken.NiceToString(),
-                            "sf-query-button sf-add-column sf-disabled",
-                            new Dictionary<string, object> 
-                            { 
-                                { "data-icon", "ui-icon-arrowthick-1-e" },
-                                { "data-url", Url.Action("GetColumnName", "Finder") }
-                            })
+            <div class="btn-group">
+                <a id="@Model.Compose("btnAddColumn")" class="sf-query-button sf-add-column btn btn-default btn-sm" title="@SearchMessage.AddColumn.NiceToString()">
+                    <span class="glyphicon glyphicon-arrow-right"></span>
+                    @SearchMessage.AddColumn.NiceToString()
+                </a>
+            </div>
         }
     </div>
 
-
-    <div class="ui-widget-content ui-corner-bottom sf-filters-list">
-        <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</span>
-        <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
+    <div class="panel-body sf-filters-list table-responsive">
+        <div class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</div>
+        <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none" : null)" class="table">
             <thead>
                 <tr>
                     <th></th>

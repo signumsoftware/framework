@@ -155,7 +155,7 @@ namespace Signum.Entities.Reflection
         {
             Dictionary<string, PropertyInfo> properties = new Dictionary<string,PropertyInfo>();
 
-            foreach (var t in type.FollowC(t => t.BaseType).Reverse())
+            foreach (var t in type.Follow(t => t.BaseType).Reverse())
             {
                 foreach (var pi in PublicInstanceDeclaredPropertiesInOrder(t))
 	            {
@@ -181,7 +181,7 @@ namespace Signum.Entities.Reflection
 
         public static MemberInfo[] GetMemberListBase(Expression e)
         {
-            return e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
+            return e.Follow(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
         }
 
         static Expression NextExpression(Expression e)

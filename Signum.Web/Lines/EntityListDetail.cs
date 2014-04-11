@@ -21,13 +21,12 @@ namespace Signum.Web
     {
         public readonly RouteValueDictionary ListHtmlProps = new RouteValueDictionary();
 
-        public string DefaultDetailDiv { get; private set; }
         public string DetailDiv { get; set; }
 
         public EntityListDetail(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
-            DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);
+            DetailDiv = this.Compose(EntityBaseKeys.Detail);
             Reorder = false;
         }
 

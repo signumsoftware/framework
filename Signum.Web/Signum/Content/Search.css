@@ -1,311 +1,250 @@
-﻿.sf-entity-ctxmenu-error
+﻿.sf-search-footer
 {
-    border: 1px solid red;
+    min-height: 50px;
 }
-.sf-entity-ctxmenu-success a
-{
-    color: green;
-}
-.sf-filters
-{
-    clear: both;
-}
-.sf-filter-field-header
-{
-    min-width: 140px;    
-}
-.sf-filters-body
-{
-    padding: 5px;
-    border-bottom-width: 0px;
-    line-height: 1em;
-}
-.sf-filters-body select
-{
-    vertical-align:top;
-    padding: 3px 4px;
-    margin-top: 1px;
-}
-.sf-filters-header
-{
-    display: block;
-    float: right;
-    cursor: pointer;
-}
-.sf-filters-list
-{
-    padding: 10px;
-    clear: both;
-}
-.sf-filters-list .sf-field
-{
-    padding: 0;
-}
-.sf-filters-list th
-{
-    text-align: left;
-    padding: 4px;
-}
-.sf-filters-list td
-{
-    vertical-align: middle;
-    padding: 0 3px;
-}
-.sf-filter-token
-{
-    padding: 2px 5px;    
-}
-.sf-query-fullscreen
-{
-    float: right;    
-}
-.sf-search-ctxmenu
-{
-    border: 1px solid #aaa;
-    position: absolute;
-    background: #fff;
-}
-.sf-search-ctxitem a
-{
-    font-weight: normal;    
-    cursor: pointer;
-}
-.sf-search-ctxmenu .sf-search-ctxitem
-{
-    min-width: 100px;
-    display: block;
-}
-#sfTmSelected .sf-search-ctxitem
-{
-    width: 100%;
-}
-.sf-search-ctxitem a, .sf-search-ctxitem span
-{
-    display: block;
-    line-height: 1.5;
-    text-decoration: none;
-    white-space: nowrap;
-    text-align: left;
-    padding: .2em .4em;
-}
-.ui-state-default .sf-search-ctxitem a
-{
-    color: inherit;
-}
-.sf-search-ctxitem a.sf-disabled
-{
-    color: #aaa;
-    cursor: default;
-    text-decoration: none !important;    
-}
-.sf-search-ctxitem-header
-{
-    font-weight: bold;
-    cursor: default;
-    border-top: 1px solid #aaa;    
-}
-.sf-search-ctxitem-header:first-child
-{
-    border-top: 0;    
-}
-.sf-search-ctxitem-no-results
-{
-    font-style: italic;    
-}
-.sf-search-ctxmenu-overlay
-{
-    left: 0px;
-    top: 0px;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    min-height: 800px;
-    min-width: 1024px;
-    z-index: 100;
-}
-.sf-tm-selected-loading
-{
-    font-style: italic;
-    font-weight: normal;    
-}
-.sf-search-results .ui-state-active
-{
-    font-weight: inherit;    
-}
-.sf-search-results .ui-state-active a
-{
-    text-decoration: underline;    
-}
-.sf-search-results td.sf-search-footer-pagination
-{
-     padding: 0 7px;   
-}
-.sf-search-footer span
-{
-    padding: 5px 2px 0 2px;
-    font-weight:normal;
-}
-.sf-search-footer span.sf-pagination-strong
-{
-    font-weight: bold;
-}
-.sf-search-footer span.sf-pagination-overflow
-{
-    color : red;
-}
+
 .sf-search-footer div
 {
     float: left;
     width: 33%;
 }
-.sf-pagination-left>span
+
+table.sf-search-results > thead
 {
-    display: block;
-    float: left;
+    white-space:nowrap;
 }
+
+table.sf-search-results tr td
+{
+    white-space: pre-wrap;
+}
+
+.sf-query-button-bar
+{
+    margin-bottom: 10px;
+}
+
+/*Drag and drop*/
+
+th.drag-left
+{
+    box-shadow: inset #AAA 3px 0px 0px 0px;
+}
+
+th.drag-right
+{
+    box-shadow: inset #AAA -3px 0px 0px 0px;
+}
+
+/*Pagination*/
+
 .sf-pagination-center
 {
-    text-align: center;   
+    text-align: center;
 }
+
 .sf-pagination-right
 {
     text-align: right;
 }
-.sf-pagination-size
+
+div.sf-pagination-right > ul.pagination
 {
-    padding: 1px 2px;
-    margin: 1px;    
+    margin: 0px;
 }
+
+div.sf-pagination-right > ul.pagination > li > a,
+div.sf-pagination-right > ul.pagination > li > span
+{
+    padding: 0px 6px;
+}
+
+div.sf-pagination-right > ul.pagination > .disabled > a,
+div.sf-pagination-right > ul.pagination > .disabled > span
+{
+    cursor: default;
+}
+
+#divSearchPage .sf-search-footer
+{
+    margin-top: 10px;
+    margin-bottom: 80px;
+}
+
+
+/* Multiply */
+
+.sf-td-multiply.alert
+{
+    padding: 4px 10px;
+    margin: 3px 0px;
+}
+
+
+
+.sf-popup-fullscreen
+{
+    font-size:18px;
+}
+
+.table-hover > tbody > tr:hover.sf-search-footer > td
+{
+    background-color:transparent;
+}
+
+span.token-builder > select.form-control
+{
+    width: auto;
+    display: inline;
+    height: 30px;
+    padding: 4px;
+    margin: 2px 0px;
+}
+
+.sf-filters-body .btn-sm
+{
+    margin-top: -2px;
+}
+
+.panel-heading.sf-filters-body
+{
+    padding: 3px 5px;
+}
+
+.panel-body.sf-filters-list
+{
+    padding: 5px;
+}
+
+.sf-explanation
+{
+    margin: 10px;
+}
+
+.sf-filters-list > table.table
+{
+    margin-bottom:0px;
+}
+
+.sf-filter-token
+{
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 0px 3px;
+    display: inline-block;
+    margin-bottom: 4px;
+    background-color: #F5F5F5;
+}
+
+div.panel.sf-filters
+{
+    margin: 0px 0px 4px 0px;
+}
+
+div.sf-filters-list table.table
+{
+    width:auto;
+}
+
+
+
+.caret.caret-reversed
+{
+    border-top-width: 0;
+    border-bottom: 4px solid #000000;
+}
+
+/* SORTER */
+
+.sf-header-sort.l3
+{
+    opacity:0.20;
+}
+
+.sf-header-sort.l2
+{
+    opacity:0.40;
+}
+
+.sf-header-sort.l1
+{
+    opacity:0.60;
+}
+
+.sf-header-sort.l0
+{
+}
+
+.sf-header-sort.asc
+{
+    border-top-width: 0;
+    border-bottom: 8px solid;
+}
+
+.sf-header-sort.desc
+{
+    border-bottom-width: 0;
+    border-top: 8px solid;
+}
+
+.sf-header-sort.desc,
+.sf-header-sort.asc
+{
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin: 2px;
+    vertical-align: middle;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+}
+
+/* Context Menu */
+
+.sf-tm-selected-loading,
+.sf-search-ctxitem-no-results
+{
+    text-align: center
+}
+
+/*  Search Popup */
+
+.sf-search-popup .modal-footer
+{
+    padding: 10px;
+}
+
+.sf-search-popup .modal-body
+{  
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
 .sf-search-results
 {
-    width:100%;
-    overflow: hidden;
-}
-.sf-search-footer input[type=button]
-{
-    cursor: pointer;
-}
-.sf-search-results a[title=Navigate]
-{
-    font-weight: bold;
-}
-.sf-search-results input[type=checkbox]
-{
-    float: none;
-    margin-top: inherit;
-}
-.sf-search-results td
-{
-    vertical-align: top;
-    padding: 7px;
-    border-right: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    word-wrap: break-word;
-}
-.sf-search-results td:first-child
-{
-    border-left:1px solid #eee !important;    
-}
-.sf-search-results th
-{
-    line-height: 1.3em;
-    text-align: left;
-    cursor: pointer;
-    vertical-align: top;
-    padding: 7px 0;
-}
-.sf-search-results th:last-child
-{
-    border-right:width:0 !important;    
-}
-.sf-search-results th.sf-header-sort-down
-{
-    background: url(../images/asc.gif) no-repeat scroll left 11px;
-    text-indent: 10px;
-}
-.sf-search-results th.sf-header-sort-up
-{
-    background: url(../images/desc.gif) no-repeat scroll left 11px;
-    text-indent: 10px;
-}
-.sf-search-results .sf-header-droppable
-{
-    width: 10px;    
-    height: 1.3em;
-}
-.sf-search-results .sf-header-droppable-left
-{
-    float: left;    
-}
-.sf-search-results .sf-header-droppable-right
-{
-    float: right;    
-}
-.sf-header-droppable-active
-{
-    background-color: #aaa;
-}
-sf-search-results tbody tr:hover
-{
-    background-color: #efefef;
-}
-.sf-search-results tr:last-child td
-{
-    border-bottom: 0;
-}
-.sf-search-results-container
-{
-	overflow-x:auto;
-}
-.sf-search-control
-{
-    min-width:400px;    
-}
-.sf-search-control .sf-td-multiply
-{
-    font-style: italic;    
+    margin-bottom: 0px
 }
 
-/* slider - track | scrollbar replacement */
-.sf-search-track 
+
+/* check box */
+
+input[type=checkbox].sf-td-selection,
+th.sf-th-selection > input[type=checkbox]
 {
-	position:relative;
-	height:10px;
-	background-color:#ddd;
-	margin-bottom:3px;
-	margin-top: 3px;
-	border-radius:3px;
-	cursor:pointer;
-}
-.sf-search-track:hover 
-{
-	background-color:#ccc;	
-}
-.sf-search-slider 
-{
-	position:absolute;
-	width:7px;
-	height:10px;
-	background-color:#bbb;	
-	border-radius:3px;
-	cursor:pointer;
-}
-.sf-search-slider:hover 
-{
-	background-color:#999;	
+    width: 16px;
+    height: 16px;
 }
 
-span.count-with-results
-{
-    font-weight:bold;
-}
-
-span.count-no-results
-{
-    font-weight:normal;
-}
+/* sf-entity-ctxmenu-success */
 
 tr.sf-entity-ctxmenu-success
 {
-    opacity:.5;
+    opacity: .5;
+}
+
+/*Count search*/
+
+.count-search
+{
+    margin-right: 4px;
 }

@@ -1,106 +1,138 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.WebPages;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public static class TabHelpers
+    public class TabContainer : IDisposable
     {
-        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, string title, MvcHtmlString body)
+        List<Tab> tabs = new List<Tab>();
+
+        TypeContext context;
+        HtmlHelper helper;
+        string containerId;
+
+        public TabContainer(HtmlHelper helper, TypeContext context, string containerId)
         {
-            var result = new HelperResult(writer =>
-            {
-                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
-                writer.WriteLine("   <legend> " + HttpUtility.HtmlEncode(title) + "</legend>");
-                writer.WriteLine(body.ToHtmlString());
-                writer.WriteLine("</fieldset>");
-            });
-
-            var vo = tc.ViewOverrides;
-
-            if (vo != null)
-                return vo.OnSurrondFieldset(id, helper, tc, result);
-
-            return result;
+            this.helper = helper;
+            this.context = context;
+            this.containerId = containerId; 
         }
 
-        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, string title, Func<object, HelperResult> body)
+        public void Tab(Tab tab)
         {
-            var result = new HelperResult(writer =>
-            {
-                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
-                writer.WriteLine("   <legend> " + HttpUtility.HtmlEncode(title) + "</legend>");
-                body(null).WriteTo(writer);
-                writer.WriteLine("</fieldset>");
-            });
-
-            var vo = tc.ViewOverrides;
-
-            if (vo != null)
-                return vo.OnSurrondFieldset(id, helper, tc, result);
-
-            return result;
+            this.tabs.Add(tab);
         }
 
-        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, MvcHtmlString title, MvcHtmlString body)
+
+        public void Tab(string id, string title, MvcHtmlString body)
         {
-            var result = new HelperResult(writer =>
-            {
-                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
-                writer.WriteLine("   <legend> " + title.ToHtmlString() + "</legend>");
-                writer.WriteLine(body.ToHtmlString());
-                writer.WriteLine("</fieldset>");
-            });
-
-            var vo = tc.ViewOverrides;
-
-            if (vo != null)
-                return vo.OnSurrondFieldset(id, helper, tc, result);
-
-            return result;
+            this.tabs.Add(new Tab(id, title, body));
         }
 
-        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, MvcHtmlString title, Func<object, HelperResult> body)
+        public void Tab(string id, string title, Func<object, HelperResult> body)
         {
-            var result = new HelperResult(writer =>
-            {
-                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
-                writer.WriteLine("   <legend> " + title.ToHtmlString() + "</legend>");
-                body(null).WriteTo(writer);
-                writer.WriteLine("</fieldset>");
-            });
-
-            var vo = tc.ViewOverrides;
-
-            if (vo != null)
-                return vo.OnSurrondFieldset(id, helper, tc, result);
-
-            return result;
+            this.tabs.Add(new Tab(id, title, body(null)));
         }
 
-        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
+
+        public void Tab(string id, MvcHtmlString title, MvcHtmlString body)
         {
-            var result = new HelperResult(writer =>
-            {
-                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
+            this.tabs.Add(new Tab(id, title, body));
+        }
 
-                writer.WriteLine("   <legend> ");
-                title(null).WriteTo(writer);
-                writer.WriteLine("</legend>");
+        public void Tab(string id, MvcHtmlString title, Func<object, HelperResult> body)
+        {
+            this.tabs.Add(new Tab(id, title, body(null)));
+        }
 
-                body(null).WriteTo(writer);
-                writer.WriteLine("</fieldset>");
-            });
 
-            var vo = tc.ViewOverrides;
+        public void Tab(string id, Func<object, HelperResult> title, MvcHtmlString body)
+        {
+            this.tabs.Add(new Tab(id, title(null), body));
+        }
 
-            if (vo != null)
-                return vo.OnSurrondFieldset(id, helper, tc, result);
+        public void Tab(string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
+        {
+            this.tabs.Add(new Tab(id, title(null), body(null)));
+        }
 
-            return result;
+
+        public void Dispose()
+        {
+            var newTabs = context.ViewOverrides == null ? tabs : 
+                context.ViewOverrides.ExpandTabs(tabs, containerId, helper, context);
+
+            if (newTabs.IsEmpty())
+                return;
+
+            TextWriter writer = helper.ViewContext.Writer;
+
+            var first = newTabs.First();
+
+            using (Surround(writer, new HtmlTag("ul", context.Compose(containerId)).Class("nav nav-tabs")))
+                foreach (var t in newTabs)
+                    using (Surround(writer, new HtmlTag("li").Class(t == first ? "active" : null)))
+                    using (Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(t.Id)).Attr("data-toggle", "tab")))
+                        t.Title.WriteTo(writer);
+
+            using (Surround(writer, new HtmlTag("div").Class("tab-content")))
+                foreach (var t in newTabs)
+                    using (Surround(writer, new HtmlTag("div", context.Compose(t.Id)).Class("tab-pane fade").Class(t == first ?  "in active" : null)))
+                        t.Body.WriteTo(writer);
+        }
+
+        public static IDisposable Surround(TextWriter writer, HtmlTag div)
+        {
+            writer.WriteLine(div.ToHtml(TagRenderMode.StartTag).ToString());
+
+            return new Disposable(() => writer.WriteLine(div.ToHtml(TagRenderMode.EndTag)));
+        }
+  
+    }
+
+    public class Tab
+    {
+        public readonly string Id;
+        public HelperResult Title;
+        public HelperResult Body; 
+
+        public Tab(string id, string title, MvcHtmlString body)
+            :this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, string title, HelperResult body)
+            : this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), body)
+        {
+        }
+
+
+        public Tab(string id, MvcHtmlString title, MvcHtmlString body)
+            : this(id, new HelperResult(writer => writer.Write(title)), new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, MvcHtmlString title, HelperResult body)
+            : this(id, new HelperResult(writer => writer.Write(title)), body)
+        {
+        }
+
+        public Tab(string id, HelperResult title, MvcHtmlString body)
+            : this(id, title, new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, HelperResult title, HelperResult body)
+        {
+            this.Id = id;
+            this.Title = title;
+            this.Body = body;
         }
     }
 }

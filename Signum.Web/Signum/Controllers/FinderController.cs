@@ -55,20 +55,18 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
+        public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Navigator.Search(this, queryRequest, allowSelection, navigate, filterMode, prefix);
+            return Navigator.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
         }
 
-       
-
         [HttpPost]
-        public ContentResult GetColumnName(string webQueryName, string tokenName)
+        public ContentResult AddColumn(string webQueryName, string tokenName)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
-            return Content(token.NiceName());
+            return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
         }
 
         [HttpPost]
@@ -76,13 +74,13 @@ namespace Signum.Web.Controllers
         {
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
             if (lites.IsEmpty())
-                return Content(NoResult());
+                return Content("");
 
             object queryName = Navigator.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());
 
-            string result = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
+            var items = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
             {
                 Url = RouteHelper.New(),
                 ControllerContext = this.ControllerContext,
@@ -90,21 +88,17 @@ namespace Signum.Web.Controllers
                 QueryName = queryName,
                 Implementations = implementations,
                 Prefix = prefix,
-            }).ToString("");
+            });
 
-            if (string.IsNullOrEmpty(result))
-                return Content(NoResult());
-            else
-                return Content(result);
+            if (items.IsNullOrEmpty())
+                return Content("");
+
+            var sb = new HtmlStringBuilder(items.Select(mi => mi.ToHtml()));
+            sb.Add(new MvcHtmlString(@"<script>$(function(){ $('[data-toggle=""tooltip""]').tooltip({}); });</script>"));
+            return Content(sb.ToHtml().ToString());
         }
 
-        static string NoResult()
-        {
-            var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
-                .ToHtml().ToString();
-            return noResults;
-        }
+      
 
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix, string value)

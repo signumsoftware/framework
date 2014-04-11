@@ -71,10 +71,12 @@ namespace Signum.Web.Operations
 
         static EntityOperationSettings()
         {
-            CssClass = _ => "sf-operation";
+            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+                oi.OperationType == OperationType.Execute && oi.Key.ToString() == "Save" ? BootstrapStyle.Primary :
+                BootstrapStyle.Default;
         }
 
-        public static Func<Enum, string> CssClass { get; set; }
+        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 

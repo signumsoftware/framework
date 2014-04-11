@@ -227,12 +227,12 @@ namespace Signum.Engine.Linq
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
             {
                 if(select.GroupBy != null && select.GroupBy.Count == 0)
-                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be inproved*/).TryCC(cd => cd.GetReference(select.Alias))).ToList();
+                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be inproved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
 
 
                 IEnumerable<ColumnExpression> inner = Keys(select.From);
 
-                var result = inner.Select(ce=>select.Columns.FirstOrDefault(cd=>cd.Expression.Equals(ce)).TryCC(cd=>cd.GetReference(select.Alias))).ToList();
+                var result = inner.Select(ce=>select.Columns.FirstOrDefault(cd=>cd.Expression.Equals(ce)).Try(cd=>cd.GetReference(select.Alias))).ToList();
 
                 if (!select.IsDistinct)
                     return result;
