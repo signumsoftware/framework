@@ -88,6 +88,7 @@ namespace Signum.Engine.Authorization
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
                 }
 
+                
                 UserTicketDN result = new UserTicketDN
                 {
                     User = user.ToLite(),

@@ -108,6 +108,11 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             GridRepeater repeater = new GridRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(repeater, typeof(S).CleanType());
@@ -119,7 +124,6 @@ namespace Signum.Web
 
             var result = helper.InternalGridRepeater<S>(repeater);
 
-            var vo = repeater.ViewOverrides;
             if (vo == null)
                 return result;
 
