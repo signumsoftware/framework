@@ -225,6 +225,12 @@ ul.nav-tabs
 }
 
 
+.form-xs fieldset > legend {
+    padding: 0px 4px 0 4px;
+    font-size: 16px;
+}
+
+
 .form-horizontal.form-xs .control-label, 
 .form-horizontal.form-xs .radio, 
 .form-horizontal.form-xs .checkbox, 
@@ -277,6 +283,12 @@ ul.nav-tabs
 .form-sm .form-group 
 {
     margin-bottom: 5px;
+}
+
+
+.form-sm fieldset > legend {
+    padding: 2px 5px 0 5px;
+    font-size: 18px;
 }
 
 .form-horizontal.form-sm .control-label, 
