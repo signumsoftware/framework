@@ -12,8 +12,8 @@ namespace Signum.Entities.SMS
 {
     public static class SMSProviderOperation
     {
-        public static readonly ConstructFromManySymbol<IdentifiableEntity, SMSMessageDN> SendSMSMessage = OperationSymbol.ConstructFromMany<IdentifiableEntity, SMSMessageDN>();
-        public static readonly ExecuteSymbol<SMSMessageDN> SendSMSMessagesFromTemplate = OperationSymbol.Execute<SMSMessageDN>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessage = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
@@ -148,10 +148,10 @@ namespace Signum.Entities.SMS
     {
         public static readonly ExecuteSymbol<SMSMessageDN> Send = OperationSymbol.Execute<SMSMessageDN>();
         public static readonly ExecuteSymbol<SMSMessageDN> UpdateStatus = OperationSymbol.Execute<SMSMessageDN>();
-        public static readonly ExecuteSymbol<SMSMessageDN> CreateUpdateStatusPackage = OperationSymbol.Execute<SMSMessageDN>();
-        public static readonly ConstructFromSymbol<SMSTemplateDN, SMSMessageDN> CreateSMSFromSMSTemplate = OperationSymbol.ConstructFrom<SMSTemplateDN, SMSMessageDN>();
-        public static readonly ConstructFromSymbol<IdentifiableEntity, SMSMessageDN> CreateSMSWithTemplateFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, SMSMessageDN>();
-        public static readonly ConstructFromSymbol<IdentifiableEntity, SMSMessageDN> CreateSMSFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, SMSMessageDN>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<SMSMessageDN> CreateUpdateStatusPackage = OperationSymbol.Construct<ProcessDN>.FromMany<SMSMessageDN>();
+        public static readonly ConstructSymbol<SMSMessageDN>.From<SMSTemplateDN> CreateSMSFromSMSTemplate = OperationSymbol.Construct<SMSMessageDN>.From<SMSTemplateDN>();
+        public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSWithTemplateFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
+        public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
     }
 
     public static class SMSMessageProcess

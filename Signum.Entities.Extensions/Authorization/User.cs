@@ -155,7 +155,7 @@ namespace Signum.Entities.Authorization
 
     public static class UserOperation
     {
-        public static readonly ConstructSymbol<UserDN> Create = OperationSymbol.Construct<UserDN>();
+        public static readonly ConstructSymbol<UserDN>.Simple Create = OperationSymbol.Construct<UserDN>.Simple();
         public static readonly ExecuteSymbol<UserDN> SaveNew = OperationSymbol.Execute<UserDN>();
         public static readonly ExecuteSymbol<UserDN> Save = OperationSymbol.Execute<UserDN>();
         public static readonly ExecuteSymbol<UserDN> Enable = OperationSymbol.Execute<UserDN>();

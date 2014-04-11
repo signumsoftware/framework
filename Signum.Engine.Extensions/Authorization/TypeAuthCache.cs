@@ -203,7 +203,7 @@ namespace Signum.Entities.Authorization
                         var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
                         {
                             Allowed = a.Allowed,
-                            Condition = a.ConditionName,
+                            Condition = a.TypeCondition,
                         }).ToMList();
 
                         if (!pr.Conditions.SequenceEqual(shouldConditions))
@@ -316,7 +316,7 @@ namespace Signum.Entities.Authorization
                             new XAttribute("Resource", resource),
                             new XAttribute("Allowed", allowed.Fallback.ToString()),
                             from c in allowed.Conditions
-                            let conditionName = TypeConditionSymbol.UniqueKey(c.ConditionName)
+                            let conditionName = c.TypeCondition.Key
                             orderby conditionName
                             select new XElement("Condition",
                                 new XAttribute("Name", conditionName),

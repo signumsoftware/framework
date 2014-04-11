@@ -282,7 +282,7 @@ namespace Signum.Web.Selenium
         }
     }
 
-    public class NormalPage<T> : ILineContainer<T>, IEntityButtonContainer, IWidgetContainer, IDisposable where T : ModifiableEntity
+    public class NormalPage<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IDisposable where T : ModifiableEntity
     {
         public ISelenium Selenium { get; private set; }
 

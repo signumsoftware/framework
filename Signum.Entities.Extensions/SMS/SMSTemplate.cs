@@ -180,7 +180,7 @@ namespace Signum.Entities.SMS
 
     public static class SMSTemplateOperation
     {
-        public static readonly ConstructSymbol<SMSTemplateDN> Create = OperationSymbol.Construct<SMSTemplateDN>();
+        public static readonly ConstructSymbol<SMSTemplateDN>.Simple Create = OperationSymbol.Construct<SMSTemplateDN>.Simple();
         public static readonly ExecuteSymbol<SMSTemplateDN> Save = OperationSymbol.Execute<SMSTemplateDN>();
         public static readonly ExecuteSymbol<SMSTemplateDN> Disable = OperationSymbol.Execute<SMSTemplateDN>();
         public static readonly ExecuteSymbol<SMSTemplateDN> Enable = OperationSymbol.Execute<SMSTemplateDN>();

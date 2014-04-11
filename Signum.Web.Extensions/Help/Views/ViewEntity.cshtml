@@ -106,12 +106,12 @@
             <dl>
                 @foreach (var p in eh.Operations)
                 {
-                    <span class='shortcut'>[o:@OperationDN.UniqueKey(p.Key)]</span>
+                    <span class='shortcut'>[o:@p.Key.Key]</span>
                     <dt>@p.Key.NiceToString()</dt>
                     <dd>
                         @Html.WikiParse(p.Value.Info, HelpClient.DefaultWikiSettings)
-                        @Html.TextArea("o-" + OperationDN.UniqueKey(p.Key), p.Value.UserDescription, new { @class = "editable" })
-                        <span class="editor" id="o-@OperationDN.UniqueKey(p.Key).Replace(".", "_")-editor">
+                        @Html.TextArea("o-" + p.Key.Key, p.Value.UserDescription, new { @class = "editable" })
+                        <span class="editor" id="o-@p.Key.Key.Replace(".", "_")-editor">
                             @Html.WikiParse(p.Value.UserDescription, HelpClient.DefaultWikiSettings)
                         </span>
                     </dd>

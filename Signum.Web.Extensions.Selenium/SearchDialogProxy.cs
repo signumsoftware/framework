@@ -770,21 +770,36 @@ namespace Signum.Web.Selenium
             return result;
         }
 
-        public void ExecuteClick(Enum operationKey)
+        public void ExecuteClick(IOperationSymbolContainer symbolContainer)
         {
-            MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            ExecuteClick(symbolContainer.Operation);
+        }
+
+        public void ExecuteClick(OperationSymbol operationSymbol)
+        {
+            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
             resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator); 
         }
 
-        public void DeleteClick(Enum operationKey)
+        public void DeleteClick(IOperationSymbolContainer symbolContainer)
         {
-            MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            DeleteClick(symbolContainer.Operation);
+        }
+
+        public void DeleteClick(OperationSymbol operationSymbol)
+        {
+            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
             resultTable.Selenium.ConsumeConfirmation();
         }
 
-        public PopupControl<ProcessDN> DeleteProcessClick(Enum operationKey)
+        public PopupControl<ProcessDN> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
         {
-            MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return DeleteProcessClick(symbolContainer.Operation);
+        }
+
+        public PopupControl<ProcessDN> DeleteProcessClick(OperationSymbol operationSymbol)
+        {
+            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
             resultTable.Selenium.ConsumeConfirmation();
 
             var result = new PopupControl<ProcessDN>(this.resultTable.Selenium, "New");
@@ -808,23 +823,35 @@ namespace Signum.Web.Selenium
             return resultTable.Selenium.IsElementPresent(MenuItemLocator(itemId) + "[disabled]");
         }
 
-        public bool IsDisabled(Enum operationKey)
+        public bool IsDisabled(IOperationSymbolContainer symbol)
         {
-            return IsDisabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return IsDisabled(symbol.Operation.KeyWeb());
         }
 
-        public PopupControl<T> ConstructFromPopup<T>(Enum operationKey) where T : IdentifiableEntity
+        public PopupControl<T> MenuClickPopup<T>(string itemId, string prefix = "New")
+            where T : IdentifiableEntity
         {
-            MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            MenuClick(itemId);
             resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
-            var result = new PopupControl<T>(this.resultTable.Selenium, "New");
+            var result = new PopupControl<T>(this.resultTable.Selenium, prefix);
             result.Selenium.WaitElementPresent(result.PopupVisibleLocator);
             return result;
         }
 
-        public NormalPage<T> ConstructFromNormalPage<T>(Enum operationKey) where T : IdentifiableEntity
+        public PopupControl<T> MenuClickPopup<T>(IOperationSymbolContainer contanier, string prefix = "New")
+            where T : IdentifiableEntity
         {
-            MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return MenuClickPopup<T>(contanier.Operation.KeyWeb(), prefix);
+        }
+
+        public NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : IdentifiableEntity
+        {
+            return MenuClickNormalPage<T>(contanier.Operation.KeyWeb());
+        }
+
+        private NormalPage<T> MenuClickNormalPage<T>(string itemId) where T : IdentifiableEntity
+        {
+            MenuClick(itemId);
             resultTable.Selenium.WaitForPageToLoad();
             var result = new NormalPage<T>(this.resultTable.Selenium);
             return result;

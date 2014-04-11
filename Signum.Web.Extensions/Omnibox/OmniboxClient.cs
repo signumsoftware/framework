@@ -12,6 +12,7 @@ using Signum.Engine.Maps;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Web.Omnibox
 {
@@ -116,7 +117,7 @@ namespace Signum.Web.Omnibox
                 return Navigator.IsNavigable(type, null, isSearchEntity: true);
             }
 
-            public override bool AllowedPermission(Enum permission)
+            public override bool AllowedPermission(PermissionSymbol permission)
             {
                 return permission.IsAuthorized();
             }

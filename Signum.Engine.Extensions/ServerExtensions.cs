@@ -83,10 +83,10 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
-                () => PackageLogic.CreatePackageOperation(lites, operationKey));
+                () => PackageLogic.CreatePackageOperation(lites, operationSymbol));
         }
         #endregion
 
@@ -200,7 +200,7 @@ namespace Signum.Services
             () => PermissionAuthLogic.SetPermissionRules(rules));
         }
 
-        public DefaultDictionary<Enum, bool> PermissionRules()
+        public DefaultDictionary<PermissionSymbol, bool> PermissionRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
            () => PermissionAuthLogic.ServicePermissionRules());
@@ -221,7 +221,7 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public Dictionary<Enum, OperationAllowed> AllowedOperations()
+        public Dictionary<OperationSymbol, OperationAllowed> AllowedOperations()
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => OperationAuthLogic.AllowedOperations());

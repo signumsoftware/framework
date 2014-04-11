@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Authorization;
 
 namespace Signum.Windows.Omnibox
 {
@@ -88,7 +89,7 @@ namespace Signum.Windows.Omnibox
             return Navigator.IsNavigable(type, isSearchEntity: true);
         }
 
-        public override bool AllowedPermission(Enum permission)
+        public override bool AllowedPermission(PermissionSymbol permission)
         {
             return permission.IsAuthorized();
         }

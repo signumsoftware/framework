@@ -8,12 +8,13 @@ using System.Windows.Markup;
 using System.Windows;
 using Signum.Windows.Operations;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Windows.Authorization
 {
     public static class OperationAuthClient
     {
-        static Dictionary<Enum, OperationAllowed> authorizedOperations;
+        static Dictionary<OperationSymbol, OperationAllowed> authorizedOperations;
 
         public static bool Started { get; private set; }
 
@@ -29,9 +30,9 @@ namespace Signum.Windows.Authorization
             authorizedOperations = Server.Return((IOperationAuthServer s) => s.AllowedOperations());
         }
 
-        public static bool GetAllowed(Enum operationKey, bool inUserInterface)
+        public static bool GetAllowed(OperationSymbol operationSymbol, bool inUserInterface)
         {
-            var allowed = authorizedOperations.GetOrThrow(operationKey);
+            var allowed = authorizedOperations.GetOrThrow(operationSymbol);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
@@ -43,10 +44,10 @@ namespace Signum.Windows.Authorization
     {
         public bool InUserInterface { get; set; }
 
-        Enum operationKey;
+        OperationSymbol operationKey;
         public OperationAllowedExtension(object value)
         {
-            this.operationKey = (Enum)value;
+            this.operationKey = (OperationSymbol)value;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
@@ -60,10 +61,10 @@ namespace Signum.Windows.Authorization
     {
         public bool InUserInterface { get; set; }
 
-        Enum operationKey;
+        OperationSymbol operationKey;
         public OperationVisiblityExtension(object value)
         {
-            this.operationKey = (Enum)value;
+            this.operationKey = (OperationSymbol)value;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

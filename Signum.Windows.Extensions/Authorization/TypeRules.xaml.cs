@@ -139,9 +139,9 @@ namespace Signum.Windows.Authorization
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
             
-            Enum value;
-            if (SelectorWindow.ShowDialog<Enum>(
-                rules.AvailableConditions.Except(rules.Conditions.Select(a => a.ConditionName)).ToArray(), 
+            TypeConditionSymbol value;
+            if (SelectorWindow.ShowDialog<TypeConditionSymbol>(
+                rules.AvailableConditions.Except(rules.Conditions.Select(a => a.TypeCondition)).ToArray(), 
                 out value, 
                 elementIcon: null,
                 elementText: v => v.NiceToString(),
@@ -271,14 +271,14 @@ namespace Signum.Windows.Authorization
         public bool Selected
         {
             get { return selected; }
-            set { Set(ref selected, value, () => Selected); }
+            set { Set(ref selected, value); }
         }
 
         bool selectedFind;
         public bool SelectedFind
         {
             get { return selectedFind; }
-            set { Set(ref selectedFind, value, () => SelectedFind); }
+            set { Set(ref selectedFind, value); }
         }
 
         public List<TypeRuleBuilder> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
@@ -290,14 +290,14 @@ namespace Signum.Windows.Authorization
         public bool Selected
         {
             get { return selected; }
-            set { Set(ref selected, value, () => Selected); }
+            set { Set(ref selected, value); }
         }
 
         bool selectedFind;
         public bool SelectedFind
         {
             get { return selectedFind; }
-            set { Set(ref selectedFind, value, () => SelectedFind); }
+            set { Set(ref selectedFind, value); }
         }
 
 
@@ -306,7 +306,7 @@ namespace Signum.Windows.Authorization
         public TypeAllowedBuilder Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
+            set { Set(ref allowed, value); }
         }
 
         TypeAllowedAndConditions allowedBase;
@@ -320,14 +320,14 @@ namespace Signum.Windows.Authorization
         public MList<TypeConditionRuleBuilder> Conditions
         {
             get { return conditions; }
-            set { Set(ref conditions, value, () => Conditions); }
+            set { Set(ref conditions, value); }
         }
 
-        ReadOnlyCollection<Enum> availableConditions;
-        public ReadOnlyCollection<Enum> AvailableConditions
+        ReadOnlyCollection<TypeConditionSymbol> availableConditions;
+        public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions
         {
             get { return availableConditions; }
-            set { Set(ref availableConditions, value, () => AvailableConditions); }
+            set { Set(ref availableConditions, value); }
         }
 
         public TypeDN Resource { get; set; }
@@ -339,7 +339,7 @@ namespace Signum.Windows.Authorization
         public TypeRuleBuilder(TypeAllowedRule rule)
         {
             this.allowed = new TypeAllowedBuilder(rule.Allowed.Fallback);
-            this.conditions = rule.Allowed.Conditions.Select(c => new TypeConditionRuleBuilder(c.ConditionName, c.Allowed)).ToMList();
+            this.conditions = rule.Allowed.Conditions.Select(c => new TypeConditionRuleBuilder(c.TypeCondition, c.Allowed)).ToMList();
             this.availableConditions = rule.AvailableConditions;
             this.allowedBase = rule.AllowedBase; 
             this.Resource = rule.Resource;
@@ -374,7 +374,7 @@ namespace Signum.Windows.Authorization
 
                 AllowedBase = AllowedBase,
                 Allowed = new TypeAllowedAndConditions(Allowed.TypeAllowed, 
-                    Conditions.Select(a=>new TypeConditionRule(a.ConditionName, a.Allowed.TypeAllowed)).ToReadOnly()),
+                    Conditions.Select(a=>new TypeConditionRule(a.TypeCondition, a.Allowed.TypeAllowed)).ToReadOnly()),
 
                 AvailableConditions = this.AvailableConditions,
 
@@ -394,13 +394,13 @@ namespace Signum.Windows.Authorization
                     return true;
 
                 return !allowedBase.Conditions.SequenceEqual(Conditions.Select(a => 
-                    new TypeConditionRule(a.ConditionName, a.Allowed.TypeAllowed)));
+                    new TypeConditionRule(a.TypeCondition, a.Allowed.TypeAllowed)));
             }
         }
 
         public bool CanAdd
         {
-            get { return availableConditions.Except(Conditions.Select(a => a.ConditionName)).Any(); }
+            get { return availableConditions.Except(Conditions.Select(a => a.TypeCondition)).Any(); }
         }
     }
 
@@ -411,16 +411,16 @@ namespace Signum.Windows.Authorization
         public TypeAllowedBuilder Allowed
         {
             get { return allowed; }
-            private set { Set(ref allowed, value, () => Allowed); }
+            private set { Set(ref allowed, value); }
         }
 
-        public Enum ConditionName { get; private set; }
+        public TypeConditionSymbol TypeCondition { get; private set; }
 
-        public string ConditionNiceToString { get { return ConditionName.NiceToString(); } }
+        public string ConditionNiceToString { get { return TypeCondition.NiceToString(); } }
 
-        public TypeConditionRuleBuilder(Enum conditionName, TypeAllowed allowed)
+        public TypeConditionRuleBuilder(TypeConditionSymbol typeCondition, TypeAllowed allowed)
         {
-            this.ConditionName = conditionName;
+            this.TypeCondition = typeCondition;
             this.Allowed = new TypeAllowedBuilder(allowed);
         }
 

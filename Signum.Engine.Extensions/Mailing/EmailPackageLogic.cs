@@ -50,7 +50,7 @@ namespace Signum.Engine.Mailing
                 dqm.RegisterExpression((EmailPackageDN ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
 
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(EmailMessageProcesses.SendEmails, new SendEmailProcessAlgorithm());
+                ProcessLogic.Register(EmailMessageProcess.SendEmails, new SendEmailProcessAlgorithm());
 
                 new Graph<ProcessDN>.ConstructFromMany<EmailMessageDN>(EmailMessageOperation.ReSendEmails)
                 {
@@ -79,7 +79,7 @@ namespace Signum.Engine.Mailing
                             }.Save();
                         }
 
-                        return ProcessLogic.Create(EmailMessageProcesses.SendEmails, emailPackage);
+                        return ProcessLogic.Create(EmailMessageProcess.SendEmails, emailPackage);
                     }
                 }.Register();
 

@@ -49,7 +49,7 @@
                 }
                 @if (operationRules)
                 {
-                    <th>@typeof(OperationDN).NiceName()
+                    <th>@typeof(OperationSymbol).NiceName()
                     </th>
                 }
                 @if (queryRules)
@@ -84,11 +84,11 @@
                             style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
                             <span class="glyphicon glyphicon-plus"></span></a>
                         
-                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")" />
+                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(ac.Key, ac.NiceToString()), ",")" />
                     }
                     <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
-                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(TypeConditionNameDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";"))))
+                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
                 </td>
                 @using (var fallback = item.SubContext(a => a.Allowed.Fallback))
                 {
@@ -161,7 +161,7 @@
                     var condition = conditionIter.Value.Condition;
                     var prefix = conditionIter.Value.Prefix;
                         
-            <tr class="sf-auth-condition" data-ns="@iter.Value.Key" data-type="@item.Value.Resource.ClassName" data-condition="@TypeConditionNameDN.UniqueKey(condition.ConditionName)" data-index="@conditionIter.Value.Index">
+            <tr class="sf-auth-condition" data-ns="@iter.Value.Key" data-type="@item.Value.Resource.ClassName" data-condition="@condition.TypeCondition.Key" data-index="@conditionIter.Value.Index">
                 <td>
                     <div class="sf-auth-tree @(iter.IsLast ? "sf-auth-blank" : "sf-auth-line")">
                     </div>
@@ -171,8 +171,8 @@
                     </div>
                     <a class="sf-line-button sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
                         <span class="glyphicon glyphicon-remove"></span></a>
-                    <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
-                    @Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
+                    <span class="sf-auth-label">@condition.TypeCondition.NiceToString()</span>
+                    @Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), condition.TypeCondition.Key)
                 </td>
 
                 @{var allowed = TypeContextUtilities.Compose(prefix, "Allowed");}

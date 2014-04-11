@@ -20,20 +20,20 @@ namespace Signum.Windows.UIAutomation
                             timeout ?? DefaultTimeout);
         }
 
-        public static void ConstructProcessPlayAndWait<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
+        public static void ConstructProcessPlayAndWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : IdentifiableEntity
         {
-            using (var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation))
+            using (var pe = normalWindow.ConstructFrom(symbol))
             {
                 pe.Execute(ProcessOperation.Execute);
-                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)), timeout);
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Operation), timeout);
             }
         }
 
-        public static void ConstructProcessWait<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
+        public static void ConstructProcessWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : IdentifiableEntity
         {
-            using (var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation))
+            using (var pe = normalWindow.ConstructFrom(symbol))
             {
-                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)), timeout);
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Operation), timeout);
             }
         }
     }

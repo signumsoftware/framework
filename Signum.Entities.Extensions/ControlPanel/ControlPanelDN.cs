@@ -206,9 +206,9 @@ namespace Signum.Entities.ControlPanel
 
     public static class ControlPanelOperation
     {
-        public static readonly ConstructSymbol<ControlPanelDN> Create = OperationSymbol.Construct<ControlPanelDN>();
+        public static readonly ConstructSymbol<ControlPanelDN>.Simple Create = OperationSymbol.Construct<ControlPanelDN>.Simple();
         public static readonly ExecuteSymbol<ControlPanelDN> Save = OperationSymbol.Execute<ControlPanelDN>();
-        public static readonly ConstructFromSymbol<ControlPanelDN, ControlPanelDN> Clone = OperationSymbol.ConstructFrom<ControlPanelDN, ControlPanelDN>();
+        public static readonly ConstructSymbol<ControlPanelDN>.From<ControlPanelDN> Clone = OperationSymbol.Construct<ControlPanelDN>.From<ControlPanelDN>();
         public static readonly DeleteSymbol<ControlPanelDN> Delete = OperationSymbol.Delete<ControlPanelDN>();
     }
 

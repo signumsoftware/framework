@@ -510,10 +510,10 @@ namespace Signum.Entities.Mailing
     public static class EmailMessageOperation
     {
         public static readonly ExecuteSymbol<EmailMessageDN> Send = OperationSymbol.Execute<EmailMessageDN>();
-        public static readonly ConstructFromSymbol<EmailMessageDN, EmailMessageDN> ReSend = OperationSymbol.ConstructFrom<EmailMessageDN, EmailMessageDN>();
-        public static readonly ConstructFromManySymbol<EmailMessageDN, ProcessDN> ReSendEmails = OperationSymbol.ConstructFromMany<EmailMessageDN, ProcessDN>();
-        public static readonly ConstructSymbol<EmailMessageDN> CreateMail = OperationSymbol.Construct<EmailMessageDN>();
-        public static readonly ConstructFromSymbol<EmailTemplateDN, EmailMessageDN> CreateMailFromTemplate = OperationSymbol.ConstructFrom<EmailTemplateDN, EmailMessageDN>();
+        public static readonly ConstructSymbol<EmailMessageDN>.From<EmailMessageDN> ReSend = OperationSymbol.Construct<EmailMessageDN>.From<EmailMessageDN>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<EmailMessageDN> ReSendEmails = OperationSymbol.Construct<ProcessDN>.FromMany<EmailMessageDN>();
+        public static readonly ConstructSymbol<EmailMessageDN>.Simple CreateMail = OperationSymbol.Construct<EmailMessageDN>.Simple();
+        public static readonly ConstructSymbol<EmailMessageDN>.From<EmailTemplateDN> CreateMailFromTemplate = OperationSymbol.Construct<EmailMessageDN>.From<EmailTemplateDN>();
         public static readonly DeleteSymbol<EmailMessageDN> Delete = OperationSymbol.Delete<EmailMessageDN>();
     }
 

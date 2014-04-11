@@ -51,7 +51,7 @@ namespace Signum.Web.Files
                     {
                         new EntitySettings<FileRepositoryDN>{ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
                         new EntitySettings<FilePathDN>(),
-                        new EntitySettings<FileTypeDN>(),
+                        new EntitySettings<FileTypeSymbol>(),
                     });
 
                     var es = Navigator.EntitySettings<FilePathDN>();
@@ -71,7 +71,7 @@ namespace Signum.Web.Files
                                 if (hpf != null)
                                 {
                                     string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    return new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType))
+                                    return new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
                                     {
                                         FileName = Path.GetFileName(hpf.FileName),
                                         BinaryFile = hpf.InputStream.ReadAllBytes(),

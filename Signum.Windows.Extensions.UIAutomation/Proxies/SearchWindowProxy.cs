@@ -394,13 +394,13 @@ namespace Signum.Windows.UIAutomation
             get { return new PaginationSelectorProxy(Element.ChildById("paginationSelector"), this); }
         }
 
-        public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
+        public AutomationElement ConstructFrom(OperationSymbol operationSymbol, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
             return Element.CaptureWindow(
-                () => GetOperationButton(operationKey).ButtonInvoke(),
-                () => "Finding a window after {0} from SearchControl {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), QueryName, time), timeOut);
+                () => GetOperationButton(operationSymbol).ButtonInvoke(),
+                () => "Finding a window after {0} from SearchControl {1} took more than {2} ms".Formato(operationSymbol, QueryName, time), timeOut);
         }
 
         public string QueryNameKey
@@ -413,21 +413,21 @@ namespace Signum.Windows.UIAutomation
             get { return QueryLogic.QueryNames[QueryNameKey]; }
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> ConstructFrom<T>(OperationSymbol operationSymbol, int? timeOut = null) where T : IdentifiableEntity
         {
-            AutomationElement element = ConstructFrom(operationKey, timeOut);
+            AutomationElement element = ConstructFrom(operationSymbol, timeOut);
 
             return new NormalWindowProxy<T>(element);
         }
 
-        public AutomationElement GetOperationButton(Enum operationKey)
+        public AutomationElement GetOperationButton(OperationSymbol operationSymbol)
         {
-            return Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+            return Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == operationSymbol.Key);
         }
 
-        public AutomationElement TryGetOperationButton(Enum operationKey)
+        public AutomationElement TryGetOperationButton(OperationSymbol operationSymbol)
         {
-            return Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+            return Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == operationSymbol.Key);
         }
     }
 

@@ -15,6 +15,11 @@ namespace Signum.Web.Selenium
         string ContainerLocator();
     }
 
+    public interface IEntityButtonContainer<T> : IEntityButtonContainer
+    {
+
+    }
+
     public static class EntityButtonContainerExtensions
     {
         public static string ButtonLocator(this IEntityButtonContainer container, string buttonId)
@@ -22,9 +27,15 @@ namespace Signum.Web.Selenium
             return container.ContainerLocator() + " #" + buttonId;
         }
 
-        public static string OperationLocator(this IEntityButtonContainer container, Enum operationKey)
+        public static string OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+            where T:IdentifiableEntity
         {
-            return container.ButtonLocator(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ButtonLocator(symbol.Operation.KeyWeb());
+        }
+
+        public static string KeyWeb(this OperationSymbol operationSymbol)
+        {
+            return operationSymbol.Key.Replace('.', '_');
         }
 
         public static bool ButtonEnabled(this IEntityButtonContainer container, string idButton)
@@ -34,9 +45,10 @@ namespace Signum.Web.Selenium
             return container.Selenium.IsElementPresent(locator + ":not([disabled])");
         }
 
-        public static bool OperationEnabled(this IEntityButtonContainer container, Enum operationKey)
+        public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+            where T : IdentifiableEntity
         {
-            return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ButtonEnabled(symbol.Operation.KeyWeb());
         }
 
         public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
@@ -46,9 +58,10 @@ namespace Signum.Web.Selenium
             return container.Selenium.IsElementPresent(locator + "[disabled]");
         }
 
-        public static bool OperationDisabled(this IEntityButtonContainer container, Enum operationKey)
+        public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+              where T : IdentifiableEntity
         {
-            return container.ButtonDisabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ButtonDisabled(symbol.Operation.KeyWeb());
         }
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
@@ -56,14 +69,16 @@ namespace Signum.Web.Selenium
             container.Selenium.Click(container.ButtonLocator(idButton) + ":not([disabled])");
         }
 
-        public static void OperationClick(this IEntityButtonContainer container, Enum operationKey)
+        public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            container.ButtonClick(symbol.Operation.KeyWeb());
         }
 
-        public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
+        public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
+            where T : IdentifiableEntity
         {
-            container.WaitReload(() => container.OperationClick(operationKey));
+            container.WaitReload(() => container.OperationClick(symbol));
         }
 
         public static void WaitReload(this IEntityButtonContainer container, Action action)
@@ -73,15 +88,17 @@ namespace Signum.Web.Selenium
             container.Selenium.Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        public static void ExecuteSubmit<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.OperationClick(operationKey);
+            container.OperationClick(symbol);
             container.Selenium.WaitForPageToLoad();
         }
 
-        public static SearchPageProxy DeleteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.ExecuteSubmit(operationKey);
+            container.OperationClick(symbol);
             container.Selenium.ConsumeConfirmation();
 
             container.Selenium.WaitForPageToLoad(); 
@@ -89,32 +106,46 @@ namespace Signum.Web.Selenium
             return new SearchPageProxy(container.Selenium);
         }
 
-        public static void ConstructFrom(this IEntityButtonContainer container, Enum operationKey)
+        public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
         {
-            container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
-        }
-
-        public static NormalPage<T> ConstructFromNormalPageSaved<T>(this IEntityButtonContainer container, Enum operationKey) where T: IdentifiableEntity
-        {
-            container.ConstructFrom(operationKey);
+            container.OperationClick(symbol);
 
             container.Selenium.WaitForPageToLoad();
 
             return new NormalPage<T>(container.Selenium, null);
         }
 
-        public static NormalPage<T> ConstructFromNormalPageNew<T>(this IEntityButtonContainer container, Enum operationKey) where T : IdentifiableEntity
+        public static NormalPage<T> ConstructFromNormalPageNew<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol) 
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
         {
-            container.ConstructFrom(operationKey);
+            container.OperationClick(symbol);
 
             container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
 
             return new NormalPage<T>(container.Selenium, null);
         }
 
-        public static PopupControl<T> ConstructFromPopup<T>(this IEntityButtonContainer container, Enum operationKey) where T : ModifiableEntity
+
+        public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, string prefix = "New")
+            where T : ModifiableEntity
         {
-            container.ConstructFrom(operationKey); 
+            container.ButtonClick(symbol.Operation.KeyWeb());
+
+            var popup = new PopupControl<T>(container.Selenium, prefix);
+
+            container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
+
+            return popup;
+        }
+
+        public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
+        {
+            container.OperationClick(symbol);
 
             var popup = new PopupControl<T>(container.Selenium, "New");
 

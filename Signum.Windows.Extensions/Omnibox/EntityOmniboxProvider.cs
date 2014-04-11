@@ -78,7 +78,7 @@ namespace Signum.Windows.Omnibox
 
         public override string GetName(EntityOmniboxResult result)
         {
-            return "E:" + result.Lite.TryCC(l => l.Key()); 
+            return "E:" + result.Lite.Try(l => l.Key()); 
         }
     }
 }

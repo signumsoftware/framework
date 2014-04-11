@@ -75,7 +75,7 @@ namespace Signum.Windows.Chart
             if (csp == null || csp.Type != ChartParameterType.Enum)
                 return null;
 
-            var t = token.TryCC(tk => tk.Token);
+            var t = token.Try(tk => tk.Token);
 
             return csp.GetEnumValues()
                 .Where(a => a.CompatibleWith(t))

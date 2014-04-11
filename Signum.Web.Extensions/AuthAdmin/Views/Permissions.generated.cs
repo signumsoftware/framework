@@ -119,7 +119,7 @@ WriteLiteral("                    ");
 
             
             #line 18 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(typeof(PermissionDN).NiceName());
+               Write(typeof(PermissionSymbol).NiceName());
 
             
             #line default

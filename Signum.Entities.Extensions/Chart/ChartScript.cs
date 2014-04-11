@@ -301,7 +301,7 @@ namespace Signum.Entities.Chart
     public static class ChartScriptOperation
     {
         public static readonly ExecuteSymbol<ChartScriptDN> Save = OperationSymbol.Execute<ChartScriptDN>();
-        public static readonly ConstructFromSymbol<ChartScriptDN, ChartScriptDN> Clone = OperationSymbol.ConstructFrom<ChartScriptDN, ChartScriptDN>();
+        public static readonly ConstructSymbol<ChartScriptDN>.From<ChartScriptDN> Clone = OperationSymbol.Construct<ChartScriptDN>.From<ChartScriptDN>();
         public static readonly DeleteSymbol<ChartScriptDN> Delete = OperationSymbol.Delete<ChartScriptDN>();
     }
 

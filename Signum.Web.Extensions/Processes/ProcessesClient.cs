@@ -39,7 +39,7 @@ namespace Signum.Web.Processes
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process"), },
-                    new EntitySettings<ProcessAlgorithmDN>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
+                    new EntitySettings<ProcessAlgorithmSymbol>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
                     new EntitySettings<UserProcessSessionDN>{ PartialViewName = e => ViewPrefix.Formato("UserProcessSession") }
                 });
 
@@ -82,7 +82,7 @@ namespace Signum.Web.Processes
             var contexts = (from t in types
                             from oi in OperationClient.Manager.OperationInfos(t)
                             where oi.IsEntityOperation
-                            group new { t, oi } by oi.Key into g
+                            group new { t, oi } by oi.OperationSymbol into g
                             let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
                             let oi = g.First().oi
                             let context = new ContextualOperationContext
@@ -92,7 +92,7 @@ namespace Signum.Web.Processes
                                 QueryName = ctx.QueryName,
                                 Entities = ctx.Lites,
                                 OperationSettings = os.Try(s => s.ContextualFromMany),
-                                CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
+                                CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                             os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.OnClick == null || os.ContextualFromMany.OnClick != null)) :
@@ -103,14 +103,14 @@ namespace Signum.Web.Processes
                 return null;
 
             var cleanKeys = contexts.Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
-                .Select(kvp => kvp.OperationInfo.Key).ToList();
+                .Select(kvp => kvp.OperationInfo.OperationSymbol).ToList();
 
             if (cleanKeys.Any())
             {
-                Dictionary<Enum, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
+                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
                 foreach (var cod in contexts)
                 {
-                    var ce = canExecutes.TryGetC(cod.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);
                     if (ce.HasText())
                         cod.CanExecute = ce;
                 }

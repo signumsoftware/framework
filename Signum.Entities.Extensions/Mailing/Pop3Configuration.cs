@@ -104,9 +104,9 @@ namespace Signum.Entities.Mailing
         public static readonly ExecuteSymbol<Pop3ConfigurationDN> ReceiveEmails = OperationSymbol.Execute<Pop3ConfigurationDN>();
     }
 
-    public enum Pop3ConfigurationAction
+    public static class Pop3ConfigurationAction
     {
-        ReceiveAllActivePop3Configurations
+        public static SimpleTaskSymbol ReceiveAllActivePop3Configurations = new SimpleTaskSymbol(); 
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

@@ -85,23 +85,23 @@ namespace Signum.Engine.Authorization
                              OperationAllowed.None;
 
                         var ops = operations[type];
-                        foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.Key) > typeAllowed))
+                        foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.OperationSymbol) > typeAllowed))
                         {
                             bool isError = ta.MaxDB() == TypeAllowedBasic.None;
 
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Operation {1} is {2} but type {3} is [{4}]".Formato(
                                   isError ? "Error" : "Warning",
-                                OperationSymbol.UniqueKey(oi.Key),
-                                GetOperationAllowed(r, oi.Key),
+                                oi.OperationSymbol.Key,
+                                GetOperationAllowed(r, oi.OperationSymbol),
                                 type.Name,
                                 ta));
 
 
                             SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
-                            string message = "{0} to {1} for {2}?".Formato(OperationSymbol.UniqueKey(oi.Key), typeAllowed, r);
+                            string message = "{0} to {1} for {2}?".Formato(oi.OperationSymbol.Key, typeAllowed, r);
                             if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
                             {
-                                Manual.SetAllowed(r, oi.Key, typeAllowed);
+                                Manual.SetAllowed(r, oi.OperationSymbol, typeAllowed);
                                 SafeConsole.WriteLineColor(ConsoleColor.Red, "Disallowed");
                             }
                             else

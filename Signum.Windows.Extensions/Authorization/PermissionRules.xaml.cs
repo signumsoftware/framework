@@ -44,7 +44,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionSymbol).NiceName(), Role);
             DataContext = Server.Return((IPermissionAuthServer s) => s.GetPermissionRules(Role));
         }
 

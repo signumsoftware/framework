@@ -55,7 +55,7 @@ namespace Signum.Windows.Extensions
             (object d) => d == null ? null : Brushes.Pink);
 
         public static readonly IValueConverter TokenToDN = ConverterFactory.New(
-            (QueryTokenDN qt) => qt.TryCC(t => t.TryToken),
+            (QueryTokenDN qt) => qt.Try(t => t.TryToken),
             (QueryToken t) => new QueryTokenDN(t));
     }
 }

@@ -308,7 +308,7 @@ namespace Signum.Entities.Authorization
             if (conditions.IsEmpty())
                 return Fallback.ToString();
 
-            return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.ConditionName, c.Allowed), " | "));
+            return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.TypeCondition, c.Allowed), " | "));
         }
 
         internal bool Exactly(TypeAllowed current)
@@ -320,17 +320,17 @@ namespace Signum.Entities.Authorization
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
-        public TypeConditionRule(TypeConditionSymbol conditionName, TypeAllowed allowed)
+        public TypeConditionRule(TypeConditionSymbol typeCondition, TypeAllowed allowed)
         {
-            this.conditionName = conditionName;
+            this.typeCondition = typeCondition;
             this.allowed = allowed;
         }
 
-        TypeConditionSymbol conditionName;
-        public TypeConditionSymbol ConditionName
+        TypeConditionSymbol typeCondition;
+        public TypeConditionSymbol TypeCondition
         {
-            get { return conditionName; }
-            set { Set(ref conditionName, value); }
+            get { return typeCondition; }
+            set { Set(ref typeCondition, value); }
         }
 
         TypeAllowed allowed;
@@ -342,7 +342,7 @@ namespace Signum.Entities.Authorization
 
         public bool Equals(TypeConditionRule other)
         {
-            return conditionName.Equals(other.conditionName) && 
+            return typeCondition.Equals(other.typeCondition) && 
                 allowed.Equals(other.allowed);
         }
     }

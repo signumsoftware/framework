@@ -63,7 +63,7 @@ namespace Signum.Web.Alerts
             items.Add(new MenuItem
             {
                 CssClass = "sf-alert-create",
-                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity), url),
+                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, AlertOperation.CreateAlertFromEntity.Operation.Key, url),
                 Text = AlertMessage.CreateAlert.NiceToString(),
             }); 
 

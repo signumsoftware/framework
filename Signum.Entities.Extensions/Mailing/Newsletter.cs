@@ -152,10 +152,10 @@ namespace Signum.Entities.Mailing
     public static class NewsletterOperation
     {
         public static readonly ExecuteSymbol<NewsletterDN> Save = OperationSymbol.Execute<NewsletterDN>();
-        public static readonly ExecuteSymbol<NewsletterDN> Send = OperationSymbol.Execute<NewsletterDN>();
+        public static readonly ConstructSymbol<ProcessDN>.From<NewsletterDN> Send = OperationSymbol.Construct<ProcessDN>.From<NewsletterDN>();
         public static readonly ExecuteSymbol<NewsletterDN> AddRecipients = OperationSymbol.Execute<NewsletterDN>();
         public static readonly ExecuteSymbol<NewsletterDN> RemoveRecipients = OperationSymbol.Execute<NewsletterDN>();
-        public static readonly ConstructFromSymbol<NewsletterDN, NewsletterDN> Clone = OperationSymbol.ConstructFrom<NewsletterDN, NewsletterDN>();
+        public static readonly ConstructSymbol<NewsletterDN>.From<NewsletterDN> Clone = OperationSymbol.Construct<NewsletterDN>.From<NewsletterDN>();
     }
 
     public enum NewsletterState

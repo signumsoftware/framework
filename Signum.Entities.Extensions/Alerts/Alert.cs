@@ -163,7 +163,7 @@ namespace Signum.Entities.Alerts
 
     public static class AlertOperation
     {
-        public static readonly ConstructFromSymbol<IdentifiableEntity, AlertDN> CreateAlertFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, AlertDN>();
+        public static readonly ConstructSymbol<AlertDN>.From<IdentifiableEntity> CreateAlertFromEntity = OperationSymbol.Construct<AlertDN>.From<IdentifiableEntity>();
         public static readonly ExecuteSymbol<AlertDN> SaveNew = OperationSymbol.Execute<AlertDN>();
         public static readonly ExecuteSymbol<AlertDN> Save = OperationSymbol.Execute<AlertDN>();
         public static readonly ExecuteSymbol<AlertDN> Attend = OperationSymbol.Execute<AlertDN>();

@@ -29,7 +29,7 @@ namespace Signum.Engine.Notes
             return NotesExpression.Evaluate(ident);
         }
 
-        static HashSet<Enum> SystemNoteTypes = new HashSet<Enum>();
+        static HashSet<NoteTypeDN> SystemNoteTypes = new HashSet<NoteTypeDN>();
         static bool started = false;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
@@ -72,7 +72,7 @@ namespace Signum.Engine.Notes
                         t.Key,
                     });
 
-                SymbolLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
+                SemiSymbolLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
 
                 new Graph<NoteTypeDN>.Execute(NoteTypeOperation.Save)
                 {
@@ -92,7 +92,7 @@ namespace Signum.Engine.Notes
             }
         }
 
-        public static void RegisterNoteType(Enum noteType)
+        public static void RegisterNoteType(NoteTypeDN noteType)
         {
             SystemNoteTypes.Add(noteType);
         }

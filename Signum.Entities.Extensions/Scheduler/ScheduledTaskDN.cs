@@ -81,8 +81,8 @@ namespace Signum.Entities.Scheduler
 
     public static class TaskOperation
     {
-        public static readonly ExecuteSymbol<ScheduledTaskDN> ExecuteSync = OperationSymbol.Execute<ScheduledTaskDN>();
-        public static readonly ExecuteSymbol<ScheduledTaskDN> ExecuteAsync = OperationSymbol.Execute<ScheduledTaskDN>();
+        public static readonly ConstructSymbol<IIdentifiable>.From<ITaskDN> ExecuteSync = OperationSymbol.Construct<IIdentifiable>.From<ITaskDN>();
+        public static readonly ExecuteSymbol<ITaskDN> ExecuteAsync = OperationSymbol.Execute<ITaskDN>();
     }
 
 

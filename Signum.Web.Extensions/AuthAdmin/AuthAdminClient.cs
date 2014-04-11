@@ -60,11 +60,11 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (operations)
-                    Register<OperationRulePack, OperationAllowedRule, OperationDN, OperationAllowed, OperationDN>("operations", a => a.Resource,
+                    Register<OperationRulePack, OperationAllowedRule, OperationSymbol, OperationAllowed, OperationSymbol>("operations", a => a.Resource,
                         Mapping.New<OperationAllowed>(), "Resource", true);
 
                 if (permissions)
-                    Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,
+                    Register<PermissionRulePack, PermissionAllowedRule, PermissionSymbol, bool, PermissionSymbol>("permissions", a => a.Resource,
                         Mapping.New<bool>(), "Resource", false);
 
                 LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
@@ -130,7 +130,7 @@ namespace Signum.Web.AuthAdmin
                                 ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
                                 ctx.Inputs.SubDictionary("Conditions").IndexSubDictionaries().Select(d =>
                                     new TypeConditionRule(
-                                        MultiEnumLogic<TypeConditionNameDN>.ToEnum(d["ConditionName"]),
+                                        SymbolLogic<TypeConditionSymbol>.ToSymbol(d["ConditionName"]),
                                         ParseTypeAllowed(d.SubDictionary("Allowed")))
                                    ).ToReadOnly()))
                         })

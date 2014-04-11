@@ -271,7 +271,7 @@ namespace Signum.Entities.Processes
         public static readonly ExecuteSymbol<ProcessDN> Cancel = OperationSymbol.Execute<ProcessDN>();
         public static readonly ExecuteSymbol<ProcessDN> Execute = OperationSymbol.Execute<ProcessDN>();
         public static readonly ExecuteSymbol<ProcessDN> Suspend = OperationSymbol.Execute<ProcessDN>();
-        public static readonly ExecuteSymbol<ProcessDN> Retry = OperationSymbol.Execute<ProcessDN>();
+        public static readonly ConstructSymbol<ProcessDN>.From<ProcessDN> Retry = OperationSymbol.Construct<ProcessDN>.From<ProcessDN>();
     }
 
     public static class ProcessPermission

@@ -76,7 +76,7 @@ namespace Signum.Entities.Disconnected
     {
         public static readonly ExecuteSymbol<DisconnectedMachineDN> Save = OperationSymbol.Execute<DisconnectedMachineDN>();
         public static readonly ExecuteSymbol<DisconnectedMachineDN> UnsafeUnlock = OperationSymbol.Execute<DisconnectedMachineDN>();
-        public static readonly ConstructFromSymbol<DisconnectedMachineDN, DisconnectedImportDN> FixImport = OperationSymbol.ConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>();
+        public static readonly ConstructSymbol<DisconnectedImportDN>.From<DisconnectedMachineDN> FixImport = OperationSymbol.Construct<DisconnectedImportDN>.From<DisconnectedMachineDN>();
     }
 
     [Serializable]

@@ -161,8 +161,8 @@ namespace Signum.Web.Selenium
         }
     }
 
-   
-    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer where T : ModifiableEntity
+
+    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T> where T : ModifiableEntity
     {
         public PropertyRoute Route { get; private set; }
 

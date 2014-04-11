@@ -77,7 +77,7 @@ namespace Signum.Entities.Mailing
 
     public static class EmailMasterTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailMasterTemplateDN> Create = OperationSymbol.Construct<EmailMasterTemplateDN>();
+        public static readonly ConstructSymbol<EmailMasterTemplateDN>.Simple Create = OperationSymbol.Construct<EmailMasterTemplateDN>.Simple();
         public static readonly ExecuteSymbol<EmailMasterTemplateDN> Save = OperationSymbol.Execute<EmailMasterTemplateDN>();
     }
 

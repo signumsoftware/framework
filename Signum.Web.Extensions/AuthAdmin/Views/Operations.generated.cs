@@ -116,7 +116,7 @@ WriteLiteral("                    ");
 
             
             #line 14 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(typeof(Signum.Entities.Basics.OperationDN).NiceName());
+               Write(typeof(OperationSymbol).NiceName());
 
             
             #line default
@@ -187,7 +187,7 @@ WriteLiteral("                    ");
 
             
             #line 34 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(Html.Span(null, item.Value.Resource.ToEnum().NiceToString()));
+               Write(Html.Span(null, item.Value.Resource.NiceToString()));
 
             
             #line default

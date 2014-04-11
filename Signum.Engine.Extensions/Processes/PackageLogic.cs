@@ -227,7 +227,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((T)(IIdentifiable)line.Target).Delete<T>(DeleteSymbol, args);
+                ((T)(IIdentifiable)line.Target).Delete<T, T>(DeleteSymbol, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
@@ -237,14 +237,14 @@ namespace Signum.Engine.Processes
    
     public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
     {
-        public Enum OperationKey { get; private set; }
+        public ExecuteSymbol<T> Symbol { get; private set; }
 
-        public PackageExecuteAlgorithm(Enum operationKey)
+        public PackageExecuteAlgorithm(ExecuteSymbol<T> symbol)
         {
-            if(operationKey == null)
+            if (symbol == null)
                 throw new ArgumentNullException("operationKey");
 
-            this.OperationKey = operationKey;
+            this.Symbol = symbol;
         }
 
         public virtual void Execute(ExecutingProcess executingProcess)
@@ -255,7 +255,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                line.Target.Execute(OperationKey, args);
+                ((T)(object)line.Target).Execute(Symbol, args);
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
             });
@@ -266,11 +266,12 @@ namespace Signum.Engine.Processes
         where T : class, IIdentifiable
         where F : class, IIdentifiable
     {
+        public ConstructSymbol<T>.From<F> Symbol { get; private set; }
         public Enum OperationKey { get; private set; }
 
-        public PackageConstructFromAlgorithm(Enum operationKey)
+        public PackageConstructFromAlgorithm(ConstructSymbol<T>.From<F> symbol)
         {
-            this.OperationKey = operationKey;
+            this.Symbol = symbol;
         }
 
         public virtual void Execute(ExecutingProcess executingProcess)
@@ -281,7 +282,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines(), line =>
             {
-                var result = line.Target.ConstructFrom<T>(OperationKey, args);
+                var result = ((F)(object)line.Target).ConstructFrom(Symbol, args);
                 if (result.IsNew)
                     result.Save();
 

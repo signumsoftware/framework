@@ -79,7 +79,7 @@ namespace Signum.Entities.Notes
 
     public static class NoteOperation
     {
-        public static readonly ConstructFromSymbol<IdentifiableEntity, NoteDN> CreateNoteFromEntity = OperationSymbol.ConstructFrom<IdentifiableEntity, NoteDN>();
+        public static readonly ConstructSymbol<NoteDN>.From<IdentifiableEntity> CreateNoteFromEntity = OperationSymbol.Construct<NoteDN>.From<IdentifiableEntity>();
         public static readonly ExecuteSymbol<NoteDN> Save = OperationSymbol.Execute<NoteDN>();
     }
 

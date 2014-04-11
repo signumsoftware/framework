@@ -176,7 +176,7 @@ namespace Signum.Engine.Help
             switch (operationInfo.OperationType)
             {
                 case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(
-                    operationInfo.Key.NiceToString(),
+                    operationInfo.OperationSymbol.NiceToString(),
                     operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), 
                     type.NiceName());
                 case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString().Formato(type.NiceName());

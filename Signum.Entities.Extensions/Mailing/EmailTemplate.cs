@@ -18,8 +18,8 @@ namespace Signum.Entities.Mailing
 {
     public static class EmailTemplateOperation
     {
-        public static readonly ConstructFromSymbol<SystemEmailDN, EmailTemplateDN> CreateEmailTemplateFromSystemEmail = OperationSymbol.ConstructFrom<SystemEmailDN, EmailTemplateDN>();
-        public static readonly ConstructSymbol<EmailTemplateDN> Create = OperationSymbol.Construct<EmailTemplateDN>();
+        public static readonly ConstructSymbol<EmailTemplateDN>.From<SystemEmailDN> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateDN>.From<SystemEmailDN>();
+        public static readonly ConstructSymbol<EmailTemplateDN>.Simple Create = OperationSymbol.Construct<EmailTemplateDN>.Simple();
         public static readonly ExecuteSymbol<EmailTemplateDN> Save = OperationSymbol.Execute<EmailTemplateDN>();
         public static readonly ExecuteSymbol<EmailTemplateDN> Enable = OperationSymbol.Execute<EmailTemplateDN>();
         public static readonly ExecuteSymbol<EmailTemplateDN> Disable = OperationSymbol.Execute<EmailTemplateDN>();

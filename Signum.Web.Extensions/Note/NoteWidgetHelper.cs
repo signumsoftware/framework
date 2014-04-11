@@ -51,7 +51,7 @@ namespace Signum.Web.Notes
                 new MenuItem
                 {
                     CssClass = "sf-note-create",
-                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity), url),
+                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, NoteOperation.CreateNoteFromEntity.Operation.Key, url),
                     Text = NoteMessage.CreateNote.NiceToString()
                 },
             }; 

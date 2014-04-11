@@ -419,7 +419,7 @@ namespace Signum.Engine.Authorization
 
             var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
             {
-                var lambda = TypeConditionLogic.GetExpression(type, tacRule.ConditionName);
+                var lambda = TypeConditionLogic.GetExpression(type, tacRule.TypeCondition);
 
                 var exp = (Expression)Expression.Invoke(lambda, entity);
 
@@ -446,8 +446,8 @@ namespace Signum.Engine.Authorization
             Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
 
             var list = (from line in tac.Conditions
-                        select Expression.New(ciGroupDebugData, Expression.Constant(line.ConditionName, typeof(Enum)),
-                        Expression.Invoke(TypeConditionLogic.GetExpression(type, line.ConditionName), entity),
+                        select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(Enum)),
+                        Expression.Invoke(TypeConditionLogic.GetExpression(type, line.TypeCondition), entity),
                         Expression.Constant(line.Allowed))).ToArray();
 
             Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)), list);
@@ -570,7 +570,7 @@ namespace Signum.Engine.Authorization
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionDN
                 {
                     Allowed = a.Allowed,
-                    Condition = a.ConditionName
+                    Condition = a.TypeCondition
                 }).ToMList()
             };
         }

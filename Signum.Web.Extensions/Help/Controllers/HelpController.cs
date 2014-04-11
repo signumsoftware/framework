@@ -17,6 +17,7 @@ using Signum.Engine;
 using Signum.Engine.WikiMarkup;
 using Signum.Engine.Basics;
 using Signum.Entities.Help;
+using Signum.Entities;
 
 namespace Signum.Web.Help
 {
@@ -140,7 +141,7 @@ namespace Signum.Web.Help
                 else if (key.StartsWith("o-"))
                 {
                     subKey = subKey.Replace("_", ".");
-                    Enum e = eh.Operations.Keys.Where(k => OperationDN.UniqueKey(k).Equals(subKey)).SingleEx();
+                    OperationSymbol e = eh.Operations.Keys.Where(k => k.Key.Equals(subKey)).SingleEx();
                     eh.Operations[e].UserDescription = Request.Form[key].ToString();
                     entityModified = true;
                 }

@@ -11,7 +11,7 @@
         <thead>
             <tr>
                 <th>
-                    @typeof(Signum.Entities.Basics.OperationDN).NiceName()
+                    @typeof(OperationSymbol).NiceName()
                 </th>
                 <th>
                     @OperationAllowed.Allow.NiceToString()
@@ -31,7 +31,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.ToEnum().NiceToString())
+                    @Html.Span(null, item.Value.Resource.NiceToString())
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>
