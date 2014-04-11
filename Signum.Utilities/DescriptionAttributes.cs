@@ -197,6 +197,11 @@ namespace Signum.Utilities
             return a.ToString().NiceName();
         }
 
+        public static string NiceName(this FieldInfo fi)
+        {
+            return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
+        }
+
         public static string NiceName(this PropertyInfo pi)
         {
             return GetMemberNiceName(pi) ??
@@ -346,11 +351,11 @@ namespace Signum.Utilities
         {
             var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
             if (doa != null)
-                return type.IsGenericTypeDefinition ? doa.Options  & DescriptionOptions.Members : doa.Options;
+                return type.IsGenericTypeDefinition ? doa.Options & DescriptionOptions.Members : doa.Options;
 
             DescriptionOptions? def = DescriptionManager.OnDefaultDescriptionOptions(type);
             if (def != null)
-                return type.IsGenericTypeDefinition ? def.Value  & DescriptionOptions.Members : def.Value;
+                return type.IsGenericTypeDefinition ? def.Value & DescriptionOptions.Members : def.Value;
 
             return DescriptionOptions.None;
         }
@@ -471,14 +476,17 @@ namespace Signum.Utilities
                 );
         }
 
-        const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
         static IEnumerable<MemberInfo> GetMembers(Type type)
         {
             if (type.IsEnum)
                 return EnumFieldCache.Get(type).Values;
+            else if (type.IsAbstract && type.IsSealed) // static 
+                return type.GetFields(staticFlags).Cast<MemberInfo>();
             else
-                return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
+                return type.GetProperties(instanceFlags).Concat(type.GetFields(instanceFlags).Cast<MemberInfo>());
         }
 
         internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, LocalizedAssembly assembly, XElement x)

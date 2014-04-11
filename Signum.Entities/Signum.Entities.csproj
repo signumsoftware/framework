@@ -83,9 +83,9 @@
     </Compile>
     <Compile Include="Basics\Exception.cs" />
     <Compile Include="Basics\IUserDN.cs" />
-    <Compile Include="Basics\MultiEnum.cs" />
     <Compile Include="Basics\Operation.cs" />
     <Compile Include="Basics\OperationLog.cs" />
+    <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="CallerInfoAttributes.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
@@ -127,6 +127,7 @@
     <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Reflection\StringHashEncoder.cs" />
     <Compile Include="Services\IOperationServer.cs" />
+    <Compile Include="Basics\Symbol.cs" />
     <Compile Include="TimeZoneManager.cs" />
     <Compile Include="TypeAttributes.cs" />
     <Compile Include="Validator.cs" />

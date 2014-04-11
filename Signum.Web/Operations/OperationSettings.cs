@@ -72,7 +72,7 @@ namespace Signum.Web.Operations
         static EntityOperationSettings()
         {
             Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
-                oi.OperationType == OperationType.Execute && oi.Key.ToString() == "Save" ? BootstrapStyle.Primary :
+                oi.OperationType == OperationType.Execute && oi.OperationSymbol.Key.EndsWith(".Save") ? BootstrapStyle.Primary :
                 BootstrapStyle.Default;
         }
 
@@ -123,7 +123,7 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix) { isLite = OperationInfo.Lite };
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -152,7 +152,7 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix){ isLite = OperationInfo.Lite};
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix){ isLite = OperationInfo.Lite};
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -163,9 +163,9 @@ namespace Signum.Web.Operations
 
     public class JsOperationOptions
     {
-        public JsOperationOptions(Enum operationKey, string prefix)
+        public JsOperationOptions(OperationSymbol operation, string prefix)
         {
-            this.operationKey = OperationDN.UniqueKey(operationKey);
+            this.operationKey = operation.Key;
             this.prefix = prefix;
         }
 
