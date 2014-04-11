@@ -110,7 +110,7 @@ namespace Signum.Web
             EntitySettings es = Navigator.EntitySettings(tc.UntypedValue.GetType());
            
             var result = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
-            tc.ViewOverrides = es.ViewOverrides;
+            tc.ViewOverrides = es.GetViewOverrides();
             return result;
         }
 

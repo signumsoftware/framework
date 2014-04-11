@@ -134,6 +134,11 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             EntityStrip es = new EntityStrip(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(es, typeof(S).CleanType());
@@ -145,7 +150,6 @@ namespace Signum.Web
 
             var result = helper.InternalEntityStrip<S>(es);
 
-            var vo = es.ViewOverrides;
             if (vo == null)
                 return result;
 

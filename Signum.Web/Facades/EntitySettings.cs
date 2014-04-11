@@ -30,7 +30,7 @@ namespace Signum.Web
         internal abstract bool OnIsNavigable(string partialViewName, bool isSearchEntity);
         internal abstract bool OnIsReadonly();
 
-        public ViewOverrides ViewOverrides { get; set; }
+        public abstract IViewOverrides GetViewOverrides();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
 
@@ -165,6 +165,19 @@ namespace Signum.Web
         {
             return IsReadonly;
         }
+
+
+        ViewOverrides<T> viewOverride;
+
+        public ViewOverrides<T> CreateViewOverride()
+        {
+            return viewOverride ?? (viewOverride = new ViewOverrides<T>());
+        }
+
+        public override IViewOverrides GetViewOverrides()
+        {
+            return viewOverride;
+        }
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity
@@ -237,6 +250,11 @@ namespace Signum.Web
                 return OverrideImplementations[route];
 
             return ModelEntity.GetImplementations(route); 
+        }
+
+        public override IViewOverrides GetViewOverrides()
+        {
+ 	        return null; //not implemented
         }
     }
 

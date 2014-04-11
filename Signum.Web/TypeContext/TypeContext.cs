@@ -344,13 +344,13 @@ namespace Signum.Web
     {
         List<Tab> ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context);
         MvcHtmlString OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
-
+        bool IsVisible(PropertyRoute propertyRoute);
     }
 
-    public class ViewOverrides : IViewOverrides
+    public class ViewOverrides<T> : IViewOverrides where T : IRootEntity
     {
         public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> BeforeTabDictionary;
-        public ViewOverrides BeforeTab<T>(string id, Func<HtmlHelper, TypeContext<T>, Tab> constructor) where T:IdentifiableEntity
+        public ViewOverrides<T> BeforeTab(string id, Func<HtmlHelper, TypeContext<T>, Tab> constructor) 
         {
             if (BeforeTabDictionary == null)
                 BeforeTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
@@ -361,7 +361,7 @@ namespace Signum.Web
         }
 
         public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> AfterTabDictionary;
-        public ViewOverrides AfterTab<T>(string id, Func<HtmlHelper, TypeContext, Tab> constructor) where T : IdentifiableEntity
+        public ViewOverrides<T> AfterTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
         {
             if (AfterTabDictionary == null)
                 AfterTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
@@ -407,13 +407,12 @@ namespace Signum.Web
         }
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
-        public ViewOverrides BeforeLine<T, S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
-            where T : IRootEntity
+        public ViewOverrides<T> BeforeLine<S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
         {
             return BeforeLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
         }
 
-        public ViewOverrides BeforeLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        public ViewOverrides<T> BeforeLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
         {
             if (beforeLine == null)
                 beforeLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
@@ -425,13 +424,12 @@ namespace Signum.Web
 
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterLine;
-        public ViewOverrides AfterLine<T, S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
-            where T : IRootEntity
+        public ViewOverrides<T> AfterLine< S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
         {
             return AfterLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
         }
 
-        public ViewOverrides AfterLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        public ViewOverrides<T> AfterLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
         {
             if (afterLine == null)
                 afterLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
@@ -455,6 +453,27 @@ namespace Signum.Web
                     result = result.Concat(a(helper, tc));
 
             return result;
+        }
+
+        public ViewOverrides<T> HideLine<S>(Expression<Func<T, S>> propertyRoute) 
+        {
+            return HideLine(PropertyRoute.Construct(propertyRoute));
+        }
+
+        HashSet<PropertyRoute> hiddenLines;
+        public ViewOverrides<T> HideLine(PropertyRoute propertyRoute)
+        {
+            if (hiddenLines == null)
+                hiddenLines = new HashSet<PropertyRoute>();
+
+            hiddenLines.Add(propertyRoute);
+
+            return this;
+        }
+
+        bool IViewOverrides.IsVisible(PropertyRoute propertyRoute)
+        {
+            return hiddenLines == null || !hiddenLines.Contains(propertyRoute);
         }
     }
 }

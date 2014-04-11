@@ -135,6 +135,12 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
+
             EntityCombo ec = new EntityCombo(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(ec, ec.CleanRuntimeType ?? ec.Type.CleanType());
@@ -146,7 +152,6 @@ namespace Signum.Web
 
             var result = helper.InternalEntityCombo(ec);
 
-            var vo = ec.ViewOverrides;
             if (vo == null)
                 return result;
 

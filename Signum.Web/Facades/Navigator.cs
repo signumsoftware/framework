@@ -608,7 +608,7 @@ namespace Signum.Web
             var entity = (ModifiableEntity)options.Entity;
 
             controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
-            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
@@ -648,7 +648,7 @@ namespace Signum.Web
             
             controller.ViewData.Model = typeContext;
             controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
-            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
             bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
@@ -684,7 +684,7 @@ namespace Signum.Web
             if (Navigator.IsReadOnly(cleanType))
                 cleanTC.ReadOnly = true;
 
-            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).ViewOverrides;
+            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).GetViewOverrides();
 
             return new PartialViewResult
             {
