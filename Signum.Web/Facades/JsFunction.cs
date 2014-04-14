@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 
@@ -141,9 +142,9 @@ namespace Signum.Web
             return new ChooserOption(enumValue.ToString(), enumValue.NiceToString());
         }
 
-        public static ChooserOption ToChooserOptionMultiEnum(this Enum enumValue)
+        public static ChooserOption ToChooserOptionMultiEnum(this Symbol symbol)
         {
-            return new ChooserOption(MultiEnumDN.UniqueKey(enumValue), enumValue.NiceToString());
+            return new ChooserOption(symbol.Key, symbol.NiceToString());
         }
     }
 }

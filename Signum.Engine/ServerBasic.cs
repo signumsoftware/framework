@@ -201,28 +201,28 @@ namespace Signum.Services
         #endregion
 
         #region IOperationServer Members
-        public Dictionary<Enum, string> GetCanExecuteAll(IdentifiableEntity entity)
+        public Dictionary<OperationSymbol, string> GetCanExecuteAll(IdentifiableEntity entity)
         {
             return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
                 () => OperationLogic.ServiceCanExecute(entity));
         }
 
-        public Dictionary<Enum, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite)
+        public Dictionary<OperationSymbol, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name,
                 () => OperationLogic.ServiceCanExecute(Database.Retrieve(lite)));
         }
 
-        public string GetCanExecute(IdentifiableEntity entity, Enum operationKey)
+        public string GetCanExecute(IdentifiableEntity entity, OperationSymbol operationSymbol)
         {
-            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name + " " + OperationDN.UniqueKey(operationKey),
-                () => entity.CanExecute(operationKey));
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name + " " + operationSymbol,
+                () => OperationLogic.ServiceCanExecute(entity, operationSymbol));
         }
 
-        public string GetCanExecuteLite(Lite<IdentifiableEntity> lite, Enum operationKey)
+        public string GetCanExecuteLite(Lite<IdentifiableEntity> lite, OperationSymbol operationSymbol)
         {
-            return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name + " " + OperationDN.UniqueKey(operationKey),
-                () => lite.Retrieve().CanExecute(operationKey));
+            return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name + " " + operationSymbol,
+                () => OperationLogic.ServiceCanExecute(lite.Retrieve(), operationSymbol));
         }
 
         public List<OperationInfo> GetOperationInfos(Type entityType)
@@ -237,52 +237,52 @@ namespace Signum.Services
                 () => OperationLogic.GetSaveProtectedTypes());
         }
 
-        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => (IdentifiableEntity)OperationLogic.Execute(entity, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => OperationLogic.ServiceExecute(entity, operationSymbol, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => (IdentifiableEntity)OperationLogic.ExecuteLite(lite, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => (IdentifiableEntity)OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
         }
 
-        public void Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        public void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
-            Execute(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.Delete(lite, operationKey, args));
+            Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
         }
 
-        public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.Construct(type, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => OperationLogic.ServiceConstruct(type, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFrom(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ConstructFrom<IdentifiableEntity>(entity, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => OperationLogic.ServiceConstructFrom(entity, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ConstructFromLite<IdentifiableEntity>(lite, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                () => OperationLogic.ServiceConstructFromLite(lite, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<Enum> cleanKeys)
+        public Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<OperationSymbol> operatonSymbols)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
-                () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
+                () => OperationLogic.GetContextualCanExecute(lite, operatonSymbols));
         }
 
         #endregion

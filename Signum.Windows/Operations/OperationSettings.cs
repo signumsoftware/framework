@@ -14,14 +14,14 @@ namespace Signum.Windows.Operations
 {
     public abstract class OperationSettings
     {
-        public Enum Key { get; set; }
+        public OperationSymbol OperationSymbol { get; set; }
         public string Text { get; set; }
         public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
 
-        public OperationSettings(Enum key)
+        public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.Key = key;
+            this.OperationSymbol = symbol.Operation;
         }
 
     }
@@ -58,11 +58,11 @@ namespace Signum.Windows.Operations
 
         public EntityOperationGroup Group { get; set; }
 
-        public EntityOperationSettings(Enum key)
-            : base(key)
+        public EntityOperationSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
-            Contextual = new ContextualOperationSettings(key);
-            ContextualFromMany = new ContextualOperationSettings(key); 
+            Contextual = new ContextualOperationSettings(symbolContainer);
+            ContextualFromMany = new ContextualOperationSettings(symbolContainer); 
         }
     }
 
@@ -82,10 +82,10 @@ namespace Signum.Windows.Operations
     public class ConstructorSettings : OperationSettings
     {
         public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
-        public Func<OperationInfo, bool> IsVisible { get; set; } 
+        public Func<OperationInfo, bool> IsVisible { get; set; }
 
-        public ConstructorSettings(Enum key)
-            : base(key)
+        public ConstructorSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
         }
     }
@@ -96,8 +96,8 @@ namespace Signum.Windows.Operations
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public double Order { get; set; }
 
-        public ContextualOperationSettings(Enum key)
-            : base(key)
+        public ContextualOperationSettings(IOperationSymbolContainer symbolContainer)
+            : base(symbolContainer)
         {
         }
     }

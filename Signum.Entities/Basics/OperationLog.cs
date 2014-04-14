@@ -26,9 +26,9 @@ namespace Signum.Entities.Basics
             set { Set(ref origin, value); }
         }
 
-        OperationDN operation;
+        OperationSymbol operation;
         [NotNullValidator]
-        public OperationDN Operation
+        public OperationSymbol Operation
         {
             get { return operation; }
             set { SetToStr(ref operation, value); }

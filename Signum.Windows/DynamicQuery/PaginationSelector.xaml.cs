@@ -67,7 +67,7 @@ namespace Signum.Windows
             {
                 loading = true;
 
-                cbMode.SelectedItem = Pagination.TryCS(p => p.GetMode());
+                cbMode.SelectedItem = Pagination.Try(p => p.GetMode());
 
                 if (Pagination is Pagination.Paginate || Pagination is Pagination.Firsts)
                 {
