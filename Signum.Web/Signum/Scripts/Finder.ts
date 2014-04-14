@@ -120,7 +120,7 @@ function findInternal(findOptions: FindOptions, multipleSelection: boolean): Pro
                 });
             }, div=> {
                     getFor(findOptions.prefix).then(sc=> {
-                        updateOkButton(okButtonId, 0, multipleSelection);
+                        updateOkButton(okButtonId, sc.selectedItems().length, multipleSelection);
                         sc.selectionChanged = selected => updateOkButton(okButtonId, selected.length, multipleSelection);
                     });
                 }).then(pair => pair.button.id == okButtonId ? items : null);

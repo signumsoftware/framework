@@ -83,7 +83,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
             }, function (div) {
                 exports.getFor(findOptions.prefix).then(function (sc) {
-                    updateOkButton(okButtonId, 0, multipleSelection);
+                    updateOkButton(okButtonId, sc.selectedItems().length, multipleSelection);
                     sc.selectionChanged = function (selected) {
                         return updateOkButton(okButtonId, selected.length, multipleSelection);
                     };
