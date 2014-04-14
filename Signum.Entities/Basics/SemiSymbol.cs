@@ -20,7 +20,7 @@ namespace Signum.Entities.Basics
         /// </summary>
         /// <param name="frame">Inheritors should use new StackFrame(1, false) and add [MethodImpl(MethodImplOptions.NoInlining)]</param>
         /// <param name="fieldName">Inheritors should use [CallerMemberName]</param>
-        public void MakeSymbol(StackFrame frame, string fieldName)
+        protected void MakeSymbol(StackFrame frame, string fieldName)
         {
             var mi = frame.GetMethod();
 
@@ -64,18 +64,6 @@ namespace Signum.Entities.Basics
         private void OnDeserialized(StreamingContext context)
         {
             SemiSymbolManager.SemiSymbolDeserialized.Invoke(this);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Symbol &&
-                obj.GetType() == this.GetType() &&
-                ((Symbol)obj).Key == Key;
-        }
-
-        public override int GetHashCode()
-        {
-            return key.GetHashCode();
         }
 
 

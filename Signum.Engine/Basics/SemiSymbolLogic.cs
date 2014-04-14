@@ -43,7 +43,8 @@ namespace Signum.Engine.Extensions.Basics
                              c.id = s.id;
                              c.Name = s.Name;
                              c.IsNew = false;
-                             c.Modified = ModifiedState.Sealed;
+                             if (c.Modified != ModifiedState.Sealed)
+                                 c.Modified = ModifiedState.Sealed;
                              return c;
                          }
                     , "loading {0}. Consider synchronize".Formato(typeof(T).Name));

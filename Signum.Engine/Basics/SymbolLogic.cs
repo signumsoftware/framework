@@ -31,22 +31,22 @@ namespace Signum.Engine
 
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
-                {   
-                    var symbols = getSymbols();
-
-                    EnumerableExtensions.JoinStrict(
+                {
+                    var symbols = EnumerableExtensions.JoinStrict(
                          Database.RetrieveAll<T>(),
-                         symbols,
+                         getSymbols(),
                          c => c.Key,
                          s => s.Key,
-                         (c, s) => 
+                         (c, s) =>
                          {
-                             c.id = s.id;
-                             c.IsNew = false; 
-                             c.Modified = ModifiedState.Sealed; 
-                             return c; 
+                             s.id = c.id;
+                             s.toStr = c.toStr;
+                             s.IsNew = false;
+                             if (s.Modified != ModifiedState.Sealed)
+                                 s.Modified = ModifiedState.Sealed;
+                             return s;
                          }
-                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
+                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToList();
 
                     return symbols.ToDictionary(a => a.Key);
 

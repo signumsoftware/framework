@@ -615,8 +615,8 @@ namespace Signum.Engine.Operations
         {
             if (!fromStates.Contains(state))
                 return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
-                    fromStates.CommaOr(v => ((OperationSymbol)(object)v).NiceToString()),
-                    ((OperationSymbol)(object)state).NiceToString());
+                    fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                    ((Enum)(object)state).NiceToString());
 
             return null;
         }

@@ -87,7 +87,7 @@ namespace Signum.Entities.Reflection
         {
             return t.IsAbstract && t.IsSealed && 
                 t.GetFields(BindingFlags.Static | BindingFlags.Public)
-                .Any(a => typeof(Symbol).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+                .Any(a => typeof(Symbol).IsAssignableFrom(a.FieldType) || typeof(IOperationSymbolContainer).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)
