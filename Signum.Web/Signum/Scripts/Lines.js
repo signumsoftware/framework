@@ -95,14 +95,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
 
             this.updateButtonsDisplay();
-            this.notifyChanges();
+            this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
         };
 
-        EntityBase.prototype.notifyChanges = function () {
-            SF.setHasChanges(this.element);
+        EntityBase.prototype.notifyChanges = function (setHasChanges) {
+            if (setHasChanges)
+                SF.setHasChanges(this.element);
 
             this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
         };
@@ -134,6 +135,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return _this.options.prefix;
                 }
 
+                _this.notifyChanges(false);
                 return null;
             });
         };
@@ -208,6 +210,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return _this.options.prefix;
                 }
 
+                _this.notifyChanges(false);
                 return null;
             });
         };
@@ -463,8 +466,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityLineDetail.prototype.find_click = function () {
             var _this = this;
             return this.onFinding(this.options.prefix).then(function (result) {
-                if (result == null)
+                if (result == null) {
+                    _this.notifyChanges(false);
                     return null;
+                }
 
                 if (result.isLoaded())
                     return Promise.resolve(result);
@@ -542,7 +547,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
-            this.notifyChanges();
+            this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
@@ -557,6 +562,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return itemPrefix;
                 }
 
+                _this.notifyChanges(false);
                 return null;
             }).then(function (prefix) {
                 _this.freeReservedPrefix(itemPrefix);
@@ -586,7 +592,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
-            this.notifyChanges();
+            this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
@@ -600,7 +606,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.removeEntitySpecific(itemPrefix);
 
             this.updateButtonsDisplay();
-            this.notifyChanges();
+            this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
             }
@@ -687,6 +693,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return prefixes.join(",");
                 }
 
+                _this.notifyChanges(false);
                 return null;
             }).then(function (prefix) {
                 prefixes.forEach(_this.freeReservedPrefix);
@@ -734,7 +741,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $item.insertBefore($itemPrev);
 
-            this.notifyChanges();
+            this.notifyChanges(true);
         };
 
         EntityListBase.prototype.moveDown = function (itemPrefix) {
@@ -754,7 +761,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $item.insertAfter($itemNext);
 
-            this.notifyChanges();
+            this.notifyChanges(true);
         };
 
         EntityListBase.prototype.getPosIndex = function (itemPrefix) {
@@ -1065,8 +1072,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityRepeater.prototype.find_click = function () {
             var _this = this;
             return this.onFindingMany(this.options.prefix).then(function (result) {
-                if (!result)
+                if (!result) {
+                    _this.notifyChanges(false);
                     return;
+                }
 
                 return Promise.all(result.map(function (e) {
                     var itemPrefix = _this.reserveNextPrefix();
