@@ -146,7 +146,7 @@ namespace Signum.Web.Selenium
 
             return new PopupControl<T>(this.Selenium, newPrefix, route)
             {
-                Disposing = okPressed => { if (okPressed) { WaitNewChanges(changes, "create dialog closed"); } }
+                Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
         }
 
@@ -192,7 +192,7 @@ namespace Signum.Web.Selenium
 
             return new SearchPopupProxy(Selenium, Prefix)
             {
-                Disposing = okPressed => { if (okPressed) { WaitNewChanges(changes, "create dialog closed"); } }
+                Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
         }
 
