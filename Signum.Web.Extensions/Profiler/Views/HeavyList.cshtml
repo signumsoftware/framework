@@ -9,16 +9,18 @@
     <div class="col-sm-6">
         @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
         <div>
-              @Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))
-    @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
+            <br />
+            @Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))
+            <br />
+            @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
         </div>
     </div>
 
-    <div class="col-sm-6" style="text-align:right">
+    <div class="col-sm-6" style="text-align: right">
         @Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null), new { @class = "btn btn-default" })
         @using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
         {
-            <input type="file" name="xmlFile" style="display:inline"/>
+            <input type="file" name="xmlFile" style="display: inline" />
             <input type="submit" value="Upload" class="btn btn-default" />
         }
     </div>

@@ -87,24 +87,24 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        <div>\r\n");
+WriteLiteral("\r\n        <div>\r\n            <br />\r\n");
 
-WriteLiteral("              ");
+WriteLiteral("            ");
 
             
-            #line 12 "..\..\Profiler\Views\HeavyList.cshtml"
-         Write(Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime)));
+            #line 13 "..\..\Profiler\Views\HeavyList.cshtml"
+       Write(Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
+WriteLiteral("\r\n            <br />\r\n");
 
-WriteLiteral("    ");
+WriteLiteral("            ");
 
             
-            #line 13 "..\..\Profiler\Views\HeavyList.cshtml"
-Write(Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum)));
+            #line 15 "..\..\Profiler\Views\HeavyList.cshtml"
+       Write(Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum)));
 
             
             #line default
@@ -113,14 +113,14 @@ WriteLiteral("\r\n        </div>\r\n    </div>\r\n\r\n    <div");
 
 WriteLiteral(" class=\"col-sm-6\"");
 
-WriteLiteral(" style=\"text-align:right\"");
+WriteLiteral(" style=\"text-align: right\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("        ");
 
             
-            #line 18 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 20 "..\..\Profiler\Views\HeavyList.cshtml"
    Write(Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null), new { @class = "btn btn-default" }));
 
             
@@ -129,13 +129,13 @@ WriteLiteral("        ");
 WriteLiteral("\r\n");
 
             
-            #line 19 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 21 "..\..\Profiler\Views\HeavyList.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 21 "..\..\Profiler\Views\HeavyList.cshtml"
          using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
         {
 
@@ -148,9 +148,9 @@ WriteLiteral(" type=\"file\"");
 
 WriteLiteral(" name=\"xmlFile\"");
 
-WriteLiteral(" style=\"display:inline\"");
+WriteLiteral(" style=\"display: inline\"");
 
-WriteLiteral("/>\r\n");
+WriteLiteral(" />\r\n");
 
 WriteLiteral("            <input");
 
@@ -163,7 +163,7 @@ WriteLiteral(" class=\"btn btn-default\"");
 WriteLiteral(" />\r\n");
 
             
-            #line 23 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 25 "..\..\Profiler\Views\HeavyList.cshtml"
         }
 
             
@@ -172,7 +172,7 @@ WriteLiteral(" />\r\n");
 WriteLiteral("    </div>\r\n</div>\r\n\r\n");
 
             
-            #line 27 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 29 "..\..\Profiler\Views\HeavyList.cshtml"
  if (Model != null)
 {
 
@@ -190,7 +190,7 @@ WriteLiteral(" class=\"sf-profiler-chart\"");
 WriteLiteral(" data-detail-url=\"");
 
             
-            #line 31 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 33 "..\..\Profiler\Views\HeavyList.cshtml"
                                                Write(Url.Action("HeavyRoute", "Profiler"));
 
             
@@ -203,7 +203,7 @@ WriteLiteral(">\r\n    </div>\r\n");
 WriteLiteral("    <br />\r\n");
 
             
-            #line 34 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 36 "..\..\Profiler\Views\HeavyList.cshtml"
 }
 
             
@@ -212,7 +212,7 @@ WriteLiteral("    <br />\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 36 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 38 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(Html.ScriptCss("~/Profiler/Content/Profiler.css"));
 
             
@@ -227,7 +227,7 @@ WriteLiteral(">\r\n\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 41 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 43 "..\..\Profiler\Views\HeavyList.cshtml"
     Write(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
 
             

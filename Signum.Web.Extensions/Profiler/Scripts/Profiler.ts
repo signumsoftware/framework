@@ -21,6 +21,8 @@ export function initStats() {
         e.preventDefault();
         $(this).closest("tr").next().toggle();
     });
+
+    init();
 }
 
 export function init() {

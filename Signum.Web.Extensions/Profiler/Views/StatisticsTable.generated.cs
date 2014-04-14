@@ -61,19 +61,19 @@ namespace Signum.Web.Extensions.Profiler.Views
             #line hidden
 WriteLiteral("\r\n<table");
 
-WriteLiteral(" class=\"sf-search-results sf-stats-table\"");
+WriteLiteral(" class=\"table sf-stats-table\"");
 
 WriteLiteral(">\r\n    <thead>\r\n        <tr>\r\n            <th>\r\n                Query\r\n          " +
 "  </th>\r\n            <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 334), Tuple.Create("\"", 408)
+WriteAttribute("class", Tuple.Create(" class=\"", 322), Tuple.Create("\"", 396)
             
             #line 13 "..\..\Profiler\Views\StatisticsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 342), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Count ? "sf-header-sort-up" : ""
+, Tuple.Create(Tuple.Create("", 330), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Count ? "sf-header-sort-up" : ""
             
             #line default
             #line hidden
-, 342), false)
+, 330), false)
 );
 
 WriteLiteral(">\r\n");
@@ -89,14 +89,14 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </th>\r\n            <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 560), Tuple.Create("\"", 632)
+WriteAttribute("class", Tuple.Create(" class=\"", 548), Tuple.Create("\"", 620)
             
             #line 16 "..\..\Profiler\Views\StatisticsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 568), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Sum ? "sf-header-sort-up" : ""
+, Tuple.Create(Tuple.Create("", 556), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Sum ? "sf-header-sort-up" : ""
             
             #line default
             #line hidden
-, 568), false)
+, 556), false)
 );
 
 WriteLiteral(">\r\n");
@@ -112,14 +112,14 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </th>\r\n            <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 780), Tuple.Create("\"", 852)
+WriteAttribute("class", Tuple.Create(" class=\"", 768), Tuple.Create("\"", 840)
             
             #line 19 "..\..\Profiler\Views\StatisticsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 788), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Avg ? "sf-header-sort-up" : ""
+, Tuple.Create(Tuple.Create("", 776), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Avg ? "sf-header-sort-up" : ""
             
             #line default
             #line hidden
-, 788), false)
+, 776), false)
 );
 
 WriteLiteral(">\r\n");
@@ -135,14 +135,14 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </th>\r\n            <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1000), Tuple.Create("\"", 1072)
+WriteAttribute("class", Tuple.Create(" class=\"", 988), Tuple.Create("\"", 1060)
             
             #line 22 "..\..\Profiler\Views\StatisticsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 1008), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Min ? "sf-header-sort-up" : ""
+, Tuple.Create(Tuple.Create("", 996), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Min ? "sf-header-sort-up" : ""
             
             #line default
             #line hidden
-, 1008), false)
+, 996), false)
 );
 
 WriteLiteral(">\r\n");
@@ -158,14 +158,14 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </th>\r\n            <th");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1220), Tuple.Create("\"", 1292)
+WriteAttribute("class", Tuple.Create(" class=\"", 1208), Tuple.Create("\"", 1280)
             
             #line 25 "..\..\Profiler\Views\StatisticsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 1228), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Max ? "sf-header-sort-up" : ""
+, Tuple.Create(Tuple.Create("", 1216), Tuple.Create<System.Object, System.Int32>(order == SqlProfileResumeOrder.Max ? "sf-header-sort-up" : ""
             
             #line default
             #line hidden
-, 1228), false)
+, 1216), false)
 );
 
 WriteLiteral(">\r\n");
@@ -199,6 +199,8 @@ WriteLiteral("\r\n            </th>\r\n            <th>\r\n               Refere
 WriteLiteral("            <tr>\r\n                <td><a");
 
 WriteLiteral(" class=\"sf-stats-show\"");
+
+WriteLiteral(" href=\"javascript:void(0)\"");
 
 WriteLiteral(">Show</a></td>\r\n                <td>");
 

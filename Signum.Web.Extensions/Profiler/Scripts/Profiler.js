@@ -6,6 +6,8 @@ define(["require", "exports", "d3"], function(require, exports, d3) {
             e.preventDefault();
             $(this).closest("tr").next().toggle();
         });
+
+        exports.init();
     }
     exports.initStats = initStats;
 
