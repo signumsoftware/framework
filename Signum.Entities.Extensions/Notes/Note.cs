@@ -8,6 +8,8 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Notes
 {
@@ -102,6 +104,12 @@ namespace Signum.Entities.Notes
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class NoteTypeDN : SemiSymbol
     {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public NoteTypeDN MakeSymbol([CallerMemberName]string memberName = null)
+        {
+            base.MakeSymbol(new StackFrame(1, false), memberName);
+            return this;
+        }
 
     }
 

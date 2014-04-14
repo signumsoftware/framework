@@ -777,7 +777,7 @@ namespace Signum.Web.Selenium
 
         public void ExecuteClick(OperationSymbol operationSymbol)
         {
-            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
+            MenuClick(operationSymbol.KeyWeb());
             resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator); 
         }
 
@@ -788,7 +788,7 @@ namespace Signum.Web.Selenium
 
         public void DeleteClick(OperationSymbol operationSymbol)
         {
-            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
+            MenuClick(operationSymbol.KeyWeb());
             resultTable.Selenium.ConsumeConfirmation();
         }
 
@@ -799,7 +799,7 @@ namespace Signum.Web.Selenium
 
         public PopupControl<ProcessDN> DeleteProcessClick(OperationSymbol operationSymbol)
         {
-            MenuClick(operationSymbol.GetType().Name + "_" + operationSymbol.ToString());
+            MenuClick(operationSymbol.KeyWeb());
             resultTable.Selenium.ConsumeConfirmation();
 
             var result = new PopupControl<ProcessDN>(this.resultTable.Selenium, "New");

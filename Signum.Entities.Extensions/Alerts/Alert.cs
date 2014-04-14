@@ -11,6 +11,8 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using System.ServiceModel;
 using Signum.Services;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Alerts
 {
@@ -173,7 +175,12 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeDN : SemiSymbol
     {
-    
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public AlertTypeDN MakeSymbol([CallerMemberName]string memberName = null)
+        {
+            base.MakeSymbol(new StackFrame(1, false), memberName);
+            return this;
+        }
     }
 
     public static class AlertTypeOperation

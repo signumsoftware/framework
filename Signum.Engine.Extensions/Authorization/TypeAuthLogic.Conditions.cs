@@ -446,7 +446,7 @@ namespace Signum.Engine.Authorization
             Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
 
             var list = (from line in tac.Conditions
-                        select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(Enum)),
+                        select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(TypeConditionSymbol)),
                         Expression.Invoke(TypeConditionLogic.GetExpression(type, line.TypeCondition), entity),
                         Expression.Constant(line.Allowed))).ToArray();
 
@@ -501,7 +501,7 @@ namespace Signum.Engine.Authorization
                     {
                         if (cond.InGroup)
                             return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".Formato(Lite.EntityType.TypeName(), cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
+                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".Formato(Lite.EntityType.TypeName(), cond.TypeCondition, cond.Allowed.Get(UserInterface), Requested);
                     }
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
@@ -512,13 +512,13 @@ namespace Signum.Engine.Authorization
 
         public class ConditionDebugData
         {
-            public Enum ConditionName { get; private set; }
+            public TypeConditionSymbol TypeCondition { get; private set; }
             public bool InGroup { get; private set; }
             public TypeAllowed Allowed { get; private set; }
 
-            internal ConditionDebugData(Enum conditionName, bool inGroup, TypeAllowed allowed)
+            internal ConditionDebugData(TypeConditionSymbol typeCondition, bool inGroup, TypeAllowed allowed)
             {
-                this.ConditionName = conditionName;
+                this.TypeCondition = typeCondition;
                 this.InGroup = inGroup;
                 this.Allowed = allowed;
             }
