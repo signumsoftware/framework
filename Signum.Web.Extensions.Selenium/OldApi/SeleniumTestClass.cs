@@ -152,12 +152,16 @@ namespace Signum.Web.Selenium
             if (!selenium.IsElementPresent("jq=.sf-logout:visible"))
                 throw new InvalidOperationException("No login or logout button found");
 
-            return selenium.GetEval("window.$('.sf-login').attr('data-user')");
+            var result = selenium.GetEval("window.$('.sf-logout').attr('data-user')");
+
+            return result;
         }
 
         public virtual void Logout()
         {
             selenium.Click("jq=.sf-logout:visible");
+            selenium.WaitForPageToLoad();
+            selenium.Open(Url("Auth/Login"));
             selenium.WaitForPageToLoad();
         }
 
