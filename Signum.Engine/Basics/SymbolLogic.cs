@@ -86,7 +86,7 @@ namespace Signum.Engine
                 {
                     var originalName = c.Key;
                     c.Key = s.Key;
-                    return table.UpdateSqlSync(c, comment: c.Key);
+                    return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
 
