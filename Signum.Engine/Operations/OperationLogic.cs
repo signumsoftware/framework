@@ -468,8 +468,8 @@ namespace Signum.Engine.Operations
 
         public static T ConstructFrom<F, FB, T>(this F entity, ConstructSymbol<T>.From<FB> symbol, params object[] args)
             where T : class, IIdentifiable
-            where F : class, IIdentifiable
-            where FB : class, IIdentifiable, F
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(object)entity);
             return (T)op.Construct(entity, args);
@@ -482,9 +482,9 @@ namespace Signum.Engine.Operations
         }
 
         public static T ConstructFromLite<F, FB, T>(this Lite<F> lite, ConstructSymbol<T>.From<FB> symbol, params object[] args)
-            where F : class, IIdentifiable
-            where FB : class, IIdentifiable, F
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Operation).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
