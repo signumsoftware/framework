@@ -401,7 +401,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        public static string CanExecute<T, B>(this T entity, ExecuteSymbol<B> symbol)
+        public static string CanExecute<T, B>(this T entity, IEntityOperationSymbolContainer<B> symbol)
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
