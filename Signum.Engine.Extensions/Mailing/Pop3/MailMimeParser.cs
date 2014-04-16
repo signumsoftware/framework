@@ -188,7 +188,9 @@ namespace Signum.Engine.Mailing.Pop3
 
             foreach (var email in cleanAddress.Split(','))
             {
-                MailAddress address = new MailAddress(email);
+                MailAddress address = email.Contains("undisclosed") && email.Contains("recipients") ? 
+                    new MailAddress("undisclosed@recipients.com") : 
+                    new MailAddress(email);
 
                 addresses.Add(address);
             }
