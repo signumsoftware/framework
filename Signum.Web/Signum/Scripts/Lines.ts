@@ -135,14 +135,15 @@ export class EntityBase {
         }
 
         this.updateButtonsDisplay();
-        this.notifyChanges();
+        this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
     }
 
-    notifyChanges() {
-        SF.setHasChanges(this.element);
+    notifyChanges(setHasChanges: boolean) {
+        if (setHasChanges)
+            SF.setHasChanges(this.element);
 
         this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
     }
@@ -172,6 +173,7 @@ export class EntityBase {
                 return this.options.prefix;
             }
 
+            this.notifyChanges(false);
             return null;
         });
     }
@@ -244,6 +246,7 @@ export class EntityBase {
                 return this.options.prefix;
             }
 
+            this.notifyChanges(false);
             return null;
         });
     }
@@ -502,8 +505,10 @@ export class EntityLineDetail extends EntityBase {
 
     find_click(): Promise<string> {
         return this.onFinding(this.options.prefix).then(result => {
-            if (result == null)
+            if (result == null) {
+                this.notifyChanges(false);
                 return null;
+            }
 
             if (result.isLoaded())
                 return Promise.resolve(<Entities.EntityHtml>result);
@@ -596,7 +601,7 @@ export class EntityListBase extends EntityBase {
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
         this.updateButtonsDisplay();
-        this.notifyChanges();
+        this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
@@ -610,6 +615,7 @@ export class EntityListBase extends EntityBase {
                 return itemPrefix;
             }
 
+            this.notifyChanges(false);
             return null;
         }).then(
             prefix => { this.freeReservedPrefix(itemPrefix); return prefix; },
@@ -634,7 +640,7 @@ export class EntityListBase extends EntityBase {
         Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
         this.updateButtonsDisplay();
-        this.notifyChanges();
+        this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
@@ -648,7 +654,7 @@ export class EntityListBase extends EntityBase {
         this.removeEntitySpecific(itemPrefix);
 
         this.updateButtonsDisplay();
-        this.notifyChanges();
+        this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
             this.entityChanged();
         }
@@ -735,6 +741,7 @@ export class EntityListBase extends EntityBase {
                 return prefixes.join(",");
             }
 
+            this.notifyChanges(false);
             return null;
         }).then(
             prefix => { prefixes.forEach(this.freeReservedPrefix); return prefix; },
@@ -778,7 +785,7 @@ export class EntityListBase extends EntityBase {
 
         $item.insertBefore($itemPrev);
 
-        this.notifyChanges();
+        this.notifyChanges(true);
     }
 
     moveDown(itemPrefix: string) {
@@ -799,7 +806,7 @@ export class EntityListBase extends EntityBase {
 
         $item.insertAfter($itemNext);
 
-        this.notifyChanges();
+        this.notifyChanges(true);
     }
 
     getPosIndex(itemPrefix: string) {
@@ -1101,8 +1108,10 @@ export class EntityRepeater extends EntityListBase {
     find_click(): Promise<string> {
         return this.onFindingMany(this.options.prefix)
             .then(result => {
-                if (!result)
+                if (!result) {
+                    this.notifyChanges(false);
                     return;
+                }
 
                 return Promise.all(result
                     .map(e => {

@@ -30,7 +30,7 @@ namespace Signum.Windows
 
         private void SetTokens(QueryToken token)
         {
-            itemsControl.ItemsSource = token.FollowC(a => a.Parent).Reverse().ToArray();
+            itemsControl.ItemsSource = token.Follow(a => a.Parent).Reverse().ToArray();
 
             AutomationProperties.SetName(this, token.FullKey());
         }

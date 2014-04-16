@@ -100,13 +100,13 @@ namespace Signum.Windows
         public static readonly IValueConverter Not = ConverterFactory.New((bool b) => !b, (bool b) => !b);
 
         public static readonly IValueConverter TypeContextName =
-            ConverterFactory.New((FrameworkElement b) => b.TryCC(fe => Common.GetPropertyRoute(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((FrameworkElement b) => b.Try(fe => Common.GetPropertyRoute(fe)).Try(c => c.Type).Try(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter NiceName =
-            ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((Type type) => type.Try(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeImage =
-            ConverterFactory.New((Type type) => type.TryCC(t => Navigator.Manager.GetEntityIcon(type, true)));
+            ConverterFactory.New((Type type) => type.Try(t => Navigator.Manager.GetEntityIcon(type, true)));
 
         public static readonly IValueConverter ThicknessToCornerRadius =
             ConverterFactory.New((Thickness b) => new CornerRadius

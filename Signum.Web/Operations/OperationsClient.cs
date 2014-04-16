@@ -51,12 +51,12 @@ namespace Signum.Web.Operations
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.AddOrThrow(setting.Key, setting, "EntitySettings {0} repeated");
+            Manager.Settings.AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
         }
 
         public static void AddSettings(List<OperationSettings> settings)
         {
-            Manager.Settings.AddRange(settings, s => s.Key, s => s, "EntitySettings");
+            Manager.Settings.AddRange(settings, s => s.OperationSymbol, s => s, "EntitySettings");
         }
 
 
@@ -135,15 +135,15 @@ namespace Signum.Web.Operations
             }
         }
 
-        public static Enum GetOperationKeyAssert(this Controller controller)
+        public static OperationSymbol GetOperationKeyAssert(this Controller controller)
         {
             var operationFullKey = controller.Request.RequestContext.HttpContext.Request["operationFullKey"]; 
 
-            var operationKey = MultiEnumLogic<OperationDN>.ToEnum(operationFullKey);
+            var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(operationFullKey);
 
-            OperationLogic.AssertOperationAllowed(operationKey, inUserInterface: true);
+            OperationLogic.AssertOperationAllowed(operationSymbol, inUserInterface: true);
 
-            return operationKey;
+            return operationSymbol;
         }
 
         public static bool IsLite(this Controller controller)
@@ -154,18 +154,18 @@ namespace Signum.Web.Operations
 
     public class OperationManager
     {
-        public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
+        public Dictionary<OperationSymbol, OperationSettings> Settings = new Dictionary<OperationSymbol, OperationSettings>();
 
-        public T GetSettings<T>(Enum key)
+        public T GetSettings<T>(OperationSymbol operationSymbol)
             where T : OperationSettings
         {
-            OperationSettings settings = Settings.TryGetC(key);
+            OperationSettings settings = Settings.TryGetC(operationSymbol);
             if (settings != null)
             {
                 var result = settings as T;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), OperationDN.UniqueKey(key), typeof(T).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operationSymbol.Key, typeof(T).TypeName()));
 
                 return result;
             }
@@ -178,7 +178,7 @@ namespace Signum.Web.Operations
         {
             var result = operationInfoCache.GetOrAdd(entityType, OperationLogic.GetAllOperationInfos);
 
-            return result.Where(oi => OperationLogic.OperationAllowed(oi.Key, true));
+            return result.Where(oi => OperationLogic.OperationAllowed(oi.OperationSymbol, true));
         }
 
         #region Execute ToolBarButton
@@ -194,7 +194,7 @@ namespace Signum.Web.Operations
 
             var operations = (from oi in OperationInfos(ident.GetType())
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
-                              let os = GetSettings<EntityOperationSettings>(oi.Key)
+                              let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
                               let eoc = new EntityOperationContext
                               {
                                   Url = ctx.Url,
@@ -211,10 +211,10 @@ namespace Signum.Web.Operations
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = OperationLogic.ServiceCanExecute(ident);
+                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.ServiceCanExecute(ident);
                 foreach (var eoc in operations)
                 {
-                    var ce = canExecutes.TryGetC(eoc.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(eoc.OperationInfo.OperationSymbol);
                     if (ce != null && ce.HasText())
                         eoc.CanExecute = ce;
                 }
@@ -277,7 +277,7 @@ namespace Signum.Web.Operations
         {
             return new ToolBarButton
             {
-                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
+                Id = ctx.OperationInfo.OperationSymbol.Key,
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
@@ -285,7 +285,7 @@ namespace Signum.Web.Operations
                 Enabled = ctx.CanExecute == null,
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
 
-                Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
+                Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).SetOptions(ctx.Options()),
             };
         }
@@ -301,7 +301,8 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefault");
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(
+                        ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
         #endregion
@@ -317,7 +318,7 @@ namespace Signum.Web.Operations
             if (constructor == null)
                 return null;
 
-            return OperationLogic.Construct(type, constructor.Key);
+            return OperationLogic.ServiceConstruct(type, constructor.OperationSymbol);
         }
 
         protected internal virtual ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
@@ -343,7 +344,7 @@ namespace Signum.Web.Operations
                 (from t in types
                  from oi in OperationInfos(t)
                  where oi.OperationType == OperationType.ConstructorFromMany
-                 group new { t, oi } by oi.Key into g
+                 group new { t, oi } by oi.OperationSymbol into g
                  let os = GetSettings<ContextualOperationSettings>(g.Key)
                  let coc = new ContextualOperationContext
                  {
@@ -352,7 +353,7 @@ namespace Signum.Web.Operations
                      Entities = ctx.Lites,
                      OperationSettings = os,
                      OperationInfo = g.First().oi,
-                     CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t)))
+                     CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t)))
                  }
                  where os == null || os.IsVisible == null || os.IsVisible(coc)
                  select CreateContextual(coc, _ => new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromManyDefault")))
@@ -377,7 +378,7 @@ namespace Signum.Web.Operations
             List<ContextualOperationContext> context =
                 (from oi in OperationInfos(ctx.Lites.Single().EntityType)
                  where oi.IsEntityOperation
-                 let os = GetSettings<EntityOperationSettings>(oi.Key)
+                 let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
                  let coc = new ContextualOperationContext
                  {
                      Url = ctx.Url,
@@ -397,10 +398,10 @@ namespace Signum.Web.Operations
 
             if (context.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = OperationLogic.ServiceCanExecute(Database.Retrieve(ctx.Lites.Single()));
+                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.ServiceCanExecute(Database.Retrieve(ctx.Lites.Single()));
                 foreach (var coc in context)
                 {
-                    var ce = canExecutes.TryGetC(coc.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(coc.OperationInfo.OperationSymbol);
                     if (ce != null)
                         coc.CanExecute = ce;
                 }
@@ -424,7 +425,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefaultContextual");
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
 
@@ -432,7 +433,7 @@ namespace Signum.Web.Operations
         {
             return new MenuItem
             {
-                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
+                Id = ctx.OperationInfo.OperationSymbol.Key,
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
@@ -441,7 +442,7 @@ namespace Signum.Web.Operations
 
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
-                Text = ctx.OperationSettings.Try(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
+                Text = ctx.OperationSettings.Try(o => o.Text) ?? ctx.OperationInfo.OperationSymbol.NiceToString(),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) :
                         defaultClick(ctx)).SetOptions(ctx.Options())
             };

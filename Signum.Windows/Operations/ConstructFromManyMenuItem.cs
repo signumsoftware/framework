@@ -25,8 +25,8 @@ namespace Signum.Windows.Operations
         { 
             MenuItem miResult = new MenuItem
             {
-                Header = OperationClient.GetText(coc.OperationInfo.Key),
-                Icon = OperationClient.GetImage(coc.OperationInfo.Key).ToSmallImage(),
+                Header = OperationClient.GetText(coc.OperationInfo.OperationSymbol),
+                Icon = OperationClient.GetImage(coc.OperationInfo.OperationSymbol).ToSmallImage(),
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
@@ -50,12 +50,12 @@ namespace Signum.Windows.Operations
                     coc.OperationSettings.Click(coc);
                 else
                 {
-                    IIdentifiable result = Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.Key));
+                    IIdentifiable result = Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.OperationSymbol));
 
                     if (result != null)
                         Navigator.Navigate(result);
                     else
-                        MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.Key.NiceToString()));
+                        MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.OperationSymbol.NiceToString()));
                 }
             };
 

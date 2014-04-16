@@ -68,9 +68,9 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum NoteWithDateOperation
-    { 
-        Save
+    public static class NoteWithDateOperation
+    {
+        public static readonly ExecuteSymbol<NoteWithDateDN> Save = OperationSymbol.Execute<NoteWithDateDN>();
     }
 
     [DescriptionOptions(DescriptionOptions.All)]
@@ -169,10 +169,10 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum ArtistOperation
+    public static class ArtistOperation
     {
-        Save,
-        AssignPersonalAward
+        public static readonly ExecuteSymbol<ArtistDN> Save = OperationSymbol.Execute<ArtistDN>();
+        public static readonly ExecuteSymbol<ArtistDN> AssignPersonalAward = OperationSymbol.Execute<ArtistDN>();
     }
 
     [Flags]
@@ -245,9 +245,9 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum BandOperation
-    { 
-        Save
+    public static class BandOperation
+    {
+        public static readonly ExecuteSymbol<BandDN> Save = OperationSymbol.Execute<BandDN>();
     }
 
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
@@ -277,9 +277,9 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum AwardOperation
-    { 
-        Save
+    public static class AwardOperation
+    {
+        public static readonly ExecuteSymbol<AwardDN> Save = OperationSymbol.Execute<AwardDN>();
     }
 
     public enum AwardResult 
@@ -345,9 +345,9 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum LabelOperation
-    { 
-        Save
+    public static class LabelOperation
+    {
+        public static readonly ExecuteSymbol<LabelDN> Save = OperationSymbol.Execute<LabelDN>();
     }
 
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
@@ -441,15 +441,15 @@ namespace Signum.Test.Environment
         Saved
     }
 
-    public enum AlbumOperation
+    public static class AlbumOperation
     {
-        Save,
-        Modify,
-        CreateAlbumFromBand,
-        Delete,
-        Clone,
-        CreateGreatestHitsAlbum,
-        CreateEmptyGreatestHitsAlbum
+        public static readonly ExecuteSymbol<AlbumDN> Save = OperationSymbol.Execute<AlbumDN>();
+        public static readonly ExecuteSymbol<AlbumDN> Modify = OperationSymbol.Execute<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.From<BandDN> CreateAlbumFromBand = OperationSymbol.Construct<AlbumDN>.From<BandDN>();
+        public static readonly DeleteSymbol<AlbumDN> Delete = OperationSymbol.Delete<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.From<AlbumDN> Clone = OperationSymbol.Construct<AlbumDN>.From<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
+        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
     }
 
     [Serializable]
@@ -527,9 +527,9 @@ namespace Signum.Test.Environment
         }
     }
 
-    public enum ConfigOperation
+    public static class ConfigOperation
     {
-        Save
+        public static readonly ExecuteSymbol<ConfigDN> Save = OperationSymbol.Execute<ConfigDN>();
     }
 
     public class EmbeddedConfigDN : EmbeddedEntity
