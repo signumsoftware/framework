@@ -56,7 +56,8 @@ namespace Signum.Engine
                 {
                     s.id = lazy.Value.GetOrThrow(s.Key).id;
                     s.IsNew = false;
-                    s.Modified = ModifiedState.Sealed;
+                    if (s.Modified != ModifiedState.Sealed)
+                        s.Modified = ModifiedState.Sealed;
                 });
             }
         }
