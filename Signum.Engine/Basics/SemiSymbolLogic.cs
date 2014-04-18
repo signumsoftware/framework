@@ -104,7 +104,7 @@ namespace Signum.Engine.Extensions.Basics
                     var originalName = c.Key;
                     c.Key = s.Key;
                     c.Name = s.Name;
-                    return table.UpdateSqlSync(c, comment: c.Key);
+                    return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
 

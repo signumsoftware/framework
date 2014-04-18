@@ -378,7 +378,11 @@ namespace Signum.Web
             var before = BeforeTabDictionary.TryGetC(containerId);
             if (before != null)
                 foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
-                    Expand(b(helper, context), helper, context, newTabs);
+                {
+                    var newTab = b(helper, context);
+                    if (newTab != null)
+                        Expand(newTab, helper, context, newTabs);
+                }
 
             foreach (var item in tabs)
                 Expand(item, helper, context, newTabs);
@@ -386,7 +390,11 @@ namespace Signum.Web
             var after = AfterTabDictionary.TryGetC(containerId);
             if (after != null)
                 foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
-                    Expand(a(helper, context), helper, context, newTabs);
+                {
+                    var newTab = a(helper, context);
+                    if (newTab != null)
+                        Expand(newTab, helper, context, newTabs);
+                }
 
             return newTabs;
         }
@@ -396,14 +404,22 @@ namespace Signum.Web
             var before = BeforeTabDictionary.TryGetC(item.Id);
             if (before != null)
                 foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
-                    Expand(b(helper, context), helper, context, newTabs);
+                {
+                    var newTab = b(helper, context);
+                    if (newTab != null)
+                        Expand(newTab, helper, context, newTabs);
+                }
 
             newTabs.Add(item);
 
             var after = AfterTabDictionary.TryGetC(item.Id);
             if (after != null)
                 foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
-                    Expand(a(helper, context), helper, context, newTabs);
+                {
+                    var newTab = a(helper, context);
+                    if (newTab != null)
+                        Expand(newTab, helper, context, newTabs);
+                }
         }
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;

@@ -224,10 +224,32 @@ namespace Signum.Engine.Operations
 
         #region Events
 
+        public static event SurroundOperationHandler SurroundOperation;
         public static event OperationHandler BeginOperation;
         public static event OperationHandler EndOperation;
         public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation;
+
+        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity)
+        {
+            if (SurroundOperation == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
+            {
+                var r = surround(operation, entity);
+                if (r != null)
+                {
+                    if (result == null)
+                        result = r;
+                    else
+                        result = new Disposable(() => { try { result.Dispose(); } finally { r.Dispose(); } });
+                }
+            }
+
+            return result;
+        }
 
         internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
         {
@@ -401,7 +423,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        public static string CanExecute<T, B>(this T entity, ExecuteSymbol<B> symbol)
+        public static string CanExecute<T, B>(this T entity, IEntityOperationSymbolContainer<B> symbol)
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
@@ -468,8 +490,8 @@ namespace Signum.Engine.Operations
 
         public static T ConstructFrom<F, FB, T>(this F entity, ConstructSymbol<T>.From<FB> symbol, params object[] args)
             where T : class, IIdentifiable
-            where F : class, IIdentifiable
-            where FB : class, IIdentifiable, F
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(object)entity);
             return (T)op.Construct(entity, args);
@@ -482,9 +504,9 @@ namespace Signum.Engine.Operations
         }
 
         public static T ConstructFromLite<F, FB, T>(this Lite<F> lite, ConstructSymbol<T>.From<FB> symbol, params object[] args)
-            where F : class, IIdentifiable
-            where FB : class, IIdentifiable, F
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Operation).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
@@ -716,6 +738,7 @@ namespace Signum.Engine.Operations
     }
 
 
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);

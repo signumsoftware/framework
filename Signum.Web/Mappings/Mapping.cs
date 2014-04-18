@@ -634,7 +634,7 @@ namespace Signum.Web
             {
                 runtimeInfo = strRuntimeInfo.Split(',')
                     .Select(r => RuntimeInfo.FromFormValue(r))
-                    .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
+                    .OrderBy(a => !(a == null ? null : a.ToLite()).RefersTo((IdentifiableEntity)(object)ctx.Value))
                     .FirstEx();
             }
 
