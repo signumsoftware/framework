@@ -368,13 +368,13 @@ namespace Signum.Utilities.DataStructures
                 e => e.ToString() ?? "[null]");
         }
 
-        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string> getEdgeLabel)
+        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string> getEdgeLabel = null)
         {
             return ToDGML(n => new[]
             {
                 new XAttribute("Label", getNodeLabel(n)),
                 new XAttribute("Background", getColor(n))
-            }, e=> new []
+            }, e => getEdgeLabel == null ? new XAttribute[0] : new[]
             {
                 new XAttribute("Label", getEdgeLabel(e))
             });
@@ -550,8 +550,6 @@ namespace Signum.Utilities.DataStructures
 
             return to.For(n => previous.ContainsKey(n), n => previous[n]).Reverse().ToList();
         }
-
-
     }
 
     public struct Edge<T, E>
