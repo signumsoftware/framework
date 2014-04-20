@@ -19,10 +19,14 @@ namespace Signum.Engine.Authorization
         public static TimeSpan ExpirationInterval = TimeSpan.FromDays(60);
         public static int MaxTicketsPerUser = 4;
 
+        public static bool IsStarted { get; private set; }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                IsStarted = true;
+
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketDN>();
 
