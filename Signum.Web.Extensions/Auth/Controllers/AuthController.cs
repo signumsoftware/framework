@@ -28,9 +28,9 @@ namespace Signum.Web.Auth
     {
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
-        public static event Action OnUserLogged;
-        public static event Func<Controller, UserDN, ActionResult> OnUserPreLogin;
-        public static event Func<Controller, string> OnUserLoggedDefaultRedirect = c =>
+        public static event Action UserLogged;
+        public static event Action<Controller, UserDN> UserPreLogin;
+        public static event Func<Controller, string> UserLoggedRedirect = c =>
         {
             string referrer = c.ControllerContext.HttpContext.Request["referrer"];
 
@@ -40,8 +40,8 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
-        public static event Action OnUserLoggingOut;
-        public static event Func<Controller, string> OnUserLogoutRedirect = c =>
+        public static event Action UserLoggingOut;
+        public static event Func<Controller, string> UserLogoutRedirect = c =>
         {
             return RouteHelper.New().Action("Index", "Home");
         };
@@ -344,28 +344,13 @@ namespace Signum.Web.Auth
             if (user == null)
                 throw new Exception(AuthMessage.ExpectedUserLogged.NiceToString());
 
-
-            if (OnUserPreLogin != null)
-            {
-                var result = OnUserPreLogin(this, user);
-                if (result != null)
-                    return result;
-            }
+            OnUserPreLogin(this, user);
 
             UserDN.Current = user;
 
-            //guardamos una cookie persistente si se ha seleccionado
-            if (rememberMe.HasValue && rememberMe.Value)
+            if (rememberMe == true)
             {
-                string ticketText = UserTicketLogic.NewTicket(
-                       System.Web.HttpContext.Current.Request.UserHostAddress);
-
-                HttpCookie cookie = new HttpCookie(AuthClient.CookieName, ticketText)
-                {
-                    Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
-                };
-
-                System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
+                UserTicketClient.SaveCookie();
             }
 
             AddUserSession(user);
@@ -373,8 +358,16 @@ namespace Signum.Web.Auth
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
 
-            return this.RedirectHttpOrAjax(OnUserLoggedDefaultRedirect(this));
+            return this.RedirectHttpOrAjax(UserLoggedRedirect(this));
 
+        }
+
+        internal static void OnUserPreLogin(Controller controller, UserDN user)
+        {
+            if (UserPreLogin != null)
+            {
+                UserPreLogin(controller, user);
+            }
         }
 
         private ActionResult LoginErrorAjaxOrForm(string key, string message)
@@ -395,52 +388,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.LoginView);
         }
 
-        public static bool LoginFromCookie()
-        {
-            using (AuthLogic.Disable())
-            {
-                try
-                {
-                    var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
-                    if (authCookie == null || !authCookie.Value.HasText())
-                        return false;   //there is no cookie
-
-                    string ticketText = authCookie.Value;
-
-                    UserDN user = UserTicketLogic.UpdateTicket(
-                           System.Web.HttpContext.Current.Request.UserHostAddress,
-                           ref ticketText);
-
-                    if (OnUserPreLogin != null)
-                    {
-                        var result = OnUserPreLogin(null, user);
-                        if (result != null)
-                        {
-                            //We can not execute :S
-                        }
-                    }
-
-                    System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
-                    {
-                        Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
-                    });
-
-                    AddUserSession(user);
-                    return true;
-                }
-                catch
-                {
-                    //Remove cookie
-                    HttpCookie cookie = new HttpCookie(AuthClient.CookieName)
-                    {
-                        Expires = DateTime.UtcNow.AddDays(-10) // or any other time in the past
-                    };
-                    System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
-
-                    return false;
-                }
-            }
-        }
+      
         #endregion
 
 
@@ -461,30 +409,28 @@ namespace Signum.Web.Auth
         {
             UserDN.Current = user;
 
-            if (OnUserLogged != null)
-                OnUserLogged();
+            if (UserLogged != null)
+                UserLogged();
         }
 
         public ActionResult Logout()
         {
             LogoutDo();
 
-            return this.RedirectHttpOrAjax(OnUserLogoutRedirect(this));
+            return this.RedirectHttpOrAjax(UserLogoutRedirect(this));
         }
 
         public static void LogoutDo()
         {
             var httpContext = System.Web.HttpContext.Current;
 
-            if (OnUserLoggingOut != null)
-                OnUserLoggingOut();
+            if (UserLoggingOut != null)
+                UserLoggingOut();
 
             FormsAuthentication.SignOut();
 
-            var authCookie = httpContext.Request.Cookies[AuthClient.CookieName];
-            if (authCookie != null && authCookie.Value.HasText())
-                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.UtcNow.AddDays(-10);
-
+            UserTicketClient.RemoveCookie();
+            
             httpContext.Session.Abandon();
         }
     }

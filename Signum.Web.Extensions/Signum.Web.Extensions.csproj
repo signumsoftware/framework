@@ -144,6 +144,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Auth\UserTicketClient.cs" />
     <Compile Include="ControlPanel\GridRepeaterHelper.cs" />
     <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.generated.cs">
       <AutoGen>True</AutoGen>
