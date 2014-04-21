@@ -114,7 +114,6 @@ namespace Signum.Engine.Processes
                 SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
-                AuthLogic.AssertStarted(sb);
                 CacheLogic.AssertStarted(sb); 
 
                 ProcessGraph.Register();
