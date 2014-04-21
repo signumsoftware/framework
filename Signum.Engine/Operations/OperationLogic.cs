@@ -527,8 +527,8 @@ namespace Signum.Engine.Operations
 
         public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
             where T : class, IIdentifiable
-            where FB : class, IIdentifiable, F
-            where F : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), symbol.Operation).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
         }
