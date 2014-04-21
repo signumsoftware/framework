@@ -68,15 +68,15 @@ namespace Signum.Entities.Alerts
             set { SetToStr(ref text, value); }
         }
 
-        Lite<UserDN> createdBy;
-        public Lite<UserDN> CreatedBy
+        Lite<IUserDN> createdBy;
+        public Lite<IUserDN> CreatedBy
         {
             get { return createdBy; }
             set { Set(ref createdBy, value); }
         }
 
-        Lite<UserDN> attendedBy;
-        public Lite<UserDN> AttendedBy
+        Lite<IUserDN> attendedBy;
+        public Lite<IUserDN> AttendedBy
         {
             get { return attendedBy; }
             set { Set(ref attendedBy, value); }

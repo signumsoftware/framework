@@ -36,7 +36,7 @@ namespace Signum.Windows.Alerts
             return new AlertDN
             {
                 Target = entity.ToLite(),
-                CreatedBy = UserDN.Current.ToLite()
+                CreatedBy = UserHolder.Current.ToLite()
             };
         }
 
