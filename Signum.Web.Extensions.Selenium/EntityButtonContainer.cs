@@ -128,6 +128,15 @@ namespace Signum.Web.Selenium
             return new NormalPage<T>(container.Selenium, null);
         }
 
+        public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
+            where T : IdentifiableEntity
+        {
+            container.ButtonClick(symbol.Operation.KeyWeb());
+
+            container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
+
+            return new NormalPage<T>(container.Selenium, null);
+        }
 
         public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, string prefix = "New")
             where T : ModifiableEntity
