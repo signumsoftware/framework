@@ -230,8 +230,8 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class UserProcessSessionDN : Entity, IProcessSessionDN
     {
-        Lite<UserDN> user;
-        public Lite<UserDN> User
+        Lite<IUserDN> user;
+        public Lite<IUserDN> User
         {
             get { return user; }
             set { Set(ref user, value); }

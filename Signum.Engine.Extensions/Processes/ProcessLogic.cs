@@ -173,7 +173,7 @@ namespace Signum.Engine.Processes
                     ApplySession.Register((UserProcessSessionDN ups) =>
                     {
                         if (ups.User != null)
-                            UserDN.Current = ups.User.Retrieve();
+                            UserHolder.Current = ups.User.Retrieve();
                     });
 
                     CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
