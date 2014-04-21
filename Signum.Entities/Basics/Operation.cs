@@ -132,7 +132,11 @@ namespace Signum.Entities
         OperationSymbol Operation { get; }
     }
 
-    public interface IEntityOperationSymbolContainer<in T> : IOperationSymbolContainer
+    public interface IEntityOperationSymbolContainer : IOperationSymbolContainer
+    {
+    }
+
+    public interface IEntityOperationSymbolContainer<in T> : IEntityOperationSymbolContainer
         where T : class, IIdentifiable
     {
     }
