@@ -224,10 +224,32 @@ namespace Signum.Engine.Operations
 
         #region Events
 
+        public static event SurroundOperationHandler SurroundOperation;
         public static event OperationHandler BeginOperation;
         public static event OperationHandler EndOperation;
         public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation;
+
+        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity)
+        {
+            if (SurroundOperation == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
+            {
+                var r = surround(operation, entity);
+                if (r != null)
+                {
+                    if (result == null)
+                        result = r;
+                    else
+                        result = new Disposable(() => { try { result.Dispose(); } finally { r.Dispose(); } });
+                }
+            }
+
+            return result;
+        }
 
         internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
         {
@@ -716,6 +738,7 @@ namespace Signum.Engine.Operations
     }
 
 
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);

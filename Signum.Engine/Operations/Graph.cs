@@ -45,6 +45,7 @@ namespace Signum.Engine.Operations
                     OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     using (OperationLogic.AllowSave<T>())
+                    using (OperationLogic.OnSuroundOperation(this, null))
                     {
                         try
                         {
@@ -171,6 +172,7 @@ namespace Signum.Engine.Operations
 
                     using (OperationLogic.AllowSave(entity.GetType()))
                     using (OperationLogic.AllowSave<T>())
+                    using (OperationLogic.OnSuroundOperation(this, entity))
                     {
                         try
                         {
@@ -267,6 +269,7 @@ namespace Signum.Engine.Operations
 
                     using (OperationLogic.AllowSave<F>())
                     using (OperationLogic.AllowSave<T>())
+                    using (OperationLogic.OnSuroundOperation(this, null))
                     {
                         try
                         {
@@ -400,6 +403,7 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
+                    using (OperationLogic.OnSuroundOperation(this, entity))
                     {
                         try
                         {
@@ -546,6 +550,7 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
+                    using (OperationLogic.OnSuroundOperation(this, entity))
                     {
                         try
                         {
