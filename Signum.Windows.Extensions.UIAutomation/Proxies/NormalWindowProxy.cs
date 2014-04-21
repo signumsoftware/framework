@@ -247,9 +247,10 @@ namespace Signum.Windows.UIAutomation
                 actionDescription: () => "Executing {0} from {1}".Formato(symbol.Operation, entityId));
         }
 
-        public static NormalWindowProxy<T> ConstructFrom<F, T>(this NormalWindowProxy<F> window, ConstructSymbol<T>.From<F> symbol, int? timeOut = null)
-            where F : IdentifiableEntity
+        public static NormalWindowProxy<T> ConstructFrom<F, FB, T>(this NormalWindowProxy<F> window, ConstructSymbol<T>.From<FB> symbol, int? timeOut = null)
             where T : IdentifiableEntity
+            where FB : class, IIdentifiable
+            where F : IdentifiableEntity, FB
         {
             AutomationElement element = window.ConstructFromCapture(symbol.Operation, timeOut);
 
