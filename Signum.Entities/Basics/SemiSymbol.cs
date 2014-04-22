@@ -24,7 +24,7 @@ namespace Signum.Entities.Basics
         {
             var mi = frame.GetMethod();
 
-            if (!mi.IsStatic || !mi.IsConstructor)
+            if (mi != mi.DeclaringType.TypeInitializer)
                 throw new InvalidOperationException(string.Format("{0} {1} can only be created in static field initializers", GetType().Name, fieldName));
 
             if (!IsStaticClass(mi.DeclaringType))

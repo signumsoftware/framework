@@ -32,7 +32,10 @@ namespace Signum.Entities
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags);
+            PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags) ?? this.GetType().GetInterfaces().Select(i => i.GetProperty(automaticPropertyName, flags)).NotNull().FirstOrDefault();
+
+            if (pi == null)
+                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
 
             INotifyCollectionChanged col = field as INotifyCollectionChanged;
             if (col != null)
