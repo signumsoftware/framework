@@ -583,7 +583,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
         static void NotifyInvalidateAllConnectedTypes(Type type)
         {
-            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode: true);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeInitialNode: true);
 
             foreach (var stype in connected)
             {
