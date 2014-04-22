@@ -106,64 +106,6 @@ namespace Signum.Windows.UIAutomation
 
         
 
-        public bool IsOperationOperationEnabled(OperationSymbol operationSymbol)
-        {
-            return ButtonBar.GetButton(operationSymbol).Current.IsEnabled;
-        }
-
-        public AutomationElement ExecuteCapture(OperationSymbol operationSymbol, int? timeOut = null)
-        {
-            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
-            var entityId = EntityId;
-            var button = ButtonBar.GetButton(operationSymbol);
-
-            return Element.CaptureWindow(
-                action: () => button.ButtonInvoke(),
-                actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(operationSymbol.Key, entityId));
-        }
-
-        public void ExecuteCaptureDialog(OperationSymbol operationSymbol, Action<AutomationElement> dialogAction, int? timeOut = null)
-        {
-            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
-            var entityId = EntityId;
-            var button = ButtonBar.GetButton(operationSymbol);
-
-            Element.WaitDataContextChangedAfter(
-                action: () =>
-                {
-                    var dialog = Element.CaptureWindow(action: () => button.ButtonInvoke(),
-                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(operationSymbol.Key, entityId));
-
-                    dialogAction(dialog);
-                },
-                actionDescription: () => "Executing {0} from {1}".Formato(operationSymbol.Key, entityId));
-        }
-
-        public AutomationElement ConstructFromCapture(OperationSymbol operationSymbol, int? timeOut = null)
-        {
-            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
-            var entityId = EntityId;
-
-            var button = GetConstructorButton(operationSymbol);
-
-            return Element.CaptureWindow(
-                () => button.ButtonInvoke(),
-                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(operationSymbol.Key, entityId, time));
-        }
-
-        private AutomationElement GetConstructorButton(OperationSymbol operationSymbol)
-        {
-            var result = ButtonBar.TryGetButton(operationSymbol);
-            if (result != null)
-                return result;
-            
-            result = (from sc in MainControl.Descendants(a => a.Current.ClassName == "SearchControl").Select(sc => new SearchControlProxy(sc))
-                      select sc.GetOperationButton(operationSymbol)).NotNull().FirstOrDefault();
-            if (result != null)
-                return result;
-
-            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".Formato(operationSymbol.Key));
-        }
 
 
         public override void Dispose()
@@ -238,13 +180,19 @@ namespace Signum.Windows.UIAutomation
         public static void Execute<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
               where T : IdentifiableEntity
         {
-            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
             var entityId = window.EntityId;
-            var button = window.ButtonBar.GetButton(symbol.Operation);
+            var button = window.GetOperationButton(symbol.Operation);
 
             window.Element.WaitDataContextChangedAfter(
                 action: () => button.ButtonInvoke(),
+                timeOut : timeOut ?? OperationTimeouts.ExecuteTimeout,
                 actionDescription: () => "Executing {0} from {1}".Formato(symbol.Operation, entityId));
+        }
+
+        public static AutomationElement ExecuteCapture<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
+            where T : IdentifiableEntity
+        {
+            return window.OperationCapture(symbol.Operation, timeOut); 
         }
 
         public static NormalWindowProxy<T> ConstructFrom<F, FB, T>(this NormalWindowProxy<F> window, ConstructSymbol<T>.From<FB> symbol, int? timeOut = null)
@@ -252,9 +200,62 @@ namespace Signum.Windows.UIAutomation
             where FB : class, IIdentifiable
             where F : IdentifiableEntity, FB
         {
-            AutomationElement element = window.ConstructFromCapture(symbol.Operation, timeOut);
+            AutomationElement element = window.OperationCapture(symbol.Operation, timeOut);
 
             return new NormalWindowProxy<T>(element);
+        }
+
+
+        public static bool IsOperationEnabled<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)
+             where T : IdentifiableEntity
+        {
+            return window.ButtonBar.GetButton(operationSymbol).Current.IsEnabled;
+        }
+
+        public static void OperationDialog<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol, Action<AutomationElement> dialogAction, int? timeOut = null)
+            where T : IdentifiableEntity
+        {
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+            var entityId = window.EntityId;
+            var button = window.ButtonBar.GetButton(operationSymbol);
+
+            window.Element.WaitDataContextChangedAfter(
+                action: () =>
+                {
+                    var dialog = window.Element.CaptureWindow(action: () => button.ButtonInvoke(),
+                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(operationSymbol.Key, entityId));
+
+                    dialogAction(dialog);
+                },
+                actionDescription: () => "Executing {0} from {1}".Formato(operationSymbol.Key, entityId));
+        }
+
+        public static AutomationElement OperationCapture<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol, int? timeOut = null)
+            where T : IdentifiableEntity
+        {
+            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
+            var entityId = window.EntityId;
+
+            var button = window.GetOperationButton(operationSymbol);
+
+            return window.Element.CaptureWindow(
+                () => button.ButtonInvoke(),
+                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(operationSymbol.Key, entityId, time));
+        }
+
+        public static AutomationElement GetOperationButton<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)
+             where T : IdentifiableEntity
+        {
+            var result = window.ButtonBar.TryGetButton(operationSymbol);
+            if (result != null)
+                return result;
+
+            result = (from sc in window.MainControl.Descendants(a => a.Current.ClassName == "SearchControl").Select(sc => new SearchControlProxy(sc))
+                      select sc.GetOperationButton(operationSymbol)).NotNull().FirstOrDefault();
+            if (result != null)
+                return result;
+
+            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".Formato(operationSymbol.Key));
         }
     }
 
