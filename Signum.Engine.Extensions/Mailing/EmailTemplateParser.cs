@@ -47,7 +47,7 @@ namespace Signum.Engine.Mailing
                     .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)).ToList());
             }
 
-            public bool Equals(object x, object y)
+            bool IEqualityComparer<object>.Equals(object x, object y)
             {
                 if (x == null || y == null)
                     return x == null && y == null;

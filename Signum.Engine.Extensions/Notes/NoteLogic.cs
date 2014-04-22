@@ -94,6 +94,9 @@ namespace Signum.Engine.Notes
 
         public static void RegisterNoteType(NoteTypeDN noteType)
         {
+            if (!noteType.Key.HasText())
+                throw new InvalidOperationException("noteType must have a key, use MakeSymbol method after the constructor when declaring it");
+
             SystemNoteTypes.Add(noteType);
         }
 

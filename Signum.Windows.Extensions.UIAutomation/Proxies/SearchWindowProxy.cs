@@ -43,7 +43,7 @@ namespace Signum.Windows.UIAutomation
         {
             SearchControl.Search();
         }
-       
+
         public SearchWindowProxy SearchSelectAt(int index)
         {
             Search();
@@ -413,9 +413,11 @@ namespace Signum.Windows.UIAutomation
             get { return QueryLogic.QueryNames[QueryNameKey]; }
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(OperationSymbol operationSymbol, int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol, int? timeOut = null)
+            where T : IdentifiableEntity
+            where F : class, IIdentifiable
         {
-            AutomationElement element = ConstructFrom(operationSymbol, timeOut);
+            AutomationElement element = ConstructFrom(symbol.Operation, timeOut);
 
             return new NormalWindowProxy<T>(element);
         }

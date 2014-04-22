@@ -27,6 +27,8 @@
                 @Html.Password("password", null, new { @class = "form-control", placeholder = AuthMessage.Password.NiceToString() })
             </div>
         </div>
+         @if (Signum.Engine.Authorization.UserTicketLogic.IsStarted)
+         {
         <div class="form-group">
             <div class="col-sm-offset-4 col-sm-6">
                 <div class="checkbox">
@@ -36,6 +38,7 @@
                 </div>
             </div>
         </div>
+         }
         <div class="form-group">
             <div class="col-sm-offset-4 col-sm-6">
                 <button type="submit" class="btn btn-default" id="login">@AuthMessage.Login.NiceToString()</button>
