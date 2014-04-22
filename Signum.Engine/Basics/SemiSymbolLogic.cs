@@ -31,21 +31,20 @@ namespace Signum.Engine.Extensions.Basics
                 SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    var symbols =  CreateSemiSymbols();
-
-                    EnumerableExtensions.JoinStrict(
+                    var symbols = EnumerableExtensions.JoinStrict(
                          Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
-                         symbols,
+                         CreateSemiSymbols(),
                          c => c.Key,
                          s => s.Key,
                          (c, s) =>
                          {
-                             c.id = s.id;
-                             c.Name = s.Name;
-                             c.IsNew = false;
-                             if (c.Modified != ModifiedState.Sealed)
-                                 c.Modified = ModifiedState.Sealed;
-                             return c;
+                             s.id = c.id;
+                             s.toStr = c.toStr;
+                             s.Name = c.Name;
+                             s.IsNew = false;
+                             if (s.Modified != ModifiedState.Sealed)
+                                 s.Modified = ModifiedState.Sealed;
+                             return s;
                          }
                     , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
 

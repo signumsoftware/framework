@@ -36,26 +36,26 @@ namespace Signum.Windows
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.Construct(typeof(T), symbol.Operation, args)); 
         }
 
-        public static T ConstructFrom<F, B, T>(this F entity, ConstructSymbol<T>.From<B> symbol, params object[] args)
-            where F : class, IIdentifiable
-            where B : class, IIdentifiable, F
+        public static T ConstructFrom<F, FB, T>(this F entity, ConstructSymbol<T>.From<FB> symbol, params object[] args)
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFrom(entity, symbol.Operation, args)); 
         }
 
-        public static T ConstructFromLite<F, B, T>(this Lite<F> lite, ConstructSymbol<T>.From<B> symbol, params object[] args)
-            where F : class, IIdentifiable
-            where B : class, IIdentifiable, F
+        public static T ConstructFromLite<F, FB, T>(this Lite<F> lite, ConstructSymbol<T>.From<FB> symbol, params object[] args)
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromLite(lite, symbol.Operation, args)); 
         }
 
-        public static T ConstructFromMany<F, B, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<B> symbol, params object[] args)
-            where F : class, IIdentifiable
-            where B : class, IIdentifiable, F
+        public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
             where T : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromMany(lites, typeof(F), symbol.Operation, args)); 
         }

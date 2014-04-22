@@ -100,16 +100,21 @@ namespace Signum.Windows.Operations
             new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
         };
 
-        public T GetSettings<T>(OperationSymbol operation)
-            where T : OperationSettings
+        public EntityOperationSettings GetSettings(IEntityOperationSymbolContainer operation)
+        {
+            return GetSettings<EntityOperationSettings>(operation.Operation);
+        }
+
+        public OS GetSettings<OS>(OperationSymbol operation)
+            where OS : OperationSettings
         {
             OperationSettings settings = Settings.TryGetC(operation);
             if (settings != null)
             {
-                var result = settings as T;
+                var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(T).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }

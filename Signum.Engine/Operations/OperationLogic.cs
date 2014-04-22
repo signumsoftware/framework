@@ -527,8 +527,8 @@ namespace Signum.Engine.Operations
 
         public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
             where T : class, IIdentifiable
-            where FB : class, IIdentifiable, F
-            where F : class, IIdentifiable
+            where FB : class, IIdentifiable
+            where F : class, IIdentifiable, FB
         {
             return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), symbol.Operation).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
         }
@@ -558,36 +558,36 @@ namespace Signum.Engine.Operations
             return result;
         }
 
-        public static Graph<T>.Construct FindConstruct<T>(OperationSymbol operationSymbol) 
+        public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Construct)FindOperation(typeof(T), operationSymbol);
+            return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Operation);
         }
 
-        public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(OperationSymbol operationSymbol) 
+        public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol) 
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), operationSymbol);
+            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Operation);
         }
 
-        public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(OperationSymbol operationSymbol)
+        public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbol)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), operationSymbol);
+            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Operation);
         }
 
-        public static Graph<T>.Execute FindExecute<T>(OperationSymbol operationSymbol)
+        public static Graph<T>.Execute FindExecute<T>(ExecuteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Execute)FindOperation(typeof(T), operationSymbol);
+            return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Operation);
         }
 
-        public static Graph<T>.Delete FindDelete<T>(OperationSymbol operationSymbol)
+        public static Graph<T>.Delete FindDelete<T>(DeleteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Delete)FindOperation(typeof(T), operationSymbol);
+            return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Operation);
         }
 
         static T AssertLite<T>(this T result)
