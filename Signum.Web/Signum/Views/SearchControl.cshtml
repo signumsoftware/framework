@@ -73,10 +73,10 @@
     }
 
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
+        <button type="button" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
