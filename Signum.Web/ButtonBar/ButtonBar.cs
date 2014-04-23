@@ -45,12 +45,6 @@ namespace Signum.Web
             if (list != null)
                 links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(ctx, entity)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
-            foreach (var l in links)
-            {
-                if (l.DivCssClass == "not-set")
-                    l.DivCssClass = ToolBarButton.DefaultEntityDivCssClass;
-            }
-
             return links;
         }
     }
@@ -85,12 +79,6 @@ namespace Signum.Web
             if (globalButtons != null)
                 elements.AddRange(globalButtons.SelectMany(d => d(ctx) ?? Enumerable.Empty<ToolBarButton>()).NotNull().ToList());
 
-            foreach (var el in elements)
-            {
-                if (el.DivCssClass == "not-set")
-                    el.DivCssClass = ToolBarButton.DefaultQueryCssClass;
-            }
-
             return elements;
         }
 
@@ -104,9 +92,13 @@ namespace Signum.Web
             globalButtons.Add(buttonsFactory);
         }
 
-        public static MvcHtmlString ToString(this List<ToolBarButton> elements, HtmlHelper helper)
+        public static MvcHtmlString ToStringButton(this List<ToolBarButton> elements, HtmlHelper helper)
         {
-            return MvcHtmlString.Create(elements.ToString(tb => tb.ToHtml(helper).ToHtmlString(), "\r\n"));
+            HtmlStringBuilder sb = new HtmlStringBuilder(elements.Select(tb=> tb.ToHtml(helper)));
+
+            sb.Add(new MvcHtmlString(@"<script>$(function(){ $('[data-toggle=""tooltip""]').tooltip({}); });</script>"));
+
+            return sb.ToHtml();
         }
     }
 }

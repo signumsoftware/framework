@@ -38,7 +38,7 @@ namespace Signum.Windows
 
         private void EntitiesTypeChanged(Type type)
         {
- 	        Type = type.ElementType().ThrowIfNullC("EntitiesType must be a collection type");
+ 	        Type = type.ElementType().ThrowIfNull("EntitiesType must be a collection type");
         }
 
         public new event Func<object> Finding;

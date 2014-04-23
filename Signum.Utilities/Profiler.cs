@@ -376,7 +376,7 @@ namespace Signum.Utilities
 
         public string FullIndex()
         {
-            return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
+            return this.Follow(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
         public string AdditionalData;
@@ -474,7 +474,7 @@ namespace Signum.Utilities
                 BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
-                AdditionalData = xLog.Attribute("AdditionalData").TryCC(ad => ad.Value),
+                AdditionalData = xLog.Attribute("AdditionalData").Try(ad => ad.Value),
             };
 
             if (xLog.Element("Log") != null)

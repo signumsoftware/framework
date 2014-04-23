@@ -82,7 +82,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (route != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
+                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name).Try(pp =>
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx());
                     if (att != null)
                     {
@@ -106,7 +106,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Unit
         {
-            get { return PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName); }
+            get { return PropertyInfo.SingleAttribute<UnitAttribute>().Try(u => u.UnitName); }
         }
 
         public override string IsAllowed()

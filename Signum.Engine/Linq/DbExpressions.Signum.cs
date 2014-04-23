@@ -110,7 +110,7 @@ namespace Signum.Engine.Linq
         {
             string constructor = "new {0}".Formato(Type.TypeName());
 
-            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+            string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ? 
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
@@ -144,7 +144,7 @@ namespace Signum.Engine.Linq
         {
             string constructor = "new {0}".Formato(Type.TypeName());
 
-            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+            string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :

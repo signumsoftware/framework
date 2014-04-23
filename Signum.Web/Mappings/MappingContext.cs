@@ -48,7 +48,7 @@ namespace Signum.Web
 
         public IEnumerable<MappingContext> Children()
         {
-            return FirstChild.FollowC(n => n.Next);
+            return FirstChild.Follow(n => n.Next);
         }
 
         public abstract ControllerContext ControllerContext { get; }

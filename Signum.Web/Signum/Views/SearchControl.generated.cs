@@ -165,180 +165,167 @@ WriteLiteral("\r\n\r\n\r\n");
             
             #line 34 "..\..\Signum\Views\SearchControl.cshtml"
       
-        bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
-        bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
+        bool filtersAlwaysHidden = !findOptions.ShowHeader || !findOptions.ShowFilters && !findOptions.ShowFilterButton;
     
             
             #line default
             #line hidden
 WriteLiteral("\r\n\r\n    <div");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2049), Tuple.Create("\"", 2106)
-, Tuple.Create(Tuple.Create("", 2057), Tuple.Create("display:", 2057), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 1955), Tuple.Create("\"", 2012)
+, Tuple.Create(Tuple.Create("", 1963), Tuple.Create("display:", 1963), true)
             
-            #line 39 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 2065), Tuple.Create<System.Object, System.Int32>(filtersAlwaysHidden ? "none" : "block"
+            #line 38 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 1971), Tuple.Create<System.Object, System.Int32>(filtersAlwaysHidden ? "none" : "block"
             
             #line default
             #line hidden
-, 2065), false)
+, 1971), false)
 );
 
 WriteLiteral(">\r\n");
 
             
-            #line 40 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 39 "..\..\Signum\Views\SearchControl.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 39 "..\..\Signum\Views\SearchControl.cshtml"
           
             ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-            ViewData[ViewDataKeys.FiltersVisible] = filtersVisible;
+            ViewData[ViewDataKeys.FiltersVisible] = findOptions.ShowFilters;
             ViewData[ViewDataKeys.ShowAddColumn] = string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns;
             Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
         
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n\r\n");
-
-            
-            #line 48 "..\..\Signum\Views\SearchControl.cshtml"
-    
-            
-            #line default
-            #line hidden
-            
-            #line 48 "..\..\Signum\Views\SearchControl.cshtml"
-     if (!filtersAlwaysHidden)
-    {
-        
-            
-            #line default
-            #line hidden
-            
-            #line 50 "..\..\Signum\Views\SearchControl.cshtml"
-   Write(Html.Href("",
-                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
-                "",
-                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
-                "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
-                new Dictionary<string, object> 
-                { 
-                    { "onclick", JsFunction.SFControlThen(prefix,  "toggleFilters()") },
-                    { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
-                }));
-
-            
-            #line default
-            #line hidden
-            
-            #line 59 "..\..\Signum\Views\SearchControl.cshtml"
-                  
-    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    ");
-
-            
-            #line 61 "..\..\Signum\Views\SearchControl.cshtml"
-     if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
-    { 
-        
-            
-            #line default
-            #line hidden
-            
-            #line 63 "..\..\Signum\Views\SearchControl.cshtml"
-   Write(Html.Href(Model.Compose("sfFullScreen"),
-            "Full Screen",
-            "",
-            "Full Screen",
-            "sf-query-button sf-query-fullscreen",
-            new Dictionary<string, object> 
-            { 
-                { "data-icon", "ui-icon-extlink" },
-                { "data-text", false }
-            }));
-
-            
-            #line default
-            #line hidden
-            
-            #line 72 "..\..\Signum\Views\SearchControl.cshtml"
-              
-    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    <div");
+WriteLiteral("\r\n    </div>\r\n\r\n\r\n\r\n\r\n    <div");
 
 WriteLiteral(" class=\"sf-query-button-bar\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 3716), Tuple.Create("\"", 3804)
-, Tuple.Create(Tuple.Create("", 3724), Tuple.Create("display:", 3724), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2445), Tuple.Create("\"", 2502)
             
-            #line 75 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 3732), Tuple.Create<System.Object, System.Int32>((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none"
+            #line 50 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 2453), Tuple.Create<System.Object, System.Int32>(findOptions.ShowHeader ? null : "display:none"
             
             #line default
             #line hidden
-, 3732), false)
+, 2453), false)
 );
 
-WriteLiteral(">\r\n        <button");
-
-WriteLiteral(" type=\"button\"");
-
-WriteLiteral(" class=\"sf-query-button sf-search\"");
-
-WriteLiteral(" data-icon=\"ui-icon-search\"");
-
-WriteAttribute("id", Tuple.Create(" id=\"", 3898), Tuple.Create("\"", 3929)
-            
-            #line 76 "..\..\Signum\Views\SearchControl.cshtml"
-               , Tuple.Create(Tuple.Create("", 3903), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearch")
-            
-            #line default
-            #line hidden
-, 3903), false)
-);
-
-WriteAttribute("onclick", Tuple.Create(" onclick=\"", 3930), Tuple.Create("\"", 3985)
-            
-            #line 76 "..\..\Signum\Views\SearchControl.cshtml"
-                                                    , Tuple.Create(Tuple.Create("", 3940), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "search()")
-            
-            #line default
-            #line hidden
-, 3940), false)
-);
-
-WriteLiteral(">");
+WriteLiteral(">\r\n");
 
             
-            #line 76 "..\..\Signum\Views\SearchControl.cshtml"
-                                                                                                                                                                              Write(SearchMessage.Search.NiceToString());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</button>\r\n");
-
-            
-            #line 77 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 51 "..\..\Signum\Views\SearchControl.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 77 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 51 "..\..\Signum\Views\SearchControl.cshtml"
+         if (!filtersAlwaysHidden)
+        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <a");
+
+WriteAttribute("class", Tuple.Create("  class=\"", 2567), Tuple.Create("\"", 2668)
+, Tuple.Create(Tuple.Create("", 2576), Tuple.Create("sf-query-button", 2576), true)
+, Tuple.Create(Tuple.Create(" ", 2591), Tuple.Create("sf-filters-header", 2592), true)
+, Tuple.Create(Tuple.Create(" ", 2609), Tuple.Create("btn", 2610), true)
+, Tuple.Create(Tuple.Create(" ", 2613), Tuple.Create("btn-default", 2614), true)
+            
+            #line 53 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create(" ", 2625), Tuple.Create<System.Object, System.Int32>(findOptions.ShowFilters ? "active" : ""
+            
+            #line default
+            #line hidden
+, 2626), false)
+);
+
+WriteAttribute("onclick", Tuple.Create("\r\n            onclick=\"", 2669), Tuple.Create("\"", 2744)
+            
+            #line 54 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 2692), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "toggleFilters()")
+            
+            #line default
+            #line hidden
+, 2692), false)
+);
+
+WriteAttribute("title", Tuple.Create("\r\n            title=\"", 2745), Tuple.Create("\"", 2886)
+            
+            #line 55 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 2766), Tuple.Create<System.Object, System.Int32>(findOptions.ShowFilters ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()
+            
+            #line default
+            #line hidden
+, 2766), false)
+);
+
+WriteLiteral(">\r\n                <span");
+
+WriteLiteral(" class=\"glyphicon glyphicon glyphicon-filter\"");
+
+WriteLiteral("></span>\r\n            </a>\r\n");
+
+            
+            #line 58 "..\..\Signum\Views\SearchControl.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <button");
+
+WriteLiteral(" type=\"button\"");
+
+WriteLiteral(" class=\"sf-query-button sf-search btn btn-primary\"");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 3074), Tuple.Create("\"", 3105)
+            
+            #line 59 "..\..\Signum\Views\SearchControl.cshtml"
+    , Tuple.Create(Tuple.Create("", 3079), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearch")
+            
+            #line default
+            #line hidden
+, 3079), false)
+);
+
+WriteAttribute("onclick", Tuple.Create(" onclick=\"", 3106), Tuple.Create("\"", 3161)
+            
+            #line 59 "..\..\Signum\Views\SearchControl.cshtml"
+                                         , Tuple.Create(Tuple.Create("", 3116), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "search()")
+            
+            #line default
+            #line hidden
+, 3116), false)
+);
+
+WriteLiteral(" >");
+
+            
+            #line 59 "..\..\Signum\Views\SearchControl.cshtml"
+                                                                                                                                                                    Write(SearchMessage.Search.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n\r\n");
+
+            
+            #line 61 "..\..\Signum\Views\SearchControl.cshtml"
+        
+            
+            #line default
+            #line hidden
+            
+            #line 61 "..\..\Signum\Views\SearchControl.cshtml"
          if (findOptions.Create)
         {
 
@@ -347,54 +334,147 @@ WriteLiteral("</button>\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteLiteral(" class=\"sf-query-button\"");
+WriteLiteral(" class=\"sf-query-button btn btn-default sf-line-button sf-create\"");
 
-WriteLiteral(" data-icon=\"ui-icon-plusthick\"");
-
-WriteLiteral(" data-text=\"false\"");
-
-WriteAttribute("id", Tuple.Create(" id=\"", 4165), Tuple.Create("\"", 4202)
+WriteAttribute("id", Tuple.Create(" id=\"", 3337), Tuple.Create("\"", 3374)
             
-            #line 79 "..\..\Signum\Views\SearchControl.cshtml"
-           , Tuple.Create(Tuple.Create("", 4170), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearchCreate")
+            #line 63 "..\..\Signum\Views\SearchControl.cshtml"
+    , Tuple.Create(Tuple.Create("", 3342), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbSearchCreate")
             
             #line default
             #line hidden
-, 4170), false)
+, 3342), false)
 );
 
-WriteAttribute("onclick", Tuple.Create(" onclick=\"", 4203), Tuple.Create("\"", 4264)
+WriteAttribute("title", Tuple.Create(" title=\"", 3375), Tuple.Create("\"", 3530)
             
-            #line 79 "..\..\Signum\Views\SearchControl.cshtml"
-                                                      , Tuple.Create(Tuple.Create("", 4213), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "create_click()")
+            #line 63 "..\..\Signum\Views\SearchControl.cshtml"
+                                             , Tuple.Create(Tuple.Create("", 3383), Tuple.Create<System.Object, System.Int32>(SearchMessage.CreateNew0.NiceToString(implementations.IsByAll ? EntityBase.ImplementedByAllKey : implementations.Types.CommaOr(a => a.NiceName()))
             
             #line default
             #line hidden
-, 4213), false)
+, 3383), false)
 );
 
-WriteLiteral(">");
-
+WriteAttribute("onclick", Tuple.Create(" onclick=\"", 3531), Tuple.Create("\"", 3592)
             
-            #line 79 "..\..\Signum\Views\SearchControl.cshtml"
-                                                                                                                                                                                      Write(SearchMessage.Create.NiceToString());
-
+            #line 63 "..\..\Signum\Views\SearchControl.cshtml"
+                                                                                                                                                                                                           , Tuple.Create(Tuple.Create("", 3541), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "create_click()")
             
             #line default
             #line hidden
-WriteLiteral("</a>\r\n");
+, 3541), false)
+);
+
+WriteLiteral(">\r\n                <span");
+
+WriteLiteral(" class=\"glyphicon glyphicon-plus\"");
+
+WriteLiteral("></span>\r\n            </a>\r\n");
 
             
-            #line 80 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 66 "..\..\Signum\Views\SearchControl.cshtml"
         }
 
             
             #line default
             #line hidden
-WriteLiteral("        ");
+WriteLiteral("\r\n");
+
+            
+            #line 68 "..\..\Signum\Views\SearchControl.cshtml"
+        
+            
+            #line default
+            #line hidden
+            
+            #line 68 "..\..\Signum\Views\SearchControl.cshtml"
+         if (findOptions.ShowContextMenu)
+        {
+
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <div");
+
+WriteLiteral(" class=\"btn-group\"");
+
+WriteLiteral(">\r\n                <button");
+
+WriteLiteral(" class=\"sf-query-button sf-tm-selected btn btn btn-default dropdown-toggle\"");
+
+WriteLiteral(" data-toggle=\"dropdown\"");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 3905), Tuple.Create("\"", 3939)
+            
+            #line 72 "..\..\Signum\Views\SearchControl.cshtml"
+                                              , Tuple.Create(Tuple.Create("", 3910), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnSelected")
+            
+            #line default
+            #line hidden
+, 3910), false)
+);
+
+WriteLiteral(" disabled=\"disabled\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                    ");
+
+            
+            #line 73 "..\..\Signum\Views\SearchControl.cshtml"
+               Write(JavascriptMessage.Selected);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    (<span");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 4038), Tuple.Create("\"", 4076)
+            
+            #line 74 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 4043), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnSelectedSpan")
+            
+            #line default
+            #line hidden
+, 4043), false)
+);
+
+WriteLiteral(">0</span>)\r\n                <span");
+
+WriteLiteral(" class=\"caret\"");
+
+WriteLiteral("></span>\r\n                </button>\r\n                <ul");
+
+WriteLiteral(" class=\"dropdown-menu\"");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 4202), Tuple.Create("\"", 4244)
+            
+            #line 77 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 4207), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnSelectedDropDown")
+            
+            #line default
+            #line hidden
+, 4207), false)
+);
+
+WriteLiteral(">\r\n                    <li>hi there!</li>\r\n                </ul>\r\n            </d" +
+"iv>\r\n");
 
             
             #line 81 "..\..\Signum\Views\SearchControl.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("        ");
+
+            
+            #line 83 "..\..\Signum\Views\SearchControl.cshtml"
    Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
            Url = Url,
@@ -403,82 +483,49 @@ WriteLiteral("        ");
            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
            EntityType = entitiesType,
            Prefix = Model.Prefix
-       }).ToString(Html));
+       }).ToStringButton(Html));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n");
+WriteLiteral("\r\n\r\n    </div>\r\n    <div");
 
+WriteAttribute("id", Tuple.Create(" id=\"", 4779), Tuple.Create("\"", 4812)
             
-            #line 91 "..\..\Signum\Views\SearchControl.cshtml"
-    
+            #line 94 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 4784), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-            
-            #line 91 "..\..\Signum\Views\SearchControl.cshtml"
-     if (findOptions.FilterMode != FilterMode.OnlyResults)
-    {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <div");
-
-WriteLiteral(" class=\"clearall\"");
-
-WriteLiteral(">\r\n        </div>\r\n");
-
-            
-            #line 95 "..\..\Signum\Views\SearchControl.cshtml"
-    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
-
-WriteAttribute("id", Tuple.Create(" id=\"", 4868), Tuple.Create("\"", 4901)
-            
-            #line 96 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4873), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
-            
-            #line default
-            #line hidden
-, 4873), false)
+, 4784), false)
 );
 
-WriteLiteral(" class=\"ui-widget ui-corner-all sf-search-results-container\"");
+WriteLiteral(" class=\"sf-search-results-container table-responsive\"");
 
 WriteLiteral(">\r\n        <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4979), Tuple.Create("\"", 5012)
+WriteAttribute("id", Tuple.Create(" id=\"", 4883), Tuple.Create("\"", 4916)
             
-            #line 97 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4984), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
+            #line 95 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 4888), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
             
             #line default
             #line hidden
-, 4984), false)
+, 4888), false)
 );
 
-WriteLiteral(" class=\"sf-search-results\"");
+WriteLiteral(" class=\"sf-search-results  table table-hover  table-condensed\"");
 
-WriteLiteral(">\r\n            <thead");
-
-WriteLiteral(" class=\"ui-widget-header ui-corner-top\"");
-
-WriteLiteral(">\r\n                <tr>\r\n");
+WriteLiteral(">\r\n            <thead>\r\n                <tr>\r\n");
 
             
-            #line 100 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 98 "..\..\Signum\Views\SearchControl.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 100 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 98 "..\..\Signum\Views\SearchControl.cshtml"
                      if (findOptions.AllowSelection)
                     {
 
@@ -487,14 +534,14 @@ WriteLiteral(">\r\n                <tr>\r\n");
             #line hidden
 WriteLiteral("                        <th");
 
-WriteLiteral(" class=\"ui-state-default sf-th-selection\"");
+WriteLiteral(" class=\"sf-th-selection\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("                            ");
 
             
-            #line 103 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 101 "..\..\Signum\Views\SearchControl.cshtml"
                        Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()") }));
 
             
@@ -503,7 +550,7 @@ WriteLiteral("                            ");
 WriteLiteral("\r\n                        </th>\r\n");
 
             
-            #line 105 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 103 "..\..\Signum\Views\SearchControl.cshtml"
                     }
 
             
@@ -512,7 +559,7 @@ WriteLiteral("\r\n                        </th>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 106 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 104 "..\..\Signum\Views\SearchControl.cshtml"
                      if (findOptions.Navigate)
                     {
 
@@ -521,12 +568,12 @@ WriteLiteral("                    ");
             #line hidden
 WriteLiteral("                        <th");
 
-WriteLiteral(" class=\"ui-state-default sf-th-entity\"");
+WriteLiteral(" class=\"sf-th-entity\"");
 
 WriteLiteral("></th>\r\n");
 
             
-            #line 109 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 107 "..\..\Signum\Views\SearchControl.cshtml"
                     }
 
             
@@ -535,7 +582,7 @@ WriteLiteral("></th>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 110 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 108 "..\..\Signum\Views\SearchControl.cshtml"
                       List<Column> columns = findOptions.MergeColumns(); 
             
             #line default
@@ -543,13 +590,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n");
 
             
-            #line 111 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 109 "..\..\Signum\Views\SearchControl.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 111 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 109 "..\..\Signum\Views\SearchControl.cshtml"
                      foreach (var col in columns)
                     {
                         var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
@@ -558,139 +605,100 @@ WriteLiteral("\r\n");
                         {
                             orderType = order.OrderType;
                         }
+                        
+            
+            #line default
+            #line hidden
+            
+            #line 117 "..\..\Signum\Views\SearchControl.cshtml"
+                   Write(SearchControlHelper.Header(col, orderType));
 
             
             #line default
             #line hidden
-WriteLiteral("                        <th");
-
-WriteAttribute("class", Tuple.Create(" class=\"", 6150), Tuple.Create("\"", 6285)
-, Tuple.Create(Tuple.Create("", 6158), Tuple.Create("ui-state-default", 6158), true)
             
-            #line 119 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create(" ", 6174), Tuple.Create<System.Object, System.Int32>((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up")
-            
-            #line default
-            #line hidden
-, 6175), false)
-);
-
-WriteLiteral(">\r\n                            <div");
-
-WriteLiteral(" class=\"sf-header-droppable sf-header-droppable-right\"");
-
-WriteLiteral("></div>\r\n                            <div");
-
-WriteLiteral(" class=\"sf-header-droppable sf-header-droppable-left\"");
-
-WriteLiteral("></div>\r\n                            <input");
-
-WriteLiteral(" type=\"hidden\"");
-
-WriteAttribute("value", Tuple.Create(" value=\"", 6526), Tuple.Create("\"", 6543)
-            
-            #line 122 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6534), Tuple.Create<System.Object, System.Int32>(col.Name
-            
-            #line default
-            #line hidden
-, 6534), false)
-);
-
-WriteLiteral(" />\r\n                            <span>");
-
-            
-            #line 123 "..\..\Signum\Views\SearchControl.cshtml"
-                             Write(col.DisplayName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</span>\r\n                        </th>\r\n");
-
-            
-            #line 125 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 117 "..\..\Signum\Views\SearchControl.cshtml"
+                                                                   
                     }
 
             
             #line default
             #line hidden
-WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody");
-
-WriteLiteral(" class=\"ui-widget-content\"");
-
-WriteLiteral(">\r\n");
+WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody>\r\n");
 
             
-            #line 129 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 122 "..\..\Signum\Views\SearchControl.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 129 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 122 "..\..\Signum\Views\SearchControl.cshtml"
                    int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); 
             
             #line default
             #line hidden
 WriteLiteral("\r\n                <tr>\r\n                    <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6927), Tuple.Create("\"", 6950)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6321), Tuple.Create("\"", 6344)
             
-            #line 131 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6937), Tuple.Create<System.Object, System.Int32>(columnsCount
+            #line 124 "..\..\Signum\Views\SearchControl.cshtml"
+, Tuple.Create(Tuple.Create("", 6331), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 6937), false)
+, 6331), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 131 "..\..\Signum\Views\SearchControl.cshtml"
-                                           Write(JavascriptMessage.noResults.NiceToString());
+            #line 124 "..\..\Signum\Views\SearchControl.cshtml"
+                                           Write(JavascriptMessage.searchForResults.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                </tr>\r\n");
+WriteLiteral("</td>\r\n                </tr>\r\n            </tbody>\r\n        </table>\r\n    </div>\r" +
+"\n\r\n");
 
+            
+            #line 130 "..\..\Signum\Views\SearchControl.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 130 "..\..\Signum\Views\SearchControl.cshtml"
+      
+        ViewData[ViewDataKeys.ShowFooter] = findOptions.ShowFooter;
+        ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
+        
+            
+            #line default
+            #line hidden
             
             #line 133 "..\..\Signum\Views\SearchControl.cshtml"
-                
+   Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
+
             
             #line default
             #line hidden
             
             #line 133 "..\..\Signum\Views\SearchControl.cshtml"
-                   
-                    ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
-                    ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
-                    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
-                
+                                                                      
+    
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("                ");
-
-            
-            #line 138 "..\..\Signum\Views\SearchControl.cshtml"
-           Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</div>\r\n<script");
+WriteLiteral("\r\n</div>\r\n<script");
 
 WriteLiteral(" type=\"text/javascript\"");
 
 WriteLiteral(">\r\n    require([\"");
 
             
-            #line 144 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 137 "..\..\Signum\Views\SearchControl.cshtml"
          Write(JsFunction.FinderModule);
 
             
@@ -699,7 +707,7 @@ WriteLiteral(">\r\n    require([\"");
 WriteLiteral("\"], function(Finder) { new Finder.SearchControl($(\"#");
 
             
-            #line 144 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 137 "..\..\Signum\Views\SearchControl.cshtml"
                                                                                      Write(Model.Compose("sfSearchControl"));
 
             
@@ -708,7 +716,7 @@ WriteLiteral("\"], function(Finder) { new Finder.SearchControl($(\"#");
 WriteLiteral("\"), ");
 
             
-            #line 144 "..\..\Signum\Views\SearchControl.cshtml"
+            #line 137 "..\..\Signum\Views\SearchControl.cshtml"
                                                                                                                            Write(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()));
 
             

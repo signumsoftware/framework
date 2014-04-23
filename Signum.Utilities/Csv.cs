@@ -229,7 +229,7 @@ namespace Signum.Utilities
         static class ColumnInfoCache<T>
         {
             public static List<CsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter)
-                .Select((me, i) => new CsvColumnInfo<T>(i, me,me.MemberInfo.SingleAttribute<FormatAttribute>().TryCC(f => f.Format))).ToList();
+                .Select((me, i) => new CsvColumnInfo<T>(i, me,me.MemberInfo.SingleAttribute<FormatAttribute>().Try(f => f.Format))).ToList();
         }
 
         static string DecodeCsv(string s)

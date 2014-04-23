@@ -19,7 +19,7 @@ namespace Signum.Windows.Operations
         public static bool MoveToSearchControls(EntityOperationContext eoc)
         {
             var controls = eoc.EntityControl.Children<SearchControl>()
-                .Where(sc => eoc.OperationInfo.Key.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
+                .Where(sc => eoc.OperationInfo.OperationSymbol.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
                 sc.NotSet(OperationClient.ConstructFromOperationKeyProperty) && sc.EntityType == eoc.OperationInfo.ReturnType).ToList();
 
             if (!controls.Any())
@@ -28,7 +28,7 @@ namespace Signum.Windows.Operations
             foreach (var sc in controls)
             {
                 if (sc.NotSet(OperationClient.ConstructFromOperationKeyProperty))
-                    OperationClient.SetConstructFromOperationKey(sc, eoc.OperationInfo.Key);
+                    OperationClient.SetConstructFromOperationKey(sc, eoc.OperationInfo.OperationSymbol);
 
                 sc.Create = false;
 
@@ -36,7 +36,7 @@ namespace Signum.Windows.Operations
 
                 var panel = (StackPanel)menu.Parent;
 
-                var oldButton = panel.Children<ToolBarButton>(tb => tb.Tag is OperationInfo && ((OperationInfo)tb.Tag).Key.Equals(eoc.OperationInfo.Key)).FirstOrDefault();
+                var oldButton = panel.Children<ToolBarButton>(tb => tb.Tag is OperationInfo && ((OperationInfo)tb.Tag).OperationSymbol.Equals(eoc.OperationInfo.OperationSymbol)).FirstOrDefault();
                 if (oldButton != null)
                     panel.Children.Remove(oldButton);
 
@@ -52,8 +52,8 @@ namespace Signum.Windows.Operations
 
             ToolBarButton button = new ToolBarButton
             {
-                Content = man.GetText(eoc.OperationInfo.Key, eoc.OperationSettings),
-                Image = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings),
+                Content = man.GetText(eoc.OperationInfo.OperationSymbol, eoc.OperationSettings),
+                Image = man.GetImage(eoc.OperationInfo.OperationSymbol, eoc.OperationSettings),
                 Tag = eoc.OperationInfo,
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
@@ -61,7 +61,7 @@ namespace Signum.Windows.Operations
             if (eoc.OperationSettings != null && eoc.OperationSettings.Order != 0)
                 Common.SetOrder(button, eoc.OperationSettings.Order);
 
-            AutomationProperties.SetName(button, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(button, eoc.OperationInfo.OperationSymbol.Key);
 
             eoc.SenderButton = button;
 
@@ -86,10 +86,10 @@ namespace Signum.Windows.Operations
 
             MenuItem menuItem = new MenuItem
             {
-                Header = eoc.OperationSettings.TryCC(os => os.Text) ?? 
-                (group == null || group.SimplifyName == null ? eoc.OperationInfo.Key.NiceToString() : 
-                 group.SimplifyName(eoc.OperationInfo.Key.NiceToString())),
-                Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings).ToSmallImage(),
+                Header = eoc.OperationSettings.Try(os => os.Text) ?? 
+                (group == null || group.SimplifyName == null ? eoc.OperationInfo.OperationSymbol.NiceToString() :
+                 group.SimplifyName(eoc.OperationInfo.OperationSymbol.NiceToString())),
+                Icon = man.GetImage(eoc.OperationInfo.OperationSymbol, eoc.OperationSettings).ToSmallImage(),
                 Tag = eoc.OperationInfo,
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
@@ -97,7 +97,7 @@ namespace Signum.Windows.Operations
             if (eoc.OperationSettings != null && eoc.OperationSettings.Order != 0)
                 Common.SetOrder(menuItem, eoc.OperationSettings.Order);
 
-            AutomationProperties.SetName(menuItem, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(menuItem, eoc.OperationInfo.OperationSymbol.Key);
 
             eoc.SenderButton = menuItem;
 
@@ -118,7 +118,7 @@ namespace Signum.Windows.Operations
         static void OperationExecute(EntityOperationContext eoc)
         {
             if (eoc.CanExecute != null)
-                throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.Key, eoc.CanExecute));
+                throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
 
             if (eoc.OperationSettings != null && eoc.OperationSettings.Click != null)
             {
@@ -136,14 +136,14 @@ namespace Signum.Windows.Operations
                         if (eoc.EntityControl.LooseChangesIfAny())
                         {
                             Lite<IdentifiableEntity> lite = ident.ToLite();
-                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.Key, null));
+                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
                             if (eoc.OperationInfo.Returns)
                                 eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                         }
                     }
                     else
                     {
-                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.Key, null));
+                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
                         if (eoc.OperationInfo.Returns)
                             eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                     }
@@ -157,17 +157,17 @@ namespace Signum.Windows.Operations
                             return;
 
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        result = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.Key, null));
+                        result = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.OperationSymbol, null));
                     }
                     else
                     {
-                        result = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.Key, null));
+                        result = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
                     }
 
                     if (result != null)
                         Navigator.Navigate(result);
                     else
-                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.Key.NiceToString()));
+                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
 
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.Delete)
@@ -175,7 +175,7 @@ namespace Signum.Windows.Operations
                     if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString(),  OperationMessage.Delete.NiceToString(), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
+                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.OperationSymbol, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }

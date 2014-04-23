@@ -34,8 +34,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.executeAjax = executeAjax;
 
     function executeDefaultContextual(options) {
-        Finder.removeOverlay();
-
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
@@ -93,8 +91,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function constructFromDefaultContextual(options, newPrefix) {
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
             exports.markCells(options.prefix);
@@ -157,8 +153,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
-        Finder.removeOverlay();
-
         return exports.deleteAjaxContextual(options).then(function (result) {
             exports.markCells(options.prefix);
         });
@@ -183,8 +177,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
             exports.markCells(options.prefix);
@@ -220,7 +212,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.openPopup = openPopup;
 
     function markCells(prefix) {
-        $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
+        $("tr.active").addClass("sf-entity-ctxmenu-success");
         exports.notifyExecuted();
     }
     exports.markCells = markCells;
@@ -330,7 +322,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.validateAndSubmit = validateAndSubmit;
 
     function submit(options) {
-        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl");
+        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divMainControl");
 
         var $form = mainControl.closest("form");
         $form.append(SF.hiddenInput('isLite', options.isLite) + SF.hiddenInput('operationFullKey', options.operationKey) + SF.hiddenInput("prefix", options.prefix));

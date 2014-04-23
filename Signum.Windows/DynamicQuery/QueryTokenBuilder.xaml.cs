@@ -43,7 +43,7 @@ namespace Signum.Windows
             if (queryToken == null)
                 tokens = new List<QueryToken>();
             else
-                tokens = queryToken.FollowC(a => a.Parent).Reverse().ToList();
+                tokens = queryToken.Follow(a => a.Parent).Reverse().ToList();
             UpdateCombo();
         }
 

@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
+using System.Web.Mvc.Html;
 
 namespace Signum.Web
 {
@@ -83,7 +84,12 @@ namespace Signum.Web
                 }),
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => (h,o) => 
                 {
-                    return o != null ? AlignCenter(h.CheckBox("", (bool)o, false)) : MvcHtmlString.Empty;
+                    return o != null ? new HtmlTag("input")
+                        .Attr("type", "checkbox")
+                        .Attr("style", "text-align:center")
+                        .Attr("disabled", "disabled")
+                        .Let(a => (bool)o ? a.Attr("checked", "checked") : a)
+                        .ToHtml() : MvcHtmlString.Empty;
                 }),
             };
 
@@ -99,14 +105,6 @@ namespace Signum.Web
             };
 
             PropertyFormatters = new Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>>();
-        }
-
-        public static MvcHtmlString AlignCenter(MvcHtmlString innerHTML)
-        {
-            return new HtmlTag("div")
-                .Attrs(new { style = "text-align:center" })
-                .InnerHtml(innerHTML)
-                .ToHtml();
         }
 
         public CellFormatter GetFormatter(Column column)

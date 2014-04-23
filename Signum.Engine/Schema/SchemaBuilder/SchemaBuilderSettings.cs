@@ -121,7 +121,7 @@ namespace Signum.Engine.Maps
 
         private void AssertCorrect(Attribute[] attributes, AttributeTargets attributeTargets)
         {
-            var incorrects = attributes.Where(a => a.GetType().SingleAttribute<AttributeUsageAttribute>().TryCS(au => (au.ValidOn & attributeTargets) == 0) ?? false);
+            var incorrects = attributes.Where(a => a.GetType().SingleAttribute<AttributeUsageAttribute>().Try(au => (au.ValidOn & attributeTargets) == 0) ?? false);
 
             if (incorrects.Count() > 0)
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));

@@ -1,68 +1,46 @@
-﻿.sf-widgets-container
+﻿ul.sf-widgets
 {
-    float: right;    
-}
-.sf-widget
-{
-    display: inline-block;
-    position: relative; 
-    border-left: solid 1px #AAA;
-}
-.sf-widget-content
-{
-    margin-left: 0 !important;
-    margin-top: 0 !important;
-}
-.sf-widget-toggler
-{
-    vertical-align: top;    
-    line-height: 20px;
-    height: 20px;
-    text-align: left !important;
-    display: block;
-    padding: 0 2px;
-    cursor: pointer;
-}
-.sf-widget-toggler:hover,.sf-widget-toggler:hover
-{
-    text-decoration: none;    
-}
-.sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count
-{
-    display: inline-block;
-    vertical-align: top;
-}
-.sf-widget-toggler .ui-icon 
-{
-    margin-top: 2px;
-}
-.sf-widget-toggler .sf-widget-count 
-{
-    margin-top: 1px \0/;
-}
-a.sf-widget-toggler-active
-{
-    color:#000;
-} 
-
-.sf-alerts-count-separator
-{
-    vertical-align: top;    
-}
-.sf-widget-count
-{
-    margin-left: 2px;
-}
-.sf-alert-warned.sf-alert-active
-{
-    color: Red;    
-}
-.sf-alert-attended.sf-alert-active, .sf-alert-future.sf-alert-active
-{
-    color: Black;    
+    float:right;
+    list-style-type: none;
+    margin-top:-25px;
 }
 
-.ui-state-highlight a
+ul.sf-widgets>li
 {
-    color: auto !important;    
+    display:block;
+    position:relative;
+    float: left;
+    margin-left: 4px;
+}
+
+ul.sf-widgets > li > a:not(.sf-widget-active)
+{
+    background-color:#ddd;
+}
+
+ul.dropdown-menu li a span.sf-alert-active
+{
+    font-weight:bold;
+}
+
+ul.dropdown-menu li a span.sf-alert-alerted.sf-alert-active
+{
+    color:#FF4400;
+}
+
+span.sf-widget-count
+{
+    padding: 2px;
+}
+
+a.badge span.sf-alert-active {
+    background: #999;
+    border-radius: 10px;
+    border: 2px solid #999;
+}
+
+a.badge span.sf-alert-active.sf-alert-alerted {
+    font-size: 15px;
+    padding: 4px;
+    background: #FF4400;
 }

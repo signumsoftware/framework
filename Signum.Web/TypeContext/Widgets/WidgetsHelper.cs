@@ -9,70 +9,99 @@ using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate WidgetItem GetWidgetDelegate(ModifiableEntity entity, string partialViewName, string prefix);
-
-    public class WidgetItem
+    public interface IWidget
     {
-        public WidgetItem()
+        MvcHtmlString ToHTml(HtmlHelper helper);
+    }
+
+    public class Widget : IWidget
+    {
+        public Widget()
         {
-            Show = true;
+            Visible = true;
         }
 
         public string Id { get; set; }
+        public bool Visible { get; set; }
+        public string Title { get; set; }
+        public string IconClass { get; set; }
+        public string Class { get; set; }
+        public string Text { get; set; }
+        public bool Active { get; set; }
+        public MvcHtmlString Html { get; set; }
+        public List<IMenuItem> Items { get; set; }
 
-        /// <summary>
-        /// Indicates wheter the widget will be shown
-        /// </summary>
-        public bool Show { get; set; }
+        public MvcHtmlString ToHTml(HtmlHelper helper)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround("li"))
+            {
+                using (sb.Surround(new HtmlTag("a", Id)
+                    .Class("badge").Class(Class).Class(Active? "sf-widget-active" : null)
+                    .Attr("title", Title)
+                    .Attr("role", "button")
+                    .Attr("href", "#")
+                    .Attr("data-toggle", "dropdown")))
+                {
 
-        /// <summary>
-        /// Text that will be shown as a header
-        /// </summary>
-        public MvcHtmlString Label { get; set; }
+                    if (IconClass.HasText())
+                        sb.AddLine(new HtmlTag("span").Class(IconClass));
 
-        /// <summary>
-        /// The different widgets
-        /// </summary>
-        public MvcHtmlString Content { get; set; }
+                    if (Text.HasText())
+                        sb.AddLine(new HtmlTag("span").SetInnerText(Text));
 
-        public static string CssClassHighlighted = "ui-state-highlight ui-corner-all";
+                    if (Html != null)
+                        sb.AddLine(Html);
+                }
+
+                using (sb.Surround(new HtmlTag("ul")
+                    .Class("dropdown-menu dropdown-menu-right")
+                    .Attr("role", "menu")
+                    .Attr("aria-labelledby", Id)))
+                {
+                    foreach (var mi in Items)
+                    {
+                        sb.AddLine(mi.ToHtml());
+                    }
+                }
+            }
+
+            return sb.ToHtml();
+        }
+    }
+
+
+    public class WidgetContext
+    {
+        public ModifiableEntity Entity;
+        public string PartialViewName;
+        public string Prefix; 
     }
 
     public static class WidgetsHelper
     {
-        public static event GetWidgetDelegate GetWidgetsForView;
+        public static event Func<WidgetContext, IWidget> GetWidget;
 
-        public static List<WidgetItem> GetWidgetsForEntity(ModifiableEntity entity, string partialViewName, string prefix)
+        public static MvcHtmlString RenderWidgetsForEntity(this HtmlHelper helper, WidgetContext ctx)
         {
-            List<WidgetItem> widgets = new List<WidgetItem>();
-            if (entity != null)
-            {
-                if (GetWidgetsForView != null)
-                    widgets.AddRange(GetWidgetsForView.GetInvocationList()
-                        .Cast<GetWidgetDelegate>()
-                        .Select(d => d(entity, partialViewName, prefix))
-                        .NotNull().ToList());
-            }
-            return widgets;
-        }
+            if (GetWidget == null)
+                return MvcHtmlString.Empty;
 
-        public static MvcHtmlString RenderWidgetsForEntity(this HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix)
-        {
-            List<WidgetItem> widgets = GetWidgetsForEntity(entity, partialViewName, prefix);
+            List<IWidget> widgets = GetWidget.GetInvocationList()
+                .Cast<Func<WidgetContext, IWidget>>()
+                .Select(d => d(ctx))
+                .NotNull()
+                .ToList();
 
-            if (widgets == null)
+            if (widgets.IsNullOrEmpty())
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("ul").Class("sf-widgets-container")))
+            using (sb.Surround(new HtmlTag("ul").Class("sf-widgets")))
             {
-                foreach (WidgetItem widget in widgets)
+                foreach (Widget widget in widgets)
                 {
-                    using (sb.Surround(new HtmlTag("li").IdName(widget.Id).Class("sf-dropdown sf-widget")))
-                    {
-                        sb.AddLine(widget.Label);
-                        sb.AddLine(widget.Content);
-                    }
+                    sb.AddLine(widget.ToHTml(helper));
                 }
             }
             return sb.ToHtml();

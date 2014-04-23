@@ -38,8 +38,9 @@ namespace Signum.Utilities.DataStructures
 
         public bool Overlap(Interval<T> other)
         {
-            if (max.CompareTo(other.min)<=0)
+            if (max.CompareTo(other.min) <= 0)
                 return false;
+
             if (other.max.CompareTo(min) <= 0)
                 return false;
 

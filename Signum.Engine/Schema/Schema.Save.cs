@@ -657,7 +657,7 @@ namespace Signum.Engine.Maps
 
             var uc = updater.Value;
             SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern("", false),
-                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
+                uc.UpdateParameters(ident, (ident as Entity).Try(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
 
             if (!includeCollections)
                 return update;

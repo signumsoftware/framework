@@ -4,44 +4,38 @@
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
     string partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
-}               
-<div>
+}
+<h3>
     @Html.AntiForgeryToken()
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
-   
-    <div class="ui-widget-header ui-corner-all sf-normal-control-header">
-        <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</span>
-        @Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.Prefix)
-    </div>
-    <div class="clearall"></div>
-    @if(string.IsNullOrEmpty(ViewBag.Title))
+
+    @if (string.IsNullOrEmpty(ViewBag.Title))
     {
         ViewBag.Title = modifiable.TryToString();
     }
     <span class="sf-entity-title">@(ViewBag.Title)</span>
-</div>
+    <br />
+    <small class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</small>
+</h3>
+@Html.RenderWidgetsForEntity(new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix })
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
-    { 
+    {
         Url = Url,
         ViewMode = ViewMode.Navigate,
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-        Prefix =  Model.Prefix
-    },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
+        Prefix = Model.Prefix
+    }, (ModifiableEntity)Model.UntypedValue).ToStringButton(Html)
 </div>
-
-<div class="clearall"></div>
-<div class="validationSummaryAjax">
-    @Html.ValidationSummaryAjax()
-    @Html.NormalPageHeader()
-     @if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
-    {
-        @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
-    }
-</div>
+@Html.ValidationSummaryAjax()
+@Html.HiddenRuntimeInfo(Model)
+@if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
+{
+    @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
+}
 <div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix" data-test-ticks="@DateTime.Now.Ticks">
     @{ Html.RenderPartial(partialViewName, Model);}
 </div>

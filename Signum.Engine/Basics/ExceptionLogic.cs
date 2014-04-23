@@ -82,7 +82,7 @@ namespace Signum.Engine.Basics
 
             entity.ExceptionType = ex.GetType().Name;
 
-            var exceptions= ex.FollowC(e => e.InnerException);
+            var exceptions= ex.Follow(e => e.InnerException);
             string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
             string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
            

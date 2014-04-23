@@ -18,105 +18,123 @@ namespace Signum.Web
 {
     public static class EntityTabRepeaterHelper
     {
-        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityTabRepeater entityTabRepeater)
+        private static MvcHtmlString InternalEntityRepeater<T>(this HtmlHelper helper, EntityTabRepeater repeater)
         {
-            if (!entityTabRepeater.Visible || entityTabRepeater.HideIfNull && entityTabRepeater.UntypedValue == null)
+            if (!repeater.Visible || repeater.HideIfNull && repeater.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Id(entityTabRepeater.Prefix).Class("sf-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(repeater.Prefix).Class("sf-tab-repeater-field SF-control-container")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
+                using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
                 {
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityTabRepeater));
+                    sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityTabRepeater, hidden: false));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityTabRepeater, hidden: false));
-                }
-
-                sb.AddLine(helper.Hidden(entityTabRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
-
-                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-                if (entityTabRepeater.ElementType.IsEmbeddedEntity())
-                {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityTabRepeater.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityTabRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityTabRepeater), templateTC.Value.ToString()));
-                }
-
-                using (sb.Surround(new HtmlTag("div").Id(entityTabRepeater.Compose(EntityRepeaterKeys.TabsContainer))))
-                {
-                    using (sb.Surround(new HtmlTag("ul").Id(entityTabRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                    using (sb.Surround(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {
-                        if (entityTabRepeater.UntypedValue != null)
+                        sb.AddLine(EntityButtonHelper.Create(helper, repeater, btn: false));
+                        sb.AddLine(EntityButtonHelper.Find(helper, repeater, btn: false));
+                    }
+                }
+
+                sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
+
+                using (sb.Surround(new HtmlTag("div")))
+                {
+                    using (sb.Surround(new HtmlTag("ul", repeater.Compose(EntityRepeaterKeys.ItemsContainer)).Class("nav nav-tabs")))
+                    {
+                        if (repeater.UntypedValue != null)
                         {
-                            foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityTabRepeater.Parent))
-                                sb.Add(InternalTabRepeaterHeader(helper, itemTC, entityTabRepeater));
+                            foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)repeater.Parent))
+                                sb.Add(InternalTabRepeaterHeader(helper, itemTC, repeater));
                         }
                     }
 
-                    if (entityTabRepeater.UntypedValue != null)
-                    {
-                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityTabRepeater.Parent))
-                            sb.Add(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, entityTabRepeater));
-                    }
+                    using (sb.Surround(new HtmlTag("div", repeater.Compose(EntityRepeaterKeys.TabsContainer)).Class("tab-content")))
+                        if (repeater.UntypedValue != null)
+                        {
+                            foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)repeater.Parent))
+                                using (sb.Surround(new HtmlTag("div", itemTC.Compose(EntityBaseKeys.Entity)).Class("tab-pane")
+                                    .Let(h => itemTC.Index == 0 ? h.Class("active") : h)))
+                                    sb.Add(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.Content, repeater));
+                        }
                 }
-            }
 
-            sb.AddLine(entityTabRepeater.ConstructorScript(JsFunction.LinesModule, "EntityTabRepeater"));
+                if (repeater.ElementType.IsEmbeddedEntity() && repeater.Create)
+                {
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), templateTC.Value.ToString()));
+                }
+
+                sb.AddLine(repeater.ConstructorScript(JsFunction.LinesModule, "EntityTabRepeater"));
+            }
 
             return sb.ToHtml();
         }
 
-        private static MvcHtmlString InternalTabRepeaterHeader<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityTabRepeater entityTabRepeater)
+        private static MvcHtmlString InternalTabRepeaterHeader<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityTabRepeater repeater)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("li").Id(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            using (sb.Surround(new HtmlTag("li", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Let(h => itemTC.Index == 0 ? h.Class("active") : h)
+                .Class("sf-repeater-element")))
             {
-                sb.AddLine(new HtmlTag("a").Attr("href", "#" + itemTC.Compose(EntityBaseKeys.Entity)).SetInnerText(itemTC.Value.ToString()).ToHtml());
-
-                if (entityTabRepeater.Remove)
-                    sb.AddLine(EntityListBaseHelper.RemoveButtonItem(helper, itemTC, entityTabRepeater));
-
-                if (entityTabRepeater.Reorder)
+                using (sb.Surround(new HtmlTag("a")
+                    .Attr("href", "#" + itemTC.Compose(EntityBaseKeys.Entity))
+                    .Attr("data-toggle", "tab")))
                 {
-                    sb.AddLine(EntityListBaseHelper.MoveUpButtonItem(helper, itemTC, entityTabRepeater, true));
-                    sb.AddLine(EntityListBaseHelper.MoveDownButtonItem(helper, itemTC, entityTabRepeater, true));
+                    sb.Add(new HtmlTag("span").SetInnerText(itemTC.Value.ToString()));
+
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC, itemTC.Index));
+                    sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
+
+                    if (repeater.Reorder)
+                    {
+                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "span", isVertical: false));
+                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "span", isVertical: false));
+                    }
+
+                    if (repeater.Remove)
+                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "span"));
                 }
-                sb.AddLine(EntityListBaseHelper.WriteIndex(helper, entityTabRepeater, itemTC, itemTC.Index));
-                sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
+
             }
 
             return sb.ToHtml();
         }
 
         public static MvcHtmlString EntityTabRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
-            where S : Modifiable 
+            where S : Modifiable
         {
-            return helper.EntityRepeater(tc, property, null);
+            return helper.EntityTabRepeater(tc, property, null);
         }
 
         public static MvcHtmlString EntityTabRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityTabRepeater> settingsModifier)
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityTabRepeater el = new EntityTabRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            var vo = tc.ViewOverrides;
 
-            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
 
-            Common.FireCommonTasks(el);
+            EntityTabRepeater repeater = new EntityTabRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+
+            EntityBaseHelper.ConfigureEntityBase(repeater, typeof(S).CleanType());
+
+            Common.FireCommonTasks(repeater);
 
             if (settingsModifier != null)
-                settingsModifier(el);
+                settingsModifier(repeater);
 
-            var result = helper.InternalEntityRepeater<S>(el);
+            var result = helper.InternalEntityRepeater<S>(repeater);
 
-            var vo = el.ViewOverrides;
             if (vo == null)
                 return result;
 
-            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
+            return vo.OnSurroundLine(repeater.PropertyRoute, helper, tc, result);
         }
     }
 }

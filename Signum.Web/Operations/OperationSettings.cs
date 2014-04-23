@@ -18,20 +18,20 @@ namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(Enum key)
+        public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.Key = key; 
+            this.OperationSymbol = symbol.Operation; 
         }
 
-        public Enum Key { get; private set; }
+        public OperationSymbol OperationSymbol { get; private set; }
 
         public string Text { get; set; }
     }
 
     public class ConstructorSettings : OperationSettings
     {
-        public ConstructorSettings(Enum operationKey)
-            : base(operationKey)
+        public ConstructorSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 
@@ -62,19 +62,21 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings Contextual { get; private set; }
         public double Order { get; set; }
 
-        public EntityOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public EntityOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
-            this.Contextual = new ContextualOperationSettings(operationKey);
-            this.ContextualFromMany = new ContextualOperationSettings(operationKey); 
+            this.Contextual = new ContextualOperationSettings(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings(symbol); 
         }
 
         static EntityOperationSettings()
         {
-            CssClass = _ => "sf-operation";
+            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+                oi.OperationType == OperationType.Execute && oi.OperationSymbol.Key.EndsWith(".Save") ? BootstrapStyle.Primary :
+                BootstrapStyle.Default;
         }
 
-        public static Func<Enum, string> CssClass { get; set; }
+        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 
@@ -85,8 +87,8 @@ namespace Signum.Web.Operations
 
     public class ContextualOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public ContextualOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 
@@ -121,7 +123,7 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix) { isLite = OperationInfo.Lite };
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -150,7 +152,7 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix){ isLite = OperationInfo.Lite};
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix){ isLite = OperationInfo.Lite};
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -161,9 +163,9 @@ namespace Signum.Web.Operations
 
     public class JsOperationOptions
     {
-        public JsOperationOptions(Enum operationKey, string prefix)
+        public JsOperationOptions(OperationSymbol operation, string prefix)
         {
-            this.operationKey = OperationDN.UniqueKey(operationKey);
+            this.operationKey = operation.Key;
             this.prefix = prefix;
         }
 

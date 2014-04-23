@@ -147,11 +147,6 @@ var SF;
     })(SF.LocalStorage || (SF.LocalStorage = {}));
     var LocalStorage = SF.LocalStorage;
 
-    function triggerNewContent($source) {
-        $source.trigger("sf-new-content");
-    }
-    SF.triggerNewContent = triggerNewContent;
-
     function hiddenInput(id, value) {
         return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
     }
@@ -191,16 +186,6 @@ var SF;
         return clone;
     }
     SF.cloneWithValues = cloneWithValues;
-
-    function getPathPrefixes(prefix) {
-        var path = [], pathSplit = prefix.split("_");
-
-        for (var i = 0, l = pathSplit.length; i < l; i++)
-            path[i] = pathSplit.slice(0, i).join("_");
-
-        return path;
-    }
-    SF.getPathPrefixes = getPathPrefixes;
 
     function ajaxPost(settings) {
         return new Promise(function (resolve, reject) {

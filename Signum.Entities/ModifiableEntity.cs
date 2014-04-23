@@ -18,18 +18,24 @@ using System.Threading;
 using System.Collections;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
-        protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
+        internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
+            PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags) ?? this.GetType().GetInterfaces().Select(i => i.GetProperty(automaticPropertyName, flags)).NotNull().FirstOrDefault();
+
+            if (pi == null)
+                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
 
             INotifyCollectionChanged col = field as INotifyCollectionChanged;
             if (col != null)
@@ -101,9 +107,9 @@ namespace Signum.Entities
             }
         }
 
-        protected bool SetToStr<T>(ref T field, T value, Expression<Func<T>> property)
+        protected bool SetToStr<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
-            if (this.Set(ref field, value, property))
+            if (this.Set(ref field, value, automaticPropertyName))
             {
                 NotifyToString();
                 return true;
@@ -410,7 +416,7 @@ namespace Signum.Entities
             var type = target.GetType();
             list.Add(new Member("Type", type, typeof(Type)));
 
-            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
+            foreach (var t in type.Follow(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
             {
                 foreach (var fi in t.GetFields(flags).Where(fi => fi.Name != "mixin").OrderBy(f => f.MetadataToken))
                 {

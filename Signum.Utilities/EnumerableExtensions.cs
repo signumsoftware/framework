@@ -97,14 +97,15 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> elementName)
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> elementName, bool forEndUser = false)
         {
             return collection.SingleEx(
-                () => "Sequence contains no {0}".Formato(elementName()),
-                () => "Sequence contains more than one {0}".Formato(elementName()));
+                () => forEndUser ? CollectionMessage.No0Found.NiceToString(elementName()) : "Sequence contains no {0}".Formato(elementName()),
+                () => forEndUser ? CollectionMessage.MoreThanOne0Found.NiceToString(elementName()) : "Sequence contains more than one {0}".Formato(elementName()),
+                forEndUser);
         }
 
-        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -112,7 +113,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
+                    throw NewException(forEndUser, errorZero());
 
                 T current = enumerator.Current;
 
@@ -120,7 +121,15 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMoreThanOne());
+            throw NewException(forEndUser, errorMoreThanOne());
+        }
+
+        static Exception NewException(bool forEndUser, string message)
+        {
+            if (forEndUser)
+                return new ApplicationException(message);
+            else
+                return new InvalidOperationException(message); 
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -174,7 +183,7 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -190,7 +199,7 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMorethanOne());
+            throw NewException(forEndUser, errorMoreThanOne());
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -231,7 +240,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -239,7 +248,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
+                    throw NewException(forEndUser, errorZero());
 
                 return enumerator.Current;
             }
@@ -276,7 +285,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -284,7 +293,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
+                    throw NewException(forEndUser, errorZero());
 
                 T current = enumerator.Current;
 
@@ -595,7 +604,7 @@ namespace Signum.Utilities
             foreach (var item in collection)
             {
                 for (int i = 0; i < members.Count; i++)
-                    result[i, j] = members[i].Getter(item).TryCC(a => a.ToString()) ?? "";
+                    result[i, j] = members[i].Getter(item).Try(a => a.ToString()) ?? "";
                 j++;
             }
 
@@ -613,7 +622,7 @@ namespace Signum.Utilities
             foreach (DataRow row in table.Rows)
             {
                 for (int i = 0; i < table.Columns.Count; i++)
-                    result[i, j] = row[i].TryCC(a => a.ToString()) ?? "";
+                    result[i, j] = row[i].Try(a => a.ToString()) ?? "";
                 j++;
             }
 
@@ -1220,7 +1229,11 @@ namespace Signum.Utilities
         [Description(" and ")]
         And,
         [Description(" or ")]
-        Or
+        Or,
+        [Description("No {0} found")]
+        No0Found,
+        [Description("More than one {0} found")]
+        MoreThanOne0Found,
     }
 
     public class JoinStrictResult<O, N, R>

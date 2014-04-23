@@ -8,15 +8,6 @@ export interface ValidationOptions {
     requestExtraJsonData?: any;
     rootType?: any;
     propertyRoute?: any;
-
-    showInlineErrors?: boolean;
-    fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
-    errorSummaryId?: string;
-    showPathErrors?: boolean;
-}
-
-export function cleanError($element: JQuery) {
-    $element.removeClass(inputErrorClass)
 }
 
 export interface ValidationResult {
@@ -30,17 +21,15 @@ export interface ModelState {
     [prefix: string]: string[];
 }
 
-export var inputErrorClass = "input-validation-error";
-export var fieldErrorClass = "sf-field-validation-error";
-export var summaryErrorClass = "validation-summary-errors";
-export var inlineErrorVal = "inlineVal";
+
+export var validationSummary = "validaton-summary";
 export var globalErrorsKey = "sfGlobalErrors";
 export var globalValidationSummary = "sfGlobalValidationSummary";
 
 export function validate(valOptions: ValidationOptions): Promise<ValidationResult> {
     SF.log("validate");
 
-    valOptions = $.extend({
+    var options = $.extend({
         prefix: "",
         controllerUrl: SF.Urls.validate,
         requestExtraJsonData: null,
@@ -49,9 +38,9 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
     }, valOptions);
 
     return SF.ajaxPost({
-        url: valOptions.controllerUrl,
+        url: options.controllerUrl,
         async: false,
-        data: constructRequestData(valOptions),
+        data: constructRequestData(options),
     }).then(result => {
             var validatorResult: ValidationResult = {
                 modelState: result.ModelState,
@@ -59,7 +48,7 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
                 newToStr: result[Entities.Keys.toStr],
                 newLink: result[Entities.Keys.link]
             };
-            showErrors(valOptions, validatorResult.modelState);
+            showErrors(options, validatorResult.modelState);
             return validatorResult
         });
 }
@@ -70,8 +59,6 @@ function constructRequestData(valOptions: ValidationOptions): FormObject {
 
     var formValues = getFormValues(valOptions.prefix, "prefix");
 
- 
-
     if (valOptions.rootType)
         formValues["rootType"] = valOptions.rootType
 
@@ -81,9 +68,9 @@ function constructRequestData(valOptions: ValidationOptions): FormObject {
     return $.extend(formValues, valOptions.requestExtraJsonData);
 }
 
-export function getFormValues(prefix: string, prefixRequestKey?: string) : FormObject {
+export function getFormValues(prefix: string, prefixRequestKey?: string): FormObject {
 
-    var result; 
+    var result;
     if (!prefix) {
         result = cleanFormInputs($("form :input")).serializeObject();
     }
@@ -103,13 +90,13 @@ export function getFormValues(prefix: string, prefixRequestKey?: string) : FormO
     return result;
 }
 
-export function getFormValuesLite(prefix: string, prefixRequestKey? : string): FormObject {
+export function getFormValuesLite(prefix: string, prefixRequestKey?: string): FormObject {
 
     var result = getFormBasics();
 
     result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
-        $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
-        $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+    $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
+    $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
 
     if (prefixRequestKey)
         result[prefixRequestKey] = prefix;
@@ -119,7 +106,7 @@ export function getFormValuesLite(prefix: string, prefixRequestKey? : string): F
 
 export function getFormValuesHtml(entityHtml: Entities.EntityHtml, prefixRequestKey?: string): FormObject {
 
-    var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix)); 
+    var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix));
 
     var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
@@ -140,7 +127,7 @@ function cleanFormInputs(form: JQuery): JQuery {
     return form.not(".sf-search-control :input");
 }
 
-export function isModelState(result : any) : boolean {
+export function isModelState(result: any): boolean {
     return typeof result == "Object" && typeof result.ModelState != "undefined";
 }
 
@@ -155,34 +142,22 @@ export function showErrors(valOptions: ValidationOptions, modelState: ModelState
 
     SF.log("Validator showErrors");
     //Remove previous errors
-    $('.' + fieldErrorClass).remove()
-            $('.' + inputErrorClass).removeClass(inputErrorClass);
-    $('.' + summaryErrorClass).remove();
+    $('.' + hasError).removeClass(hasError);
+    $('.' + validationSummary).remove();
 
-    var allErrors: string[][]= [];
-    
+    var allErrors: string[][] = [];
+
     var prefix: string;
     for (prefix in modelState) {
         if (modelState.hasOwnProperty(prefix)) {
             var errorsArray = modelState[prefix];
-            var partialErrors = errorsArray.map(a=> "<li>" + a + "</li>");
             allErrors.push(errorsArray);
-
-            if (prefix != globalErrorsKey && prefix != "") {
-                var $control = $('#' + prefix);
-                $control.addClass(inputErrorClass);
-                $('#' + SF.compose(prefix, Entities.Keys.toStr) + ',#' + SF.compose(prefix, Entities.Keys.link)).addClass(inputErrorClass);
-                if (valOptions.showInlineErrors && $control.hasClass(inlineErrorVal)) {
-
-                    var errorMessage = '<span class="' + fieldErrorClass + '">' + (valOptions.fixedInlineErrorText || errorsArray.join('')) + "</span>";
-
-                    if ($control.next().hasClass("ui-datepicker-trigger"))
-                        $control.next().after(errorMessage);
-                    else
-                        $control.after(errorMessage);
-                }
+            if (prefix != globalErrorsKey) {
+                setHasError($('#' + prefix));
+                setPathErrors(valOptions, prefix, errorsArray);
+            } else {
+                setPathErrors(valOptions, valOptions.prefix, errorsArray);
             }
-            setPathErrors(valOptions, prefix, partialErrors.join(''));
         }
     }
 
@@ -193,36 +168,58 @@ export function showErrors(valOptions: ValidationOptions, modelState: ModelState
     return true;
 }
 
+export var hasError = "has-error";
+export function cleanHasError($element: JQuery) {
+    errorElement($element).removeClass(hasError)
+}
 
-//This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
-function setPathErrors(valOptions: ValidationOptions, prefix: string, partialErrors: string) {
-    var pathPrefixes = (prefix != globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
-    for (var i = 0, l = pathPrefixes.length; i < l; i++) {
-        var currPrefix = pathPrefixes[i];
-        if (currPrefix != undefined) {
-            var isEqual = (currPrefix === valOptions.prefix);
-            var isMoreInner = !isEqual && (currPrefix.indexOf(valOptions.prefix) > -1);
-            if (valOptions.showPathErrors || isMoreInner) {
-                $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
-                $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
-            }
-            if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
-                var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
+export function setHasError($element: JQuery) {
+    errorElement($element).addClass(hasError)
+}
 
-                var summaryUL = currentSummary.children('.' + summaryErrorClass);
-                if (summaryUL.length === 0) {
-                    currentSummary.append('<ul class="' + summaryErrorClass + '">\n' + partialErrors + '</ul>');
-                }
-                else {
-                    summaryUL.append(partialErrors);
-                }
-            }
-        }
-    }
+export function errorElement($element: JQuery) {
+    var formGroup = $element.closest(".form-group"); 
+    if (formGroup.length)
+        return formGroup; 
+
+    return $element;
 }
 
 
-function isValid(modelState : ModelState) {
+//This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
+function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArray: string[]) {
+
+    var partialErrors = errorsArray.map(a=> "<li>" + a + "</li>").join('');
+
+    getPathPrefixes(prefix).forEach(currPrefix=> {
+
+        var summary = $('#' + SF.compose(currPrefix, globalValidationSummary))
+
+        if (summary.length > 0) {
+            var ul = summary.children("ul." + validationSummary);
+            if (ul.length == 0)
+                ul = $('<ul class="' + validationSummary + ' alert alert-danger"></ul>').appendTo(summary);
+
+            ul.append(partialErrors);
+        }
+        if (currPrefix.length < valOptions.prefix.length)
+            setHasError($('#' + currPrefix));
+
+    });
+}
+
+export function getPathPrefixes(prefix): string[] {
+    var path: string[] = [],
+        pathSplit = prefix.split("_");
+
+    for (var i = 0, l = pathSplit.length; i < l; i++)
+        path[i] = pathSplit.slice(0, i).join("_");
+
+    return path;
+}
+
+
+function isValid(modelState: ModelState) {
     SF.log("Validator isValid");
     for (var prefix in modelState) {
         if (modelState.hasOwnProperty(prefix) && modelState[prefix].length) {
@@ -242,6 +239,6 @@ export function entityIsValid(validationOptions: ValidationOptions): Promise<voi
 
         SF.Notify.error(lang.signum.error, 2000);
         alert(lang.signum.popupErrorsStop);
-        throw result; 
+        throw result;
     });
 }

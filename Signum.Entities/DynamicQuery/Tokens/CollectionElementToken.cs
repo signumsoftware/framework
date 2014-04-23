@@ -142,7 +142,7 @@ namespace Signum.Entities.DynamicQuery
         public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
         {
             return allTokens
-                .SelectMany(t => t.FollowC(tt => tt.Parent))
+                .SelectMany(t => t.Follow(tt => tt.Parent))
                 .OfType<CollectionElementToken>()
                 .Where(a => a.CollectionElementType.IsElement())
                 .Distinct()

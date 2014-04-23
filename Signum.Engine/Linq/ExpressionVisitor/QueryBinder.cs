@@ -943,7 +943,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return map.TryGetC(p) ?? p; //i.e. trycc
+            return map.TryGetC(p) ?? p; //i.e. Try
         }
 
         protected override MemberAssignment VisitMemberAssignment(MemberAssignment assignment)

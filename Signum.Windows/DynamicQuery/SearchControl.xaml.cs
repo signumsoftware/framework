@@ -401,6 +401,8 @@ namespace Signum.Windows
                 }
             }
 
+            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString(entityColumn.Implementations.Value.IsByAll ? "[All]" : entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
                            Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
@@ -515,7 +517,7 @@ namespace Signum.Windows
 
                 foreach (var fun in GetContextMenuItems.GetInvocationList().Cast<Func<SearchControl, IEnumerable<MenuItem>>>())
                 {
-                    var items = fun(this).TryCC(a => a.ToList());
+                    var items = fun(this).Try(a => a.ToList());
 
                     if (items.IsNullOrEmpty())
                         continue;
@@ -537,7 +539,7 @@ namespace Signum.Windows
             btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
-            SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(r => r.Entity);
+            SelectedItem = ((ResultRow)lvResult.SelectedItem).Try(r => r.Entity);
             if (MultiSelection)
                 SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToArray();
             else

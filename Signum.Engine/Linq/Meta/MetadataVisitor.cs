@@ -56,7 +56,7 @@ namespace Signum.Engine.Linq
             return props.ToDictionary(pi => pi.Name, pi =>
             {
                 Expression ex = BindMember(proj, pi, pi.PropertyType);
-                return (ex as MetaExpression).TryCC(c => c.Meta);
+                return (ex as MetaExpression).Try(c => c.Meta);
             });
         }
 
@@ -550,7 +550,7 @@ namespace Signum.Engine.Linq
 
             if (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.TypeAs)
             {
-                var imps = exp.Meta.Implementations.TrySS(s => CastImplementations(s, u.Type.CleanType()));
+                var imps = exp.Meta.Implementations.Try(s => CastImplementations(s, u.Type.CleanType()));
 
                 return new MetaExpression(u.Type, exp.Meta is DirtyMeta ?
                     (Meta)new DirtyMeta(imps, ((DirtyMeta)exp.Meta).CleanMetas.Cast<Meta>().ToArray()) :

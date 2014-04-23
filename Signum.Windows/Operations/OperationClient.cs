@@ -55,43 +55,43 @@ namespace Signum.Windows.Operations
         }
 
         public static readonly DependencyProperty ConstructFromOperationKeyProperty =
-            DependencyProperty.RegisterAttached("ConstructFromOperationKey", typeof(Enum), typeof(OperationClient), new UIPropertyMetadata(null));
-        public static Enum GetConstructFromOperationKey(DependencyObject obj)
+            DependencyProperty.RegisterAttached("ConstructFromOperationKey", typeof(OperationSymbol), typeof(OperationClient), new UIPropertyMetadata(null));
+        public static OperationSymbol GetConstructFromOperationKey(DependencyObject obj)
         {
-            return (Enum)obj.GetValue(ConstructFromOperationKeyProperty);
+            return (OperationSymbol)obj.GetValue(ConstructFromOperationKeyProperty);
         }
 
-        public static void SetConstructFromOperationKey(DependencyObject obj, Enum value)
+        public static void SetConstructFromOperationKey(DependencyObject obj, OperationSymbol value)
         {
             obj.SetValue(ConstructFromOperationKeyProperty, value);
         }
 
-        public static ImageSource GetImage(Enum key)
+        public static ImageSource GetImage(OperationSymbol operation)
         {
-            return Manager.GetImage(key, Manager.Settings.TryGetC(key));
+            return Manager.GetImage(operation, Manager.Settings.TryGetC(operation));
         }
 
-        public static string GetText(Enum key)
+        public static string GetText(OperationSymbol operation)
         {
-            return Manager.GetText(key, Manager.Settings.TryGetC(key));
+            return Manager.GetText(operation, Manager.Settings.TryGetC(operation));
         }
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.AddOrThrow(setting.Key, setting, "EntitySettings {0} repeated");
+            Manager.Settings.AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
         }
 
         public static void AddSettings(List<OperationSettings> settings)
         {
-            Manager.Settings.AddRange(settings, s => s.Key, s => s, "EntitySettings");
+            Manager.Settings.AddRange(settings, s => s.OperationSymbol, s => s, "EntitySettings");
         }
     }
 
     public class OperationManager
     {
-        public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
+        public Dictionary<OperationSymbol, OperationSettings> Settings = new Dictionary<OperationSymbol, OperationSettings>();
 
-        public Func<Enum, bool> IsSave = e => e.ToString().StartsWith("Save");
+        public Func<OperationSymbol, bool> IsSave = e => e.ToString().StartsWith("Save");
 
         public List<OperationColor> BackgroundColors = new List<OperationColor>
         {
@@ -100,16 +100,21 @@ namespace Signum.Windows.Operations
             new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
         };
 
-        public T GetSettings<T>(Enum key)
-            where T : OperationSettings
+        public EntityOperationSettings GetSettings(IEntityOperationSymbolContainer operation)
         {
-            OperationSettings settings = Settings.TryGetC(key);
+            return GetSettings<EntityOperationSettings>(operation.Operation);
+        }
+
+        public OS GetSettings<OS>(OperationSymbol operation)
+            where OS : OperationSettings
+        {
+            OperationSettings settings = Settings.TryGetC(operation);
             if (settings != null)
             {
-                var result = settings as T;
+                var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), OperationDN.UniqueKey(key), typeof(T).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }
@@ -134,7 +139,7 @@ namespace Signum.Windows.Operations
 
             var operations = (from oi in OperationInfos(ident.GetType())
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
-                              let os = GetSettings<EntityOperationSettings>(oi.Key)
+                              let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
                               let eoc = new EntityOperationContext
                               {
                                   Entity = (IdentifiableEntity)entity,
@@ -149,10 +154,10 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteAll(ident));
+                Dictionary<OperationSymbol, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteAll(ident));
                 foreach (var eoc in operations)
                 {
-                    var ce = canExecutes.TryGetC(eoc.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(eoc.OperationInfo.OperationSymbol);
                     if (ce != null && ce.HasText())
                         eoc.CanExecute = ce;
                 }
@@ -224,23 +229,23 @@ namespace Signum.Windows.Operations
             return null;
         }
 
-        protected internal virtual ImageSource GetImage(Enum key, OperationSettings os)
+        protected internal virtual ImageSource GetImage(OperationSymbol operation, OperationSettings os)
         {
             if (os != null && os.Icon != null)
                 return os.Icon;
 
-            if (IsSave(key))
+            if (IsSave(operation))
                 return ImageLoader.GetImageSortName("save.png");
 
             return null;
         }
 
-        protected internal virtual string GetText(Enum key, OperationSettings os)
+        protected internal virtual string GetText(OperationSymbol operation, OperationSettings os)
         {
             if (os != null && os.Text != null)
                 return os.Text;
 
-            return key.NiceToString();
+            return operation.NiceToString();
         }
 
 
@@ -252,16 +257,16 @@ namespace Signum.Windows.Operations
 
             var dic = (from oi in OperationInfos(entityType)
                        where oi.OperationType == OperationType.Constructor
-                       let os = GetSettings<ConstructorSettings>(oi.Key)
+                       let os = GetSettings<ConstructorSettings>(oi.OperationSymbol)
                        where os == null || os.IsVisible == null || os.IsVisible(oi)
-                       select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
+                       select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.OperationSymbol);
 
             if (dic.Count == 0)
                 return null;
 
             var win = Window.GetWindow(element);
 
-            Enum selected = null;
+            OperationSymbol selected = null;
             if (dic.Count == 1)
             {
                 selected = dic.Keys.SingleEx();
@@ -296,7 +301,7 @@ namespace Signum.Windows.Operations
             return (from t in types
                     from oi in OperationInfos(t)
                     where oi.OperationType == OperationType.ConstructorFromMany
-                    group new { t, oi } by oi.Key into g
+                    group new { t, oi } by oi.OperationSymbol into g
                     let os = GetSettings<ContextualOperationSettings>(g.Key)
                     let coc = new ContextualOperationContext
                     {
@@ -304,7 +309,7 @@ namespace Signum.Windows.Operations
                         SearchControl = sc,
                         OperationSettings = os,
                         OperationInfo = g.First().oi,
-                        CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t)))
+                        CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t)))
                     }
                     where os == null || os.IsVisible == null || os.IsVisible(coc)
                     select ConstructFromManyMenuItemConsturctor.Construct(coc))
@@ -322,7 +327,7 @@ namespace Signum.Windows.Operations
 
             var operations = (from oi in OperationInfos(sc.SelectedItem.EntityType)
                               where oi.IsEntityOperation
-                              let os = GetSettings<EntityOperationSettings>(oi.Key)
+                              let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
                               let coc = new ContextualOperationContext
                               {
                                   Entities = sc.SelectedItems,
@@ -340,10 +345,10 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLiteAll(sc.SelectedItem));
+                Dictionary<OperationSymbol, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLiteAll(sc.SelectedItem));
                 foreach (var coc in operations)
                 {
-                    var ce = canExecutes.TryGetC(coc.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(coc.OperationInfo.OperationSymbol);
                     if (ce != null && ce.HasText())
                         coc.CanExecute = ce;
                 }

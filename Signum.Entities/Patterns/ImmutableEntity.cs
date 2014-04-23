@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
@@ -19,12 +20,12 @@ namespace Signum.Entities
             set { allowTemporaly = value; Notify(()=>AllowChange); }
         }
 
-        protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
+        protected override bool Set<T>(ref T variable, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (AllowChange)
-                return base.Set(ref variable, value, property);
+                return base.Set(ref variable, value, automaticPropertyName);
             else
-                return base.SetIfNew(ref variable, value, property);
+                return base.SetIfNew(ref variable, value, automaticPropertyName);
         }
 
         protected internal override void PreSaving(ref bool graphModified)

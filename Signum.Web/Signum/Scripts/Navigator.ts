@@ -37,20 +37,6 @@ export interface NavigatePopupOptions extends ViewOptionsBase {
     onPopupLoaded?: (popupDiv: JQuery) => void;
 }
 
-export function createTempDiv(entityHtml: Entities.EntityHtml): string {
-    var tempDivId = SF.compose(entityHtml.prefix, "Temp");
-
-    $("body").append(SF.hiddenDiv(tempDivId, ""));
-
-    var tempDiv = $("#" + tempDivId);
-
-    tempDiv.html(entityHtml.html);
-
-    SF.triggerNewContent(tempDiv);
-
-    return tempDivId; 
-}
-
 export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: NavigatePopupOptions): Promise<void> {
     viewOptions = $.extend({
         controllerUrl: SF.Urls.popupNavigate,
@@ -68,29 +54,12 @@ export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: Nav
     });
 }
 
-function openNavigatePopup(entityHtml: Entities.EntityHtml, viewOptions: NavigatePopupOptions): Promise<void> {
+function openNavigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: NavigatePopupOptions): Promise<void> {
 
-    var tempDivId = createTempDiv(entityHtml);
+    entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", true);
 
-    var tempDiv = $("#" + tempDivId);
-
-    var result = new Promise<void>(resolve => {
-        tempDiv.popup({
-            onCancel: function () {
-
-                $("#" + tempDivId).remove(); // could be reloaded
-
-                resolve(null);
-            }
-        });
-    });
-
-    if (viewOptions.onPopupLoaded != null)
-        viewOptions.onPopupLoaded(tempDiv);
-
-    return result;
+    return openEntityHtmlModal(entityHtml, null, viewOptions.onPopupLoaded).then(() => null);
 }
-
 
 export interface ViewPopupOptions extends ViewOptionsBase {
     avoidClone?: boolean;
@@ -143,83 +112,115 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
 
 function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOptions): Promise<Entities.EntityHtml> {
 
-    var tempDivId = createTempDiv(entityHtml);
+    entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", false);
 
-    var tempDiv = $("#" + tempDivId);
+    return openEntityHtmlModal(entityHtml, isOk => {
+        if (!isOk)
+            return Promise.resolve(true);
 
-    return new Promise<Entities.EntityHtml>(function (resolve) {
-        tempDiv.popup({
-            onOk: function () {
+        if (viewOptions.avoidValidate)
+            return Promise.resolve(true);
 
-                var continuePromise: Promise<boolean> =
-                    viewOptions.avoidValidate ? Promise.resolve<boolean>(true) :
-                    checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(valResult=> {
-                        if (valResult == null)
-                            return false;
+        return checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(valResult=> {
+            if (valResult == null)
+                return false;
 
-                        entityHtml.hasErrors = !valResult.isValid;
-                        entityHtml.link = valResult.newLink;
-                        entityHtml.toStr = valResult.newToStr;
+            entityHtml.hasErrors = !valResult.isValid;
+            entityHtml.link = valResult.newLink;
+            entityHtml.toStr = valResult.newToStr;
 
-                        return true;
-                    });
-
-                continuePromise.then(result=> {
-                    if (result) {
-                        var newTempDiv = $("#" + tempDivId);
-                        var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
-                        if ($mainControl.length > 0) {
-                            entityHtml.runtimeInfo = Entities.RuntimeInfo.parse($mainControl.data("runtimeinfo"));
-                        }
-
-                        newTempDiv.popup('restoreTitle');
-                        newTempDiv.popup('destroy');
-                        entityHtml.html = newTempDiv.children();
-                        newTempDiv.remove();
-
-                        resolve(entityHtml);
-                    }
-                });
-            },
-            onCancel: function () {
-                $("#" + tempDivId).remove();
-
-                resolve(null);
-            }
+            return true;
         });
+    }, viewOptions.onPopupLoaded).then(pair=> {
 
-        if (viewOptions.onPopupLoaded != null)
-            viewOptions.onPopupLoaded(tempDiv);
-    });
+        if (!pair.isOk)
+            return null;
+
+        return pair.entityHtml;
+    }); 
 }
 
+export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
+    canClose?: (isOk: boolean) => Promise<boolean>,
+    shown?: (modalDiv: JQuery) => void
+    ): Promise<{ isOk: boolean; entityHtml: Entities.EntityHtml }> {
 
-export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: (div: JQuery) => Promise<boolean>): Promise<void> {
+    if (!canClose)
+        canClose = () => Promise.resolve(true);
 
-    var tempDivId = createTempDiv(entityHtml);
+    var panelPopup = entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup"));
 
-    var tempDiv = $("#" + tempDivId);
+    var okButtonId =  SF.compose(entityHtml.prefix, "btnOk");
 
-    return new Promise<void>(function (resolve) {
-        tempDiv.popup({
-            onOk: function () {
-                onOk($("#" + tempDivId)).then(result => {
-                    if (result) {
-                        var newTempDiv = $("#" + tempDivId);
-                          $("#" + tempDivId).remove();
-                        resolve(null);
-                    }
-                });
-            },
-            onCancel: function () {
-                var newTempDiv = $("#" + tempDivId);
-                $("#" + tempDivId).remove();
-                resolve(null);
+    return openModal(panelPopup, button => {
+        var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+        if (button.id == okButtonId) {
+            if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
+                alert(lang.signum.saveChangesBeforeOrPressCancel);
+                return Promise.resolve(false);
             }
-        });
-    });
-}
 
+            return canClose(true);
+
+        } else {
+            if (main.hasClass("sf-changed") && !confirm(lang.signum.looseCurrentChanges))
+                return Promise.resolve(false);
+
+            return canClose(false);
+        }
+    }, shown).then(pair => {
+
+        var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+        entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
+        entityHtml.html = pair.modalDiv;
+       
+        return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
+    });
+
+} 
+
+export function openModal(modalDiv: JQuery,
+    canClose?: (button: HTMLElement) => Promise<boolean>,
+    shown? : (modalDiv : JQuery) => void
+    ): Promise<{ button: HTMLElement; modalDiv: JQuery }> {
+
+    if (!canClose)
+        canClose = () => Promise.resolve(true);
+
+    $("body").append(modalDiv);
+
+    return new Promise<{ button: HTMLElement; modalDiv: JQuery }>(function (resolve) {
+
+        var button: HTMLElement = null;
+        modalDiv.on("click", ".sf-close-button", function (event) {
+            event.preventDefault();
+
+            button = this;
+
+            canClose(button).then(result=> {
+                if (result) {
+                    modalDiv.modal("hide");
+                }
+            });
+        });
+
+        modalDiv.on("hidden.bs.modal", function (event) {
+            modalDiv.remove();
+
+            resolve({ button: button, modalDiv: modalDiv });
+        });
+
+        if (shown)
+            modalDiv.on("shown.bs.modal", function (event) {
+                shown(modalDiv);
+            });
+
+        modalDiv.modal({
+            keyboard: false,
+            backdrop: "static",
+        });
+    }); 
+}
 
 export function requestAndReload(prefix: string, options?: ViewOptionsBase): Promise<Entities.EntityHtml> {
 
@@ -260,9 +261,8 @@ export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {
 }
 
 export function reloadMain(entityHtml: Entities.EntityHtml) {
-    var $elem = $("#divNormalControl");
+    var $elem = $("#divMainPage");
     $elem.html(entityHtml.html);
-    SF.triggerNewContent($elem);
 }
 
 export function closePopup(prefix: string): void {
@@ -271,30 +271,14 @@ export function closePopup(prefix: string): void {
 
     var tempDiv = $("#" + tempDivId);
 
-    var popupOptions = tempDiv.popup();
-
-    tempDiv.popup("destroy");
-
-    tempDiv.remove();
+    tempDiv.modal("hide");//should remove automatically
 }
-
-
 
 export function reloadPopup(entityHtml : Entities.EntityHtml) {
 
-    var tempDivId = SF.compose(entityHtml.prefix, "Temp");
+    var panelPopupId = SF.compose(entityHtml.prefix, "panelPopup");
 
-    var tempDiv = $("#" + tempDivId);
-
-    var popupOptions = tempDiv.popup();
-
-    tempDiv.popup("destroy");
-
-    tempDiv.html(entityHtml.html);
-
-    SF.triggerNewContent(tempDiv);
-
-    tempDiv.popup(popupOptions);
+    $("#" + panelPopupId).html(entityHtml.html.filter("#" + panelPopupId).children());
 }
 
 export function reload(entityHtml: Entities.EntityHtml): void {
@@ -309,13 +293,7 @@ export function isNavigatePopup(prefix: string) : boolean {
     if (SF.isEmpty(prefix))
         return false;
 
-    var tempDivId = SF.compose(prefix, "Temp");
-
-    var tempDiv = $("#" + tempDivId);
-
-    var popupOptions = tempDiv.popup();
-
-    return popupOptions.onOk == null
+    return $("#" + SF.compose(prefix, "panelPopup")).data("sf-navigate")
 }
 
 
@@ -386,9 +364,6 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
         return Promise.resolve(options[0]);
     }
 
-    var tempDivId = SF.compose(prefix, "Temp");
-
-
     if (getStr == null) {
         getStr = (a: any) =>
             a.toStr ? a.toStr :
@@ -403,33 +378,72 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
             a.toString();
     }
 
-    var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'
-        .format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
+    var modalBody = $("<div>")
+    options.forEach(o=> $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>')
+        .data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody));
 
-    options.forEach(o=> div.append($('<button type="button" class="sf-chooser-button"/>')
-        .data("option", o).attr("data-value", getValue(o)).text(getStr(o))));
+    var modalDiv = createBootstrapModal({ titleText: title,  prefix: prefix, body: modalBody, titleClose: true });
 
-    $("body").append(SF.hiddenDiv(tempDivId, div));
+    var option : T; 
+    return openModal(modalDiv,
+        button => { option = <T>$(button).data("option"); return Promise.resolve(true); })
+        .then(pair=> option);
+}
 
-    var tempDiv = $("#" + tempDivId);
+export interface BootstrapModalOptions
+{
+    prefix : string;
 
-    SF.triggerNewContent(tempDiv);
+    title?: JQuery;
+    titleText?: string;
+    titleClose?: boolean;
 
-    return new Promise<T>((resolve, reject) => {
+    body?: JQuery;
 
-        tempDiv.on("click", ":button", function () {
-            var option = <T>$(this).data("option");
-            tempDiv.remove();
-            resolve(option);
-        });
+    footer?: JQuery;
+    footerOkId?: string;
+    footerCancelId?: string;
+}
 
-        tempDiv.popup({
-            onCancel: function () {
-                tempDiv.remove();
-                resolve(null);
-            }
-        });
-    });
+export function createBootstrapModal(options: BootstrapModalOptions) : JQuery {
+    var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + SF.compose(options.prefix, "panelPopup") + '">'
+        + '<div class="modal-dialog modal-sm" >'
+        + '<div class="modal-content">'
+
+        + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '')
+        + '<div class="modal-body"></div>'
+        + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '')
+
+        + '</div>'
+        + '</div>'
+        + '</div>');
+
+    if (options.titleClose)
+        result.find(".modal-header").append('<button type="button" class="close sf-close-button" aria-hidden="true">×</button>');
+
+    if (options.title)
+        result.find(".modal-header").append(options.title);
+
+    if (options.titleText)
+        result.find(".modal-header").append($('<h4 class="modal-title"></h4>').text(options.titleText));
+
+    if (options.body)
+        result.find(".modal-body").append(options.body);
+
+    if (options.footer)
+        result.find(".modal-footer").append(options.footer)
+
+    if (options.footerOkId)
+        result.find(".modal-footer").append($('<button class="btn btn-primary sf-entity-button sf-close-button sf-ok-button)">)')
+            .attr("id", options.footerOkId)
+            .text(lang.signum.ok));
+
+    if (options.footerCancelId)
+        result.find(".modal-footer").append($('<button class="btn btn-primary sf-entity-button sf-close-button sf-ok-button)">)')
+            .attr("id", options.footerCancelId)
+            .text(lang.signum.cancel));
+
+    return result;
 }
 
 export interface ChooserOption {
@@ -448,38 +462,38 @@ export enum ValueLineType {
 }
 
 export interface ValueLineBoxOptions {
-    type: ValueLineType;
-    title: string;
-    labelText: string;
-    message: string;
     prefix: string;
-    value: any;
+    type: ValueLineType;
+    title?: string;
+    labelText?: string;
+    message?: string;
+    value?: any;
 }
 
-export function valueLineBox(options: ValueLineBoxOptions) : Promise<string>
-{
-    return new Promise<string>(resolve => {
-        requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
-            controllerUrl: SF.Urls.valueLineBox,
-            requestExtraJsonData: options,
-        }).then(eHtml=> {
-                var result = null;
-                basicPopupView(eHtml, div => {
-                    var input = div.find(":input:not(:button)");
-                    if (input.length != 1)
-                        throw new Error("{0} inputs found in ValueLineBox".format(input.length)); 
+export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
+    return requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+        controllerUrl: SF.Urls.valueLineBox,
+        requestExtraJsonData: options,
+    })
+        .then(eHtml=> openEntityHtmlModal(eHtml))
+        .then(pair => {
+            if (!pair.isOk)
+                return null;
 
-                    result = input.val();
-                    return Promise.resolve(true);
-                }).then(() => resolve(result));
-            }); 
-    }); 
+            var html = pair.entityHtml.html;
+
+            var date = html.find(SF.compose(options.prefix, "Date"));
+            var time = html.find(SF.compose(options.prefix, "Time"));
+
+            if (date.length && time.length)
+                return date.val() + " " + time.val();
+
+            var input = html.find(":input:not(:button)");
+            if (input.length != 1)
+                throw new Error("{0} inputs found in ValueLineBox".format(input.length));
+
+            return input.val();
+        });
 }
 
-
-once("widgetToggler", () =>
-    $(document).on("click", ".sf-widget-toggler", function (evt) {
-        SF.Dropdowns.toggle(evt, this, 1);
-        return false;
-    }));
 

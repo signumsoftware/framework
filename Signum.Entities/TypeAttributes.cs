@@ -35,7 +35,7 @@ namespace Signum.Entities
 
         public static bool IsLowPopulation(Type type)
         {
-            return TryGetAttribute(type).TryCS(a => a.IsLowPopulation) ?? false;
+            return TryGetAttribute(type).Try(a => a.IsLowPopulation) ?? false;
         }
 
         public static EntityKindAttribute GetAttribute(Type type)

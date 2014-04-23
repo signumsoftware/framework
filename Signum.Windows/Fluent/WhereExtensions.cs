@@ -14,12 +14,12 @@ namespace Signum.Windows
     {
         public static IEnumerable<DependencyObject> VisualParents(this DependencyObject child)
         {
-            return child.FollowC(VisualTreeHelper.GetParent);
+            return child.Follow(VisualTreeHelper.GetParent);
         }
 
         public static IEnumerable<DependencyObject> LogicalParents(this DependencyObject child)
         {
-            return child.FollowC(LogicalTreeHelper.GetParent);
+            return child.Follow(LogicalTreeHelper.GetParent);
         }
 
         public static IEnumerable<DependencyObject> BreathFirstVisual(DependencyObject parent, bool startOnParent, bool recursive, Func<DependencyObject, bool> predicate)
@@ -303,7 +303,7 @@ namespace Signum.Windows
                         source.BaseValueSource,
                         source.IsExpression ? " (IsExpression)" : "",
                         fe.DataContext.TryToString() ?? "null",
-                        fe.DataContext.TryCC(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
+                        fe.DataContext.Try(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
 
                     any = true;
                 }
