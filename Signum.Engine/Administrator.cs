@@ -303,12 +303,6 @@ namespace Signum.Engine
             });
         }
 
-        public static IUpdateablePart<A, T> SetToStr<A, T>(this IUpdateablePart<A, T> update, Expression<Func<A, string>> expression)
-            where T:  IdentifiableEntity
-        {
-            return update.Set(a => a.toStr, expression);
-        }
-
         public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
             UpdateToStrings(Database.Query<T>(), expression);
