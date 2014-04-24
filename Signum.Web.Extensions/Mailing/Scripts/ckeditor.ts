@@ -1,3 +1,3 @@
- declare module "ckeditor" {
-    export = any;
-}
+var a :any= null;
+
+export = a;
