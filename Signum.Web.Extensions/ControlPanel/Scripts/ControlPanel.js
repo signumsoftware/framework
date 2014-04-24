@@ -1,18 +1,35 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Entities, Navigator, Validator) {
-    function createNewPart(prefix, url, typesOptions) {
-        Navigator.chooser(SF.compose(prefix, "New"), lang.signum.chooseAType, typesOptions).then(function (a) {
-            if (a == null)
-                return;
+    function attachGridControl(gridRepeater, url, typesOptions) {
+        gridRepeater.creating = function (prefix) {
+            return Navigator.typeChooser(SF.compose(prefix, "New"), typesOptions).then(function (type) {
+                if (type == null)
+                    return null;
 
-            SF.ajaxPost({
-                url: url,
-                data: $.extend({ newPartType: a.value }, Validator.getFormValues(prefix))
-            }).then(function (html) {
-                return Navigator.reload(Entities.EntityHtml.fromHtml(prefix, html));
+                return SF.ajaxPost({
+                    url: url,
+                    data: $.extend({
+                        prefix: prefix,
+                        rootType: gridRepeater.options.rootType,
+                        propertyRoute: gridRepeater.options.propertyRoute,
+                        partialViewName: gridRepeater.options.partialViewName,
+                        newPartType: type
+                    }, Validator.getFormValues(prefix))
+                }).then(function (html) {
+                    var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
+                    result.loadHtml(html);
+                    return result;
+                });
             });
+        };
+
+        gridRepeater.element.on("change", "select[name$=_Style]", function (e) {
+            var select = $(e.currentTarget);
+            var panel = select.closest(".panel");
+            panel.removeClass("panel-default panel-primary panel-success panel-info panel-warning panel-danger");
+            panel.addClass("panel-" + select.val().toLowerCase());
         });
     }
-    exports.createNewPart = createNewPart;
+    exports.attachGridControl = attachGridControl;
 });
 //# sourceMappingURL=ControlPanel.js.map

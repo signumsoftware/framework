@@ -22,8 +22,9 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Basics;
 using System.Net.Mime;
+using System.Threading;
 
-namespace Signum.Engine.Mailing
+namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
@@ -171,7 +172,9 @@ namespace Signum.Engine.Mailing
 
         public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
         {
-            Pop3ReceptionDN reception = new Pop3ReceptionDN { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now };
+            Pop3ReceptionDN reception = Transaction.ForceNew().Using(tr => tr.Commit(
+                new Pop3ReceptionDN { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now }.Save()));
+
             var now = TimeZoneManager.Now;
             try
             {
@@ -210,7 +213,7 @@ namespace Signum.Engine.Mailing
 
                                     MailMessage mm = MailMimeParser.Parse(rawContent);
 
-                                    EmailMessageDN email = ToEmailMessage(mm, rawContent, kvp.Value, reception.ToLite());
+                                    var email = ToEmailMessage(mm, rawContent, kvp.Value, reception.ToLite());
 
                                     if (email.Recipients.IsEmpty())
                                     {
@@ -218,7 +221,7 @@ namespace Signum.Engine.Mailing
                                         {
                                             EmailAddress = config.Username,
                                             Kind = EmailRecipientKind.To,
-                                        }); 
+                                        });
                                     }
 
                                     Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
@@ -279,8 +282,13 @@ namespace Signum.Engine.Mailing
                         }
                     }
 
-                    reception.EndDate = TimeZoneManager.Now;
-                    reception.Save();
+
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        reception.EndDate = TimeZoneManager.Now;
+                        reception.Save();
+                        tr.Commit();
+                    }
 
 
                     client.Disconnect(); //Delete messages now

@@ -6,20 +6,20 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Chart
 @using Signum.Engine.DynamicQuery
-@model PanelPartDN
-@Html.ScriptCss("~/Chart/Content/Chart.css")
-@{ 
-    var ucPart = (UserChartPartDN)Model.Content;
-    UserChartDN uc = ucPart.UserChart;
-    ChartRequest request = uc.ToRequest();
-  
 
-    using (var crc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
+
+@Html.ScriptCss("~/Chart/Content/Chart.css")
+
+@using (var tc = Html.TypeContext<UserChartPartDN>())
+{
+    UserChartDN uc = tc.Value.UserChart;
+    ChartRequest request = uc.ToRequest();
+
+    using (var crc = new TypeContext<ChartRequest>(request, tc.Prefix))
     {
         var containerId = crc.Compose("sfChartBuilderContainer");
-        
-        ResultTable resultTable = ChartLogic.ExecuteChart(request);
 
+        ResultTable resultTable = ChartLogic.ExecuteChart(request);
 
     <div id="@crc.Compose("sfChartControl")" class="sf-search-control sf-chart-control" data-prefix="@crc.Prefix">
         <div style="display: none">
@@ -35,48 +35,48 @@
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>
             <script type="text/javascript">
-                var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()))
-                 require(["@ChartClient.Module"], function (Chart) {
+                require(["@ChartClient.Module"], function (Chart) {
+                     var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()));
+
                      var chartBuilder = new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.Prefix' }, findOptions));
 
-                     @if (!ucPart.ShowData)
+                     @if (!tc.Value.ShowData)
                      {
                          <text>
                      chartBuilder.reDraw();
                         </text>
                      }
-                 }); 
+                 });
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">
-            <div class="sf-chart-container" style="display:@(ucPart.ShowData ? "none" : "block")" 
+            <div class="sf-chart-container" style="display:@(tc.Value.ShowData ? "none" : "block")" 
                     data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.Prefix)))" 
                     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(crc.Prefix)))"
                     data-json="@Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString()">
             </div>
         </div>
     </div>
-    
-        if (ucPart.ShowData)
-        {
-            ViewData[ViewDataKeys.Results] = resultTable;
-            ViewData[ViewDataKeys.Navigate] = false;
+                     if (tc.Value.ShowData)
+                     {
+                         ViewData[ViewDataKeys.Results] = resultTable;
+                         ViewData[ViewDataKeys.Navigate] = false;
 
-            QuerySettings settings = Navigator.QuerySettings(request.QueryName);
-            ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => settings.GetFormatter(c.c.Column));
+                         QuerySettings settings = Navigator.QuerySettings(request.QueryName);
+                         ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => settings.GetFormatter(c.c.Column));
 
-            @Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
-        }
-        else
-        {
-            MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
-        }
-        <script type="text/javascript">
-            (function () {
-                $("#" + SF.compose("@crc.Prefix", "sfFullScreen")).on("mousedown", function (e) {
+    @Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, tc.Prefix))
+                     }
+                     else
+                     {
+                         MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
+                     }
+    <script type="text/javascript">
+        (function () {
+            $("#" + SF.compose("@crc.Prefix", "sfFullScreen")).on("mousedown", function (e) {
                     $("#@containerId").SFControl().fullScreen();
                 });
             })();
-        </script>
+    </script>
     }
 }

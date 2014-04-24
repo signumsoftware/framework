@@ -91,9 +91,9 @@ namespace Signum.Engine.Help
             return BaseUrl + "/" + TypeLogic.GetCleanName(entityType);
         }
 
-        public static string OperationUrl(Type entityType, Enum operation)
+        public static string OperationUrl(Type entityType, OperationSymbol operation)
         {
-            return HelpLogic.EntityUrl(entityType) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_');
+            return HelpLogic.EntityUrl(entityType) + "#" + "o-" + operation.Key.Replace('.', '_');
         }
 
         public static string PropertyUrl(PropertyRoute route)
@@ -350,7 +350,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.OperationLink:
                         {
-                            string operation = r.SelectInteractive(link, MultiEnumLogic<OperationDN>.AllUniqueKeys, "Operation", sd);
+                            string operation = r.SelectInteractive(link,  SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", sd);
 
                             if (operation == null)
                                 return m.Value;

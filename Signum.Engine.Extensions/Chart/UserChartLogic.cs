@@ -114,19 +114,19 @@ namespace Signum.Engine.Chart
                     select er.ToLite()).ToList();
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(UserDN));
+            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
+            TypeConditionLogic.Register<UserChartDN>(typeCondition, uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
 
-        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
+            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+            TypeConditionLogic.Register<UserChartDN>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)

@@ -1,11 +1,10 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 define(["require", "exports"], function(require, exports) {
-    
-
-    function init($textArea) {
+    function init($textArea, CodeMirror) {
         var changedDelay;
 
         var editor = CodeMirror.fromTextArea($textArea[0], {
+            highlightSelectionMatches: true,
             lineNumbers: true,
             matchBrackets: true,
             mode: "javascript",
@@ -21,16 +20,14 @@ define(["require", "exports"], function(require, exports) {
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
                 }
-            },
-            onCursorActivity: function () {
-                editor.matchHighlight("CodeMirror-matchhighlight");
-            },
-            onChange: function () {
-                editor.save();
-                if (opener != null && opener != undefined) {
-                    clearTimeout(changedDelay);
-                    changedDelay = setTimeout(updatePreview, 150);
-                }
+            }
+        });
+
+        editor.on("change", function () {
+            editor.save();
+            if (opener != null && opener != undefined) {
+                clearTimeout(changedDelay);
+                changedDelay = setTimeout(updatePreview, 150);
             }
         });
 
@@ -46,9 +43,9 @@ define(["require", "exports"], function(require, exports) {
             if (number != null) {
                 clearTimeout(exceptionDelay);
                 if (hlLine != null)
-                    editor.setLineClass(hlLine, null, null);
+                    editor.removeLineClass(hlLine, null, null);
                 if (number != -1)
-                    hlLine = editor.setLineClass(number - 1, null, "exceptionLine");
+                    hlLine = editor.addLineClass(number - 1, null, "exceptionLine");
             }
         }
 

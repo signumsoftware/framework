@@ -49,7 +49,7 @@ namespace Signum.Windows.Chart
 
         public override string GetName(ChartOmniboxResult result)
         {
-            return "C:" + result.QueryName.TryCC(QueryUtils.GetQueryUniqueKey);
+            return "C:" + result.QueryName.Try(QueryUtils.GetQueryUniqueKey);
         }
     }
 }

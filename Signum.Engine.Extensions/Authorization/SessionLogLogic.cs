@@ -67,22 +67,27 @@ namespace Signum.Engine.Authorization
 
             using (AuthLogic.Disable())
             {
-                var log = Database.Query<SessionLogDN>()
-                    .Where(sl => sl.User.RefersTo(user))
-                    .OrderByDescending(sl => sl.SessionStart)
-                    .FirstOrDefault();
-
-                if (log != null && log.SessionEnd == null)
+                using (Transaction tr = new Transaction())
                 {
-                    var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
-                    
-                    if (sessionEnd < log.SessionStart) //caused by an IIS reset for example
-                        sessionEnd = log.SessionStart;
+                    var log = Database.Query<SessionLogDN>()
+                        .Where(sl => sl.User.RefersTo(user))
+                        .OrderByDescending(sl => sl.SessionStart)
+                        .FirstOrDefault();
 
-                    log.SessionEnd = sessionEnd;
-                    log.SessionTimeOut = timeOut.HasValue;
-                    log.Save();
+                    if (log != null && log.SessionEnd == null)
+                    {
+                        var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
+
+                        if (sessionEnd < log.SessionStart) //caused by an IIS reset for example
+                            sessionEnd = log.SessionStart;
+
+                        log.SessionEnd = sessionEnd;
+                        log.SessionTimeOut = timeOut.HasValue;
+                        log.Save();
+                    }
+                    tr.Commit();
                 }
+
             }
         }
     }

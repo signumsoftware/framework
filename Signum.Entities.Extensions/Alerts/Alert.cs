@@ -11,6 +11,8 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using System.ServiceModel;
 using Signum.Services;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Alerts
 {
@@ -22,14 +24,14 @@ namespace Signum.Entities.Alerts
         public Lite<IdentifiableEntity> Target
         {
             get { return target; }
-            set { Set(ref target, value, () => Target); }
+            set { Set(ref target, value); }
         }
 
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
         {
             get { return creationDate; }
-            private set { Set(ref creationDate, value, () => CreationDate); }
+            private set { Set(ref creationDate, value); }
         }
 
         [NotNullable]
@@ -38,14 +40,14 @@ namespace Signum.Entities.Alerts
         public DateTime? AlertDate
         {
             get { return alertDate; }
-            set { Set(ref alertDate, value, () => AlertDate); }
+            set { Set(ref alertDate, value); }
         }
 
         DateTime? attendedDate;
         public DateTime? AttendedDate
         {
             get { return attendedDate; }
-            set { Set(ref attendedDate, value, () => AttendedDate); }
+            set { Set(ref attendedDate, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -54,7 +56,7 @@ namespace Signum.Entities.Alerts
         public string Title
         {
             get { return title; }
-            set { SetToStr(ref title, value, () => Title); }
+            set { SetToStr(ref title, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -63,21 +65,21 @@ namespace Signum.Entities.Alerts
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value, () => Text); }
+            set { SetToStr(ref text, value); }
         }
 
         Lite<UserDN> createdBy;
         public Lite<UserDN> CreatedBy
         {
             get { return createdBy; }
-            set { Set(ref createdBy, value, () => CreatedBy); }
+            set { Set(ref createdBy, value); }
         }
 
         Lite<UserDN> attendedBy;
         public Lite<UserDN> AttendedBy
         {
             get { return attendedBy; }
-            set { Set(ref attendedBy, value, () => AttendedBy); }
+            set { Set(ref attendedBy, value); }
         }
 
         [NotNullable]
@@ -86,14 +88,14 @@ namespace Signum.Entities.Alerts
         public AlertTypeDN AlertType
         {
             get { return alertType; }
-            set { Set(ref alertType, value, () => AlertType); }
+            set { Set(ref alertType, value); }
         }
 
         AlertState state;
         public AlertState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         public override string ToString()
@@ -142,7 +144,7 @@ namespace Signum.Entities.Alerts
         public Lite<IIdentifiable> AdditionalData
         {
             get { return additionalData; }
-            set { Set(ref additionalData, value, () => AdditionalData); }
+            set { Set(ref additionalData, value); }
         }
     }
 
@@ -161,33 +163,29 @@ namespace Signum.Entities.Alerts
         Future,
     }
 
-    public enum AlertOperation
+    public static class AlertOperation
     {
-        CreateAlertFromEntity,
-        SaveNew,
-        Save,
-        Attend,
-        Unattend
+        public static readonly ConstructSymbol<AlertDN>.From<IdentifiableEntity> CreateAlertFromEntity = OperationSymbol.Construct<AlertDN>.From<IdentifiableEntity>();
+        public static readonly ExecuteSymbol<AlertDN> SaveNew = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Save = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Attend = OperationSymbol.Execute<AlertDN>();
+        public static readonly ExecuteSymbol<AlertDN> Unattend = OperationSymbol.Execute<AlertDN>();
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class AlertTypeDN : MultiOptionalEnumDN
+    public class AlertTypeDN : SemiSymbol
     {
-        static AlertTypeDN()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public AlertTypeDN MakeSymbol([CallerMemberName]string memberName = null)
         {
-            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
-            DescriptionManager.Invalidate();
-        }
-
-        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
-        {
-            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+            base.MakeSymbol(new StackFrame(1, false), memberName);
+            return this;
         }
     }
 
-    public enum AlertTypeOperation
+    public static class AlertTypeOperation
     {
-        Save,
+        public static readonly ExecuteSymbol<AlertTypeDN> Save = OperationSymbol.Execute<AlertTypeDN>();
     }
 
     public enum AlertMessage

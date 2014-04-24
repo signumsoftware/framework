@@ -194,6 +194,8 @@ namespace Signum.Entities.Omnibox
         [Description("yes")]
         Yes,
         [Description(@"\b(the|of) ")]
-        ComplementWordsRegex
+        ComplementWordsRegex,
+        [Description("Search...")]
+        Search,
     }
 }

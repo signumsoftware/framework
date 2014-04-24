@@ -2,15 +2,16 @@
 @using Signum.Engine.Basics
 @using (var tc = Html.TypeContext<OperationRulePack>())
 {
-    @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.Strategy)
-    @Html.EntityLine(tc, f => f.Type)
-
+    <div class="form-compact">
+        @Html.EntityLine(tc, f => f.Role)
+        @Html.ValueLine(tc, f => f.Strategy)
+        @Html.EntityLine(tc, f => f.Type)
+    </div>
     <table class="sf-auth-rules" id="operations">
         <thead>
             <tr>
                 <th>
-                    @typeof(Signum.Entities.Basics.OperationDN).NiceName()
+                    @typeof(OperationSymbol).NiceName()
                 </th>
                 <th>
                     @OperationAllowed.Allow.NiceToString()
@@ -30,7 +31,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.ToEnum().NiceToString())
+                    @Html.Span(null, item.Value.Resource.NiceToString())
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>

@@ -4,9 +4,9 @@
 @{           
     SqlProfileResumeOrder order = ViewBag.Order;
 }
-<table class="sf-search-results sf-stats-table">
+<table class="table sf-stats-table">
     <thead>
-        <tr class="ui-state-default">
+        <tr>
             <th>
                 Query
             </th>
@@ -34,7 +34,7 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td><a class="sf-stats-show">Show</a></td>
+                <td><a class="sf-stats-show" href="javascript:void(0)">Show</a></td>
                 <td>@item.Count</td>
                 <td>@item.Sum.NiceToString()</td>
                 <td>@item.Avg.NiceToString()</td>

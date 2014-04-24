@@ -55,7 +55,7 @@ namespace Signum.Web.Scheduler
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<SimpleTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("SimpleTask") },
+                        new EntitySettings<SimpleTaskSymbol>{ PartialViewName = _ => ViewPrefix.Formato("SimpleTask") },
                     });
                 }
                 

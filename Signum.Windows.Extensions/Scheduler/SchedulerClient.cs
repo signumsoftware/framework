@@ -25,7 +25,7 @@ namespace Signum.Windows.Scheduler
                 {              
                     new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") },
 
-                    new EntitySettings<SimpleTaskDN> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") },
+                    new EntitySettings<SimpleTaskSymbol> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") },
                     new EntitySettings<ScheduledTaskLogDN> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") },
 
                     new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() },

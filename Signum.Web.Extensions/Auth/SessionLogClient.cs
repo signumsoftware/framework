@@ -17,8 +17,8 @@ namespace Signum.Web.Auth
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthController.OnUserLogged += new Action(LogSessionStart);
-                AuthController.OnUserLoggingOut += new Action(AuthController_OnUserLoggingOut);
+                AuthController.UserLogged += new Action(LogSessionStart);
+                AuthController.UserLoggingOut += new Action(AuthController_OnUserLoggingOut);
             }
         }
 

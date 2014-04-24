@@ -15,14 +15,14 @@ namespace Signum.Entities.Disconnected
         public DateTime CreationDate
         {
             get { return creationDate; }
-            set { Set(ref creationDate, value, () => CreationDate); }
+            set { Set(ref creationDate, value); }
         }
 
         Lite<DisconnectedMachineDN> machine;
         public Lite<DisconnectedMachineDN> Machine
         {
             get { return machine; }
-            set { Set(ref machine, value, () => Machine); }
+            set { Set(ref machine, value); }
         }
 
         int? restoreDatabase;
@@ -30,7 +30,7 @@ namespace Signum.Entities.Disconnected
         public int? RestoreDatabase
         {
             get { return restoreDatabase; }
-            set { Set(ref restoreDatabase, value, () => RestoreDatabase); }
+            set { Set(ref restoreDatabase, value); }
         }
 
         int? synchronizeSchema;       
@@ -38,7 +38,7 @@ namespace Signum.Entities.Disconnected
         public int? SynchronizeSchema
         {
             get { return synchronizeSchema; }
-            set { Set(ref synchronizeSchema, value, () => SynchronizeSchema); }
+            set { Set(ref synchronizeSchema, value); }
         }
 
         int? disableForeignKeys;
@@ -46,7 +46,7 @@ namespace Signum.Entities.Disconnected
         public int? DisableForeignKeys
         {
             get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
+            set { Set(ref disableForeignKeys, value); }
         }
 
         [NotNullable]
@@ -54,7 +54,7 @@ namespace Signum.Entities.Disconnected
         public MList<DisconnectedImportTableDN> Copies
         {
             get { return copies; }
-            set { Set(ref copies, value, () => Copies); }
+            set { Set(ref copies, value); }
         }
 
         int? unlock;
@@ -62,7 +62,7 @@ namespace Signum.Entities.Disconnected
         public int? Unlock
         {
             get { return unlock; }
-            set { Set(ref unlock, value, () => Unlock); }
+            set { Set(ref unlock, value); }
         }
 
         int? enableForeignKeys;
@@ -70,7 +70,7 @@ namespace Signum.Entities.Disconnected
         public int? EnableForeignKeys
         {
             get { return enableForeignKeys; }
-            set { Set(ref enableForeignKeys, value, () => EnableForeignKeys); }
+            set { Set(ref enableForeignKeys, value); }
         }
 
         int? dropDatabase;
@@ -78,7 +78,7 @@ namespace Signum.Entities.Disconnected
         public int? DropDatabase
         {
             get { return dropDatabase; }
-            set { Set(ref dropDatabase, value, () => DropDatabase); }
+            set { Set(ref dropDatabase, value); }
         }
 
         int? total;
@@ -86,21 +86,21 @@ namespace Signum.Entities.Disconnected
         public int? Total
         {
             get { return total; }
-            set { Set(ref total, value, () => Total); }
+            set { Set(ref total, value); }
         }
 
         DisconnectedImportState state;
         public DisconnectedImportState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         public double Ratio(DisconnectedImportDN orientative)
@@ -185,7 +185,7 @@ namespace Signum.Entities.Disconnected
         public Lite<TypeDN> Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         int? copyTable;
@@ -193,28 +193,28 @@ namespace Signum.Entities.Disconnected
         public int? CopyTable
         {
             get { return copyTable; }
-            set { Set(ref copyTable, value, () => CopyTable); }
+            set { Set(ref copyTable, value); }
         }
 
         bool? disableForeignKeys;
         public bool? DisableForeignKeys
         {
             get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
+            set { Set(ref disableForeignKeys, value); }
         }
 
         int? insertedRows;
         public int? InsertedRows
         {
             get { return insertedRows; }
-            set { Set(ref insertedRows, value, () => InsertedRows); }
+            set { Set(ref insertedRows, value); }
         }
 
         int? updatedRows;
         public int? UpdatedRows
         {
             get { return updatedRows; }
-            set { Set(ref updatedRows, value, () => UpdatedRows); }
+            set { Set(ref updatedRows, value); }
         }
 
         public int? InsertedOrUpdated
@@ -229,7 +229,7 @@ namespace Signum.Entities.Disconnected
         public int Order
         {
             get { return order; }
-            set { Set(ref order, value, () => Order); }
+            set { Set(ref order, value); }
         }
     }
 }

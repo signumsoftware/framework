@@ -43,10 +43,12 @@ namespace Signum.Web.Omnibox
         {
             var html = "!{0}".FormatHtml(result.Match.ToHtml()).Concat(Icon());
 
-            return new HtmlTag("a")
-                    .Attr("href", ((SpecialOmniboxAction)result.Match.Value).OnClick(RouteHelper.New()))
-                    .InnerHtml(html)
-                    .ToHtml();
+            return html;
+        }
+
+        public override string GetUrl(SpecialOmniboxResult result)
+        {
+            return ((SpecialOmniboxAction)result.Match.Value).OnClick(RouteHelper.New()); 
         }
 
         public override MvcHtmlString Icon()

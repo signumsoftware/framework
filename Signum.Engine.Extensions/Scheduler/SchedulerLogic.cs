@@ -122,7 +122,7 @@ namespace Signum.Engine.Scheduler
                 dqm.RegisterExpression((ITaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
                 dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
 
-                new Graph<HolidayCalendarDN>.Execute(CalendarOperation.Save)
+                new Graph<HolidayCalendarDN>.Execute(HolidayCalendarOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -138,7 +138,7 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
-                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).TryCC(l => l.Retrieve())
+                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())
                 }.Register();
 
                 new Graph<ITaskDN>.Execute(TaskOperation.ExecuteAsync)

@@ -169,7 +169,7 @@ namespace Signum.Windows.Chart
 
             var jsonData = ChartUtils.DataJson(Request, ResultTable);
 
-            var json = new JavaScriptSerializer().Serialize(jsonData);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(jsonData);
 
             if (webBrowserLoaded)
                 WebBroserInvoke(script, json);
@@ -228,7 +228,7 @@ namespace Signum.Windows.Chart
 
             lastRequest = null;
 
-            var keys = Request.Columns.Select(a => a.Token.TryCC(t => t.Token)).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
+            var keys = Request.Columns.Select(a => a.Token.Try(t => t.Token)).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
             OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
 

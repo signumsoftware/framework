@@ -1,20 +1,27 @@
 ﻿@using Signum.Entities.Chart
 @using (var cc = Html.TypeContext<ChartScriptColumnDN>())
 {
-    using (Html.FieldInline())
-    {
-    @Html.ValueLine(cc, c => c.DisplayName)
-    @Html.ValueLine(cc, c => c.ColumnType)
-    @Html.ValueLine(cc, c => c.IsGroupKey)
-    @Html.ValueLine(cc, c => c.IsOptional)
-    }    
 
-                @Html.EntityLineDetail(cc, c => c.Parameter1)
-           
-                @Html.EntityLineDetail(cc, c => c.Parameter2)
-           
-                @Html.EntityLineDetail(cc, c => c.Parameter3)
-           
+    @Html.ValueLine(cc, c => c.DisplayName, vl => vl.ValueColumns = new BsColumn(8))
+
+    using (var sc = cc.SubContext())
+    {
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.ValueLine(sc, c => c.ColumnType, vl=> vl.LabelColumns = new BsColumn(4))
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(sc, c => c.IsGroupKey, vl=> vl.LabelColumns = new BsColumn(6))
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(sc, c => c.IsOptional, vl=> vl.LabelColumns = new BsColumn(6))
+        </div>
+    </div>
+    }
     
-    </table>
+    <div class="chart-column-parameters form-sm">
+        @Html.EntityLineDetail(cc, c => c.Parameter1)
+        @Html.EntityLineDetail(cc, c => c.Parameter2)
+        @Html.EntityLineDetail(cc, c => c.Parameter3)
+    </div>
 }

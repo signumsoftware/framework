@@ -37,18 +37,18 @@ namespace Signum.Engine.Processes
 
         public static Func<IProcessSessionDN> CreateDefaultProcessSession;
 
-        static Expression<Func<ProcessAlgorithmDN, IQueryable<ProcessDN>>> ProcessesFromAlgorithmExpression =
+        static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessDN>>> ProcessesFromAlgorithmExpression =
             p => Database.Query<ProcessDN>().Where(a => a.Algorithm == p);
         [ExpressionField("ProcessesFromAlgorithmExpression")]
-        public static IQueryable<ProcessDN> Processes(this ProcessAlgorithmDN p)
+        public static IQueryable<ProcessDN> Processes(this ProcessAlgorithmSymbol p)
         {
             return ProcessesFromAlgorithmExpression.Evaluate(p);
         }
 
-        static Expression<Func<ProcessAlgorithmDN, ProcessDN>> LastProcessFromAlgorithmExpression =
+        static Expression<Func<ProcessAlgorithmSymbol, ProcessDN>> LastProcessFromAlgorithmExpression =
             p => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
           [ExpressionField("LastProcessFromAlgorithmExpression")]
-        public static ProcessDN LastProcess(this ProcessAlgorithmDN p)
+        public static ProcessDN LastProcess(this ProcessAlgorithmSymbol p)
         {
             return LastProcessFromAlgorithmExpression.Evaluate(p);
         }
@@ -94,7 +94,7 @@ namespace Signum.Engine.Processes
             return LastProcessFromDataExpression.Evaluate(e);
         }
 
-        static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
+        static Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm> registeredProcesses = new Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -105,13 +105,13 @@ namespace Signum.Engine.Processes
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ProcessAlgorithmDN>();
+                sb.Include<ProcessAlgorithmSymbol>();
                 sb.Include<ProcessDN>();
                 sb.Include<ProcessExceptionLineDN>();
 
                 PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
-                MultiEnumLogic<ProcessAlgorithmDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
+                SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
@@ -119,8 +119,8 @@ namespace Signum.Engine.Processes
 
                 ProcessGraph.Register();
 
-                dqm.RegisterQuery(typeof(ProcessAlgorithmDN), () =>
-                             from pa in Database.Query<ProcessAlgorithmDN>()
+                dqm.RegisterQuery(typeof(ProcessAlgorithmSymbol), () =>
+                             from pa in Database.Query<ProcessAlgorithmSymbol>()
                              select new
                              {
                                  Entity = pa,
@@ -159,8 +159,8 @@ namespace Signum.Engine.Processes
                                  p.Exception,
                              });
 
-                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
-                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
+                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
                 dqm.RegisterExpression((IProcessDataDN p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
                 dqm.RegisterExpression((IProcessDataDN p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
@@ -183,15 +183,15 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void Register(Enum processKey, IProcessAlgorithm logic)
+        public static void Register(ProcessAlgorithmSymbol processAlgorthm, IProcessAlgorithm logic)
         {
-            if (processKey == null)
-                throw new ArgumentNullException("processKey");
+            if (processAlgorthm == null)
+                throw new ArgumentNullException("processAlgorthmSymbol");
 
             if (logic == null)
                 throw new ArgumentNullException("logic");
 
-            registeredProcesses.Add(processKey, logic);
+            registeredProcesses.Add(processAlgorthm, logic);
         }
 
 
@@ -271,13 +271,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-
-        public static ProcessDN Create(Enum processKey, IProcessDataDN processData, IProcessSessionDN session = null)
-        {
-            return processKey.ToEntity<ProcessAlgorithmDN>().Create(processData, session);
-        }
-
-        public static ProcessDN Create(this ProcessAlgorithmDN process, IProcessDataDN processData, IProcessSessionDN session = null)
+        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IProcessSessionDN session = null)
         {
             if (session == null)
             {
@@ -299,7 +293,7 @@ namespace Signum.Engine.Processes
         {
             p.QueuedDate = TimeZoneManager.Now;
             var ep = new ExecutingProcess(
-                GetProcessAlgorithm(MultiEnumLogic<ProcessAlgorithmDN>.ToEnum(p.Algorithm.Key)),
+                GetProcessAlgorithm(p.Algorithm),
                 p
             );
 
@@ -307,9 +301,9 @@ namespace Signum.Engine.Processes
             ep.Execute();
         }
 
-        public static IProcessAlgorithm GetProcessAlgorithm(Enum processKey)
+        public static IProcessAlgorithm GetProcessAlgorithm(ProcessAlgorithmSymbol processAlgorithm)
         {
-            return registeredProcesses.GetOrThrow(processKey, "The process {0} is not registered");
+            return registeredProcesses.GetOrThrow(processAlgorithm, "The process algorithm {0} is not registered");
         }
 
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)

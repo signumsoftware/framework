@@ -57,7 +57,7 @@ namespace Signum.Engine.Cache
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Synchronizing += Synchronize;
-                sb.Schema.Generating += () => Synchronize(null).TryCC(s => s.ToSimple());
+                sb.Schema.Generating += () => Synchronize(null).Try(s => s.ToSimple());
             }
         }
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Cache
             CacheLogic.OnStart();
 
             Table table = Schema.Current.Table(type);
-            DatabaseName db = table.Name.Schema.TryCC(s => s.Database);
+            DatabaseName db = table.Name.Schema.Try(s => s.Database);
 
             SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
 
@@ -515,7 +515,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             foreach (var stype in connected)
             {
                 hs.Add(stype);
-                controllers[stype].TryDoC(t => t.NotifyDisabled());
+                controllers[stype].TryDo(t => t.NotifyDisabled());
             }
         }
 
@@ -583,7 +583,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
         static void NotifyInvalidateAllConnectedTypes(Type type)
         {
-            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode: true);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeInitialNode: true);
 
             foreach (var stype in connected)
             {
@@ -644,7 +644,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 case CacheType.Semi: return Color.Pink;
             }
 
-            if (typeof(MultiEnumDN).IsAssignableFrom(type))
+            if (typeof(Symbol).IsAssignableFrom(type))
                 return Color.Orange;
 
             if (cacheHint != null && cacheHint(type))

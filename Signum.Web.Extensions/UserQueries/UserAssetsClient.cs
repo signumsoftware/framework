@@ -27,7 +27,7 @@ namespace Signum.Web.Extensions.UserQueries
         {
             LinksClient.RegisterEntityLinks<T>((lite, ctx) => new[]
             {
-               new QuickLinkAction(UserAssetMessage.ExportToXml.NiceToString(), RouteHelper.New().Action((UserAssetController a)=>a.Export(lite)))
+               new QuickLinkAction(UserAssetMessage.ExportToXml, RouteHelper.New().Action((UserAssetController a)=>a.Export(lite)))
                {
                    IsVisible = UserAssetPermission.UserAssetsToXML.IsAuthorized()
                }

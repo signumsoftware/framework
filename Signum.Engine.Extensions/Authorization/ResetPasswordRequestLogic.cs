@@ -70,22 +70,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlResetPassword)
-        {
-            var rpr = ResetPasswordRequest(user);
-            var url = urlResetPassword(rpr);
-            new ResetPasswordRequestMail { Entity = rpr, Url = url }.SendMailAsync();
-        }
-
-        public static Func<string, UserDN> GetUserByEmail = (email) =>
-        {
-            UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
-
-            if (user == null)
-                throw new ApplicationException(AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
-
-            return user;
-        };
+        public static Func<string, UserDN> GetUserByEmail = (email) => Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
     }
 
     public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>

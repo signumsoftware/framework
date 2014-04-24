@@ -15,6 +15,7 @@ namespace Signum.Web.Notes
     {
         public static string ViewPrefix = "~/Note/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/Note/Scripts/Notes";
+        public static Type[] Types; 
 
         public static void Start(params Type[] types)
         {
@@ -32,10 +33,9 @@ namespace Signum.Web.Notes
                     },
                 });
 
-                WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) =>
-                    SupportsNotes(entity, types) ? NoteWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
-                    null;
+                Types = types;
 
+                WidgetsHelper.GetWidget += WidgetsHelper_GetWidget;
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings(NoteOperation.CreateNoteFromEntity) 
@@ -46,16 +46,19 @@ namespace Signum.Web.Notes
             }
         }
 
-        static bool SupportsNotes(ModifiableEntity entity, Type[] tipos)
+        static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
         {
-            IdentifiableEntity ie = entity as IdentifiableEntity;
+            IdentifiableEntity ie = ctx.Entity as IdentifiableEntity;
             if (ie == null || ie.IsNew)
-                return false;
+                return null;
 
-            if (!tipos.Contains(ie.GetType()))
-                return false;
+            if (!Types.Contains(ie.GetType()))
+                return null;
 
-            return Navigator.IsFindable(typeof(NoteDN));
+            if (!Navigator.IsFindable(typeof(NoteDN)))
+                return null;
+
+            return NoteWidgetHelper.CreateWidget(ctx);
         }
     }
 }

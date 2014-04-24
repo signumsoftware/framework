@@ -55,7 +55,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                 string contentTransferEncoding = headers["content-transfer-encoding"];
 
-                ContentType contentType = FindContentType(headers);
+                ContentType contentType = FindContentType(headers, req);
 
                 if (contentType.MediaType != null && contentType.MediaType.StartsWith("multipart/"))
                 {
@@ -158,15 +158,8 @@ namespace Signum.Engine.Mailing.Pop3
             if (string.IsNullOrEmpty(message.Subject))
                 message.Subject = GetHeaderValue(message.Headers, "subject");
 
-            try
-            {
-                message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
-            }
-            catch
-            {
-                message.From = new MailAddress("error@error.com");
-            }
-
+            message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
+          
             FillAddressesCollection(message.CC, message.Headers["cc"]);
             FillAddressesCollection(message.To, message.Headers["to"]);
             FillAddressesCollection(message.Bcc, message.Headers["bcc"]);
@@ -191,18 +184,13 @@ namespace Signum.Engine.Mailing.Pop3
             if (string.IsNullOrEmpty(addressHeader))
                 return;
 
-            foreach (var email in addressHeader.Split(','))
-            {
-                MailAddress address;
+            var cleanAddress = Regex.Replace(addressHeader, "\"[^\"]*\"", str => str.Value.Replace(',', '.'));
 
-                try
-                {
-                    address = new MailAddress(email);
-                }
-                catch
-                {
-                    address = new MailAddress("error@error.com");
-                }
+            foreach (var email in cleanAddress.Split(','))
+            {
+                MailAddress address = email.Contains("undisclosed") && email.Contains("recipients") ? 
+                    new MailAddress("undisclosed@recipients.com") : 
+                    new MailAddress(email);
 
                 addresses.Add(address);
             }
@@ -314,14 +302,17 @@ namespace Signum.Engine.Mailing.Pop3
             return string.Empty;
         }
 
-        static ContentType FindContentType(NameValueCollection headers)
+        static ContentType FindContentType(NameValueCollection headers, Request req)
         {
-            ContentType result = new ContentType();
             var ct = headers["content-type"];
             if (ct == null)
-                return result;
+            {
+                return req == Request.LinkedResource ?  
+                    new ContentType():
+                    new ContentType( "text/plain");
+            }
 
-            result = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
+            ContentType result = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
 
             var m = Regex.Match(ct, @"name\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
             if(m.Success)
@@ -348,21 +339,30 @@ namespace Signum.Engine.Mailing.Pop3
         {
             const RegexOptions options = RegexOptions.IgnoreCase | RegexOptions.Multiline;
 
+            const string pattern = @"=\?(?<enc>[^?]*)?\?(?<cod>Q|B)\?(?<text>.*?)\?=";
+
             foreach (string key in headers.AllKeys)
             {
+
                 //strip qp encoding information from the header if present
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?(?<enc>[^?]*)?\?(?<cod>Q|B)\?(?<text>.*?)\?=", m =>
+                headers[key] = Regex.Replace(headers[key].ToString(), "(" + pattern + ")+", mm =>
                 {
-                    string text = m.Groups["text"].Value;
+                    var list = Regex.Matches(mm.Value, pattern, options).Cast<Match>().ToList();
 
-                    byte[] bytes = m.Groups["cod"].Value == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text);
+                    var groups = list.GroupWhenChange(m => new
+                    {
+                        cod = m.Groups["cod"].Value.ToUpper(),
+                        end = m.Groups["enc"].Value.ToLower(),
+                    });
 
-                    var result = Encoding.GetEncoding(m.Groups["enc"].Value.ToLower()).GetString(bytes);
+                    var result = groups.ToString(gr =>
+                    {
+                        var bytes = gr.Select(m => m.Groups["text"].Value)
+                        .SelectMany(text => gr.Key.cod == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text))
+                        .ToArray();
 
-                    //string result2 = Attachment.CreateAttachmentFromString("", m.Value).Name;
-
-                    //if (result != result2)
-                    //    throw new InvalidOperationException();
+                        return Encoding.GetEncoding(gr.Key.end).GetString(bytes);
+                    }, "");
 
                     return result;
                 }

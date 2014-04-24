@@ -47,7 +47,7 @@ namespace Signum.Engine.Mailing
                     .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)).ToList());
             }
 
-            public bool Equals(object x, object y)
+            bool IEqualityComparer<object>.Equals(object x, object y)
             {
                 if (x == null || y == null)
                     return x == null && y == null;
@@ -235,7 +235,7 @@ namespace Signum.Engine.Mailing
                 variables = variables.Previous;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
-                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.TryCC(p => p.GetType()))));
+                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.Try(p => p.GetType()))));
                     return null;
                 }
                 return n;

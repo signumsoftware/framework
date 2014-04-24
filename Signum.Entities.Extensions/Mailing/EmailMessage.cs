@@ -32,7 +32,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailRecipientDN> Recipients
         {
             get { return recipients; }
-            set { Set(ref recipients, value, () => Recipients); }
+            set { Set(ref recipients, value); }
         }
 
         [ImplementedByAll]
@@ -40,7 +40,7 @@ namespace Signum.Entities.Mailing
         public Lite<IdentifiableEntity> Target
         {
             get { return target; }
-            set { Set(ref target, value, () => Target); }
+            set { Set(ref target, value); }
         }
 
         [NotNullable]
@@ -49,42 +49,42 @@ namespace Signum.Entities.Mailing
         public EmailAddressDN From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
 
         Lite<SmtpConfigurationDN> smtpConfiguration;
         public Lite<SmtpConfigurationDN> SmtpConfiguration
         {
             get { return smtpConfiguration; }
-            set { Set(ref smtpConfiguration, value, () => SmtpConfiguration); }
+            set { Set(ref smtpConfiguration, value); }
         }
 
         Lite<EmailTemplateDN> template;
         public Lite<EmailTemplateDN> Template
         {
             get { return template; }
-            set { Set(ref template, value, () => Template); }
+            set { Set(ref template, value); }
         }
 
         DateTime creationTime = TimeZoneManager.Now;
         public DateTime CreationTime
         {
             get { return creationTime; }
-            private set { Set(ref creationTime, value, () => CreationTime); }
+            private set { Set(ref creationTime, value); }
         }
 
         DateTime? sent;
         public DateTime? Sent
         {
             get { return sent; }
-            set { SetToStr(ref sent, value, () => Sent); }
+            set { SetToStr(ref sent, value); }
         }
 
         DateTime? receptionNotified;
         public DateTime? ReceptionNotified
         {
             get { return receptionNotified; }
-            set { Set(ref receptionNotified, value, () => ReceptionNotified); }
+            set { Set(ref receptionNotified, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -93,7 +93,7 @@ namespace Signum.Entities.Mailing
         public string Subject
         {
             get { return subject; }
-            set { if (Set(ref subject, value, () => Subject))CalculateHash(); }
+            set { if (Set(ref subject, value))CalculateHash(); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -102,7 +102,7 @@ namespace Signum.Entities.Mailing
         public string Body
         {
             get { return body; }
-            set { if (Set(ref body, value, () => Subject))CalculateHash(); }
+            set { if (Set(ref body, value))CalculateHash(); }
         }
 
         static readonly char[] spaceChars = new[] { '\r', '\n', ' ' };
@@ -120,49 +120,49 @@ namespace Signum.Entities.Mailing
         public string BodyHash
         {
             get { return bodyHash; }
-            set { Set(ref bodyHash, value, () => BodyHash); }
+            set { Set(ref bodyHash, value); }
         }
 
         bool isBodyHtml = false;
         public bool IsBodyHtml
         {
             get { return isBodyHtml; }
-            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
+            set { Set(ref isBodyHtml, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         EmailMessageState state;
         public EmailMessageState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         Guid? uniqueIdentifier;
         public Guid? UniqueIdentifier
         {
             get { return uniqueIdentifier; }
-            set { Set(ref uniqueIdentifier, value, () => UniqueIdentifier); }
+            set { Set(ref uniqueIdentifier, value); }
         }
 
         bool editableMessage = true;
         public bool EditableMessage
         {
             get { return editableMessage; }
-            set { Set(ref editableMessage, value, () => EditableMessage); }
+            set { Set(ref editableMessage, value); }
         }
 
         Lite<EmailPackageDN> package;
         public Lite<EmailPackageDN> Package
         {
             get { return package; }
-            set { Set(ref package, value, () => Package); }
+            set { Set(ref package, value); }
         }
 
         [NotNullable]
@@ -171,7 +171,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailAttachmentDN> Attachments
         {
             get { return attachments; }
-            set { Set(ref attachments, value, () => Attachments); }
+            set { Set(ref attachments, value); }
         }
 
         static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
@@ -203,7 +203,7 @@ namespace Signum.Entities.Mailing
         public EmailReceptionInfoDN ReceptionInfo
         {
             get { return receptionInfo; }
-            set { Set(ref receptionInfo, value, () => ReceptionInfo); }
+            set { Set(ref receptionInfo, value); }
         }
     }
 
@@ -216,7 +216,7 @@ namespace Signum.Entities.Mailing
         public string UniqueId
         {
             get { return uniqueId; }
-            set { Set(ref uniqueId, value, () => UniqueId); }
+            set { Set(ref uniqueId, value); }
         }
 
         [NotNullable]
@@ -225,7 +225,7 @@ namespace Signum.Entities.Mailing
         public Lite<Pop3ReceptionDN> Reception
         {
             get { return reception; }
-            set { Set(ref reception, value, () => Reception); }
+            set { Set(ref reception, value); }
         }
 
         [SqlDbType(Size = int.MaxValue), NotNullable]
@@ -233,28 +233,28 @@ namespace Signum.Entities.Mailing
         public string RawContent
         {
             get { return rawContent; }
-            set { Set(ref rawContent, value, () => RawContent); }
+            set { Set(ref rawContent, value); }
         }
 
         DateTime sentDate;
         public DateTime SentDate
         {
             get { return sentDate; }
-            set { Set(ref sentDate, value, () => SentDate); }
+            set { Set(ref sentDate, value); }
         }
 
         DateTime receivedDate;
         public DateTime ReceivedDate
         {
             get { return receivedDate; }
-            set { Set(ref receivedDate, value, () => ReceivedDate); }
+            set { Set(ref receivedDate, value); }
         }
 
         DateTime? deletionDate;
         public DateTime? DeletionDate
         {
             get { return deletionDate; }
-            set { Set(ref deletionDate, value, () => DeletionDate); }
+            set { Set(ref deletionDate, value); }
         }
     }
 
@@ -270,7 +270,7 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         [NotNullable]
@@ -281,7 +281,7 @@ namespace Signum.Entities.Mailing
             get { return file; }
             set
             {
-                if (Set(ref file, value, () => File))
+                if (Set(ref file, value))
                 {
                     if (ContentId == null && File != null)
                         ContentId = Guid.NewGuid() + File.FileName;
@@ -295,7 +295,7 @@ namespace Signum.Entities.Mailing
         public string ContentId
         {
             get { return contentId; }
-            set { Set(ref contentId, value, () => ContentId); }
+            set { Set(ref contentId, value); }
         }
 
         public EmailAttachmentDN Clone()
@@ -340,7 +340,7 @@ namespace Signum.Entities.Mailing
         public EmailRecipientKind Kind
         {
             get { return kind; }
-            set { Set(ref kind, value, () => Kind); }
+            set { Set(ref kind, value); }
         }
 
         public new EmailRecipientDN Clone()
@@ -409,7 +409,7 @@ namespace Signum.Entities.Mailing
         public Lite<IEmailOwnerDN> EmailOwner
         {
             get { return emailOwner; }
-            set { Set(ref emailOwner, value, () => EmailOwner); }
+            set { Set(ref emailOwner, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -418,14 +418,14 @@ namespace Signum.Entities.Mailing
         public string EmailAddress
         {
             get { return emailAddress; }
-            set { Set(ref emailAddress, value, () => EmailAddress); }
+            set { Set(ref emailAddress, value); }
         }
 
         string displayName;
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         public override string ToString()
@@ -457,16 +457,6 @@ namespace Signum.Entities.Mailing
         {
             return (emailAddress ?? "").GetHashCode() ^ (displayName ?? "").GetHashCode();
         }
-    }
-
-    public enum EmailSenderOperation
-    {
-        Save
-    }
-
-    public enum EmailRecipientOperation
-    {
-        Save
     }
 
     public enum EmailMessageState
@@ -512,19 +502,19 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailMessageProcesses
+    public static class EmailMessageProcess
     {
-        SendEmails
+        public static readonly ProcessAlgorithmSymbol SendEmails = new ProcessAlgorithmSymbol();
     }
 
-    public enum EmailMessageOperation
+    public static class EmailMessageOperation
     {
-        Send,
-        ReSend,
-        ReSendEmails,
-        CreateMail,
-        CreateMailFromTemplate,
-        Delete,
+        public static readonly ExecuteSymbol<EmailMessageDN> Send = OperationSymbol.Execute<EmailMessageDN>();
+        public static readonly ConstructSymbol<EmailMessageDN>.From<EmailMessageDN> ReSend = OperationSymbol.Construct<EmailMessageDN>.From<EmailMessageDN>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<EmailMessageDN> ReSendEmails = OperationSymbol.Construct<ProcessDN>.FromMany<EmailMessageDN>();
+        public static readonly ConstructSymbol<EmailMessageDN>.Simple CreateMail = OperationSymbol.Construct<EmailMessageDN>.Simple();
+        public static readonly ConstructSymbol<EmailMessageDN>.From<EmailTemplateDN> CreateMailFromTemplate = OperationSymbol.Construct<EmailMessageDN>.From<EmailTemplateDN>();
+        public static readonly DeleteSymbol<EmailMessageDN> Delete = OperationSymbol.Delete<EmailMessageDN>();
     }
 
     public enum EmailMessageMessage
@@ -548,7 +538,7 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         public override string ToString()
@@ -557,9 +547,9 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailFileType
+    public static class EmailFileType
     {
-        Attachment
+        public static readonly FileTypeSymbol Attachment = new FileTypeSymbol();
     }
 }
 

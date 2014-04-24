@@ -186,7 +186,7 @@ namespace Signum.Engine.Mailing
 
             string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
             {
-                entityToken = token.FollowC(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
+                entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
 
                 if (entityToken == null)
                     entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), canAggregate: false);

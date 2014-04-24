@@ -178,10 +178,9 @@ namespace Signum.Web.Chart
             return new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
-                AltText = chartNewText,
+                Title = chartNewText,
                 Text = chartNewText,
-                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart")),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
+                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart"))
             };
         }
 
@@ -239,7 +238,7 @@ namespace Signum.Web.Chart
             {
                 vl.ValueLineType = ValueLineType.Combo;
 
-                var token = column.Token.TryCC(t => t.Token);
+                var token = column.Token.Try(t => t.Token);
 
                 var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(token)).ToList();
                 vl.ReadOnly = compatible.Count <= 1;

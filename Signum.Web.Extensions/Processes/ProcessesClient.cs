@@ -39,7 +39,7 @@ namespace Signum.Web.Processes
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process"), },
-                    new EntitySettings<ProcessAlgorithmDN>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
+                    new EntitySettings<ProcessAlgorithmSymbol>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
                     new EntitySettings<UserProcessSessionDN>{ PartialViewName = e => ViewPrefix.Formato("UserProcessSession") }
                 });
 
@@ -66,7 +66,7 @@ namespace Signum.Web.Processes
             }
         }
 
-        public static ContextualItem CreateGroupContextualItem(SelectedItemsMenuContext ctx)
+        public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)
         {
             if (!Navigator.IsViewable(typeof(PackageOperationDN), null))
                 return null;
@@ -82,7 +82,7 @@ namespace Signum.Web.Processes
             var contexts = (from t in types
                             from oi in OperationClient.Manager.OperationInfos(t)
                             where oi.IsEntityOperation
-                            group new { t, oi } by oi.Key into g
+                            group new { t, oi } by oi.OperationSymbol into g
                             let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
                             let oi = g.First().oi
                             let context = new ContextualOperationContext
@@ -91,8 +91,8 @@ namespace Signum.Web.Processes
                                 Prefix = ctx.Prefix,
                                 QueryName = ctx.QueryName,
                                 Entities = ctx.Lites,
-                                OperationSettings = os.TryCC(s => s.ContextualFromMany),
-                                CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
+                                OperationSettings = os.Try(s => s.ContextualFromMany),
+                                CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                             os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.OnClick == null || os.ContextualFromMany.OnClick != null)) :
@@ -103,48 +103,27 @@ namespace Signum.Web.Processes
                 return null;
 
             var cleanKeys = contexts.Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
-                .Select(kvp => kvp.OperationInfo.Key).ToList();
+                .Select(kvp => kvp.OperationInfo.OperationSymbol).ToList();
 
             if (cleanKeys.Any())
             {
-                Dictionary<Enum, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
+                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
                 foreach (var cod in contexts)
                 {
-                    var ce = canExecutes.TryGetC(cod.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);
                     if (ce.HasText())
                         cod.CanExecute = ce;
                 }
             }
 
-            List<ContextualItem> operations = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
+            List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
                 coc => new JsOperationFunction(ProcessesClient.Module, "processFromMany")
-                )).OrderBy(o => o.Order).ToList();
+                )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
-            {
-                string ctxItemClass = "sf-search-ctxitem";
 
-                content.AddLine(new HtmlTag("li")
-                    .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Processes.NiceToString().EncodeHtml())));
+            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Processes.NiceToString()));
 
-                foreach (var operation in operations)
-                {
-                    content.AddLine(new HtmlTag("li")
-                        .Class(ctxItemClass)
-                        .InnerHtml(OperationClient.Manager.ContextualOperationLink(operation)));
-                }
-            }
-
-            return new ContextualItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemOperations"),
-                Content = content.ToHtml().ToString()
-            };
+            return menuItems;
         }
-
-
-
     }
 }

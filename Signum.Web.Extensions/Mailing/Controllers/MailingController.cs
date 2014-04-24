@@ -50,7 +50,7 @@ namespace Signum.Web.Mailing
             var entity = Lite.Parse(Request["keys"]).Retrieve();
 
             var emailMessage = this.ExtractEntity<EmailTemplateDN>()
-                .ConstructFrom<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
+                .ConstructFrom(EmailMessageOperation.CreateMailFromTemplate, entity);
 
             return this.DefaultConstructResult(emailMessage);
         }

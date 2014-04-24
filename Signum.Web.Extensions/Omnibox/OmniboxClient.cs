@@ -12,6 +12,7 @@ using Signum.Engine.Maps;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Web.Omnibox
 {
@@ -50,11 +51,19 @@ namespace Signum.Web.Omnibox
                 }
 
                 return new HtmlTag("span").InnerHtml(innerHtml)
-                    .Attr("style", "color: gray; font-style: italic; padding: .2em .4em; line-height: 1.6em;")
+                    .Attr("style", "font-style: italic;")
                     .ToHtml();
             }
             else
-                return Providers[result.GetType()].RenderHtmlBase(result);
+                return Providers[result.GetType()].RenderHtmlUntyped(result);
+        }
+
+        public static string GetUrl(OmniboxResult result)
+        {
+           if(result is HelpOmniboxResult)
+               return null;
+
+           return Providers[result.GetType()].GetUrlUntyped(result);
         }
 
         public static MvcHtmlString ToHtml(this OmniboxMatch match)
@@ -73,7 +82,8 @@ namespace Signum.Web.Omnibox
         {
             public abstract MvcHtmlString Icon();
 
-            public abstract MvcHtmlString RenderHtmlBase(OmniboxResult result);
+            public abstract MvcHtmlString RenderHtmlUntyped(OmniboxResult result);
+            public abstract string GetUrlUntyped(OmniboxResult result);
             
             public MvcHtmlString ColoredSpan(string text, string colorName)
             { 
@@ -87,10 +97,16 @@ namespace Signum.Web.Omnibox
         {
             public abstract OmniboxResultGenerator<T> CreateGenerator();
             public abstract MvcHtmlString RenderHtml(T result);
+            public abstract string GetUrl(T result);
             
-            public override MvcHtmlString RenderHtmlBase(OmniboxResult result)
+            public override MvcHtmlString RenderHtmlUntyped(OmniboxResult result)
             {
                 return RenderHtml((T)result);
+            }
+
+            public override string GetUrlUntyped(OmniboxResult result)
+            {
+                return GetUrl((T)result);
             }
         }
 
@@ -101,7 +117,7 @@ namespace Signum.Web.Omnibox
                 return Navigator.IsNavigable(type, null, isSearchEntity: true);
             }
 
-            public override bool AllowedPermission(Enum permission)
+            public override bool AllowedPermission(PermissionSymbol permission)
             {
                 return permission.IsAuthorized();
             }

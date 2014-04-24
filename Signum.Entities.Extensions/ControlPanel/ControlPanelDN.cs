@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using Signum.Entities.Chart;
 using Signum.Utilities.Reflection;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -28,21 +29,29 @@ namespace Signum.Entities.ControlPanel
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value, () => EntityType); }
+            set { Set(ref entityType, value); }
         }
 
-        Lite<IdentifiableEntity> related;
-        public Lite<IdentifiableEntity> Related
+        Lite<IdentifiableEntity> owner;
+        public Lite<IdentifiableEntity> Owner
         {
-            get { return related; }
-            set { Set(ref related, value, () => Related); }
+            get { return owner; }
+            set { Set(ref owner, value); }
         }
 
         int? homePagePriority;
         public int? HomePagePriority
         {
             get { return homePagePriority; }
-            set { Set(ref homePagePriority, value, () => HomePagePriority); }
+            set { Set(ref homePagePriority, value); }
+        }
+
+        int? autoRefreshPeriod;
+        [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThan, 1)]
+        public int? AutoRefreshPeriod
+        {
+            get { return autoRefreshPeriod; }
+            set { Set(ref autoRefreshPeriod, value); }
         }
 
         string displayName;
@@ -50,15 +59,7 @@ namespace Signum.Entities.ControlPanel
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
-        }
-
-        int numberOfColumns = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public int NumberOfColumns
-        {
-            get { return numberOfColumns; }
-            set { Set(ref numberOfColumns, value, () => NumberOfColumns); }
+            set { Set(ref displayName, value); }
         }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
@@ -67,7 +68,7 @@ namespace Signum.Entities.ControlPanel
         public MList<PanelPartDN> Parts
         {
             get { return parts; }
-            set { Set(ref parts, value, () => Parts); }
+            set { Set(ref parts, value); }
         }
 
         [UniqueIndex]
@@ -75,7 +76,7 @@ namespace Signum.Entities.ControlPanel
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         static Expression<Func<ControlPanelDN, IPartDN, bool>> ContainsContentExpression =
@@ -91,22 +92,16 @@ namespace Signum.Entities.ControlPanel
             {
                 PanelPartDN part = (PanelPartDN)sender;
 
-                if (pi.Is(() => part.Column))
+                if (pi.Is(() => part.StartColumn))
                 {
-                    if (part.Column >= NumberOfColumns)
-                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.NiceToString().Formato(part.Title, part.Column, NumberOfColumns);
-                }
+                    if (part.StartColumn + part.Columns > 12)
+                        return ControlPanelMessage.Part0IsTooLarge.NiceToString(part);
 
-                if (pi.Is(() => part.Row))
-                {
-                    if (part.Row > 0 && !parts.Any(p => p.Row == part.Row - 1 && p.Column == p.Column))
-                        return "There's nothing in Column {0} Row {1}. Move this part up to Row {2}".Formato(part.Column, part.Row, part.Row - 1);
-                }
+                    var other = parts.TakeWhile(p => p != part)
+                        .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlap(part.ColumnInterval()));
 
-                if (pi.Is(() => part.Row) || pi.Is(() => part.Column))
-                {
-                    if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
-                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.NiceToString().Formato(part.Title, part.Column, part.Row);
+                    if (other != null)
+                        return ControlPanelMessage.Part0OverlapsWith1.NiceToString(part, other);
                 }
 
                 if (entityType != null && pi.Is(() => part.Content) && part.Content != null)
@@ -115,8 +110,8 @@ namespace Signum.Entities.ControlPanel
 
                     string errorsUserQuery = idents.OfType<IHasEntitytype>()
                         .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
-                        .ToString(uc => ControlPanelMessage._0Is1InstedOf2In3.NiceToString().Formato(
-                        NicePropertyName(() => EntityType), uc.EntityType, entityType, uc), "\r\n");
+                        .ToString(uc => ControlPanelMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
+                        "\r\n");
 
                     return errorsUserQuery.DefaultText(null);
                 }
@@ -176,9 +171,8 @@ namespace Signum.Entities.ControlPanel
             {
                 DisplayName = "Clone {0}".Formato(this.DisplayName),
                 HomePagePriority = HomePagePriority,
-                NumberOfColumns = NumberOfColumns,
                 Parts = Parts.Select(p => p.Clone()).ToMList(),
-                Related = Related,
+                Owner = Owner,
             };
         }
 
@@ -188,9 +182,8 @@ namespace Signum.Entities.ControlPanel
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                Related == null ? null : new XAttribute("Related", Related.Key()),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 HomePagePriority == null ? null : new XAttribute("HomePagePriority", HomePagePriority.Value.ToString()),
-                new XAttribute("NumberOfColumns", NumberOfColumns.ToString()),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
         }
 
@@ -198,40 +191,32 @@ namespace Signum.Entities.ControlPanel
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
-            Related = element.Attribute("Related").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
-            HomePagePriority = element.Attribute("HomePagePriority").TryCS(a => int.Parse(a.Value));
-            NumberOfColumns = int.Parse(element.Attribute("NumberOfColumns").Value);
+            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner").Try(a => Lite.Parse<IdentifiableEntity>(a.Value));
+            HomePagePriority = element.Attribute("HomePagePriority").Try(a => int.Parse(a.Value));
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
 
         }
     }
 
-    public enum ControlPanelPermission
+    public static class ControlPanelPermission
     {
-        ViewControlPanel,
+        public static readonly PermissionSymbol ViewControlPanel = new PermissionSymbol();
     }
 
-    public enum ControlPanelOperation
+    public static class ControlPanelOperation
     {
-        Create,
-        Save,
-        Clone,
-        Delete,
+        public static readonly ConstructSymbol<ControlPanelDN>.Simple Create = OperationSymbol.Construct<ControlPanelDN>.Simple();
+        public static readonly ExecuteSymbol<ControlPanelDN> Save = OperationSymbol.Execute<ControlPanelDN>();
+        public static readonly ConstructSymbol<ControlPanelDN>.From<ControlPanelDN> Clone = OperationSymbol.Construct<ControlPanelDN>.From<ControlPanelDN>();
+        public static readonly DeleteSymbol<ControlPanelDN> Delete = OperationSymbol.Delete<ControlPanelDN>();
     }
 
     public enum ControlPanelMessage
     {
-        [Description("Create new part")]
-        ControlPanel_CreateNewPart,
-        [Description("You must save the panel before adding parts")]
-        ControlPanel_YouMustSaveThePanelBeforeAddingParts,
-        [Description("Part {0} is in column {1} but panel has only {2} columns")]
-        ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns,
-        [Description("Part {0} is in column {1} of row {2} which already has other parts")]
-        ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts,
-        [Description("There are not any parts in rows {0}")]
-        ControlPanelDN_Rows0DontHaveAnyParts,
+        CreateNewPart,
+
+
         [Description("Title must be specified for {0}")]
         ControlPanelDN_TitleMustBeSpecifiedFor0,
         [Description("Counter list")]
@@ -240,6 +225,12 @@ namespace Signum.Entities.ControlPanel
         CountUserQueryElement,
         Preview,
         [Description("{0} is {1} (instead of {2}) in {3}")]
-        _0Is1InstedOf2In3
+        _0Is1InstedOf2In3,
+
+        [Description("Part {0} is too large")]
+        Part0IsTooLarge,
+
+        [Description("Part {0} overlaps with {1}")]
+        Part0OverlapsWith1
     }
 }

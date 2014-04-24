@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +18,7 @@ namespace Signum.Entities.Authorization
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         MergeStrategy mergeStrategy;
@@ -27,7 +27,7 @@ namespace Signum.Entities.Authorization
             get { return mergeStrategy; }
             set
             {
-                if (Set(ref mergeStrategy, value, () => MergeStrategy))
+                if (Set(ref mergeStrategy, value))
                     Notify(() => StrategyHint);
             }
         }
@@ -37,7 +37,7 @@ namespace Signum.Entities.Authorization
         public MList<Lite<RoleDN>> Roles
         {
             get { return roles; }
-            set { Set(ref roles, value, () => Roles); }
+            set { Set(ref roles, value); }
         }
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -53,7 +53,7 @@ namespace Signum.Entities.Authorization
                 if (roles.Any())
                     return null;
 
-                return ("(-> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() + ")");
+                return "� -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
             }
         }
 
@@ -87,10 +87,10 @@ namespace Signum.Entities.Authorization
         RolesReferedBy
     }
 
-    public enum RoleOperation
+    public static class RoleOperation
     {
-        Save,
-        Delete
+        public static readonly ExecuteSymbol<RoleDN> Save = OperationSymbol.Execute<RoleDN>();
+        public static readonly DeleteSymbol<RoleDN> Delete = OperationSymbol.Delete<RoleDN>();
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
@@ -103,7 +103,7 @@ namespace Signum.Entities.Authorization
         public DateTime Date
         {
             get { return date; }
-            set { Set(ref date, value, () => Date); }
+            set { Set(ref date, value); }
         }
 
         static Expression<Func<LastAuthRulesImportDN, string>> ToStringExpression = e => e.uniqueKey;

@@ -13,53 +13,68 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    
     
-    <table id="@chart.Compose("sfChartBuilder")" class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)))">
-        <tr>
-            <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
-                <div class="ui-widget-header">
-                    @typeof(ChartScriptDN).NiceName()
+    <div id="@chart.Compose("sfChartBuilder")" class="row sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)))">
+
+        <div class="col-lg-2">
+            <div class="sf-chart-type panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">@typeof(ChartScriptDN).NiceName()</h3>
                     @using (var csc = chart.SubContext(c => c.ChartScript))
                     {
                         @Html.Hidden(csc.Compose("sfRuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" })
                     }
                     @Html.Hidden(chart.Compose("GroupResults"), chart.Value.GroupResults, new { @class = "sf-chart-group-results" })
                 </div>
-                @foreach (var group in ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value.Values, 4))
-                {   
-                    foreach (var script in group)
-                    { 
-                    <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" 
-                    data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
-                        <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
-                        Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
-                    </div>
-                    }
-                    <div class="clearall">
-                    </div>
-                }
-            </td>
-            <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
-                <div class="ui-widget-header">@ChartMessage.Chart_ChartSettings.NiceToString()</div>
-                <table>
-                    <tr>
-                        <th class="sf-chart-token-narrow">@ChartMessage.Chart_Dimension.NiceToString()
-                        </th>
-                        <th class="sf-chart-token-narrow">@ChartMessage.Chart_Group.NiceToString()
-                        </th>
-                        <th class="sf-chart-token-wide">
-                            Token
-                        </th>
-                    </tr>
-                    @foreach (var column in chart.TypeElementContext(a => a.Columns))
+                <div class="panel-body">
+                    @foreach (var group in ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value.Values, 4))
                     {
-                        @Html.HiddenRuntimeInfo(column)
-                        @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
+                        foreach (var script in group)
+                        { 
+                        <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" 
+                    data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
+                            <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
+                        Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
+                        </div>
+                        }
+                        <div class="clearall">
+                        </div>
                     }
-                </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-10">
+            <div class="sf-chart-tokens panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">@ChartMessage.Chart_ChartSettings.NiceToString()</h3>
+                </div>
+                <div class="panel-body table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="sf-chart-token-narrow">@ChartMessage.Chart_Dimension.NiceToString()
+                                </th>
+                                @if (chart.Value.ChartScript.GroupBy == GroupByChart.Optional)
+                                {
+                                    <th class="sf-chart-token-narrow">@ChartMessage.Chart_Group.NiceToString()
+                                    </th>
+                                }
+                                <th class="sf-chart-token-wide">Token
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var column in chart.TypeElementContext(a => a.Columns))
+                            {
+                                @Html.HiddenRuntimeInfo(column)
+                                @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
+                            }
+                        </tbody>
+                    </table>
+                </div>
                 <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.NavigateRoute(chart.Value.ChartScript)">
                     @chart.Value.ChartScript.Script
-                </textarea>
-            </td>
-        </tr>
-    </table>
+            </textarea>
+            </div>
+        </div>
+    </div>
 }

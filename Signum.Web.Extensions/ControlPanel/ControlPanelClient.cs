@@ -20,12 +20,10 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelClient
     {
-        public static long RefreshMilliseconds = 300000; //5 minutes
-
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/ControlPanel";
-        public static string FlowTableModule = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/FlowTable";
+        public static string GridRepeater = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/GridRepeater";
 
         public struct PartViews
         {
@@ -66,37 +64,23 @@ namespace Signum.Web.ControlPanel
                     new EmbeddedEntitySettings<PanelPartDN>(),
                     
                     new EntitySettings<UserChartPartDN>(),
+
                     new EntitySettings<UserQueryPartDN>(),
 
                     new EntitySettings<CountSearchControlPartDN>(),
-                    new EmbeddedEntitySettings<CountUserQueryElement> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
+                    new EmbeddedEntitySettings<CountUserQueryElementDN> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartDN>(),
-                    new EmbeddedEntitySettings<LinkElement> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
+                    new EmbeddedEntitySettings<LinkElementDN> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite() });
-
-                ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
-                {
-                    return new ToolBarButton[]
-                    {
-                        new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
-                            Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            Enabled = !panel.IsNew,
-                            AltText = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            OnClick = new JsFunction(Module, "createNewPart", ctx.Prefix, ctx.Url.Action((ControlPanelController a)=>a.AddNewPart()), PanelPartViews.Keys.Select(t=>t.ToChooserOption()).ToArray())
-                        }
-                    };
-                });
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Owner = UserDN.Current.ToLite() });
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
                     !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:
-                     new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
+                     new QuickLinkAction(ControlPanelMessage.Preview, RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
                 });
            
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>

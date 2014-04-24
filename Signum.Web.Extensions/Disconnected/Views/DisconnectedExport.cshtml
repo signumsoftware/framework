@@ -22,7 +22,7 @@
             </thead>
             @foreach (var dtc in dc.TypeElementContext(a => a.Copies))
             {
-                dtc.LabelVisible = false;
+                dtc.FormGroupStyle = FormGroupStyle.None;
                 <tr>
                     <td>
                         @Html.EntityLine(dtc, d => d.Type)

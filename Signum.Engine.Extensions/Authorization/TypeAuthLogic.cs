@@ -323,9 +323,9 @@ namespace Signum.Engine.Authorization
             if (first == null)
                 return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
 
-            var conditions = first.Conditions.Select(c => c.ConditionName).ToList();
+            var conditions = first.Conditions.Select(c => c.TypeCondition).ToList();
 
-            if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
+            if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.TypeCondition).SequenceEqual(conditions)))
                 return new TypeAllowedAndConditions(TypeAllowed.None);
 
             return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),

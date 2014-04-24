@@ -31,9 +31,7 @@ namespace Signum.Web.Auth
         {
             return RouteHelper.New().Action((AuthController c) => c.Login(returnUrl));
         };
-
-        public static string CookieName = "sfUser";
-         
+ 
         public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
 
         public static string Module = "Extensions/Signum.Web.Extensions/Auth/Scripts/Auth";
@@ -84,7 +82,7 @@ namespace Signum.Web.Auth
 
                 if (property)
                 {
-                    Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
+                    Common.CommonTask += TaskAuthorizeProperties;
                     Mapping.CanChange += Mapping_CanChange;
                 }
 

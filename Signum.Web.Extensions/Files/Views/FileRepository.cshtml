@@ -8,10 +8,9 @@
     @Html.EntityList(e, f => f.FileTypes)
     if (!e.Value.IsNew)
     {
-    @Html.CountSearchControl(new FindOptions(typeof(FilePathDN), "Repository", e.Value), csc =>
+        @Html.CountSearchControl(e, new FindOptions(typeof(FilePathDN), "Repository", e.Value), csc =>
     {
         csc.PopupViewPrefix = "files";
-        csc.WriteQueryName = WriteQueryName.Field;
     });
     }
 }

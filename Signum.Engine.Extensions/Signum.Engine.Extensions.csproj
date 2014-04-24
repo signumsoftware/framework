@@ -108,7 +108,6 @@
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
     <Compile Include="Basics\PropertyRouteLogic.cs" />
-    <Compile Include="Basics\MultiOptionalEnumLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
@@ -135,10 +134,11 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Isolation\IsolationLogic.cs" />
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />
     <Compile Include="Mailing\EmailTemplateRenderer.cs" />
-    <Compile Include="Mailing\Pop3ConfigurationLogic.cs" />
+    <Compile Include="Mailing\Pop3\Pop3ConfigurationLogic.cs" />
     <Compile Include="Mailing\Pop3\MailMimeParser.cs" />
     <Compile Include="Mailing\Pop3\Pop3Client.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />

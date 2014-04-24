@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Processes;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
@@ -21,23 +22,23 @@ namespace Signum.Entities.Scheduler
         public IScheduleRuleDN Rule
         {
             get { return rule; }
-            set { SetToStr(ref rule, value, () => Rule); }
+            set { SetToStr(ref rule, value); }
         }
 
-        [ImplementedBy(typeof(SimpleTaskDN))]
+        [ImplementedBy(typeof(SimpleTaskSymbol))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task
         {
             get { return task; }
-            set { SetToStr(ref task, value, () => Task); }
+            set { SetToStr(ref task, value); }
         }
 
         bool suspended;
         public bool Suspended
         {
             get { return suspended; }
-            set { Set(ref suspended, value, () => Suspended); }
+            set { Set(ref suspended, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -46,7 +47,7 @@ namespace Signum.Entities.Scheduler
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]
@@ -55,7 +56,7 @@ namespace Signum.Entities.Scheduler
         public string ApplicationName
         {
             get { return applicationName; }
-            set { Set(ref applicationName, value, () => ApplicationName); }
+            set { Set(ref applicationName, value); }
         }
 
         public override string ToString()
@@ -66,9 +67,9 @@ namespace Signum.Entities.Scheduler
         public const string None = "none";
     }
 
-    public enum ScheduledTaskOperation
-    { 
-        Save
+    public static class ScheduledTaskOperation
+    {
+        public static readonly ExecuteSymbol<ScheduledTaskDN> Save = OperationSymbol.Execute<ScheduledTaskDN>();
     }
 
     public enum TaskMessage
@@ -78,16 +79,16 @@ namespace Signum.Entities.Scheduler
         LastExecution
     }
 
-    public enum TaskOperation
+    public static class TaskOperation
     {
-        ExecuteSync,
-        ExecuteAsync,
+        public static readonly ConstructSymbol<IIdentifiable>.From<ITaskDN> ExecuteSync = OperationSymbol.Construct<IIdentifiable>.From<ITaskDN>();
+        public static readonly ExecuteSymbol<ITaskDN> ExecuteAsync = OperationSymbol.Execute<ITaskDN>();
     }
 
 
-    public enum SchedulerPermission
+    public static class SchedulerPermission
     {
-        ViewSchedulerPanel,
+        public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
     }
 
     public interface ITaskDN : IIdentifiable

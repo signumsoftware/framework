@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.ControlPanel;
@@ -16,7 +17,7 @@ namespace Signum.Entities.UserQueries
         public MList<UserAssetPreviewLine> Lines
         {
             get { return lines; }
-            set { Set(ref lines, value, () => Lines); }
+            set { Set(ref lines, value); }
         }
     }
 
@@ -27,35 +28,35 @@ namespace Signum.Entities.UserQueries
         public Type Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         string text;
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, () => Text); }
+            set { Set(ref text, value); }
         }
 
         EntityAction action;
         public EntityAction Action
         {
             get { return action; }
-            set { Set(ref action, value, () => Action); }
+            set { Set(ref action, value); }
         }
 
         bool overrideEntity;
         public bool OverrideEntity
         {
             get { return overrideEntity; }
-            set { Set(ref overrideEntity, value, () => OverrideEntity); }
+            set { Set(ref overrideEntity, value); }
         }
 
         Guid guid;
         public Guid Guid
         {
             get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
+            set { Set(ref guid, value); }
         }
 
         [HiddenProperty]
@@ -81,9 +82,9 @@ namespace Signum.Entities.UserQueries
         SucessfullyImported,
     }
 
-    public enum UserAssetPermission
+    public static class UserAssetPermission
     {
-        UserAssetsToXML,
+        public static readonly PermissionSymbol UserAssetsToXML = new PermissionSymbol();
     }
 
     public interface IToXmlContext

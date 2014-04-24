@@ -180,7 +180,7 @@ namespace Signum.Web.Help
                         return new WikiLink(link, text);
 
                     case WikiFormat.OperationLink:
-                        Enum operation = MultiEnumLogic<OperationDN>.TryToEnum(link);
+                        OperationSymbol operation = SymbolLogic<OperationSymbol>.TryToSymbol(link);
 
                         List<Type> types = OperationLogic.FindTypes(operation).Where(TypeLogic.TypeToDN.ContainsKey).ToList();
                         if (types.Count == 1)

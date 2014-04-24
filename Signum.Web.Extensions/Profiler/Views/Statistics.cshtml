@@ -11,7 +11,7 @@
 </div>
 
 @Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable"))
-<script language="javascript">
+<script>
     $(function () {
         @(new JsFunction(ProfilerClient.Module, "initStats"));
     });

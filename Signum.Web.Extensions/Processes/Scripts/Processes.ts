@@ -41,18 +41,23 @@ export function initControlPanel(url : string) {
 }
 
 
-export function refreshUpdate(idProcess: string, prefix: string, getProgressUrl: string) {
-    setTimeout(function () {
+export function refreshPage(prefix: string) {
+    setTimeout(() => Navigator.requestAndReload(prefix), 500);
+}
+
+
+export function refreshProgress(idProcess: string, prefix: string, getProgressUrl: string) {
+    setTimeout(() =>
         $.post(getProgressUrl, { id: idProcess }, function (data) {
-            $("#progressBar").width(data * 100 + '%');
+            $("#progressBar").width(data * 100 + '%').attr("aria-valuenow", data * 100);
             if (data < 1) {
-                refreshUpdate(idProcess, prefix, getProgressUrl);
+                refreshProgress(idProcess, prefix, getProgressUrl);
             }
             else {
                 Navigator.requestAndReload(prefix);
             }
-        });
-    }, 2000);
+        })
+        , 500);
 }
 
 export function processFromMany(options: Operations.EntityOperationOptions ) : Promise<void> {

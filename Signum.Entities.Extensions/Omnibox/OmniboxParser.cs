@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ using System.Threading;
 using Signum.Entities.UserQueries;
 using System.Collections.Concurrent;
 using System.Globalization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Omnibox
 {
@@ -35,6 +36,7 @@ namespace Signum.Entities.Omnibox
 @"(?<entity>[a-zA-Z_][a-zA-Z0-9_]*;\d+)|
 (?<space>\s+)|
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
+(?<ident>\[[a-zA-Z_][a-zA-Z0-9_]*\])|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
 (?<comparer>(" + FilterValueConverter.OperationRegex + @"))|
@@ -135,7 +137,7 @@ namespace Signum.Entities.Omnibox
     public abstract class OmniboxManager
     {
         public abstract bool AllowedType(Type type);
-        public abstract bool AllowedPermission(Enum permission);
+        public abstract bool AllowedPermission(PermissionSymbol permission);
         public abstract bool AllowedQuery(object queryName);
 
         public abstract QueryDescription GetDescription(object queryName);
@@ -260,8 +262,8 @@ namespace Signum.Entities.Omnibox
         Entity,
     }
 
-    public enum OmniboxPermission
+    public static class OmniboxPermission
     {
-        OmniboxInAssemblyLanguage,
+        public static readonly PermissionSymbol OmniboxInAssemblyLanguage = new PermissionSymbol();
     }
 }

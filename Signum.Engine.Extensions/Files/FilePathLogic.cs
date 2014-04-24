@@ -34,7 +34,7 @@ namespace Signum.Engine.Files
             return WebDownloadExpression.Evaluate(fp);
         }
 
-        static Dictionary<Enum, FileTypeAlgorithm> fileTypes = new Dictionary<Enum, FileTypeAlgorithm>();
+        static Dictionary<FileTypeSymbol, FileTypeAlgorithm> fileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -47,7 +47,7 @@ namespace Signum.Engine.Files
             {
                 sb.Include<FilePathDN>();
 
-                MultiEnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
+                SymbolLogic<FileTypeSymbol>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new DeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
@@ -77,8 +77,8 @@ namespace Signum.Engine.Files
                         p.Repository
                     });
 
-                dqm.RegisterQuery(typeof(FileTypeDN), () =>
-                    from f in Database.Query<FileTypeDN>()
+                dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
+                    from f in Database.Query<FileTypeSymbol>()
                     select new
                     {
                         Entity = f,
@@ -127,7 +127,7 @@ namespace Signum.Engine.Files
             return new Disposable(() => unsafeMode.Value = false);
         }
 
-        public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeDN fileType, string fullPath)
+        public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeSymbol fileType, string fullPath)
         {
             if (!fullPath.StartsWith(repository.FullPhysicalPrefix))
                 throw new InvalidOperationException("The File {0} doesn't belong to the repository {1}".Formato(fullPath, repository.PhysicalPrefix));
@@ -148,15 +148,7 @@ namespace Signum.Engine.Files
             {
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
-                    //set typedn from enum
-                    if (fp.FileType == null)
-                        fp.FileType = fp.FileTypeEnum.ToEntity<FileTypeDN>();
-
-                    //set enum from typedn
-                    if (fp.FileTypeEnum == null)
-                        fp.SetFileTypeEnum(fp.FileType.ToEnum());
-
-                    FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
+                    FileTypeAlgorithm alg = fileTypes[fp.FileType];
                     string sufix = alg.CalculateSufix(fp);
                     if (!sufix.HasText())
                         throw new InvalidOperationException("Sufix not set");
@@ -214,9 +206,9 @@ namespace Signum.Engine.Files
             return true;
         }
 
-        public static void Register(Enum fileTypeKey, FileTypeAlgorithm algorithm)
+        public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
         {
-            fileTypes.Add(fileTypeKey, algorithm);
+            fileTypes.Add(fileTypeSymbol, algorithm);
         }
 
         public static byte[] GetByteArray(this FilePathDN fp)

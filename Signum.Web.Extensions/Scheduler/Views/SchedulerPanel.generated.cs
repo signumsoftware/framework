@@ -319,7 +319,7 @@ WriteLiteral("        ");
             #line 66 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
    Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
 {
-    FilterMode = Signum.Web.FilterMode.Hidden,
+    ShowFilters = false,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
 }, new Context(null, "st")));
@@ -345,7 +345,7 @@ WriteLiteral("        ");
    Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
 {
     OrderOptions = { new OrderOption("StartTime", Signum.Entities.DynamicQuery.OrderType.Descending) },
-    FilterMode = Signum.Web.FilterMode.Hidden,
+    ShowFilters = false,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
 }, new Context(null, "stl")));

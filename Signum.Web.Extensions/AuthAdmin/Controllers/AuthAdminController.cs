@@ -16,6 +16,7 @@ using Signum.Web.Controllers;
 using System.IO;
 using System.Xml;
 using Signum.Entities.Basics;
+using System.Linq;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -61,7 +62,7 @@ namespace Signum.Web.AuthAdmin
             return RedirectToAction("Types", new { role = role.Id });
         }
 
-
+        [HttpPost]
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type)
         {
             return this.PopupNavigate(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()));
@@ -73,11 +74,17 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(ControllerContext, true, prefix); ;
+            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(ControllerContext, true, prefix);
 
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
-            return JsonAction.ModelState(ModelState);
+            if (prp.GlobalErrors.Any())
+            {
+                this.ModelState.FromContext(prp);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            return null;
         }
 
         [HttpPost]
@@ -92,11 +99,17 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var prp = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, true, prefix); ;
+            var querys = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, true, prefix);
 
-            QueryAuthLogic.SetQueryRules(prp.Value);
+            if (querys.GlobalErrors.Any())
+            {
+                this.ModelState.FromContext(querys);
+                return JsonAction.ModelState(ModelState);
+            }
 
-            return JsonAction.ModelState(ModelState);
+            QueryAuthLogic.SetQueryRules(querys.Value);
+
+            return null;
         }
 
 
@@ -112,11 +125,17 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, true, prefix);
+            var opers = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, true, prefix);
 
-            OperationAuthLogic.SetOperationRules(prp.Value);
+            if (opers.GlobalErrors.Any())
+            {
+                this.ModelState.FromContext(opers);
+                return JsonAction.ModelState(ModelState);
+            }
 
-            return JsonAction.ModelState(ModelState);
+            OperationAuthLogic.SetOperationRules(opers.Value);
+
+            return null;
         }
 
         [HttpGet]

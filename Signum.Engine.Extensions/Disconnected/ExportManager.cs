@@ -396,7 +396,7 @@ SELECT {3}
                 command + "\r\n" +
                 "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName);
 
-            return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
+            return Executor.ExecuteNonQuery(fullCommand, filter.Try(a => a.Parameters));
         }
 
         protected virtual SqlPreCommandSimple GetWhere(DisconnectedStrategy<T> pair)

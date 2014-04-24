@@ -126,7 +126,7 @@ namespace Signum.Engine.Processes
 
             Task.Factory.StartNew(() =>
             {
-                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.TryCC(s => s.Database); 
+                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.Try(s => s.Database); 
 
                 using (AuthLogic.Disable())
                 {
@@ -208,7 +208,7 @@ namespace Signum.Engine.Processes
                                         {
                                             ProcessDN pro = pair.Process.Retrieve();
 
-                                            IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm.ToEnum());
+                                            IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
                                             ExecutingProcess executingProcess = new ExecutingProcess(algorithm, pro);
 

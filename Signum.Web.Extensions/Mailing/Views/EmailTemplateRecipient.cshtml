@@ -3,15 +3,27 @@
 @using Signum.Web.UserQueries
 @using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
 {
-    using (Html.FieldInline())
+    using (var sc = tc.SubContext())
     {
-    @Html.ValueLine(tc, c => c.Kind)
-    @Html.ValueLine(tc, c => c.EmailAddress)
-    @Html.ValueLine(tc, c => c.DisplayName)
+        sc.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-2" style="text-align: right;">
+            <label>
+                @Html.ValueLine(tc, c => c.Kind, vl => vl.FormGroupStyle = FormGroupStyle.None)
+            </label>
+        </div>
+        <div class="col-sm-5">
+            @Html.ValueLine(sc, c => c.EmailAddress)
+        </div>
+        <div class="col-sm-5">
+            @Html.ValueLine(sc, c => c.DisplayName)
+        </div>
+    </div>
     }
+
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
     {
-    @Html.Field("Email Owner", Html.QueryTokenDNBuilder(qtTc,  SearchControlHelper.GetQueryTokenBuilderSettings(  
+    @Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, SearchControlHelper.GetQueryTokenBuilderSettings(
             (QueryDescription)ViewData[ViewDataKeys.QueryDescription])))
     }
 }

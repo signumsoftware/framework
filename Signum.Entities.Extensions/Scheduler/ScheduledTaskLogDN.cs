@@ -15,23 +15,23 @@ namespace Signum.Entities.Scheduler
         public ScheduledTaskDN ScheduledTask
         {
             get { return scheduledTask; }
-            set { Set(ref scheduledTask, value, () => ScheduledTask); }
+            set { Set(ref scheduledTask, value); }
         }
 
         Lite<IUserDN> user;
         public Lite<IUserDN> User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
-        [ImplementedBy(typeof(SimpleTaskDN))]
+        [ImplementedBy(typeof(SimpleTaskSymbol))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task
         {
             get { return task; }
-            set { Set(ref task, value, () => Task); }
+            set { Set(ref task, value); }
         }
 
         DateTime startTime;
@@ -39,7 +39,7 @@ namespace Signum.Entities.Scheduler
         public DateTime StartTime
         {
             get { return startTime; }
-            set { Set(ref startTime, value, () => StartTime); }
+            set { Set(ref startTime, value); }
         }
 
         DateTime? endTime;
@@ -47,7 +47,7 @@ namespace Signum.Entities.Scheduler
         public DateTime? EndTime
         {
             get { return endTime; }
-            set { Set(ref endTime, value, () => EndTime); }
+            set { Set(ref endTime, value); }
         }
 
         static Expression<Func<ScheduledTaskLogDN, double?>> DurationExpression =
@@ -63,7 +63,7 @@ namespace Signum.Entities.Scheduler
         public string MachineName
         {
             get { return machineName; }
-            set { Set(ref machineName, value, () => MachineName); }
+            set { Set(ref machineName, value); }
         }
 
         [NotNullable, SqlDbType(Size = 200)]
@@ -72,7 +72,7 @@ namespace Signum.Entities.Scheduler
         public string ApplicationName
         {
             get { return applicationName; }
-            set { Set(ref applicationName, value, () => ApplicationName); }
+            set { Set(ref applicationName, value); }
         }
 
         [ImplementedByAll]
@@ -80,14 +80,14 @@ namespace Signum.Entities.Scheduler
         public Lite<IIdentifiable> ProductEntity
         {
             get { return productEntity; }
-            set { Set(ref productEntity, value, () => ProductEntity); }
+            set { Set(ref productEntity, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         public override string ToString()

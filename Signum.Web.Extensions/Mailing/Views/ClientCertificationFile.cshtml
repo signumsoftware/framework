@@ -2,9 +2,6 @@
 
 @using (var sc = Html.TypeContext<ClientCertificationFileDN>())
 {
-    using (Html.FieldInline())
-    {
     @Html.ValueLine(sc, s => s.CertFileType)
     @Html.ValueLine(sc, s => s.FullFilePath)
-    }
 }

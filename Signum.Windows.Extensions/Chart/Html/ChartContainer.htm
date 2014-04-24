@@ -3,20 +3,19 @@
 <head>
     <title>Chart container</title>
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
-   
-    <style src="reset.css" />
+
     <style type="text/css">
         body
         {
-            font:12px/1.5 Arial,'Liberation Sans',FreeSans,sans-serif;
+            font: 12px/1.5 Arial,'Liberation Sans',FreeSans,sans-serif;
             overflow: hidden;
         }
-            
+
         #container svg
         {
-            shape-rendering: crispEdges;         
+            shape-rendering: crispEdges;
         }
-        </style>
+    </style>
 </head>
 <body>
     <div id="container">
@@ -26,7 +25,7 @@
             func();
         }
     </script>
-    <script src="jquery-1.7.2.min.js" />
+    <script src="jquery-1.11.0.js" />
     <script src="d3.v3.min.js" />
     <script src="ChartUtils.js" />
     <script src="colorbrewer.js" />
@@ -34,7 +33,7 @@
 
         var exceptionLine = null;
 
-       
+
 
         function reDraw(rawCode, rawData) {
             var $container = $("#container");
@@ -67,7 +66,7 @@
                 var skewY = ChartUtils.skewY;
                 var matrix = ChartUtils.matrix;
                 var scaleFor = ChartUtils.scaleFor;
-                var rule = ChartUtils.rule; 
+                var rule = ChartUtils.rule;
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {
@@ -106,8 +105,7 @@
             chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
         }
 
-        function bindMouseClick($container) 
-        {
+        function bindMouseClick($container) {
             $container.find('[data-click]').click(function () {
                 window.external.OpenSubgroup($(this).data("click"));
             });

@@ -28,8 +28,8 @@ namespace Signum.Windows.Processes
         {
             MenuItem miResult = new MenuItem
             {
-                Header = coc.OperationSettings.TryCC(s => s.Text) ?? coc.OperationInfo.Key.NiceToString(),
-                Icon = coc.OperationSettings.TryCC(s => s.Icon.ToSmallImage()),
+                Header = coc.OperationSettings.Try(s => s.Text) ?? coc.OperationInfo.OperationSymbol.NiceToString(),
+                Icon = coc.OperationSettings.Try(s => s.Icon.ToSmallImage()),
             };
 
             if (coc.CanExecute != null)
@@ -53,7 +53,7 @@ namespace Signum.Windows.Processes
                      });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IProcessServer s) => s.CreatePackageOperation(coc.Entities.ToList(), coc.OperationInfo.Key));
+                    IIdentifiable entity = Server.Return((IProcessServer s) => s.CreatePackageOperation(coc.Entities.ToList(), coc.OperationInfo.OperationSymbol));
 
                     Navigator.Navigate(entity);
                 }

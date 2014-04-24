@@ -3,11 +3,7 @@
 
 @using (var e = Html.TypeContext<ScheduleRuleWeekDaysDN>())
 {
-    using (@Html.FieldInline())
-    {
-        @Html.ValueLine(e, srd => srd.StartingOn, vl => { vl.Format = "d"; })
-        @Html.HourMinute(e, srwd => srwd.StartingOn)    
-    }
+    @Html.ValueLine(e, f => f.StartingOn)
     @Html.ValueLine(e, f => f.Sunday)
     @Html.ValueLine(e, f => f.Monday)
     @Html.ValueLine(e, f => f.Tuesday)

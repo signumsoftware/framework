@@ -69,7 +69,7 @@ namespace Signum.Engine.Translation
             if (route.Type != typeof(string))
                 throw new InvalidOperationException("Only string routes can be traducibles");
 
-            if (route.FollowC(a => a.Parent).Any(a => a.PropertyRouteType == PropertyRouteType.MListItems))
+            if (route.Follow(a => a.Parent).Any(a => a.PropertyRouteType == PropertyRouteType.MListItems))
                 throw new NotImplementedException("MList elements are not traducible yet");
 
             TraducibleRoutes.GetOrCreate(route.RootType).Add(route); 
@@ -114,7 +114,7 @@ namespace Signum.Engine.Translation
             {
                 Expression exp = pe;
 
-                foreach (var p in pr.FollowC(a => a.Parent).Reverse().Skip(1))
+                foreach (var p in pr.Follow(a => a.Parent).Reverse().Skip(1))
                     exp = Expression.Property(exp, p.PropertyInfo);
 
                 var selector = Expression.Lambda<Func<T, string>>(exp, pe);

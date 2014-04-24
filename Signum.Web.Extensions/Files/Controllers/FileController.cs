@@ -35,13 +35,13 @@ namespace Signum.Web.Files
         {
             Type type = typeof(FilePathDN);
             FilePathDN entity = null;
-            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).Try(e => e.IdOrNull))
             {
                 if (sfId.HasValue)
                     entity = Database.Retrieve<FilePathDN>(sfId.Value);
                 else
                 {
-                    entity = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
+                    entity = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
                 }
             }
             ViewData["IdValueField"] = prefix;
@@ -69,7 +69,7 @@ namespace Signum.Web.Files
                 if (!fileType.HasText())
                     throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(fileName));
 
-                file = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
+                file = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
             }
             else
             {
@@ -118,7 +118,7 @@ namespace Signum.Web.Files
                 if (!fileType.HasText())
                     throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
 
-                file = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
+                file = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
             }
             else
             {

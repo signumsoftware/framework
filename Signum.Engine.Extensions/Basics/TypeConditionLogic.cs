@@ -19,7 +19,7 @@ namespace Signum.Engine.Basics
 {
     public static class TypeConditionLogic
     {
-        static Dictionary<Type, Dictionary<Enum, LambdaExpression>> infos = new Dictionary<Type, Dictionary<Enum, LambdaExpression>>();
+        static Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>> infos = new Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>();
 
         public static IEnumerable<Type> Types
         {
@@ -30,24 +30,24 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                MultiEnumLogic<TypeConditionNameDN>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
+                SymbolLogic<TypeConditionSymbol>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
             }
         }
 
-        public static void Register<T>(Enum conditionName, Expression<Func<T, bool>> condition)
+        public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
             where T : IdentifiableEntity
         {
-            if (conditionName == null)
-                throw new ArgumentNullException("conditionName");
+            if (typeCondition == null)
+                throw new ArgumentNullException("typeCondition");
 
             if (condition == null)
                 throw new ArgumentNullException("condition");
 
-            infos.GetOrCreate(typeof(T))[conditionName] = condition;
+            infos.GetOrCreate(typeof(T))[typeCondition] = condition;
         }
 
         [MethodExpander(typeof(InConditionExpander))]
-        public static bool InCondition(this IdentifiableEntity entity, Enum conditionName)
+        public static bool InCondition(this IdentifiableEntity entity, TypeConditionSymbol typeCondition)
         {
             throw new InvalidProgramException("InCondition is meant to be used in database only");
         }
@@ -57,9 +57,9 @@ namespace Signum.Engine.Basics
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression entity = arguments[0];
-                Enum conditionName = (Enum)ExpressionEvaluator.Eval(arguments[1]);
+                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
 
-                var exp = GetExpression(entity.Type, conditionName);
+                var exp = GetExpression(entity.Type, typeCondition);
 
                 return Expression.Invoke(exp, entity);
             }
@@ -67,10 +67,10 @@ namespace Signum.Engine.Basics
 
 
         [MethodExpander(typeof(WhereConditionExpander))]
-        public static IQueryable<T> WhereCondition<T>(this IQueryable<T> query, Enum conditionName)
+        public static IQueryable<T> WhereCondition<T>(this IQueryable<T> query, TypeConditionSymbol typeCondition)
             where T : IdentifiableEntity
         {
-            Expression<Func<T, bool>> exp = (Expression<Func<T, bool>>)GetExpression(typeof(T), conditionName);
+            Expression<Func<T, bool>> exp = (Expression<Func<T, bool>>)GetExpression(typeof(T), typeCondition);
 
             return query.Where(exp);
         }
@@ -84,36 +84,36 @@ namespace Signum.Engine.Basics
                 Type type = mi.GetGenericArguments()[0];
 
                 Expression query = arguments[0];
-                Enum conditionName = (Enum)ExpressionEvaluator.Eval(arguments[1]);
+                TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
 
-                LambdaExpression exp = GetExpression(type, conditionName);
+                LambdaExpression exp = GetExpression(type, typeCondition);
 
                 return Expression.Call(null, miWhere.MakeGenericMethod(type), query, exp);
             }
         }
 
-        public static IEnumerable<Enum> ConditionsFor(Type type)
+        public static IEnumerable<TypeConditionSymbol> ConditionsFor(Type type)
         {
             var dic = infos.TryGetC(type);
             if (dic == null)
-                return Enumerable.Empty<Enum>();
+                return Enumerable.Empty<TypeConditionSymbol>();
 
             return dic.Keys;
         }
 
-        public static LambdaExpression GetExpression(Type type, Enum conditionName)
+        public static LambdaExpression GetExpression(Type type, TypeConditionSymbol typeCondition)
         {
-            var expression = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(conditionName);
+            var expression = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
 
             if (expression == null)
-                throw new KeyNotFoundException("There's no TypeCondition registered for type {0} with key {1}".Formato(type, conditionName));
+                throw new KeyNotFoundException("There's no TypeCondition registered for type {0} with key {1}".Formato(type, typeCondition));
 
             return expression;
         }
 
-        public static bool IsDefined(Type type, Enum conditionName)
+        public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)
         {
-            return infos.TryGetC(type).TryGetC(conditionName) != null;
+            return infos.TryGetC(type).TryGetC(typeCondition) != null;
         }
     }
 }

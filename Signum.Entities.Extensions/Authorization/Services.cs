@@ -58,7 +58,7 @@ namespace Signum.Services
         void SetPermissionRules(PermissionRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<Enum, bool> PermissionRules();
+        DefaultDictionary<PermissionSymbol, bool> PermissionRules();
     }
 
     [ServiceContract]
@@ -97,6 +97,6 @@ namespace Signum.Services
         void SetOperationRules(OperationRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, OperationAllowed> AllowedOperations();
+        Dictionary<OperationSymbol, OperationAllowed> AllowedOperations();
     }
 }

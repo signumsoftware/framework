@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Web.Operations;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.ControlPanel
 {
@@ -19,8 +20,8 @@ namespace Signum.Web.ControlPanel
     {
         public ViewResult View(Lite<ControlPanelDN> panel, Lite<IdentifiableEntity> currentEntity)
         {
-            ControlPanelPermission.ViewControlPanel.Authorize(); 
-         
+            ControlPanelPermission.ViewControlPanel.Authorize();
+
             var cp = panel.Retrieve();
 
             if (cp.EntityType != null)
@@ -33,23 +34,20 @@ namespace Signum.Web.ControlPanel
             return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), cp);
         }
 
-        public ActionResult AddNewPart()
+        public ActionResult AddNewPart(string rootType, string propertyRoute, string newPartType, string partialViewName)
         {
-            var cp = this.ExtractEntity<ControlPanelDN>().ApplyChanges(this.ControllerContext, true).Value;
+            var type = Navigator.ResolveType(newPartType);
 
-            var lastColumn = 0.To(cp.NumberOfColumns).WithMin(c => cp.Parts.Count(p => p.Column == c));
-
-            var newPart = new PanelPartDN
+            PanelPartDN part = new PanelPartDN
             {
-                Column = lastColumn,
-                Row = (cp.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
-                Title = "",
-                Content = (IPartDN)Activator.CreateInstance(Navigator.ResolveType(Request["newPartType"]))
+                StartColumn = 0,
+                Columns = 12,
+                Content = (IPartDN)Activator.CreateInstance(type),
             };
 
-            cp.Parts.Add(newPart);
-
-            return this.DefaultExecuteResult(cp);
+            PropertyRoute route = PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute);
+            ViewData[GridRepeaterHelper.LastEnd] = 0;
+            return Navigator.PartialView(this, new TypeContext<PanelPartDN>(part, null, this.Prefix(), route), partialViewName);
         }
     }
 }

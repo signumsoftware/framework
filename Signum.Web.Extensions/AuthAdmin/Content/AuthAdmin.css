@@ -1,4 +1,10 @@
-﻿.sf-auth-rules th
+﻿.sf-auth-rules
+{
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.sf-auth-rules th
 {
     padding:2px;
 }
@@ -79,7 +85,7 @@
 }
 .sf-auth-chooser:hover
 {
-    background-position: 0 -48px!; 
+    background-position: 0 -48px; 
 }
 .sf-auth-chooser.sf-auth-read 
 {
@@ -178,4 +184,13 @@ span.group.inactive
 span.group.active
 {
     color:black
+}
+
+
+/*form-compact*/
+
+.form-compact .form-group
+{
+    margin-bottom: 0px;
+    min-height: 30px;
 }

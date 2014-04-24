@@ -17,24 +17,19 @@ namespace Signum.Entities.Files
     {
         public FilePathDN() { }
 
-        public FilePathDN(FileTypeDN fileType)
+        public FilePathDN(FileTypeSymbol fileType)
         {
-            this.FileType = fileType;
+            this.fileType = fileType;
         }
 
-        public FilePathDN(Enum fileType)
-        {
-            this.fileTypeEnum = fileType;
-        }
-
-        public FilePathDN(Enum fileType, string path)
+        public FilePathDN(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
             this.FileName = Path.GetFileName(path);
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
-        public FilePathDN(Enum fileType, string fileName, byte[] fileData)
+        public FilePathDN(FileTypeSymbol fileType, string fileName, byte[] fileData)
             : this(fileType)
         {
             this.FileName = fileName;
@@ -47,7 +42,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, () => FileName); }
+            set { SetToStr(ref fileName, value); }
         }
 
         [Ignore]
@@ -57,7 +52,7 @@ namespace Signum.Entities.Files
             get { return binaryFile; }
             set 
             {
-                if (Set(ref binaryFile, value, () => BinaryFile) && binaryFile != null)
+                if (Set(ref binaryFile, value) && binaryFile != null)
                     FileLength = binaryFile.Length;
             }
         }
@@ -66,7 +61,7 @@ namespace Signum.Entities.Files
         public int FileLength
         {
             get { return fileLength; }
-            internal set { SetToStr(ref fileLength, value, () => FileLength); }
+            internal set { SetToStr(ref fileLength, value); }
         }
 
         public string FileLengthString
@@ -80,27 +75,15 @@ namespace Signum.Entities.Files
         public string Sufix
         {
             get { return sufix; }
-            internal set { Set(ref sufix, value, () => Sufix); }
-        }
-
-        [Ignore]
-        Enum fileTypeEnum;
-        public Enum FileTypeEnum
-        {
-            get { return fileTypeEnum; }
-        }
-
-        public void SetFileTypeEnum(Enum ftEnum)
-        {
-            fileTypeEnum = ftEnum;
+            internal set { Set(ref sufix, value); }
         }
 
         [NotNullable]
-        FileTypeDN fileType;
-        public FileTypeDN FileType
+        FileTypeSymbol fileType;
+        public FileTypeSymbol FileType
         {
             get { return fileType; }
-            internal set { Set(ref fileType, value, () => FileType); }
+            internal set { Set(ref fileType, value); }
         }
 
         [NotNullable]
@@ -108,7 +91,7 @@ namespace Signum.Entities.Files
         public FileRepositoryDN Repository
         {
             get { return repository; }
-            internal set { Set(ref repository, value, () => Repository); }
+            internal set { Set(ref repository, value); }
         }
 
         static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);

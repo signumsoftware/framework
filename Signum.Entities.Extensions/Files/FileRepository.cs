@@ -6,12 +6,21 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class FileTypeDN : MultiEnumDN
+    [Serializable]
+    public class FileTypeSymbol : Symbol
     {
+        private FileTypeSymbol() { } 
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public FileTypeSymbol([CallerMemberName]string memberName = null) : 
+            base(new StackFrame(1, false), memberName)
+        {
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
@@ -23,7 +32,7 @@ namespace Signum.Entities.Files
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [NotNullable, SqlDbType(Size = 500)]
@@ -32,7 +41,7 @@ namespace Signum.Entities.Files
         public string PhysicalPrefix
         {
             get { return physicalPrefix; }
-            set { Set(ref physicalPrefix, value, () => PhysicalPrefix); }
+            set { Set(ref physicalPrefix, value); }
         }
 
 
@@ -58,22 +67,22 @@ namespace Signum.Entities.Files
         public string WebPrefix
         {
             get { return webPrefix; }
-            set { Set(ref webPrefix, value, () => WebPrefix); }
+            set { Set(ref webPrefix, value); }
         }
 
         bool active = true;
         public bool Active
         {
             get { return active; }
-            set { Set(ref active, value, () => Active); }
+            set { Set(ref active, value); }
         }
 
         [NotNullable]
-        MList<FileTypeDN> fileTypes = new MList<FileTypeDN>();
-        public MList<FileTypeDN> FileTypes
+        MList<FileTypeSymbol> fileTypes = new MList<FileTypeSymbol>();
+        public MList<FileTypeSymbol> FileTypes
         {
             get { return fileTypes; }
-            set { Set(ref fileTypes, value, () => FileTypes); }
+            set { Set(ref fileTypes, value); }
         }
 
         static readonly Expression<Func<FileRepositoryDN, string>> ToStringExpression = e => e.name;
@@ -83,8 +92,8 @@ namespace Signum.Entities.Files
         }
     }
 
-    public enum FileRepositoryOperation
-    { 
-        Save
+    public static class FileRepositoryOperation
+    {
+        public static readonly ExecuteSymbol<FileRepositoryDN> Save = OperationSymbol.Execute<FileRepositoryDN>();
     }
 }

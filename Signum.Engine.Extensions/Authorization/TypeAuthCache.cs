@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
             }
             
             Type type = TypeLogic.DnToType[rt.Resource];
-            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, a.Condition.ToEnum()));
+            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, a.Condition));
 
             if (conditions.IsEmpty())
                 return null;
@@ -203,7 +203,7 @@ namespace Signum.Entities.Authorization
                         var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
                         {
                             Allowed = a.Allowed,
-                            Condition = a.ConditionName.ToEntity<TypeConditionNameDN>(),
+                            Condition = a.TypeCondition,
                         }).ToMList();
 
                         if (!pr.Conditions.SequenceEqual(shouldConditions))
@@ -306,7 +306,7 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in rac.DefaultDictionary().OverrideDictionary.TryCC(dic => dic.Keys).EmptyIfNull()
+                         from k in rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
                          where !allowed.Equals(allowedBase)
@@ -316,7 +316,7 @@ namespace Signum.Entities.Authorization
                             new XAttribute("Resource", resource),
                             new XAttribute("Allowed", allowed.Fallback.ToString()),
                             from c in allowed.Conditions
-                            let conditionName = TypeConditionNameDN.UniqueKey(c.ConditionName)
+                            let conditionName = c.TypeCondition.Key
                             orderby conditionName
                             select new XElement("Condition",
                                 new XAttribute("Name", conditionName),
@@ -340,8 +340,8 @@ namespace Signum.Entities.Authorization
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),
-                MultiEnumLogic<TypeConditionNameDN>.AllUniqueKeys.ToHashSet(),
-                typeof(TypeConditionNameDN).Name);
+                SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
+                typeof(TypeConditionSymbol).Name);
 
             Func<string, TypeDN> getResource = s =>
             {
@@ -414,7 +414,7 @@ namespace Signum.Entities.Authorization
         private static MList<RuleTypeConditionDN> Conditions(XElement xr, Replacements replacements)
         {
             return (from xc in xr.Elements("Condition")
-                    let cn = MultiEnumLogic<TypeConditionNameDN>.TryToEntity(replacements.Apply(typeof(TypeConditionNameDN).Name, xc.Attribute("Name").Value))
+                    let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeof(TypeConditionSymbol).Name, xc.Attribute("Name").Value))
                     where cn != null
                     select new RuleTypeConditionDN
                     {

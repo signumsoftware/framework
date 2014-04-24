@@ -18,7 +18,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
         
         [NotNullable]
@@ -27,7 +27,7 @@ namespace Signum.Entities.Scheduler
         public MList<HolidayDN> Holidays
         {
             get { return holidays; }
-            set { Set(ref holidays, value, () => Holidays); }
+            set { Set(ref holidays, value); }
         }
 
         public void CleanOldHolidays()
@@ -63,9 +63,9 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    public enum CalendarOperation
-    { 
-        Save
+    public static class HolidayCalendarOperation
+    {
+        public static readonly ExecuteSymbol<HolidayCalendarDN> Save = OperationSymbol.Execute<HolidayCalendarDN>();
     }
 
     [Serializable]
@@ -76,7 +76,7 @@ namespace Signum.Entities.Scheduler
         public DateTime Date
         {
             get { return date; }
-            set { SetToStr(ref date, value, () => Date); }
+            set { SetToStr(ref date, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -85,7 +85,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         public override string ToString()

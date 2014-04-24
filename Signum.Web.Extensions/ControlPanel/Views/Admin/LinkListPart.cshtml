@@ -3,5 +3,9 @@
 
 @using (var tc = Html.TypeContext<LinkListPartDN>())
 {
-    @Html.EntityRepeater(tc, p => p.Links)
+    tc.FormGroupStyle = FormGroupStyle.None;
+    tc.PlaceholderLabels = true;
+    <div class="form-inline repeater-inline">
+          @Html.EntityRepeater(tc, p => p.Links)
+    </div>
 }

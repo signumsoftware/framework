@@ -64,25 +64,26 @@ namespace Signum.Web.UserQueries
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
-                            .CreateProperty(a=>a.DisplayName)
                             .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .CreateProperty(a=>a.DisplayName)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
-                            .CreateProperty(a=>a.OrderType)
                             .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .CreateProperty(a=>a.OrderType)
+                            
                     },
                 });
 
@@ -138,62 +139,57 @@ namespace Signum.Web.UserQueries
             if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearchEntity: true))
                 return null;
 
-            var items = new List<ToolBarButton>();
+            var items = new List<IMenuItem>();
 
             Lite<UserQueryDN> currentUserQuery = null;
-            string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
+            string url = (ctx.ControllerContext.RouteData.Route as Route).Try(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
                 currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Text = uq.ToString(),
-                    AltText = uq.ToString(),
+                    Title = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + " sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
+                    CssClass = "sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
             }
 
             if (items.Count > 0)
-                items.Add(new ToolBarSeparator());
+                items.Add(new MenuItemSeparator());
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
-                string uqNewText = UserQueryMessage.UserQueries_CreateNew.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
-                    AltText = uqNewText,
-                    Text = uqNewText,
-                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries")),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                    Title = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
+                    Text = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
+                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
                 });
             }
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string uqEditText = UserQueryMessage.UserQueries_Edit.NiceToString();
-                items.Add(new ToolBarButton
+                items.Add(new MenuItem
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
-                    AltText = uqEditText,
-                    Text = uqEditText,
-                    Href = Navigator.NavigateRoute(currentUserQuery),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                    Title = UserQueryMessage.UserQueries_Edit.NiceToString(),
+                    Text = UserQueryMessage.UserQueries_Edit.NiceToString(),
+                    Href = Navigator.NavigateRoute(currentUserQuery)
                 });
             }
 
             string uqUserQueriesText = UserQueryMessage.UserQueries_UserQueries.NiceToString();
             return new ToolBarButton[]
             {
-                new ToolBarMenu
+                new ToolBarDropDown
                 { 
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
-                    AltText = uqUserQueriesText,
+                    Title = uqUserQueriesText,
                     Text = uqUserQueriesText,
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
                     Items = items
                 }
             };

@@ -2,12 +2,8 @@
 @using Signum.Web.ControlPanel
 @using Signum.Entities.Reports
 
-@using (var tc = Html.TypeContext<LinkElement>())
+@using (var tc = Html.TypeContext<LinkElementDN>())
 {
-    tc.ValueFirst = true;
-    using (Html.FieldInline())
-    {
-        @Html.ValueLine(tc, l => l.Label)
-        @Html.ValueLine(tc, l => l.Link)
-    }
+    @Html.ValueLine(tc, l => l.Label)
+    @Html.ValueLine(tc, l => l.Link)
 }

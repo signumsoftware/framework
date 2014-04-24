@@ -5,37 +5,32 @@ import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-export function exploreAlerts(prefix : string, column : string) {
-    var findOptions: Finder.FindOptions = JSON.parse(JSON.stringify( $("#" + SF.compose(prefix, "alertsWidget") + " ul").data("findoptions")));
+export function exploreAlerts(prefix : string, findOptions : Finder.FindOptions, updateUrl: string) {
 
-    findOptions.filters.push({ columnName: "Entity." + column, operation: Finder.FilterOperation.EqualTo, value: "true" }); 
-
-    Finder.explore(findOptions).then(() => updateAlerts(prefix)); 
+    Finder.explore(findOptions).then(() => updateAlerts(prefix, updateUrl)); 
 }
 
-export function createAlert(prefix: string, operationKey: string) {
+export function createAlert(prefix: string, operationKey: string, updateUrl: string) {
 
-    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(() => updateAlerts(prefix));
+    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(() => updateAlerts(prefix, updateUrl));
 }
 
-function updateAlerts(prefix: string) {
-    var widget = $("#" + SF.compose(prefix, "alertsWidget") + " ul"); 
+function updateAlerts(prefix: string, updateUrl: string) {
+    var widget = $("#" + SF.compose(prefix, "alertsWidget")).parent(); 
 
     SF.ajaxPost({
-        url: widget.data("url"),
+        url: updateUrl,
         data: { key: Entities.RuntimeInfo.getFromPrefix(prefix).key() },
     }).then(function (jsonNewCount) {
-            updateCountAndHighlight(widget.parent(), "attended", jsonNewCount.Attended);
-            updateCountAndHighlight(widget.parent(), "alerted", jsonNewCount.Alerted);
-            updateCountAndHighlight(widget.parent(), "future", jsonNewCount.Future);
+            updateCountAndHighlight(widget, "attended", jsonNewCount.Attended);
+            updateCountAndHighlight(widget, "alerted", jsonNewCount.Alerted);
+            updateCountAndHighlight(widget, "future", jsonNewCount.Future);
         });
 }
 
 var highlightClass = "sf-alert-active";
-function updateCountAndHighlight($alertsWidget, key, count) {
+function updateCountAndHighlight($alertsWidget : JQuery, key: string, count : number) {
     var $current = $alertsWidget.find(".sf-alert-" + key);
-    $current.not(".sf-alert-count-label").html(count);
-    if (count > 0) {
-        $current.addClass(highlightClass);
-    }
+    $current.not(".sf-alert-count-label").html(count.toString());
+    $current.toggleClass(highlightClass, count > 0);
 }

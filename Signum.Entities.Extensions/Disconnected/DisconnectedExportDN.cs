@@ -16,7 +16,7 @@ namespace Signum.Entities.Disconnected
         public DateTime CreationDate
         {
             get { return creationDate; }
-            set { Set(ref creationDate, value, () => CreationDate); }
+            set { Set(ref creationDate, value); }
         }
 
         Lite<DisconnectedMachineDN> machine;
@@ -24,7 +24,7 @@ namespace Signum.Entities.Disconnected
         public Lite<DisconnectedMachineDN> Machine
         {
             get { return machine; }
-            set { Set(ref machine, value, () => Machine); }
+            set { Set(ref machine, value); }
         }
 
         int? @lock;
@@ -32,7 +32,7 @@ namespace Signum.Entities.Disconnected
         public int? Lock
         {
             get { return @lock; }
-            set { Set(ref @lock, value, () => Lock); }
+            set { Set(ref @lock, value); }
         }
 
         int? createDatabase;
@@ -40,7 +40,7 @@ namespace Signum.Entities.Disconnected
         public int? CreateDatabase
         {
             get { return createDatabase; }
-            set { Set(ref createDatabase, value, () => CreateDatabase); }
+            set { Set(ref createDatabase, value); }
         }
 
         int? createSchema;
@@ -48,7 +48,7 @@ namespace Signum.Entities.Disconnected
         public int? CreateSchema
         {
             get { return createSchema; }
-            set { Set(ref createSchema, value, () => CreateSchema); }
+            set { Set(ref createSchema, value); }
         }
 
         int? disableForeignKeys;
@@ -56,7 +56,7 @@ namespace Signum.Entities.Disconnected
         public int? DisableForeignKeys
         {
             get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
+            set { Set(ref disableForeignKeys, value); }
         }
 
         [NotNullable]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Disconnected
         public MList<DisconnectedExportTableDN> Copies
         {
             get { return copies; }
-            set { Set(ref copies, value, () => Copies); }
+            set { Set(ref copies, value); }
         }
 
         int? enableForeignKeys;
@@ -72,7 +72,7 @@ namespace Signum.Entities.Disconnected
         public int? EnableForeignKeys
         {
             get { return enableForeignKeys; }
-            set { Set(ref enableForeignKeys, value, () => EnableForeignKeys); }
+            set { Set(ref enableForeignKeys, value); }
         }
 
         int? reseedIds;
@@ -80,7 +80,7 @@ namespace Signum.Entities.Disconnected
         public int? ReseedIds
         {
             get { return reseedIds; }
-            set { Set(ref reseedIds, value, () => ReseedIds); }
+            set { Set(ref reseedIds, value); }
         }
 
         int? backupDatabase;
@@ -88,7 +88,7 @@ namespace Signum.Entities.Disconnected
         public int? BackupDatabase
         {
             get { return backupDatabase; }
-            set { Set(ref backupDatabase, value, () => BackupDatabase); }
+            set { Set(ref backupDatabase, value); }
         }
 
         int? dropDatabase;
@@ -96,7 +96,7 @@ namespace Signum.Entities.Disconnected
         public int? DropDatabase
         {
             get { return dropDatabase; }
-            set { Set(ref dropDatabase, value, () => DropDatabase); }
+            set { Set(ref dropDatabase, value); }
         }
 
         int? total;
@@ -104,21 +104,21 @@ namespace Signum.Entities.Disconnected
         public int? Total
         {
             get { return total; }
-            set { Set(ref total, value, () => Total); }
+            set { Set(ref total, value); }
         }
 
         DisconnectedExportState state;
         public DisconnectedExportState State
         {
             get { return state; }
-            set { Set(ref state, value, () => State); }
+            set { Set(ref state, value); }
         }
 
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
+            set { Set(ref exception, value); }
         }
 
         public double Ratio(DisconnectedExportDN estimation)
@@ -241,7 +241,7 @@ namespace Signum.Entities.Disconnected
         public Lite<TypeDN> Type
         {
             get { return type; }
-            set { Set(ref type, value, () => Type); }
+            set { Set(ref type, value); }
         }
 
         int? copyTable;
@@ -249,14 +249,14 @@ namespace Signum.Entities.Disconnected
         public int? CopyTable
         {
             get { return copyTable; }
-            set { Set(ref copyTable, value, () => CopyTable); }
+            set { Set(ref copyTable, value); }
         }
 
         int? maxIdInRange;
         public int? MaxIdInRange
         {
             get { return maxIdInRange; }
-            set { Set(ref maxIdInRange, value, () => MaxIdInRange); }
+            set { Set(ref maxIdInRange, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -264,14 +264,14 @@ namespace Signum.Entities.Disconnected
         public string Errors
         {
             get { return errors; }
-            set { Set(ref errors, value, () => Errors); }
+            set { Set(ref errors, value); }
         }
 
         int order;
         public int Order
         {
             get { return order; }
-            set { Set(ref order, value, () => Order); }
+            set { Set(ref order, value); }
         }
     }
 }

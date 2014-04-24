@@ -25,7 +25,7 @@
     
     <div class="clearall"></div>
     <div id="sfTemplateLiterals">
-        @using (Html.FieldInline())
+        @using (Html.FormInline())
         {
             @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
             {
@@ -39,12 +39,10 @@
         <input type="button" class="sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
     </div>
     
-    <div class="sf-tabs-repeater sf-sms-template-messages">
         @Html.EntityTabRepeater(tc, e => e.Messages, er =>
         {
             er.PreserveViewData = true;
         })
-    </div>
     
     <script>
     @(new JsFunction(SMSClient.Module, "init", 

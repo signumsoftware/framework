@@ -114,39 +114,38 @@ WriteLiteral("\r\n");
             #line 24 "..\..\AuthAdmin\Views\Types.cshtml"
  using (var tc = Html.TypeContext<TypeRulePack>())
 {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 26 "..\..\AuthAdmin\Views\Types.cshtml"
-Write(Html.EntityLine(tc, f => f.Role));
 
             
             #line default
             #line hidden
-            
-            #line 26 "..\..\AuthAdmin\Views\Types.cshtml"
-                                     
-    
-            
-            #line default
-            #line hidden
+WriteLiteral("    <div");
+
+WriteLiteral(" class=\"form-compact\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("        ");
+
             
             #line 27 "..\..\AuthAdmin\Views\Types.cshtml"
-Write(Html.ValueLine(tc, f => f.Strategy));
+   Write(Html.EntityLine(tc, f => f.Role));
 
             
             #line default
             #line hidden
-            
-            #line 27 "..\..\AuthAdmin\Views\Types.cshtml"
-                                        
+WriteLiteral("\r\n");
 
+WriteLiteral("        ");
+
+            
+            #line 28 "..\..\AuthAdmin\Views\Types.cshtml"
+   Write(Html.ValueLine(tc, f => f.Strategy));
 
             
             #line default
             #line hidden
+WriteLiteral("\r\n    </div>\r\n");
+
 WriteLiteral("    <table");
 
 WriteLiteral(" class=\"sf-auth-rules\"");
@@ -154,7 +153,7 @@ WriteLiteral(" class=\"sf-auth-rules\"");
 WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n                <th>");
 
             
-            #line 32 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 33 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(typeof(TypeDN).NiceName());
 
             
@@ -163,7 +162,7 @@ WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n                <th>")
 WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
-            #line 34 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 35 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(TypeAllowed.Create.NiceToString());
 
             
@@ -172,7 +171,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
-            #line 36 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 37 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(TypeAllowed.Modify.NiceToString());
 
             
@@ -181,7 +180,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
-            #line 38 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 39 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(TypeAllowed.Read.NiceToString());
 
             
@@ -190,7 +189,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
-            #line 40 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 41 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(TypeAllowed.None.NiceToString());
 
             
@@ -199,7 +198,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
-            #line 42 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 43 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(AuthAdminMessage.Overriden.NiceToString());
 
             
@@ -208,13 +207,13 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n");
 
             
-            #line 44 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 45 "..\..\AuthAdmin\Views\Types.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 44 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 45 "..\..\AuthAdmin\Views\Types.cshtml"
                  if (propertyRules)
                 {
 
@@ -224,7 +223,7 @@ WriteLiteral("\r\n                </th>\r\n");
 WriteLiteral("                    <th>");
 
             
-            #line 46 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 47 "..\..\AuthAdmin\Views\Types.cshtml"
                    Write(typeof(PropertyRouteDN).NiceName());
 
             
@@ -233,7 +232,7 @@ WriteLiteral("                    <th>");
 WriteLiteral("\r\n                    </th>\r\n");
 
             
-            #line 48 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 49 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -242,7 +241,7 @@ WriteLiteral("\r\n                    </th>\r\n");
 WriteLiteral("                ");
 
             
-            #line 49 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 50 "..\..\AuthAdmin\Views\Types.cshtml"
                  if (operationRules)
                 {
 
@@ -252,8 +251,8 @@ WriteLiteral("                ");
 WriteLiteral("                    <th>");
 
             
-            #line 51 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(typeof(OperationDN).NiceName());
+            #line 52 "..\..\AuthAdmin\Views\Types.cshtml"
+                   Write(typeof(OperationSymbol).NiceName());
 
             
             #line default
@@ -261,7 +260,7 @@ WriteLiteral("                    <th>");
 WriteLiteral("\r\n                    </th>\r\n");
 
             
-            #line 53 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 54 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -270,7 +269,7 @@ WriteLiteral("\r\n                    </th>\r\n");
 WriteLiteral("                ");
 
             
-            #line 54 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 55 "..\..\AuthAdmin\Views\Types.cshtml"
                  if (queryRules)
                 {
 
@@ -280,7 +279,7 @@ WriteLiteral("                ");
 WriteLiteral("                    <th>");
 
             
-            #line 56 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 57 "..\..\AuthAdmin\Views\Types.cshtml"
                    Write(typeof(QueryDN).NiceName());
 
             
@@ -289,7 +288,7 @@ WriteLiteral("                    <th>");
 WriteLiteral("\r\n                    </th>\r\n");
 
             
-            #line 58 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 59 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -298,13 +297,13 @@ WriteLiteral("\r\n                    </th>\r\n");
 WriteLiteral("            </tr>\r\n        </thead>\r\n");
 
             
-            #line 61 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 62 "..\..\AuthAdmin\Views\Types.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 61 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 62 "..\..\AuthAdmin\Views\Types.cshtml"
          foreach (var iter in tc.TypeElementContext(p => p.Rules).GroupBy(a => a.Value.Resource.Namespace).OrderBy(a => a.Key).Iterate())
         {
 
@@ -321,27 +320,27 @@ WriteLiteral(" class=\"sf-auth-namespace\"");
 
 WriteLiteral("><span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 2558), Tuple.Create("\"", 2640)
-, Tuple.Create(Tuple.Create("", 2566), Tuple.Create("sf-auth-tree", 2566), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2612), Tuple.Create("\"", 2694)
+, Tuple.Create(Tuple.Create("", 2620), Tuple.Create("sf-auth-tree", 2620), true)
             
-            #line 65 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 2578), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded"
+            #line 66 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create(" ", 2632), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded"
             
             #line default
             #line hidden
-, 2579), false)
+, 2633), false)
 );
 
-WriteLiteral(">\r\n                    </span>\r\n                        <img");
+WriteLiteral("></span>\r\n                        <img");
 
-WriteAttribute("src", Tuple.Create(" src=\"", 2701), Tuple.Create("\"", 2755)
+WriteAttribute("src", Tuple.Create(" src=\"", 2733), Tuple.Create("\"", 2787)
             
             #line 67 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 2707), Tuple.Create<System.Object, System.Int32>(Url.Content("~/authAdmin/Images/namespace.png")
+, Tuple.Create(Tuple.Create("", 2739), Tuple.Create<System.Object, System.Int32>(Url.Content("~/authAdmin/Images/namespace.png")
             
             #line default
             #line hidden
-, 2707), false)
+, 2739), false)
 );
 
 WriteLiteral(" />\r\n                        <span");
@@ -387,35 +386,35 @@ WriteLiteral(" ");
 
             
             #line 74 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                          Write(Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName  + "\"") : ""));
+                                                          Write(Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName + "\"") : ""));
 
             
             #line default
             #line hidden
 WriteLiteral(">\r\n                <td>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3270), Tuple.Create("\"", 3340)
-, Tuple.Create(Tuple.Create("", 3278), Tuple.Create("sf-auth-tree", 3278), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 3301), Tuple.Create("\"", 3371)
+, Tuple.Create(Tuple.Create("", 3309), Tuple.Create("sf-auth-tree", 3309), true)
             
             #line 76 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 3290), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
+, Tuple.Create(Tuple.Create(" ", 3321), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
             
             #line default
             #line hidden
-, 3291), false)
+, 3322), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3396), Tuple.Create("\"", 3471)
-, Tuple.Create(Tuple.Create("", 3404), Tuple.Create("sf-auth-tree", 3404), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 3427), Tuple.Create("\"", 3502)
+, Tuple.Create(Tuple.Create("", 3435), Tuple.Create("sf-auth-tree", 3435), true)
             
             #line 78 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 3416), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
+, Tuple.Create(Tuple.Create(" ", 3447), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
             
             #line default
             #line hidden
-, 3417), false)
+, 3448), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n");
@@ -430,43 +429,43 @@ WriteLiteral(">\r\n                    </div>\r\n");
             #line 80 "..\..\AuthAdmin\Views\Types.cshtml"
                      if (!item.Value.AvailableConditions.IsNullOrEmpty())
                     {
+                        
 
             
             #line default
             #line hidden
 WriteLiteral("                        <a");
 
-WriteAttribute("title", Tuple.Create(" title=\"", 3627), Tuple.Create("\"", 3685)
+WriteAttribute("title", Tuple.Create(" title=\"", 3684), Tuple.Create("\"", 3742)
             
-            #line 82 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 3635), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_AddCondition.NiceToString()
+            #line 83 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 3692), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_AddCondition.NiceToString()
             
             #line default
             #line hidden
-, 3635), false)
+, 3692), false)
 );
 
-WriteLiteral(" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf" +
-"-create sf-auth-condition-button\"");
+WriteLiteral(" class=\"sf-line-button sf-create sf-auth-condition-button\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 3800), Tuple.Create("\"", 3908)
+WriteAttribute("style", Tuple.Create(" \r\n                            style=\"", 3801), Tuple.Create("\"", 3939)
             
-            #line 82 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                                                , Tuple.Create(Tuple.Create("", 3808), Tuple.Create<System.Object, System.Int32>(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : ""
+            #line 84 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 3839), Tuple.Create<System.Object, System.Int32>(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : ""
             
             #line default
             #line hidden
-, 3808), false)
+, 3839), false)
 );
 
 WriteLiteral(">\r\n                            <span");
 
-WriteLiteral(" class=\"ui-button-icon-primary ui-icon ui-icon-circle-plus\"");
+WriteLiteral(" class=\"glyphicon glyphicon-plus\"");
 
-WriteLiteral("></span>\r\n                        </a>\r\n");
+WriteLiteral("></span></a>\r\n");
 
             
-            #line 85 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 86 "..\..\AuthAdmin\Views\Types.cshtml"
                         
 
             
@@ -480,20 +479,20 @@ WriteLiteral(" disabled=\"disabled\"");
 
 WriteLiteral(" class=\"sf-auth-available-conditions\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 4171), Tuple.Create("\"", 4303)
+WriteAttribute("value", Tuple.Create(" value=\"", 4150), Tuple.Create("\"", 4255)
             
-            #line 86 "..\..\AuthAdmin\Views\Types.cshtml"
-                             , Tuple.Create(Tuple.Create("", 4179), Tuple.Create<System.Object, System.Int32>(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")
+            #line 87 "..\..\AuthAdmin\Views\Types.cshtml"
+                             , Tuple.Create(Tuple.Create("", 4158), Tuple.Create<System.Object, System.Int32>(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(ac.Key, ac.NiceToString()), ",")
             
             #line default
             #line hidden
-, 4179), false)
+, 4158), false)
 );
 
 WriteLiteral(" />\r\n");
 
             
-            #line 87 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 88 "..\..\AuthAdmin\Views\Types.cshtml"
                     }
 
             
@@ -506,7 +505,7 @@ WriteLiteral(" class=\"sf-auth-label\"");
 WriteLiteral(">");
 
             
-            #line 88 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 89 "..\..\AuthAdmin\Views\Types.cshtml"
                                            Write(item.Value.Resource.ToType().NiceName());
 
             
@@ -517,7 +516,7 @@ WriteLiteral("</span>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 89 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 90 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
 
             
@@ -528,8 +527,8 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 90 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(TypeConditionNameDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";")))));
+            #line 91 "..\..\AuthAdmin\Views\Types.cshtml"
+               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";")))));
 
             
             #line default
@@ -537,13 +536,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </td>\r\n");
 
             
-            #line 92 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 93 "..\..\AuthAdmin\Views\Types.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 92 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 93 "..\..\AuthAdmin\Views\Types.cshtml"
                  using (var fallback = item.SubContext(a => a.Allowed.Fallback))
                 {
 
@@ -559,7 +558,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                            ");
 
             
-            #line 96 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 97 "..\..\AuthAdmin\Views\Types.cshtml"
                        Write(Html.CheckBox(fallback.Compose("Create"), fallback.Value.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } }));
 
             
@@ -576,7 +575,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                            ");
 
             
-            #line 101 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 102 "..\..\AuthAdmin\Views\Types.cshtml"
                        Write(Html.CheckBox(fallback.Compose("Modify"), fallback.Value.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } }));
 
             
@@ -593,7 +592,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                            ");
 
             
-            #line 106 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 107 "..\..\AuthAdmin\Views\Types.cshtml"
                        Write(Html.CheckBox(fallback.Compose("Read"), fallback.Value.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } }));
 
             
@@ -610,7 +609,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                            ");
 
             
-            #line 111 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 112 "..\..\AuthAdmin\Views\Types.cshtml"
                        Write(Html.CheckBox(fallback.Compose("None"), fallback.Value.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } }));
 
             
@@ -619,7 +618,7 @@ WriteLiteral("                            ");
 WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n");
 
             
-            #line 114 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 115 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -634,7 +633,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 116 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 117 "..\..\AuthAdmin\Views\Types.cshtml"
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
             
@@ -643,13 +642,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </td>\r\n");
 
             
-            #line 118 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 119 "..\..\AuthAdmin\Views\Types.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 118 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 119 "..\..\AuthAdmin\Views\Types.cshtml"
                  if (propertyRules)
                 {
 
@@ -663,13 +662,13 @@ WriteLiteral(" class=\"sf-auth-type-only\"");
 WriteLiteral(">\r\n");
 
             
-            #line 121 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 122 "..\..\AuthAdmin\Views\Types.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 121 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 122 "..\..\AuthAdmin\Views\Types.cshtml"
                          if (item.Value.Properties.HasValue)
                         {
 
@@ -684,32 +683,31 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 6819), Tuple.Create("\"", 6923)
+WriteAttribute("href", Tuple.Create(" href=\"", 6744), Tuple.Create("\"", 6848)
             
-            #line 124 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 6826), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite()))
+            #line 125 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 6751), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
-, 6826), false)
+, 6751), false)
 );
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 6968), Tuple.Create("\"", 7041)
-, Tuple.Create(Tuple.Create("", 6976), Tuple.Create("sf-auth-thumb", 6976), true)
-, Tuple.Create(Tuple.Create(" ", 6989), Tuple.Create("sf-auth-", 6990), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 6893), Tuple.Create("\"", 6966)
+, Tuple.Create(Tuple.Create("", 6901), Tuple.Create("sf-auth-thumb", 6901), true)
+, Tuple.Create(Tuple.Create(" ", 6914), Tuple.Create("sf-auth-", 6915), true)
             
-            #line 125 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 6998), Tuple.Create<System.Object, System.Int32>(item.Value.Properties.ToString().ToLower()
+            #line 126 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 6923), Tuple.Create<System.Object, System.Int32>(item.Value.Properties.ToString().ToLower()
             
             #line default
             #line hidden
-, 6998), false)
+, 6923), false)
 );
 
-WriteLiteral(">\r\n                                    </span></a>\r\n                            <" +
-"/div>\r\n");
+WriteLiteral("></span></a>\r\n                            </div>\r\n");
 
             
             #line 128 "..\..\AuthAdmin\Views\Types.cshtml"
@@ -765,35 +763,34 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 7525), Tuple.Create("\"", 7629)
+WriteAttribute("href", Tuple.Create(" href=\"", 7412), Tuple.Create("\"", 7516)
             
             #line 137 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 7532), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite()))
+, Tuple.Create(Tuple.Create("", 7419), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
-, 7532), false)
+, 7419), false)
 );
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 7674), Tuple.Create("\"", 7747)
-, Tuple.Create(Tuple.Create("", 7682), Tuple.Create("sf-auth-thumb", 7682), true)
-, Tuple.Create(Tuple.Create(" ", 7695), Tuple.Create("sf-auth-", 7696), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 7561), Tuple.Create("\"", 7634)
+, Tuple.Create(Tuple.Create("", 7569), Tuple.Create("sf-auth-thumb", 7569), true)
+, Tuple.Create(Tuple.Create(" ", 7582), Tuple.Create("sf-auth-", 7583), true)
             
             #line 138 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 7704), Tuple.Create<System.Object, System.Int32>(item.Value.Operations.ToString().ToLower()
+, Tuple.Create(Tuple.Create("", 7591), Tuple.Create<System.Object, System.Int32>(item.Value.Operations.ToString().ToLower()
             
             #line default
             #line hidden
-, 7704), false)
+, 7591), false)
 );
 
-WriteLiteral(">\r\n                                    </span></a>\r\n                            <" +
-"/div>\r\n");
+WriteLiteral("></span></a>\r\n                            </div>\r\n");
 
             
-            #line 141 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 140 "..\..\AuthAdmin\Views\Types.cshtml"
                         }
 
             
@@ -802,7 +799,7 @@ WriteLiteral(">\r\n                                    </span></a>\r\n          
 WriteLiteral("                    </td>\r\n");
 
             
-            #line 143 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 142 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -811,7 +808,7 @@ WriteLiteral("                    </td>\r\n");
 WriteLiteral("                ");
 
             
-            #line 144 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 143 "..\..\AuthAdmin\Views\Types.cshtml"
                  if (queryRules)
                 {
 
@@ -825,13 +822,13 @@ WriteLiteral(" class=\"sf-auth-type-only\"");
 WriteLiteral(">\r\n");
 
             
-            #line 147 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 146 "..\..\AuthAdmin\Views\Types.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 147 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 146 "..\..\AuthAdmin\Views\Types.cshtml"
                          if (item.Value.Queries.HasValue)
                         {
 
@@ -846,35 +843,35 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 8220), Tuple.Create("\"", 8321)
+WriteAttribute("href", Tuple.Create(" href=\"", 8069), Tuple.Create("\"", 8170)
             
-            #line 150 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 8227), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite()))
+            #line 149 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 8076), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
-, 8227), false)
+, 8076), false)
 );
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 8366), Tuple.Create("\"", 8436)
-, Tuple.Create(Tuple.Create("", 8374), Tuple.Create("sf-auth-thumb", 8374), true)
-, Tuple.Create(Tuple.Create(" ", 8387), Tuple.Create("sf-auth-", 8388), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 8215), Tuple.Create("\"", 8285)
+, Tuple.Create(Tuple.Create("", 8223), Tuple.Create("sf-auth-thumb", 8223), true)
+, Tuple.Create(Tuple.Create(" ", 8236), Tuple.Create("sf-auth-", 8237), true)
             
-            #line 151 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 8396), Tuple.Create<System.Object, System.Int32>(item.Value.Queries.ToString().ToLower()
+            #line 150 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 8245), Tuple.Create<System.Object, System.Int32>(item.Value.Queries.ToString().ToLower()
             
             #line default
             #line hidden
-, 8396), false)
+, 8245), false)
 );
 
 WriteLiteral("></span>\r\n                                </a>\r\n                            </div" +
 ">\r\n");
 
             
-            #line 154 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 153 "..\..\AuthAdmin\Views\Types.cshtml"
                         }
 
             
@@ -883,7 +880,7 @@ WriteLiteral("></span>\r\n                                </a>\r\n              
 WriteLiteral("                    </td>\r\n");
 
             
-            #line 156 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 155 "..\..\AuthAdmin\Views\Types.cshtml"
                 }
 
             
@@ -892,13 +889,13 @@ WriteLiteral("                    </td>\r\n");
 WriteLiteral("            </tr>\r\n");
 
             
-            #line 158 "..\..\AuthAdmin\Views\Types.cshtml"
-                    var conditions = item.Compose("Allowed", "Conditions"); 
-                
-                    foreach (var conditionIter in item.Value.Allowed.Conditions.Select((c, i) => new { Condition = c, Index = i, Prefix =  TypeContextUtilities.Compose(conditions, i.ToString())}).Iterate())
-                    {
-                        var condition = conditionIter.Value.Condition;
-                        var prefix = conditionIter.Value.Prefix;
+            #line 157 "..\..\AuthAdmin\Views\Types.cshtml"
+                var conditions = item.Compose("Allowed", "Conditions");
+
+                foreach (var conditionIter in item.Value.Allowed.Conditions.Select((c, i) => new { Condition = c, Index = i, Prefix = TypeContextUtilities.Compose(conditions, i.ToString()) }).Iterate())
+                {
+                    var condition = conditionIter.Value.Condition;
+                    var prefix = conditionIter.Value.Prefix;
                         
 
             
@@ -911,7 +908,7 @@ WriteLiteral(" class=\"sf-auth-condition\"");
 WriteLiteral(" data-ns=\"");
 
             
-            #line 165 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 164 "..\..\AuthAdmin\Views\Types.cshtml"
                                               Write(iter.Value.Key);
 
             
@@ -922,7 +919,7 @@ WriteLiteral("\"");
 WriteLiteral(" data-type=\"");
 
             
-            #line 165 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 164 "..\..\AuthAdmin\Views\Types.cshtml"
                                                                           Write(item.Value.Resource.ClassName);
 
             
@@ -933,8 +930,8 @@ WriteLiteral("\"");
 WriteLiteral(" data-condition=\"");
 
             
-            #line 165 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                                          Write(TypeConditionNameDN.UniqueKey(condition.ConditionName));
+            #line 164 "..\..\AuthAdmin\Views\Types.cshtml"
+                                                                                                                          Write(condition.TypeCondition.Key);
 
             
             #line default
@@ -944,8 +941,8 @@ WriteLiteral("\"");
 WriteLiteral(" data-index=\"");
 
             
-            #line 165 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                                                                                                               Write(conditionIter.Value.Index);
+            #line 164 "..\..\AuthAdmin\Views\Types.cshtml"
+                                                                                                                                                                    Write(conditionIter.Value.Index);
 
             
             #line default
@@ -954,71 +951,70 @@ WriteLiteral("\"");
 
 WriteLiteral(">\r\n                <td>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9376), Tuple.Create("\"", 9446)
-, Tuple.Create(Tuple.Create("", 9384), Tuple.Create("sf-auth-tree", 9384), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9161), Tuple.Create("\"", 9231)
+, Tuple.Create(Tuple.Create("", 9169), Tuple.Create("sf-auth-tree", 9169), true)
             
-            #line 167 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9396), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
+            #line 166 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create(" ", 9181), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
             
             #line default
             #line hidden
-, 9397), false)
+, 9182), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9502), Tuple.Create("\"", 9573)
-, Tuple.Create(Tuple.Create("", 9510), Tuple.Create("sf-auth-tree", 9510), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9287), Tuple.Create("\"", 9358)
+, Tuple.Create(Tuple.Create("", 9295), Tuple.Create("sf-auth-tree", 9295), true)
             
-            #line 169 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9522), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-blank" : "sf-auth-line"
+            #line 168 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create(" ", 9307), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-blank" : "sf-auth-line"
             
             #line default
             #line hidden
-, 9523), false)
+, 9308), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9629), Tuple.Create("\"", 9712)
-, Tuple.Create(Tuple.Create("", 9637), Tuple.Create("sf-auth-tree", 9637), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9414), Tuple.Create("\"", 9497)
+, Tuple.Create(Tuple.Create("", 9422), Tuple.Create("sf-auth-tree", 9422), true)
             
-            #line 171 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9649), Tuple.Create<System.Object, System.Int32>(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
+            #line 170 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create(" ", 9434), Tuple.Create<System.Object, System.Int32>(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
             
             #line default
             #line hidden
-, 9650), false)
+, 9435), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <a");
 
-WriteLiteral(" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf" +
-"-remove sf-auth-condition-button\"");
+WriteLiteral(" class=\"sf-line-button sf-remove sf-auth-condition-button\"");
 
-WriteAttribute("title", Tuple.Create(" title=\"", 9880), Tuple.Create("\"", 9943)
+WriteAttribute("title", Tuple.Create(" title=\"", 9609), Tuple.Create("\"", 9672)
             
-            #line 173 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                 , Tuple.Create(Tuple.Create("", 9888), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_RemoveCondition.NiceToString()
+            #line 172 "..\..\AuthAdmin\Views\Types.cshtml"
+         , Tuple.Create(Tuple.Create("", 9617), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_RemoveCondition.NiceToString()
             
             #line default
             #line hidden
-, 9888), false)
+, 9617), false)
 );
 
 WriteLiteral(">\r\n                        <span");
 
-WriteLiteral(" class=\"ui-button-icon-primary ui-icon ui-icon-circle-close\"");
+WriteLiteral(" class=\"glyphicon glyphicon-remove\"");
 
-WriteLiteral("></span>\r\n                    </a>\r\n                    <span");
+WriteLiteral("></span></a>\r\n                    <span");
 
 WriteLiteral(" class=\"sf-auth-label\"");
 
 WriteLiteral(">");
 
             
-            #line 176 "..\..\AuthAdmin\Views\Types.cshtml"
-                                           Write(condition.ConditionName.NiceToString());
+            #line 174 "..\..\AuthAdmin\Views\Types.cshtml"
+                                           Write(condition.TypeCondition.NiceToString());
 
             
             #line default
@@ -1028,108 +1024,106 @@ WriteLiteral("</span>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 177 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName)));
+            #line 175 "..\..\AuthAdmin\Views\Types.cshtml"
+               Write(Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), condition.TypeCondition.Key));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </td>\r\n                \r\n");
+WriteLiteral("\r\n                </td>\r\n\r\n");
 
             
-            #line 180 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 178 "..\..\AuthAdmin\Views\Types.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 180 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 178 "..\..\AuthAdmin\Views\Types.cshtml"
                   var allowed = TypeContextUtilities.Compose(prefix, "Allowed");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                \r\n                    <td>\r\n                        <a");
+WriteLiteral("\r\n\r\n                <td>\r\n                    <a");
 
 WriteLiteral(" class=\"sf-auth-chooser sf-auth-create\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                        ");
 
             
-            #line 184 "..\..\AuthAdmin\Views\Types.cshtml"
-                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Create"), condition.Allowed.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } }));
+            #line 182 "..\..\AuthAdmin\Views\Types.cshtml"
+                   Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Create"), condition.Allowed.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
-"d>\r\n                        <a");
+WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
+"            <a");
 
 WriteLiteral(" class=\"sf-auth-chooser sf-auth-modify\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                        ");
 
             
-            #line 189 "..\..\AuthAdmin\Views\Types.cshtml"
-                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Modify"), condition.Allowed.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } }));
+            #line 187 "..\..\AuthAdmin\Views\Types.cshtml"
+                   Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Modify"), condition.Allowed.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
-"d>\r\n                        <a");
+WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
+"            <a");
 
 WriteLiteral(" class=\"sf-auth-chooser sf-auth-read\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                        ");
 
             
-            #line 194 "..\..\AuthAdmin\Views\Types.cshtml"
-                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Read"), condition.Allowed.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } }));
+            #line 192 "..\..\AuthAdmin\Views\Types.cshtml"
+                   Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Read"), condition.Allowed.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
-"d>\r\n                        <a");
+WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
+"            <a");
 
 WriteLiteral(" class=\"sf-auth-chooser sf-auth-none\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                        ");
 
             
-            #line 199 "..\..\AuthAdmin\Views\Types.cshtml"
-                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "None"), condition.Allowed.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } }));
+            #line 197 "..\..\AuthAdmin\Views\Types.cshtml"
+                   Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "None"), condition.Allowed.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                \r\n    " +
-"            <td");
+WriteLiteral("\r\n                    </a>\r\n                </td>\r\n\r\n                <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 11908), Tuple.Create("\"", 11998)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 11435), Tuple.Create("\"", 11525)
             
-            #line 203 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 11918), Tuple.Create<System.Object, System.Int32>(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0)
+            #line 201 "..\..\AuthAdmin\Views\Types.cshtml"
+, Tuple.Create(Tuple.Create("", 11445), Tuple.Create<System.Object, System.Int32>(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0)
             
             #line default
             #line hidden
-, 11918), false)
+, 11445), false)
 );
 
-WriteLiteral(">\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("></td>\r\n            </tr>\r\n");
 
             
-            #line 206 "..\..\AuthAdmin\Views\Types.cshtml"
-                    }
-                
+            #line 203 "..\..\AuthAdmin\Views\Types.cshtml"
+                }
             }
         }
 
@@ -1139,7 +1133,7 @@ WriteLiteral(">\r\n                </td>\r\n            </tr>\r\n");
 WriteLiteral("    </table>\r\n");
 
             
-            #line 211 "..\..\AuthAdmin\Views\Types.cshtml"
+            #line 207 "..\..\AuthAdmin\Views\Types.cshtml"
 }
 
             

@@ -163,7 +163,7 @@ namespace Signum.Engine.Mailing
 
         static object GetDefaultQueryName(Type model)
         {
-            var baseType = model.FollowC(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemEmail<>)));
+            var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemEmail<>)));
 
             if(baseType != null)
             {

@@ -15,7 +15,7 @@ namespace Signum.Entities.Authorization
         public Lite<UserDN> User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { Set(ref user, value); }
         }
 
         DateTime sessionStart;
@@ -23,7 +23,7 @@ namespace Signum.Entities.Authorization
         public DateTime SessionStart
         {
             get { return sessionStart; }
-            set { Set(ref sessionStart, value, () => SessionStart); }
+            set { Set(ref sessionStart, value); }
         }
 
         DateTime? sessionEnd;
@@ -31,14 +31,14 @@ namespace Signum.Entities.Authorization
         public DateTime? SessionEnd
         {
             get { return sessionEnd; }
-            set { Set(ref sessionEnd, value, () => SessionEnd); }
+            set { Set(ref sessionEnd, value); }
         }
 
         bool sessionTimeOut;
         public bool SessionTimeOut
         {
             get { return sessionTimeOut; }
-            set { Set(ref sessionTimeOut, value, () => SessionTimeOut); }
+            set { Set(ref sessionTimeOut, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -47,7 +47,7 @@ namespace Signum.Entities.Authorization
         public string UserHostAddress
         {
             get { return userHostAddress; }
-            set { Set(ref userHostAddress, value, () => UserHostAddress); }
+            set { Set(ref userHostAddress, value); }
         }
 
         [SqlDbType(Size = 300)]
@@ -56,7 +56,7 @@ namespace Signum.Entities.Authorization
         public string UserAgent
         {
             get { return userAgent; }
-            set { Set(ref userAgent, value, () => UserAgent); }
+            set { Set(ref userAgent, value); }
         }
 
         public override string ToString()
@@ -74,8 +74,8 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    public enum SessionLogPermission
-    { 
-        TrackSession
+    public static class SessionLogPermission
+    {
+        public static readonly PermissionSymbol TrackSession = new PermissionSymbol();
     }
 }

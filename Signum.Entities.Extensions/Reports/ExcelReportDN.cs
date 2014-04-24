@@ -19,7 +19,7 @@ namespace Signum.Entities.Reports
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
   
         [NotNullable]
@@ -28,7 +28,7 @@ namespace Signum.Entities.Reports
         public string DisplayName
         {
             get { return displayName; }
-            set { SetToStr(ref displayName, value, () => DisplayName); }
+            set { SetToStr(ref displayName, value); }
         }
 
         [NotNullable]
@@ -37,7 +37,7 @@ namespace Signum.Entities.Reports
         public EmbeddedFileDN File
         {
             get { return file; }
-            set { Set(ref file, value, () => File); }
+            set { Set(ref file, value); }
         }
 
         static readonly Expression<Func<ExcelReportDN, string>> ToStringExpression = e => e.displayName;
@@ -47,10 +47,10 @@ namespace Signum.Entities.Reports
         }
     }
 
-    public enum ExcelReportOperation
-    { 
-        Save,
-        Delete
+    public static class ExcelReportOperation
+    {
+        public static readonly ExecuteSymbol<ExcelReportDN> Save = OperationSymbol.Execute<ExcelReportDN>();
+        public static readonly DeleteSymbol<ExcelReportDN> Delete = OperationSymbol.Delete<ExcelReportDN>();
     }
 
     public enum ExcelMessage

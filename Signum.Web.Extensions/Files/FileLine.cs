@@ -35,7 +35,7 @@ namespace Signum.Web.Files
 
     public class FileLine : EntityBase
     {
-        public Enum FileType { get; set; }
+        public FileTypeSymbol FileType { get; set; }
 
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
@@ -75,7 +75,16 @@ namespace Signum.Web.Files
                 result.Add("uploadDroppedUrl", UploadDroppedUrl);
             if (!DragAndDrop)
                 result.Add("dragAndDrop", false);
-            result.Add("download", (int)Download); 
+            result.Add("download", (int)Download);
+
+            if (this.Type.CleanType() == typeof(FilePathDN) && !this.ReadOnly)
+            {
+                if (FileType == null)
+                    throw new ArgumentException("FileType is mandatory for FilePathDN (FileLine {0})".Formato(Prefix));
+
+                result.Add("fileType", FileType.Key);
+            }       
+
             return result;
         }
 

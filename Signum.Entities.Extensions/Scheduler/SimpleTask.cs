@@ -7,12 +7,20 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class SimpleTaskDN : MultiEnumDN, ITaskDN
+    public class SimpleTaskSymbol : Symbol, ITaskDN
     {
-        
+        private SimpleTaskSymbol() { } 
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public SimpleTaskSymbol([CallerMemberName]string memberName = null) :
+            base(new StackFrame(1, false), memberName)
+        {
+        }
     }
 }

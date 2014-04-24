@@ -33,7 +33,7 @@ namespace Signum.Web.Auth
         public string Password
         {
             get { return password; }
-            set { Set(ref password, value, () => Password); }
+            set { Set(ref password, value); }
         }
     }
 }

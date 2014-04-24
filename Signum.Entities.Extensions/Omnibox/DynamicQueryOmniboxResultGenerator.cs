@@ -439,7 +439,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string token = QueryToken.FollowC(q => q.Parent).Reverse().Skip(SubordinatedEntity ? 1 : 0).Select(a => a.ToString().ToOmniboxPascal()).ToString(".");
+            string token = QueryToken.Follow(q => q.Parent).Reverse().Skip(SubordinatedEntity ? 1 : 0).Select(a => a.ToString().ToOmniboxPascal()).ToString(".");
 
             if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;

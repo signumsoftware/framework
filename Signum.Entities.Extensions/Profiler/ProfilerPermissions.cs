@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ServiceModel;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Profiler
 {
-    public enum ProfilerPermission
+    public static class ProfilerPermission
     {
-        ViewTimeTracker,
-        ViewHeavyProfiler, 
-        OverrideSessionTimeout
+        public static readonly PermissionSymbol ViewTimeTracker = new PermissionSymbol();
+        public static readonly PermissionSymbol ViewHeavyProfiler = new PermissionSymbol();
+        public static readonly PermissionSymbol OverrideSessionTimeout = new PermissionSymbol();
     }
 }

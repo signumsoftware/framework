@@ -29,7 +29,7 @@ namespace Signum.Engine.Notes
             return NotesExpression.Evaluate(ident);
         }
 
-        static HashSet<Enum> SystemNoteTypes = new HashSet<Enum>();
+        static HashSet<NoteTypeDN> SystemNoteTypes = new HashSet<NoteTypeDN>();
         static bool started = false;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
@@ -72,7 +72,7 @@ namespace Signum.Engine.Notes
                         t.Key,
                     });
 
-                MultiOptionalEnumLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
+                SemiSymbolLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
 
                 new Graph<NoteTypeDN>.Execute(NoteTypeOperation.Save)
                 {
@@ -92,18 +92,16 @@ namespace Signum.Engine.Notes
             }
         }
 
-        public static void RegisterNoteType(Enum noteType)
+        public static void RegisterNoteType(NoteTypeDN noteType)
         {
+            if (!noteType.Key.HasText())
+                throw new InvalidOperationException("noteType must have a key, use MakeSymbol method after the constructor when declaring it");
+
             SystemNoteTypes.Add(noteType);
         }
 
-        public static NoteTypeDN GetAlertType(Enum noteType)
-        {
-            return MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType);
-        }
 
-
-        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, Enum noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, NoteTypeDN noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -114,7 +112,7 @@ namespace Signum.Engine.Notes
                 Text = text,
                 Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
-                NoteType = MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType)
+                NoteType = noteType
             }.Execute(NoteOperation.Save);
         }
     }

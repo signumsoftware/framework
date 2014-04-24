@@ -74,7 +74,7 @@ namespace Signum.Windows.Chart
                 {
                     MessageBox.Show(Window.GetWindow(elem),
                         ChartMessage._0CanOnlyBeCreatedFromTheChartWindow.NiceToString().Formato(typeof(UserChartDN).NicePluralName()),
-                        ChartMessage.UserChart_CreateNew.NiceToString(),
+                        ChartMessage.CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
                 }); 

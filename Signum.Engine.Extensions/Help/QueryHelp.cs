@@ -63,7 +63,7 @@ namespace Signum.Engine.Help
             if (!queryName.Equals(this.Key))
                 throw new InvalidOperationException("QueryName should be {0} instead of {1}".Formato(QueryUtils.GetQueryUniqueKey(this.Key), QueryUtils.GetQueryUniqueKey(queryName))); 
 
-            this.UserDescription = element.Element(_Description).TryCC(d => d.Value); 
+            this.UserDescription = element.Element(_Description).Try(d => d.Value); 
             
             var cs = element.Element(_Columns);
             if(cs != null)
@@ -83,7 +83,7 @@ namespace Signum.Engine.Help
             if (document.Root.Name != _Query)
                 throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Query));
 
-            var result = document.Root.Attribute(_Key).TryCC(a => a.Value);
+            var result = document.Root.Attribute(_Key).Try(a => a.Value);
 
             if (string.IsNullOrEmpty(result))
                 throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _Key));
@@ -146,7 +146,7 @@ namespace Signum.Engine.Help
 
             bool changed = false;
             HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)),
-              (qc, element) => qc.UserDescription = syncContent(element.Element(_Description).TryCC(a => a.Value)),
+              (qc, element) => qc.UserDescription = syncContent(element.Element(_Description).Try(a => a.Value)),
               (action, column) =>
               {
                   if (!changed)
@@ -157,7 +157,7 @@ namespace Signum.Engine.Help
                   Console.WriteLine("  Column {0}: {1}".Formato(action, column));
               });
 
-            created.UserDescription = syncContent(loadedQuery.Element(_Description).TryCC(a => a.Value));
+            created.UserDescription = syncContent(loadedQuery.Element(_Description).Try(a => a.Value));
 
             if (fileName != created.FileName)
             {

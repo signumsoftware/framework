@@ -53,7 +53,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationDN).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationSymbol).NiceName(), Role);
             DataContext = Server.Return((IOperationAuthServer s) => s.GetOperationRules(Role, Type));
         }
 

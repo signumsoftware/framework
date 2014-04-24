@@ -28,7 +28,7 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ProcessAlgorithmDN> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessAlgorithmSymbol> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
                 Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
                 Navigator.AddSetting(new EntitySettings<UserProcessSessionDN> { View = e => new UserProcessSession(), Icon = ImageLoader.GetImageSortName("user.png") });
 
@@ -72,7 +72,7 @@ namespace Signum.Windows.Processes
             var result = (from t in sc.Implementations.Types
                           from oi in OperationClient.Manager.OperationInfos(t)
                           where oi.IsEntityOperation
-                          group new { t, oi } by oi.Key into g
+                          group new { t, oi } by oi.OperationSymbol into g
                           let oi = g.First().oi
                           let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
                           let coc = new ContextualOperationContext
@@ -80,8 +80,8 @@ namespace Signum.Windows.Processes
                               Entities = sc.SelectedItems,
                               SearchControl = sc,
                               OperationInfo = oi,
-                              OperationSettings = os.TryCC(a => a.ContextualFromMany),
-                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
+                              OperationSettings = os.Try(a => a.ContextualFromMany),
+                              CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t))),
                           }
                           where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                               os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.Click == null || os.ContextualFromMany.Click != null)) :
@@ -93,14 +93,14 @@ namespace Signum.Windows.Processes
 
             var cleanKeys = result
                 .Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
-                .Select(cod => cod.OperationInfo.Key).ToList();
+                .Select(cod => cod.OperationInfo.OperationSymbol).ToList();
 
             if (cleanKeys.Any())
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetContextualCanExecute(sc.SelectedItems, cleanKeys));
+                Dictionary<OperationSymbol, string> canExecutes = Server.Return((IOperationServer os) => os.GetContextualCanExecute(sc.SelectedItems, cleanKeys));
                 foreach (var cod in result)
                 {
-                    var ce = canExecutes.TryGetC(cod.OperationInfo.Key);
+                    var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);
                     if (ce.HasText())
                         cod.CanExecute = ce;
                 }

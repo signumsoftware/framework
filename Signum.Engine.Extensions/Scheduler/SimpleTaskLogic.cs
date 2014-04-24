@@ -20,24 +20,23 @@ namespace Signum.Engine.Scheduler
 {
     public static class SimpleTaskLogic
     {
-        static Dictionary<Enum, Func<Lite<IIdentifiable>>> tasks = new Dictionary<Enum, Func<Lite<IIdentifiable>>>();
+        static Dictionary<SimpleTaskSymbol, Func<Lite<IIdentifiable>>> tasks = new Dictionary<SimpleTaskSymbol, Func<Lite<IIdentifiable>>>();
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                MultiEnumLogic<SimpleTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
+                SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
 
-                SchedulerLogic.ExecuteTask.Register((SimpleTaskDN ct) =>
+                SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st) =>
                 {
-                    Enum enumValue = MultiEnumLogic<SimpleTaskDN>.ToEnum(ct.Key);
-                    Func<Lite<IIdentifiable>> func = tasks.GetOrThrow(enumValue);
+                    Func<Lite<IIdentifiable>> func = tasks.GetOrThrow(st);
                     return func();
                 });
 
 
-                dqm.RegisterQuery(typeof(SimpleTaskDN), ()=>
-                      from ct in Database.Query<SimpleTaskDN>()
+                dqm.RegisterQuery(typeof(SimpleTaskSymbol), ()=>
+                      from ct in Database.Query<SimpleTaskSymbol>()
                        select new
                        {
                            Entity = ct,
@@ -47,15 +46,15 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void Register(Enum key, Func<Lite<IIdentifiable>> action)
+        public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<Lite<IIdentifiable>> action)
         {
-            if (key == null)
-                throw new ArgumentNullException("taskKey");
+            if (simpleTaskSymbol == null)
+                throw new ArgumentNullException("simpleTaskSymbol");
 
             if (action == null)
                 throw new ArgumentNullException("actionKey");
 
-            tasks.Add(key, action); 
+            tasks.Add(simpleTaskSymbol, action); 
         }      
     }
 }

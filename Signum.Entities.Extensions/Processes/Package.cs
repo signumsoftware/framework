@@ -18,7 +18,7 @@ namespace Signum.Entities.Processes
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -26,7 +26,7 @@ namespace Signum.Entities.Processes
         public string OperationArguments
         {
             get { return operationArguments; }
-            private set { Set(ref operationArguments, value, () => OperationArguments); }
+            private set { Set(ref operationArguments, value); }
         }
 
         [HiddenProperty]
@@ -45,11 +45,11 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageOperationDN : PackageDN
     {
-        OperationDN operation;
-        public OperationDN Operation
+        OperationSymbol operation;
+        public OperationSymbol Operation
         {
             get { return operation; }
-            set { SetToStr(ref operation, value, () => Operation); }
+            set { SetToStr(ref operation, value); }
         }
 
         public override string ToString()
@@ -58,9 +58,9 @@ namespace Signum.Entities.Processes
         }
     }
 
-    public enum PackageOperationProcess
+    public static class PackageOperationProcess
     {
-        PackageOperation
+        public static readonly ProcessAlgorithmSymbol PackageOperation = new ProcessAlgorithmSymbol();
     }
 
 
@@ -73,7 +73,7 @@ namespace Signum.Entities.Processes
         public Lite<PackageDN> Package
         {
             get { return package; }
-            set { Set(ref package, value, () => Package); }
+            set { Set(ref package, value); }
         }
 
         [NotNullable, ImplementedByAll]
@@ -82,7 +82,7 @@ namespace Signum.Entities.Processes
         public IdentifiableEntity Target
         {
             get { return target; }
-            set { Set(ref target, value, () => Target); }
+            set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
@@ -90,14 +90,14 @@ namespace Signum.Entities.Processes
         public Lite<IdentifiableEntity> Result //ConstructFrom only!
         {
             get { return result; }
-            set { Set(ref result, value, () => Result); }
+            set { Set(ref result, value); }
         }
 
         DateTime? finishTime;
         public DateTime? FinishTime
         {
             get { return finishTime; }
-            set { Set(ref finishTime, value, () => FinishTime); }
+            set { Set(ref finishTime, value); }
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
 using System.Reflection;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Translation
 {
@@ -27,21 +28,21 @@ namespace Signum.Entities.Translation
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         string nativeName;
         public string NativeName
         {
             get { return nativeName; }
-            private set { Set(ref nativeName, value, () => NativeName); }
+            private set { Set(ref nativeName, value); }
         }
 
         string englishName;
         public string EnglishName
         {
             get { return englishName; }
-            private set { Set(ref englishName, value, () => EnglishName); }
+            private set { Set(ref englishName, value); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -83,14 +84,14 @@ namespace Signum.Entities.Translation
         }
     }
 
-    public enum CultureInfoOperation
+    public static class CultureInfoOperation
     {
-        Save
+        public static readonly ExecuteSymbol<CultureInfoDN> Save = OperationSymbol.Execute<CultureInfoDN>();
     }
 
-    public enum TranslationPermission
+    public static class TranslationPermission
     {
-        TranslateCode,
-        TranslateInstances
+        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
+        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
     }
 }

@@ -12,48 +12,73 @@ namespace Signum.Web.Selenium
     {
         RuntimeInfoProxy RuntimeInfo();
 
-        string ButtonLocator(string buttonId);
+        string ContainerLocator();
+    }
+
+    public interface IEntityButtonContainer<T> : IEntityButtonContainer
+    {
+
     }
 
     public static class EntityButtonContainerExtensions
     {
-        public static string OperationLocator(this IEntityButtonContainer container, Enum operationKey)
+        public static string ButtonLocator(this IEntityButtonContainer container, string buttonId)
         {
-            return container.ButtonLocator(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ContainerLocator() + " #" + buttonId;
         }
 
-        public static bool OperationEnabled(this IEntityButtonContainer container, Enum operationKey)
+        public static string OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+            where T:IdentifiableEntity
         {
-            return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ButtonLocator(symbol.Operation.KeyWeb());
         }
 
-        public static bool OperationDisabled(this IEntityButtonContainer container, Enum operationKey)
+        public static string KeyWeb(this OperationSymbol operationSymbol)
         {
-            return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return operationSymbol.Key.Replace('.', '_');
         }
 
         public static bool ButtonEnabled(this IEntityButtonContainer container, string idButton)
         {
             string locator = container.ButtonLocator(idButton);
 
-            return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
+            return container.Selenium.IsElementPresent(locator + ":not([disabled])");
+        }
+
+        public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+            where T : IdentifiableEntity
+        {
+            return container.ButtonEnabled(symbol.Operation.KeyWeb());
         }
 
         public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
         {
             string locator = container.ButtonLocator(idButton);
 
-            return container.Selenium.IsElementPresent(locator + ".sf-disabled");
+            return container.Selenium.IsElementPresent(locator + "[disabled]");
         }
 
-        public static void OperationClick(this IEntityButtonContainer container, Enum operationKey)
+        public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            return container.ButtonDisabled(symbol.Operation.KeyWeb());
         }
 
-        public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
+        public static void ButtonClick(this IEntityButtonContainer container, string idButton)
         {
-            container.WaitReload(() => container.OperationClick(operationKey));
+            container.Selenium.Click(container.ButtonLocator(idButton) + ":not([disabled])");
+        }
+
+        public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+              where T : IdentifiableEntity
+        {
+            container.ButtonClick(symbol.Operation.KeyWeb());
+        }
+
+        public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
+            where T : IdentifiableEntity
+        {
+            container.WaitReload(() => container.OperationClick(symbol));
         }
 
         public static void WaitReload(this IEntityButtonContainer container, Action action)
@@ -63,15 +88,17 @@ namespace Signum.Web.Selenium
             container.Selenium.Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        public static void ExecuteSubmit<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.OperationClick(operationKey);
+            container.OperationClick(symbol);
             container.Selenium.WaitForPageToLoad();
         }
 
-        public static SearchPageProxy DeleteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol)
+              where T : IdentifiableEntity
         {
-            container.ExecuteSubmit(operationKey);
+            container.OperationClick(symbol);
             container.Selenium.ConsumeConfirmation();
 
             container.Selenium.WaitForPageToLoad(); 
@@ -79,71 +106,61 @@ namespace Signum.Web.Selenium
             return new SearchPageProxy(container.Selenium);
         }
 
-        public static void ButtonClick(this IEntityButtonContainer container, string idButton)
+        public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
         {
-            container.Selenium.Click(container.ButtonLocator(idButton) + ":not(.sf-disabled)");
-        }
-
-        public static string MenuOptionLocator(this IEntityButtonContainer container, string menuId, string optionId)
-        {
-            return "jq={0} #{1}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-entity-button#{2}".Formato(container.Prefix, menuId, optionId);
-        }
-
-        public static void ConstructFrom(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors")
-        {
-            if (group.HasText())
-                container.MenuOption(group, operationKey.GetType().Name + "_" + operationKey.ToString());
-            else
-                container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
-        }
-
-        public static NormalPage<T> ConstructFromNormalPageSaved<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T: IdentifiableEntity
-        {
-            container.ConstructFrom(operationKey, group);
+            container.OperationClick(symbol);
 
             container.Selenium.WaitForPageToLoad();
 
             return new NormalPage<T>(container.Selenium, null);
         }
 
-        public static NormalPage<T> ConstructFromNormalPageNew<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T : IdentifiableEntity
+        public static NormalPage<T> ConstructFromNormalPageNew<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol) 
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
         {
-            container.ConstructFrom(operationKey, group);
+            container.OperationClick(symbol);
 
             container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
 
             return new NormalPage<T>(container.Selenium, null);
         }
 
-        public static PopupControl<T> ConstructFromPopup<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T : ModifiableEntity
+        public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
+            where T : IdentifiableEntity
         {
-            container.ConstructFrom(operationKey, group); 
+            container.ButtonClick(symbol.Operation.KeyWeb());
 
-            var popup = new PopupControl<T>(container.Selenium, "New");
+            container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
+
+            return new NormalPage<T>(container.Selenium, null);
+        }
+
+        public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, string prefix = "New")
+            where T : ModifiableEntity
+        {
+            container.ButtonClick(symbol.Operation.KeyWeb());
+
+            var popup = new PopupControl<T>(container.Selenium, prefix);
 
             container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
 
             return popup;
         }
 
-        public static void MenuOption(this IEntityButtonContainer container, string menuId, string optionId)
+        public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+            where T : IdentifiableEntity
+            where F : IdentifiableEntity
         {
-            container.Selenium.Click(container.MenuOptionLocator(menuId, optionId));
-        }
+            container.OperationClick(symbol);
 
-        public static bool ConstructFromEnabled(this IEntityButtonContainer container, Enum constructFromKey)
-        {
-            return container.MenuOptionEnabled("tmConstructors", constructFromKey.GetType().Name + "_" + constructFromKey.ToString());
-        }
+            var popup = new PopupControl<T>(container.Selenium, "New");
 
-        public static bool MenuOptionEnabled(this IEntityButtonContainer container, string menuId, string optionId)
-        {
-            string locator = container.MenuOptionLocator(menuId, optionId);
+            container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
 
-            if (!container.Selenium.IsElementPresent(locator))
-                throw new InvalidOperationException("{0} not found on {1}".Formato(optionId, menuId));
-
-            return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
+            return popup;
         }
 
         public static bool HasChanges(this IEntityButtonContainer container)

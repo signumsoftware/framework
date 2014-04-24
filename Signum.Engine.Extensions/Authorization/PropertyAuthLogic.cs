@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
 
-                    string replacementKey = typeof(OperationDN).Name;
+                    string replacementKey = typeof(OperationSymbol).Name;
 
                     var groups =  x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
                         .AgGroupToDictionary(a=>a.Type, gr=>gr.Select(pp=> pp.Property).ToHashSet());

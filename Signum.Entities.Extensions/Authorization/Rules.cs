@@ -18,7 +18,7 @@ namespace Signum.Entities.Authorization
         public Lite<RoleDN> Role
         {
             get { return role; }
-            set { Set(ref role, value, () => Role); }
+            set { Set(ref role, value); }
         }
 
         [NotNullable]
@@ -27,14 +27,14 @@ namespace Signum.Entities.Authorization
         public R Resource
         {
             get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
+            set { Set(ref resource, value); }
         }
 
         A allowed;
         public A Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
+            set { Set(ref allowed, value); }
         }
 
         public override string ToString()
@@ -52,10 +52,10 @@ namespace Signum.Entities.Authorization
     public class RuleQueryDN : RuleDN<QueryDN, bool> { }
 
     [Serializable]
-    public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
+    public class RulePermissionDN : RuleDN<PermissionSymbol, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
+    public class RuleOperationDN : RuleDN<OperationSymbol, OperationAllowed> { }
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
@@ -68,7 +68,7 @@ namespace Signum.Entities.Authorization
         public MList<RuleTypeConditionDN> Conditions
         {
             get { return conditions; }
-            set { Set(ref conditions, value, () => Conditions); }
+            set { Set(ref conditions, value); }
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -89,12 +89,12 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN>
     {
-        TypeConditionNameDN condition;
+        TypeConditionSymbol condition;
         [NotNullValidator]
-        public TypeConditionNameDN Condition
+        public TypeConditionSymbol Condition
         {
             get { return condition; }
-            set { Set(ref condition, value, () => Condition); }
+            set { Set(ref condition, value); }
         }
 
 
@@ -102,14 +102,14 @@ namespace Signum.Entities.Authorization
         public TypeAllowed Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
+            set { Set(ref allowed, value); }
         }
 
         int order;
         public int Order
         {
             get { return order; }
-            set { Set(ref order, value, () => Order); }
+            set { Set(ref order, value); }
         }
 
         public bool Equals(RuleTypeConditionDN other)

@@ -16,13 +16,13 @@ using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
-    public enum EmailTemplateOperation
+    public static class EmailTemplateOperation
     {
-        CreateEmailTemplateFromSystemEmail,
-        Create,
-        Save,
-        Enable,
-        Disable
+        public static readonly ConstructSymbol<EmailTemplateDN>.From<SystemEmailDN> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateDN>.From<SystemEmailDN>();
+        public static readonly ConstructSymbol<EmailTemplateDN>.Simple Create = OperationSymbol.Construct<EmailTemplateDN>.Simple();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Save = OperationSymbol.Execute<EmailTemplateDN>();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Enable = OperationSymbol.Execute<EmailTemplateDN>();
+        public static readonly ExecuteSymbol<EmailTemplateDN> Disable = OperationSymbol.Execute<EmailTemplateDN>();
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
@@ -44,21 +44,21 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            set { SetToStr(ref name, value); }
         }
 
         bool editableMessage = true;
         public bool EditableMessage
         {
             get { return editableMessage; }
-            set { Set(ref editableMessage, value, () => EditableMessage); }
+            set { Set(ref editableMessage, value); }
         }
 
         bool disableAuthorization;
         public bool DisableAuthorization
         {
             get { return disableAuthorization; }
-            set { Set(ref disableAuthorization, value, () => DisableAuthorization); }
+            set { Set(ref disableAuthorization, value); }
         }
 
         [NotNullable]
@@ -67,28 +67,28 @@ namespace Signum.Entities.Mailing
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, () => Query); }
+            set { Set(ref query, value); }
         }
 
         SystemEmailDN systemEmail;
         public SystemEmailDN SystemEmail
         {
             get { return systemEmail; }
-            set { Set(ref systemEmail, value, () => SystemEmail); }
+            set { Set(ref systemEmail, value); }
         }
 
         bool sendDifferentMessages;
         public bool SendDifferentMessages
         {
             get { return sendDifferentMessages; }
-            set { Set(ref sendDifferentMessages, value, () => SendDifferentMessages); }
+            set { Set(ref sendDifferentMessages, value); }
         }
 
         EmailTemplateContactDN from;
         public EmailTemplateContactDN From
         {
             get { return from; }
-            set { Set(ref from, value, () => From); }
+            set { Set(ref from, value); }
         }
 
         [NotNullable]
@@ -97,7 +97,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateRecipientDN> Recipients
         {
             get { return recipients; }
-            set { Set(ref recipients, value, () => Recipients); }
+            set { Set(ref recipients, value); }
         }
 
        
@@ -105,21 +105,21 @@ namespace Signum.Entities.Mailing
         public Lite<EmailMasterTemplateDN> MasterTemplate
         {
             get { return masterTemplate; }
-            set { Set(ref masterTemplate, value, () => MasterTemplate); }
+            set { Set(ref masterTemplate, value); }
         }
 
         Lite<SmtpConfigurationDN> smtpConfiguration;
         public Lite<SmtpConfigurationDN> SmtpConfiguration
         {
             get { return smtpConfiguration; }
-            set { Set(ref smtpConfiguration, value, () => SmtpConfiguration); }
+            set { Set(ref smtpConfiguration, value); }
         }
 
         bool isBodyHtml = true;
         public bool IsBodyHtml
         {
             get { return isBodyHtml; }
-            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
+            set { Set(ref isBodyHtml, value); }
         }
 
         [NotifyCollectionChanged]
@@ -127,14 +127,14 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateMessageDN> Messages
         {
             get { return messages; }
-            set { Set(ref messages, value, () => Messages); }
+            set { Set(ref messages, value); }
         }
 
         bool active;
         public bool Active
         {
             get { return active; }
-            set { Set(ref active, value, () => Active); }
+            set { Set(ref active, value); }
         }
 
         DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
@@ -142,7 +142,7 @@ namespace Signum.Entities.Mailing
         public DateTime StartDate
         {
             get { return startDate; }
-            set { Set(ref startDate, value, () => StartDate); }
+            set { Set(ref startDate, value); }
         }
 
         DateTime? endDate;
@@ -150,7 +150,7 @@ namespace Signum.Entities.Mailing
         public DateTime? EndDate
         {
             get { return endDate; }
-            set { Set(ref endDate, value, () => EndDate); }
+            set { Set(ref endDate, value); }
         }
 
         static Expression<Func<EmailTemplateDN, bool>> IsActiveNowExpression =
@@ -223,21 +223,21 @@ namespace Signum.Entities.Mailing
         public QueryTokenDN Token
         {
             get { return token; }
-            set { Set(ref token, value, () => Token); }
+            set { Set(ref token, value); }
         }
 
         string emailAddress;
         public string EmailAddress
         {
             get { return emailAddress; }
-            set { Set(ref emailAddress, value, () => EmailAddress); }
+            set { Set(ref emailAddress, value); }
         }
 
         string displayName;
         public string DisplayName
         {
             get { return displayName; }
-            set { Set(ref displayName, value, () => DisplayName); }
+            set { Set(ref displayName, value); }
         }
 
         public override string ToString()
@@ -261,7 +261,7 @@ namespace Signum.Entities.Mailing
         public EmailRecipientKind Kind
         {
             get { return kind; }
-            set { Set(ref kind, value, () => Kind); }
+            set { Set(ref kind, value); }
         }
 
         public override string ToString()
@@ -294,7 +294,7 @@ namespace Signum.Entities.Mailing
         public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
+            set { Set(ref cultureInfo, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -305,7 +305,7 @@ namespace Signum.Entities.Mailing
             get { return text; }
             set
             {
-                if (Set(ref text, value, () => Text))
+                if (Set(ref text, value))
                     TextParsedNode = null;
             }
         }
@@ -321,7 +321,7 @@ namespace Signum.Entities.Mailing
             get { return subject; }
             set
             {
-                if (Set(ref subject, value, () => Subject))
+                if (Set(ref subject, value))
                     SubjectParsedNode = null;
             }
         }

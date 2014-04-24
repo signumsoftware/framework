@@ -71,6 +71,17 @@ namespace Signum.Web.Selenium
             throw new InvalidOperationException("Implement this method returing something like: http://localhost/MyApp/ + url");
         }
 
+      
+        public SearchPageProxy SearchPage(object queryName)
+        {
+            var url = Url(FindRoute(queryName));
+
+            selenium.Open(url);
+            selenium.WaitForPageToLoad();
+
+            return new SearchPageProxy(selenium);
+        }
+
         protected virtual string FindRoute(object queryName)
         {
             return "Find/" + GetWebQueryName(queryName);
@@ -86,17 +97,35 @@ namespace Signum.Web.Selenium
             return queryName.ToString();
         }
 
-        public SearchPageProxy SearchPage(object queryName, Action<string> checkLogin = null)
-        {
-            var url = Url(FindRoute(queryName));
 
+        public NormalPage<T> NormalPage<T>(int id) where T : IdentifiableEntity
+        {
+            return NormalPage<T>(Lite.Create<T>(id));
+        }
+
+        public NormalPage<T> NormalPage<T>() where T : IdentifiableEntity
+        {
+            var url = Url(NavigateRoute(typeof(T), null));
+
+            return NormalPageUrl<T>(url);
+        }
+
+        public NormalPage<T> NormalPage<T>(Lite<T> lite) where T : IdentifiableEntity
+        {
+            if(lite != null && lite.EntityType != typeof(T))
+                throw new InvalidOperationException("Use NormalPage<{0}> instead".Formato(lite.EntityType.Name));
+            
+            var url = Url(NavigateRoute(lite));
+
+            return NormalPageUrl<T>(url);
+        }
+
+        public NormalPage<T> NormalPageUrl<T>(string url) where T : IdentifiableEntity
+        {
             selenium.Open(url);
             selenium.WaitForPageToLoad();
 
-            if (checkLogin != null)
-                checkLogin(url);
-
-            return new SearchPageProxy(selenium);
+            return new NormalPage<T>(selenium, null);
         }
 
         protected virtual string NavigateRoute(Type type, int? id)
@@ -114,37 +143,45 @@ namespace Signum.Web.Selenium
             return NavigateRoute(lite.EntityType, lite.IdOrNull);
         }
 
-        public NormalPage<T> NormalPage<T>(int id, Action<string> checkLogin = null) where T : IdentifiableEntity
+
+        public virtual string GetCurrentUser()
         {
-            return NormalPage<T>(Lite.Create<T>(id), checkLogin);
+            if (selenium.IsElementPresent("jq=.sf-login:visible"))
+                return null;
+
+            if (!selenium.IsElementPresent("jq=.sf-logout:visible"))
+                throw new InvalidOperationException("No login or logout button found");
+
+            var result = selenium.GetEval("window.$('.sf-logout').attr('data-user')");
+
+            return result;
         }
 
-        public NormalPage<T> NormalPage<T>(Action<string> checkLogin = null) where T : IdentifiableEntity
+        public virtual void Logout()
         {
-            var url = Url(NavigateRoute(typeof(T), null));
-
-            return NormalPageUrl<T>(url, checkLogin);
+            selenium.Click("jq=.sf-logout:visible");
+            selenium.WaitForPageToLoad();
+            selenium.Open(Url("Auth/Login"));
+            selenium.WaitForPageToLoad();
         }
 
-        public NormalPage<T> NormalPage<T>(Lite<T> lite, Action<string> checkLogin = null) where T : IdentifiableEntity
+        public virtual void Login(string username, string password)
         {
-            if(lite != null && lite.EntityType != typeof(T))
-                throw new InvalidOperationException("Use NormalPage<{0}> instead".Formato(lite.EntityType.Name));
-            
-            var url = Url(NavigateRoute(lite));
-
-            return NormalPageUrl<T>(url, checkLogin);
-        }
-
-        public NormalPage<T> NormalPageUrl<T>(string url, Action<string> checkLogin) where T : IdentifiableEntity
-        {
-            selenium.Open(url);
+            selenium.Open(Url("Auth/Login"));
             selenium.WaitForPageToLoad();
 
-            if (checkLogin != null)
-                checkLogin(url);
+            var currentUser = GetCurrentUser();
+            if (currentUser == username)
+                return;
 
-            return new NormalPage<T>(selenium, null);
+            if (currentUser.HasText())
+                Logout();
+
+            selenium.Type("username", username);
+            selenium.Type("password", password);
+            selenium.Submit("jq=form");
+
+            selenium.WaitForPageToLoad();
         }
     }
 }

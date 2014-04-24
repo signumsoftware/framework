@@ -50,7 +50,7 @@ namespace Signum.Engine.ControlPanel
                         Entity = cp,
                         cp.DisplayName,
                         cp.EntityType,
-                        cp.Related,
+                        Related = cp.Owner,
                     });
 
                 dqm.RegisterQuery(typeof(LinkListPartDN), () =>
@@ -125,7 +125,7 @@ namespace Signum.Engine.ControlPanel
             {
                 new Construct(ControlPanelOperation.Create)
                 {
-                    Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
+                    Construct = (_) => new ControlPanelDN { Owner = UserQueryUtils.DefaultRelated() }
                 }.Register();
 
                 new Execute(ControlPanelOperation.Save)
@@ -169,38 +169,38 @@ namespace Signum.Engine.ControlPanel
             return cps.Retrieve(); //I assume this simplifies the cross applys.
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => uq.Related.RefersTo(UserDN.Current));
+            TypeConditionLogic.Register<ControlPanelDN>(typeCondition,
+                uq => uq.Owner.RefersTo(UserDN.Current));
 
-            TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
-                 cscp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(cscp)));
+            TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
+                 cscp => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
 
-            TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
-                 llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
+            TypeConditionLogic.Register<LinkListPartDN>(typeCondition,
+                 llp => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(llp)));
 
-            TypeConditionLogic.Register<UserChartPartDN>(newEntityGroupKey,
-                 llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
+            TypeConditionLogic.Register<UserChartPartDN>(typeCondition,
+                 llp => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(llp)));
         }
 
-        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+            TypeConditionLogic.Register<ControlPanelDN>(typeCondition,
+                uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-            TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
 
-            TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<LinkListPartDN>(typeCondition,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
 
-            TypeConditionLogic.Register<UserChartPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<UserChartPartDN>(typeCondition,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
         }
 
         public static List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)

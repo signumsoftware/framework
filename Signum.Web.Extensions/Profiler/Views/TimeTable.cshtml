@@ -1,10 +1,11 @@
 ﻿@using System.Configuration
 @using System.Drawing
 @{  
-    ViewBag.Title = "Table Times";
+    ViewBag.Title = "Times table";
 }
-@Html.ActionLink("Clear", "ClearTimesTable")
-<table class="sf-search-results">
+<h3>Times table</h3>
+@Html.ActionLink("Clear", (Signum.Web.Profiler.ProfilerController a) => a.ClearTimesTable(), new { @class = "btn btn-default" })
+<table class="table table-nonfluid">
     <thead>
         <tr>
             <th>

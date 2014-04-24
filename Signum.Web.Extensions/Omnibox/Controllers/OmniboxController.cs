@@ -17,7 +17,8 @@ namespace Signum.Web.Omnibox
                 .Select(or => new
                 {
                     label = OmniboxClient.Render(or).ToString(),
-                    cleanText = or.ToString()
+                    cleanText = or.ToString(),
+                    url = OmniboxClient.GetUrl(or)
                 });
 
             return this.JsonNet(result);

@@ -227,11 +227,11 @@ namespace Signum.Web.Selenium
             return new QueryTokenBuilderProxy(lineContainer.Selenium, newPrefix + "_");
         }
 
-        public static void SelectTab<T>(this ILineContainer<T> lineContainer, string locator)
-            where T : ModifiableEntity
+        public static void SelectTab(this ILineContainer lineContainer, string tabId)
         {
-            lineContainer.Selenium.Click("jq=a[href='#{0}']".Formato(locator));
-            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}".Formato(locator)));
+            var fullTabId = lineContainer.PrefixUnderscore() + tabId;
+            lineContainer.Selenium.Click("jq=a[href='#{0}']".Formato(fullTabId));
+            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}:visible".Formato(fullTabId)));
 
         }
 
@@ -251,7 +251,7 @@ namespace Signum.Web.Selenium
             return result.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer,object queryName)
+        public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
         {
             string query = QueryUtils.GetQueryUniqueKey(queryName);
 
@@ -260,6 +260,10 @@ namespace Signum.Web.Selenium
             return new SearchControlProxy(lineContainer.Selenium, prefix);
         }
 
+        public static SearchControlProxy GetSearchControlSuffix(this ILineContainer lineContainer, string suffix)
+        {
+            return new SearchControlProxy(lineContainer.Selenium, lineContainer.PrefixUnderscore() + suffix); 
+        }
     }
 
     public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
@@ -278,7 +282,7 @@ namespace Signum.Web.Selenium
         }
     }
 
-    public class NormalPage<T> : ILineContainer<T>, IEntityButtonContainer, IWidgetContainer, IDisposable where T : ModifiableEntity
+    public class NormalPage<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IDisposable where T : ModifiableEntity
     {
         public ISelenium Selenium { get; private set; }
 
@@ -293,25 +297,23 @@ namespace Signum.Web.Selenium
             this.Route = PropertyRoute.Root(typeof(T));
         }
 
-        public string ButtonLocator(string buttonId)
+        public string ContainerLocator()
         {
-            return "jq=#divNormalControl #{0}.sf-entity-button".Formato(buttonId);
+            return "jq=#divMainPage";
         }
 
         public void Dispose()
         {
         }
 
-       
-
         public bool HasId()
         {
-            return Selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]");
+            return Selenium.IsElementPresent("jq=#divMainPage[data-isnew=false]");
         }
 
         public string Title()
         {
-            return Selenium.GetEval("window.$('#divNormalControl > div > .sf-entity-title').html()");
+            return Selenium.GetEval("window.$('#divMainPage > h3 > .sf-entity-title').html()");
         }
 
         public RuntimeInfoProxy RuntimeInfo()
