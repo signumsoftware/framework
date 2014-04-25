@@ -21,13 +21,6 @@ namespace Signum.Engine.Isolation
 
     public static class IsolationLogic
     {
-        static Expression<Func<IdentifiableEntity, Lite<IsolationDN>>> IsolationExpression =
-            entity => entity.Mixin<IsolationMixin>().Isolation;
-        public static Lite<IsolationDN> Isolation(this IdentifiableEntity entity)
-        {
-            return IsolationExpression.Evaluate(entity);
-        }
-
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -60,10 +53,13 @@ namespace Signum.Engine.Isolation
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) == IsolationStrategy.Isolated)
+            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) == IsolationStrategy.Isolated && IsolationDN.Current != null)
             {
                 if (ident.Mixin<IsolationMixin>().Isolation == null)
                     ident.Mixin<IsolationMixin>().Isolation = IsolationDN.Current;
+                else if (!ident.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current))
+                    throw new ApplicationException(IsolationMessage.Entity0HasIsolation1ButCurrentIsolationIs2.NiceToString(ident, ident.Mixin<IsolationMixin>().Isolation, IsolationDN.Current));
+                    
             }
         }
 
