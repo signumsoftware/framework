@@ -69,14 +69,6 @@ namespace Signum.Entities.Notes
             get { return noteType; }
             set { Set(ref noteType, value); }
         }
-
-        [ImplementedBy()]
-        Lite<IIdentifiable> additionalData;
-        public Lite<IIdentifiable> AdditionalData
-        {
-            get { return additionalData; }
-            set { Set(ref additionalData, value); }
-        }
     }
 
     public static class NoteOperation
