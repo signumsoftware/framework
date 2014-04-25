@@ -144,10 +144,10 @@ namespace Signum.Entities
         }
 
         public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-            where T : IdentifiableEntity
+            where T : IIdentifiable
             where M : MixinEntity
         {
-            M mixin = entity.Mixin<M>();
+            M mixin = ((IdentifiableEntity)(IIdentifiable)entity).Mixin<M>();
 
             var pi = ReflectionTools.BasePropertyInfo(mixinProperty);
 
