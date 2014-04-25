@@ -101,9 +101,9 @@ namespace Signum.Entities.Isolation
         }
 
         public static T SetIsolation<T>(this T entity, Lite<IsolationDN> isolation)
-            where T:IdentifiableEntity
+            where T : IIdentifiable
         {
-            return entity.SetMixin((IsolationMixin m) => m.Isolation, isolation); 
+            return entity.SetMixin((IsolationMixin m) => m.Isolation, isolation);
         }
     }
 }
