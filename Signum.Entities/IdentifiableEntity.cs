@@ -177,18 +177,7 @@ namespace Signum.Entities
             }
         }
 
-        public void CopyMixinsFrom(IdentifiableEntity original, params object[] args)
-        {
-            var list = (from nm in this.Mixins
-                        join om in original.Mixins
-                        on nm.GetType() equals om.GetType()
-                        select new { nm, om });
-
-            foreach (var pair in list)
-            {
-                pair.nm.CopyFrom(pair.om, args);
-            }
-        }
+       
     }
 
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
