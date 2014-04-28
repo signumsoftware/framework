@@ -20,6 +20,8 @@ using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Web;
 using Microsoft.SqlServer.Types;
+using Signum.Entities.Basics;
+using System.Drawing;
 #endregion
 
 namespace Signum.Web
@@ -59,6 +61,7 @@ namespace Signum.Web
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));

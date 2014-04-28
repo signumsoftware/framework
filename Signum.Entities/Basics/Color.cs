@@ -67,7 +67,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return ToColor().ToString();
+            return "#" + Argb.ToString("X8");
         }
     }
 }
