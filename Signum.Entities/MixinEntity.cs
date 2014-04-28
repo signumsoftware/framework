@@ -167,6 +167,22 @@ namespace Signum.Entities
                 return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
             }
         }
+
+        public static T CopyMixinsFrom<T>(this T newEntity, IdentifiableEntity original, params object[] args)
+            where T: IIdentifiable
+        {
+            var list = (from nm in ((IdentifiableEntity)(IIdentifiable)newEntity).Mixins
+                        join om in ((IdentifiableEntity)(IIdentifiable)original).Mixins
+                        on nm.GetType() equals om.GetType()
+                        select new { nm, om });
+
+            foreach (var pair in list)
+            {
+                pair.nm.CopyFrom(pair.om, args);
+            }
+
+            return newEntity;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]

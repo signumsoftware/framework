@@ -186,10 +186,10 @@ namespace Signum.Utilities.DataStructures
             return IndirectlyRelatedTo(node, false);
         }
 
-        public HashSet<T> IndirectlyRelatedTo(T node, bool includeParentNode)
+        public HashSet<T> IndirectlyRelatedTo(T node, bool includeInitialNode)
         {
             HashSet<T> set = new HashSet<T>();
-            if (includeParentNode)
+            if (includeInitialNode)
                 set.Add(node);
             IndirectlyRelatedTo(node, set);
             return set;

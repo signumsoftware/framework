@@ -15,7 +15,6 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
-    <TypeScriptToolsVersion>0.9</TypeScriptToolsVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <IISExpressSSLPort />
@@ -265,6 +264,7 @@
     <TypeScriptCompile Include="Signum\Scripts\globals.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Finder.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Operations.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Polyfills.ts" />
     <TypeScriptCompile Include="Signum\Scripts\SF.UI.ts" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>

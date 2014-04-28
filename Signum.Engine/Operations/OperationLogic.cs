@@ -238,7 +238,7 @@ namespace Signum.Engine.Operations
             IDisposable result = null;
             foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
             {
-                var r = surround(operation, entity);
+                var r = surround(operation, (IdentifiableEntity)entity);
                 if (r != null)
                 {
                     if (result == null)
@@ -254,13 +254,13 @@ namespace Signum.Engine.Operations
         internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
         {
             if (BeginOperation != null)
-                BeginOperation(operation, entity);
+                BeginOperation(operation, (IdentifiableEntity)entity);
         }
 
         internal static void OnEndOperation(IOperation operation, IIdentifiable entity)
         {
             if (EndOperation != null)
-                EndOperation(operation, entity);
+                EndOperation(operation, (IdentifiableEntity)entity);
         }
 
         internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, object[] args, Exception ex)
@@ -270,7 +270,7 @@ namespace Signum.Engine.Operations
                 ex.Data["args"] = args;
 
             if (ErrorOperation != null)
-                ErrorOperation(operation, entity, ex);
+                ErrorOperation(operation, (IdentifiableEntity)entity, ex);
         }
 
         public static bool OperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
@@ -738,9 +738,9 @@ namespace Signum.Engine.Operations
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, IIdentifiable entity);
-    public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
-    public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, IdentifiableEntity entity);
+    public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);
+    public delegate void ErrorOperationHandler(IOperation operation, IdentifiableEntity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);
 
 
