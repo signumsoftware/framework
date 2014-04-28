@@ -199,6 +199,16 @@ ul.nav-tabs
     border-color: #a94442;
 }
 
+.form-group .form-group {
+    margin-bottom: 0px;
+}
+
+    .form-group .form-group label {
+        color: #D8D8D8;
+        font-size: 12px;
+        margin-bottom: 0px;
+    }
+
 /*form xs*/
 
 .form-xs .form-control
