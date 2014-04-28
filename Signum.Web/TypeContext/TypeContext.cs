@@ -190,6 +190,7 @@ namespace Signum.Web
     {
         None,
         Basic,
+        BasicDown,
         SrOnly,
         LabelColumns,
     }

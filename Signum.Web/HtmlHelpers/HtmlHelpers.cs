@@ -100,12 +100,16 @@ namespace Signum.Web
                 else if (context.FormGroupStyle == FormGroupStyle.LabelColumns)
                     lbl.Class("control-label").Class(context.LabelColumns.ToString());
 
-                sb.AddLine(lbl);
+                if (context.FormGroupStyle != FormGroupStyle.BasicDown)
+                    sb.AddLine(lbl);
 
                 using (context.FormGroupStyle == FormGroupStyle.LabelColumns ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
                 {
                     sb.AddLine(value);
                 }
+
+                if (context.FormGroupStyle == FormGroupStyle.BasicDown)
+                    sb.AddLine(lbl);
             }
 
             return sb.ToHtml();
