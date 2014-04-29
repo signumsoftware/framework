@@ -81,7 +81,7 @@ namespace Signum.Windows.Operations
 
     public class ConstructorSettings : OperationSettings
     {
-        public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
+        public Func<OperationInfo, Window, List<object>, IdentifiableEntity> Constructor { get; set; }
         public Func<OperationInfo, bool> IsVisible { get; set; }
 
         public ConstructorSettings(IOperationSymbolContainer symbolContainer)
