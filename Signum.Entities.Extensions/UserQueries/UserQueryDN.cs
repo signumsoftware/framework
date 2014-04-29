@@ -534,17 +534,17 @@ namespace Signum.Entities.UserQueries
 
             if (token.TryToken != null)
             {
-                if (value != null)
-                {
-                    if (valueString.HasText())
-                        throw new InvalidOperationException("Value and ValueString defined at the same time");
+                //if (value != null)
+                //{
+                //    if (valueString.HasText())
+                //        throw new InvalidOperationException("Value and ValueString defined at the same time");
 
-                    ValueString = FilterValueConverter.ToString(value, Token.Token.Type);
-                }
-                else
-                {
+                //    ValueString = FilterValueConverter.ToString(value, Token.Token.Type);
+                //}
+                //else
+                //{
                     SetValue();
-                }
+                //}
             }
         }
 
