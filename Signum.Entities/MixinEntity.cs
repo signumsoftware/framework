@@ -124,11 +124,14 @@ namespace Signum.Entities
                 });
         }
 
-        public static void AssertDefined(Type mainEntity, Type mixinType)
+        public static bool IsDeclared(Type mainEntity, Type mixinType)
         {
-            var hs = GetMixinDeclarations(mainEntity);
-            
-            if (!hs.Contains(mixinType))
+            return GetMixinDeclarations(mainEntity).Contains(mixinType);
+        }
+
+        public static void AssertDeclared(Type mainEntity, Type mixinType)
+        {
+            if (!IsDeclared(mainEntity, mixinType))
                 throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
@@ -183,6 +186,8 @@ namespace Signum.Entities
 
             return newEntity;
         }
+
+       
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
