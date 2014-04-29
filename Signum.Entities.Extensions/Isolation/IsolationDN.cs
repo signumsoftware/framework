@@ -58,7 +58,8 @@ namespace Signum.Entities.Isolation
     public enum IsolationMessage
     {
         [Description("Entity {0} has isolation {1} but current isolation is {2}")]
-        Entity0HasIsolation1ButCurrentIsolationIs2
+        Entity0HasIsolation1ButCurrentIsolationIs2,
+        SelectAnIsolation
     }
 
     [Serializable]

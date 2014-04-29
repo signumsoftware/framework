@@ -261,6 +261,7 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
+    <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>

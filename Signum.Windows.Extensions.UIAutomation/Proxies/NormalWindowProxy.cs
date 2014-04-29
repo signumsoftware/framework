@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Isolation;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -365,6 +366,21 @@ namespace Signum.Windows.UIAutomation
         public static NormalWindowProxy<T> QuickLinkNavigate<T>(this LeftPanelProxy left) where T : IdentifiableEntity
         {
             return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(typeof(T).FullName)).ToNormalWindow<T>();
+        }
+    }
+
+    public static class IsolationExtensions
+    {
+        public static Lite<IsolationDN> GetIsolation<T>(this NormalWindowProxy<T> window)
+             where T: IdentifiableEntity
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void SetIsolation<T>(this NormalWindowProxy<T> window, Lite<IsolationDN> isolation)
+            where T : IdentifiableEntity
+        {
+            throw new NotImplementedException(); 
         }
     }
 }
