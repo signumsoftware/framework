@@ -22,6 +22,21 @@ namespace Signum.Utilities
             }
         }
 
+        public static void CreateDirectory(string FilePath)
+        {
+            if (FilePath != string.Empty)
+            {
+                string directory = Path.GetDirectoryName(FilePath);
+                if (directory != string.Empty)
+                {
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                }
+            }
+        }
+
         public class TemporalFile : IDisposable
         {
             string tempFile;
