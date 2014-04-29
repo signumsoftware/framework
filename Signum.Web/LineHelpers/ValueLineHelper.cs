@@ -9,6 +9,7 @@ using System.Web.Mvc.Html;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using System.Globalization;
+using Signum.Entities.Basics;
 
 
 namespace Signum.Web
@@ -140,6 +141,25 @@ namespace Signum.Web
             return helper.TextboxInLine(valueLine);
         }
 
+        public static MvcHtmlString ColorTextbox(this HtmlHelper helper, ValueLine valueLine)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            using (sb.Surround(new HtmlTag("div").Class("input-group")))
+            {
+                sb.AddLine(helper.TextboxInLine(valueLine));
+
+                sb.AddLine(new HtmlTag("span").Class("input-group-addon").InnerHtml(new HtmlTag("i")));
+            }
+
+            sb.AddLine(new HtmlTag("script").InnerHtml(MvcHtmlString.Create(
+@" $(function(){
+        $('#" + valueLine.Prefix + @"').parent().colorpicker();
+    });")));
+
+            return sb.ToHtml();
+        }
+
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
@@ -212,6 +232,8 @@ namespace Signum.Web
 
             if (type.IsEnum)
                 return ValueLineType.Combo;
+            else if (type == typeof(ColorDN))
+                return ValueLineType.Color;
             else
             {
                 switch (Type.GetTypeCode(type))
@@ -250,7 +272,9 @@ namespace Signum.Web
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
             {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
-            {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)}
+            {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},
+            {ValueLineType.Color, (helper, valueLine) => helper.ColorTextbox(valueLine)}
+
         };
     }
 
@@ -261,7 +285,8 @@ namespace Signum.Web
         DateTime,
         TextBox,
         TextArea,
-        Number
+        Number,
+        Color
     };
 
 }
