@@ -114,8 +114,44 @@ namespace Signum.Web
 
             return sb.ToHtml();
         }
+        
 
-      
+        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool isChecked, bool enabled, IDictionary<string, object> htmlAttributes = null)
+        {
+            if (htmlAttributes == null)
+                htmlAttributes = new Dictionary<string, object>();
+
+            if (enabled)
+                return html.CheckBox(name, isChecked, htmlAttributes); //MVC CheckBox only applied disabled=disabled to the checkbox, not to the hidden value
+            else
+            {
+                HtmlTag checkbox = new HtmlTag("input")
+                    .Id(name)
+                    .Attrs(new
+                    {
+                        type = "checkbox",
+                        name = name,
+                        value = (isChecked ? "true" : "false"),
+                        disabled = "disabled"
+                    })
+                    .Attrs(htmlAttributes);
+
+                if (isChecked)
+                    checkbox.Attr("checked", "checked");
+
+                HtmlTag hidden = new HtmlTag("input")
+                        .Id(name)
+                        .Attrs(new
+                        {
+                            type = "hidden",
+                            name = name,
+                            value = (isChecked ? "true" : "false"),
+                            disabled = "disabled"
+                        });
+
+                return checkbox.ToHtmlSelf().Concat(hidden.ToHtmlSelf());
+            }
+        }
 
         public static IDisposable FormInline(this HtmlHelper html)
         {
