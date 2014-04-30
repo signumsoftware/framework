@@ -150,8 +150,7 @@ namespace Signum.Web
             var input = new HtmlTag("input")
                 .IdName(name)
                 .Attr("type", "text")
-                .Class("form-control")
-               
+                .Class("form-control")               
                 .Attrs(htmlProps)
                 .Attr("value", value);
                
