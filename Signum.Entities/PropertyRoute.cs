@@ -139,7 +139,7 @@ namespace Signum.Entities
             }
             else if (typeof(IdentifiableEntity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
             {
-                MixinDeclarations.AssertDefined(parent.type, (Type)fieldOrProperty);
+                MixinDeclarations.AssertDeclared(parent.type, (Type)fieldOrProperty);
 
                 type = (Type)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.Mixin;

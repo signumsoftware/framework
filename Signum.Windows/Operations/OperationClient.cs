@@ -35,7 +35,7 @@ namespace Signum.Windows.Operations
 
                 Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
 
-                Constructor.Manager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+                Constructor.Manager.GlobalConstructor += Manager.ConstructorManager_GlobalConstructor;
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
@@ -250,7 +250,7 @@ namespace Signum.Windows.Operations
 
 
 
-        protected internal virtual object ConstructorManager_GeneralConstructor(Type entityType, FrameworkElement element)
+        protected internal virtual Func<FrameworkElement, List<object>, object> ConstructorManager_GlobalConstructor(Type entityType)
         {
             if (!entityType.IsIIdentifiable())
                 return null;
@@ -264,30 +264,33 @@ namespace Signum.Windows.Operations
             if (dic.Count == 0)
                 return null;
 
-            var win = Window.GetWindow(element);
-
-            OperationSymbol selected = null;
-            if (dic.Count == 1)
+            return (element, args) =>
             {
-                selected = dic.Keys.SingleEx();
-            }
-            else
-            {
-                if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
-                    elementIcon: k => OperationClient.GetImage(k),
-                    elementText: k => OperationClient.GetText(k),
-                    title: SelectorMessage.ConstructorSelector.NiceToString(),
-                    message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
-                    owner: win))
-                    return null;
-            }
+                var win = Window.GetWindow(element);
 
-            var pair = dic[selected];
+                OperationSymbol selected = null;
+                if (dic.Count == 1)
+                {
+                    selected = dic.Keys.SingleEx();
+                }
+                else
+                {
+                    if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
+                        elementIcon: k => OperationClient.GetImage(k),
+                        elementText: k => OperationClient.GetText(k),
+                        title: SelectorMessage.ConstructorSelector.NiceToString(),
+                        message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
+                        owner: win))
+                        return null;
+                }
 
-            if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                return pair.OperationSettings.Constructor(pair.OperationInfo, win);
-            else
-                return Server.Return((IOperationServer s) => s.Construct(entityType, selected));
+                var pair = dic[selected];
+
+                if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
+                    return pair.OperationSettings.Constructor(pair.OperationInfo, win, args);
+                else
+                    return Server.Return((IOperationServer s) => s.Construct(entityType, selected, args));
+            }; 
         }
 
 

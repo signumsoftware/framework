@@ -14,82 +14,113 @@ namespace Signum.Windows
 {
     public static class Constructor
     {
-        public static ConstructorManager Manager;
+        public static ConstructorManager Manager; 
 
-        public static void Start(ConstructorManager constructorManager)
+        public static void Start(ConstructorManager manager)
         {
-            Manager = constructorManager;
-            constructorManager.Initialize();
+            Manager = manager;
         }
 
-        public static object Construct(Type type, FrameworkElement element)
-        {
-            return Manager.Construct(type, element); 
-        }
-
-        public static T Construct<T>(FrameworkElement element)
+        public static T Construct<T>(FrameworkElement element = null, List<object> args = null)
+         where T : ModifiableEntity
         {
             return (T)Construct(typeof(T), element);
         }
 
-        public static T DefaultConstruct<T>(FrameworkElement element)
+        public static object Construct(Type type, FrameworkElement element = null, List<object> args = null)
         {
-            return (T)Construct(typeof(T), element);
+            args = args ?? new List<object>();
+
+            return Manager.SurroundConstruct(type, element, args, Manager.ConstructCore);
         }
 
-        public static void Register<T>(Func<FrameworkElement, T> constructor)
-            where T : class
+        public static T SurroundConstruct<T>(FrameworkElement element, List<object> args, Func<FrameworkElement, List<object>, T> constructor)
+            where T : ModifiableEntity
+        {
+            return (T)SurroundConstruct(typeof(T), element, args, (_type, _element, _args) => constructor(element, args));
+        }
+
+        public static object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, object> constructor)
+        {
+            return Manager.SurroundConstruct(type, element, args, constructor);
+        }
+       
+
+        public static void Register<T>(Func<FrameworkElement, List<object>, T> constructor)
+            where T : ModifiableEntity
         {
             Manager.Constructors.Add(typeof(T), constructor);
         }
+
+        
     }
-    
+
     public class ConstructorManager
     {
-        public event Func<Type, FrameworkElement, object> GeneralConstructor;
+        public event Func<Type, FrameworkElement, List<object>, bool> PreConstructors;
 
-        public Dictionary<Type, Func<FrameworkElement, object>> Constructors;
+        public Func<Type, Func<FrameworkElement, List<object>, object>> GlobalConstructor;
+        public Dictionary<Type, Func<FrameworkElement, List<object>, object>> Constructors = new Dictionary<Type, Func<FrameworkElement, List<object>, object>>();
 
-        internal void Initialize()
+        public event Func<Type, FrameworkElement, List<object>, object, bool> PostConstructors;
+
+        public ConstructorManager()
         {
-            if (Constructors == null)
-                Constructors = new Dictionary<Type, Func<FrameworkElement, object>>();
+            PostConstructors += PostConstructors_AddFilterProperties;
         }
 
-        public virtual object Construct(Type type, FrameworkElement element)
+        public virtual object ConstructCore(Type type, FrameworkElement element = null, List<object> args = null)
         {
-            Func<FrameworkElement, object> c = Constructors.TryGetC(type);
+            args = args ?? new List<object>();
+
+            Func<FrameworkElement, List<object>, object> c = Constructors.TryGetC(type);
             if (c != null)
             {
-                object result = c(element);
+                object result = c(element, args);
                 return result;
             }
 
-            if (GeneralConstructor != null)
+            if (GlobalConstructor != null)
             {
-                object result = GeneralConstructor(type, element);
-                if (result != null)
-                    return result;
+                foreach (Func<Type, Func<FrameworkElement, List<object>, object>> factory in GlobalConstructor.GetInvocationList())
+                {
+                    var func = factory(type);
+
+                    if (func != null)
+                        return func(element, args);
+                }
             }
 
-            return DefaultContructor(type, element);
+            return Activator.CreateInstance(type);
         }
 
-        protected internal virtual object DefaultContructor(Type type, FrameworkElement element)
+        public virtual  object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, object> constructor)
         {
-            object result = Activator.CreateInstance(type);
+            args = args ?? new List<object>();
 
-            AddFilterProperties(element, result);
+            if (PreConstructors != null)
+                foreach (Func<Type, FrameworkElement, List<object>, bool> pre in PreConstructors.GetInvocationList())
+                    if (!pre(type, element, args))
+                        return null;
 
-            return result;
+            var entity = constructor(type, element, args);
+
+            if (entity == null)
+                return null;
+
+            if (PostConstructors != null)
+                foreach (Func<Type, FrameworkElement, List<object>, object, bool> post in PostConstructors.GetInvocationList())
+                    if (!post(type, element, args, entity))
+                        return null;
+
+            return entity;
         }
 
-        protected internal virtual object AddFilterProperties(FrameworkElement element, object obj)
+
+        public static bool PostConstructors_AddFilterProperties(Type type, FrameworkElement element, List<object> args, object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException("result");
-
-            Type type = obj.GetType();
 
             if (element is SearchControl)
             {
@@ -106,7 +137,8 @@ namespace Signum.Windows
                 }
             }
 
-            return obj; 
+            return true;
         }
+
     }
 }
