@@ -19,6 +19,9 @@ namespace Signum.Engine
         static ResetLazy<Dictionary<string, T>> lazy;
         static Func<IEnumerable<T>> getSymbols;
 
+        [ThreadStatic]
+        static bool initializing; 
+
         public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
         {
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
@@ -32,25 +35,36 @@ namespace Signum.Engine
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    var symbols = EnumerableExtensions.JoinStrict(
-                         Database.RetrieveAll<T>(),
-                         getSymbols(),
-                         c => c.Key,
-                         s => s.Key,
-                         (c, s) =>
-                         {
-                             s.id = c.id;
-                             s.toStr = c.toStr;
-                             s.IsNew = false;
-                             if (s.Modified != ModifiedState.Sealed)
-                                 s.Modified = ModifiedState.Sealed;
-                             return s;
-                         }
-                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToList();
+                    try
+                    {
+                        initializing = true;
 
-                    return symbols.ToDictionary(a => a.Key);
+                        var symbols = EnumerableExtensions.JoinStrict(
+                             Database.RetrieveAll<T>(),
+                             getSymbols(),
+                             c => c.Key,
+                             s => s.Key,
+                             (c, s) =>
+                             {
+                                 s.id = c.id;
+                                 s.toStr = c.toStr;
+                                 s.IsNew = false;
+                                 if (s.Modified != ModifiedState.Sealed)
+                                     s.Modified = ModifiedState.Sealed;
+                                 return s;
+                             }
+                        , "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToList();
+
+                        return symbols.ToDictionary(a => a.Key);
+                    }
+                    finally
+                    {
+                        initializing = false;
+                    }
 
                 }, new InvalidateWith(typeof(T)));
+
+                sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
 
                 SymbolManager.SymbolDeserialized.Register((T s) =>
                 {
@@ -60,6 +74,12 @@ namespace Signum.Engine
                         s.Modified = ModifiedState.Sealed;
                 });
             }
+        }
+
+        static void SymbolLogic_Retrieved(T ident)
+        {
+            if (!initializing)
+                ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
       
         static SqlPreCommand Schema_Generating()
