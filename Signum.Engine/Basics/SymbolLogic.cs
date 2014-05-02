@@ -20,7 +20,14 @@ namespace Signum.Engine
         static Func<IEnumerable<T>> getSymbols;
 
         [ThreadStatic]
-        static bool initializing; 
+        static bool avoidCache;
+
+        static IDisposable AvoidCache()
+        {
+            var old = avoidCache;
+            avoidCache = true;
+            return new Disposable(() => avoidCache = old);
+        }
 
         public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
         {
@@ -35,10 +42,8 @@ namespace Signum.Engine
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    try
+                    using(AvoidCache())
                     {
-                        initializing = true;
-
                         var symbols = EnumerableExtensions.JoinStrict(
                              Database.RetrieveAll<T>(),
                              getSymbols(),
@@ -57,10 +62,6 @@ namespace Signum.Engine
 
                         return symbols.ToDictionary(a => a.Key);
                     }
-                    finally
-                    {
-                        initializing = false;
-                    }
 
                 }, new InvalidateWith(typeof(T)));
 
@@ -78,7 +79,7 @@ namespace Signum.Engine
 
         static void SymbolLogic_Retrieved(T ident)
         {
-            if (!initializing)
+            if (!avoidCache)
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
       
@@ -95,7 +96,7 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table<T>();
 
-            List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+            List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = getSymbols();
 
             return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,

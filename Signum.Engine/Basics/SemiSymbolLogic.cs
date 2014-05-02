@@ -19,8 +19,15 @@ namespace Signum.Engine.Extensions.Basics
         static Func<IEnumerable<T>> getSemiSymbols;
         
         [ThreadStatic]
-        static bool initializing; 
-        
+        static bool avoidCache;
+
+        static IDisposable AvoidCache()
+        {
+            var old = avoidCache;
+            avoidCache = true;
+            return new Disposable(() => avoidCache = old);
+        }
+
         public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
         {
             if (sb.NotDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
@@ -34,9 +41,8 @@ namespace Signum.Engine.Extensions.Basics
                 SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    try
+                    using(AvoidCache())
                     {
-                        initializing = true;
                         var symbols = EnumerableExtensions.JoinStrict(
                              Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
                              CreateSemiSymbols(),
@@ -55,10 +61,6 @@ namespace Signum.Engine.Extensions.Basics
                         , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
 
                         return symbols.ToDictionary(a => a.Key);
-                    }
-                    finally
-                    {
-                        initializing = false;
                     }
 
                 }, new InvalidateWith(typeof(T)));
@@ -81,7 +83,7 @@ namespace Signum.Engine.Extensions.Basics
 
         static void SymbolLogic_Retrieved(T ident)
         {
-            if (!initializing)
+            if (!avoidCache)
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
 
@@ -109,7 +111,7 @@ namespace Signum.Engine.Extensions.Basics
         {
             Table table = Schema.Current.Table<T>();
 
-            List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+            List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = CreateSemiSymbols();
 
             return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
