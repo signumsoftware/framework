@@ -158,13 +158,29 @@ namespace Signum.Engine.Maps
 
         public List<Index> GeneratAllIndexes()
         {
-            var result = Fields.SelectMany(f => f.Value.Field.GeneratIndexes(this)).ToList();
-
+            IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
             if (Mixins != null)
-                result.AddRange(Mixins.SelectMany(f => f.Value.GeneratIndexes(this)).ToList());
+                fields = fields.Concat(Mixins.Values.SelectMany(m => m.Fields.Values));
+
+            var result = fields.SelectMany(f => f.Field.GeneratIndexes(this)).ToList();
 
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
+
+            if (result.OfType<UniqueIndex>().Any())
+            {
+                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToAllUniqueIndexesAttribute>() != null)
+                   .SelectMany(f => Index.GetColumnsFromFields(f.Field))
+                   .ToList();
+
+                if (attachedFields.Any())
+                {
+                    foreach (var ui in result.OfType<UniqueIndex>())
+                    {
+                        ui.Columns = ui.Columns.Concat(attachedFields).ToArray();
+                    }
+                }
+            }
 
             return result;
         }
@@ -563,7 +579,7 @@ namespace Signum.Engine.Maps
 
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
-            return this.Fields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
+            throw new InvalidOperationException();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
