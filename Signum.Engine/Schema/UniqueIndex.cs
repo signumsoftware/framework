@@ -14,7 +14,7 @@ namespace Signum.Engine.Maps
     public class Index
     {
         public ITable Table { get; private set; }
-        public IColumn[] Columns { get; private set; }
+        public IColumn[] Columns { get; internal set; }
 
         public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {
@@ -52,7 +52,7 @@ namespace Signum.Engine.Maps
 
     public class UniqueIndex : Index
     {
-        public UniqueIndex(ITable table, params IColumn[] columns) : base(table, columns) { }
+        public UniqueIndex(ITable table, IColumn[] columns) : base(table, columns) { }
 
         public string Where { get; set; }
 

@@ -23,6 +23,11 @@ namespace Signum.Entities
         public bool AllowMultipleNulls { get; set; }
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class AttachToAllUniqueIndexesAttribute : Attribute
+    {
+    }
+
     [Serializable]
     public struct Implementations : IEquatable<Implementations>, ISerializable
     {

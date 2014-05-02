@@ -1725,7 +1725,7 @@ namespace Signum.Engine.Linq
 
                     var param = setter.ValueExpression.Parameters.Single();
                     map.Add(param, pr.Projector);
-                    var cleanedValue = DbQueryProvider.Clean(setter.ValueExpression.Body, false, null);
+                    var cleanedValue = DbQueryProvider.Clean(setter.ValueExpression.Body, true, null);
                     Expression valExpression = Visit(cleanedValue);
                     map.Remove(param);
 
