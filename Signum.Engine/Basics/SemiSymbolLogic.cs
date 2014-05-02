@@ -81,7 +81,7 @@ namespace Signum.Engine.Extensions.Basics
 
         static void SymbolLogic_Retrieved(T ident)
         {
-            if (!initializing)
+            if (!initializing && ident.Key.HasText())
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
 
