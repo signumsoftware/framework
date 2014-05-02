@@ -35,7 +35,7 @@ namespace Signum.Entities.Isolation
 
         static readonly ThreadVariable<Lite<IsolationDN>> CurrentThreadVariable = Statics.ThreadVariable<Lite<IsolationDN>>("CurrentIsolation");
 
-        public IDisposable OverrideCurrentIsolation(Lite<IsolationDN> isolation)
+        public static IDisposable Override(Lite<IsolationDN> isolation)
         {
             var old = CurrentThreadVariable.Value; 
 
@@ -65,10 +65,12 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        IsolationMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 
+        {
+        }
 
-        [NotNullable]
-        Lite<IsolationDN> isolation;
+        [NotNullable, AttachToAllUniqueIndexes]
+        Lite<IsolationDN> isolation = IsolationDN.Current;
         [NotNullValidator]
         public Lite<IsolationDN> Isolation
         {
