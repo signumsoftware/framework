@@ -298,8 +298,6 @@ namespace Signum.Engine.Disconnected
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
-            DisconnectedTools.CreateDatabaseDirectory(fileName);
-            DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);

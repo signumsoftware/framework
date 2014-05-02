@@ -289,9 +289,6 @@ namespace Signum.Engine.Disconnected
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
-            DisconnectedTools.CreateDatabaseDirectory(fileName);
-            DisconnectedTools.CreateDatabaseDirectory(logFileName);
-
             DisconnectedTools.RestoreDatabase(DatabaseName(machine), backupFileName, fileName, logFileName);
         }
 
