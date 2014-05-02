@@ -245,7 +245,8 @@ ul.nav-tabs
 .form-horizontal.form-xs .radio, 
 .form-horizontal.form-xs .checkbox, 
 .form-horizontal.form-xs .radio-inline, 
-.form-horizontal.form-xs .checkbox-inline {
+.form-horizontal.form-xs .checkbox-inline,
+.form-horizontal.form-xs .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0px;
@@ -255,7 +256,8 @@ ul.nav-tabs
 .form-horizontal .form-xs .radio, 
 .form-horizontal .form-xs .checkbox, 
 .form-horizontal .form-xs .radio-inline, 
-.form-horizontal .form-xs .checkbox-inline {
+.form-horizontal .form-xs .checkbox-inline,
+.form-horizontal .form-xs .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0px;
@@ -265,7 +267,8 @@ ul.nav-tabs
 .form-xs .form-horizontal .radio, 
 .form-xs .form-horizontal .checkbox, 
 .form-xs .form-horizontal .radio-inline, 
-.form-xs .form-horizontal .checkbox-inline {
+.form-xs .form-horizontal .checkbox-inline,
+.form-xs .form-horizontal .form-control-static  {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0px;
@@ -305,7 +308,8 @@ ul.nav-tabs
 .form-horizontal.form-sm .radio, 
 .form-horizontal.form-sm .checkbox, 
 .form-horizontal.form-sm .radio-inline, 
-.form-horizontal.form-sm .checkbox-inline {
+.form-horizontal.form-sm .checkbox-inline,
+.form-horizontal.form-sm .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 5px;
@@ -315,7 +319,8 @@ ul.nav-tabs
 .form-horizontal .form-sm .radio, 
 .form-horizontal .form-sm .checkbox, 
 .form-horizontal .form-sm .radio-inline, 
-.form-horizontal .form-sm .checkbox-inline {
+.form-horizontal .form-sm .checkbox-inline,
+.form-horizontal .form-sm .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 5px;
@@ -325,7 +330,8 @@ ul.nav-tabs
 .form-sm .form-horizontal .radio, 
 .form-sm .form-horizontal .checkbox, 
 .form-sm .form-horizontal .radio-inline, 
-.form-sm .form-horizontal .checkbox-inline {
+.form-sm .form-horizontal .checkbox-inline,
+.form-sm .form-horizontal .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 5px;
