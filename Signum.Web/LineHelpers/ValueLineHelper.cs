@@ -178,13 +178,10 @@ namespace Signum.Web
 
         public static MvcHtmlString CheckBox(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.ReadOnly)
-                valueLine.ValueHtmlProps.Add("disabled", "disabled");
-
             bool? value = (bool?)valueLine.UntypedValue;
             if (!valueLine.InlineCheckbox)
                 valueLine.ValueHtmlProps.AddCssClass("form-control");
-            return helper.CheckBox(valueLine.Prefix, value ?? false, valueLine.ValueHtmlProps);
+            return helper.CheckBox(valueLine.Prefix, value ?? false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)

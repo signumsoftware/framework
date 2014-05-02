@@ -48,6 +48,7 @@ namespace Signum.Entities.Basics
         public FieldInfo FieldInfo
         {
             get { return fieldInfo; }
+            internal set { fieldInfo = value; }
         }
 
 
