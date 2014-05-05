@@ -45,7 +45,7 @@ namespace Signum.Engine.Operations
                     OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
                     using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, null))
+                    using (OperationLogic.OnSuroundOperation(this, null, args))
                     {
                         try
                         {
@@ -172,7 +172,7 @@ namespace Signum.Engine.Operations
 
                     using (OperationLogic.AllowSave(entity.GetType()))
                     using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, entity))
+                    using (OperationLogic.OnSuroundOperation(this, entity, args))
                     {
                         try
                         {
@@ -269,7 +269,7 @@ namespace Signum.Engine.Operations
 
                     using (OperationLogic.AllowSave<F>())
                     using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, null))
+                    using (OperationLogic.OnSuroundOperation(this, null, args))
                     {
                         try
                         {
@@ -385,7 +385,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
+            void IExecuteOperation.Execute(IIdentifiable entity, params object[] args)
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Operation.Key))
                 {
@@ -403,7 +403,7 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.OnSuroundOperation(this, entity))
+                    using (OperationLogic.OnSuroundOperation(this, entity, args))
                     {
                         try
                         {
@@ -411,7 +411,7 @@ namespace Signum.Engine.Operations
                             {
                                 OnBeginOperation((T)entity);
 
-                                Execute((T)entity, parameters);
+                                Execute((T)entity, args);
 
                                 OnEndOperation((T)entity);
 
@@ -427,7 +427,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
+                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, ex);
 
                             if (!entity.IsNew)
                             {
@@ -532,7 +532,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IDeleteOperation.Delete(IIdentifiable entity, params object[] parameters)
+            void IDeleteOperation.Delete(IIdentifiable entity, params object[] args)
             {
                 using (HeavyProfiler.Log("Delete", () => Symbol.Operation.Key))
                 {
@@ -550,7 +550,7 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.OnSuroundOperation(this, entity))
+                    using (OperationLogic.OnSuroundOperation(this, entity, args))
                     {
                         try
                         {
@@ -558,7 +558,7 @@ namespace Signum.Engine.Operations
                             {
                                 OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
 
-                                OnDelete((T)entity, parameters);
+                                OnDelete((T)entity, args);
 
                                 OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
 
@@ -572,7 +572,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
+                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, ex);
 
                             if (Transaction.InTestTransaction)
                                 throw;
