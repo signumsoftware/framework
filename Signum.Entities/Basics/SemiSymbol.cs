@@ -13,6 +13,9 @@ namespace Signum.Entities.Basics
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public abstract class SemiSymbol : IdentifiableEntity
     {
+        static Dictionary<Type, Dictionary<string, SemiSymbol>> Symbols = new Dictionary<Type, Dictionary<string, SemiSymbol>>();
+        static Dictionary<Type, Dictionary<string, int>> Ids = new Dictionary<Type, Dictionary<string, int>>();
+
         public SemiSymbol() { }
 
         /// <summary>
@@ -36,6 +39,12 @@ namespace Signum.Entities.Basics
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, mi.DeclaringType.Name));
 
             this.Key = mi.DeclaringType.Name + "." + fieldName;
+
+            var dic = Ids.TryGetC(this.GetType());
+            if (dic != null)
+                this.SetId(dic.GetOrThrow(this.key));
+
+            Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
         }
 
         private static bool IsStaticClass(Type type)
@@ -60,13 +69,6 @@ namespace Signum.Entities.Basics
             get { return key; }
             set { SetToStr(ref key, value); }
         }
-
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            SemiSymbolManager.SemiSymbolDeserialized.Invoke(this);
-        }
-
 
         internal string NiceToString()
         {
@@ -100,26 +102,37 @@ namespace Signum.Entities.Basics
         {
             return ToStringExpression.Evaluate(this);
         }
-    }
 
-    public class SemiSymbolManager
-    {
-        public static Polymorphic<Action<SemiSymbol>> SemiSymbolDeserialized = new Polymorphic<Action<SemiSymbol>>();
-
-        static SemiSymbolManager()
+        public static void SetSemiSymbolIds<S>(Dictionary<string, int> symbolIds)
+            where S : SemiSymbol
         {
-            SemiSymbolDeserialized.Register((SemiSymbol s) =>
+            SemiSymbol.Ids.Add(typeof(S), symbolIds);
+
+            var symbols = SemiSymbol.Symbols.TryGetC(typeof(S));
+
+            if (symbols != null)
             {
-                throw new InvalidOperationException(@"Symbols require that the id are set before accesing the database. 
-If your curent AppDomain won't access the database (like a Windows application), call SymbolManager.AvoidSetIdOnDeserialized()");
-            });
+                foreach (var kvp in symbolIds)
+                {
+                    var s = symbols.TryGetC(kvp.Key);
+                    if (s != null)
+                        s.SetId(kvp.Value);
+                }
+            }
         }
 
-        public static void AvoidSetIdOnDeserialized()
+        private void SetId(int id)
         {
-            SemiSymbolDeserialized.Register((SemiSymbol s) =>
-            {
-            });
+            this.id = id;
+            this.IsNew = false;
+            this.toStr = this.key;
+            if (this.Modified != ModifiedState.Sealed)
+                this.Modified = ModifiedState.Sealed;
+        }
+
+        internal static Dictionary<string, int> GetSymbolIds(Type type)
+        {
+            return SemiSymbol.Ids.GetOrThrow(type);
         }
     }
 }

@@ -284,9 +284,6 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
 
-            SymbolManager.AvoidSetIdOnDeserialized();
-            SemiSymbolManager.AvoidSetIdOnDeserialized();
-
             TypeDN.SetTypeNameAndResolveType(
                 t => Server.ServerTypes.GetOrThrow(t).CleanName,
                 Server.TryGetType,

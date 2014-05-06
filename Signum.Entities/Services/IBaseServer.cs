@@ -60,5 +60,11 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         long Ticks(Lite<Entity> entity);
+
+        [OperationContract, NetDataContract]
+        Dictionary<string, int> GetSymbolIds(Type type);
+
+        [OperationContract, NetDataContract]
+        Dictionary<string, int> GetSemiSymbolIds(Type type);
     }
 }

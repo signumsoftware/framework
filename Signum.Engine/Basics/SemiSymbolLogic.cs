@@ -17,7 +17,7 @@ namespace Signum.Engine.Extensions.Basics
     {
         static ResetLazy<Dictionary<string, T>> lazy;
         static Func<IEnumerable<T>> getSemiSymbols;
-        
+
         [ThreadStatic]
         static bool avoidCache;
 
@@ -43,41 +43,13 @@ namespace Signum.Engine.Extensions.Basics
                 {
                     using(AvoidCache())
                     {
-                        var symbols = EnumerableExtensions.JoinStrict(
-                             Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
-                             CreateSemiSymbols(),
-                             c => c.Key,
-                             s => s.Key,
-                             (c, s) =>
-                             {
-                                 s.id = c.id;
-                                 s.toStr = c.toStr;
-                                 s.Name = c.Name;
-                                 s.IsNew = false;
-                                 if (s.Modified != ModifiedState.Sealed)
-                                     s.Modified = ModifiedState.Sealed;
-                                 return s;
-                             }
-                        , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
-
-                        return symbols.ToDictionary(a => a.Key);
+                        SemiSymbol.SetSemiSymbolIds<T>(Database.RetrieveAll<T>().Where(a => a.Key.HasText()).ToDictionary(a => a.Key, a => a.Id));
+                        return getSemiSymbols().ToDictionary(a => a.Key);
                     }
 
                 }, new InvalidateWith(typeof(T)));
 
                 sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
-
-                SemiSymbolManager.SemiSymbolDeserialized.Register((T s) =>
-                {
-                    if (s.Key == null)
-                        return;
-
-                    var cached = lazy.Value.GetOrThrow(s.Key);
-                    s.id = cached.id;
-                    s.Name= cached.Name;
-                    s.IsNew = false;
-                    s.Modified = ModifiedState.Sealed;
-                });
             }
         }
 
@@ -127,8 +99,6 @@ namespace Signum.Engine.Extensions.Basics
                     return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
-
-
 
         static Dictionary<string, T> AssertStarted()
         {
