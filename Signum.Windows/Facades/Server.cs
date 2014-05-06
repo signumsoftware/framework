@@ -37,6 +37,16 @@ namespace Signum.Windows
             };
         }
 
+        public static void SetSymbolIds<S>() where S :Symbol 
+        {
+            Symbol.SetSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSymbolIds(typeof(S))));
+        }
+
+        public static void SetSemiSymbolIds<S>() where S : SemiSymbol
+        {
+            SemiSymbol.SetSemiSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIds(typeof(S))));
+        }
+
         public static void SetNewServerCallback(Func<IBaseServer> server)
         {
             getServer = server;

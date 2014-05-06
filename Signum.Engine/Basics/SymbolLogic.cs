@@ -11,8 +11,7 @@ using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine
-{
-   
+{  
     public static class SymbolLogic<T>
         where T: Symbol
     {
@@ -32,33 +31,11 @@ namespace Signum.Engine
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    var symbols = EnumerableExtensions.JoinStrict(
-                         Database.RetrieveAll<T>(),
-                         getSymbols(),
-                         c => c.Key,
-                         s => s.Key,
-                         (c, s) =>
-                         {
-                             s.id = c.id;
-                             s.toStr = c.toStr;
-                             s.IsNew = false;
-                             if (s.Modified != ModifiedState.Sealed)
-                                 s.Modified = ModifiedState.Sealed;
-                             return s;
-                         }
-                    , "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToList();
+                    Symbol.SetSymbolIds<T>(Database.RetrieveAll<T>().ToDictionary(a => a.Key, a => a.Id));
 
-                    return symbols.ToDictionary(a => a.Key);
+                    return getSymbols().ToDictionary(a => a.Key);
 
                 }, new InvalidateWith(typeof(T)));
-
-                SymbolManager.SymbolDeserialized.Register((T s) =>
-                {
-                    s.id = lazy.Value.GetOrThrow(s.Key).id;
-                    s.IsNew = false;
-                    if (s.Modified != ModifiedState.Sealed)
-                        s.Modified = ModifiedState.Sealed;
-                });
             }
         }
       
@@ -90,8 +67,6 @@ namespace Signum.Engine
                     return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
-
-
 
         static Dictionary<string, T> AssertStarted()
         {

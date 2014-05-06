@@ -16,6 +16,10 @@ namespace Signum.Entities
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public abstract class Symbol : IdentifiableEntity
     {
+
+        static Dictionary<Type, Dictionary<string, Symbol>> Symbols = new Dictionary<Type, Dictionary<string, Symbol>>();
+        static Dictionary<Type, Dictionary<string, int>> Ids = new Dictionary<Type, Dictionary<string, int>>();
+
         public Symbol() { }
       
         /// <summary>
@@ -39,6 +43,16 @@ namespace Signum.Entities
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, mi.DeclaringType.Name));
 
             this.Key = mi.DeclaringType.Name + "." + fieldName;
+
+            var dic = Ids.TryGetC(this.GetType());
+            if (dic != null)
+            {
+                var id = dic.TryGetS(this.key);
+                if (id != null)
+                    this.SetId(id.Value);
+            }
+
+            Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
         }
 
         private static bool IsStaticClass(Type type)
@@ -63,13 +77,6 @@ namespace Signum.Entities
             set { SetToStr(ref key, value); }
         }
 
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            SymbolManager.SymbolDeserialized.Invoke(this);
-        }
-
-
         static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
         public override string ToString()
         {
@@ -88,31 +95,41 @@ namespace Signum.Entities
             return key.GetHashCode();
         }
 
-
         public string NiceToString()
         {
             return this.FieldInfo.NiceName();
         }
-    }
 
-    public class SymbolManager
-    {
-        public static Polymorphic<Action<Symbol>> SymbolDeserialized = new Polymorphic<Action<Symbol>>();
-
-        static SymbolManager()
+        public static void SetSymbolIds<S>(Dictionary<string, int> symbolIds)
+            where S : Symbol
         {
-            SymbolDeserialized.Register((Symbol s) =>
+            Symbol.Ids.Add(typeof(S),symbolIds);
+
+            var symbols = Symbol.Symbols.TryGetC(typeof(S));
+
+            if (symbols != null) 
             {
-                throw new InvalidOperationException(@"Symbols require that the id are set before accesing the database. 
-If your curent AppDomain won't access the database (like a Windows application), call SymbolManager.AvoidSetIdOnDeserialized()");
-            });
+                foreach (var kvp in symbolIds)
+                {
+                    var s = symbols.TryGetC(kvp.Key);
+                    if (s != null)
+                        s.SetId(kvp.Value);
+                }
+            }
         }
 
-        public static void AvoidSetIdOnDeserialized()
+        private void SetId(int id)
         {
-            SymbolDeserialized.Register((Symbol s) =>
-            {
-            });
+            this.id = id;
+            this.IsNew = false;
+            this.toStr = this.key;
+            if (this.Modified != ModifiedState.Sealed)
+                this.Modified = ModifiedState.Sealed;
+        }
+
+        internal static Dictionary<string, int> GetSymbolIds(Type type)
+        {
+            return Symbol.Ids.GetOrThrow(type);
         }
     }
 }

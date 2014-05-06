@@ -148,6 +148,17 @@ namespace Signum.Services
                 () => entity.InDB(e => e.Ticks));
         }
 
+        public Dictionary<string, int> GetSymbolIds(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => Symbol.GetSymbolIds(type));
+        }
+
+        public Dictionary<string, int> GetSemiSymbolIds(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => SemiSymbol.GetSymbolIds(type));
+        }
         #endregion
 
         #region IDynamicQueryServer
@@ -286,5 +297,8 @@ namespace Signum.Services
         }
 
         #endregion
+
+
+      
     }
 }
