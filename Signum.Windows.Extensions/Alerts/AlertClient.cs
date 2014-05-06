@@ -27,6 +27,8 @@ namespace Signum.Windows.Alerts
                     }   
                 });
 
+                Server.SetSemiSymbolIds<AlertTypeDN>();
+
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
                     new EntityOperationSettings(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },

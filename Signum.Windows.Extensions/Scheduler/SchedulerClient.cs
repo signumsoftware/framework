@@ -36,6 +36,8 @@ namespace Signum.Windows.Scheduler
                     new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() },
                 });
 
+                Server.SetSymbolIds<SimpleTaskSymbol>();
+
                 var executeGroup = new EntityOperationGroup
                 {
                     Background = Brushes.Gold,
