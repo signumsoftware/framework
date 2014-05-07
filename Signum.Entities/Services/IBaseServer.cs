@@ -65,6 +65,6 @@ namespace Signum.Services
         Dictionary<string, int> GetSymbolIds(Type type);
 
         [OperationContract, NetDataContract]
-        Dictionary<string, int> GetSemiSymbolIds(Type type);
+        Dictionary<string, Tuple<int, string>> GetSemiSymbolIdsAndNames(Type type);
     }
 }

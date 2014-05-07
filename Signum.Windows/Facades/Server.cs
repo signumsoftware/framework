@@ -44,7 +44,7 @@ namespace Signum.Windows
 
         public static void SetSemiSymbolIds<S>() where S : SemiSymbol
         {
-            SemiSymbol.SetSemiSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIds(typeof(S))));
+            SemiSymbol.SetSemiSymbolIdsAndNames<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIdsAndNames(typeof(S))));
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)
