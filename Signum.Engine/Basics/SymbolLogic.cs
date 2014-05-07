@@ -11,8 +11,7 @@ using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine
-{
-   
+{  
     public static class SymbolLogic<T>
         where T: Symbol
     {
@@ -20,7 +19,14 @@ namespace Signum.Engine
         static Func<IEnumerable<T>> getSymbols;
 
         [ThreadStatic]
-        static bool initializing; 
+        static bool avoidCache;
+
+        static IDisposable AvoidCache()
+        {
+            var old = avoidCache;
+            avoidCache = true;
+            return new Disposable(() => avoidCache = old);
+        }
 
         public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
         {
@@ -35,50 +41,20 @@ namespace Signum.Engine
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    try
+ 					using(AvoidCache())
                     {
-                        initializing = true;
-
-                        var symbols = EnumerableExtensions.JoinStrict(
-                             Database.RetrieveAll<T>(),
-                             getSymbols(),
-                             c => c.Key,
-                             s => s.Key,
-                             (c, s) =>
-                             {
-                                 s.id = c.id;
-                                 s.toStr = c.toStr;
-                                 s.IsNew = false;
-                                 if (s.Modified != ModifiedState.Sealed)
-                                     s.Modified = ModifiedState.Sealed;
-                                 return s;
-                             }
-                        , "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToList();
-
-                        return symbols.ToDictionary(a => a.Key);
+                    	Symbol.SetSymbolIds<T>(Database.RetrieveAll<T>().ToDictionary(a => a.Key, a => a.Id));
+                    	return getSymbols().ToDictionary(a => a.Key);
                     }
-                    finally
-                    {
-                        initializing = false;
-                    }
-
                 }, new InvalidateWith(typeof(T)));
 
-                sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
-
-                SymbolManager.SymbolDeserialized.Register((T s) =>
-                {
-                    s.id = lazy.Value.GetOrThrow(s.Key).id;
-                    s.IsNew = false;
-                    if (s.Modified != ModifiedState.Sealed)
-                        s.Modified = ModifiedState.Sealed;
-                });
+               sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
             }
         }
 
         static void SymbolLogic_Retrieved(T ident)
         {
-            if (!initializing)
+            if (!avoidCache)
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
       
@@ -95,7 +71,7 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table<T>();
 
-            List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+            List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = getSymbols();
 
             return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
@@ -110,8 +86,6 @@ namespace Signum.Engine
                     return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
-
-
 
         static Dictionary<string, T> AssertStarted()
         {

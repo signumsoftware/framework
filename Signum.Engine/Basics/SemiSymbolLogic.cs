@@ -17,10 +17,17 @@ namespace Signum.Engine.Extensions.Basics
     {
         static ResetLazy<Dictionary<string, T>> lazy;
         static Func<IEnumerable<T>> getSemiSymbols;
-        
+
         [ThreadStatic]
-        static bool initializing; 
-        
+        static bool avoidCache;
+
+        static IDisposable AvoidCache()
+        {
+            var old = avoidCache;
+            avoidCache = true;
+            return new Disposable(() => avoidCache = old);
+        }
+
         public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
         {
             if (sb.NotDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
@@ -34,54 +41,20 @@ namespace Signum.Engine.Extensions.Basics
                 SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    try
+                    using (AvoidCache())
                     {
-                        initializing = true;
-                        var symbols = EnumerableExtensions.JoinStrict(
-                             Database.RetrieveAll<T>().Where(a => a.Key.HasText()),
-                             CreateSemiSymbols(),
-                             c => c.Key,
-                             s => s.Key,
-                             (c, s) =>
-                             {
-                                 s.id = c.id;
-                                 s.toStr = c.toStr;
-                                 s.Name = c.Name;
-                                 s.IsNew = false;
-                                 if (s.Modified != ModifiedState.Sealed)
-                                     s.Modified = ModifiedState.Sealed;
-                                 return s;
-                             }
-                        , "loading {0}. Consider synchronize".Formato(typeof(T).Name));
-
-                        return symbols.ToDictionary(a => a.Key);
+                        SemiSymbol.SetSemiSymbolIdsAndNames<T>(Database.RetrieveAll<T>().Where(a => a.Key.HasText()).ToDictionary(a => a.Key, a => Tuple.Create(a.Id, a.Name)));
+                        return getSemiSymbols().ToDictionary(a => a.Key);
                     }
-                    finally
-                    {
-                        initializing = false;
-                    }
-
                 }, new InvalidateWith(typeof(T)));
 
                 sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
-
-                SemiSymbolManager.SemiSymbolDeserialized.Register((T s) =>
-                {
-                    if (s.Key == null)
-                        return;
-
-                    var cached = lazy.Value.GetOrThrow(s.Key);
-                    s.id = cached.id;
-                    s.Name= cached.Name;
-                    s.IsNew = false;
-                    s.Modified = ModifiedState.Sealed;
-                });
             }
         }
 
         static void SymbolLogic_Retrieved(T ident)
         {
-            if (!initializing && ident.Key.HasText())
+            if (!avoidCache && ident.Key.HasText())
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
         }
 
@@ -109,7 +82,7 @@ namespace Signum.Engine.Extensions.Basics
         {
             Table table = Schema.Current.Table<T>();
 
-            List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+            List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = CreateSemiSymbols();
 
             return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
@@ -125,8 +98,6 @@ namespace Signum.Engine.Extensions.Basics
                     return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
-
-
 
         static Dictionary<string, T> AssertStarted()
         {

@@ -40,6 +40,8 @@ namespace Signum.Windows.Operations
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
 
+                Server.SetSymbolIds<OperationSymbol>();
+
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
                 { 
                     entity.GetType() == typeof(OperationLogDN) ? null : 
