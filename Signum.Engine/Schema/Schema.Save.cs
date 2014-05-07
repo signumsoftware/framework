@@ -580,7 +580,7 @@ namespace Signum.Engine.Maps
                 using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
                 {
                     List<TableMList.IRelationalCache> caches =
-                        (from rt in table.TableMList()
+                        (from rt in table.TablesMList()
                          select giCreateCache.GetInvoker(rt.Field.FieldType)(rt)).ToList();
 
                     if (caches.IsEmpty())

@@ -195,7 +195,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public IEnumerable<TableMList> TableMList()
+        public IEnumerable<TableMList> TablesMList()
         {
             var tables = Fields.Values.SelectMany(a => a.Field.TablesMList(a.Getter)).ToList();
 
@@ -213,7 +213,7 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnDatabase(databaseName);
 
-            foreach (var item in TableMList())
+            foreach (var item in TablesMList())
                 item.ToDatabase(databaseName);
         }
 
@@ -221,7 +221,7 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnSchema(schemaName);
 
-            foreach (var item in TableMList())
+            foreach (var item in TablesMList())
                 item.ToSchema(schemaName);
         }
     }
