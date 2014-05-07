@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing.Pop3
         static void FixStandardFields(MailMessage message)
         {
             if (string.IsNullOrEmpty(message.Subject))
-                message.Subject = GetHeaderValue(message.Headers, "subject");
+                message.Subject = GetHeaderValue(message.Headers, "subject").Try(s => s.Replace('\r', ' ').Replace('\n', ' '));
 
             message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
           
