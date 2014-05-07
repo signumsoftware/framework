@@ -99,12 +99,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType);
         }
 
-        public static AlertDN CreateAlert(this IIdentifiable entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null)
+        public static AlertDN CreateAlert(this IIdentifiable entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<IUserDN> user = null, string title = null)
         {
             return CreateAlert(entity.ToLite(), text, alertType, alertDate, user, title);
         }
 
-        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<IUserDN> user = null, string title = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -112,7 +112,7 @@ namespace Signum.Engine.Alerts
             return new AlertDN
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = user ?? UserDN.Current.ToLite(),
+                CreatedBy = user ?? UserHolder.Current.ToLite(),
                 Text = text,
                 Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
@@ -120,12 +120,12 @@ namespace Signum.Engine.Alerts
             }.Execute(AlertOperation.SaveNew);
         }
 
-        public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<UserDN> user = null)
+        public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<IUserDN> user = null)
         {
             return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, user);
         }
 
-        public static AlertDN CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<UserDN> user = null) where T : class, IIdentifiable
+        public static AlertDN CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<IUserDN> user = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -151,7 +151,7 @@ namespace Signum.Engine.Alerts
                 Construct = (a, _) => new AlertDN
                 {
                     AlertDate = TimeZoneManager.Now,
-                    CreatedBy = UserDN.Current.ToLite(),
+                    CreatedBy = UserHolder.Current.ToLite(),
                     Text = null,
                     Title = null,
                     Target = a.ToLite(),

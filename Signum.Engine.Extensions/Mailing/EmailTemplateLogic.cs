@@ -79,6 +79,8 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
                 sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;
 
+                sb.Schema.Table<SystemEmailDN>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
+
                 Validator.PropertyValidator<EmailTemplateDN>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
                     if (et.Active && !et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
@@ -87,6 +89,15 @@ namespace Signum.Engine.Mailing
                     return null;
                 }; 
             }
+        }
+
+        static SqlPreCommand EmailTemplateLogic_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            SystemEmailDN systemEmail = (SystemEmailDN)arg;
+
+            var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateDN>().Where(et => et.SystemEmail == systemEmail));
+
+            return emailTemplates;
         }
 
         static void EmailTemplateLogic_Retrieved(EmailTemplateDN emailTemplate)

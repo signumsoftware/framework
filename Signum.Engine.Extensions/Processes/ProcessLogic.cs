@@ -114,7 +114,6 @@ namespace Signum.Engine.Processes
                 SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
-                AuthLogic.AssertStarted(sb);
                 CacheLogic.AssertStarted(sb); 
 
                 ProcessGraph.Register();
@@ -173,7 +172,7 @@ namespace Signum.Engine.Processes
                     ApplySession.Register((UserProcessSessionDN ups) =>
                     {
                         if (ups.User != null)
-                            UserDN.Current = ups.User.Retrieve();
+                            UserHolder.Current = ups.User.Retrieve();
                     });
 
                     CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
