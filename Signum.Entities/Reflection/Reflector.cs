@@ -364,6 +364,10 @@ namespace Signum.Entities.Reflection
                 if (datetimePrecission != null)
                     return datetimePrecission.FormatString;
 
+                TimeSpanPrecissionValidatorAttribute timeSpanPrecission = pp.Validators.OfType<TimeSpanPrecissionValidatorAttribute>().SingleOrDefaultEx();
+                if (timeSpanPrecission != null)
+                    return timeSpanPrecission.FormatString;
+
                 DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)
                     return "N" + decimals.DecimalPlaces;
