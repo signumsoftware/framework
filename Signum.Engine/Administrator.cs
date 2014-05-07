@@ -174,7 +174,7 @@ namespace Signum.Engine
         public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
           where T : IdentifiableEntity
         {
-            RelationalTable table = ((FieldMList)Schema.Current.Field(mListField)).RelationalTable;
+            TableMList table = ((FieldMList)Schema.Current.Field(mListField)).TableMList;
             return DisableIdentity(table.Name);
         }
 
@@ -325,7 +325,7 @@ namespace Signum.Engine
         {
             IDisposable disp = PrepareTableForBatchLoadScope(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
 
-            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
+            var list = table.TableMList().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
 
             return new Disposable(() =>
             {
@@ -458,7 +458,7 @@ namespace Signum.Engine
             return columns.Select(ct => new ColumnTableScript
             {
                 ColumnTable = ct,
-                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".Formato(ct.Table.Name, ct.Column.Name.SqlScape()), new List<DbParameter>
+                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".Formato(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
                 {
                     pb.CreateParameter("@oldEntity", SqlBuilder.PrimaryKeyType, null, false, oldEntity.Id),
                     pb.CreateParameter("@newEntity", SqlBuilder.PrimaryKeyType, null, false, newEntity.Id),

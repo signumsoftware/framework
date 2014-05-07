@@ -20,5 +20,15 @@ namespace Signum.Utilities
             if (action != null)
                 action(); 
         }
+
+        public static IDisposable Combine(IDisposable first, IDisposable second)
+        {
+            if (first == null || second == null)
+                return first ?? second;
+
+            return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
+        }
     }
+
+    
 }

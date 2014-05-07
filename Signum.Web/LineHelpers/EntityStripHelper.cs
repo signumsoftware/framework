@@ -90,7 +90,7 @@ namespace Signum.Web
                 {
                     sb.AddLine(
                         helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                            lite.ToString(), Navigator.NavigateRoute(lite),
+                        lite.ToString(), lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
                             JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
                 }
                 else

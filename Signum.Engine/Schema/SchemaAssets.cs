@@ -205,7 +205,7 @@ namespace Signum.Engine.Maps
             return (from t in DefaultContraints
                     from c in t.Value
                     select new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                         .Formato(t.Key.Name, c.Value.ConstraintName.SqlScape(), c.Value.DefaultExpression, c.Key.Name.SqlScape())))
+                         .Formato(t.Key.Name, c.Value.ConstraintName.SqlEscape(), c.Value.DefaultExpression, c.Key.Name.SqlEscape())))
                         .Combine(Spacing.Double);
         }
 

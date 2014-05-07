@@ -505,7 +505,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareMList(MListExpression a, MListExpression b)
         {
-            return a.RelationalTable == b.RelationalTable
+            return a.TableMList == b.TableMList
                 && Compare(a.BackID, b.BackID);
         }
 

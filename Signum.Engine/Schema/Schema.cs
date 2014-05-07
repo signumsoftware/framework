@@ -545,7 +545,7 @@ namespace Signum.Engine.Maps
             {
                 yield return table;
 
-                foreach (var subTable in table.RelationalTables().Cast<ITable>())
+                foreach (var subTable in table.TableMList().Cast<ITable>())
                     yield return subTable;
             }
         }
@@ -759,7 +759,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return Name.SqlScape();
+            return Name.SqlEscape();
         }
 
         public bool Equals(ServerName other)
@@ -804,7 +804,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            var result = Name.SqlScape();
+            var result = Name.SqlEscape();
 
             if (Server == null)
                 return result;
@@ -873,7 +873,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            var result = Name.SqlScape();
+            var result = Name.SqlEscape();
 
             if (Database == null)
                 return result;
@@ -929,17 +929,17 @@ namespace Signum.Engine.Maps
         public override string ToString()
         {
             if (Schema == null || Schema.IsDefault())
-                return Name.SqlScape();
+                return Name.SqlEscape();
 
-            return Schema.ToString() + "." + Name.SqlScape();
+            return Schema.ToString() + "." + Name.SqlEscape();
         }
 
         public string ToStringDbo()
         {
             if (Schema == null)
-                return Name.SqlScape();
+                return Name.SqlEscape();
 
-            return Schema.ToString() + "." + Name.SqlScape();
+            return Schema.ToString() + "." + Name.SqlEscape();
         }
 
         public bool Equals(ObjectName other)

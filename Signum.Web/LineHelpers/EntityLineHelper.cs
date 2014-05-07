@@ -86,24 +86,28 @@ namespace Signum.Web
 
         private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)
         {
-            if (entityLine.ReadOnly)
-                return helper.FormControlStatic(entityLine.Compose(EntityBaseKeys.Link), entityLine.UntypedValue.TryToString(), null);
-
+            MvcHtmlString result;
             if (entityLine.Navigate)
             {
-                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ?? (entityLine.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
+                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ??
+                           (entityLine.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
 
-                return helper.Href(entityLine.Compose(EntityBaseKeys.Link),
+                result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         lite.TryToString(),
-                        lite == null ? null : Navigator.NavigateRoute(lite),
-                        JavascriptMessage.navigate.NiceToString(), "form-control  btn-default sf-entity-line-entity", null);
+                        lite == null || lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
+                        JavascriptMessage.navigate.NiceToString(), entityLine.ReadOnly ? null:  "form-control  btn-default sf-entity-line-entity", null);
             }
             else
             {
-                return helper.Span(entityLine.Compose(EntityBaseKeys.Link),
+                result = helper.Span(entityLine.Compose(EntityBaseKeys.Link),
                         entityLine.UntypedValue.TryToString() ?? " ",
-                        "form-control btn-default sf-entity-line-entity");
+                        entityLine.ReadOnly ? null : "form-control btn-default sf-entity-line-entity");
             }
+
+            if (entityLine.ReadOnly)
+                return new HtmlTag("p").Class("form-control-static").InnerHtml(result);
+
+            return result;
         }
 
         private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine)
@@ -142,8 +146,7 @@ namespace Signum.Web
 
             if (vo != null && !vo.IsVisible(context.PropertyRoute))
                 return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
-
-
+            
             EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
