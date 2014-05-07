@@ -501,7 +501,7 @@ namespace Signum.Engine.Maps
                     Nullable = nullable,
                     ReferenceTable = null,
                 },
-                ColumnTypes = new ImplementationColumn
+                ColumnType = new ImplementationColumn
                 {
                     Name = preName.Add("Type").ToString(),
                     Nullable = nullable,

@@ -1191,7 +1191,7 @@ namespace Signum.Engine.Maps
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
         {
             trios.Add(new Table.Trio(Column, this.GetIdFactory(value, forbidden), postfix));
-            trios.Add(new Table.Trio(ColumnTypes, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), postfix));
+            trios.Add(new Table.Trio(ColumnType, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), postfix));
         }
 
         static MethodInfo miConvertType = ReflectionTools.GetMethodInfo((FieldImplementedByAll fe) => fe.ConvertType(null));

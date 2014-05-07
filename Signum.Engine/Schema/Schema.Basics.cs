@@ -771,13 +771,13 @@ namespace Signum.Engine.Maps
         public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public ImplementationColumn Column { get; set; }
-        public ImplementationColumn ColumnTypes { get; set; }
+        public ImplementationColumn ColumnType { get; set; }
 
         public FieldImplementedByAll(Type fieldType) : base(fieldType) { }
 
         public override IEnumerable<IColumn> Columns()
         {
-            return new[] { Column, ColumnTypes };
+            return new[] { Column, ColumnType };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -803,7 +803,7 @@ namespace Signum.Engine.Maps
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType == Maps.IndexType.None)
-                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnTypes) };
+                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
 
             return base.GeneratIndexes(table);
         }
