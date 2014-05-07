@@ -100,6 +100,22 @@ namespace Signum.Web
             return helper.DateTimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
         }
 
+        public static MvcHtmlString TimeSpanPicker(this HtmlHelper helper, ValueLine valueLine)
+        {
+            TimeSpan? value = (TimeSpan?)valueLine.UntypedValue;
+
+            if (valueLine.ReadOnly)
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
+                return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
+            }
+
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
+            return helper.TimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
+        }
+
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ??
@@ -231,6 +247,8 @@ namespace Signum.Web
                 return ValueLineType.Combo;
             else if (type == typeof(ColorDN))
                 return ValueLineType.Color;
+            else if (type == typeof(TimeSpan))
+                return ValueLineType.TimeSpan;
             else
             {
                 switch (Type.GetTypeCode(type))
@@ -269,9 +287,9 @@ namespace Signum.Web
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
             {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
+            {ValueLineType.TimeSpan, (helper, valueLine) => helper.TimeSpanPicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},
             {ValueLineType.Color, (helper, valueLine) => helper.ColorTextbox(valueLine)}
-
         };
     }
 
@@ -280,6 +298,7 @@ namespace Signum.Web
         Boolean,
         Combo,
         DateTime,
+        TimeSpan,
         TextBox,
         TextArea,
         Number,

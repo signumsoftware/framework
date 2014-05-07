@@ -181,6 +181,9 @@ namespace Signum.Web
 
         public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, TimeSpan? ts, string format, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
         {
+            if (format == null)
+                format = @"hh\:mm";
+
             if (format.Contains("f") || format.Contains("F"))
                 return helper.TextBox(name, ts == null ? "" : ts.Value.ToString(format, culture), new { @class = "form-control" });
 
@@ -222,9 +225,9 @@ namespace Signum.Web
             return tag.Attr("data-provide", "timepicker")
              .Attr("data-minute-step", "1")
              .Attr("data-second-step", "1")
-             .Attr("data-show-meridian", (format.Contains("tt") || format.Contains("h")).ToString().ToLower())
+             .Attr("data-show-meridian", false.ToString().ToLower())
              .Attr("data-show-seconds", (format.Contains("s")).ToString().ToLower())
-             .Attr("data-hours-two-digits", (format.Contains("hh") || format.Contains("HH")).ToString().ToLower());
+             .Attr("data-hours-two-digits", format.Contains("hh").ToString().ToLower());
         }
     }
 }
