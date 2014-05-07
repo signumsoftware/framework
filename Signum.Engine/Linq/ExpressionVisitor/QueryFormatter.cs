@@ -386,9 +386,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            sb.Append(column.Alias.Name.SqlScape());
+            sb.Append(column.Alias.Name.SqlEscape());
             sb.Append(".");
-            sb.Append(column.Name.SqlScape());
+            sb.Append(column.Name.SqlEscape());
 
             return column;
         }
@@ -551,7 +551,7 @@ namespace Signum.Engine.Linq
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
                 sb.Append(" AS ");
-                sb.Append(column.Name.SqlScape());
+                sb.Append(column.Name.SqlEscape());
             }
         }
 
@@ -579,7 +579,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlScape());
+                sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlEscape());
             }
             else
                 this.VisitJoin((JoinExpression)source);
@@ -703,7 +703,7 @@ namespace Signum.Engine.Linq
                     sb.Append(",");
                     this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column.SqlScape());
+                sb.Append(assignment.Column.SqlEscape());
                 sb.Append(" = ");
                 this.Visit(assignment.Expression);
             }
@@ -734,7 +734,7 @@ namespace Signum.Engine.Linq
                     if (i % 4 == 0)
                         this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column.SqlScape());
+                sb.Append(assignment.Column.SqlEscape());
             }
             sb.Append(")");
             this.AppendNewLine(Indentation.Same);
