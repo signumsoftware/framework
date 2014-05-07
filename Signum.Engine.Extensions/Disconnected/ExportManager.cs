@@ -309,7 +309,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.EnableForeignKeys(table);
 
-            foreach (var rt in table.RelationalTables())
+            foreach (var rt in table.TableMList())
                 DisconnectedTools.EnableForeignKeys(rt);
         }
 
@@ -317,7 +317,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.DisableForeignKeys(table);
 
-            foreach (var rt in table.RelationalTables())
+            foreach (var rt in table.TableMList())
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
@@ -359,7 +359,7 @@ namespace Signum.Engine.Disconnected
 
             CopyTableBasic(table, newDatabaseName, filter);
 
-            foreach (var rt in table.RelationalTables())
+            foreach (var rt in table.TableMList())
                 CopyTableBasic(rt, newDatabaseName, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
 
@@ -373,8 +373,8 @@ SELECT {3}
                     from {1} as [table]".Formato(
                     newTableName,
                     table.Name,
-                    table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
-                    table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "));
+                    table.Columns.Keys.ToString(a => a.SqlEscape(), ", "),
+                    table.Columns.Keys.ToString(a => "[table]." + a.SqlEscape(), ", "));
 
             if (filter != null)
             {
@@ -384,9 +384,9 @@ SELECT {3}
                 }
                 else
                 {
-                    RelationalTable rt = (RelationalTable)table;
+                    TableMList rt = (TableMList)table;
                     command +=
-                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlScape()) +
+                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape()) +
                         "\r\nWHERE [masterTable].Id in ({0})".Formato(filter.Sql);
                 }
             }

@@ -525,7 +525,7 @@ namespace Signum.Engine.Authorization
         public static void SynchronizeRoles(XDocument doc)
         {
             Table table = Schema.Current.Table(typeof(RoleDN));
-            RelationalTable relationalTable = table.RelationalTables().Single();
+            TableMList relationalTable = table.TableMList().Single();
 
             Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
@@ -541,7 +541,7 @@ namespace Signum.Engine.Authorization
                     (name, xelement) => table.InsertSqlSync(new RoleDN { Name = name }, includeCollections: false),
                     (name, role) => SqlPreCommand.Combine(Spacing.Simple,
                             new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                .Formato(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlScape(), role.Id, role.Name)),
+                                .Formato(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
                             table.DeleteSqlSync(role)),
                     (name, xElement, role) =>
                     {

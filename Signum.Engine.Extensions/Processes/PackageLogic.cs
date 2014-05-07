@@ -153,11 +153,8 @@ namespace Signum.Engine.Processes
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            TypeConditionLogic.Register<UserProcessSessionDN>(typeCondition,
-               se => se.User.RefersTo(UserDN.Current));
-
             TypeConditionLogic.Register<ProcessDN>(typeCondition,
-                pe => ((UserProcessSessionDN)pe.Session).InCondition(typeCondition));
+                pe => pe.Mixin<UserProcessSessionMixin>().User.RefersTo(UserDN.Current));
 
             TypeConditionLogic.Register<PackageOperationDN>(typeCondition,
                 po => Database.Query<ProcessDN>().WhereCondition(typeCondition).Any(pe => pe.Data == po));

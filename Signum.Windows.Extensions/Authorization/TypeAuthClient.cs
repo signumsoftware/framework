@@ -13,6 +13,7 @@ using System.Windows;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Authorization
 {
@@ -35,6 +36,8 @@ namespace Signum.Windows.Authorization
             manager.IsReadOnly += manager_IsReadOnly;
 
             manager.IsViewable += manager_IsViewable;
+
+            Server.SetSymbolIds<TypeConditionSymbol>();
 
             LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {

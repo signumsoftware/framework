@@ -40,7 +40,6 @@ namespace Signum.Web.Processes
                 {
                     new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process"), },
                     new EntitySettings<ProcessAlgorithmSymbol>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
-                    new EntitySettings<UserProcessSessionDN>{ PartialViewName = e => ViewPrefix.Formato("UserProcessSession") }
                 });
 
                 if (packages || packageOperations)
@@ -59,6 +58,10 @@ namespace Signum.Web.Processes
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
+
+                if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
+                    Navigator.EntitySettings<ProcessDN>().CreateViewOverride().AfterLine(p => p.Algorithm, 
+                        (html, tc) => html.EntityLine(tc, p => p.Mixin<UserProcessSessionMixin>().User));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
                     () => ProcessPermission.ViewProcessPanel.IsAuthorized(),

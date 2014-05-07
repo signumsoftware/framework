@@ -67,10 +67,12 @@ namespace Signum.Windows.Isolation
                 return result;
 
             var entity = element.DataContext as IdentifiableEntity;
-
-            result = entity.TryIsolation();
-            if (result != null)
-                return result;
+            if (element != null)
+            {
+                result = entity.TryIsolation();
+                if (result != null)
+                    return result;
+            }
 
             return SelectIsolationInteractively(Window.GetWindow(element));
         }

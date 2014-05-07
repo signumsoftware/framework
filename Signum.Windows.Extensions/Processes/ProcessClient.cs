@@ -30,7 +30,9 @@ namespace Signum.Windows.Processes
             {
                 Navigator.AddSetting(new EntitySettings<ProcessAlgorithmSymbol> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
                 Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
-                Navigator.AddSetting(new EntitySettings<UserProcessSessionDN> { View = e => new UserProcessSession(), Icon = ImageLoader.GetImageSortName("user.png") });
+
+
+                Server.SetSymbolIds<ProcessAlgorithmSymbol>();
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
@@ -51,6 +53,15 @@ namespace Signum.Windows.Processes
                     Navigator.AddSetting(new EntitySettings<PackageOperationDN> { View = e => new PackageOperation(), Icon = Image("package.png") });
 
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
+                }
+
+                if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
+                {
+                    Navigator.EntitySettings<ProcessDN>().OverrideView((p, c) =>
+                    {
+                        c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
+                        return c;
+                    }); 
                 }
             }
         }

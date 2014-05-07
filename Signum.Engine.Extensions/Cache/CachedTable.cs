@@ -161,7 +161,7 @@ namespace Signum.Engine.Cache
 
             internal string CreatePartialInnerJoin(IColumn column)
             {
-                return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name.ToStringDbo(), currentAlias.Name.SqlScape(), column.Name);
+                return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name.ToStringDbo(), currentAlias.Name.SqlEscape(), column.Name);
             }
 
             internal Type GetColumnType(IColumn column)
@@ -203,9 +203,9 @@ namespace Signum.Engine.Cache
               new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
                   new CachedLiteTable<IdentifiableEntity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
-            static GenericInvoker<Func<ICacheLogicController, RelationalTable, AliasGenerator, string, string, CachedTableBase>> ciCachedRelationalTable =
-              new GenericInvoker<Func<ICacheLogicController, RelationalTable, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                  new CachedRelationalTable<IdentifiableEntity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
+            static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>> ciCachedTableMList =
+              new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
+                  new CachedTableMList<IdentifiableEntity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
             static Expression NullId = Expression.Constant(null, typeof(int?));
 
@@ -255,7 +255,7 @@ namespace Signum.Engine.Cache
                         var iba = (FieldImplementedByAll)field;
 
                         Expression id = GetTupleProperty(iba.Column);
-                        Expression typeId = GetTupleProperty(iba.ColumnTypes);
+                        Expression typeId = GetTupleProperty(iba.ColumnType);
 
                         if (isLite)
                         {
@@ -303,7 +303,7 @@ namespace Signum.Engine.Cache
 
                     Type elementType = field.FieldType.ElementType();
 
-                    CachedTableBase ctb = ciCachedRelationalTable.GetInvoker(elementType)(cachedTable.controller, mListField.RelationalTable, aliasGenerator, lastPartialJoin, remainingJoins);
+                    CachedTableBase ctb = ciCachedTableMList.GetInvoker(elementType)(cachedTable.controller, mListField.TableMList, aliasGenerator, lastPartialJoin, remainingJoins);
 
                     if (cachedTable.subTables == null)
                         cachedTable.subTables = new List<CachedTableBase>();
@@ -502,11 +502,11 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
-                    Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
+                    Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToStringDbo(),
-                    ctr.currentAlias.Name.SqlScape());
+                    ctr.currentAlias.Name.SqlEscape());
 
-                ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias.Name.SqlScape() + ".Id\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + ".Id\r\n" + remainingJoins;
 
                 if (ctr.remainingJoins != null)
                     select += ctr.remainingJoins;
@@ -615,9 +615,9 @@ namespace Signum.Engine.Cache
         }
     }
 
-    class CachedRelationalTable<T> : CachedTableBase
+    class CachedTableMList<T> : CachedTableBase
     {
-        RelationalTable table;
+        TableMList table;
 
         ResetLazy<Dictionary<int, Dictionary<int, object>>> relationalRows;
 
@@ -627,7 +627,7 @@ namespace Signum.Engine.Cache
         Func<object, int> parentIdGetter;
         Func<object, int> rowIdGetter;
 
-        public CachedRelationalTable(ICacheLogicController controller, RelationalTable table, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
+        public CachedTableMList(ICacheLogicController controller, TableMList table, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
             : base(controller)
         {
             this.table = table;
@@ -638,11 +638,11 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
-                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
+                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToStringDbo(),
-                    ctr.currentAlias.Name.SqlScape());
+                    ctr.currentAlias.Name.SqlEscape());
 
-                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias.Name.SqlScape() + "." + table.BackReference.Name.SqlScape() + "\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -776,12 +776,12 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT {0}, {1}\r\nFROM {2} {3}\r\n".Formato(
-                    currentAlias.Name.SqlScape() + "." + colId.Name.SqlScape(),
-                    currentAlias.Name.SqlScape() + "." + colToStr.Name.SqlScape(),
+                    currentAlias.Name.SqlEscape() + "." + colId.Name.SqlEscape(),
+                    currentAlias.Name.SqlEscape() + "." + colToStr.Name.SqlEscape(),
                     table.Name.ToStringDbo(),
-                    currentAlias.Name.SqlScape());
+                    currentAlias.Name.SqlEscape());
 
-                select += lastPartialJoin + currentAlias.Name.SqlScape() + ".Id\r\n" + remainingJoins;
+                select += lastPartialJoin + currentAlias.Name.SqlEscape() + ".Id\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
