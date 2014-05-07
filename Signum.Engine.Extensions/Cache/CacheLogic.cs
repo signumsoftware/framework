@@ -321,7 +321,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
         static SqlPreCommandSimple GetDependencyQuery(ITable table)
         {
-            return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlScape(), ", "), table.Name));
+            return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlEscape(), ", "), table.Name));
         }
 
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
