@@ -154,10 +154,10 @@ namespace Signum.Services
                  () => Symbol.GetSymbolIds(type));
         }
 
-        public Dictionary<string, int> GetSemiSymbolIds(Type type)
+        public Dictionary<string, Tuple<int,string>> GetSemiSymbolIdsAndNames(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                 () => SemiSymbol.GetSymbolIds(type));
+                 () => SemiSymbol.GetSemiSymbolIdsAndNames(type));
         }
         #endregion
 

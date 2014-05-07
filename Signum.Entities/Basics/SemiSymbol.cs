@@ -14,7 +14,7 @@ namespace Signum.Entities.Basics
     public abstract class SemiSymbol : IdentifiableEntity
     {
         static Dictionary<Type, Dictionary<string, SemiSymbol>> Symbols = new Dictionary<Type, Dictionary<string, SemiSymbol>>();
-        static Dictionary<Type, Dictionary<string, int>> Ids = new Dictionary<Type, Dictionary<string, int>>();
+        static Dictionary<Type, Dictionary<string, Tuple<int, string>>> Ids = new Dictionary<Type, Dictionary<string, Tuple<int, string>>>();
 
         public SemiSymbol() { }
 
@@ -42,8 +42,11 @@ namespace Signum.Entities.Basics
 
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
-                this.SetId(dic.GetOrThrow(this.key));
-
+            {
+                var tup = dic.TryGetC(this.key);
+                if (tup != null)
+                    this.SetIdAndName(tup);
+            }
             Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
         }
 
@@ -102,7 +105,7 @@ namespace Signum.Entities.Basics
             return ToStringExpression.Evaluate(this);
         }
 
-        public static void SetSemiSymbolIds<S>(Dictionary<string, int> symbolIds)
+        public static void SetSemiSymbolIdsAndNames<S>(Dictionary<string, Tuple<int, string>> symbolIds)
             where S : SemiSymbol
         {
             SemiSymbol.Ids.Add(typeof(S), symbolIds);
@@ -115,21 +118,22 @@ namespace Signum.Entities.Basics
                 {
                     var s = symbols.TryGetC(kvp.Key);
                     if (s != null)
-                        s.SetId(kvp.Value);
+                        s.SetIdAndName(kvp.Value);
                 }
             }
         }
 
-        private void SetId(int id)
+        private void SetIdAndName(Tuple<int, string> idAndName)
         {
-            this.id = id;
+            this.id = idAndName.Item1;
+            this.name = idAndName.Item2;
             this.IsNew = false;
             this.toStr = this.key;
             if (this.Modified != ModifiedState.Sealed)
                 this.Modified = ModifiedState.Sealed;
         }
 
-        internal static Dictionary<string, int> GetSymbolIds(Type type)
+        internal static Dictionary<string, Tuple<int, string>> GetSemiSymbolIdsAndNames(Type type)
         {
             return SemiSymbol.Ids.GetOrThrow(type);
         }
