@@ -579,8 +579,8 @@ namespace Signum.Engine.Maps
             {
                 using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
                 {
-                    List<RelationalTable.IRelationalCache> caches =
-                        (from rt in table.RelationalTables()
+                    List<TableMList.IRelationalCache> caches =
+                        (from rt in table.TableMList()
                          select giCreateCache.GetInvoker(rt.Field.FieldType)(rt)).ToList();
 
                     if (caches.IsEmpty())
@@ -611,9 +611,9 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache> saveCollections;
 
-        static GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>> giCreateCache =
-            new GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>>(
-            (RelationalTable rt) => rt.CreateCache<int>());
+        static GenericInvoker<Func<TableMList, TableMList.IRelationalCache>> giCreateCache =
+            new GenericInvoker<Func<TableMList, TableMList.IRelationalCache>>(
+            (TableMList rt) => rt.CreateCache<int>());
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
@@ -728,7 +728,7 @@ namespace Signum.Engine.Maps
     }
 
 
-    public partial class RelationalTable
+    public partial class TableMList
     {
         internal interface IRelationalCache
         {

@@ -92,7 +92,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class RelationalTable
+    public partial class TableMList
     {
         internal ColumnExpression RowIdExpression(Alias tableAlias)
         {
@@ -189,7 +189,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
-            return new MListExpression(FieldType, id, RelationalTable); // keep back id empty for some seconds 
+            return new MListExpression(FieldType, id, TableMList); // keep back id empty for some seconds 
         }
     }
 

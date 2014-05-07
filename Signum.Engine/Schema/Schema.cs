@@ -545,7 +545,7 @@ namespace Signum.Engine.Maps
             {
                 yield return table;
 
-                foreach (var subTable in table.RelationalTables().Cast<ITable>())
+                foreach (var subTable in table.TableMList().Cast<ITable>())
                     yield return subTable;
             }
         }

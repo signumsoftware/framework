@@ -174,7 +174,7 @@ namespace Signum.Engine
         public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
           where T : IdentifiableEntity
         {
-            RelationalTable table = ((FieldMList)Schema.Current.Field(mListField)).RelationalTable;
+            TableMList table = ((FieldMList)Schema.Current.Field(mListField)).TableMList;
             return DisableIdentity(table.Name);
         }
 
@@ -325,7 +325,7 @@ namespace Signum.Engine
         {
             IDisposable disp = PrepareTableForBatchLoadScope(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
 
-            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
+            var list = table.TableMList().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
 
             return new Disposable(() =>
             {

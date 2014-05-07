@@ -83,7 +83,7 @@ namespace Signum.Engine.Maps
         {
             Schema schema = Schema.Current;
 
-            RelationalTable table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).RelationalTable;
+            TableMList table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
             IColumn[] columns = Split(table, fields);
 
@@ -518,7 +518,7 @@ namespace Signum.Engine.Maps
 
             Type type = route.Parent.Type;
 
-            RelationalTable relationalTable = new RelationalTable(route.Type)
+            TableMList relationalTable = new TableMList(route.Type)
             {
                 Name = GenerateTableNameCollection(table, name),
                 BackReference = new FieldReference(table.Type)
@@ -526,7 +526,7 @@ namespace Signum.Engine.Maps
                     Name = GenerateBackReferenceName(type),
                     ReferenceTable = table
                 },
-                PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
+                PrimaryKey = new TableMList.PrimaryKeyColumn(),
                 Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 
@@ -534,7 +534,7 @@ namespace Signum.Engine.Maps
 
             return new FieldMList(route.Type)
             {
-                RelationalTable = relationalTable,
+                TableMList = relationalTable,
             };
         }
 

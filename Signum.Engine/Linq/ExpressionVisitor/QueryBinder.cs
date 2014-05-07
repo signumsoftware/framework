@@ -878,7 +878,7 @@ namespace Signum.Engine.Linq
 
             Expression exp = table is Table ? 
                 ((Table)table).GetProjectorExpression(tableAlias, this) :
-                ((RelationalTable)table).GetProjectorExpression(tableAlias, this);
+                ((TableMList)table).GetProjectorExpression(tableAlias, this);
 
             Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
             TableExpression tableExpression = new TableExpression(tableAlias, table);
@@ -1665,8 +1665,8 @@ namespace Signum.Engine.Linq
 
                 commands.AddRange(ee.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
                 {
-                    Expression backId = f.RelationalTable.BackColumnExpression(aliasGenerator.Table(f.RelationalTable.Name));
-                    return new DeleteExpression(f.RelationalTable, pr.Select,
+                    Expression backId = f.TableMList.BackColumnExpression(aliasGenerator.Table(f.TableMList.Name));
+                    return new DeleteExpression(f.TableMList, pr.Select,
                         SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
 
@@ -1711,7 +1711,7 @@ namespace Signum.Engine.Linq
 
             Expression toUpdate = table is Table ?
                 ((Table)table).GetProjectorExpression(alias, this) :
-                ((RelationalTable)table).GetProjectorExpression(alias, this);
+                ((TableMList)table).GetProjectorExpression(alias, this);
 
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
             using (SetCurrentSource(pr.Select.From))
@@ -1773,7 +1773,7 @@ namespace Signum.Engine.Linq
 
             Expression toInsert = table is Table ?
                 ((Table)table).GetProjectorExpression(alias, this) :
-                ((RelationalTable)table).GetProjectorExpression(alias, this);
+                ((TableMList)table).GetProjectorExpression(alias, this);
 
             ParameterExpression param = constructor.Parameters[0];
             ParameterExpression toInsertParam = Expression.Parameter(toInsert.Type, "toInsert");
@@ -2202,9 +2202,9 @@ namespace Signum.Engine.Linq
 
         internal ProjectionExpression MListProjection(MListExpression mle)
         {
-            RelationalTable relationalTable = mle.RelationalTable;
+            TableMList relationalTable = mle.TableMList;
 
-            Alias tableAlias = NextTableAlias(mle.RelationalTable.Name);
+            Alias tableAlias = NextTableAlias(mle.TableMList.Name);
             TableExpression tableExpression = new TableExpression(tableAlias, relationalTable);
 
             Expression projector = relationalTable.FieldExpression(tableAlias, this);

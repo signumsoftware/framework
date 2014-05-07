@@ -397,10 +397,10 @@ namespace Signum.Engine.Linq
                     PropertyRoute parent = PropertyRoute.Root(parentType);
 
                     ISignumTable st = (ISignumTable)c.Value;
-                    var rt = (RelationalTable)st.Table;
+                    var rt = (TableMList)st.Table;
 
                     Table table = rt.BackReference.ReferenceTable;
-                    FieldInfo fieldInfo = table.Fields.Values.Single(f => f.Field is FieldMList && ((FieldMList)f.Field).RelationalTable == rt).FieldInfo;
+                    FieldInfo fieldInfo = table.Fields.Values.Single(f => f.Field is FieldMList && ((FieldMList)f.Field).TableMList == rt).FieldInfo;
 
                     PropertyRoute element = parent.Add(fieldInfo).Add("Item");
 
