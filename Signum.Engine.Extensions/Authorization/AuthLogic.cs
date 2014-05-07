@@ -525,7 +525,7 @@ namespace Signum.Engine.Authorization
         public static void SynchronizeRoles(XDocument doc)
         {
             Table table = Schema.Current.Table(typeof(RoleDN));
-            TableMList relationalTable = table.TableMList().Single();
+            TableMList relationalTable = table.TablesMList().Single();
 
             Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
