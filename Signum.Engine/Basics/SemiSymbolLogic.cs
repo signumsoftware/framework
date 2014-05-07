@@ -41,8 +41,11 @@ namespace Signum.Engine.Extensions.Basics
                 SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
-                    SemiSymbol.SetSemiSymbolIdsAndNames<T>(Database.RetrieveAll<T>().Where(a => a.Key.HasText()).ToDictionary(a => a.Key, a => Tuple.Create(a.Id, a.Name)));
-                    return getSemiSymbols().ToDictionary(a => a.Key);
+                    using (AvoidCache())
+                    {
+                        SemiSymbol.SetSemiSymbolIdsAndNames<T>(Database.RetrieveAll<T>().Where(a => a.Key.HasText()).ToDictionary(a => a.Key, a => Tuple.Create(a.Id, a.Name)));
+                        return getSemiSymbols().ToDictionary(a => a.Key);
+                    }
                 }, new InvalidateWith(typeof(T)));
 
                 sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
