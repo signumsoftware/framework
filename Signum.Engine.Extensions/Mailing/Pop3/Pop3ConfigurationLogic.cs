@@ -63,7 +63,7 @@ namespace Signum.Engine.Mailing.Pop3
             {
                 FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.YearMonth_Guid_Filename_Sufix });
 
-                MixinDeclarations.AssertDefined(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
+                MixinDeclarations.AssertDeclared(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
 
                 MimeType.CacheExtension.TryAdd("message/rfc822", ".eml");
 

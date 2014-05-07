@@ -276,7 +276,7 @@ namespace Signum.Entities.ControlPanel
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQueries.Syncronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(element, ctx));
+            UserQueries.Syncronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(x, ctx));
         }
     }
 

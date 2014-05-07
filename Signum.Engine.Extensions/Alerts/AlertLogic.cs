@@ -93,8 +93,8 @@ namespace Signum.Engine.Alerts
 
         public static void RegisterAlertType(AlertTypeDN alertType)
         {
-            if (alertType.Key.HasText())
-                throw new InvalidOperationException("AlertType must have a key");
+            if (!alertType.Key.HasText())
+                throw new InvalidOperationException("alertType must have a key, use MakeSymbol method after the constructor when declaring it");
 
             SystemAlertTypes.Add(alertType);
         }

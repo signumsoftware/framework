@@ -133,7 +133,9 @@ export class FileLine extends Lines.EntityBase {
 
         var $divNew = $(this.pf("DivNew"));
         var $clonedDivNew = $divNew.clone(true);
-        $divNew.after($clonedDivNew).appendTo($fileForm);
+        $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
+
+        $("<input type='hidden' name='" + this.options.prefix + "_sfFileType' value='" + this.options.fileType + "'/>").appendTo($fileForm);
 
         var $tabId = $("#" + Entities.Keys.tabId).clone().appendTo($fileForm);
         var $antiForgeryToken = $("input[name=" + Entities.Keys.antiForgeryToken + "]").clone().appendTo($fileForm);

@@ -114,14 +114,6 @@ namespace Signum.Entities.SMS
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        [ImplementedBy()]
-        IIdentifiable additionalData;
-        public IIdentifiable AdditionalData
-        {
-            get { return additionalData; }
-            set { Set(ref additionalData, value); }
-        }
-
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))

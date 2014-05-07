@@ -23,6 +23,8 @@ namespace Signum.Windows.Authorization
 
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
 
+            Server.SetSymbolIds<PermissionSymbol>();
+
             LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.IsAuthorized();

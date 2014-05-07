@@ -65,15 +65,19 @@ namespace Signum.Web.Selenium
                 {
                     Selenium.SetChecked(Prefix, bool.Parse(value));
                 }
+                else if (Selenium.IsElementPresent("jq=div.input-group.date>#{0}".Formato(Prefix)))
+                {
+                    Selenium.RunScript("window.$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".Formato(Prefix, value));
+                }
+                else if (Selenium.IsElementPresent("jq=#{0} > div.date".Formato(Prefix)) &&
+                    Selenium.IsElementPresent("jq=#{0} > div.time".Formato(Prefix)))
+                {
+                    Selenium.RunScript("window.$('#{0} > div.date').datepicker('setDate', '{1}')".Formato(Prefix, value.TryBefore(" ")));
+                    Selenium.RunScript("window.$('#{0} > div.time').timepicker('setTime', '{1}')".Formato(Prefix, value.TryAfter(" ")));
+                }
                 else if (Selenium.IsElementPresent("jq=[name={0}]".Formato(Prefix)))
                 {
                     Selenium.Type(Prefix, value);
-                }
-                else if (Selenium.IsElementPresent("jq=#{0} > div.date".Formato(Prefix)) &&
-                   Selenium.IsElementPresent("jq=#{0} > div.time".Formato(Prefix)))
-                {
-                    Selenium.RunScript("window.$('#{0} > div.date').datepicker('update', '{1}')".Formato(Prefix, value.TryBefore(" ")));
-                    Selenium.RunScript("window.$('#{0} > div.time').timepicker('setTime', '{1}')".Formato(Prefix, value.TryAfter(" ")));
                 }
                 else
                     throw new InvalidOperationException("Element {0} not found".Formato(Prefix));
@@ -408,7 +412,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity()
         {
-            return Selenium.IsElementPresent(DivSelector + ":parent");
+            return Selenium.IsElementPresent(DivSelector + " *:first");
         }
 
         public Lite<IIdentifiable> Lite
