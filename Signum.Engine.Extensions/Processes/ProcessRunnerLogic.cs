@@ -408,42 +408,41 @@ namespace Signum.Engine.Processes
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (CurrentExecution.Session != null)
-                    using (AuthLogic.Disable())
-                        ProcessLogic.ApplySession.Invoke(CurrentExecution.Session);
-
-                if (UserDN.Current == null)
-                    UserDN.Current = AuthLogic.SystemUser;
-                try
+                using (ProcessLogic.ApplySession(CurrentExecution))
                 {
-                    Algorithm.Execute(this);
+                    if (UserDN.Current == null)
+                        UserDN.Current = AuthLogic.SystemUser;
+                    try
+                    {
+                        Algorithm.Execute(this);
 
-                    CurrentExecution.ExecutionEnd = TimeZoneManager.Now;
-                    CurrentExecution.State = ProcessState.Finished;
-                    CurrentExecution.Progress = null;
-                    using (OperationLogic.AllowSave<ProcessDN>())
-                        CurrentExecution.Save();
-                }
-                catch (OperationCanceledException e)
-                {
-                    if (!e.CancellationToken.Equals(this.CancellationToken))
-                        throw;
+                        CurrentExecution.ExecutionEnd = TimeZoneManager.Now;
+                        CurrentExecution.State = ProcessState.Finished;
+                        CurrentExecution.Progress = null;
+                        using (OperationLogic.AllowSave<ProcessDN>())
+                            CurrentExecution.Save();
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        if (!e.CancellationToken.Equals(this.CancellationToken))
+                            throw;
 
-                    CurrentExecution.SuspendDate = TimeZoneManager.Now;
-                    CurrentExecution.State = ProcessState.Suspended;
-                    using (OperationLogic.AllowSave<ProcessDN>())
-                        CurrentExecution.Save();
-                }
-                catch (Exception e)
-                {
-                    if (Transaction.InTestTransaction)
-                        throw;
+                        CurrentExecution.SuspendDate = TimeZoneManager.Now;
+                        CurrentExecution.State = ProcessState.Suspended;
+                        using (OperationLogic.AllowSave<ProcessDN>())
+                            CurrentExecution.Save();
+                    }
+                    catch (Exception e)
+                    {
+                        if (Transaction.InTestTransaction)
+                            throw;
 
-                    CurrentExecution.State = ProcessState.Error;
-                    CurrentExecution.ExceptionDate = TimeZoneManager.Now;
-                    CurrentExecution.Exception = e.LogException(el => el.ActionName = CurrentExecution.Algorithm.ToString()).ToLite();
-                    using (OperationLogic.AllowSave<ProcessDN>())
-                        CurrentExecution.Save();
+                        CurrentExecution.State = ProcessState.Error;
+                        CurrentExecution.ExceptionDate = TimeZoneManager.Now;
+                        CurrentExecution.Exception = e.LogException(el => el.ActionName = CurrentExecution.Algorithm.ToString()).ToLite();
+                        using (OperationLogic.AllowSave<ProcessDN>())
+                            CurrentExecution.Save();
+                    }
                 }
             }
         }

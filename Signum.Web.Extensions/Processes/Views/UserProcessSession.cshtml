@@ -1,6 +1,0 @@
-﻿@using Signum.Entities.Processes
-
-@using (var e = Html.TypeContext<UserProcessSessionDN>())
-{ 
-    @Html.EntityLine(e, f => f.User, f => f.ReadOnly = true)
-}

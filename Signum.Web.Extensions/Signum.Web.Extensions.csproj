@@ -253,11 +253,6 @@
       <DependentUpon>Pop3Configuration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\WebMailProcessor.cs" />
-    <Compile Include="Processes\Views\UserProcessSession.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>UserProcessSession.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
     <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
       <DependentUpon>SchedulerPanel.cshtml</DependentUpon>
@@ -1285,10 +1280,6 @@
     <Content Include="Mailing\Views\EmailMasterTemplateMessage.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailMasterTemplateMessage.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Processes\Views\UserProcessSession.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>UserProcessSession.generated.cs</LastGenOutput>
     </Content>
     <Content Include="ControlPanel\Views\Admin\PanelPartViewAdmin.cshtml">
       <Generator>RazorGenerator</Generator>

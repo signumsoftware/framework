@@ -31,11 +31,9 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
-        public static bool JustMyProcesses = true; 
+        public static bool JustMyProcesses = true;
 
-        public static Polymorphic<Action<IProcessSessionDN>> ApplySession = new Polymorphic<Action<IProcessSessionDN>>();
-
-        public static Func<IProcessSessionDN> CreateDefaultProcessSession;
+        public static Func<ProcessDN, IDisposable> ApplySession;
 
         static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessDN>>> ProcessesFromAlgorithmExpression =
             p => Database.Query<ProcessDN>().Where(a => a.Algorithm == p);
@@ -169,18 +167,30 @@ namespace Signum.Engine.Processes
 
                 if (userProcessSession)
                 {
-                    sb.Settings.AssertImplementedBy((ProcessDN p) => p.Session, typeof(UserProcessSessionDN));
-                    ApplySession.Register((UserProcessSessionDN ups) =>
+                    PropertyAuthLogic.AvoidAutomaticUpgrade.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
+                    MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
+                    ApplySession += process =>
                     {
-                        if (ups.User != null)
-                            UserDN.Current = ups.User.Retrieve();
-                    });
+                        if (process.Mixin<UserProcessSessionMixin>().User == null)
+                            return null;
 
-                    CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
+                        return AuthLogic.UserSession(process.Mixin<UserProcessSessionMixin>().User.Retrieve());
+                    };
                 }
-                else
-                    CreateDefaultProcessSession = () => null;
             }
+        }
+
+        public static IDisposable OnApplySession(ProcessDN process)
+        {
+            if (ApplySession == null) 
+                return null;
+
+            IDisposable result = null;
+            foreach (Func<ProcessDN, IDisposable> item in ApplySession.GetInvocationList())
+            {
+                result = Disposable.Combine(result, item(process));
+            }
+            return result;
         }
 
         public static void Register(ProcessAlgorithmSymbol processAlgorthm, IProcessAlgorithm logic)
@@ -266,24 +276,18 @@ namespace Signum.Engine.Processes
                 {
                     CanConstruct = p => p.State.InState(ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
                     ToState = ProcessState.Created,
-                    Construct = (p, _) => p.Algorithm.Create(p.Data, p.Session)
+                    Construct = (p, _) => p.Algorithm.Create(p.Data).CopyMixinsFrom(p)
                 }.Register();
             }
         }
 
-        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IProcessSessionDN session = null)
+        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData)
         {
-            if (session == null)
-            {
-                session = ProcessLogic.CreateDefaultProcessSession();
-            }
-
             using (OperationLogic.AllowSave<ProcessDN>())
                 return new ProcessDN(process)
                 {
                     State = ProcessState.Created,
                     Data = processData,
-                    Session = session,
                     MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None,
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None,
                 }.Save();

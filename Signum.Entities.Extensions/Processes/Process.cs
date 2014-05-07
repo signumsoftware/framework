@@ -53,14 +53,6 @@ namespace Signum.Entities.Processes
             set { Set(ref data, value); }
         }
 
-        [ImplementedBy(typeof(UserProcessSessionDN))]
-        IProcessSessionDN session;
-        public IProcessSessionDN Session
-        {
-            get { return session; }
-            set { Set(ref session, value); }
-        }
-
         public const string None = "none";
 
         [SqlDbType(Size = 100), NotNullable]
@@ -223,31 +215,24 @@ namespace Signum.Entities.Processes
 
     }
 
-    public interface IProcessSessionDN : IIdentifiable
-    {
-    }
-
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class UserProcessSessionDN : Entity, IProcessSessionDN
+    public class UserProcessSessionMixin : MixinEntity
     {
-        Lite<UserDN> user;
+        UserProcessSessionMixin(IdentifiableEntity mainEntity, MixinEntity next)
+            : base(mainEntity, next)
+        {
+        }
+
+        Lite<UserDN> user = UserDN.Current.ToLite();
         public Lite<UserDN> User
         {
             get { return user; }
             set { Set(ref user, value); }
         }
 
-        public static UserProcessSessionDN CreateCurrent()
+        protected override void CopyFrom(MixinEntity mixin, object[] args)
         {
-            return new UserProcessSessionDN
-            {
-                User = UserDN.Current.ToLite(),
-            };
-        }
-
-        public override string ToString()
-        {
-            return GetType().NiceName() + ":" + user.TryToString();
+            this.User = ((UserProcessSessionMixin)mixin).User;
         }
     }
 

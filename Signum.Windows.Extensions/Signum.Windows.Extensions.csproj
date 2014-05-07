@@ -316,9 +316,6 @@
     <Compile Include="Processes\ProcessUI.xaml.cs">
       <DependentUpon>ProcessUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Processes\UserProcessSession.xaml.cs">
-      <DependentUpon>UserProcessSession.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\ProfilerUploader.xaml.cs">
       <DependentUpon>ProfilerUploader.xaml</DependentUpon>
@@ -722,10 +719,6 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\UserProcessSession.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Profiler\ProfilerUploader.xaml">
       <SubType>Designer</SubType>
