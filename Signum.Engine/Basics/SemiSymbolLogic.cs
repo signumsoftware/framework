@@ -43,8 +43,6 @@ namespace Signum.Engine.Extensions.Basics
                 {
                     SemiSymbol.SetSemiSymbolIdsAndNames<T>(Database.RetrieveAll<T>().Where(a => a.Key.HasText()).ToDictionary(a => a.Key, a => Tuple.Create(a.Id, a.Name)));
                     return getSemiSymbols().ToDictionary(a => a.Key);
-                    }
-
                 }, new InvalidateWith(typeof(T)));
 
                 sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
