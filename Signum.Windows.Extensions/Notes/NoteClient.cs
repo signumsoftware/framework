@@ -25,6 +25,8 @@ namespace Signum.Windows.Notes
                     return null;
                 };
 
+                Server.SetSemiSymbolIds<NoteTypeDN>();
+
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings(NoteOperation.CreateNoteFromEntity) 

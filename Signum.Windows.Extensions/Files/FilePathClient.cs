@@ -26,6 +26,8 @@ namespace Signum.Windows.Files
                     new EntitySettings<FileRepositoryDN> { View = e => new FileRepository() },
                     new EntitySettings<FilePathDN> { View = e => new FilePath() },
                 });
+
+                Server.SetSymbolIds<FileTypeSymbol>();
             }
         }
     }

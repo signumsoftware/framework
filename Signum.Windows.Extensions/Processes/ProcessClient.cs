@@ -32,6 +32,8 @@ namespace Signum.Windows.Processes
                 Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
 
 
+                Server.SetSymbolIds<ProcessAlgorithmSymbol>();
+
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
                     new EntityOperationSettings(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },

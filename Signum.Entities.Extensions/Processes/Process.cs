@@ -223,8 +223,8 @@ namespace Signum.Entities.Processes
         {
         }
 
-        Lite<UserDN> user = UserDN.Current.ToLite();
-        public Lite<UserDN> User
+        Lite<IUserDN> user = UserHolder.Current.ToLite();
+        public Lite<IUserDN> User
         {
             get { return user; }
             set { Set(ref user, value); }

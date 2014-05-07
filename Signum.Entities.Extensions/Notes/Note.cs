@@ -50,9 +50,9 @@ namespace Signum.Entities.Notes
             set { SetToStr(ref text, value); }
         }
 
-        Lite<UserDN> createdBy = UserDN.Current.ToLite();
+        Lite<IUserDN> createdBy = UserHolder.Current.ToLite();
         [NotNullValidator]
-        public Lite<UserDN> CreatedBy
+        public Lite<IUserDN> CreatedBy
         {
             get { return createdBy; }
             set { Set(ref createdBy, value); }

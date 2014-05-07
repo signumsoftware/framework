@@ -112,7 +112,6 @@ namespace Signum.Engine.Processes
                 SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
-                AuthLogic.AssertStarted(sb);
                 CacheLogic.AssertStarted(sb); 
 
                 ProcessGraph.Register();
@@ -171,10 +170,12 @@ namespace Signum.Engine.Processes
                     MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {
-                        if (process.Mixin<UserProcessSessionMixin>().User == null)
-                            return null;
+						var user = process.Mixin<UserProcessSessionMixin>().User; 
 
-                        return AuthLogic.UserSession(process.Mixin<UserProcessSessionMixin>().User.Retrieve());
+                        if (user == null)
+                             UserHolder.Current = user.Retrieve();
+  					  
+  					    return null; 
                     };
                 }
             }

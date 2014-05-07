@@ -502,7 +502,7 @@ namespace Signum.Web.Selenium
 
             var index = tokens.IndexOf(token);
 
-            if (index == null)
+            if (index == -1)
                 throw new InvalidOperationException("Token {0} not found between {1}".Formato(token, tokens.CommaAnd()));
 
             return RowLocator(rowIndex) + "> td:nth-child({0})".Formato(index + 1);
@@ -766,7 +766,7 @@ namespace Signum.Web.Selenium
             QuickLinkClick(title);
             var result = new SearchPopupProxy(resultTable.Selenium, resultTable.PrefixUnderscore + "New");
             resultTable.Selenium.WaitElementPresent(result.PopupVisibleLocator);
-            resultTable.Selenium.WaitSearchCompleted();
+            result.SearchControl.WaitInitialSearchCompleted();
             return result;
         }
 
