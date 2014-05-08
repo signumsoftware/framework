@@ -270,7 +270,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.EnableForeignKeys(table);
 
-            foreach (var rt in table.TableMList())
+            foreach (var rt in table.TablesMList())
                 DisconnectedTools.EnableForeignKeys(rt);
         }
 
@@ -278,7 +278,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.DisableForeignKeys(table);
 
-            foreach (var rt in table.TableMList())
+            foreach (var rt in table.TablesMList())
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
@@ -385,7 +385,7 @@ namespace Signum.Engine.Disconnected
 
                         int result = Executor.ExecuteNonQuery(sql);
 
-                        foreach (var rt in table.TableMList())
+                        foreach (var rt in table.TablesMList())
                         {
                             SqlPreCommandSimple rsql = InsertRelationalTableScript(table, newDatabaseName, interval, rt);
 
@@ -480,7 +480,7 @@ table.Name.OnDatabase(newDatabaseName));
 
                 int result = Executor.ExecuteNonQuery(command);
 
-                foreach (var rt in table.TableMList())
+                foreach (var rt in table.TablesMList())
                 {
                     SqlPreCommandSimple delete = DeleteUpdatedRelationalTableScript(machine, table, rt, newDatabaseName);
 

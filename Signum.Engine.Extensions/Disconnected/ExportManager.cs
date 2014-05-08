@@ -309,7 +309,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.EnableForeignKeys(table);
 
-            foreach (var rt in table.TableMList())
+            foreach (var rt in table.TablesMList())
                 DisconnectedTools.EnableForeignKeys(rt);
         }
 
@@ -317,7 +317,7 @@ namespace Signum.Engine.Disconnected
         {
             DisconnectedTools.DisableForeignKeys(table);
 
-            foreach (var rt in table.TableMList())
+            foreach (var rt in table.TablesMList())
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
@@ -359,7 +359,7 @@ namespace Signum.Engine.Disconnected
 
             CopyTableBasic(table, newDatabaseName, filter);
 
-            foreach (var rt in table.TableMList())
+            foreach (var rt in table.TablesMList())
                 CopyTableBasic(rt, newDatabaseName, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
 
