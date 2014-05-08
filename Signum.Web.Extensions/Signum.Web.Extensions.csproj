@@ -18,7 +18,6 @@
     </AssemblyOriginatorKeyFile>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
-    <TypeScriptToolsVersion>0.9</TypeScriptToolsVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
@@ -1057,7 +1056,7 @@
     </Content>
     <Content Include="Mailing\Content\Mailing.css" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
-    <TypeScriptCompile Include="Mailing\Scripts\ckeditor.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\ckeditor.d.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
