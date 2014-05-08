@@ -51,7 +51,21 @@ namespace Signum.Engine.Isolation
 
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertIsolationStrategies;
+                OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
             }
+        }
+
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)
+        {
+            if (IsolationDN.Current == null)
+                return null;
+
+            Lite<IsolationDN> isolation = (entity == null ? null : entity.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>();
+
+            if (isolation == null)
+                return null;
+
+            return IsolationDN.Override(isolation);
         }
 
         static void EntityEventsGlobal_PreSaving(IdentifiableEntity ident, ref bool graphModified)
