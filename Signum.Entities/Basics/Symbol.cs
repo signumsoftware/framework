@@ -104,7 +104,7 @@ namespace Signum.Entities
         public static void SetSymbolIds<S>(Dictionary<string, int> symbolIds)
             where S : Symbol
         {
-            Symbol.Ids.Add(typeof(S),symbolIds);
+            Symbol.Ids[typeof(S)] = symbolIds;
 
             var symbols = Symbol.Symbols.TryGetC(typeof(S));
 

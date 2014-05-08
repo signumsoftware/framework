@@ -15,7 +15,7 @@ using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {
-    internal static class SqlBuilder
+    public static class SqlBuilder
     {
         public readonly static SqlDbType PrimaryKeyType = SqlDbType.Int;
         public readonly static string PrimaryKeyName = "Id";
