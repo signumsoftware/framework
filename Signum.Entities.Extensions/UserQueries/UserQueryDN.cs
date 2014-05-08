@@ -504,9 +504,9 @@ namespace Signum.Entities.UserQueries
             set { Set(ref operation, value); }
         }
 
-        [SqlDbType(Size = 100)]
+        [SqlDbType(Size = 300)]
         string valueString;
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString
         {
             get { return valueString; }
