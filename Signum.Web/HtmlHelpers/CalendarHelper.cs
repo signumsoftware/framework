@@ -227,7 +227,7 @@ namespace Signum.Web
              .Attr("data-second-step", "1")
              .Attr("data-show-meridian", false.ToString().ToLower())
              .Attr("data-show-seconds", (format.Contains("s")).ToString().ToLower())
-             .Attr("data-hours-two-digits", format.Contains("hh").ToString().ToLower());
+             .Attr("data-hours-two-digits", (format.Contains("hh") || format.Contains("HH")).ToString().ToLower());
         }
     }
 }

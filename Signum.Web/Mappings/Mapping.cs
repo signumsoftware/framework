@@ -59,7 +59,18 @@ namespace Signum.Web
             MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
             MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.HasInput ? ctx.Input : ctx.Inputs["Date"] + " " + ctx.Inputs["Time"]).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
-            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
+            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => 
+            {
+                var pv = ctx.PropertyValidator;
+                if (pv != null)
+                {
+                    var dateFormat = pv.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
+                    if (dateFormat != null)
+                        return DateTime.ParseExact(ctx.Input, dateFormat.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                }
+
+                return TimeSpan.Parse(ctx.Input);
+            });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
             MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
 
@@ -81,7 +92,21 @@ namespace Signum.Web
                 return input.HasText() ? DateTime.Parse(input).FromUserInterface() : (DateTime?)null;
             });
             MappingRepository<Guid?>.Mapping = GetValueNullable(ctx => Guid.Parse(ctx.Input));
-            MappingRepository<TimeSpan?>.Mapping = GetValueNullable(ctx => TimeSpan.Parse(ctx.Input));
+            MappingRepository<TimeSpan?>.Mapping = GetValue(ctx => 
+            {
+                if (ctx.Input.IsNullOrEmpty())
+                    return (TimeSpan?)null;
+
+                var pv = ctx.PropertyValidator;
+                if (pv != null)
+                {
+                    var dateFormat = pv.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
+                    if (dateFormat != null)
+                        return DateTime.ParseExact(ctx.Input, dateFormat.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                }
+                
+                return TimeSpan.Parse(ctx.Input);
+            });
 
 
             MappingRepository<string>.Mapping = ctx =>
