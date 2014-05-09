@@ -607,26 +607,6 @@ namespace Signum.Entities
         }
     }
 
-    public class TimeSpanDateFormatAttribute : ValidatorAttribute
-    {
-        public string Format { get; private set; }
-
-        public TimeSpanDateFormatAttribute(string format)
-        {
-            Format = format;
-        }
-
-        public override string HelpMessage
-        {
-            get { return null; }
-        }
-
-        protected override string OverrideError(object value)
-        {
-            return null;
-        }
-    }
-
     public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }

@@ -179,20 +179,22 @@ namespace Signum.Web
                .Attr("data-date-today-highlight", "true");
         }
 
-        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, TimeSpan? ts, string format, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, TimeSpan? ts, string dateFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
         {
-            if (format == null)
-                format = @"hh\:mm";
+            if (dateFormat == null)
+                dateFormat = "HH:mm";
 
-            if (format.Contains("f") || format.Contains("F"))
-                return helper.TextBox(name, ts == null ? "" : ts.Value.ToString(format, culture), new { @class = "form-control" });
+            var stringValue = ts == null ? "" : DateTime.Today.Add(ts.Value).ToString(dateFormat, culture);
 
-            return helper.TimePicker(name, formGroup, ts == null ? "" : ts.Value.ToString(format, culture), format, htmlProps: htmlProps);
+            if (dateFormat.Contains("f") || dateFormat.Contains("F"))
+                return helper.TextBox(name, stringValue, new { @class = "form-control" });
+
+            return helper.TimePicker(name, formGroup, stringValue, dateFormat, htmlProps: htmlProps);
         }
 
-        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, string value, string format, IDictionary<string, object> htmlProps = null)
+        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, string value, string dateFormat, IDictionary<string, object> htmlProps = null)
         {
-            if (format.Contains("f") || format.Contains("F"))
+            if (dateFormat.Contains("f") || dateFormat.Contains("F"))
             {
                 htmlProps["class"] += " form-control";
                 return helper.TextBox(TypeContextUtilities.Compose(name, "Time"), value, htmlProps);
@@ -206,10 +208,10 @@ namespace Signum.Web
                 .Attr("value", value);
 
             if (!formGroup)
-                return AttachTimePiceker(input, format);
+                return AttachTimePiceker(input, dateFormat);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(AttachTimePiceker(new HtmlTag("div").Class("input-group time"), format)))
+            using (sb.Surround(AttachTimePiceker(new HtmlTag("div").Class("input-group time"), dateFormat)))
             {
                 sb.Add(input);
 

@@ -61,15 +61,11 @@ namespace Signum.Web
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan>.Mapping = GetValue(ctx => 
             {
-                var pv = ctx.PropertyValidator;
-                if (pv != null)
-                {
-                    var dateFormat = pv.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
-                    if (dateFormat != null)
-                        return DateTime.ParseExact(ctx.Input, dateFormat.Format, CultureInfo.CurrentCulture).TimeOfDay;
-                }
-
-                return TimeSpan.Parse(ctx.Input);
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                if (dateFormatAttr != null)
+                    return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                else
+                    return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
             MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
@@ -97,17 +93,12 @@ namespace Signum.Web
                 if (ctx.Input.IsNullOrEmpty())
                     return (TimeSpan?)null;
 
-                var pv = ctx.PropertyValidator;
-                if (pv != null)
-                {
-                    var dateFormat = pv.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
-                    if (dateFormat != null)
-                        return DateTime.ParseExact(ctx.Input, dateFormat.Format, CultureInfo.CurrentCulture).TimeOfDay;
-                }
-                
-                return TimeSpan.Parse(ctx.Input);
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                if (dateFormatAttr != null)
+                    return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                else
+                    return TimeSpan.Parse(ctx.Input);
             });
-
 
             MappingRepository<string>.Mapping = ctx =>
             {

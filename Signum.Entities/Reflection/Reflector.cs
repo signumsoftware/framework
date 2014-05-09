@@ -364,10 +364,6 @@ namespace Signum.Entities.Reflection
                 if (datetimePrecission != null)
                     return datetimePrecission.FormatString;
 
-                TimeSpanDateFormatAttribute timeSpanDateFormat = pp.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
-                if (timeSpanDateFormat != null)
-                    return timeSpanDateFormat.Format;
-
                 TimeSpanPrecissionValidatorAttribute timeSpanPrecission = pp.Validators.OfType<TimeSpanPrecissionValidatorAttribute>().SingleOrDefaultEx();
                 if (timeSpanPrecission != null)
                     return timeSpanPrecission.FormatString;

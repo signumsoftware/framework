@@ -112,25 +112,14 @@ namespace Signum.Web
                 return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
 
-            var pv = Validator.TryGetPropertyValidator(valueLine.PropertyRoute);
-            if (pv != null)
+            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+            if (dateFormatAttr != null)
+                return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
+            else
             {
-                var dateFormatAttr = pv.Validators.OfType<TimeSpanDateFormatAttribute>().SingleOrDefaultEx();
-                if (dateFormatAttr != null)
-                {
-                    var stringValue = "";
-                    if (value != null)
-                    {
-                        var date = DateTime.Today.Add(value.Value);
-                        stringValue = date.ToString(dateFormatAttr.Format);
-                    }
-
-                    return helper.TimePicker(valueLine.Prefix, true, stringValue, dateFormatAttr.Format, valueLine.ValueHtmlProps);
-                }
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+                return helper.TextBox(valueLine.Prefix, value == null ? "" : value.Value.ToString(valueLine.Format, CultureInfo.CurrentCulture), valueLine.ValueHtmlProps);
             }
-
-            valueLine.ValueHtmlProps.AddCssClass("form-control");
-            return helper.TextBox(valueLine.Prefix, value == null ? "" : value.Value.ToString(valueLine.Format, CultureInfo.CurrentCulture), valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
