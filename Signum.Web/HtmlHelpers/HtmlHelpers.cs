@@ -153,45 +153,6 @@ namespace Signum.Web
             }
         }
 
-        public static IDisposable FormInline(this HtmlHelper html)
-        {
-            TextWriter writer = html.ViewContext.Writer;
-
-            HtmlTag div = new HtmlTag("div").Class("form-inline");
-            writer.Write(div.ToHtml(TagRenderMode.StartTag));
-
-            return new Disposable(() =>
-            {
-                writer.Write(div.ToHtml(TagRenderMode.EndTag));
-            });
-        }
-
-        public static IDisposable FormHorizontal(this HtmlHelper html)
-        {
-            TextWriter writer = html.ViewContext.Writer;
-
-            HtmlTag div = new HtmlTag("div").Class("form-horizontal");
-            writer.Write(div.ToHtml(TagRenderMode.StartTag));
-
-            return new Disposable(() =>
-            {
-                writer.Write(div.ToHtml(TagRenderMode.EndTag));
-            });
-        }
-
-        public static IDisposable FormVertical(this HtmlHelper html)
-        {
-            TextWriter writer = html.ViewContext.Writer;
-
-            HtmlTag div = new HtmlTag("div").Class("form-vertical");
-            writer.Write(div.ToHtml(TagRenderMode.StartTag));
-
-            return new Disposable(() =>
-            {
-                writer.Write(div.ToHtml(TagRenderMode.EndTag));
-            });
-        }
-
         public static TabContainer Tabs(this HtmlHelper html, TypeContext ctx, string containerId = "tabs")
         {
             return new TabContainer(html, ctx, containerId);
