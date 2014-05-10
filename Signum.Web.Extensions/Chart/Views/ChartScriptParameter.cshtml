@@ -3,18 +3,17 @@
 {
     cc.FormGroupStyle = FormGroupStyle.Basic;
 
-    using (Html.FormVertical())
-    {
-    <div class="col-sm-2">
-        @Html.ValueLine(cc, c => c.Name)
+    <div class="form-vertical">
+        <div class="col-sm-2">
+            @Html.ValueLine(cc, c => c.Name)
+        </div>
+
+        <div class="col-sm-2">
+            @Html.ValueLine(cc, c => c.Type)
+        </div>
+
+        <div class="col-sm-8">
+            @Html.ValueLine(cc, c => c.ValueDefinition)
+        </div>
     </div>
-    
-    <div class="col-sm-2">
-        @Html.ValueLine(cc, c => c.Type)
-    </div>
-    
-    <div class="col-sm-8">
-        @Html.ValueLine(cc, c => c.ValueDefinition)
-    </div>
-    }
 }
