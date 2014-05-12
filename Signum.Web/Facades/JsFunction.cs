@@ -111,7 +111,7 @@ namespace Signum.Web
         {
             var varName = VarName(Module);
 
-            var args = this.Arguments.HasText() ? (", " + this.Arguments) : "";
+            var args = this.Arguments.HasText() ? (", " + this.Arguments.Replace("\"", "'")) : "";
 
             return "(function(that) { require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(that" + args + "); }); })(this);";
         }
