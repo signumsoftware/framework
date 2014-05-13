@@ -98,6 +98,15 @@ namespace Signum.Windows
             set { SetValue(PaginationProperty, value); }
         }
 
+        public static readonly DependencyProperty ArgsProperty =
+           DependencyProperty.Register("Args", typeof(List<object>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public List<object> Args
+        {
+            get { return (List<object>)GetValue(ArgsProperty); }
+            set { SetValue(ArgsProperty, value); }
+        }
+
+
         public static readonly DependencyProperty ItemsCountProperty =
             DependencyProperty.Register("ItemsCount", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
@@ -694,6 +703,7 @@ namespace Signum.Windows
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = gvResults.Columns.Select(gvc => ((SortGridViewColumnHeader)gvc.Header).RequestColumn).ToList(),
                 Pagination = Pagination,
+                Args = Args
             };
 
             return request;

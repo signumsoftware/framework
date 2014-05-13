@@ -237,14 +237,14 @@ namespace Signum.Windows
             return RetrieveAllLite(typeof(T)).Cast<Lite<T>>().ToList(); 
         }
 
-        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
+        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations, List<object> args)
         {
-            return Return((IBaseServer s) => s.FindAllLite(implementations));
+            return Return((IBaseServer s) => s.FindAllLite(implementations, args));
         }
 
-        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
+        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count, List<object> args)
         {
-            return Return((IBaseServer s) => s.FindLiteLike(implementations, subString, count)); 
+            return Return((IBaseServer s) => s.FindLiteLike(implementations, subString, count, args)); 
         }
 
         public static List<T> SaveList<T>(List<T> list)

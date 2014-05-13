@@ -158,5 +158,15 @@ namespace Signum.Windows
 
             return threadWindows.Any();
         }
+
+        internal static System.Windows.Controls.Control GetCurrentWindow()
+        {
+            var win = threadWindows.TryGetC(Thread.CurrentThread);
+
+            if (win == null)
+                return null;
+            
+            return win;
+        }
     }
 }

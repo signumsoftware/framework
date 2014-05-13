@@ -266,6 +266,14 @@ namespace Signum.Windows
         {
             Manager.OpenIndependentWindow(windowConstructor, afterShown, closed);
         }
+
+        public static List<object> GetArgs()
+        {
+            var list = Manager.GetArgs == null ? Enumerable.Empty<Func<object>>() :
+                Manager.GetArgs.GetInvocationList().Cast<Func<object>>();
+
+            return list.Select(a => a()).Where(o => o != null).ToList();
+        }
     }
 
     public class NavigationManager
@@ -395,9 +403,16 @@ namespace Signum.Windows
             return SearchMessage.FinderOf0.NiceToString().Formato(QueryUtils.GetNiceName(queryName));
         }
 
+        public Func<object> GetArgs;
+
+        
+
         public virtual Lite<IdentifiableEntity> Find(FindOptions options)
         {
             AssertFindable(options.QueryName);
+
+            if (options.Args == null)
+                options.Args = Navigator.GetArgs();
 
             if (options.ReturnIfOne)
             {
@@ -427,6 +442,9 @@ namespace Signum.Windows
         public virtual Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
+         
+            if (options.Args == null)
+                options.Args = Navigator.GetArgs();
 
             SearchWindow sw = CreateSearchWindow(options);
             if (sw.ShowDialog() == true)
@@ -440,12 +458,16 @@ namespace Signum.Windows
         {
             AssertFindable(options.QueryName);
 
+            if (options.Args == null)
+                options.Args = Navigator.GetArgs();
+
             if (options.NavigateIfOne)
             {
                 Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,
+                    Args = options.Args
                 });
 
                 if (lite != null)
@@ -471,6 +493,7 @@ namespace Signum.Windows
                 ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions.Select(c => c.CloneIfNecessary())),
                 ColumnOptionsMode = options.ColumnOptionsMode,
                 Pagination = options.Pagination ?? GetQuerySettings(options.QueryName).Pagination ?? FindOptions.DefaultPagination,
+                Args = options.Args,
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
@@ -882,6 +905,14 @@ namespace Signum.Windows
                 if (afterShown != null)
                     afterShown(win);
             }
+        }
+
+        public Control GetCurrentWindow()
+        {
+            if (multithreaded)
+                return Async.GetCurrentWindow();
+
+            return Application.Current.Windows.Cast<Window>().FirstOrDefault(a => a.IsActive);
         }
     }
 }

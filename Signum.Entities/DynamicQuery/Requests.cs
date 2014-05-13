@@ -23,6 +23,13 @@ namespace Signum.Entities.DynamicQuery
             set { filters = value; }
         }
 
+        List<object> args;
+        public List<object> Args
+        {
+            get { return args; }
+            set { args = value; }
+        }
+
         public override string ToString()
         {
             return "{0} {1}".Formato(GetType().Name, QueryName);

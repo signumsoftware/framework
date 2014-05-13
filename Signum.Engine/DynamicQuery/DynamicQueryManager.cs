@@ -72,16 +72,29 @@ namespace Signum.Engine.DynamicQuery
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
 
-        T Execute<T>(string description, object queryName, Func<DynamicQueryBucket, T> executor)
+        public Func<object, List<object>, IDisposable> SurroundQuery;
+
+        public IDisposable OnSurroundQuery(object queryName, List<object> args)
+        {
+            IDisposable result = null;
+            if(SurroundQuery != null)
+                foreach (Func<object, List<object>, IDisposable> item in SurroundQuery.GetInvocationList())
+                    result = Disposable.Combine(result, item(queryName, args));
+
+            return result;
+        }
+
+        T Execute<T>(string description, object queryName, List<object> args, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())
+            using (OnSurroundQuery(queryName, args))
             using (HeavyProfiler.Log(description, () => QueryUtils.GetQueryUniqueKey(queryName)))
             {
                 try
                 {
                     var qb = GetQuery(queryName);
 
-                    return executor(qb); 
+                    return executor(qb);
                 }
                 catch (Exception e)
                 {
@@ -93,27 +106,27 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Execute("ExecuteQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQuery(request));
+            return Execute("ExecuteQuery", request.QueryName, request.Args, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Execute("ExecuteQueryCount", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryCount(request));
+            return Execute("ExecuteQueryCount", request.QueryName, request.Args, dqb => dqb.Core.Value.ExecuteQueryCount(request));
         }
 
         internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
-            return Execute("ExecuteGroupQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+            return Execute("ExecuteGroupQuery", request.QueryName, request.Args, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Execute("ExecuteUniqueEntity", request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+            return Execute("ExecuteUniqueEntity", request.QueryName, request.Args, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return Execute("QueryDescription", queryName, dqb => dqb.GetDescription());
+            return Execute("QueryDescription", queryName, null, dqb => dqb.GetDescription());
         }
 
         public event Func<object, bool> AllowQuery;

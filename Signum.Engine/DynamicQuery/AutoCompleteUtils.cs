@@ -20,7 +20,19 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class AutocompleteUtils
     {
-        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
+        public static Func<Implementations, List<object>, IDisposable> SurroundQuery;
+
+        public static IDisposable OnSurroundQuery(Implementations implementations, List<object> args)
+        {
+            IDisposable result = null;
+            if (SurroundQuery != null)
+                foreach (Func<Implementations, List<object>, IDisposable> item in SurroundQuery.GetInvocationList())
+                    result = Disposable.Combine(result, item(implementations, args));
+
+            return result;
+        }
+
+        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count, List<object> args)
         {
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
@@ -28,6 +40,7 @@ namespace Signum.Engine.DynamicQuery
             try
             {
                 using (ExecutionMode.UserInterface())
+                using (OnSurroundQuery(implementations, args))
                     return FindLiteLike(implementations.Types, subString, count);
             }
             catch (Exception e)
@@ -79,34 +92,39 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
-        public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count)
+        public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count, List<object> args)
             where T : IdentifiableEntity
         {
-            List<Lite<T>> results = new List<Lite<T>>();
-
-            int? id = subString.ToInt();
-            if (id.HasValue)
+            using(ExecutionMode.UserInterface())
+            using (OnSurroundQuery(Implementations.By(typeof(T)), args))
             {
-                Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
 
-                if (entity != null)
-                    results.Add(entity);
+                List<Lite<T>> results = new List<Lite<T>>();
 
-                if (results.Count >= count)
-                    return results;
+                int? id = subString.ToInt();
+                if (id.HasValue)
+                {
+                    Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
+
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Select(a => a.ToLite())
+                    .Take(count - results.Count));
+
+                return results;
             }
-
-            if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                subString = subString.Trim('\'', '"');
-
-            var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
-                .OrderBy(a => a.ToString().Length)
-                .Select(a => a.ToLite())
-                .Take(count - results.Count));
-
-            return results;
         }
 
         static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> miLiteById =
@@ -132,7 +150,7 @@ namespace Signum.Engine.DynamicQuery
                 .ToList();
         }
 
-        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
+        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations, List<object> args)
         {
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
@@ -140,6 +158,7 @@ namespace Signum.Engine.DynamicQuery
             try
             {
                 using (ExecutionMode.UserInterface())
+                using (OnSurroundQuery(implementations, args))
                     return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
             }
             catch (Exception e)

@@ -89,7 +89,7 @@ namespace Signum.Web
             List<SelectListItem> items = new List<SelectListItem>();
             items.Add(new SelectListItem() { Text = "-", Value = "" });
 
-            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value, Navigator.GetArgs(helper.ViewContext.Controller.ControllerContext));
 
 
             var current = entityCombo.UntypedValue is IIdentifiable ? ((IIdentifiable)entityCombo.UntypedValue).ToLite() :

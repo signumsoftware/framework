@@ -81,7 +81,7 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements, Navigator.GetArgs());  
 
             return value;
         }

@@ -103,6 +103,13 @@ namespace Signum.Windows
             get { return pagination; }
             set { this.pagination = value; }
         }
+
+        List<object> args;
+        public List<object> Args
+        {
+            get { return args; }
+            set { args = value; }
+        }
     }
 
     public abstract class FindOptionsBase : QueryOptions
@@ -208,6 +215,13 @@ namespace Signum.Windows
         {
             get { return orderOptions; }
             set { this.orderOptions = value; }
+        }
+
+        List<object> args;
+        public List<object> Args
+        {
+            get { return args; }
+            set { this.args = value; }
         }
 
         public UniqueOptions() 
