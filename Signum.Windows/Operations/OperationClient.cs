@@ -93,7 +93,7 @@ namespace Signum.Windows.Operations
     {
         public Dictionary<OperationSymbol, OperationSettings> Settings = new Dictionary<OperationSymbol, OperationSettings>();
 
-        public Func<OperationSymbol, bool> IsSave = e => e.ToString().StartsWith("Save");
+        public Func<OperationSymbol, bool> IsSave = e => e.ToString().EndsWith(".Save");
 
         public List<OperationColor> BackgroundColors = new List<OperationColor>
         {
