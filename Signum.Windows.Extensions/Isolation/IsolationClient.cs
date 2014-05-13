@@ -41,6 +41,29 @@ namespace Signum.Windows.Isolation
                         return result;
 
                     return null;
+                };
+
+                Navigator.Manager.GetArgs += () =>
+                {
+                    var win = Navigator.Manager.GetCurrentWindow();
+
+                    var ident = win.DataContext as IdentifiableEntity;
+                    if (ident != null)
+                    {
+                        var iso = ident.TryIsolation();
+
+                        if (iso != null)
+                            return iso;
+                    }
+
+                    var sw = win as SearchWindow;
+
+                    if (sw != null)
+                    {
+                        return sw.SearchControl.Args.TryGetArgC<Lite<IsolationDN>>();
+                    }
+
+                    return null;
                 }; 
             }
         }

@@ -118,7 +118,7 @@ namespace Signum.Windows.Omnibox
             if (string.IsNullOrEmpty(subString))
                 return new List<Lite<IdentifiableEntity>>();
 
-            return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5));
+            return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5, null));
         }
 
         protected override IEnumerable<object> GetAllQueryNames()

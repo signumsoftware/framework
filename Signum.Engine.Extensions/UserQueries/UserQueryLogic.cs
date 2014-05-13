@@ -120,7 +120,7 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
         {
-            return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit);
+            return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit, null);
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)

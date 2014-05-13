@@ -144,7 +144,7 @@ namespace Signum.Web.Omnibox
                 if (string.IsNullOrEmpty(subString))
                     return new List<Lite<IdentifiableEntity>>();
 
-                return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
+                return AutocompleteUtils.FindLiteLike(implementations, subString, 5, null);
             }
 
             protected override IEnumerable<object> GetAllQueryNames()

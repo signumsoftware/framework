@@ -212,7 +212,7 @@ namespace Signum.Engine.ControlPanel
 
         public static List<Lite<ControlPanelDN>> Autocomplete(string subString, int limit)
         {
-            return Database.Query<ControlPanelDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit);
+            return Database.Query<ControlPanelDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit, null);
         }
     }
 }
