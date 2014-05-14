@@ -112,8 +112,14 @@ namespace Signum.Web
                 return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
 
-            valueLine.ValueHtmlProps.AddCssClass("form-control");
-            return helper.TimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
+            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+            if (dateFormatAttr != null)
+                return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
+            else
+            {
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+                return helper.TextBox(valueLine.Prefix, value == null ? "" : value.Value.ToString(valueLine.Format, CultureInfo.CurrentCulture), valueLine.ValueHtmlProps);
+            }
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
