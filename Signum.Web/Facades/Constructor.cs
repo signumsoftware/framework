@@ -123,7 +123,9 @@ namespace Signum.Web
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    return Navigator.PopupOpen(controller, new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
+                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName };
+                    viewOptions.SaveProtected = !Navigator.IsCreable(entity.GetType(), false);
+                    return Navigator.PopupOpen(controller, viewOptions);
                 case VisualConstructStyle.PopupNavigate:
                     return Navigator.PopupOpen(controller, new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
                 case VisualConstructStyle.PartialView:
