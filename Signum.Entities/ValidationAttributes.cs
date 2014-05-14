@@ -635,13 +635,12 @@ namespace Signum.Entities
         {
             get
             {
-                var dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
                 switch (Precision)
                 {
-                    case DateTimePrecision.Hours: return "HH";
-                    case DateTimePrecision.Minutes: return dtfi.ShortTimePattern;
-                    case DateTimePrecision.Seconds: return "c";
-                    case DateTimePrecision.Milliseconds: return dtfi.LongTimePattern + ".fff";
+                    case DateTimePrecision.Hours: return "hh";
+                    case DateTimePrecision.Minutes: return @"hh\:mm";
+                    case DateTimePrecision.Seconds: return @"hh\:mm\:ss";
+                    case DateTimePrecision.Milliseconds: return "c";
                     default: return "";
                 }
             }

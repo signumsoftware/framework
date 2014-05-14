@@ -212,7 +212,7 @@ WITH
 WORK
 WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
-        public static string SqlScape(this string ident)
+        public static string SqlEscape(this string ident)
         {
             if (Keywords.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ]"))
                 return "[" + ident + "]";

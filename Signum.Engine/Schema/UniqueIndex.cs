@@ -157,7 +157,7 @@ namespace Signum.Engine.Maps
             {
                 if (b.TypeOperand.IsAssignableFrom(fr.FieldType))
                 {
-                    sb.Append(fr.Name.SqlScape() + " IS NOT NULL");
+                    sb.Append(fr.Name.SqlEscape() + " IS NOT NULL");
                 }
                 else
                     throw new InvalidOperationException("A {0} will never be {1}".Formato(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
                 var imp = fib.ImplementationColumns.Where(kvp => b.TypeOperand.IsAssignableFrom(kvp.Key));
 
                 if (imp.Any())
-                    sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlScape() + " IS NOT NULL", " OR "));
+                    sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape() + " IS NOT NULL", " OR "));
                 else
                     throw new InvalidOperationException("No implementation ({0}) will never be {1}".Formato(fib.ImplementationColumns.Keys.ToString(t=>t.TypeName(), ", "), b.TypeOperand.TypeName()));
 
@@ -238,27 +238,27 @@ namespace Signum.Engine.Maps
             {
                 var col = ((IColumn)field);
 
-                string result = isNull.Formato(col.Name.SqlScape());
+                string result = isNull.Formato(col.Name.SqlEscape());
 
                 if (!IsString(col.SqlDbType))
                     return result;
 
-                return result + (equals ? " OR " : " AND ") + (col.Name.SqlScape() + (equals ? " == " : " <> ") + "''");
+                return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " == " : " <> ") + "''");
 
             }
             else if (field is FieldImplementedBy)
             {
                 var ib = (FieldImplementedBy)field;
 
-                return ib.ImplementationColumns.Values.Select(ic => isNull.Formato(ic.Name.SqlScape())).ToString(equals ? " AND " : " OR ");
+                return ib.ImplementationColumns.Values.Select(ic => isNull.Formato(ic.Name.SqlEscape())).ToString(equals ? " AND " : " OR ");
             }
             else if (field is FieldImplementedByAll)
             {
                 var iba = (FieldImplementedByAll)field;
 
-                return isNull.Formato(iba.Column.Name.SqlScape()) +
+                return isNull.Formato(iba.Column.Name.SqlEscape()) +
                     (equals ? " AND " : " OR ") +
-                    isNull.Formato(iba.ColumnTypes.Name.SqlScape());
+                    isNull.Formato(iba.ColumnType.Name.SqlEscape());
             }
             else if (field is FieldEmbedded)
             {
@@ -267,7 +267,7 @@ namespace Signum.Engine.Maps
                 if (fe.HasValue == null)
                     throw new NotSupportedException("{0} is not nullable".Formato(field));
 
-                return fe.HasValue.Name.SqlScape() + " = TRUE";
+                return fe.HasValue.Name.SqlEscape() + " = TRUE";
             }
 
             throw new NotSupportedException(isNull.Formato(field.GetType())); 
@@ -283,7 +283,7 @@ namespace Signum.Engine.Maps
             {
                 if (field is IColumn)
                 {
-                    return ((IColumn)field).Name.SqlScape() +
+                    return ((IColumn)field).Name.SqlEscape() +
                         (equals ? " = " : " <> ") + SqlPreCommandSimple.Encode(value);
                 }
 

@@ -590,7 +590,7 @@ namespace Signum.Engine
 
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
-            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.RelationalTable);
+            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.TableMList);
         }
 
         class MListQueryExpander : IMethodExpander
@@ -876,7 +876,7 @@ namespace Signum.Engine
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c=>c.Parent));
-                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).RelationalTable;
+                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
                     return tr.Commit(rows);

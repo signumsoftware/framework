@@ -106,6 +106,17 @@ namespace Signum.Utilities
         }
     }
 
+    [AttributeUsage(AttributeTargets.Property)]
+    public class TimeSpanDateFormatAttribute : Attribute
+    {
+        public string Format { get; private set; }
+
+        public TimeSpanDateFormatAttribute(string format)
+        {
+            Format = format;
+        }
+    }
+
     public static class DescriptionManager
     {
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN

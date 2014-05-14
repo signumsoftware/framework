@@ -275,7 +275,7 @@ namespace Signum.Engine.Linq
         {
             var newBackID = Visit(ml.BackID);
             if (newBackID != ml.BackID)
-                return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
+                return new MListExpression(ml.Type, newBackID, ml.TableMList);
             return ml;
         }
 

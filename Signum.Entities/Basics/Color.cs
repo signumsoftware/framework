@@ -65,6 +65,16 @@ namespace Signum.Entities.Basics
             return Color.FromArgb(argb); 
         }
 
+        public string RGBHex()
+        {
+            return "#" + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
+        }
+
+        public string ARGBHex()
+        {
+            return "#" + A.ToString("X2") + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
+        }
+
         public override string ToString()
         {
             return "#" + Argb.ToString("X8");

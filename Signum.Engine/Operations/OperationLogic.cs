@@ -203,7 +203,7 @@ namespace Signum.Engine.Operations
         static SqlPreCommand Type_PreDeleteSqlSync(IdentifiableEntity arg)
         {
             var t = Schema.Current.Table<OperationLogDN>();
-            var f = ((FieldImplementedByAll)t.Fields["target"].Field).ColumnTypes;
+            var f = ((FieldImplementedByAll)t.Fields["target"].Field).ColumnType;
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
 
@@ -230,7 +230,7 @@ namespace Signum.Engine.Operations
         public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation;
 
-        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity)
+        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity, object[] args)
         {
             if (SurroundOperation == null)
                 return null;
@@ -238,14 +238,7 @@ namespace Signum.Engine.Operations
             IDisposable result = null;
             foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
             {
-                var r = surround(operation, (IdentifiableEntity)entity);
-                if (r != null)
-                {
-                    if (result == null)
-                        result = r;
-                    else
-                        result = new Disposable(() => { try { result.Dispose(); } finally { r.Dispose(); } });
-                }
+                result = Disposable.Combine(result, surround(operation, (IdentifiableEntity)entity, args));
             }
 
             return result;
@@ -738,7 +731,7 @@ namespace Signum.Engine.Operations
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, IdentifiableEntity entity);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, IdentifiableEntity entity, object[] args);
     public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);
     public delegate void ErrorOperationHandler(IOperation operation, IdentifiableEntity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);

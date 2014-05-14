@@ -184,7 +184,7 @@ namespace Signum.Engine.Maps
 
                     result.SqlInsertPattern = (post) =>
                         "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
-                        trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                        trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         trios.ToString(p => p.ParameterName + post, ", "));
 
                     var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
@@ -305,7 +305,7 @@ namespace Signum.Engine.Maps
 
                     result.SqlInsertPattern = (post, output) =>
                         "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
-                        trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                        trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
                         trios.ToString(p => p.ParameterName + post, ", "));
 
@@ -535,7 +535,7 @@ namespace Signum.Engine.Maps
                     {
                         string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
                             table.Name,
-                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
+                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + post).Indent(2), ",\r\n"),
                             idParamName + post);
 
                         if (typeof(Entity).IsAssignableFrom(table.Type))
@@ -579,8 +579,8 @@ namespace Signum.Engine.Maps
             {
                 using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
                 {
-                    List<RelationalTable.IRelationalCache> caches =
-                        (from rt in table.RelationalTables()
+                    List<TableMList.IRelationalCache> caches =
+                        (from rt in table.TablesMList()
                          select giCreateCache.GetInvoker(rt.Field.FieldType)(rt)).ToList();
 
                     if (caches.IsEmpty())
@@ -611,9 +611,9 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache> saveCollections;
 
-        static GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>> giCreateCache =
-            new GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>>(
-            (RelationalTable rt) => rt.CreateCache<int>());
+        static GenericInvoker<Func<TableMList, TableMList.IRelationalCache>> giCreateCache =
+            new GenericInvoker<Func<TableMList, TableMList.IRelationalCache>>(
+            (TableMList rt) => rt.CreateCache<int>());
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
@@ -728,7 +728,7 @@ namespace Signum.Engine.Maps
     }
 
 
-    public partial class RelationalTable
+    public partial class TableMList
     {
         internal interface IRelationalCache
         {
@@ -873,7 +873,7 @@ namespace Signum.Engine.Maps
 
             result.Getter = ident => (MList<T>)FullGetter(ident);
 
-            result.sqlDelete = post => "DELETE {0} WHERE {1} = @{2}".Formato(Name, BackReference.Name.SqlScape(), BackReference.Name + post);
+            result.sqlDelete = post => "DELETE {0} WHERE {1} = @{2}".Formato(Name, BackReference.Name.SqlEscape(), BackReference.Name + post);
 
             var pb = Connector.Current.ParameterBuilder;
             result.DeleteParameter = (ident, post) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + post), false, ident.Id);
@@ -891,7 +891,7 @@ namespace Signum.Engine.Maps
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
 
             result.sqlInsert = post => "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name,
-                trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                 trios.ToString(p => p.ParameterName + post, ", "));
 
             var expr = Expression.Lambda<Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>>>(
@@ -1191,7 +1191,7 @@ namespace Signum.Engine.Maps
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
         {
             trios.Add(new Table.Trio(Column, this.GetIdFactory(value, forbidden), postfix));
-            trios.Add(new Table.Trio(ColumnTypes, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), postfix));
+            trios.Add(new Table.Trio(ColumnType, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), postfix));
         }
 
         static MethodInfo miConvertType = ReflectionTools.GetMethodInfo((FieldImplementedByAll fe) => fe.ConvertType(null));
