@@ -85,7 +85,11 @@ namespace Signum.Web.Controllers
             }
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
-            return this.PopupOpen(new PopupViewOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly.HasValue });
+
+            var viewOptions = new PopupViewOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly.HasValue };
+            viewOptions.SaveProtected = !Navigator.IsCreable(entity.GetType(), false);
+
+            return this.PopupOpen(viewOptions);
         }
 
         [HttpPost]
