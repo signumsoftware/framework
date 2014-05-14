@@ -68,7 +68,7 @@ namespace Signum.Web
         public static MvcHtmlString FormGroupStatic(this HtmlHelper html, Context context, string controlId, string label, string text)
         {
             var span = html.FormControlStatic(controlId, text);
-            return FormGroup(html, context, label, controlId, span);
+            return FormGroup(html, context, controlId, label, span);
         }
 
         public static MvcHtmlString FormControlStatic(this HtmlHelper html, string controlId, string text, IDictionary<string, object> htmlProps = null)
