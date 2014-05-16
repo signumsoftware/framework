@@ -322,7 +322,7 @@ namespace Signum.Engine.Disconnected
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
-            DisconnectedTools.CreateDatabaseDirectory(backupFileName);
+            FileTools.CreateParentDirectory(backupFileName);
             DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
         }
 

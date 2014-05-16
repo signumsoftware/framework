@@ -34,21 +34,6 @@ END".Formato(databaseName);
             Executor.ExecuteNonQuery(dropDatabase);
         }
 
-        public static void CreateDatabaseDirectory(string databaseFile)
-        {
-            if (databaseFile != string.Empty)
-            {
-                string databaseDirectory = Path.GetDirectoryName(databaseFile);
-                if (databaseDirectory != string.Empty)
-                {
-                    if (!Directory.Exists(databaseDirectory))
-                    {
-                        Directory.CreateDirectory(databaseDirectory);
-                    }
-                }
-            }
-        }
-
         public static void CreateDatabase(DatabaseName databaseName, string databaseFile, string databaseLogFile)
         {
             string script = @"CREATE DATABASE {0} ON  PRIMARY 

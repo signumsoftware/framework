@@ -15,7 +15,7 @@ namespace Signum.Engine.Disconnected
     {
         public virtual void RestoreLocalDatabase(string connectionString, string backupFile, string databaseFile, string databaseLogFile)
         {
-            DisconnectedTools.CreateDatabaseDirectory(databaseFile);
+            FileTools.CreateParentDirectory(databaseFile);
 
             var csb = new SqlConnectionStringBuilder(connectionString);
 

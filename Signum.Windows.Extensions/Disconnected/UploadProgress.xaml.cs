@@ -28,10 +28,7 @@ namespace Signum.Windows.Disconnected
     /// </summary>
     public partial class UploadProgress : Window
     {
-        private string uploadFilePath;
-
-        public UploadProgress() : this(string.Empty) { }
-        public UploadProgress(string UploadFilePath)
+        public UploadProgress()
         {
             InitializeComponent();
 
@@ -39,8 +36,6 @@ namespace Signum.Windows.Disconnected
             this.Closing += new System.ComponentModel.CancelEventHandler(UploadProgress_Closing);
 
             var a = DisconnectedMachineDN.Current;
-
-            uploadFilePath = UploadFilePath;
         }
 
         void UploadProgress_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -62,6 +57,8 @@ namespace Signum.Windows.Disconnected
         IDisconnectedTransferServer transferServer = DisconnectedClient.GetTransferServer();
 
         DispatcherTimer timer = new DispatcherTimer();
+
+        FileInfo fi = new FileInfo(DisconnectedClient.UploadBackupFile);
 
         void DownloadDatabase_Loaded(object sender, RoutedEventArgs e)
         {
@@ -87,9 +84,6 @@ namespace Signum.Windows.Disconnected
 
         private Task<Lite<DisconnectedImportDN>> UploadDatabase()
         {
-            string filePath = System.IO.Path.Combine(uploadFilePath, DisconnectedClient.UploadBackupFile);
-            FileInfo fi = new FileInfo(filePath);
-
             pbUploading.Minimum = 0;
             pbUploading.Maximum = fi.Length;
 

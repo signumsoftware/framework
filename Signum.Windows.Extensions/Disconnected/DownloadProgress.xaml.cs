@@ -27,18 +27,13 @@ namespace Signum.Windows.Disconnected
     /// </summary>
     public partial class DownloadProgress : Window
     {
-        private string downloadFilePath;
-
-        public DownloadProgress() : this(string.Empty) { }
-        public DownloadProgress(string DownloadFilePath)
+        public DownloadProgress()
         {
             InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(DownloadDatabase_Loaded);
 
             var a = DisconnectedMachineDN.Current;
-
-            downloadFilePath = DownloadFilePath;
         }
 
         DisconnectedExportDN estimation;
@@ -108,9 +103,7 @@ namespace Signum.Windows.Disconnected
                 DownloadStatistics = currentLite
             });
 
-            string filePath = System.IO.Path.Combine(downloadFilePath, DisconnectedClient.DownloadBackupFile);
-            FileTools.CreateParentDirectory(filePath);
-
+            FileTools.CreateParentDirectory(DisconnectedClient.DownloadBackupFile);
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
@@ -124,7 +117,7 @@ namespace Signum.Windows.Disconnected
                 {
                     ps.ProgressChanged += (s, args) => Dispatcher.Invoke(() => pbDownloading.Value = ps.Position);
 
-                    using (FileStream fs = File.OpenWrite(filePath))
+                    using (FileStream fs = File.OpenWrite(DisconnectedClient.DownloadBackupFile))
                         ps.CopyTo(fs);
                 }
 
