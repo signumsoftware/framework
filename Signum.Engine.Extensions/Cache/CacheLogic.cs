@@ -36,6 +36,8 @@ namespace Signum.Engine.Cache
 
         public static bool AssertOnStart = true;
 
+        public static bool IsLocalDB = false;
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
@@ -167,30 +169,32 @@ namespace Signum.Engine.Cache
 
                 using (Connector.Override(sub))
                 {
-
-                    string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
-
-                    AssertNonIntegratedSecurity(currentUser);
-
                     string databaseName = sub.DatabaseName();
 
-                    var serverPrincipalName = (from db in Database.View<SysDatabases>()
-                                               where db.name == databaseName
-                                               join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
-                                               select spl.name).Single();
+                    if (!IsLocalDB)
+                    {
+                        string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+
+                        AssertNonIntegratedSecurity(currentUser);
+
+                        var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                                   where db.name == databaseName
+                                                   join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                                   select spl.name).Single();
 
 
-                    if (currentUser != serverPrincipalName)
-                        commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(databaseName, serverPrincipalName, currentUser)));
+                        if (currentUser != serverPrincipalName)
+                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".Formato(databaseName, serverPrincipalName, currentUser)));
 
 
-                    var databasePrincipalName = (from db in Database.View<SysDatabases>()
-                                                 where db.name == databaseName
-                                                 join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
-                                                 select dpl.name).Single();
+                        var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                                     where db.name == databaseName
+                                                     join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                                     select dpl.name).Single();
 
-                    if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
-                        commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(databaseName, databasePrincipalName.DefaultText("Unknown"), currentUser)));
+                        if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".Formato(databaseName, databasePrincipalName.DefaultText("Unknown"), currentUser)));
+                    }
 
                     var enabled = Database.View<SysDatabases>().Where(db => db.name == databaseName).Select(a => a.is_broker_enabled).Single();
 
@@ -290,6 +294,9 @@ namespace Signum.Engine.Cache
 
         private static void AssertNonIntegratedSecurity(string currentUser)
         {
+            if (IsLocalDB)
+                return;
+
             var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
 
             if (type != "SQL_LOGIN")
