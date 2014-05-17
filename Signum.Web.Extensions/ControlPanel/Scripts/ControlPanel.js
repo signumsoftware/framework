@@ -2,7 +2,7 @@
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Entities, Navigator, Validator) {
     function attachGridControl(gridRepeater, url, typesOptions) {
         gridRepeater.creating = function (prefix) {
-            return Navigator.typeChooser(SF.compose(prefix, "New"), typesOptions).then(function (type) {
+            return Navigator.typeChooser(prefix.child("New"), typesOptions).then(function (type) {
                 if (type == null)
                     return null;
 

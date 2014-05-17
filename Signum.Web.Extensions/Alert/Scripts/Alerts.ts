@@ -16,7 +16,7 @@ export function createAlert(prefix: string, operationKey: string, updateUrl: str
 }
 
 function updateAlerts(prefix: string, updateUrl: string) {
-    var widget = $("#" + SF.compose(prefix, "alertsWidget")).parent(); 
+    var widget = prefix.child("alertsWidget").get().parent(); 
 
     SF.ajaxPost({
         url: updateUrl,

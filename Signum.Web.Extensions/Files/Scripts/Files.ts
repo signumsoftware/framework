@@ -39,7 +39,7 @@ export class FileLine extends Lines.EntityBase {
 
     _create() {
         if (this.options.dragAndDrop == null || this.options.dragAndDrop == true)
-            FileLine.initDragDrop($(this.pf("DivNew")),
+            FileLine.initDragDrop(this.prefix.child("DivNew").get(),
                 e=> this.fileDropped(e));
 
 
@@ -66,18 +66,18 @@ export class FileLine extends Lines.EntityBase {
     }
 
     uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
-        $(this.pf('loading')).show();
+         this.prefix.child('loading').get().show();
         Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.singleType(), null, true));
 
         var fileName = f.name;
 
-        var $divNew = $(this.pf("DivNew"));
+        var $divNew = this.prefix.child("DivNew").get();
 
         var xhr = new XMLHttpRequest();
         xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
         xhr.setRequestHeader("X-FileName", fileName);
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
-        xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
+        xhr.setRequestHeader("X-" + this.options.prefix.child(Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
         xhr.setRequestHeader("X-sfFileType", this.options.fileType);
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
@@ -108,7 +108,7 @@ export class FileLine extends Lines.EntityBase {
 
     prepareSyncUpload() {
         //New file in FileLine but not to be uploaded asyncronously => prepare form for multipart and set runtimeInfo
-        $(this.pf(''))[0].setAttribute('value', (<HTMLInputElement>$(this.pf(''))[0]).value);
+        this.prefix.get()[0].setAttribute('value', (<HTMLInputElement>this.prefix.get()[0]).value);
         var $mform = $('form');
         $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
         Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.singleType(), null, true));
@@ -117,9 +117,9 @@ export class FileLine extends Lines.EntityBase {
     upload() {
         Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.singleType(), null, true));
 
-        var $fileInput = $(this.pf(''));
+        var $fileInput = this.prefix.get();
         $fileInput[0].setAttribute('value', (<HTMLInputElement>$fileInput[0]).value);
-        $(this.pf('loading')).show();
+        this.prefix.child('loading').get().show();
 
         this.createTargetIframe();
 
@@ -127,11 +127,11 @@ export class FileLine extends Lines.EntityBase {
 
         var $fileForm = $('<form></form>')
             .attr('method', 'post').attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data')
-            .attr('target', SF.compose(this.options.prefix, "frame")).attr('action', url)
+            .attr('target', this.options.prefix.child("frame")).attr('action', url)
             .hide()
             .appendTo($('body'));
 
-        var $divNew = $(this.pf("DivNew"));
+        var $divNew = this.prefix.child("DivNew").get();
         var $clonedDivNew = $divNew.clone(true);
         $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
 
@@ -144,23 +144,23 @@ export class FileLine extends Lines.EntityBase {
     }
 
     createTargetIframe() {
-        var name = SF.compose(this.options.prefix, "frame");
+        var name = this.options.prefix.child("frame");
         return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>")
             .appendTo($("body"));
     }
 
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
-        $(this.pf(Entities.Keys.loading)).hide();
+        this.prefix.child(Entities.Keys.loading).get().hide();
         if (entityValue) {
-            $(this.pf(Entities.Keys.toStr)).html(entityValue.toStr);
-            $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("href", entityValue.link);
+            this.prefix.child(Entities.Keys.toStr).get().html(entityValue.toStr);
+            this.prefix.child(Entities.Keys.link).get().html(entityValue.toStr).attr("href", entityValue.link);
 
             if (this.options.download == DownloadBehaviour.SaveAs)
-                $(this.pf(Entities.Keys.link)).attr("download", entityValue.toStr);
+                this.prefix.child(Entities.Keys.link).get().attr("download", entityValue.toStr);
 
         } else {
-            $(this.pf(Entities.Keys.toStr)).html("");
-            $(this.pf(Entities.Keys.toStr)).html("").removeAttr("download").removeAttr("href");
+            this.prefix.child(Entities.Keys.toStr).get().html("");
+            this.prefix.child(Entities.Keys.toStr).get().html("").removeAttr("download").removeAttr("href");
         }
     }
 
@@ -168,9 +168,9 @@ export class FileLine extends Lines.EntityBase {
 
         this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
-        $(this.pf(Entities.Keys.entityState)).val(entityState);
+        this.prefix.child(Entities.Keys.entityState).get().val(entityState);
 
-        $(this.pf("frame")).remove();
+        this.prefix.child("frame").get().remove();
     }
 
     onChanged() {
@@ -185,18 +185,19 @@ export class FileLine extends Lines.EntityBase {
     updateButtonsDisplay() {
         var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
-        $(this.pf('DivOld')).toggle(hasEntity);
-        $(this.pf('DivNew')).toggle(!hasEntity);
+        
+        this.prefix.child('DivOld').get().toggle(hasEntity);
+        this.prefix.child('DivNew').get().toggle(!hasEntity);
 
-        $(this.pf("btnRemove")).toggle(hasEntity);
+        this.prefix.child("btnRemove").get().toggle(hasEntity);
     }
 
     getLink(itemPrefix?: string): string {
-        return $(this.pf(Entities.Keys.link)).attr("href");
+        return this.prefix.child(Entities.Keys.link).get().attr("href");
     }
 
     getToString(itemPrefix?: string): string {
-        return $(this.pf(Entities.Keys.link)).text();
+        return this.prefix.child(Entities.Keys.link).get().text();
     }
 
 }

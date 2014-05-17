@@ -17,7 +17,7 @@ export function createNote(prefix: string, operationKey: string, urlUpdate: stri
 
 
 export function updateNotes(prefix : string, urlUpdate: string) {
-    var widget = $("#" + SF.compose(prefix, "notesWidget"))
+    var widget = prefix.child("notesWidget").get()
 
     SF.ajaxPost({
         url: urlUpdate,
