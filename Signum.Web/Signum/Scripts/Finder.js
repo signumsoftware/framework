@@ -35,7 +35,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     var ColumnOptionsMode = exports.ColumnOptionsMode;
 
     function getFor(prefix) {
-        return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl();
+        return prefix.child("sfSearchControl").get().SFControl();
     }
     exports.getFor = getFor;
 
@@ -67,7 +67,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }).then(function (modalDivHtml) {
             var modalDiv = $(modalDivHtml);
 
-            var okButtonId = SF.compose(findOptions.prefix, "btnOk");
+            var okButtonId = findOptions.prefix.child("btnOk");
 
             var items;
             return Navigator.openModal(modalDiv, function (button) {
@@ -233,39 +233,35 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 webQueryName: null
             }, _options);
 
+            this.prefix = this.options.prefix;
+
             this._create();
         }
         SearchControl.prototype.ready = function () {
             this.element.SFControlFullfill(this);
         };
 
-        SearchControl.prototype.pf = function (s) {
-            return "#" + SF.compose(this.options.prefix, s);
-        };
-
         SearchControl.prototype._create = function () {
             var _this = this;
-            var self = this;
-
-            this.filterBuilder = new FilterBuilder($(this.pf("tblFilterBuilder")), this.options.prefix, this.options.webQueryName, SF.Urls.addFilter);
+            this.filterBuilder = new FilterBuilder(this.prefix.child("tblFilterBuilder").get(), this.options.prefix, this.options.webQueryName, SF.Urls.addFilter);
 
             this.filterBuilder.addColumnClicked = function () {
                 return _this.addColumn();
             };
 
-            var $tblResults = self.element.find(".sf-search-results-container");
+            var $tblResults = this.element.find(".sf-search-results-container");
 
             if (this.options.allowOrder) {
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    self.newSortOrder($(this), e.shiftKey);
-                    self.search();
+                    _this.newSortOrder($(e.currentTarget), e.shiftKey);
+                    _this.search();
                     return false;
                 });
             }
 
             if (this.options.allowChangeColumns || this.options.showContextMenu) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    self.headerContextMenu(e);
+                    _this.headerContextMenu(e);
                     return false;
                 });
             }
@@ -276,54 +272,54 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.showContextMenu) {
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                    var $td = $(this).closest("td");
+                    var $td = $(e.currentTarget).closest("td");
 
                     var $tr = $td.closest("tr");
                     var $currentRowSelector = $tr.find(".sf-td-selection");
                     if ($currentRowSelector.filter(":checked").length == 0) {
-                        self.changeRowSelection($(self.pf("sfSearchControl .sf-td-selection:checked")), false);
-                        self.changeRowSelection($currentRowSelector, true);
+                        _this.changeRowSelection(_this.prefix.child("sfSearchControl").get().find(".sf-td-selection:checked"), false);
+                        _this.changeRowSelection($currentRowSelector, true);
                     }
 
                     var index = $td.index();
                     var $th = $td.closest("table").find("th").eq(index);
                     if ($th.hasClass('sf-th-selection') || $th.hasClass('sf-th-entity')) {
-                        if (self.options.selectedItemsContextMenu == true) {
-                            self.entityContextMenu(e);
+                        if (_this.options.selectedItemsContextMenu == true) {
+                            _this.entityContextMenu(e);
                         }
                     } else {
-                        self.cellContextMenu(e);
+                        _this.cellContextMenu(e);
                     }
                     return false;
                 });
             }
 
             if (this.options.showFooter) {
-                this.element.on("click", ".sf-search-footer ul.pagination a", function () {
-                    self.search(parseInt($(this).attr("data-page")));
+                this.element.on("click", ".sf-search-footer ul.pagination a", function (e) {
+                    return _this.search(parseInt($(e.currentTarget).attr("data-page")));
                 });
 
-                this.element.on("change", ".sf-search-footer .sf-pagination-size", function () {
-                    if ($(this).find("option:selected").val() == "All") {
-                        self.clearResults();
+                this.element.on("change", ".sf-search-footer .sf-pagination-size", function (e) {
+                    if ($(e.currentTarget).find("option:selected").val() == "All") {
+                        _this.clearResults();
                     } else {
-                        self.search();
+                        _this.search();
                     }
                 });
             }
 
             if (this.options.showContextMenu) {
-                $tblResults.on("change", ".sf-td-selection", function () {
-                    self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
+                $tblResults.on("change", ".sf-td-selection", function (e) {
+                    _this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
                 });
 
-                $(this.pf("sfFullScreen")).on("mousedown", function (e) {
+                this.prefix.child("sfFullScreen").get().on("mousedown", function (e) {
                     e.preventDefault();
-                    self.fullScreen(e);
+                    _this.fullScreen(e);
                 });
 
-                this.element.find(this.pf("btnSelected")).click(function () {
-                    self.ctxMenuInDropdown();
+                this.prefix.child("btnSelected").get().click(function (e) {
+                    _this.ctxMenuInDropdown();
                 });
             }
 
@@ -332,14 +328,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
 
             if (exports.doubleScroll) {
-                var div = $(this.pf("divResults"));
+                var div = this.prefix.child("divResults").get();
 
                 div.removeClass("table-responsive");
                 div.css("overflow-x", "auto");
 
-                var divUp = $("<div>").attr("id", SF.compose(this.options.prefix, "divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
+                var divUp = $("<div>").attr("id", this.options.prefix.child("divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
 
-                var resultUp = $("<div>").attr("id", SF.compose(this.options.prefix, "tblResults_Up")).css("height", "1").appendTo(divUp);
+                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
 
                 div.scroll(function () {
                     _this.syncSize();
@@ -366,9 +362,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (!exports.doubleScroll)
                 return;
 
-            $(this.pf("tblResults_Up")).width($(this.pf("tblResults")).width());
+            this.prefix.child("tblResults_Up").get().width(this.prefix.child("tblResults").get().width());
 
-            $(this.pf("divResults_Up")).css("height", $(this.pf("tblResults_Up")).width() > $(this.pf("divResults_Up")).width() ? "15" : "1");
+            this.prefix.child("divResults_Up").get().css("height", this.prefix.child("tblResults_Up").get().width() > this.prefix.child("divResults_Up").get().width() ? "15" : "1");
         };
 
         SearchControl.prototype.changeRowSelection = function ($rowSelectors, select) {
@@ -377,8 +373,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var selected = this.element.find(".sf-td-selection:checked").length;
 
-            this.element.find(this.pf("btnSelectedSpan")).text(selected);
-            var btn = this.element.find(this.pf("btnSelected"));
+            this.prefix.child("btnSelectedSpan").get().text(selected);
+            var btn = this.prefix.child("btnSelected").get();
             if (selected == 0)
                 btn.attr("disabled", "disabled");
             else
@@ -390,7 +386,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.ctxMenuInDropdown = function () {
             var _this = this;
-            var $dropdown = $(this.pf("btnSelectedDropDown"));
+            var $dropdown = this.prefix.child("btnSelectedDropDown").get();
 
             if (!$dropdown.closest(".btn-group").hasClass("open")) {
                 $dropdown.html(this.loadingMessage());
@@ -455,7 +451,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }).toArray().join(","),
                 webQueryName: this.options.webQueryName,
                 prefix: this.options.prefix,
-                implementationsKey: $(this.pf(Entities.Keys.entityTypeNames)).val()
+                implementationsKey: this.prefix.child(Entities.Keys.entityTypeNames).get().val()
             };
         };
 
@@ -498,7 +494,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.search = function (page) {
             var _this = this;
-            var $searchButton = $(this.pf("qbSearch"));
+            var $searchButton = this.prefix.child("qbSearch").get();
             $searchButton.addClass("sf-searching");
             var count = parseInt($searchButton.attr("data-searchCount")) || 0;
             var self = this;
@@ -533,7 +529,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var page = $(this.pf(this.keys.page)).val() || 1;
+            var page = this.prefix.child(this.keys.page).get().val() || 1;
             var form = this.requestDataForSearch(2 /* FullScreen */, page);
 
             return $.param(form);
@@ -544,8 +540,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (type != 2 /* FullScreen */)
                 requestData["webQueryName"] = this.options.webQueryName;
 
-            requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
-            requestData["elems"] = $(this.pf(this.keys.elems)).val();
+            requestData["pagination"] = this.prefix.child(this.keys.pagination).tryGet().val();
+            requestData["elems"] = this.prefix.child(this.keys.elems).tryGet().val();
             requestData["page"] = page || 1;
             requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
@@ -582,7 +578,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.serializeColumns = function () {
             var self = this;
-            return $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).toArray().map(function (th) {
+            return this.prefix.child("tblResults").get().find("thead tr th:not(.sf-th-entity):not(.sf-th-selection)").toArray().map(function (th) {
                 var $th = $(th);
                 var token = $th.data("column-name");
                 var niceName = $th.data("nice-name");
@@ -595,7 +591,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.getSelectedItems = function (prefix) {
-            return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(function (v) {
+            return $("input:checkbox[name^=" + prefix.child("rowSelection") + "]:checked").toArray().map(function (v) {
                 var parts = v.value.split("__");
                 return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false), parts[2], $(v).parent().next().children('a').attr('href'));
             });
@@ -650,21 +646,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.addColumn = function () {
             var _this = this;
-            if (!this.options.allowChangeColumns || $(this.pf("tblFilters tbody")).length == 0) {
+            if (!this.options.allowChangeColumns || this.prefix.child("tblFilters").get().find("tbody").length == 0) {
                 throw "Adding columns is not allowed";
             }
 
-            var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.options.prefix, "tokenBuilder"));
+            var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix.child("tokenBuilder"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }
 
-            var prefixedTokenName = SF.compose(this.options.prefix, tokenName);
-            if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) {
+            var tblResults = this.prefix.child("tblResults").get();
+
+            var prefixedTokenName = this.options.prefix.child(tokenName);
+            if (tblResults.find("thead tr th[id=\"" + prefixedTokenName + "\"]").length > 0) {
                 return;
             }
 
-            var $tblHeaders = $(this.pf("tblResults thead tr"));
+            var $tblHeaders = tblResults.find("thead tr");
 
             SF.ajaxPost({
                 url: SF.Urls.addColumn,
@@ -681,7 +679,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var colName = $th.find("span").text().trim();
 
             Navigator.valueLineBox({
-                prefix: SF.compose(this.options.prefix, "newName"),
+                prefix: this.options.prefix.child("newName"),
                 title: lang.signum.renameColumn,
                 message: lang.signum.enterTheNewColumnName,
                 value: colName,
@@ -702,7 +700,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $source.removeAttr("style"); //remove absolute positioning
             this.clearResults();
-            this.createMoveColumnDragDrop();
         };
 
         SearchControl.prototype.createMoveColumnDragDrop = function () {
@@ -711,8 +708,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.element.on("dragstart", rowsSelector, function (e) {
                 var de = e.originalEvent;
                 de.dataTransfer.effectAllowed = "move";
-                de.dataTransfer.setData("Text", $(this).attr("data-column-name"));
-                current = this;
+                de.dataTransfer.setData("Text", $(e.currentTarget).attr("data-column-name"));
+                current = e.currentTarget;
             });
 
             function dragClass(offsetX, width) {
@@ -733,21 +730,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     e.preventDefault();
 
                 var de = e.originalEvent;
-                if (this == current) {
+                if (e.currentTarget == current) {
                     de.dataTransfer.dropEffect = "none";
                     return;
                 }
 
-                $(this).removeClass("drag-left drag-right");
-                $(this).addClass(dragClass(de.pageX - $(this).offset().left, $(this).width()));
+                $(e.currentTarget).removeClass("drag-left drag-right");
+                $(e.currentTarget).addClass(dragClass(de.pageX - $(e.currentTarget).offset().left, $(e.currentTarget).width()));
 
                 de.dataTransfer.dropEffect = "move";
             };
             this.element.on("dragover", rowsSelector, onDragOver);
             this.element.on("dragenter", rowsSelector, onDragOver);
 
-            this.element.on("dragleave", rowsSelector, function () {
-                $(this).removeClass("drag-left drag-right");
+            this.element.on("dragleave", rowsSelector, function (e) {
+                $(e.currentTarget).removeClass("drag-left drag-right");
             });
 
             var me = this;
@@ -755,14 +752,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (e.preventDefault)
                     e.preventDefault();
 
-                $(this).removeClass("drag-left drag-right");
+                var curr = $(e.currentTarget);
+
+                curr.removeClass("drag-left drag-right");
 
                 var de = e.originalEvent;
 
-                var result = dragClass(de.pageX - $(this).offset().left, $(this).width());
+                var result = dragClass(de.pageX - $(e.currentTarget).offset().left, curr.width());
 
                 if (result)
-                    me.moveColumn($(current), $(this), result == "drag-left");
+                    me.moveColumn($(current), curr, result == "drag-left");
             });
         };
 
@@ -773,7 +772,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.clearResults = function () {
-            var $tbody = $(this.pf("tblResults tbody"));
+            var $tbody = this.prefix.child("tblResults").get().find("tbody");
             $tbody.find("tr:not('.sf-search-footer')").remove();
             $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
         };
@@ -819,14 +818,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     else {
                         var requestData = _this.requestDataForSearchPopupCreate();
 
-                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
+                        Navigator.navigatePopup(new Entities.EntityHtml(_this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: requestData });
                     }
                 });
         };
 
         SearchControl.prototype.getEntityType = function () {
-            var names = $(this.pf(Entities.Keys.entityTypeNames)).val().split(",");
-            var niceNames = $(this.pf(Entities.Keys.entityTypeNiceNames)).val().split(",");
+            var names = this.prefix.child(Entities.Keys.entityTypeNames).get().val().split(",");
+            var niceNames = this.prefix.child(Entities.Keys.entityTypeNiceNames).get().val().split(",");
 
             var options = names.map(function (p, i) {
                 return ({
@@ -850,13 +849,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.toggleSelectAll = function () {
-            var select = $(this.pf("cbSelectAll:checked"));
-            this.changeRowSelection($(this.pf("sfSearchControl .sf-td-selection")), (select.length > 0) ? true : false);
+            this.changeRowSelection(this.prefix.child("sfSearchControl").get().find(".sf-td-selection"), this.prefix.child("cbSelectAll").get().is(":checked"));
         };
 
         SearchControl.prototype.searchOnLoad = function () {
             var _this = this;
-            var $button = $("#" + SF.compose(this.options.prefix, "qbSearch"));
+            var $button = this.options.prefix.child("qbSearch").get();
 
             SF.onVisible($button, function () {
                 if (!_this.searchOnLoadFinished) {
@@ -876,7 +874,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix = prefix;
             this.webQueryName = webQueryName;
             this.url = url;
-            this.newSubTokensComboAdded(this.element.find("#" + SF.compose(prefix, "tokenBuilder") + " select:first"));
+            this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
             this.element.on("sf-new-subtokens-combo", function (event) {
                 var args = [];
@@ -886,15 +884,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 _this.newSubTokensComboAdded($("#" + args[0]));
             });
         }
-        FilterBuilder.prototype.pf = function (s) {
-            return "#" + SF.compose(this.prefix, s);
-        };
-
         FilterBuilder.prototype.newSubTokensComboAdded = function ($selectedCombo) {
-            var $btnAddFilter = $(this.pf("btnAddFilter"));
-            var $btnAddColumn = $(this.pf("btnAddColumn"));
+            var _this = this;
+            var $btnAddFilter = this.prefix.child("btnAddFilter").get();
+            var $btnAddColumn = this.prefix.child("btnAddColumn").get();
 
-            var self = this;
             var $selectedOption = $selectedCombo.children("option:selected");
             $selectedCombo.attr("title", $selectedOption.attr("title"));
             $selectedCombo.attr("style", $selectedOption.attr("style"));
@@ -906,18 +900,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 } else {
                     var $prevSelectedOption = $prevSelect.find("option:selected");
                     this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () {
-                        self.addFilterClicked();
+                        return _this.addFilterClicked();
                     });
                     this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () {
-                        self.addColumnClicked();
+                        return _this.addColumnClicked();
                     });
                 }
             } else {
                 this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
-                    self.addFilterClicked();
+                    return _this.addFilterClicked();
                 });
                 this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
-                    self.addColumnClicked();
+                    return _this.addColumnClicked();
                 });
             }
         };
@@ -945,7 +939,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FilterBuilder.prototype.addFilterClicked = function () {
-            var tokenName = QueryTokenBuilder.constructTokenName(SF.compose(this.prefix, "tokenBuilder"));
+            var tokenName = QueryTokenBuilder.constructTokenName(this.prefix.child("tokenBuilder"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }
@@ -954,7 +948,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FilterBuilder.prototype.addFilter = function (tokenName, value) {
-            var tableFilters = $(this.pf("tblFilters tbody"));
+            var tableFilters = this.prefix.child("tblFilters").get().find("tbody");
             if (tableFilters.length == 0) {
                 throw "Adding filters is not allowed";
             }
@@ -982,7 +976,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FilterBuilder.prototype.newFilterRowIndex = function () {
-            var lastRow = $(this.pf("tblFilters tbody tr:last"));
+            var lastRow = this.prefix.child("tblFilters").get().find("tbody tr:last");
             if (lastRow.length == 1) {
                 return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
             }
@@ -991,13 +985,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         FilterBuilder.prototype.serializeFilters = function () {
             var _this = this;
-            return $(this.pf("tblFilters > tbody > tr")).toArray().map(function (f) {
+            return this.prefix.child("tblFilters").get().find("tbody > tr").toArray().map(function (f) {
                 var $filter = $(f);
 
                 var id = $filter[0].id;
                 var index = id.afterLast("_");
 
-                var selector = $(SF.compose(_this.pf("ddlSelector"), index) + " option:selected", $filter);
+                var selector = _this.prefix.child("ddlSelector").child(index).get($filter).find("option:selected");
 
                 var value = _this.encodeValue($filter, index);
 
@@ -1006,15 +1000,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FilterBuilder.prototype.encodeValue = function ($filter, index) {
-            var id = SF.compose(this.prefix, "value", index);
+            var filterValuePrefix = this.prefix.child("value").child(index);
 
-            var eleme = $filter.find("#" + id);
+            var eleme = filterValuePrefix.get();
 
-            if (!eleme.length)
-                throw Error("value for filter " + index + " no found");
-
-            var date = $filter.find("#" + SF.compose(id, "Date"));
-            var time = $filter.find("#" + SF.compose(id, "Time"));
+            var date = filterValuePrefix.child("Date").get($filter);
+            var time = filterValuePrefix.child("Time").get($filter);
 
             if (date.length && time.length) {
                 var dateVal = date.val();
@@ -1025,7 +1016,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (eleme.is("input:checkbox"))
                 return eleme[0].checked;
 
-            var infoElem = eleme.find("#" + SF.compose(id, Entities.Keys.runtimeInfo));
+            var infoElem = filterValuePrefix.child(Entities.Keys.runtimeInfo).get(eleme);
             if (infoElem.length > 0) {
                 var val = Entities.RuntimeInfo.parse(infoElem.val());
                 return SearchControl.encodeCSV(val == null ? null : val.key());
@@ -1089,7 +1080,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var tokenName = "";
             var stop = false;
             for (var i = 0; ; i++) {
-                var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
+                var currSubtoken = prefix.child("ddlTokens_" + i).tryGet();
                 if (currSubtoken.length == 0)
                     break;
 

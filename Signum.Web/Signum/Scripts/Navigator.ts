@@ -56,7 +56,7 @@ export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: Nav
 
 function openNavigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: NavigatePopupOptions): Promise<void> {
 
-    entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", true);
+    entityHtml.getChild("panelPopup").data("sf-navigate", true);
 
     return openEntityHtmlModal(entityHtml, null, viewOptions.onPopupLoaded).then(() => null);
 }
@@ -112,7 +112,7 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
 
 function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOptions): Promise<Entities.EntityHtml> {
 
-    entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", false);
+    entityHtml.getChild("panelPopup").data("sf-navigate", false);
 
     return openEntityHtmlModal(entityHtml, isOk => {
         if (!isOk)
@@ -148,12 +148,12 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
     if (!canClose)
         canClose = () => Promise.resolve(true);
 
-    var panelPopup = entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup"));
+    var panelPopup = entityHtml.getChild("panelPopup");
 
-    var okButtonId =  SF.compose(entityHtml.prefix, "btnOk");
+    var okButtonId =  entityHtml.prefix.child("btnOk");
 
     return openModal(panelPopup, button => {
-        var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+        var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
         if (button.id == okButtonId) {
             if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
                 alert(lang.signum.saveChangesBeforeOrPressCancel);
@@ -170,7 +170,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
         }
     }, shown).then(pair => {
 
-        var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+        var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
         entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
         entityHtml.html = pair.modalDiv;
        
@@ -267,7 +267,7 @@ export function reloadMain(entityHtml: Entities.EntityHtml) {
 
 export function closePopup(prefix: string): void {
 
-    var tempDivId = SF.compose(prefix, "Temp");
+    var tempDivId = prefix.child("Temp");
 
     var tempDiv = $("#" + tempDivId);
 
@@ -276,7 +276,7 @@ export function closePopup(prefix: string): void {
 
 export function reloadPopup(entityHtml : Entities.EntityHtml) {
 
-    var panelPopupId = SF.compose(entityHtml.prefix, "panelPopup");
+    var panelPopupId = entityHtml.prefix.child("panelPopup");
 
     $("#" + panelPopupId).html(entityHtml.html.filter("#" + panelPopupId).children());
 }
@@ -293,7 +293,7 @@ export function isNavigatePopup(prefix: string) : boolean {
     if (SF.isEmpty(prefix))
         return false;
 
-    return $("#" + SF.compose(prefix, "panelPopup")).data("sf-navigate")
+    return prefix.child("panelPopup").get().data("sf-navigate")
 }
 
 
@@ -406,7 +406,7 @@ export interface BootstrapModalOptions
 }
 
 export function createBootstrapModal(options: BootstrapModalOptions) : JQuery {
-    var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + SF.compose(options.prefix, "panelPopup") + '">'
+    var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + options.prefix.child("panelPopup") + '">'
         + '<div class="modal-dialog modal-sm" >'
         + '<div class="modal-content">'
 
@@ -482,13 +482,13 @@ export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
 
             var html = pair.entityHtml.html;
 
-            var date = html.find(SF.compose(options.prefix, "Date"));
-            var time = html.find(SF.compose(options.prefix, "Time"));
+            var date = html.find(options.prefix.child("Date"));
+            var time = html.find(options.prefix.child("Time"));
 
             if (date.length && time.length)
                 return date.val() + " " + time.val();
 
-            var input = html.find(":input:not(:button)");
+            var input = pair.entityHtml.html.find(":input:not(:button)");
             if (input.length != 1)
                 throw new Error("{0} inputs found in ValueLineBox".format(input.length));
 

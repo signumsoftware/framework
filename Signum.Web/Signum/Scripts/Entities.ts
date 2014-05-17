@@ -71,22 +71,12 @@ export class RuntimeInfo {
         return this.type + ";" + this.id;
     }
 
-
-    static getHiddenInput(prefix: string, context?: JQuery) : JQuery {
-        var result = $('#' + SF.compose(prefix, Keys.runtimeInfo), context);
-
-        if (result.length != 1)
-            throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, Keys.runtimeInfo)));
-
-        return result; 
-    }
-
     static getFromPrefix(prefix: string, context?: JQuery): RuntimeInfo {
-        return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+        return RuntimeInfo.parse(prefix.child(Keys.runtimeInfo).get().val());
     }
 
     static setFromPrefix(prefix: string, runtimeInfo: RuntimeInfo, context?: JQuery) {
-        RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null? "": runtimeInfo.toString());
+        prefix.child(Keys.runtimeInfo).get().val(runtimeInfo == null? "": runtimeInfo.toString());
     }
 }
 
@@ -146,6 +136,14 @@ export class EntityHtml extends EntityValue {
 
     loadHtml(htmlText: string) {
         this.html = $('<div/>').html(htmlText).contents();
+    }
+
+    getChild(pathPart: string) : JQuery {
+        return this.prefix.child(pathPart).get(this.html);
+    }
+
+    tryGetChild(pathPart: string): JQuery {
+        return this.prefix.child(pathPart).tryGet(this.html);
     }
 
     static fromHtml(prefix: string, htmlText: string): EntityHtml {

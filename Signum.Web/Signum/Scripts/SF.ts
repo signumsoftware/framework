@@ -162,20 +162,6 @@ module SF {
         return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
     }
 
-    export function compose(str: string, ...nextParts: string[]) {
-
-        var result = str; 
-        for (var i = 0; i < nextParts.length; i++) {
-            var part = nextParts[i];
-
-            result = !result ? part :
-            !part ? result :
-            result + "_" + part;
-        }
-
-        return result;
-    }
-
     export function cloneWithValues(elements: JQuery): JQuery {
         var clone = elements.clone(true);
 
@@ -364,6 +350,17 @@ interface String {
     beforeLast(separator: string): string;
     tryAfterLast(separator: string): string;
     tryBeforeLast(separator: string): string;
+
+    child(pathPart: string): string;
+    parent(pathPart?: string): string;
+
+    get(context?: JQuery): JQuery;
+    get(context?: Element): JQuery;
+    tryGet(context?: JQuery): JQuery;
+    tryGet(context?: Element): JQuery;
+
+    getChild(pathPart: string): JQuery;
+    tryGetChild(pathPart: string): JQuery;
 }
 
 once("stringExtensions", () => {
@@ -481,11 +478,91 @@ once("stringExtensions", () => {
             return this.replace(/^\s+|\s+$/, '');
         }
     }
+
+    String.prototype.child = function (pathPart) {
+
+        if (SF.isEmpty(this))
+            return pathPart;
+
+        if (SF.isEmpty(pathPart))
+            return this;
+
+        if (this.endsWith("_"))
+            throw new Error("path {0} ends with _".format(this));
+
+        if (pathPart.startsWith("_"))
+            throw new Error("pathPart {0} starts with _".format(pathPart));
+
+        return this + "_" + pathPart;
+    };
+
+    String.prototype.parent = function (pathPart) {
+
+        if (SF.isEmpty(this))
+            throw new Error("impossible to pop the empty string"); 
+
+        if (SF.isEmpty(pathPart)) {
+            var index = this.lastIndexOf("_");
+
+            if (index == -1)
+                return "";
+
+            return this.substr(0, index);
+        }
+        else
+        {
+            if (this == pathPart)
+                return "";
+
+            var index = this.lastIndexOf("_" + pathPart); 
+
+            if (index != -1)
+                return this.substr(0, index); 
+
+            if (pathPart.startsWith(pathPart + "_"))
+                return "";
+
+            throw Error("pathPart {0} not found on {1}".format(pathPart, this));
+        }
+    };
+
+    String.prototype.get = function (context) {
+
+        if (SF.isEmpty(this))
+            throw new Error("Impossible to call 'get' on the empty string"); 
+
+        var selector = "[id='" + this + "']";
+
+        var result = $(selector, context); 
+
+        if (result.length == 0)
+            throw new Error("No element with id = '{0}' found".format(this));
+
+        if (result.length > 1)
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+
+        return result;
+    };
+
+    String.prototype.tryGet = function (context) {
+
+        if (SF.isEmpty(this))
+            throw new Error("Impossible to call 'get' on the empty string");
+
+        var selector = "[id='" + this + "']";
+
+        var result = $(selector, context);
+
+        if (result.length > 1)
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+
+        return result;
+    };
 });
 
 interface Date {
-    addMilisecconds(inc: number): Date;
-    addSeccond(inc: number): Date;
+    addMiliseconds(inc: number): Date;
+    addSecond(inc: number): Date;
     addMinutes(inc: number): Date;
     addHour(inc: number): Date;
     addDate(inc: number): Date;
@@ -495,13 +572,13 @@ interface Date {
 
 once("dateExtensions", () => {
 
-    Date.prototype.addMilisecconds = function(inc: number) {
+    Date.prototype.addMiliseconds = function(inc: number) {
         var n = new Date(this.valueOf());
         n.setMilliseconds(this.getMilliseconds() + inc);
         return n;
     };
 
-    Date.prototype.addSeccond = function(inc: number) {
+    Date.prototype.addSecond = function(inc: number) {
         var n = new Date(this.valueOf());
         n.setSeconds(this.getSeconds() + inc);
         return n;
