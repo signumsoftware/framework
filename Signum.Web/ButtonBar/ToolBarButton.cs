@@ -63,7 +63,7 @@ namespace Signum.Web
                 if (OnClick != null)
                     a.Attr("onclick", OnClick.ToString());
 
-                a.Attr("href", Href.DefaultText("#"));
+                a.Attr("href", Href.DefaultText("javascript:void(0)"));
             }
             else
                 a.Attr("disabled", "disabled");

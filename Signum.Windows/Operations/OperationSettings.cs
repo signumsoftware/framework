@@ -24,6 +24,11 @@ namespace Signum.Windows.Operations
             this.OperationSymbol = symbol.Operation;
         }
 
+        public OperationSettings(OperationSymbol operationSymbol)
+        {
+            this.OperationSymbol = operationSymbol;
+        }
+
     }
 
     public class EntityOperationGroup
@@ -47,6 +52,8 @@ namespace Signum.Windows.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
+        private Entities.OperationSymbol item;
+
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
 
@@ -63,6 +70,13 @@ namespace Signum.Windows.Operations
         {
             Contextual = new ContextualOperationSettings(symbolContainer);
             ContextualFromMany = new ContextualOperationSettings(symbolContainer); 
+        }
+
+        public EntityOperationSettings(OperationSymbol operationSymbol)
+            : base(operationSymbol)
+        {
+            Contextual = new ContextualOperationSettings(operationSymbol);
+            ContextualFromMany = new ContextualOperationSettings(operationSymbol);
         }
     }
 
@@ -99,6 +113,11 @@ namespace Signum.Windows.Operations
         public ContextualOperationSettings(IOperationSymbolContainer symbolContainer)
             : base(symbolContainer)
         {
+        }
+
+        public ContextualOperationSettings(Entities.OperationSymbol operationSymbol)
+            :base(operationSymbol)
+        {   
         }
     }
 

@@ -202,8 +202,13 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
 
             ul.append(partialErrors);
         }
-        if (currPrefix.length < valOptions.prefix.length)
-            setHasError($('#' + currPrefix));
+        if (currPrefix.length < valOptions.prefix.length) {
+
+            var element = $('#' + currPrefix);
+
+            if (element.length > 0 && !element.hasClass("SF-avoid-child-errors"))
+                setHasError(element);
+        }
 
     });
 }

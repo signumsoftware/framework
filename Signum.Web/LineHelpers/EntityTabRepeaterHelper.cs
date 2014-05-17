@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Id(repeater.Prefix).Class("sf-tab-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(repeater.Prefix).Class("sf-tab-repeater-field SF-control-container SF-avoid-child-errors")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
