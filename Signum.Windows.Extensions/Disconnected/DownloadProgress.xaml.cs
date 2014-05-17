@@ -103,6 +103,7 @@ namespace Signum.Windows.Disconnected
                 DownloadStatistics = currentLite
             });
 
+            FileTools.CreateParentDirectory(DisconnectedClient.DownloadBackupFile);
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
@@ -122,7 +123,7 @@ namespace Signum.Windows.Disconnected
 
                 Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show(Window.GetWindow(this), "You have successfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
+                    MessageBox.Show(Window.GetWindow(this), "You have successfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose Run disconnected.", "Download complete", MessageBoxButton.OK);
                 });
 
                 Environment.Exit(0);
