@@ -886,8 +886,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
         FilterBuilder.prototype.newSubTokensComboAdded = function ($selectedCombo) {
             var _this = this;
-            var $btnAddFilter = this.prefix.child("btnAddFilter").get();
-            var $btnAddColumn = this.prefix.child("btnAddColumn").get();
+            var $btnAddFilter = this.prefix.child("btnAddFilter").tryGet();
+            var $btnAddColumn = this.prefix.child("btnAddColumn").tryGet();
 
             var $selectedOption = $selectedCombo.children("option:selected");
             $selectedCombo.attr("title", $selectedOption.attr("title"));
@@ -1004,8 +1004,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var eleme = filterValuePrefix.get();
 
-            var date = filterValuePrefix.child("Date").get($filter);
-            var time = filterValuePrefix.child("Time").get($filter);
+            var date = filterValuePrefix.child("Date").tryGet($filter);
+            var time = filterValuePrefix.child("Time").tryGet($filter);
 
             if (date.length && time.length) {
                 var dateVal = date.val();
@@ -1016,8 +1016,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (eleme.is("input:checkbox"))
                 return eleme[0].checked;
 
-            var infoElem = filterValuePrefix.child(Entities.Keys.runtimeInfo).get(eleme);
-            if (infoElem.length > 0) {
+            var infoElem = filterValuePrefix.child(Entities.Keys.runtimeInfo).tryGet(eleme);
+            if (infoElem.length) {
                 var val = Entities.RuntimeInfo.parse(infoElem.val());
                 return SearchControl.encodeCSV(val == null ? null : val.key());
             }

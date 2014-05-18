@@ -488,7 +488,7 @@ once("stringExtensions", () => {
             return this;
 
         if (this.endsWith("_"))
-            throw new Error("path {0} ends with _".format(this));
+            throw new Error("path {0} ends with _".format(this.toString()));
 
         if (pathPart.startsWith("_"))
             throw new Error("pathPart {0} starts with _".format(pathPart));
@@ -522,7 +522,7 @@ once("stringExtensions", () => {
             if (pathPart.startsWith(pathPart + "_"))
                 return "";
 
-            throw Error("pathPart {0} not found on {1}".format(pathPart, this));
+            throw Error("pathPart {0} not found on {1}".format(pathPart, this.toString()));
         }
     };
 
@@ -535,11 +535,14 @@ once("stringExtensions", () => {
 
         var result = $(selector, context); 
 
+        if (result.length == 0 && context)
+            result = $(context).filter(selector);
+
         if (result.length == 0)
-            throw new Error("No element with id = '{0}' found".format(this));
+            throw new Error("No element with id = '{0}' found".format(this.toString()));
 
         if (result.length > 1)
-            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this.toString()));
 
         return result;
     };
@@ -552,6 +555,9 @@ once("stringExtensions", () => {
         var selector = "[id='" + this + "']";
 
         var result = $(selector, context);
+
+        if (result.length == 0 && context)
+            result = $(context).filter(selector);
 
         if (result.length > 1)
             throw new Error("{0} elements with id = '{1}' found".format(result.length, this));

@@ -953,36 +953,39 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var detailDiv = $("#" + this.options.detailDiv);
 
-            var children = detailDiv.children();
-            if (children.length) {
-                var itemPrefix = children[0].id.before("_" + EntityListDetail.key_entity);
-                if (selPrefix == itemPrefix) {
-                    children.show();
-                    return;
-                }
+            var currentChildren = detailDiv.children();
+            var currentPrefix = currentChildren.length ? currentChildren[0].id.parent(EntityListDetail.key_entity) : null;
+            if (currentPrefix == selPrefix) {
+                return;
             }
+
+            var hideCurrent = function () {
+                if (currentPrefix) {
+                    currentChildren.hide();
+                    _this.runtimeInfo(currentPrefix).after(currentChildren);
+                }
+            };
 
             if (selPrefix) {
                 var selContainer = this.containerDiv(selPrefix);
-                if (selContainer.children().length > 0) {
-                    children.hide();
-                    this.runtimeInfo(itemPrefix).after(children);
+
+                var promise = selContainer.children().length ? Promise.resolve(null) : Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null)).then(function (e) {
+                    return selContainer.html(e.html);
+                });
+
+                promise.then(function () {
                     detailDiv.append(selContainer);
                     selContainer.show();
-                } else {
-                    var entity = new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null);
 
-                    Navigator.requestPartialView(entity, this.defaultViewOptions()).then(function (e) {
-                        selContainer.html(e.html);
-                        children.hide();
-                        _this.runtimeInfo(itemPrefix).after(children);
-                        detailDiv.append(selContainer);
-                        selContainer.show();
-                    });
-                }
-            } else {
-                children.hide();
-                this.runtimeInfo(itemPrefix).after(children);
+                    if (currentPrefix) {
+                        currentChildren.hide();
+                        _this.runtimeInfo(currentPrefix).after(currentChildren);
+                    }
+                });
+            }
+            if (currentPrefix) {
+                currentChildren.hide();
+                this.runtimeInfo(currentPrefix).after(currentChildren);
             }
         };
 
@@ -1024,13 +1027,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityRepeater.prototype.removeEntitySpecific = function (itemPrefix) {
-            this.prefix.child(EntityRepeater.key_repeaterItem).get().remove();
+            itemPrefix.child(EntityRepeater.key_repeaterItem).get().remove();
         };
 
         EntityRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
             var fieldSet = $("<fieldset id='" + itemPrefix.child(EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend><div class='item-group'>" + (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") + "</div></legend>" + SF.hiddenInput(itemPrefix.child(EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + "<div id='" + itemPrefix.child(EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
-            itemPrefix.child(EntityRepeater.key_itemsContainer).get().append(fieldSet);
+            this.options.prefix.child(EntityRepeater.key_itemsContainer).get().append(fieldSet);
         };
 
         EntityRepeater.prototype.getRepeaterCall = function () {
@@ -1099,8 +1102,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityRepeater.prototype.updateButtonsDisplay = function () {
             var canAdd = this.canAddItems();
 
-            this.prefix.child("btnCreate").get().toggle(canAdd);
-            this.prefix.child("btnFind").get().toggle(canAdd);
+            this.prefix.child("btnCreate").tryGet().toggle(canAdd);
+            this.prefix.child("btnFind").tryGet().toggle(canAdd);
         };
         EntityRepeater.key_itemsContainer = "sfItemsContainer";
         EntityRepeater.key_repeaterItem = "sfRepeaterItem";

@@ -153,7 +153,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
     var okButtonId =  entityHtml.prefix.child("btnOk");
 
     return openModal(panelPopup, button => {
-        var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
+        var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
         if (button.id == okButtonId) {
             if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
                 alert(lang.signum.saveChangesBeforeOrPressCancel);
@@ -170,7 +170,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
         }
     }, shown).then(pair => {
 
-        var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
+        var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
         entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
         entityHtml.html = pair.modalDiv;
        

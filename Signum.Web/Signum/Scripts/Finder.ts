@@ -916,8 +916,8 @@ export class FilterBuilder {
     }
 
     newSubTokensComboAdded($selectedCombo: JQuery) {
-        var $btnAddFilter = this.prefix.child("btnAddFilter").get();
-        var $btnAddColumn = this.prefix.child("btnAddColumn").get();
+        var $btnAddFilter = this.prefix.child("btnAddFilter").tryGet();
+        var $btnAddColumn = this.prefix.child("btnAddColumn").tryGet();
 
         var $selectedOption = $selectedCombo.children("option:selected");
         $selectedCombo.attr("title", $selectedOption.attr("title"));
@@ -1027,8 +1027,8 @@ export class FilterBuilder {
 
         var eleme = filterValuePrefix.get();
 
-        var date = filterValuePrefix.child("Date").get($filter);
-        var time = filterValuePrefix.child("Time").get($filter);
+        var date = filterValuePrefix.child("Date").tryGet($filter);
+        var time = filterValuePrefix.child("Time").tryGet($filter);
 
         if (date.length && time.length) {
             var dateVal = date.val();
@@ -1039,8 +1039,8 @@ export class FilterBuilder {
         if (eleme.is("input:checkbox"))
             return (<HTMLInputElement> eleme[0]).checked;
 
-        var infoElem = filterValuePrefix.child(Entities.Keys.runtimeInfo).get(eleme);
-        if (infoElem.length > 0) { //If it's a Lite, the value is the Id
+        var infoElem = filterValuePrefix.child(Entities.Keys.runtimeInfo).tryGet(eleme);
+        if (infoElem.length) { //If it's a Lite, the value is the Id
             var val = Entities.RuntimeInfo.parse(infoElem.val());
             return SearchControl.encodeCSV(val == null ? null : val.key());
         }

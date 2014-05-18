@@ -986,36 +986,41 @@ export class EntityListDetail extends EntityList {
 
         var detailDiv = $("#" + this.options.detailDiv)
 
-        var children = detailDiv.children();
-        if (children.length) {
-            var itemPrefix = children[0].id.before("_" + EntityListDetail.key_entity);
-            if (selPrefix == itemPrefix) {
-                children.show();
-                return;
-            }
+        var currentChildren = detailDiv.children();
+        var currentPrefix = currentChildren.length ? currentChildren[0].id.parent(EntityListDetail.key_entity) : null;
+        if (currentPrefix == selPrefix) {
+            return;
         }
+
+        var hideCurrent = () => {
+
+            if (currentPrefix) {
+                currentChildren.hide();
+                this.runtimeInfo(currentPrefix).after(currentChildren);
+            }
+        }; 
 
         if (selPrefix) {
             var selContainer = this.containerDiv(selPrefix);
-            if (selContainer.children().length > 0) {
-                children.hide();
-                this.runtimeInfo(itemPrefix).after(children);
+
+            var promise = selContainer.children().length ? Promise.resolve<void>(null) :
+                Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null))
+                    .then<void>(e=> selContainer.html(e.html));
+
+            promise.then(() =>
+            {
                 detailDiv.append(selContainer);
                 selContainer.show();
-            } else {
-                var entity = new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null);
 
-                Navigator.requestPartialView(entity, this.defaultViewOptions()).then(e=> {
-                    selContainer.html(e.html);
-                    children.hide();
-                    this.runtimeInfo(itemPrefix).after(children);
-                    detailDiv.append(selContainer);
-                    selContainer.show();
-                });
-            }
-        } else {
-            children.hide();
-            this.runtimeInfo(itemPrefix).after(children);
+                if (currentPrefix) {
+                    currentChildren.hide();
+                    this.runtimeInfo(currentPrefix).after(currentChildren);
+                }
+            }); 
+
+        } if (currentPrefix) {
+            currentChildren.hide();
+            this.runtimeInfo(currentPrefix).after(currentChildren);
         }
     }
 
@@ -1054,7 +1059,7 @@ export class EntityRepeater extends EntityListBase {
     }
 
     removeEntitySpecific(itemPrefix: string) {
-        this.prefix.child(EntityRepeater.key_repeaterItem).get().remove();
+        itemPrefix.child(EntityRepeater.key_repeaterItem).get().remove();
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
@@ -1071,7 +1076,7 @@ export class EntityRepeater extends EntityListBase {
             "</fieldset>"
             );
 
-        itemPrefix.child(EntityRepeater.key_itemsContainer).get().append(fieldSet);
+        this.options.prefix.child(EntityRepeater.key_itemsContainer).get().append(fieldSet);
     }
 
     getRepeaterCall() {
@@ -1133,8 +1138,8 @@ export class EntityRepeater extends EntityListBase {
     updateButtonsDisplay() {
         var canAdd = this.canAddItems();
 
-        this.prefix.child("btnCreate").get().toggle(canAdd);
-        this.prefix.child("btnFind").get().toggle(canAdd);
+        this.prefix.child("btnCreate").tryGet().toggle(canAdd);
+        this.prefix.child("btnFind").tryGet().toggle(canAdd);
     }
 }
 

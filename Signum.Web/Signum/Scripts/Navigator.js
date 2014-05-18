@@ -129,7 +129,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         var okButtonId = entityHtml.prefix.child("btnOk");
 
         return exports.openModal(panelPopup, function (button) {
-            var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
             if (button.id == okButtonId) {
                 if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
                     alert(lang.signum.saveChangesBeforeOrPressCancel);
@@ -144,7 +144,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return canClose(false);
             }
         }, shown).then(function (pair) {
-            var main = entityHtml.prefix.child("divMainControl").get(panelPopup);
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
             entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
             entityHtml.html = pair.modalDiv;
 
