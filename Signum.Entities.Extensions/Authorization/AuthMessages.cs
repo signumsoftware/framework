@@ -54,6 +54,8 @@ namespace Signum.Entities.Authorization
         [Description("Introduce your username and password")]
         IntroduceYourUserNameAndPassword,
         InvalidUsernameOrPassword,
+        InvalidUsername,
+        InvalidPassword,
         [Description("New:")]
         Login_New,
         [Description("Password:")]

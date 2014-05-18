@@ -121,11 +121,8 @@ namespace Signum.Web.Chart
         {
             var requestCtx = this.ExtractChartRequestCtx(null).ValidateGlobal();
 
-            if (requestCtx.GlobalErrors.Any())
-            {
-                ModelState.FromContext(requestCtx);
-                return JsonAction.ModelState(ModelState);
-            }
+            if (requestCtx.HasErrors())
+                return requestCtx.JsonErrors();
 
             var request = requestCtx.Value;
 
@@ -214,8 +211,7 @@ namespace Signum.Web.Chart
         {
             var requestCtx = this.ExtractChartRequestCtx(null).ValidateGlobal();
 
-            ModelState.FromContext(requestCtx);
-            return JsonAction.ModelState(ModelState);
+            return requestCtx.JsonErrors();
         }
 
         [HttpPost]

@@ -26,6 +26,8 @@ namespace Signum.Web.Auth
     [AuthenticationRequired(false)]
     public class AuthController : Controller
     {
+        public static bool MergeInvalidUsernameAndPasswordMessages = true;
+
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
         public static event Action UserLogged;
@@ -51,11 +53,8 @@ namespace Signum.Web.Auth
         {
             var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, UserMapping.NewUser).ValidateGlobal();
 
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                return JsonAction.ModelState(ModelState);
-            }
+            if (context.HasErrors())
+                return context.JsonErrors();
 
             context.Value.Execute(UserOperation.SaveNew);
             return this.DefaultExecuteResult(context.Value);
@@ -114,7 +113,7 @@ namespace Signum.Web.Auth
 
                     var context = user.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
 
-                    if (context.GlobalErrors.Any())
+                    if (context.HasErrors())
                     {
                         ViewData["username"] = username;
                         ModelState.FromContext(context);
@@ -132,7 +131,7 @@ namespace Signum.Web.Auth
                 else
                 {
                     var context = UserDN.Current.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
-                    if (context.GlobalErrors.Any())
+                    if (context.HasErrors())
                     {
                         ModelState.FromContext(context);
                         RefreshSessionUserChanges();
@@ -315,10 +314,10 @@ namespace Signum.Web.Auth
         {
             // Basic parameter validation
             if (!username.HasText())
-                return LoginErrorAjaxOrForm("username", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                return LoginError("username", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(password))
-                return LoginErrorAjaxOrForm("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserDN user = null;
@@ -334,11 +333,15 @@ namespace Signum.Web.Auth
             }
             catch (IncorrectUsernameException)
             {
-                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "username" : "_FORM", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                return LoginError("username", MergeInvalidUsernameAndPasswordMessages ?
+                    AuthMessage.InvalidUsernameOrPassword.NiceToString() :
+                    AuthMessage.InvalidUsername.NiceToString());
             }
             catch (IncorrectPasswordException)
             {
-                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                return LoginError("password", MergeInvalidUsernameAndPasswordMessages ?
+                    AuthMessage.InvalidUsernameOrPassword.NiceToString() :
+                    AuthMessage.InvalidPassword.NiceToString());
             }
 
             if (user == null)
@@ -370,19 +373,7 @@ namespace Signum.Web.Auth
             }
         }
 
-        private ActionResult LoginErrorAjaxOrForm(string key, string message)
-        {
-            if (Request.IsAjaxRequest())
-            {
-                ModelState.Clear();
-                ModelState.AddModelError(key, message, "");
-                return JsonAction.ModelState(ModelState);
-            }
-            else
-                return LoginError(key, message);
-        }
-
-        ViewResult LoginError(string key, string error)
+        public ViewResult LoginError(string key, string error)
         {
             ModelState.AddModelError(key, error);
             return View(AuthClient.LoginView);
