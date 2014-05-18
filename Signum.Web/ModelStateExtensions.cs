@@ -29,15 +29,7 @@ namespace Signum.Web
                     foreach (var v in p.Value)
                         modelState.AddModelError(p.Key, v, form[p.Key]);
         }
-
-        public static Dictionary<string, string[]> ToJsonData(this ModelStateDictionary modelState)
-        {
-            return modelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray() 
-                );
-        }
-
+      
         //http://www.crankingoutcode.com/2009/02/01/IssuesWithAddModelErrorSetModelValueWithMVCRC1.aspx
         //Necesary to set model value if you add a model error, otherwise some htmlhelpers throw exception
         public static void AddModelError(this ModelStateDictionary modelState, string key, string errorMessage, string attemptedValue)

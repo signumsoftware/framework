@@ -1206,26 +1206,6 @@ namespace Signum.Web
             };
         }
 
-        public static JsonNetResult ModelState(ModelStateDictionary dictionary)
-        {
-            return ModelState(dictionary, null, null); 
-        }
-
-        public static JsonNetResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
-        {
-            Dictionary<string, object> result = new Dictionary<string, object>
-            {
-                {"result", JsonResultType.ModelState.ToString()},
-                {"ModelState", dictionary.ToJsonData()}
-            };
-
-            if (newToString != null)
-                result.Add(EntityBaseKeys.ToStr, newToString);
-            if (newToStringLink != null)
-                result.Add(EntityBaseKeys.Link, newToStringLink);
-
-            return new JsonNetResult { Data = result };
-        }
     }
 
     public class JsonNetResult : ActionResult
