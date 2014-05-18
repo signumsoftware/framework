@@ -152,15 +152,15 @@ export class FileLine extends Lines.EntityBase {
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
         this.prefix.child(Entities.Keys.loading).get().hide();
         if (entityValue) {
-            this.prefix.child(Entities.Keys.toStr).get().html(entityValue.toStr);
-            this.prefix.child(Entities.Keys.link).get().html(entityValue.toStr).attr("href", entityValue.link);
+            this.prefix.child(Entities.Keys.toStr).tryGet().html(entityValue.toStr);
+            this.prefix.child(Entities.Keys.link).tryGet().html(entityValue.toStr).attr("href", entityValue.link);
 
             if (this.options.download == DownloadBehaviour.SaveAs)
-                this.prefix.child(Entities.Keys.link).get().attr("download", entityValue.toStr);
+                this.prefix.child(Entities.Keys.link).tryGet().attr("download", entityValue.toStr);
 
         } else {
-            this.prefix.child(Entities.Keys.toStr).get().html("");
-            this.prefix.child(Entities.Keys.toStr).get().html("").removeAttr("download").removeAttr("href");
+            this.prefix.child(Entities.Keys.toStr).tryGet().html("");
+            this.prefix.child(Entities.Keys.toStr).tryGet().html("").removeAttr("download").removeAttr("href");
         }
     }
 

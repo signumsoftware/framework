@@ -316,15 +316,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         ChartBuilder.prototype.initOrders = function () {
             var _this = this;
             this.prefix.child("tblResults").get().on("click", "th", function (e) {
-                _this.newSortOrder($(_this), e.shiftKey);
+                _this.newSortOrder($(e.currentTarget), e.shiftKey);
                 _this.$chartControl.find(".sf-chart-draw").click();
                 return false;
             });
         };
 
         ChartBuilder.prototype.bindMouseClick = function ($chartContainer) {
-            $chartContainer.find('[data-click]').click(function () {
-                var _this = this;
+            $chartContainer.find('[data-click]').click(function (e) {
                 var url = $chartContainer.attr('data-open-url');
 
                 var win = window.open("about:blank");
@@ -335,7 +334,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     options += "&webQueryName=" + cb.options.webQueryName;
                     options += "&orders=" + cb.serializeOrders();
                     options += "&filters=" + cb.filterBuilder.serializeFilters();
-                    options += $(_this).data("click");
+                    options += $(e.currentTarget).data("click");
 
                     win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
                 });

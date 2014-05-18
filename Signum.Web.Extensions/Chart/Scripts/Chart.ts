@@ -312,8 +312,8 @@ export class ChartBuilder extends Finder.SearchControl {
     }
 
     initOrders() {
-        this.prefix.child("tblResults").get().on("click", "th", (e) => {
-            this.newSortOrder($(this), e.shiftKey);
+        this.prefix.child("tblResults").get().on("click", "th", e => {
+            this.newSortOrder($(e.currentTarget), e.shiftKey);
             this.$chartControl.find(".sf-chart-draw").click();
             return false;
         });
@@ -321,7 +321,7 @@ export class ChartBuilder extends Finder.SearchControl {
 
     bindMouseClick($chartContainer: JQuery) {
 
-        $chartContainer.find('[data-click]').click(function () {
+        $chartContainer.find('[data-click]').click(e=> {
 
             var url = $chartContainer.attr('data-open-url');
 
@@ -333,7 +333,7 @@ export class ChartBuilder extends Finder.SearchControl {
                 options += "&webQueryName=" + cb.options.webQueryName;
                 options += "&orders=" + cb.serializeOrders();
                 options += "&filters=" + cb.filterBuilder.serializeFilters();
-                options += $(this).data("click");
+                options += $(e.currentTarget).data("click");
 
                 win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
             }); 

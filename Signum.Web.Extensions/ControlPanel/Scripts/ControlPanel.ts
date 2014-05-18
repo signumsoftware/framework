@@ -15,13 +15,13 @@ export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: 
 
             return SF.ajaxPost({
                 url: url,
-                data: $.extend({
+                data: {
                     prefix: prefix,
                     rootType: gridRepeater.options.rootType,
                     propertyRoute: gridRepeater.options.propertyRoute,
                     partialViewName: gridRepeater.options.partialViewName,
                     newPartType: type,
-                }, Validator.getFormValues(prefix))
+                }
             }).then(html=> {
                 var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
                 result.loadHtml(html)

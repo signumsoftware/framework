@@ -1,5 +1,5 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Entities, Navigator, Validator) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
     function attachGridControl(gridRepeater, url, typesOptions) {
         gridRepeater.creating = function (prefix) {
             return Navigator.typeChooser(prefix.child("New"), typesOptions).then(function (type) {
@@ -8,13 +8,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                 return SF.ajaxPost({
                     url: url,
-                    data: $.extend({
+                    data: {
                         prefix: prefix,
                         rootType: gridRepeater.options.rootType,
                         propertyRoute: gridRepeater.options.propertyRoute,
                         partialViewName: gridRepeater.options.partialViewName,
                         newPartType: type
-                    }, Validator.getFormValues(prefix))
+                    }
                 }).then(function (html) {
                     var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
                     result.loadHtml(html);
