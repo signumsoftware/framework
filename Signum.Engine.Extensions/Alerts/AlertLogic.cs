@@ -109,7 +109,7 @@ namespace Signum.Engine.Alerts
             if (started == false)
                 return null;
 
-            return new AlertDN
+            var result = new AlertDN
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
                 CreatedBy = user ?? UserHolder.Current.ToLite(),
@@ -117,7 +117,12 @@ namespace Signum.Engine.Alerts
                 Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
                 AlertType = alertType
-            }.Execute(AlertOperation.SaveNew);
+            };
+
+            if (result.Mixins.Any())
+                result.CopyMixinsFrom(entity.Retrieve());
+
+            return result.Execute(AlertOperation.SaveNew);
         }
 
         public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, AlertTypeDN alertType, DateTime? alertDate = null, Lite<IUserDN> user = null)
