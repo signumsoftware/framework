@@ -87,7 +87,7 @@ namespace Signum.Web.UserQueries
             var context = userQuery.ApplyChanges(this.ControllerContext, true).ValidateGlobal();
 
             if (context.HasErrors())
-                return context.JsonErrors();
+                return context.ToJsonModelState();
 
             userQuery = context.Value.Execute(UserQueryOperation.Save);
 

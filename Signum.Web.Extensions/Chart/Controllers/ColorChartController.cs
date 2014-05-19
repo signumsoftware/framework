@@ -27,7 +27,7 @@ namespace Signum.Web.Chart
             var ctx = ChartColorLogic.GetPalette(type).ApplyChanges(this.ControllerContext, true).ValidateGlobal();
 
             if (ctx.HasErrors())
-                return ctx.JsonErrors();
+                return ctx.ToJsonModelState();
 
             var palette = ctx.Value;
 

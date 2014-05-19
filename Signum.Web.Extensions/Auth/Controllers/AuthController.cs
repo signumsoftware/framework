@@ -54,7 +54,7 @@ namespace Signum.Web.Auth
             var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, UserMapping.NewUser).ValidateGlobal();
 
             if (context.HasErrors())
-                return context.JsonErrors();
+                return context.ToJsonModelState();
 
             context.Value.Execute(UserOperation.SaveNew);
             return this.DefaultExecuteResult(context.Value);

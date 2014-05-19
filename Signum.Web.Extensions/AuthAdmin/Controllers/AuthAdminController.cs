@@ -79,7 +79,7 @@ namespace Signum.Web.AuthAdmin
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
             if (prp.HasErrors())
-                return prp.JsonErrors();
+                return prp.ToJsonModelState();
 
             return null;
         }
@@ -99,7 +99,7 @@ namespace Signum.Web.AuthAdmin
             var querys = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, true, prefix);
 
             if (querys.HasErrors())
-                return querys.JsonErrors();
+                return querys.ToJsonModelState();
 
             QueryAuthLogic.SetQueryRules(querys.Value);
 
@@ -122,7 +122,7 @@ namespace Signum.Web.AuthAdmin
             var opers = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, true, prefix);
 
             if (opers.HasErrors())
-                return opers.JsonErrors();
+                return opers.ToJsonModelState();
 
             OperationAuthLogic.SetOperationRules(opers.Value);
 
