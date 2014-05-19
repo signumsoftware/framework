@@ -4,7 +4,7 @@ var SF;
     (function (FindNavigator) {
         once("SF-searchControl", function () {
             return $.fn.searchControl = function (opt) {
-                new SF.SearchControl(this, opt);
+                new SearchControl(this, opt);
             };
         });
 
