@@ -35,6 +35,17 @@ namespace Signum.Entities.Isolation
 
         static readonly ThreadVariable<Lite<IsolationDN>> CurrentThreadVariable = Statics.ThreadVariable<Lite<IsolationDN>>("CurrentIsolation");
 
+        public static IDisposable OverrideIfNecessary(Lite<IsolationDN> isolation)
+        {
+            if (isolation == null)
+                return null;
+
+            if (IsolationDN.Current != null)
+                return null;
+
+            return Override(isolation);
+        }
+
         public static IDisposable Override(Lite<IsolationDN> isolation)
         {
             var old = CurrentThreadVariable.Value; 

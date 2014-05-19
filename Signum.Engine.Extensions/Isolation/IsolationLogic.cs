@@ -52,20 +52,24 @@ namespace Signum.Engine.Isolation
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+                AutocompleteUtils.SurroundQuery += AutocompleteUtils_SurroundQuery;
+                DynamicQueryManager.Current.SurroundQuery += Current_SurroundQuery;
             }
+        }
+
+        static IDisposable Current_SurroundQuery(object queryName, List<object> args)
+        {
+            return IsolationDN.OverrideIfNecessary(args.TryGetArgC<Lite<IsolationDN>>());
+        }
+
+        static IDisposable AutocompleteUtils_SurroundQuery(Implementations implementations, List<object> args)
+        {
+            return IsolationDN.OverrideIfNecessary(args.TryGetArgC<Lite<IsolationDN>>());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)
         {
-            if (IsolationDN.Current == null)
-                return null;
-
-            Lite<IsolationDN> isolation = (entity == null ? null : entity.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>();
-
-            if (isolation == null)
-                return null;
-
-            return IsolationDN.Override(isolation);
+            return IsolationDN.OverrideIfNecessary(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
         }
 
         static void EntityEventsGlobal_PreSaving(IdentifiableEntity ident, ref bool graphModified)
