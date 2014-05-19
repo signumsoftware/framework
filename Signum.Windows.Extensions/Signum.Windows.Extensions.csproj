@@ -262,6 +262,9 @@
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
     <Compile Include="Isolation\IsolationClient.cs" />
+    <Compile Include="Isolation\IsolationWidget.xaml.cs">
+      <DependentUpon>IsolationWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
@@ -649,6 +652,10 @@
     <Page Include="Files\FileRepository.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Isolation\IsolationWidget.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

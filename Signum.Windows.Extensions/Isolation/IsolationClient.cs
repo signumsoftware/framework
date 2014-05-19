@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 using Signum.Entities;
 using Signum.Entities.Isolation;
 using Signum.Utilities;
@@ -15,18 +16,25 @@ namespace Signum.Windows.Isolation
     {
         public static Func<Window, Lite<IsolationDN>> SelectIsolationInteractively;
 
+        public static Func<Lite<IsolationDN>, ImageSource> GetIsolationIcon; 
+
         public static void AsserIsStarted()
         {
-            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => IsolationClient.Start()));
+            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => IsolationClient.Start(null)));
         }
 
-        public static void Start()
+        public static void Start(Func<Lite<IsolationDN>, ImageSource> getIsolationIcon)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Constructor.Manager.PreConstructors += Constructor_PreConstructors;
+                Constructor.Manager.PostConstructors += Manager_PostConstructors;
 
-                List<Lite<IsolationDN>> isolations = null; 
+                WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ? new IsolationWidget() : null;
+
+                List<Lite<IsolationDN>> isolations = null;
+
+                GetIsolationIcon = getIsolationIcon;
 
                 SelectIsolationInteractively = owner =>
                 {
@@ -35,6 +43,8 @@ namespace Signum.Windows.Isolation
                     
                     Lite<IsolationDN> result;
                     if (SelectorWindow.ShowDialog(isolations, out result,
+                        elementIcon: getIsolationIcon,
+                        elementText: iso=> getIsolationIcon(iso) == null ? iso.ToString() : null,
                         title: IsolationMessage.SelectAnIsolation.NiceToString(),
                         message: IsolationMessage.SelectAnIsolation.NiceToString(), 
                         owner: owner))
@@ -46,7 +56,7 @@ namespace Signum.Windows.Isolation
                 Navigator.Manager.GetArgs += () =>
                 {
                     var win = Navigator.Manager.GetCurrentWindow();
-
+                    
                     var ident = win.DataContext as IdentifiableEntity;
                     if (ident != null)
                     {
@@ -66,6 +76,18 @@ namespace Signum.Windows.Isolation
                     return null;
                 }; 
             }
+        }
+
+        static bool Manager_PostConstructors(Type type, FrameworkElement element, List<object> args, object result)
+        {
+            var iden = result as IdentifiableEntity;
+
+            if (iden != null && MixinDeclarations.IsDeclared(type, typeof(IsolationMixin)) && iden.Isolation() == null)
+            {
+                iden.SetIsolation(args.TryGetArgC<Lite<IsolationDN>>());
+            }
+
+            return true;
         }
 
         static bool Constructor_PreConstructors(Type type, FrameworkElement element, List<object> args)
@@ -89,15 +111,15 @@ namespace Signum.Windows.Isolation
             if (result != null)
                 return result;
 
-            var entity = element.DataContext as IdentifiableEntity;
-            if (element != null)
+            var entity = element == null ? null: element.DataContext as IdentifiableEntity;
+            if (entity != null)
             {
                 result = entity.TryIsolation();
                 if (result != null)
                     return result;
             }
 
-            return SelectIsolationInteractively(Window.GetWindow(element));
+            return SelectIsolationInteractively(element == null ? null : Window.GetWindow(element));
         }
     }
 }
