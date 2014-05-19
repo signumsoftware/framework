@@ -14,6 +14,8 @@ using Signum.Entities.Isolation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Processes;
+using Signum.Entities.Processes;
 
 namespace Signum.Engine.Isolation
 {
@@ -54,7 +56,14 @@ namespace Signum.Engine.Isolation
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
                 AutocompleteUtils.SurroundQuery += AutocompleteUtils_SurroundQuery;
                 DynamicQueryManager.Current.SurroundQuery += Current_SurroundQuery;
+
+                ProcessLogic.ApplySession += ProcessLogic_ApplySession;
             }
+        }
+
+        static IDisposable ProcessLogic_ApplySession(ProcessDN process)
+        {
+            return IsolationDN.OverrideIfNecessary(process.Data.TryIsolation());
         }
 
         static IDisposable Current_SurroundQuery(object queryName, List<object> args)
