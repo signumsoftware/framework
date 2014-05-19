@@ -72,7 +72,7 @@ namespace Signum.Engine.DynamicQuery
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
 
-        public Func<object, List<object>, IDisposable> SurroundQuery;
+        public event Func<object, List<object>, IDisposable> SurroundQuery;
 
         public IDisposable OnSurroundQuery(object queryName, List<object> args)
         {

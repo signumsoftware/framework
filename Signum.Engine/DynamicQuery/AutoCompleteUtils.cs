@@ -20,7 +20,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class AutocompleteUtils
     {
-        public static Func<Implementations, List<object>, IDisposable> SurroundQuery;
+        public static event Func<Implementations, List<object>, IDisposable> SurroundQuery;
 
         public static IDisposable OnSurroundQuery(Implementations implementations, List<object> args)
         {
