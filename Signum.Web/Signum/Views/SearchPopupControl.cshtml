@@ -20,6 +20,7 @@
             <div class="modal-body">
                 @{ 
                     ViewData[ViewDataKeys.InPopup] = true;
+                    ViewData[ViewDataKeys.AvoidFullScreenButton] = true;
                     Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
                 }
                 @Html.ValidationSummaryAjax(Model)
