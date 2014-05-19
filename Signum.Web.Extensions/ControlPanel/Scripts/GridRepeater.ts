@@ -7,19 +7,19 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 
 function _prefix(repeaterItem: Element) {
-        return (<HTMLElement>repeaterItem).id.before("_sfRepeaterItem")
+        return (<HTMLElement>repeaterItem).id.parent("sfRepeaterItem")
 }
 
 function _get(repeaterItem: Element, field: string) : string {
     var prefix = _prefix(repeaterItem);
 
-    return $("#" + SF.compose(prefix, field), repeaterItem).val();
+    return prefix.child(field).get(repeaterItem).val();
 }
 
 function _set(repeaterItem: Element, field: string, value: string) : void {
     var prefix = _prefix(repeaterItem);
 
-    $("#" + SF.compose(prefix, field), repeaterItem).val(value);
+    prefix.child(field).get(repeaterItem).val(value);
 }
 
 function _overlaps(
@@ -57,7 +57,7 @@ export class GridRepeater extends Lines.EntityRepeater {
     dragMode: string;
 
     setupResizer(){
-        var container = $(this.pf(Lines.EntityRepeater.key_itemsContainer));
+        var container = this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get();
 
         var currentElement: JQuery;
         var currentRow: JQuery;
@@ -111,7 +111,7 @@ export class GridRepeater extends Lines.EntityRepeater {
     }
 
     setupMover() {
-        var container = $(this.pf(Lines.EntityRepeater.key_itemsContainer));
+        var container = this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get();
 
         var currentElement: JQuery;
         var currentRow: JQuery;
@@ -248,14 +248,14 @@ export class GridRepeater extends Lines.EntityRepeater {
     }
 
     setupRemove() {
-        $(this.pf(Lines.EntityRepeater.key_itemsContainer)).on("click", ".sf-grid-element  > .panel > .panel-heading > .sf-remove", e => {
-            this.removeItem_click((<HTMLElement>e.currentTarget).id.before("_btnRemove"));
+        this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().on("click", ".sf-grid-element  > .panel > .panel-heading > .sf-remove", e => {
+            this.removeItem_click((<HTMLElement>e.currentTarget).id.parent("btnRemove"));
         }); 
     }
 
     removeEntitySpecific(itemPrefix: string) {
 
-        $("#" + SF.compose(itemPrefix, Lines.EntityRepeater.key_repeaterItem)).remove();
+        itemPrefix.child(Lines.EntityRepeater.key_repeaterItem).get().remove();
 
         this.saveRows();
     }
@@ -284,7 +284,7 @@ export class GridRepeater extends Lines.EntityRepeater {
     }
 
     getItems() {
-        return $(this.pf(Lines.EntityRepeater.key_itemsContainer) + "  ." + GridRepeater.key_gridRepeaterItemClass);
+        return this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().find("." + GridRepeater.key_gridRepeaterItemClass);
     }
 
     //The hiddens rules over DOM to simplify non-accumulative start-column (instead of offsets)
@@ -319,7 +319,7 @@ export class GridRepeater extends Lines.EntityRepeater {
 
     //The DOM rules over the hiddens to simplify row re-indexing
     saveRows() {
-        $(this.pf(Lines.EntityRepeater.key_itemsContainer) + ">" + ".items-row").each((i, e)=> {
+        this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().children(".items-row").each((i, e)=> {
             var row = $(e);
 
             if (row.children().length)
@@ -329,7 +329,7 @@ export class GridRepeater extends Lines.EntityRepeater {
             row.remove();
         });
 
-        $(this.pf(Lines.EntityRepeater.key_itemsContainer) + ">" + ".items-row").each((index, row) => {
+        this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().children(".items-row").each((index, row) => {
             $("." + GridRepeater.key_gridRepeaterItemClass, row).each((_, elem) => {
                 _set(elem, "Row", index.toString())
             }); 
@@ -340,11 +340,11 @@ export class GridRepeater extends Lines.EntityRepeater {
 
         var eHtml = <Entities.EntityHtml>entityValue;
 
-        $(this.pf(Lines.EntityTabRepeater.key_itemsContainer))
+        this.prefix.child(Lines.EntityTabRepeater.key_itemsContainer).get()
             .append($("<div>").addClass("row items-row")
                 .append(eHtml.html));
 
-        $(this.pf(Lines.EntityTabRepeater.key_itemsContainer))
+        this.prefix.child(Lines.EntityTabRepeater.key_itemsContainer).get()
             .append($("<div>").addClass("row separator-row"));
 
         this.saveRows();

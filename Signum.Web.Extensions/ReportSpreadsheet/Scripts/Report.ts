@@ -28,7 +28,7 @@ export function administerExcelReports(prefix: string, excelReportQueryName: str
 
     Finder.explore({
         create: false,
-        prefix: SF.compose(prefix, "New"),
+        prefix: prefix.child("New"),
         webQueryName: excelReportQueryName,
         searchOnLoad: true,
         filters: [{ columnName: "Query", operation: Finder.FilterOperation.EqualTo, value: queryKey }],
@@ -36,7 +36,7 @@ export function administerExcelReports(prefix: string, excelReportQueryName: str
 }
 
 export function createExcelReports(prefix: string, url: string, query: string) {
-    Navigator.navigatePopup(Entities.EntityHtml.withoutType(SF.compose(prefix, "New")), {
+    Navigator.navigatePopup(Entities.EntityHtml.withoutType(prefix.child("New")), {
         controllerUrl: url,
         requestExtraJsonData: { query: query }
     });

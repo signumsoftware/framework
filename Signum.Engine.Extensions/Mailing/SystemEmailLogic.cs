@@ -104,9 +104,9 @@ namespace Signum.Engine.Mailing
 
                 systemEmailToDN = sb.GlobalLazy(() =>
                 {
-                    var dbTemplates = Database.RetrieveAll<SystemEmailDN>();
+                    var dbSystemEmails = Database.RetrieveAll<SystemEmailDN>();
                     return EnumerableExtensions.JoinStrict(
-                        dbTemplates, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
+                        dbSystemEmails, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
                         (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates. Consider synchronize").ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailDN)));
 
@@ -206,6 +206,9 @@ namespace Signum.Engine.Mailing
 
         public static IEnumerable<EmailMessageDN> CreateEmailMessage(this ISystemEmail systemEmail)
         {
+            if (systemEmail.UntypedEntity == null)
+                throw new InvalidOperationException("Entity property not set on SystemEmail");
+
             var systemEmailDN = ToSystemEmailDN(systemEmail.GetType());
             var template = GetDefaultTemplate(systemEmailDN);
 

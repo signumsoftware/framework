@@ -247,8 +247,14 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && Token == null && emailAddress.IsNullOrEmpty())
-                return "Token or Email Address must be set";
+            if (pi.Is(() => Token))
+            {
+                if (Token == null && emailAddress.IsNullOrEmpty())
+                    return "Token or Email Address must be set";
+
+                if (Token != null && !emailAddress.IsNullOrEmpty())
+                    return "Token and Email Address can not be set at the same time";
+            }
             
             return null;
         }

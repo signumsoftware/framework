@@ -59,9 +59,7 @@ else
                         {
                             CellFormatter ft = formatters[col.Index];
                             var value = row[col];
-                            <td @ft.WriteDataAttribute(value)>
-                                @ft.Formatter(Html, value)
-                            </td>
+                            <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
                         }
                     </tr>
                     
@@ -73,17 +71,13 @@ else
                     <tr data-entity="@entityField.Key()">
                         @if (entityField != null && navigate)
                         {
-                            <td>
-                                @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
-                            </td>
+                            <td>@QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)</td>
                         }
                         @foreach (var col in queryResult.Columns)
                         {
                             var value = row[col];
                             var ft = formatters[col.Index];
-                            <td @ft.WriteDataAttribute(value)>
-                                @ft.Formatter(Html, value)
-                            </td>
+                            <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
                         }
                     </tr>
                     

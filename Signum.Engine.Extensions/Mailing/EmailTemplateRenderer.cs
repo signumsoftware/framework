@@ -275,7 +275,7 @@ namespace Signum.Engine.Mailing
             using (ExecutionMode.Global())
             {
                 List<QueryToken> tokens = new List<QueryToken>();
-                if (template.From != null)
+                if (template.From != null && template.From.Token != null)
                     tokens.Add(template.From.Token.Token);
 
                 foreach (var tr in template.Recipients.Where(r => r.Token != null))

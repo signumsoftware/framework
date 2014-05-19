@@ -15,7 +15,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.createNote = createNote;
 
     function updateNotes(prefix, urlUpdate) {
-        var widget = $("#" + SF.compose(prefix, "notesWidget"));
+        var widget = prefix.child("notesWidget").get();
 
         SF.ajaxPost({
             url: urlUpdate,

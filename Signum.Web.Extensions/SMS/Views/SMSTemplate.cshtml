@@ -25,28 +25,28 @@
     
     <div class="clearall"></div>
     <div id="sfTemplateLiterals">
-        @using (Html.FormInline())
-        {
+        <div class="form-inline">
             @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
                 ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
             })
-        }
+        </div>
+
         @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
         <br />
         <input type="button" class="sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
     </div>
     
-        @Html.EntityTabRepeater(tc, e => e.Messages, er =>
+    @Html.EntityTabRepeater(tc, e => e.Messages, er =>
         {
             er.PreserveViewData = true;
         })
     
     <script>
-    @(new JsFunction(SMSClient.Module, "init", 
-    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
+        @(new JsFunction(SMSClient.Module, "init",
+    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")),
     Url.Action<SMSController>(s => s.GetDictionaries())))
-</script>
+    </script>
 }
