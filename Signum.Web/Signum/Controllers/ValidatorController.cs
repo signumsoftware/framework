@@ -24,7 +24,7 @@ namespace Signum.Web.Controllers
             string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;
             string newToStr = context.UntypedValue.ToString();
 
-            return context.JsonErrors(newToStr, newLink);
+            return context.ToJsonModelState(newToStr, newLink);
         }
     }
 }

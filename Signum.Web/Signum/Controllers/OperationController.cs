@@ -39,7 +39,7 @@ namespace Signum.Web.Controllers
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())
-                    return context.JsonErrors();
+                    return context.ToJsonModelState();
 
                 entity = OperationLogic.ServiceExecute(entity, operationSymbol);
             }
@@ -88,7 +88,7 @@ namespace Signum.Web.Controllers
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())
-                    return context.JsonErrors();
+                    return context.ToJsonModelState();
 
                 entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
             }

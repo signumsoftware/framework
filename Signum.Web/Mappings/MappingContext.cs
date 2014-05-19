@@ -153,12 +153,12 @@ namespace Signum.Web
             return GlobalErrors.Any();
         }
 
-        public JsonNetResult JsonErrors()
+        public JsonNetResult ToJsonModelState()
         {
-            return JsonErrors(null, null);
+            return ToJsonModelState(null, null);
         }
 
-        public JsonNetResult JsonErrors(string newToString, string newToStringLink)
+        public JsonNetResult ToJsonModelState(string newToString, string newToStringLink)
         {
             Dictionary<string, object> result = new Dictionary<string, object>
             {
