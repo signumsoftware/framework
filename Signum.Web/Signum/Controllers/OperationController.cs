@@ -38,11 +38,8 @@ namespace Signum.Web.Controllers
                 MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
-                if (context.GlobalErrors.Any())
-                {
-                    this.ModelState.FromContext(context);
-                    return JsonAction.ModelState(ModelState);
-                }
+                if (context.HasErrors())
+                    return context.JsonErrors();
 
                 entity = OperationLogic.ServiceExecute(entity, operationSymbol);
             }
@@ -90,11 +87,8 @@ namespace Signum.Web.Controllers
                 MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
-                if (context.GlobalErrors.Any())
-                {
-                    this.ModelState.FromContext(context);
-                    return JsonAction.ModelState(ModelState);
-                }
+                if (context.HasErrors())
+                    return context.JsonErrors();
 
                 entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
             }

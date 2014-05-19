@@ -147,6 +147,33 @@ namespace Signum.Web
             }
             return true;
         }
+
+        public bool HasErrors()
+        {
+            return GlobalErrors.Any();
+        }
+
+        public JsonNetResult JsonErrors()
+        {
+            return JsonErrors(null, null);
+        }
+
+        public JsonNetResult JsonErrors(string newToString, string newToStringLink)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>
+            {
+                {"result", JsonResultType.ModelState.ToString()},
+                {"ModelState", this.GlobalErrors }
+            };
+
+            if (newToString != null)
+                result.Add(EntityBaseKeys.ToStr, newToString);
+            if (newToStringLink != null)
+                result.Add(EntityBaseKeys.Link, newToStringLink);
+
+            return new JsonNetResult { Data = result };
+        }
+
     }
 
     public abstract class MappingContext<T> : MappingContext

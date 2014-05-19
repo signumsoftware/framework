@@ -34,9 +34,9 @@ namespace Signum.Web
             return (T)ConstructorManager.Construct(typeof(T));
         }
 
-        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
+        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
         {
-            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle, partialViewName);
+            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected);
         }
 
         public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
@@ -86,7 +86,7 @@ namespace Signum.Web
             return (ModifiableEntity)Activator.CreateInstance(type, true);
         }
 
-        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
+        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
         {
             ConstructContext ctx = new ConstructContext { Controller = controller, Type = type, Prefix = prefix, PreferredViewStyle = preferredStyle };
             Func<ConstructContext, ActionResult> c = VisualConstructors.TryGetC(type);
@@ -108,10 +108,10 @@ namespace Signum.Web
                 return JsonAction.RedirectAjax(Navigator.NavigateRoute(type, null));
 
             ModifiableEntity entity = Constructor.Construct(type);
-            return EncapsulateView(controller, entity, prefix, preferredStyle, partialViewName); 
+            return EncapsulateView(controller, entity, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected); 
         }
 
-        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
+        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -123,9 +123,22 @@ namespace Signum.Web
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    return Navigator.PopupOpen(controller, new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
+                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
+                    { 
+                        PartialViewName = partialViewName,
+                        ReadOnly = readOnly,
+                        SaveProtected = saveProtected,
+                        ShowOperations = showOperations
+                    };
+                    return Navigator.PopupOpen(controller, viewOptions);
                 case VisualConstructStyle.PopupNavigate:
-                    return Navigator.PopupOpen(controller, new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
+                    var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
+                    { 
+                        PartialViewName = partialViewName,
+                        ReadOnly = readOnly,
+                        ShowOperations = showOperations
+                    };
+                    return Navigator.PopupOpen(controller, navigateOptions);
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix, partialViewName);
                 case VisualConstructStyle.View:

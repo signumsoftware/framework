@@ -157,22 +157,6 @@ var SF;
     }
     SF.hiddenDiv = hiddenDiv;
 
-    function compose(str) {
-        var nextParts = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            nextParts[_i] = arguments[_i + 1];
-        }
-        var result = str;
-        for (var i = 0; i < nextParts.length; i++) {
-            var part = nextParts[i];
-
-            result = !result ? part : !part ? result : result + "_" + part;
-        }
-
-        return result;
-    }
-    SF.compose = compose;
-
     function cloneWithValues(elements) {
         var clone = elements.clone(true);
 
@@ -452,16 +436,96 @@ once("stringExtensions", function () {
             return this.replace(/^\s+|\s+$/, '');
         };
     }
+
+    String.prototype.child = function (pathPart) {
+        if (SF.isEmpty(this))
+            return pathPart;
+
+        if (SF.isEmpty(pathPart))
+            return this;
+
+        if (this.endsWith("_"))
+            throw new Error("path {0} ends with _".format(this.toString()));
+
+        if (pathPart.startsWith("_"))
+            throw new Error("pathPart {0} starts with _".format(pathPart));
+
+        return this + "_" + pathPart;
+    };
+
+    String.prototype.parent = function (pathPart) {
+        if (SF.isEmpty(this))
+            throw new Error("impossible to pop the empty string");
+
+        if (SF.isEmpty(pathPart)) {
+            var index = this.lastIndexOf("_");
+
+            if (index == -1)
+                return "";
+
+            return this.substr(0, index);
+        } else {
+            if (this == pathPart)
+                return "";
+
+            var index = this.lastIndexOf("_" + pathPart);
+
+            if (index != -1)
+                return this.substr(0, index);
+
+            if (pathPart.startsWith(pathPart + "_"))
+                return "";
+
+            throw Error("pathPart {0} not found on {1}".format(pathPart, this.toString()));
+        }
+    };
+
+    String.prototype.get = function (context) {
+        if (SF.isEmpty(this))
+            throw new Error("Impossible to call 'get' on the empty string");
+
+        var selector = "[id='" + this + "']";
+
+        var result = $(selector, context);
+
+        if (result.length == 0 && context)
+            result = $(context).filter(selector);
+
+        if (result.length == 0)
+            throw new Error("No element with id = '{0}' found".format(this.toString()));
+
+        if (result.length > 1)
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this.toString()));
+
+        return result;
+    };
+
+    String.prototype.tryGet = function (context) {
+        if (SF.isEmpty(this))
+            throw new Error("Impossible to call 'get' on the empty string");
+
+        var selector = "[id='" + this + "']";
+
+        var result = $(selector, context);
+
+        if (result.length == 0 && context)
+            result = $(context).filter(selector);
+
+        if (result.length > 1)
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+
+        return result;
+    };
 });
 
 once("dateExtensions", function () {
-    Date.prototype.addMilisecconds = function (inc) {
+    Date.prototype.addMiliseconds = function (inc) {
         var n = new Date(this.valueOf());
         n.setMilliseconds(this.getMilliseconds() + inc);
         return n;
     };
 
-    Date.prototype.addSeccond = function (inc) {
+    Date.prototype.addSecond = function (inc) {
         var n = new Date(this.valueOf());
         n.setSeconds(this.getSeconds() + inc);
         return n;

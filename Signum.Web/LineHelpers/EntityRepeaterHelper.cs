@@ -24,7 +24,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container SF-avoid-child-errors")))
             {
                 sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
 

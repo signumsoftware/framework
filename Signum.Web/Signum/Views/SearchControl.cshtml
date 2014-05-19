@@ -90,10 +90,10 @@
            Prefix = Model.Prefix
        }).ToStringButton(Html)
 
-        @if (!filtersAlwaysHidden && (bool?)ViewData[ViewDataKeys.InPopup] != true)
+        @if ((bool?)ViewData[ViewDataKeys.AvoidFullScreenButton] != true)
         { 
-             <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen" href="#">
-                <span class="sf-query-button btn btn-default glyphicon glyphicon-new-window"></span>
+             <a id="@Model.Compose("sfFullScreen")" class="sf-query-button btn btn-default" href="#">
+                <span class="glyphicon glyphicon-new-window"></span>
             </a>
         }
 

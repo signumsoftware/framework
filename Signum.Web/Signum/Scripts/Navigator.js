@@ -28,7 +28,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: "",
             requestExtraJsonData: null,
             readOnly: false,
-            onPopupLoaded: null
+            onPopupLoaded: null,
+            showOperations: true
         }, viewOptions);
 
         if (entityHtml.isLoaded())
@@ -41,7 +42,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.navigatePopup = navigatePopup;
 
     function openNavigatePopup(entityHtml, viewOptions) {
-        entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", true);
+        entityHtml.getChild("panelPopup").data("sf-navigate", true);
 
         return exports.openEntityHtmlModal(entityHtml, null, viewOptions.onPopupLoaded).then(function () {
             return null;
@@ -61,6 +62,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: null,
             requestExtraJsonData: null,
             readOnly: false,
+            saveProtected: null,
+            showOperations: true,
             avoidClone: false,
             avoidValidate: false,
             allowErrors: 0 /* Ask */,
@@ -91,7 +94,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.viewPopup = viewPopup;
 
     function openPopupView(entityHtml, viewOptions) {
-        entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup")).data("sf-navigate", false);
+        entityHtml.getChild("panelPopup").data("sf-navigate", false);
 
         return exports.openEntityHtmlModal(entityHtml, function (isOk) {
             if (!isOk)
@@ -124,12 +127,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return Promise.resolve(true);
             };
 
-        var panelPopup = entityHtml.html.filter("#" + SF.compose(entityHtml.prefix, "panelPopup"));
+        var panelPopup = entityHtml.getChild("panelPopup");
 
-        var okButtonId = SF.compose(entityHtml.prefix, "btnOk");
+        var okButtonId = entityHtml.prefix.child("btnOk");
 
         return exports.openModal(panelPopup, function (button) {
-            var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
             if (button.id == okButtonId) {
                 if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
                     alert(lang.signum.saveChangesBeforeOrPressCancel);
@@ -144,7 +147,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return canClose(false);
             }
         }, shown).then(function (pair) {
-            var main = panelPopup.find("#" + SF.compose(entityHtml.prefix, "divMainControl"));
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
             entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
             entityHtml.html = pair.modalDiv;
 
@@ -241,7 +244,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.reloadMain = reloadMain;
 
     function closePopup(prefix) {
-        var tempDivId = SF.compose(prefix, "Temp");
+        var tempDivId = prefix.child("Temp");
 
         var tempDiv = $("#" + tempDivId);
 
@@ -250,7 +253,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.closePopup = closePopup;
 
     function reloadPopup(entityHtml) {
-        var panelPopupId = SF.compose(entityHtml.prefix, "panelPopup");
+        var panelPopupId = entityHtml.prefix.child("panelPopup");
 
         $("#" + panelPopupId).html(entityHtml.html.filter("#" + panelPopupId).children());
     }
@@ -268,7 +271,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (SF.isEmpty(prefix))
             return false;
 
-        return $("#" + SF.compose(prefix, "panelPopup")).data("sf-navigate");
+        return prefix.child("panelPopup").get().data("sf-navigate");
     }
     exports.isNavigatePopup = isNavigatePopup;
 
@@ -318,6 +321,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (options.readOnly == true)
             obj["readOnly"] = options.readOnly;
 
+        if (options.saveProtected != null)
+            obj["saveProtected"] = options.saveProtected;
+
+        if (options.showOperations != true)
+            obj["showOperations"] = false;
+
         if (!SF.isEmpty(options.partialViewName))
             obj["partialViewName"] = options.partialViewName;
 
@@ -366,7 +375,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.chooser = chooser;
 
     function createBootstrapModal(options) {
-        var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + SF.compose(options.prefix, "panelPopup") + '">' + '<div class="modal-dialog modal-sm" >' + '<div class="modal-content">' + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '') + '<div class="modal-body"></div>' + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '') + '</div>' + '</div>' + '</div>');
+        var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + options.prefix.child("panelPopup") + '">' + '<div class="modal-dialog modal-sm" >' + '<div class="modal-content">' + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '') + '<div class="modal-body"></div>' + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '') + '</div>' + '</div>' + '</div>');
 
         if (options.titleClose)
             result.find(".modal-header").append('<button type="button" class="close sf-close-button" aria-hidden="true">×</button>');
@@ -416,13 +425,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var html = pair.entityHtml.html;
 
-            var date = html.find(SF.compose(options.prefix, "Date"));
-            var time = html.find(SF.compose(options.prefix, "Time"));
+            var date = html.find(options.prefix.child("Date"));
+            var time = html.find(options.prefix.child("Time"));
 
             if (date.length && time.length)
                 return date.val() + " " + time.val();
 
-            var input = html.find(":input:not(:button)");
+            var input = pair.entityHtml.html.find(":input:not(:button)");
             if (input.length != 1)
                 throw new Error("{0} inputs found in ValueLineBox".format(input.length));
 

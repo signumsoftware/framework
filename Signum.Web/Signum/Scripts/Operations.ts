@@ -49,7 +49,7 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
         .then(result=> {
-            assertModelStateErrors(result, options);
+            assertModelStateErrors(result, options.prefix);
             return Entities.EntityHtml.fromHtml(options.prefix, result)
         });
 }
@@ -222,7 +222,7 @@ export function notifyExecuted() {
 }
 
 export function getNewPrefix(options: OperationOptions) {
-    return SF.compose(options.prefix, "New");
+    return options.prefix.child("New");
 }
 
 export function entityRequestData(options: EntityOperationOptions, newPrefix?: string): FormData {
@@ -265,7 +265,7 @@ export function contextualRequestData(options: OperationOptions, newPrefix?: str
         runtimeInfo = items[0].runtimeInfo;
     }
 
-    result[SF.compose(options.prefix, Entities.Keys.runtimeInfo)] = runtimeInfo.toString();
+    result[options.prefix.child(Entities.Keys.runtimeInfo)] = runtimeInfo.toString();
 
     return result;
 }
@@ -291,13 +291,13 @@ export function baseRequestData(options: OperationOptions, newPrefix?: string) {
 }
 
 
-function assertModelStateErrors(operationResult: any, options: OperationOptions) {
+export function assertModelStateErrors(operationResult: any, prefix: string) {
     if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
         return false;
 
     var modelState = operationResult.ModelState;
 
-    Validator.showErrors({ prefix: options.prefix }, modelState);
+    Validator.showErrors({ prefix: prefix }, modelState);
 
     SF.Notify.error(lang.signum.error, 2000);
 
@@ -329,8 +329,8 @@ export function submit(options: EntityOperationOptions) {
 
     if (!SF.isEmpty(options.prefix)) {
         //Check runtimeInfo present => if it's a popup from a LineControl it will not be
-        var myRuntimeInfoKey = SF.compose(options.prefix, Entities.Keys.runtimeInfo);
-        if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
+        var myRuntimeInfoKey = options.prefix.child(Entities.Keys.runtimeInfo);
+        if (myRuntimeInfoKey.tryGet().length == 0) {
             SF.hiddenInput(myRuntimeInfoKey, mainControl.data("runtimeinfo"));
         }
     }
