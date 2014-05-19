@@ -9,6 +9,7 @@ export interface ViewOptionsBase {
     partialViewName?: string;
     requestExtraJsonData?: any;
     readOnly?: boolean;
+    showOperations?: boolean;
 }
 
 export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?: ViewOptionsBase): Promise<Entities.EntityHtml> {
@@ -44,6 +45,7 @@ export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: Nav
         requestExtraJsonData: null,
         readOnly: false,
         onPopupLoaded: null,
+        showOperations: true
     }, viewOptions);
 
     if (entityHtml.isLoaded())
@@ -67,6 +69,7 @@ export interface ViewPopupOptions extends ViewOptionsBase {
     validationOptions?: Validator.ValidationOptions;
     allowErrors?: AllowErrors;
     onPopupLoaded?: (popupDiv: JQuery) => void;
+    saveProtected?: boolean;
 }
 
 export enum AllowErrors {
@@ -82,6 +85,8 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
         partialViewName: null,
         requestExtraJsonData: null,
         readOnly: false,
+        saveProtected: null,
+        showOperations: true,
         avoidClone: false,
         avoidValidate: false,
         allowErrors: AllowErrors.Ask,
@@ -345,6 +350,12 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 
     if (options.readOnly == true)
         obj["readOnly"] = options.readOnly;
+
+    if ((<ViewPopupOptions>options).saveProtected != null)
+        obj["saveProtected"] = (<ViewPopupOptions>options).saveProtected;
+
+    if (options.showOperations != true)
+        obj["showOperations"] = false;
 
     if (!SF.isEmpty(options.partialViewName)) //Send specific partialview if given
         obj["partialViewName"] = options.partialViewName;

@@ -134,11 +134,7 @@ namespace Signum.Web
         public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix = null)
         {  
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-
-            var viewOptions = new PopupViewOptions(tc);
-            viewOptions.SaveProtected = !Navigator.IsCreable(entity.GetType(), false);
-
-            return controller.PopupOpen(viewOptions);
+            return controller.PopupOpen(new PopupViewOptions(tc));
         }
 
         public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, string prefix = null)

@@ -39,10 +39,10 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(webTypeName);
 
-            return Constructor.VisualConstruct(this, type, "", VisualConstructStyle.View, null);
+            return Constructor.VisualConstruct(this, type, "", VisualConstructStyle.View, null, null, true, null);
         }
 
-        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName)
+        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
         {
             Type type = Navigator.ResolveType(entityType);
 
@@ -51,7 +51,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate, partialViewName);
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate, partialViewName, readOnly, showOperations ?? true, saveProtected);
                 if (result.GetType() == typeof(PartialViewResult))
                     return (PartialViewResult)result;
 
@@ -65,10 +65,10 @@ namespace Signum.Web.Controllers
             }
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = partialViewName });
+            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly, ShowOperations = showOperations ?? true });
         }
 
-        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
+        public PartialViewResult PopupView(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
         {
             Type type = Navigator.ResolveType(entityType);
 
@@ -77,7 +77,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView, partialViewName);
+                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView, partialViewName, readOnly, showOperations ?? true, saveProtected);
                 if (result is PartialViewResult)
                     return (PartialViewResult)result;
                 else
@@ -86,14 +86,19 @@ namespace Signum.Web.Controllers
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            var viewOptions = new PopupViewOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly.HasValue };
-            viewOptions.SaveProtected = !Navigator.IsCreable(entity.GetType(), false);
+            var viewOptions = new PopupViewOptions(tc) 
+            { 
+                PartialViewName = partialViewName, 
+                ReadOnly = readOnly,
+                ShowOperations = showOperations ?? true,
+                SaveProtected = saveProtected
+            };
 
             return this.PopupOpen(viewOptions);
         }
 
         [HttpPost]
-        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
+        public PartialViewResult PartialView(string entityType, int? id, string prefix, string partialViewName, bool? readOnly)
         {
             Type type = Navigator.ResolveType(entityType);
 
@@ -102,7 +107,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView, partialViewName);
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView, partialViewName, readOnly, false, null);
                 if (result is PartialViewResult)
                     return (PartialViewResult)result;
                 else
