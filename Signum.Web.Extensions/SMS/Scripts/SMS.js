@@ -177,7 +177,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.sendMultipleSMSMessagesFromTemplate = sendMultipleSMSMessagesFromTemplate;
 
     function sentMultipleSms(options, prefix, urlModel, urlOperation) {
-        var prefixModel = SF.compose(prefix, "New");
+        var prefixModel = prefix.child("New");
         Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
             controllerUrl: urlModel
         }).then(function (eHtml) {

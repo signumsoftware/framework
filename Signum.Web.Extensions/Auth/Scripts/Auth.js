@@ -8,7 +8,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.saveNew = saveNew;
 
     function setPassword(options, urlModel, urlSetPassword) {
-        var passPrefix = SF.compose(options.prefix, "Pass");
+        var passPrefix = options.prefix.child("Pass");
 
         Navigator.viewPopup(Entities.EntityHtml.withoutType(passPrefix), {
             controllerUrl: urlModel,

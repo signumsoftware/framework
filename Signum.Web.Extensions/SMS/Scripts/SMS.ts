@@ -196,7 +196,7 @@ export function sendMultipleSMSMessagesFromTemplate(options: Operations.Operatio
 }
 
 export function sentMultipleSms(options: Operations.OperationOptions, prefix: string, urlModel: string, urlOperation: string) {
-    var prefixModel = SF.compose(prefix, "New");
+    var prefixModel = prefix.child("New");
     Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
         controllerUrl: urlModel
     }).then(eHtml=> {

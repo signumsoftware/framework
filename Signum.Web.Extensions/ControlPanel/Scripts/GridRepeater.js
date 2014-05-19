@@ -7,19 +7,19 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], function(require, exports, Lines) {
     function _prefix(repeaterItem) {
-        return repeaterItem.id.before("_sfRepeaterItem");
+        return repeaterItem.id.parent("sfRepeaterItem");
     }
 
     function _get(repeaterItem, field) {
         var prefix = _prefix(repeaterItem);
 
-        return $("#" + SF.compose(prefix, field), repeaterItem).val();
+        return prefix.child(field).get(repeaterItem).val();
     }
 
     function _set(repeaterItem, field, value) {
         var prefix = _prefix(repeaterItem);
 
-        $("#" + SF.compose(prefix, field), repeaterItem).val(value);
+        prefix.child(field).get(repeaterItem).val(value);
     }
 
     function _overlaps(a, b) {
@@ -47,7 +47,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
 
         GridRepeater.prototype.setupResizer = function () {
             var _this = this;
-            var container = $(this.pf(Lines.EntityRepeater.key_itemsContainer));
+            var container = this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get();
 
             var currentElement;
             var currentRow;
@@ -102,7 +102,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
 
         GridRepeater.prototype.setupMover = function () {
             var _this = this;
-            var container = $(this.pf(Lines.EntityRepeater.key_itemsContainer));
+            var container = this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get();
 
             var currentElement;
             var currentRow;
@@ -243,13 +243,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
 
         GridRepeater.prototype.setupRemove = function () {
             var _this = this;
-            $(this.pf(Lines.EntityRepeater.key_itemsContainer)).on("click", ".sf-grid-element  > .panel > .panel-heading > .sf-remove", function (e) {
-                _this.removeItem_click(e.currentTarget.id.before("_btnRemove"));
+            this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().on("click", ".sf-grid-element  > .panel > .panel-heading > .sf-remove", function (e) {
+                _this.removeItem_click(e.currentTarget.id.parent("btnRemove"));
             });
         };
 
         GridRepeater.prototype.removeEntitySpecific = function (itemPrefix) {
-            $("#" + SF.compose(itemPrefix, Lines.EntityRepeater.key_repeaterItem)).remove();
+            itemPrefix.child(Lines.EntityRepeater.key_repeaterItem).get().remove();
 
             this.saveRows();
         };
@@ -274,7 +274,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
         };
 
         GridRepeater.prototype.getItems = function () {
-            return $(this.pf(Lines.EntityRepeater.key_itemsContainer) + "  ." + GridRepeater.key_gridRepeaterItemClass);
+            return this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().find("." + GridRepeater.key_gridRepeaterItemClass);
         };
 
         //The hiddens rules over DOM to simplify non-accumulative start-column (instead of offsets)
@@ -315,7 +315,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
 
         //The DOM rules over the hiddens to simplify row re-indexing
         GridRepeater.prototype.saveRows = function () {
-            $(this.pf(Lines.EntityRepeater.key_itemsContainer) + ">" + ".items-row").each(function (i, e) {
+            this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().children(".items-row").each(function (i, e) {
                 var row = $(e);
 
                 if (row.children().length)
@@ -325,7 +325,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
                 row.remove();
             });
 
-            $(this.pf(Lines.EntityRepeater.key_itemsContainer) + ">" + ".items-row").each(function (index, row) {
+            this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().children(".items-row").each(function (index, row) {
                 $("." + GridRepeater.key_gridRepeaterItemClass, row).each(function (_, elem) {
                     _set(elem, "Row", index.toString());
                 });
@@ -335,9 +335,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Lines"], func
         GridRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
             var eHtml = entityValue;
 
-            $(this.pf(Lines.EntityTabRepeater.key_itemsContainer)).append($("<div>").addClass("row items-row").append(eHtml.html));
+            this.prefix.child(Lines.EntityTabRepeater.key_itemsContainer).get().append($("<div>").addClass("row items-row").append(eHtml.html));
 
-            $(this.pf(Lines.EntityTabRepeater.key_itemsContainer)).append($("<div>").addClass("row separator-row"));
+            this.prefix.child(Lines.EntityTabRepeater.key_itemsContainer).get().append($("<div>").addClass("row separator-row"));
 
             this.saveRows();
 

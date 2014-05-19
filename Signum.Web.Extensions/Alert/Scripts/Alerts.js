@@ -15,7 +15,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.createAlert = createAlert;
 
     function updateAlerts(prefix, updateUrl) {
-        var widget = $("#" + SF.compose(prefix, "alertsWidget")).parent();
+        var widget = prefix.child("alertsWidget").get().parent();
 
         SF.ajaxPost({
             url: updateUrl,

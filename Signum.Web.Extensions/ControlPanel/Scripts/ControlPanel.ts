@@ -9,19 +9,19 @@ import GridRepeater = require("Extensions/Signum.Web.Extensions/ControlPanel/Scr
 export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: string, typesOptions: Navigator.ChooserOption[]) {
 
     gridRepeater.creating = prefix => {
-        return Navigator.typeChooser(SF.compose(prefix, "New"), typesOptions).then(type=> {
+        return Navigator.typeChooser(prefix.child("New"), typesOptions).then(type=> {
             if (type == null)
                 return null;
 
             return SF.ajaxPost({
                 url: url,
-                data: $.extend({
+                data: {
                     prefix: prefix,
                     rootType: gridRepeater.options.rootType,
                     propertyRoute: gridRepeater.options.propertyRoute,
                     partialViewName: gridRepeater.options.partialViewName,
                     newPartType: type,
-                }, Validator.getFormValues(prefix))
+                }
             }).then(html=> {
                 var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
                 result.loadHtml(html)

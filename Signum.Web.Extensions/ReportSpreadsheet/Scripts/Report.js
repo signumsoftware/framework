@@ -21,7 +21,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function administerExcelReports(prefix, excelReportQueryName, queryKey) {
         Finder.explore({
             create: false,
-            prefix: SF.compose(prefix, "New"),
+            prefix: prefix.child("New"),
             webQueryName: excelReportQueryName,
             searchOnLoad: true,
             filters: [{ columnName: "Query", operation: 0 /* EqualTo */, value: queryKey }]
@@ -30,7 +30,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.administerExcelReports = administerExcelReports;
 
     function createExcelReports(prefix, url, query) {
-        Navigator.navigatePopup(Entities.EntityHtml.withoutType(SF.compose(prefix, "New")), {
+        Navigator.navigatePopup(Entities.EntityHtml.withoutType(prefix.child("New")), {
             controllerUrl: url,
             requestExtraJsonData: { query: query }
         });
