@@ -28,7 +28,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: "",
             requestExtraJsonData: null,
             readOnly: false,
-            onPopupLoaded: null
+            onPopupLoaded: null,
+            showOperations: true
         }, viewOptions);
 
         if (entityHtml.isLoaded())
@@ -61,6 +62,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: null,
             requestExtraJsonData: null,
             readOnly: false,
+            saveProtected: null,
+            showOperations: true,
             avoidClone: false,
             avoidValidate: false,
             allowErrors: 0 /* Ask */,
@@ -317,6 +320,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (options.readOnly == true)
             obj["readOnly"] = options.readOnly;
+
+        if (options.saveProtected != null)
+            obj["saveProtected"] = options.saveProtected;
+
+        if (options.showOperations != true)
+            obj["showOperations"] = false;
 
         if (!SF.isEmpty(options.partialViewName))
             obj["partialViewName"] = options.partialViewName;

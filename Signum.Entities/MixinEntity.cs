@@ -171,7 +171,7 @@ namespace Signum.Entities
             }
         }
 
-        public static T CopyMixinsFrom<T>(this T newEntity, IdentifiableEntity original, params object[] args)
+        public static T CopyMixinsFrom<T>(this T newEntity, IIdentifiable original, params object[] args)
             where T: IIdentifiable
         {
             var list = (from nm in ((IdentifiableEntity)(IIdentifiable)newEntity).Mixins
