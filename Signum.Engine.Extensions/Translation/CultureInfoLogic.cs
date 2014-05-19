@@ -99,6 +99,10 @@ namespace Signum.Engine.Translation
 
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoDN, T> func)
         {
+            if (CultureInfoDNToCultureInfo.Value.Count == 0)
+                throw new InvalidOperationException("No {0} found in the database".Formato(typeof(CultureInfoDN).Name));
+
+
             foreach (var c in CultureInfoDNToCultureInfo.Value)
             {
                 using (Sync.ChangeBothCultures(c.Value))
