@@ -37,7 +37,7 @@ namespace Signum.Windows
         public static T SurroundConstruct<T>(FrameworkElement element, List<object> args, Func<FrameworkElement, List<object>, T> constructor)
             where T : ModifiableEntity
         {
-            return (T)SurroundConstruct(typeof(T), element, args, (_type, _element, _args) => constructor(element, args));
+            return (T)SurroundConstruct(typeof(T), element, args, (_type, _element, _args) => constructor(_element, _args));
         }
 
         public static object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, object> constructor)

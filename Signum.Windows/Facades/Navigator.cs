@@ -909,7 +909,7 @@ namespace Signum.Windows
 
         public Control GetCurrentWindow()
         {
-            if (multithreaded)
+            if (multithreaded && Application.Current.Dispatcher != Dispatcher.CurrentDispatcher)
                 return Async.GetCurrentWindow();
 
             return Application.Current.Windows.Cast<Window>().FirstOrDefault(a => a.IsActive);
