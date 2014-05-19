@@ -15,7 +15,6 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
-
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <IISExpressSSLPort />

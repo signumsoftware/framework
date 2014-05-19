@@ -75,11 +75,11 @@ export function getFormValues(prefix: string, prefixRequestKey?: string): FormOb
         result = cleanFormInputs($("form :input")).serializeObject();
     }
     else {
-        var mainControl = $("#{0}_divMainControl".format(prefix));
+        var mainControl = prefix.child("divMainControl").get();
 
         result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
-        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+        result[prefix.child(Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
         result = $.extend(result, getFormBasics());
     }
@@ -94,9 +94,9 @@ export function getFormValuesLite(prefix: string, prefixRequestKey?: string): Fo
 
     var result = getFormBasics();
 
-    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
-    $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
-    $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+    result[prefix.child(Entities.Keys.runtimeInfo)] = prefix ?
+    prefix.child("divMainControl").get().data("runtimeinfo") : 
+    prefix.child(Entities.Keys.runtimeInfo).get().val();
 
     if (prefixRequestKey)
         result[prefixRequestKey] = prefix;
@@ -106,11 +106,11 @@ export function getFormValuesLite(prefix: string, prefixRequestKey?: string): Fo
 
 export function getFormValuesHtml(entityHtml: Entities.EntityHtml, prefixRequestKey?: string): FormObject {
 
-    var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix));
+    var mainControl = entityHtml.getChild("divMainControl");
 
     var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
-    result[SF.compose(entityHtml.prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+    result[entityHtml.prefix.child(Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
     if (prefixRequestKey)
         result[prefixRequestKey] = entityHtml.prefix;
@@ -193,17 +193,22 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
 
     getPathPrefixes(prefix).forEach(currPrefix=> {
 
-        var summary = $('#' + SF.compose(currPrefix, globalValidationSummary))
+        var summary = currPrefix.child(globalValidationSummary).tryGet()
 
-        if (summary.length > 0) {
+        if (summary.length) {
             var ul = summary.children("ul." + validationSummary);
-            if (ul.length == 0)
+            if (!ul.length)
                 ul = $('<ul class="' + validationSummary + ' alert alert-danger"></ul>').appendTo(summary);
 
             ul.append(partialErrors);
         }
-        if (currPrefix.length < valOptions.prefix.length)
-            setHasError($('#' + currPrefix));
+        if (currPrefix.length < valOptions.prefix.length) {
+
+            var element = $('#' + currPrefix);
+
+            if (element.length > 0 && !element.hasClass("SF-avoid-child-errors"))
+                setHasError(element);
+        }
 
     });
 }

@@ -61,21 +61,12 @@ define(["require", "exports"], function(require, exports) {
             return this.type + ";" + this.id;
         };
 
-        RuntimeInfo.getHiddenInput = function (prefix, context) {
-            var result = $('#' + SF.compose(prefix, exports.Keys.runtimeInfo), context);
-
-            if (result.length != 1)
-                throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, exports.Keys.runtimeInfo)));
-
-            return result;
-        };
-
         RuntimeInfo.getFromPrefix = function (prefix, context) {
-            return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+            return RuntimeInfo.parse(prefix.child(exports.Keys.runtimeInfo).get().val());
         };
 
         RuntimeInfo.setFromPrefix = function (prefix, runtimeInfo, context) {
-            RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null ? "" : runtimeInfo.toString());
+            prefix.child(exports.Keys.runtimeInfo).get().val(runtimeInfo == null ? "" : runtimeInfo.toString());
         };
         return RuntimeInfo;
     })();
@@ -128,6 +119,14 @@ define(["require", "exports"], function(require, exports) {
 
         EntityHtml.prototype.loadHtml = function (htmlText) {
             this.html = $('<div/>').html(htmlText).contents();
+        };
+
+        EntityHtml.prototype.getChild = function (pathPart) {
+            return this.prefix.child(pathPart).get(this.html);
+        };
+
+        EntityHtml.prototype.tryGetChild = function (pathPart) {
+            return this.prefix.child(pathPart).tryGet(this.html);
         };
 
         EntityHtml.fromHtml = function (prefix, htmlText) {
