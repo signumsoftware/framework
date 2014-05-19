@@ -33,7 +33,8 @@ namespace Signum.Web
         public const string PartialViewName = "sfPartialViewName";
         public const string EntityState = "sfEntityState";
         public const string WriteEntityState = "sfWriteEntityState";
-        public const string InPopup = "sfInPopup";
+        public const string InPopup = "sfIsPopup";
+        public const string AvoidFullScreenButton = "sfAvoidFullScreenButton";
         public const string ShowOperations = "sfShowOperations";
         public const string SaveProtected = "sfSaveProtected";
         public const string FiltersVisible = "sfFiltersVisible";
