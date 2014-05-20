@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Entities.Isolation;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using System.Windows.Controls;
 
 namespace Signum.Windows.Isolation
 {
@@ -74,8 +75,25 @@ namespace Signum.Windows.Isolation
                     }
 
                     return null;
-                }; 
+                };
+
+                Navigator.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
             }
+        }
+
+        static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
+        {
+            if(IsolationDN.Default!=null)
+                return;
+
+            var iso = sw.Args.TryGetArgC<Lite<IsolationDN>>();
+            
+            if (iso == null)
+                return;
+
+            var tb = sw.Child<TextBox>(a => a.Name == "tbEntityType");
+
+            tb.Before(new Image { Stretch = Stretch.None, SnapsToDevicePixels = true, Source = GetIsolationIcon(iso) }); 
         }
 
         static bool Manager_PostConstructors(Type type, FrameworkElement element, List<object> args, object result)
