@@ -75,6 +75,5 @@
         <m:ValueLine m:Common.Route="From" />
         <m:ValueLine m:Common.Route="StartDate" />
         <m:ValueLine m:Common.Route="EndDate" />
-        <m:EntityLine m:Common.Route="AdditionalData" m:Common.CollapseIfNull="True" />
     </StackPanel>
 </UserControl>
