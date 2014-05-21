@@ -39,6 +39,7 @@
     Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
 }
 
+@Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
 @if (Model.Instances.IsEmpty())
@@ -96,7 +97,8 @@ else
                         
                         if (translations.Count() == 1)
                         {
-                            <textarea name="@elementName" style="width:90%">@translations.First()</textarea>
+                            <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
+                            <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
                             <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
                         }
                         else 

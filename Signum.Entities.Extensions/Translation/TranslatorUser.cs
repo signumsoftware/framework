@@ -104,12 +104,12 @@ namespace Signum.Entities.Translation
         [Description("{0} already synchronized")]
         _0AlreadySynchronized,
 
-        NothingToTranslate,         
+        NothingToTranslate,
         All,
 
         [Description("Nothing to translate in {0}")]
         NothingToTranslateIn0,
-        
+
         [Description("sync")]
         Sync,
 
@@ -128,6 +128,10 @@ namespace Signum.Entities.Translation
         Instance,
         Property,
         Save,
+        Search,
+        [Description("Press search for results...")]
+        PressSearchForResults,
+        NoResultsFound,
     }
 
     public enum TranslationJavascriptMessage

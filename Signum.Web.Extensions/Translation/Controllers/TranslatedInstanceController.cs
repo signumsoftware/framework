@@ -18,43 +18,49 @@ using Signum.Utilities;
 
 namespace Signum.Web.Translation.Controllers
 {
+    [ValidateInputAttribute(false)]
     public class TranslatedInstanceController : Controller
     {
         public ActionResult Index()
         {
-            var cultures = TranslationLogic.CurrentCultureInfos("en");
+            var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
             var list = TranslatedInstanceLogic.TranslationInstancesStatus();
 
             return base.View(TranslationClient.ViewPrefix.Formato("IndexInstance"), list.AgGroupToDictionary(a => a.Type, gr => gr.ToDictionary(a => a.CultureInfo)));
         }
 
-        public new ActionResult View(string type, string culture)
+        [HttpGet]
+        public new ActionResult View(string type, string culture, bool searchPressed, string filter)
         {
             Type t = TypeLogic.GetType(type);
+            ViewBag.Type = t;
+            var c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
+            ViewBag.Culture = c;
+
+            ViewBag.Filter = filter;
+
+            if (!searchPressed)
+                return base.View(TranslationClient.ViewPrefix.Formato("ViewInstance"));
 
             Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
 
-            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(t, culture: null);
-
-            var c =  culture == null ? null : CultureInfo.GetCultureInfo(culture);
-
-            ViewBag.Type = t;
             ViewBag.Master = master;
-            ViewBag.Culture = c;
+
+            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(t, culture: null);
 
             return base.View(TranslationClient.ViewPrefix.Formato("ViewInstance"), support);
         }
 
         [HttpPost]
-        public ActionResult View(string type, string culture, string bla)
+        public ActionResult SaveView(string type, string culture, string filter)
         {
             Type t = TypeLogic.GetType(type);
 
-            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
-
             Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslationRecord> should = GetTranslationRecords(t).Where(a => a.Value.HasText())
                 .ToDictionary(a => Tuple.Create(a.Culture, new LocalizedInstanceKey(a.Route, a.Instance)));
+
+            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
 
             var c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
@@ -70,7 +76,7 @@ namespace Signum.Web.Translation.Controllers
                 Synchronizer.Synchronize(
                     should,
                     current,
-                    (k, n) =>new TranslatedInstanceDN
+                    (k, n) => new TranslatedInstanceDN
                     {
                         Culture = n.Culture.ToCultureInfoDN(),
                         PropertyRoute = routes.GetOrThrow(n.Route),
@@ -78,10 +84,14 @@ namespace Signum.Web.Translation.Controllers
                         OriginalText = master[k.Item2],
                         TranslatedText = n.Value,
                     }.Save(),
-                    (k, o) => o.Delete(),
+                    (k, o) => { },
                     (k, n, o) =>
                     {
-                        if (o.TranslatedText != n.Value || o.OriginalText != master[k.Item2])
+                        if (n.Value.HasText())
+                        {
+                            o.Delete();
+                        }
+                        else if (o.TranslatedText != n.Value || o.OriginalText != master[k.Item2])
                         {
                             var r = o.ToLite().Retrieve();
                             r.OriginalText = master[k.Item2];
@@ -93,7 +103,7 @@ namespace Signum.Web.Translation.Controllers
                 tr.Commit();
             }
 
-            return RedirectToAction("View", new { type = type, culture = culture });
+            return RedirectToAction("View", new { type = type, culture = culture, filter = filter, searchPressed = true });
         }
 
         static Regex regex = new Regex(@"^(?<lang>[^#]+)#(?<instance>[^#]+)#(?<route>[^#]+)$");
@@ -141,7 +151,7 @@ namespace Signum.Web.Translation.Controllers
         }
 
         [HttpPost]
-        public ActionResult Sync(string type, string culture, string bla)
+        public ActionResult SaveSync(string type, string culture)
         {
             Type t = TypeLogic.GetType(type);
 
