@@ -40,23 +40,47 @@ define(["require", "exports"], function(require, exports) {
     }
     exports.editAndRemember = editAndRemember;
 
+    function isSpace(str) {
+        return str == " " || str == "\t" || str == "\n" || str == "\r" || str == "." || str == "," || str == ";" || str == ":";
+    }
+
     function onFeedbackClick(e) {
         e.preventDefault();
 
         var $this = $(this);
 
-        var original = $this.parent().find("select").val();
-        var fixed = $this.parent().find("textarea").val();
+        var textArea = $this.parent().find("textarea");
 
+        var original = textArea.filter("[disabled]").val();
+        var fixed = textArea.not("[disabled]").val();
+
+        var word = "";
         while (original.length > 0 && fixed.length > 0 && original.charAt(0) == fixed.charAt(0)) {
+            if (isSpace(original.charAt(0)))
+                word = "";
+            else
+                word += original.charAt(0);
+
             original = original.substring(1);
             fixed = fixed.substring(1);
         }
 
+        original = word + original;
+        fixed = word + fixed;
+
+        var word = "";
         while (original.length > 0 && fixed.length > 0 && original.charAt(original.length - 1) == fixed.charAt(fixed.length - 1)) {
-            original = original.substring(0, original.length - 2);
-            fixed = fixed.substring(0, fixed.length - 2);
+            if (isSpace(original.charAt(original.length - 1)))
+                word = "";
+            else
+                word = original.charAt(original.length - 1) + word;
+
+            original = original.substring(0, original.length - 1);
+            fixed = fixed.substring(0, fixed.length - 1);
         }
+
+        original = original + word;
+        fixed = fixed + word;
 
         var wrong;
         do {

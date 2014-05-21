@@ -16,21 +16,47 @@
     var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
+
+    var filter = (string)ViewBag.Filter;
+
+    var all = string.IsNullOrEmpty(filter);
+
+    Func<LocalizedInstanceKey, bool> filtered = li => all ||
+        master.GetOrThrow(li).Contains(filter) ||
+        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).TryCC(t => t.TranslatedText).DefaultText("").Contains(filter));
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
-@if (master.Keys.IsEmpty())
+
+
+<h2>@ViewBag.Title</h2>
+
+<div>
+    @using (Html.BeginForm("View", "TranslatedInstance", FormMethod.Get))
+    {
+        @Html.Hidden("type")
+        @Html.Hidden("culture")
+        @Html.TextBox("filter", filter);
+        
+        <input type="hidden" name="searchPressed" value="true" />
+        <input type="submit" value="@TranslationMessage.Search.NiceToString()" />
+    }
+</div>
+
+@if (Model == null)
 {
-   <h2>@TranslationMessage.NothingToTranslateIn0.NiceToString().Formato(type.NiceName())</h2>
+    <em>@TranslationMessage.PressSearchForResults.NiceToString()</em>
+}
+else if (Model.IsEmpty())
+{
+    <strong>@TranslationMessage.NoResultsFound.NiceToString()</strong>  
 }
 else
 {
-   <h2>@ViewBag.Title</h2>
-
-    using (Html.BeginForm())
+    using (Html.BeginForm((TranslatedInstanceController c)=>c.SaveSync(Signum.Engine.Basics.TypeLogic.GetCleanName(type), culture == null ? null : culture.Name)))
     {
         <table id="results" style="width: 100%; margin: 0px" class="st">
-            @foreach (var instance in master.Keys.GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
+        @foreach (var instance in master.Keys.Where(filtered).GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
             { 
                 <thead>
                     <tr>

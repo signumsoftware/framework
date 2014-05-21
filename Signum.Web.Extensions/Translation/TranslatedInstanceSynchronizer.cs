@@ -26,7 +26,7 @@ namespace Signum.Web.Translation
 
             var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
-            var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a=>a.Key.Instance).Select(gr =>
+            var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a => a.Key.Instance).Select(gr =>
             {
                 var routeConflicts = (from kvp in gr
                                       let t = target.TryGetC(kvp.Key)
@@ -38,7 +38,7 @@ namespace Signum.Web.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a=>a.TranslatedText)
+                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.TranslatedText)
                               where str.HasItems()
                               select new
                               {
@@ -46,7 +46,7 @@ namespace Signum.Web.Translation
                                   Culture = c,
                                   Conflict = new PropertyRouteConflict { Original = str, AutomaticTranslation = null }
                               }).AgGroupToDictionary(a => a.Route, g => g.ToDictionary(a => a.Culture, a => a.Conflict));
-                
+
                 return new InstanceChanges
                 {
                     Instance = gr.Key,
