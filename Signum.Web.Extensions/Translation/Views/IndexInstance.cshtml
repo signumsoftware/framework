@@ -36,7 +36,7 @@ else
                 <th>@type.Key.NiceName()</th>
 
                 <td>
-                    @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(type.Key), null))
+                    @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(type.Key), null, false, null))
                 </td>
                 @foreach (var tf in type.Value.Values)
                 {
@@ -47,9 +47,9 @@ else
                         }
                         else
                         {
-                            @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
+                            @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name, false, null))
                             <br />
-                            if (tf.CultureInfo.IsNeutralCulture)
+                            if (tf.State != null)
                             {
                                 @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslatedInstanceController tc) => tc.Sync(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name), new { @class = "status-" + tf.State.ToString() })
                             }
