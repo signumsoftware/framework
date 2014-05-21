@@ -167,15 +167,7 @@ namespace Signum.Windows.UIAutomation
             if (element.Current.ClassName == expectedType)
                 return element;
 
-            try
-            {
-                throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
-            }
-            catch (Exception e)
-            {
-                WaitExtensions.PrintEntries(e, expectedType, element.Current.ClassName);
-                throw; 
-            }
+            throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
         }
     }
 }

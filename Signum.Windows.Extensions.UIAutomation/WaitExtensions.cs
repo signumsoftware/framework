@@ -159,13 +159,6 @@ namespace Signum.Windows.UIAutomation
             public string StackTrace;
         }
 
-        public static void PrintEntries(Exception e, string should, string current)
-        {
-            Entries.Add(new LogEntry { Count = 987, ClassName = should, Name = current, ItemStatus = e.Message, StackTrace = Environment.StackTrace });
-            Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
-            Entries.Clear();
-        }
-
         public static T SafeGet<T>(this AutomationElement element, Func<AutomationElement.AutomationElementInformation, T> getter, T error)
         {
             try
