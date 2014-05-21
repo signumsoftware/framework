@@ -9,18 +9,26 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Basics
 {
     public static class PropertyRouteLogic
     {
+        static Expression<Func<PropertyRouteDN, PropertyRoute, bool>> IsPropertyRouteExpression = 
+            (prdn, pr) => prdn.RootType == pr.RootType.ToTypeDN() && prdn.Path == pr.PropertyString() ;
+        public static bool IsPropertyRoute(this PropertyRouteDN prdn, PropertyRoute pr)
+        {
+            return IsPropertyRouteExpression.Evaluate(prdn, pr);
+        }
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PropertyRouteDN>();
 
-                sb.AddUniqueIndex<PropertyRouteDN>(p => new { p.Path, p.Type }); 
+                sb.AddUniqueIndex<PropertyRouteDN>(p => new { p.Path, p.RootType }); 
 
                 sb.Schema.Synchronizing += SyncronizeProperties;
             }
@@ -29,7 +37,7 @@ namespace Signum.Engine.Basics
         const string FieldsForKey = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
-            var current = Administrator.TryRetrieveAll<PropertyRouteDN>(replacements).AgGroupToDictionary(a => a.Type.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyDN in the database with path"));
+            var current = Administrator.TryRetrieveAll<PropertyRouteDN>(replacements).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyDN in the database with path"));
 
             var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyDN in the database with path"));
 
@@ -54,7 +62,7 @@ namespace Signum.Engine.Basics
 
         public static List<PropertyRouteDN> RetrieveOrGenerateProperties(TypeDN typeDN)
         {
-            var retrieve = Database.Query<PropertyRouteDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
+            var retrieve = Database.Query<PropertyRouteDN>().Where(f => f.RootType == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
             return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
@@ -66,25 +74,25 @@ namespace Signum.Engine.Basics
                 new PropertyRouteDN
                 {
                     Route = pr,
-                    Type = typeDN,
+                    RootType = typeDN,
                     Path = pr.PropertyString()
                 }).ToList();
         }
 
         public static PropertyRoute ToPropertyRoute(this PropertyRouteDN route)
         {
-            return PropertyRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
+            return PropertyRoute.Parse(TypeLogic.DnToType[route.RootType], route.Path);
         }
 
         public static PropertyRouteDN ToPropertyRouteDN(this PropertyRoute route)
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();
-            return Database.Query<PropertyRouteDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
+            return Database.Query<PropertyRouteDN>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
                  new PropertyRouteDN
                  {
                      Route = route,
-                     Type = type,
+                     RootType = type,
                      Path = path
                  };
         }

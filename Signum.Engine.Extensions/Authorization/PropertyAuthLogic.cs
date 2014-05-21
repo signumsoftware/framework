@@ -122,7 +122,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetPropertyRules(PropertyRulePack rules)
         {
-            cache.SetRules(rules, r => r.Type == rules.Type); 
+            cache.SetRules(rules, r => r.RootType == rules.Type); 
         }
 
         public static PropertyAllowed GetPropertyAllowed(Lite<RoleDN> role, PropertyRoute property)
