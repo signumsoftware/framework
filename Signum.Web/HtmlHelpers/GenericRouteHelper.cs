@@ -81,7 +81,7 @@ namespace Signum.Web
            where TController : Controller
         {
             RouteValueDictionary rvd = ExpressionHelper.GetRouteValuesFromExpression(action);
-            return htmlHelper.BeginForm(null, null, rvd, FormMethod.Post, htmlAttributes);
+            return htmlHelper.BeginForm(null, null, rvd, method, htmlAttributes);
         }
 
 
