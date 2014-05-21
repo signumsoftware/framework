@@ -360,7 +360,7 @@ namespace Signum.Utilities
             return defaultLoc.DefaultCulture;
         }
 
-        public void ExportXml()
+        public void ExportXml(bool avoidInvalidate = false)
         {
             var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
                 new XElement("Translations",
@@ -376,7 +376,8 @@ namespace Signum.Utilities
 
             doc.Save(fileName);
 
-            DescriptionManager.Invalidate();
+            if (!avoidInvalidate)
+                DescriptionManager.Invalidate();
         }
      
         public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
@@ -519,6 +520,19 @@ namespace Signum.Utilities
         public override string ToString()
         {
             return "Localized {0}".Formato(Type.Name);
+        }
+
+        public bool Contains(string text)
+        {
+            return ContainsDescription(text) ||
+                this.Members != null && this.Members.Any(m => m.Key.Contains(text, StringComparison.InvariantCultureIgnoreCase) || m.Value.Contains(text, StringComparison.InvariantCultureIgnoreCase)); 
+        }
+
+        public bool ContainsDescription(string text)
+        {
+            return this.Type.Name.Contains(text) ||
+                            this.Description != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
+                            this.PluralDescription != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 
