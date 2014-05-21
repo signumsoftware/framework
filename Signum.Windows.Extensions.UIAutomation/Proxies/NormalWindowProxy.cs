@@ -376,11 +376,5 @@ namespace Signum.Windows.UIAutomation
         {
             throw new NotImplementedException();
         }
-
-        public static void SetIsolation<T>(this NormalWindowProxy<T> window, Lite<IsolationDN> isolation)
-            where T : IdentifiableEntity
-        {
-            throw new NotImplementedException(); 
-        }
     }
 }
