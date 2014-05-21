@@ -472,6 +472,43 @@ namespace Signum.Entities
 
             info.AddValue("property", property);
         }
+
+        public Expression<Func<T, string>> GetLambdaExpression<T>() where T : IdentifiableEntity
+        {
+            if (typeof(T) != this.RootType)
+                throw new InvalidOperationException("Generic parameter T should be {0}".Formato(this.RootType));
+
+
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            Expression exp = null;
+            foreach (var p in this.FollowC(a => a.Parent).Reverse())
+            {
+                switch (p.PropertyRouteType)
+                {
+                    case PropertyRouteType.Root:
+                        exp = pe;
+                        break;
+                    case PropertyRouteType.FieldOrProperty:
+                        if(p.PropertyInfo != null)
+                            exp = Expression.Property(exp, p.PropertyInfo);
+                        else
+                            exp = Expression.Field(exp, p.FieldInfo);
+                        break;
+                    case PropertyRouteType.Mixin:
+                            exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
+                        break;
+                    case PropertyRouteType.LiteEntity:
+                        exp = Expression.Property(exp, "Entity"); 
+                        break;
+                    case PropertyRouteType.MListItems:
+                    default:
+                        throw new InvalidOperationException("Unexpected {0}".Formato(p.PropertyRouteType)); 
+                }
+            }
+
+            var selector = Expression.Lambda<Func<T, string>>(exp, pe);
+            return selector;
+        }
     }
 
     public interface IImplementationsFinder
