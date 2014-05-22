@@ -15,6 +15,7 @@ using System.Globalization;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Entities.Reports;
+using Signum.Utilities.Reflection;
 #endregion
 
 namespace Signum.Engine.Reports
@@ -121,6 +122,67 @@ namespace Signum.Engine.Reports
             }
         }
 
+        public static byte[] WritePlainExcel<T>(IEnumerable<T> results)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                WritePlainExcel(results, ms);
+                return ms.ToArray();
+            }
+        }
+
+        public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName)
+        {
+            using (FileStream fs = File.Create(fileName))
+                WritePlainExcel(results, fs);
+        }
+
+        static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
+        {
+            stream.WriteAllBytes(Template);
+
+            if (results == null)
+                throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
+            
+            var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter);
+            var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.SingleAttribute<FormatAttribute>().TryCC(f => f.Format));
+
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
+            {
+                document.PackageProperties.Creator = "";
+                document.PackageProperties.LastModifiedBy = "";
+
+                WorkbookPart workbookPart = document.WorkbookPart;
+
+                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+
+                worksheetPart.Worksheet = new Worksheet();
+
+                worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new spreadsheet.Column()
+                {
+                    Min = (uint)i + 1,
+                    Max = (uint)i + 1,
+                    Width = GetColumnWidth(c.MemberInfo.ReturningType()),
+                    BestFit = true,
+                    CustomWidth = true
+                }).ToArray()));
+
+                worksheetPart.Worksheet.Append(new Sequence<Row>()
+                {
+                    (from c in members
+                    select CellBuilder.Cell(c.Name, TemplateCells.Header)).ToRow(),
+
+                    from r in results
+                    select (from c in members
+                            let template = formats.TryGetC(c.Name) == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.MemberInfo.ReturningType())
+                            select CellBuilder.Cell(c.Getter(r), template)).ToRow()
+                }.ToSheetData());
+
+                workbookPart.Workbook.Save();
+                document.Close();
+            }
+        }
+
         static double GetColumnWidth(Type type)
         { 
             type = type.UnNullify();
@@ -133,6 +195,20 @@ namespace Signum.Engine.Reports
                 return 50;
 
             return 10;
+        }
+
+        internal static List<T> ReadPlainExcel<T>(Stream stream, Func<Cell[], T> selector)
+        {
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
+            {
+                WorkbookPart workbookPart = document.WorkbookPart;
+
+                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+
+                var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+
+                return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().ToArray())).ToList();
+            }
         }
     }
 }

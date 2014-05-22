@@ -53,10 +53,10 @@ else if (Model.IsEmpty())
 }
 else
 {
-    using (Html.BeginForm((TranslatedInstanceController c)=>c.SaveSync(Signum.Engine.Basics.TypeLogic.GetCleanName(type), culture == null ? null : culture.Name)))
+    using (Html.BeginForm((TranslatedInstanceController c) => c.SaveView(Signum.Engine.Basics.TypeLogic.GetCleanName(type), culture == null ? null : culture.Name, filter)))
     {
     <table id="results" style="width: 100%; margin: 0px" class="st">
-        @foreach (var instance in master.Keys.Where(filtered).GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
+        @foreach (var instance in master.Keys.Where(li => master.GetOrThrow(li).HasText()).Where(filtered).GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
         { 
             <thead>
                 <tr>
@@ -75,12 +75,15 @@ else
             
                 foreach (var ci in cultures)
                 {
+                    var formName = ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString();
+
                     if (ci.Name == TranslatedInstanceLogic.DefaultCulture)
                     {
             <tr>
                 <td class="leftCell">@TranslatedInstanceLogic.DefaultCulture</td>
                 <td class="monospaceCell">
                     <em>@master[key]</em>
+                    @Html.TextArea(formName, master[key], new { style = "display:none" })
                 </td>
             </tr>
                     }
@@ -95,7 +98,7 @@ else
                 <td class="monospaceCell">
                     @if (editCulture(ci))
                     {
-                        @Html.TextArea(ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString(), trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" })
+                        @Html.TextArea(formName, trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" })
                     }
                     else
                     {

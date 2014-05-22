@@ -16,49 +16,25 @@ namespace Signum.Web.Translation
     {
         public static int MaxInstancesChanges = 50;
 
-        public static TypeInstancesChanges GetTypeInstanceChanges(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
+        public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
         {
-            CultureInfo masterCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
-
-            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(type, culture: null);
-
-            Dictionary<LocalizedInstanceKey, TranslatedInstanceDN> target = support.TryGetC(targetCulture);
-
             var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
-            var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a => a.Key.Instance).Select(gr =>
-            {
-                var routeConflicts = (from kvp in gr
-                                      let t = target.TryGetC(kvp.Key)
-                                      where kvp.Value.HasText() && (t == null || t.OriginalText != kvp.Value)
-                                      select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
+            cultures.Remove(targetCulture);
 
-                if (routeConflicts.IsEmpty())
-                    return null;
-
-                var result = (from rc in routeConflicts
-                              from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).TryCC(a => a.TranslatedText)
-                              where str.HasItems()
-                              select new
-                              {
-                                  rc.Key.Route,
-                                  Culture = c,
-                                  Conflict = new PropertyRouteConflict { Original = str, AutomaticTranslation = null }
-                              }).AgGroupToDictionary(a => a.Route, g => g.ToDictionary(a => a.Culture, a => a.Conflict));
-
-                return new InstanceChanges
-                {
-                    Instance = gr.Key,
-                    RouteConflicts = result
-                };
-
-            }).NotNull().ToList();
+            var instances = TranslatedInstanceLogic.GetInstanceChanges(type, targetCulture, cultures);
 
             totalInstances = instances.Count;
             if (totalInstances > MaxInstancesChanges)
-                instances = instances.Take(MaxInstancesChanges).ToList(); 
+                instances = instances.Take(MaxInstancesChanges).ToList();
 
+            return TranslateInstances(translator, type, targetCulture, instances);
+        }
+
+       
+
+        private static TypeInstancesChanges TranslateInstances(ITranslator translator, Type type, CultureInfo targetCulture, List<InstanceChanges> instances)
+        {
             List<IGrouping<CultureInfo, PropertyRouteConflict>> memberGroups = (from t in instances
                                                                                 from rcKVP in t.RouteConflicts
                                                                                 from rc in rcKVP.Value
@@ -77,6 +53,8 @@ namespace Signum.Web.Translation
                 Instances = instances
             };
         }
+
+    
     }
 
     public class TypeInstancesChanges
@@ -88,29 +66,6 @@ namespace Signum.Web.Translation
         public override string ToString()
         {
             return "Changes for instances of type {0}".Formato(Type.NiceName());
-        }
-    }
-
-    public class InstanceChanges
-    {
-        public Lite<IdentifiableEntity> Instance { get; set; }
-
-        public Dictionary<PropertyRoute, Dictionary<CultureInfo, PropertyRouteConflict>> RouteConflicts { get; set; }
-
-        public override string ToString()
-        {
-            return "Changes for {0}".Formato(Instance);
-        }
-    }
-
-    public class PropertyRouteConflict
-    {
-        public string Original;
-        public string AutomaticTranslation;
-
-        public override string ToString()
-        {
-            return "Conflict {0} -> {1}".Formato(Original, AutomaticTranslation);
         }
     }
 }
