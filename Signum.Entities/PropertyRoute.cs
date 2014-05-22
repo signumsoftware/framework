@@ -481,7 +481,7 @@ namespace Signum.Entities
 
             ParameterExpression pe = Expression.Parameter(typeof(T));
             Expression exp = null;
-            foreach (var p in this.FollowC(a => a.Parent).Reverse())
+            foreach (var p in this.Follow(a => a.Parent).Reverse())
             {
                 switch (p.PropertyRouteType)
                 {
