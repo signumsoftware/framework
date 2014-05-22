@@ -23,7 +23,7 @@
 
     Func<LocalizedInstanceKey, bool> filtered = li => all ||
         master.GetOrThrow(li).Contains(filter) ||
-        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).TryCC(t => t.TranslatedText).DefaultText("").Contains(filter));
+        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter));
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
@@ -98,7 +98,7 @@ else
                 <td class="monospaceCell">
                     @if (editCulture(ci))
                     {
-                        @Html.TextArea(formName, trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" })
+                        @Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" })
                     }
                     else
                     {

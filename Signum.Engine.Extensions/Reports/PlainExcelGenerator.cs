@@ -145,7 +145,7 @@ namespace Signum.Engine.Reports
                 throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
             
             var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter);
-            var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.SingleAttribute<FormatAttribute>().TryCC(f => f.Format));
+            var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.SingleAttribute<FormatAttribute>().Try(f => f.Format));
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
             {

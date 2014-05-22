@@ -94,7 +94,7 @@ namespace Signum.Web.Extensions.Translation.Views
 
     Func<LocalizedInstanceKey, bool> filtered = li => all ||
         master.GetOrThrow(li).Contains(filter) ||
-        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).TryCC(t => t.TranslatedText).DefaultText("").Contains(filter));
+        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter));
 
             
             #line default
@@ -190,14 +190,14 @@ WriteLiteral("        <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1527), Tuple.Create("\"", 1576)
+WriteAttribute("value", Tuple.Create(" value=\"", 1525), Tuple.Create("\"", 1574)
             
             #line 42 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 1535), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
+, Tuple.Create(Tuple.Create("", 1533), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
             
             #line default
             #line hidden
-, 1535), false)
+, 1533), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -446,14 +446,14 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 101 "..\..\Translation\Views\ViewInstance.cshtml"
-                   Write(Html.TextArea(formName, trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" }));
+                   Write(Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" }));
 
             
             #line default
             #line hidden
             
             #line 101 "..\..\Translation\Views\ViewInstance.cshtml"
-                                                                                                                             
+                                                                                                                           
                     }
                     else
                     {
@@ -496,14 +496,14 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 4330), Tuple.Create("\"", 4377)
+WriteAttribute("value", Tuple.Create(" value=\"", 4326), Tuple.Create("\"", 4373)
             
             #line 116 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 4338), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 4334), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 4338), false)
+, 4334), false)
 );
 
 WriteLiteral(" />\r\n");
