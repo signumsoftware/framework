@@ -96,8 +96,8 @@ namespace Signum.Engine.Reports
         public Cell Cell(object value, TemplateCells template, UInt32Value styleIndex)
         {
             string excelValue = value == null ? "" :
-                        (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ((DateTime)value).ToStringExcel() :
-                        (template == TemplateCells.Decimal) ? Convert.ToDecimal(value).ToStringExcel() :
+                        (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
+                        (template == TemplateCells.Decimal) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         value.ToString();
 
             Cell cell = (template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 

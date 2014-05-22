@@ -14,34 +14,19 @@ namespace Signum.Web.Translation
 
         public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, out int totalTypes)
         {
-            var types = master.Types.Select(kvp =>
-            {
-                Type type = kvp.Key;
-
-                LocalizedType targetType = target.Types.TryGetC(type);
-
-                LocalizedType masterType = master.Types[type];
-                List<LocalizedType> supportTypes = support.Select(la => la.Types.TryGetC(type)).NotNull().ToList();
-
-                Dictionary<CultureInfo, TypeNameConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
-
-                var memberConflicts = (from m in masterType.Members.Keys
-                                       let con = MemberConflicts(m, targetType, masterType, supportTypes)
-                                       where con != null
-                                       select KVP.Create(m, con)).ToDictionary();
-
-                if (memberConflicts.IsEmpty() && typeConflicts == null)
-                    return null;
-
-                return new LocalizedTypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
-            }).NotNull().ToList();
+            var types = GetMergeChanges(target, master, support);
 
             totalTypes = types.Count;
 
             if (totalTypes > MaxTypeChanges)
                 types = types.Take(MaxTypeChanges).ToList();
 
-            List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups = 
+            return Translate(translator, target, types);
+        }
+
+        private static LocalizedAssemblyChanges Translate(ITranslator translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)
+        {
+            List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups =
                 (from t in types
                  where t.TypeConflict != null
                  from tc in t.TypeConflict
@@ -73,6 +58,32 @@ namespace Signum.Web.Translation
                 LocalizedAssembly = target,
                 Types = types,
             };
+        }
+
+        public static List<LocalizedTypeChanges> GetMergeChanges(LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support)
+        {
+            var types = master.Types.Select(kvp =>
+            {
+                Type type = kvp.Key;
+
+                LocalizedType targetType = target.Types.TryGetC(type);
+
+                LocalizedType masterType = master.Types[type];
+                List<LocalizedType> supportTypes = support.Select(la => la.Types.TryGetC(type)).NotNull().ToList();
+
+                Dictionary<CultureInfo, TypeNameConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
+
+                var memberConflicts = (from m in masterType.Members.Keys
+                                       let con = MemberConflicts(m, targetType, masterType, supportTypes)
+                                       where con != null
+                                       select KVP.Create(m, con)).ToDictionary();
+
+                if (memberConflicts.IsEmpty() && typeConflicts == null)
+                    return null;
+
+                return new LocalizedTypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
+            }).NotNull().ToList();
+            return types;
         }
 
         static Dictionary<CultureInfo, TypeNameConflict> TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)

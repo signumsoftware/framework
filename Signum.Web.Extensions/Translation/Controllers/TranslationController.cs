@@ -187,19 +187,13 @@ namespace Signum.Web.Translation.Controllers
             int totalTypes;
             var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), out totalTypes);
 
-            if (changes.Types.Count == 0)
-            {
-                changes.LocalizedAssembly.ExportXml(avoidInvalidate: true);
-                return RedirectToAction("Index");
-            }
-
             ViewBag.TotalTypes = totalTypes;
             ViewBag.Culture = targetCulture;
             return base.View(TranslationClient.ViewPrefix.Formato("Sync"), changes);
         }
 
         [HttpPost]
-        public ActionResult Sync(string assembly, string culture, string bla)
+        public ActionResult SaveSync(string assembly, string culture)
         {
             Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
 
@@ -235,14 +229,21 @@ namespace Signum.Web.Translation.Controllers
         public Assembly Assembly;
         public CultureInfo CultureInfo;
         public string FileName;
-        public bool IsDefault; 
+        public bool IsDefault;
 
         public TranslatedSummaryState Status()
         {
             if (!System.IO.File.Exists(FileName))
                 return TranslatedSummaryState.None;
 
-            if (System.IO.File.GetLastWriteTime(Assembly.Location) > System.IO.File.GetLastWriteTime(FileName))
+            var target = DescriptionManager.GetLocalizedAssembly(Assembly, CultureInfo);
+
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(Assembly.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            var master = DescriptionManager.GetLocalizedAssembly(Assembly, defaultCulture);
+
+            var result = TranslationSynchronizer.GetMergeChanges(target, master, new List<LocalizedAssembly>());
+
+            if (result.Any())
                 return TranslatedSummaryState.Pending;
 
             return TranslatedSummaryState.Completed;

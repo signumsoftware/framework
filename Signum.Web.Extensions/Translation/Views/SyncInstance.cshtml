@@ -12,13 +12,13 @@
 
     ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.Type.NiceName(), culture.DisplayName);
 
-    int totalInstances= ViewBag.TotalInstances;
+    int totalInstances = ViewBag.TotalInstances;
 
     if (Model.Instances.Count < totalInstances)
     {
         ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Instances.Count, totalInstances);
     }
-    
+
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
         var items = values.Select(s => new SelectListItem { Value = s, Text = s }).ToList();
@@ -50,7 +50,7 @@ else
 {
     <h2>@ViewBag.Title</h2>
 
-    using (Html.BeginForm())
+    using (Html.BeginForm((TranslatedInstanceController c) => c.SaveSync(Signum.Engine.Basics.TypeLogic.GetCleanName(Model.Type), culture.Name)))
     {
     <table id="results" style="width: 100%; margin: 0px" class="st"        
         data-feedback="@Url.Action("Feedback", "Translation")" 
@@ -79,12 +79,10 @@ else
                 <td class="monospaceCell">
                     @if (mc.Key.Equals(defaultCulture))
                     {
-                        <span>@mc.Value.Original</span>
+                        string originalName = defaultCulture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
+                        <textarea name="@originalName" style="display:none" >@route.Value.Single(kvp => kvp.Key.Equals(defaultCulture)).Value.Original</textarea>
                     }
-                    else
-                    {
-                        @mc.Value.Original  
-                    }
+                    <span>@mc.Value.Original</span>
                 </td>
             </tr>
                 }
@@ -92,21 +90,22 @@ else
                 <td class="leftCell">@culture.Name</td>
                 <td class="monospaceCell">
                     @{  
-                        var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
-                        string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
-                        
-                        if (translations.Count() == 1)
-                        {
-                            <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
-                            <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
-                            <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
-                        }
-                        else 
-                        {
-                            var items = selectListItems(translations);
-                            @Html.DropDownList(elementName, items);
-                            <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
-                        }
+                var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
+
+
+                string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
+                if (translations.Count() == 1)
+                {       
+                    <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
+                    <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
+                    <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                }
+                else
+                {
+                    var items = selectListItems(translations);
+                        @Html.DropDownList(elementName, items);
+                        <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                }
                     }
                 </td>
             </tr>

@@ -47,9 +47,21 @@ namespace Signum.Web.Translation.Controllers
 
             ViewBag.Master = master;
 
-            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(t, culture: null);
+            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(t, culture: c);
 
             return base.View(TranslationClient.ViewPrefix.Formato("ViewInstance"), support);
+        }
+
+        public FileContentResult ViewFile(string type, string culture)
+        {
+             Type t = TypeLogic.GetType(type);
+             var c = CultureInfo.GetCultureInfo(culture);
+
+            var bytes = TranslatedInstanceLogic.GetExcelFile(t, c);
+
+            var fileName = "{0}.{1}.View.xlsx".Formato(type, c.Name);
+
+            return File(bytes, MimeType.FromFileName(fileName), fileName);  
         }
 
         [HttpPost]
@@ -57,54 +69,15 @@ namespace Signum.Web.Translation.Controllers
         {
             Type t = TypeLogic.GetType(type);
 
-            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslationRecord> should = GetTranslationRecords(t).Where(a => a.Value.HasText())
-                .ToDictionary(a => Tuple.Create(a.Culture, new LocalizedInstanceKey(a.Route, a.Instance)));
-
-            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
+            var records = GetTranslationRecords(t);
 
             var c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
-            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslatedInstanceDN> current = 
-                (from ci in TranslatedInstanceLogic.TranslationsForType(t, c)
-                from key in ci.Value
-                select KVP.Create(Tuple.Create(ci.Key, key.Key), key.Value)).ToDictionary();
-
-            using (Transaction tr = new Transaction())
-            {
-                Dictionary<PropertyRoute, PropertyRouteDN> routes = should.Keys.Select(a => a.Item2.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
-
-                Synchronizer.Synchronize(
-                    should,
-                    current,
-                    (k, n) => new TranslatedInstanceDN
-                    {
-                        Culture = n.Culture.ToCultureInfoDN(),
-                        PropertyRoute = routes.GetOrThrow(n.Route),
-                        Instance = n.Instance,
-                        OriginalText = master[k.Item2],
-                        TranslatedText = n.Value,
-                    }.Save(),
-                    (k, o) => { },
-                    (k, n, o) =>
-                    {
-                        if (n.Value.HasText())
-                        {
-                            o.Delete();
-                        }
-                        else if (o.TranslatedText != n.Value || o.OriginalText != master[k.Item2])
-                        {
-                            var r = o.ToLite().Retrieve();
-                            r.OriginalText = master[k.Item2];
-                            r.TranslatedText = n.Value;
-                            r.Save();
-                        }
-                    });
-
-                tr.Commit();
-            }
+             TranslatedInstanceLogic.SaveRecords(records, t, c);
 
             return RedirectToAction("View", new { type = type, culture = culture, filter = filter, searchPressed = true });
         }
+
 
         static Regex regex = new Regex(@"^(?<lang>[^#]+)#(?<instance>[^#]+)#(?<route>[^#]+)$");
 
@@ -116,25 +89,20 @@ namespace Signum.Web.Translation.Controllers
                         select new TranslationRecord
                         {
                             Culture = CultureInfo.GetCultureInfo(m.Groups["lang"].Value),
-                            Instance = Lite.Parse(m.Groups["instance"].Value),
-                            Route = PropertyRoute.Parse(type, m.Groups["route"].Value),
-                            Value = Request.Form[k].DefaultText(null),
+                            Key = new LocalizedInstanceKey(
+                                PropertyRoute.Parse(type, m.Groups["route"].Value), 
+                                Lite.Parse(m.Groups["instance"].Value)),
+                            TranslatedText = Request.Form[k].DefaultText(null),
                         }).ToList();
+
+            var master = list.Extract(a => a.Culture.Name == TranslatedInstanceLogic.DefaultCulture).ToDictionary(a=>a.Key);
+
+            list.ForEach(r => r.OriginalText = master.GetOrThrow(r.Key).TranslatedText);
+
             return list;
         }
 
-        class TranslationRecord
-        {
-            public CultureInfo Culture;
-            public Lite<IdentifiableEntity> Instance;
-            public PropertyRoute Route;
-            public string Value;
-
-            public override string ToString()
-            {
-                return "{0} {1} {2} -> {3}".Formato(Culture, Instance, Route, Value);
-            }
-        }
+      
 
         public ActionResult Sync(string type, string culture)
         {
@@ -143,11 +111,28 @@ namespace Signum.Web.Translation.Controllers
             var c = CultureInfo.GetCultureInfo(culture);
 
             int totalInstances; 
-            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChanges(TranslationClient.Translator, t, c, out totalInstances);
+            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationClient.Translator, t, c, out totalInstances);
 
             ViewBag.TotalInstances = totalInstances; 
             ViewBag.Culture = c;
             return base.View(TranslationClient.ViewPrefix.Formato("SyncInstance"), changes);
+        }
+
+        public FileContentResult SyncFile(string type, string culture)
+        {
+            Type t = TypeLogic.GetType(type);
+
+            CultureInfo c = CultureInfo.GetCultureInfo(culture);
+
+            CultureInfo master = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
+
+            var changes = TranslatedInstanceLogic.GetInstanceChanges(t, c, new List<CultureInfo> { master });
+
+            byte[] bytes = TranslatedInstanceLogic.GetSyncExcelFile(changes, master, c);
+
+            string fileName = "{0}.{1}.Sync.xlsx".Formato(type, c.Name);
+
+            return File(bytes, MimeType.FromFileName(fileName), fileName);  
         }
 
         [HttpPost]
@@ -159,46 +144,23 @@ namespace Signum.Web.Translation.Controllers
 
             List<TranslationRecord> records = GetTranslationRecords(t);
 
-            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
-
-            var current = TranslatedInstanceLogic.TranslationsForType(t, c).SingleOrDefault().Value; 
-
-            Dictionary<PropertyRoute, PropertyRouteDN> routes = records.Select(a => a.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
-            using (Transaction tr = new Transaction())
-            {
-                records.Where(r => r.Value.HasText()).Select(r =>
-                {
-                    var key = new LocalizedInstanceKey(r.Route, r.Instance);
-
-                    TranslatedInstanceDN entity = current.TryGetC(key);
-
-                    if (entity != null)
-                    {
-                        entity = entity.ToLite().Retrieve();
-                        entity.OriginalText = master[key];
-                        entity.TranslatedText = r.Value;
-                        return entity;
-                    }
-                    else
-                    {
-                        return new TranslatedInstanceDN
-                        {
-                            Culture = r.Culture.ToCultureInfoDN(),
-                            PropertyRoute = routes.GetOrThrow(r.Route),
-                            Instance = r.Instance,
-                            OriginalText = master[key],
-                            TranslatedText = r.Value,
-                        };
-                    }
-
-                }).SaveList();
-
-                TranslatedInstanceLogic.CleanTranslations(t);
-
-                tr.Commit();
-            }
+            TranslatedInstanceLogic.SaveRecords(records, t, c);
 
             return RedirectToAction("Index");
         }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult UploadFile()
+        {
+            HttpPostedFileBase hpf = Request.Files[Request.Files.Cast<string>().Single()];
+
+            var type = TypeLogic.GetType(hpf.FileName.Before('.'));
+            var culture = CultureInfo.GetCultureInfo(hpf.FileName.After('.').Before('.'));
+
+            TranslatedInstanceLogic.SaveExcelFile(hpf.InputStream, type, culture);
+
+            return RedirectToAction("View", new { type = TypeLogic.GetCleanName(type), culture = culture.Name, searchPressed = false });
+        }
+
     }
 }
