@@ -360,7 +360,7 @@ namespace Signum.Utilities
             return defaultLoc.DefaultCulture;
         }
 
-        public void ExportXml(bool avoidInvalidate = false)
+        public void ExportXml()
         {
             var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
                 new XElement("Translations",
@@ -376,8 +376,7 @@ namespace Signum.Utilities
 
             doc.Save(fileName);
 
-            if (!avoidInvalidate)
-                DescriptionManager.Invalidate();
+            DescriptionManager.Invalidate();
         }
      
         public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
