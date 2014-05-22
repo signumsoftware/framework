@@ -71,6 +71,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -99,6 +100,7 @@
     <Compile Include="ControlPanel\ControlPanelOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Isolation\IsolationDN.cs" />
+    <Compile Include="Isolation\IsolationOperationBehavior.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
