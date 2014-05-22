@@ -197,7 +197,7 @@ namespace Signum.Engine.Reports
             return 10;
         }
 
-        internal static List<T> ReadPlainExcel<T>(Stream stream, Func<Cell[], T> selector)
+        internal static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
         {
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
             {
@@ -207,7 +207,7 @@ namespace Signum.Engine.Reports
 
                 var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
-                return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().ToArray())).ToList();
+                return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)).ToArray())).ToList();
             }
         }
     }

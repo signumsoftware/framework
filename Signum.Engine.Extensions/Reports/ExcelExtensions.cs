@@ -18,14 +18,24 @@ namespace Signum.Engine.Reports
 {
     public static class ExcelExtensions
     {
-        public static string ToStringExcel(this DateTime datetime)
+        public static string ToExcelDate(DateTime datetime)
         {
             return (datetime.ToOADate()).ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
         }
 
-        public static string ToStringExcel(this decimal number)
+        public static DateTime FromExcelDate(string datetime)
+        {
+            return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InstalledUICulture)); //Convert to Julean Format
+        }
+
+        public static string ToExcelNumber(decimal number)
         {
             return number.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public static decimal FromExcelNumber(string number)
+        {
+            return decimal.Parse(number, CultureInfo.InvariantCulture);
         }
 
         public static SheetData ToSheetData(this IEnumerable<Row> rows)
@@ -37,6 +47,7 @@ namespace Signum.Engine.Reports
         {
             return new Row(rows.Cast<OpenXmlElement>());
         }
+
 
         public static WorksheetPart AddWorksheet(this WorkbookPart workbookPart, string name, Worksheet sheet)
         {
