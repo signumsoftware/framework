@@ -142,7 +142,7 @@ namespace Signum.Web
             return helper.DatePicker(name, formGroup, value == null ? "" : value.Value.ToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture);
         }
 
-        public static MvcHtmlString DatePicker(this HtmlHelper helper, string name, bool formGroup, string value, string jsFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        public static MvcHtmlString DatePicker(this HtmlHelper helper, string name, bool inputGroup, string value, string jsFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
         {
             if (culture == null)
                 culture = CultureInfo.CurrentCulture;
@@ -154,7 +154,7 @@ namespace Signum.Web
                 .Attrs(htmlProps)
                 .Attr("value", value);
                
-            if(!formGroup)
+            if(!inputGroup)
                 return AttachDatePicker(input, culture, jsFormat);
             
             HtmlStringBuilder sb = new HtmlStringBuilder();
