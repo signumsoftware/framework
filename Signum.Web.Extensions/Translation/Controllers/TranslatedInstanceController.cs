@@ -159,7 +159,7 @@ namespace Signum.Web.Translation.Controllers
 
             TranslatedInstanceLogic.SaveExcelFile(hpf.InputStream, type, culture);
 
-            return RedirectToAction("View", new { type = type, culture = culture, searchPressed = false });
+            return RedirectToAction("View", new { type = TypeLogic.GetCleanName(type), culture = culture.Name, searchPressed = false });
         }
 
     }

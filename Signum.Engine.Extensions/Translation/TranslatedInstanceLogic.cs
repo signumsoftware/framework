@@ -292,12 +292,12 @@ namespace Signum.Engine.Translation
 
         public static void SaveExcelFile(Stream stream, Type type, CultureInfo culture)
         {
-            var records = PlainExcelGenerator.ReadPlainExcel(stream, cell => new TranslationRecord
+            var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
             {
                  Culture = culture,
-                 Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cell[0].InnerText), Lite.Parse<IdentifiableEntity>(cell[1].InnerText)),
-                 OriginalText = cell[2].InnerText,
-                 TranslatedText = cell[3].InnerText
+                 Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]), Lite.Parse<IdentifiableEntity>(cellValues[0])),
+                 OriginalText = cellValues[2],
+                 TranslatedText = cellValues[3]
             });
 
             SaveRecords(records, type, culture);
@@ -347,11 +347,8 @@ namespace Signum.Engine.Translation
 
         public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo c)
         {
-
             Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
                 .ToDictionary(a => Tuple.Create(a.Culture, a.Key));
-
-
 
             Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslatedInstanceDN> current =
                 (from ci in TranslatedInstanceLogic.TranslationsForType(t, c)
