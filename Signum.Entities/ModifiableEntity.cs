@@ -213,7 +213,7 @@ namespace Signum.Entities
             return ExternalPropertyValidation(this, pi);
         }
 
-        protected void Notify<T>(Expression<Func<T>> property)
+        public void Notify<T>(Expression<Func<T>> property)
         {
             NotifyPrivate(ReflectionTools.BasePropertyInfo(property).Name);
             NotifyError();
