@@ -262,8 +262,8 @@ namespace Signum.Engine.Translation
             var result = TranslatedInstanceLogic.TranslationsForType(t, c).Single().Value;
 
             var list = result
-                .OrderBy(a=>a.Key.Instance)
-                .ThenBy(a=>a.Key.Route).Select(r => new ExcelRow
+                .OrderBy(a=>a.Key.Instance.Id)
+                .ThenBy(a=>a.Key.Route.PropertyInfo.MetadataToken).Select(r => new ExcelRow
             {
                 Instance = r.Key.Instance.Key(),
                 Path = r.Key.Route.PropertyString(),
