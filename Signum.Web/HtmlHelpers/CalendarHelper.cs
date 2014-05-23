@@ -173,6 +173,7 @@ namespace Signum.Web
         {
             return tag.Attr("data-provide", "datepicker")
                .Attr("data-date-language", culture.TwoLetterISOLanguageName)
+               .Attr("data-date-week-start", ((int)culture.DateTimeFormat.FirstDayOfWeek).ToString())
                .Attr("data-date-autoclose", "true")
                .Attr("data-date-format", jsFormat)
                .Attr("data-date-today-btn", "linked")
