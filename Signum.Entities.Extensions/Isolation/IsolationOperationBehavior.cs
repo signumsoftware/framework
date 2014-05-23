@@ -26,6 +26,7 @@ namespace Signum.Services
         public void Validate(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase) { }
     }
 
+
     public sealed class IsolationOperationBehavior : IOperationBehavior
     {
         public void AddBindingParameters(OperationDescription operationDescription, BindingParameterCollection bindingParameters) { }
@@ -43,6 +44,7 @@ namespace Signum.Services
         public void Validate(OperationDescription operationDescription) { }
     }
 
+
     public class IsolationClientFormatter : IClientMessageFormatter
     {
         private readonly IClientMessageFormatter m_inner;
@@ -55,7 +57,7 @@ namespace Signum.Services
         public object DeserializeReply(Message message, object[] parameters)
         {
             var result = m_inner.DeserializeReply(message, parameters);
-            int index = message.Headers.FindHeader("isolation", "urn:isolation");
+            int index = message.Headers.FindHeader("isolation", "urn:context");
             if (index != -1)
             {
                 var reader = message.Headers.GetReaderAtHeader(index);
@@ -70,12 +72,13 @@ namespace Signum.Services
             var iso = IsolationDN.CurrentThreadVariable.Value;
             if (iso != null)
             {
-                msg.Headers.Add(MessageHeader.CreateHeader("isolation", "urn:isolation", iso.KeyLong(), false));
+                msg.Headers.Add(MessageHeader.CreateHeader("isolation", "urn:context", iso.KeyLong(), false));
                 IsolationDN.CurrentThreadVariable.Value = null;
             }
             return msg;
         }
     }
+
 
     public class IsolationDispatchFormatter : IDispatchMessageFormatter
     {
@@ -94,6 +97,8 @@ namespace Signum.Services
                 var reader = message.Headers.GetReaderAtHeader(index);
                 IsolationDN.CurrentThreadVariable.Value = Lite.Parse<IsolationDN>(reader.ReadString());
             }
+
+            if(m_inner != null)
             m_inner.DeserializeRequest(message, parameters);
         }
 
