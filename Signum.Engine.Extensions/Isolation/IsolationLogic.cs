@@ -16,6 +16,8 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
+using System.ServiceModel.Channels;
+using System.ServiceModel;
 
 namespace Signum.Engine.Isolation
 {
@@ -54,8 +56,6 @@ namespace Signum.Engine.Isolation
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
-                AutocompleteUtils.SurroundQuery += AutocompleteUtils_SurroundQuery;
-                DynamicQueryManager.Current.SurroundQuery += Current_SurroundQuery;
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
             }
@@ -64,16 +64,6 @@ namespace Signum.Engine.Isolation
         static IDisposable ProcessLogic_ApplySession(ProcessDN process)
         {
             return IsolationDN.OverrideIfNecessary(process.Data.TryIsolation());
-        }
-
-        static IDisposable Current_SurroundQuery(object queryName, List<object> args)
-        {
-            return IsolationDN.OverrideIfNecessary(args.TryGetArgC<Lite<IsolationDN>>());
-        }
-
-        static IDisposable AutocompleteUtils_SurroundQuery(Implementations implementations, List<object> args)
-        {
-            return IsolationDN.OverrideIfNecessary(args.TryGetArgC<Lite<IsolationDN>>());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)

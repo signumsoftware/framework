@@ -33,7 +33,7 @@ namespace Signum.Entities.Isolation
             set { DefaultVariable.Value = value; }
         }
 
-        internal static readonly ThreadVariable<Lite<IsolationDN>> CurrentThreadVariable = Statics.ThreadVariable<Lite<IsolationDN>>("CurrentIsolation");
+        public static readonly ThreadVariable<Lite<IsolationDN>> CurrentThreadVariable = Statics.ThreadVariable<Lite<IsolationDN>>("CurrentIsolation");
 
         public static IDisposable OverrideIfNecessary(Lite<IsolationDN> isolation)
         {
