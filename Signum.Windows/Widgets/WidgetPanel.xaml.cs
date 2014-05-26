@@ -56,7 +56,7 @@ namespace Signum.Windows
 
             stackPanel.Children.Clear();
 
-            foreach (var item in widgets)
+            foreach (var item in widgets.OrderBy(a=>a.Order))
             {
                 stackPanel.Children.Add((UIElement)item);
                 item.ForceShow += () => expander.IsExpanded = true;
@@ -78,6 +78,7 @@ namespace Signum.Windows
 
     public interface IWidget
     {
-        event Action ForceShow; 
+        event Action ForceShow;
+        decimal Order { get; set; }
     }
 }
