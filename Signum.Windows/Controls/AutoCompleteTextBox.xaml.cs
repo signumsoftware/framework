@@ -101,10 +101,14 @@ namespace Signum.Windows
 
             source = new CancellationTokenSource();
             var parent = Thread.CurrentThread;
-            var task = Task.Factory.StartNew<IEnumerable>(()=>{
+            var context = Statics.ExportThreadContext();
+            var task = Task.Factory.StartNew<IEnumerable>(() =>
+            {
                 Thread.CurrentThread.AssignCultures(parent);
+                Statics.SetThreadContext(context);
                 return AutoCompleting(text, source.Token);
             }, source.Token);
+
             task.ContinueWith(res =>
             {
                 if (res.IsFaulted)

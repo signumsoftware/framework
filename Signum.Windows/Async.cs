@@ -22,12 +22,15 @@ namespace Signum.Windows
         public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
             var disp = Dispatcher.CurrentDispatcher;
-           
+
+            var context = Statics.ExportThreadContext();
             Action action = () =>
             {
                 try
                 {
-                    backgroundThread();
+                    using (Statics.SetThreadContext(context))
+                        backgroundThread();
+
                     if (endAction != null)
                         disp.Invoke(DispatcherPriority.Normal, endAction);
                 }

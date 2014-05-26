@@ -26,6 +26,8 @@ namespace Signum.Windows
 
         public static event Action Connecting;
 
+        public static event Action<OperationContext> OnOperation; 
+
         static Server()
         {
             Connecting += () =>
@@ -119,6 +121,7 @@ namespace Signum.Windows
             try
             {
                 using (HeavyProfiler.Log("WCFClient", () => "{0}".Formato(typeof(S).TypeName())))
+                using (CreateOperationContext((IContextChannel)current))
                 {
                     action(server);
                 }
@@ -144,6 +147,7 @@ namespace Signum.Windows
             try
             {
                 using (HeavyProfiler.Log("WCFClient", () => "Return(({0} server)=>{1})".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                using (CreateOperationContext((IContextChannel)current))
                 {
                     return function(server);
                 }
@@ -154,6 +158,18 @@ namespace Signum.Windows
                 current = null;
                 goto retry;
             }
+        }
+
+        public static IDisposable CreateOperationContext(IContextChannel contex)
+        {
+            if (Server.OnOperation == null)
+                return null;
+
+            var result = new OperationContextScope(contex);
+
+            Server.OnOperation(OperationContext.Current);
+
+            return result;
         }
 
         public static void ExecuteNoRetryOnSessionExpired<S>(Action<S> action)
@@ -237,14 +253,14 @@ namespace Signum.Windows
             return RetrieveAllLite(typeof(T)).Cast<Lite<T>>().ToList(); 
         }
 
-        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations, List<object> args)
+        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
-            return Return((IBaseServer s) => s.FindAllLite(implementations, args));
+            return Return((IBaseServer s) => s.FindAllLite(implementations));
         }
 
-        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count, List<object> args)
+        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
-            return Return((IBaseServer s) => s.FindLiteLike(implementations, subString, count, args)); 
+            return Return((IBaseServer s) => s.FindLiteLike(implementations, subString, count)); 
         }
 
         public static List<T> SaveList<T>(List<T> list)
