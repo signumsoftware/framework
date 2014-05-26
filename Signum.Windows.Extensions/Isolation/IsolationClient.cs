@@ -10,6 +10,7 @@ using Signum.Entities.Isolation;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Windows.Controls;
+using System.ServiceModel;
 
 namespace Signum.Windows.Isolation
 {
@@ -31,62 +32,67 @@ namespace Signum.Windows.Isolation
                 Constructor.Manager.PreConstructors += Constructor_PreConstructors;
                 Constructor.Manager.PostConstructors += Manager_PostConstructors;
 
-                WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ? new IsolationWidget() : null;
+                WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
+                    new IsolationWidget() { Order = -1 } : null;
 
                 List<Lite<IsolationDN>> isolations = null;
+
+                Server.OnOperation += context =>
+                {
+                    var iso = IsolationDN.CurrentThreadVariable.Value;
+
+                    if (iso != null)
+                    {
+                        var msg = new MessageHeader<string>(iso.KeyLong())
+                            .GetUntypedHeader("CurrentIsolation", "http://www.signumsoftware.com/Isolation");
+                        context.OutgoingMessageHeaders.Add(msg);
+                    }
+                };
 
                 GetIsolationIcon = getIsolationIcon;
 
                 SelectIsolationInteractively = owner =>
                 {
-                    if(isolations == null)
-                        isolations = Server.RetrieveAllLite<IsolationDN>(); 
-                    
+                    if (isolations == null)
+                        isolations = Server.RetrieveAllLite<IsolationDN>();
+
                     Lite<IsolationDN> result;
                     if (SelectorWindow.ShowDialog(isolations, out result,
                         elementIcon: getIsolationIcon,
-                        elementText: iso=> getIsolationIcon(iso) == null ? iso.ToString() : null,
+                        elementText: iso => getIsolationIcon(iso) == null ? iso.ToString() : null,
                         title: IsolationMessage.SelectAnIsolation.NiceToString(),
-                        message: IsolationMessage.SelectAnIsolation.NiceToString(), 
+                        message: IsolationMessage.SelectAnIsolation.NiceToString(),
                         owner: owner))
                         return result;
 
                     return null;
                 };
 
-                Navigator.Manager.GetArgs += () =>
-                {
-                    var win = Navigator.Manager.GetCurrentWindow();
-                    
-                    var ident = win.DataContext as IdentifiableEntity;
-                    if (ident != null)
-                    {
-                        var iso = ident.TryIsolation();
-
-                        if (iso != null)
-                            return iso;
-                    }
-
-                    var sw = win as SearchWindow;
-
-                    if (sw != null)
-                    {
-                        return sw.SearchControl.Args.TryGetArgC<Lite<IsolationDN>>();
-                    }
-
-                    return null;
-                };
-
+                Navigator.Manager.TaskNormalWindow += Manager_TaskNormalWindow;
                 Navigator.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
+            }
+        }
+
+        static void Manager_TaskNormalWindow(NormalWindow win, ModifiableEntity ent)
+        {
+            var ident = ent as IdentifiableEntity;
+            if (ident != null)
+            {
+                var iso = ident.TryIsolation();
+
+                if (iso != null)
+                {
+                    IsolationDN.CurrentThreadVariable.Value = iso;
+                }
             }
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
         {
-            if(IsolationDN.Default!=null)
+            if (IsolationDN.Default != null)
                 return;
 
-            var iso = sw.Args.TryGetArgC<Lite<IsolationDN>>();
+            var iso = IsolationDN.Current;
             
             if (iso == null)
                 return;

@@ -136,5 +136,18 @@ namespace Signum.Engine.Isolation
             if (strategy == IsolationStrategy.Isolated)
                 MixinDeclarations.Register(typeof(T), typeof(IsolationMixin));
         }
+
+
+        public static IDisposable IsolationFromOperationContext()
+        {
+            MessageHeaders headers = OperationContext.Current.IncomingMessageHeaders;
+
+            int val = headers.FindHeader("CurrentIsolation", "http://www.signumsoftware.com/Isolation");
+
+            if (val == -1)
+                return null;
+
+            return IsolationDN.OverrideIfNecessary(Lite.Parse<IsolationDN>(headers.GetHeader<string>(val)));
+        }
     }
 }
