@@ -35,10 +35,10 @@ namespace Signum.Services
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations, List<object> args);
+        List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations);
 
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count, List<object> args);
+        List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);

@@ -20,7 +20,7 @@ namespace Signum.Web.Controllers
             if (typeArray == EntityBase.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l, Navigator.GetArgs(this.ControllerContext));
+            List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new AutocompleteResult(o)).ToList();
 

@@ -165,7 +165,7 @@ namespace Signum.Windows
             }
             else
             {
-                data = Server.FindAllLite(safeImplementations.Value, Navigator.GetArgs());
+                data = Server.FindAllLite(safeImplementations.Value);
             }
 
             if (SortElements)

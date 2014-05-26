@@ -94,16 +94,16 @@ namespace Signum.Services
             return list;
         }
 
-        public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations, List<object> args)
+        public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutocompleteUtils.FindAllLite(implementations, args));
+                () => AutocompleteUtils.FindAllLite(implementations));
         }
 
-        public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count, List<object> args)
+        public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutocompleteUtils.FindLiteLike(implementations, subString, count, args));
+                () => AutocompleteUtils.FindLiteLike(implementations, subString, count));
         }
 
         public virtual Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)

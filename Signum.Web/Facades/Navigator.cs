@@ -451,11 +451,6 @@ namespace Signum.Web
             if (Navigator.IsReadOnly(ident))
                 throw new UnauthorizedAccessException("{0} is read-only".Formato(ident));
         }
-
-        internal static List<object> GetArgs(ControllerContext controllerContext)
-        {
-            throw new NotImplementedException();
-        }
     }
     
     public class NavigationManager

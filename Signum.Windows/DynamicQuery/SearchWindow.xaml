@@ -38,7 +38,6 @@
                          ColumnOptions="{Binding ColumnOptions, ElementName=me}"
                          ColumnOptionsMode="{Binding ColumnOptionsMode, ElementName=me}"
                          Pagination="{Binding Pagination, ElementName=me}"
-                         Args="{Binding Args, ElementName=me}"
                          AllowChangeColumns="{Binding AllowChangeColumns, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"
                          ShowFilters="{Binding ShowFilters, ElementName=me}"

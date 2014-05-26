@@ -82,14 +82,6 @@ namespace Signum.Windows
             set { SetValue(PaginationProperty, value); }
         }
 
-        public static readonly DependencyProperty ArgsProperty =
-          DependencyProperty.Register("Args", typeof(List<object>), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public List<object> Args
-        {
-            get { return (List<object>)GetValue(ArgsProperty); }
-            set { SetValue(ArgsProperty, value); }
-        }
-
         public static readonly DependencyProperty AllowChangeColumnsProperty =
             DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
         public bool AllowChangeColumns
