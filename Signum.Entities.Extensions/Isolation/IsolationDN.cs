@@ -26,7 +26,7 @@ namespace Signum.Entities.Isolation
             return ToStringExpression.Evaluate(this);
         }
 
-        public static readonly SessionVariable<Lite<IsolationDN>> DefaultVariable = Statics.SessionVariable<Lite<IsolationDN>>("CurrentIsolation");
+        public static readonly SessionVariable<Lite<IsolationDN>> DefaultVariable = Statics.SessionVariable<Lite<IsolationDN>>("DefaultIsolation");
         public static Lite<IsolationDN> Default
         {
             get { return DefaultVariable.Value; }
