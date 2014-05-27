@@ -611,12 +611,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return SearchControl.liteKeys(this.selectedItems());
         };
 
-        SearchControl.prototype.selectedKeys = function () {
-            return this.selectedItems().map(function (item) {
-                return item.runtimeInfo.key();
-            }).join(',');
-        };
-
         SearchControl.prototype.newSortOrder = function ($th, multiCol) {
             SF.ContextMenu.hideContextMenu();
 

@@ -647,10 +647,6 @@ export class SearchControl {
         return SearchControl.liteKeys(this.selectedItems());
     }
 
-    selectedKeys() {
-        return this.selectedItems().map(function (item) { return item.runtimeInfo.key(); }).join(',');
-    }
-
     newSortOrder($th: JQuery, multiCol: boolean) {
 
         SF.ContextMenu.hideContextMenu();
