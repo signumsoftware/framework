@@ -333,6 +333,11 @@ namespace Signum.Engine.Operations
             }
         }
 
+        public static bool HasConstructOperations(Type entityType)
+        {
+            return TypeOperations(entityType).Any(o => o.OperationType == Entities.OperationType.Constructor);
+        }
+
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
         {
             return TypeOperations(entityType).Select(o => ToOperationInfo(o)).ToList();

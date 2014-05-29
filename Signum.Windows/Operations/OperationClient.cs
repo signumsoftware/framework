@@ -34,8 +34,7 @@ namespace Signum.Windows.Operations
                 Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
 
                 Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
-
-                Constructor.Manager.GlobalConstructor += Manager.ConstructorManager_GlobalConstructor;
+                Navigator.Manager.IsCreable += Manager_IsCreable;
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
@@ -49,6 +48,14 @@ namespace Signum.Windows.Operations
                         {OrderOptions ={ new OrderOption("Start") }}){ IsShy = true}
                 });
             }
+        }
+
+        static bool Manager_IsCreable(Type type)
+        {
+            if (!type.IsIdentifiableEntity() || !OperationClient.Manager.HasConstructOperations(type))
+                return true;
+
+            return Manager.HasConstructOperationsAllowedAndVisible(type);
         }
 
         public static bool SaveProtected(Type type)
@@ -128,6 +135,12 @@ namespace Signum.Windows.Operations
         public List<OperationInfo> OperationInfos(Type entityType)
         {
             return operationInfoCache.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.GetOperationInfos(t)));
+        }
+
+        ConcurrentDictionary<Type, bool> hasConstructOperations = new ConcurrentDictionary<Type, bool>();
+        public bool HasConstructOperations(Type entityType)
+        {
+            return hasConstructOperations.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.HasConstructOperations(t)));
         }
 
         protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, ButtonBarEventArgs ctx)
@@ -251,12 +264,8 @@ namespace Signum.Windows.Operations
         }
 
 
-
-        protected internal virtual Func<FrameworkElement, List<object>, object> ConstructorManager_GlobalConstructor(Type entityType)
+        protected internal virtual IdentifiableEntity Construct(Type entityType, FrameworkElement element, List<object> args)
         {
-            if (!entityType.IsIIdentifiable())
-                return null;
-
             var dic = (from oi in OperationInfos(entityType)
                        where oi.OperationType == OperationType.Constructor
                        let os = GetSettings<ConstructorSettings>(oi.OperationSymbol)
@@ -266,33 +275,30 @@ namespace Signum.Windows.Operations
             if (dic.Count == 0)
                 return null;
 
-            return (element, args) =>
+            var win = Window.GetWindow(element);
+
+            OperationSymbol selected = null;
+            if (dic.Count == 1)
             {
-                var win = Window.GetWindow(element);
+                selected = dic.Keys.SingleEx();
+            }
+            else
+            {
+                if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
+                    elementIcon: k => OperationClient.GetImage(k),
+                    elementText: k => OperationClient.GetText(k),
+                    title: SelectorMessage.ConstructorSelector.NiceToString(),
+                    message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
+                    owner: win))
+                    return null;
+            }
 
-                OperationSymbol selected = null;
-                if (dic.Count == 1)
-                {
-                    selected = dic.Keys.SingleEx();
-                }
-                else
-                {
-                    if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
-                        elementIcon: k => OperationClient.GetImage(k),
-                        elementText: k => OperationClient.GetText(k),
-                        title: SelectorMessage.ConstructorSelector.NiceToString(),
-                        message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
-                        owner: win))
-                        return null;
-                }
+            var pair = dic[selected];
 
-                var pair = dic[selected];
-
-                if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                    return pair.OperationSettings.Constructor(pair.OperationInfo, win, args);
-                else
-                    return Server.Return((IOperationServer s) => s.Construct(entityType, selected, args));
-            }; 
+            if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
+                return pair.OperationSettings.Constructor(pair.OperationInfo, win, args);
+            else
+                return Server.Return((IOperationServer s) => s.Construct(entityType, selected, args));
         }
 
 
@@ -373,6 +379,15 @@ namespace Signum.Windows.Operations
                 SaveProtectedCache = Server.Return((IOperationServer o) => o.GetSaveProtectedTypes());
 
             return SaveProtectedCache.Contains(type);
+        }
+
+        internal bool HasConstructOperationsAllowedAndVisible(Type type)
+        {
+             return OperationInfos(type).Any(oi=>
+             {
+                 var os = GetSettings<ConstructorSettings>(oi.OperationSymbol);
+                 return os == null || os.IsVisible == null || os.IsVisible(oi); 
+             }); 
         }
     }
 

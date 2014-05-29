@@ -25,6 +25,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         List<OperationInfo> GetOperationInfos(Type entityType);
+         
+        [OperationContract, NetDataContract]
+        bool HasConstructOperations(Type entityType);
 
         [OperationContract, NetDataContract]
         HashSet<Type> GetSaveProtectedTypes();
@@ -56,6 +59,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> cleanKeys);
+
+       
     }
 
 }

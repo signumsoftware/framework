@@ -9,6 +9,7 @@ using Signum.Entities.Basics;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows
 {
@@ -34,7 +35,6 @@ namespace Signum.Windows
             return Manager.SurroundConstruct(type, element, args, Manager.ConstructCore);
         }
 
-
         public static T SurroundConstruct<T>(this FrameworkElement element, List<object> args,  Func<FrameworkElement, List<object>, T> constructor)
             where T : ModifiableEntity
         {
@@ -47,61 +47,49 @@ namespace Signum.Windows
             return (T)SurroundConstruct(typeof(T), element, null, (_type, _element, _args) => constructor());
         }
 
-        public static object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, object> constructor)
+        public static object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, ModifiableEntity> constructor)
         {
             return Manager.SurroundConstruct(type, element, args, constructor);
         }
-       
 
         public static void Register<T>(Func<FrameworkElement, List<object>, T> constructor)
             where T : ModifiableEntity
         {
             Manager.Constructors.Add(typeof(T), constructor);
         }
-
-        
     }
 
     public class ConstructorManager
     {
         public event Func<Type, FrameworkElement, List<object>, bool> PreConstructors;
 
-        public Func<Type, Func<FrameworkElement, List<object>, object>> GlobalConstructor;
-        public Dictionary<Type, Func<FrameworkElement, List<object>, object>> Constructors = new Dictionary<Type, Func<FrameworkElement, List<object>, object>>();
+        public Dictionary<Type, Func<FrameworkElement, List<object>, ModifiableEntity>> Constructors = new Dictionary<Type, Func<FrameworkElement, List<object>, ModifiableEntity>>();
 
-        public event Func<Type, FrameworkElement, List<object>, object, bool> PostConstructors;
+        public event Func<Type, FrameworkElement, List<object>, ModifiableEntity, bool> PostConstructors;
 
         public ConstructorManager()
         {
             PostConstructors += PostConstructors_AddFilterProperties;
         }
 
-        public virtual object ConstructCore(Type type, FrameworkElement element = null, List<object> args = null)
+        public virtual ModifiableEntity ConstructCore(Type type, FrameworkElement element = null, List<object> args = null)
         {
             args = args ?? new List<object>();
 
-            Func<FrameworkElement, List<object>, object> c = Constructors.TryGetC(type);
+            Func<FrameworkElement, List<object>, ModifiableEntity> c = Constructors.TryGetC(type);
             if (c != null)
             {
-                object result = c(element, args);
+                ModifiableEntity result = c(element, args);
                 return result;
             }
 
-            if (GlobalConstructor != null)
-            {
-                foreach (Func<Type, Func<FrameworkElement, List<object>, object>> factory in GlobalConstructor.GetInvocationList())
-                {
-                    var func = factory(type);
+            if (type.IsIdentifiableEntity() && OperationClient.Manager.HasConstructOperations(type))
+                return OperationClient.Manager.Construct(type, element, args);
 
-                    if (func != null)
-                        return func(element, args);
-                }
-            }
-
-            return Activator.CreateInstance(type);
+            return (ModifiableEntity)Activator.CreateInstance(type);
         }
 
-        public virtual  object SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, object> constructor)
+        public virtual ModifiableEntity SurroundConstruct(Type type, FrameworkElement element, List<object> args, Func<Type, FrameworkElement, List<object>, ModifiableEntity> constructor)
         {
             args = args ?? new List<object>();
 
@@ -124,9 +112,9 @@ namespace Signum.Windows
         }
 
 
-        public static bool PostConstructors_AddFilterProperties(Type type, FrameworkElement element, List<object> args, object obj)
+        public static bool PostConstructors_AddFilterProperties(Type type, FrameworkElement element, List<object> args, ModifiableEntity entity)
         {
-            if (obj == null)
+            if (entity == null)
                 throw new ArgumentNullException("result");
 
             if (element is SearchControl)
@@ -140,7 +128,7 @@ namespace Signum.Windows
 
                 foreach (var p in pairs)
                 {
-                    p.pi.SetValue(obj, Server.Convert(p.fo.Value, p.pi.PropertyType), null);
+                    p.pi.SetValue(entity, Server.Convert(p.fo.Value, p.pi.PropertyType), null);
                 }
             }
 

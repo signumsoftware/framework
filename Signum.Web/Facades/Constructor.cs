@@ -12,58 +12,83 @@ using Signum.Entities.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
+using Signum.Web.Operations;
+using Signum.Engine.Operations;
 
 namespace Signum.Web
 {
     public static class Constructor
     {
-        public static ConstructorManager ConstructorManager;
+        public static ConstructorManager Manager;
+        public static ConstructorClientManager ClientManager;
 
-        public static void Start(ConstructorManager constructorManager)
+        public static void Start(ConstructorManager manager, ConstructorClientManager clientManager)
         {
-            ConstructorManager = constructorManager;
+            Manager = manager;
+            ClientManager = clientManager;
         }
 
-        public static ModifiableEntity Construct(Type type)
+        public static T Construct<T>(this ControllerBase controller, List<object> args = null)
+            where T : ModifiableEntity
         {
-            return ConstructorManager.Construct(type);
+            return (T)controller.Construct(typeof(T), args);
         }
 
-        public static T Construct<T>() where T : ModifiableEntity
+        public static ModifiableEntity Construct(this ControllerBase controller, Type entityType, List<object> args = null)
         {
-            return (T)ConstructorManager.Construct(typeof(T));
+            args = args ?? new List<object>();
+
+            return Manager.SurroundConstruct(entityType, controller, args, Manager.ConstructCore);
         }
 
-        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
+        public static T SurroundConstruct<T>(this ControllerBase controller, List<object> args, Func<ControllerBase, List<object>, T> constructor)
+            where T : ModifiableEntity
         {
-            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected);
+            return (T)SurroundConstruct(typeof(T), controller, args, (_type, _controller, _args) => constructor(_controller, _args));
         }
 
-        public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
+        public static T SurroundConstruct<T>(this ControllerBase controller, Func<T> constructor)
+            where T : ModifiableEntity
         {
-            ConstructorManager.Constructors.Add(typeof(T), constructor);
+            return (T)SurroundConstruct(typeof(T), controller, null, (_type, _controller, _args) => constructor());
+        }
+
+        public static ModifiableEntity SurroundConstruct(Type entityType, ControllerBase controller, List<object> args, Func<Type, ControllerBase, List<object>, ModifiableEntity> constructor)
+        {
+            return Manager.SurroundConstruct(entityType, controller, args, constructor);
+        }
+
+        public static void Register<T>(Func<T> constructor) where T:ModifiableEntity
+        {
+            Manager.Constructors.Add(typeof(T), constructor);
         }
     }
 
-    public class ConstructContext
+    public class ConstructorClientManager
     {
-        public ControllerBase Controller { get; set; }
-        public Type Type { get; set; }
-        public string Prefix { get; set; }
-        public VisualConstructStyle PreferredViewStyle { get; set; }
+        public event Func<Type, ControllerBase, JsFunction> PreConstructors;
+
+        public Dictionary<Type, Func<ControllerBase, JsFunction>> Constructors = new Dictionary<Type, Func<ControllerBase, JsFunction>>();
+
+
     }
     
     public class ConstructorManager
     {
-        public event Func<Type, ModifiableEntity> GeneralConstructor;
+        public ConstructorManager()
+        {
+            PostConstructors += PostConstructors_AddFilterProperties;
+        }
+
+        public event Func<Type, ControllerBase, List<object>, bool> PreConstructors;
+
         public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
 
-        public event Func<ConstructContext, ActionResult> VisualGeneralConstructor;
-        public Dictionary<Type, Func<ConstructContext, ActionResult>> VisualConstructors = new Dictionary<Type, Func<ConstructContext, ActionResult>>();
+        public event Func<Type, ControllerBase, List<object>, ModifiableEntity, bool> PostConstructors;
 
-        public virtual ModifiableEntity Construct(Type type)
+        public virtual ModifiableEntity ConstructCore(Type entityType, ControllerBase element = null, List<object> args = null)
         {
-            Func<ModifiableEntity> c = Constructors.TryGetC(type);
+            Func<ModifiableEntity> c = Constructors.TryGetC(entityType);
             if (c != null)
             {
                 ModifiableEntity result = c();
@@ -71,94 +96,18 @@ namespace Signum.Web
                     return result;
             }
 
-            if (GeneralConstructor != null)
-            {
-                ModifiableEntity result = GeneralConstructor(type);
-                if (result != null)
-                    return result;
-            }
+            if (entityType.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(entityType))
+                return OperationClient.Manager.ConstructSingle(entityType);
 
-            return DefaultContructor(type);
+            return (ModifiableEntity)Activator.CreateInstance(entityType, true);
         }
 
-        public static ModifiableEntity DefaultContructor(Type type)
-        {
-            return (ModifiableEntity)Activator.CreateInstance(type, true);
-        }
-
-        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
-        {
-            ConstructContext ctx = new ConstructContext { Controller = controller, Type = type, Prefix = prefix, PreferredViewStyle = preferredStyle };
-            Func<ConstructContext, ActionResult> c = VisualConstructors.TryGetC(type);
-            if (c != null)
-            {
-                ActionResult result = c(ctx);
-                if (result != null)
-                    return result;
-            }
-
-            if (VisualGeneralConstructor != null)
-            {
-                ActionResult result = VisualGeneralConstructor(ctx);
-                if (result != null)
-                    return result;
-            }
-
-            if (preferredStyle == VisualConstructStyle.Navigate)
-                return JsonAction.RedirectAjax(Navigator.NavigateRoute(type, null));
-
-            ModifiableEntity entity = Constructor.Construct(type);
-            return EncapsulateView(controller, entity, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected); 
-        }
-
-        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
-        {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
-
-            if (ident == null)
-                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities");
-
-            AddFilterProperties(entity, controller);
-
-            switch (preferredStyle)
-            {
-                case VisualConstructStyle.PopupView:
-                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
-                    { 
-                        PartialViewName = partialViewName,
-                        ReadOnly = readOnly,
-                        SaveProtected = saveProtected,
-                        ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, viewOptions);
-                case VisualConstructStyle.PopupNavigate:
-                    var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
-                    { 
-                        PartialViewName = partialViewName,
-                        ReadOnly = readOnly,
-                        ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, navigateOptions);
-                case VisualConstructStyle.PartialView:
-                    return Navigator.PartialView(controller, ident, prefix, partialViewName);
-                case VisualConstructStyle.View:
-                    return Navigator.NormalPage(controller, new NavigateOptions(ident) { PartialViewName = partialViewName });
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
-
-        public static void AddFilterProperties(ModifiableEntity obj, ControllerBase controller)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("result");
-
+        public static bool PostConstructors_AddFilterProperties(Type type, ControllerBase controller, List<object> args, ModifiableEntity entity)
+        {   
             HttpContextBase httpContext = controller.ControllerContext.HttpContext;
 
             if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
-                return;
-
-            Type type = obj.GetType();
+                return false;
 
             object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
@@ -174,7 +123,32 @@ namespace Signum.Web
                         select new { pi, fo };
 
             foreach (var p in pairs)
-                p.pi.SetValue(obj, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
+                p.pi.SetValue(entity, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
+
+            return true;
+        }
+
+        public virtual ModifiableEntity SurroundConstruct(Type type, ControllerBase controller, List<object> args, 
+            Func<Type, ControllerBase, List<object>, ModifiableEntity> constructor)
+        {
+            args = args ?? new List<object>();
+
+            if (PreConstructors != null)
+                foreach (Func<Type, ControllerBase, List<object>, bool> pre in PreConstructors.GetInvocationList())
+                    if (!pre(type, controller, args))
+                        return null;
+
+            var entity = constructor(type, controller, args);
+
+            if (entity == null)
+                return null;
+
+            if (PostConstructors != null)
+                foreach (Func<Type, ControllerBase, List<object>, ModifiableEntity, bool> post in PostConstructors.GetInvocationList())
+                    if (!post(type, controller, args, entity))
+                        return null;
+
+            return entity;
         }
     }
 
