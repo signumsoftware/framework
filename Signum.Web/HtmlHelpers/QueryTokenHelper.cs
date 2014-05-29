@@ -30,7 +30,7 @@ namespace Signum.Web
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
 
-            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "QueryTokenBuilder.init", context.Prefix,
+            sb.Add(MvcHtmlString.Create("<script>" + JsModule.Finder["QueryTokenBuilder.init"](context.Prefix,
                 Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, settings.RequestExtraJSonData).ToString()
                 + "</script>")); 
         

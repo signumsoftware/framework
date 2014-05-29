@@ -101,7 +101,7 @@ namespace Signum.Web
                 sb.Add(new HtmlTag("a", options.PopupViewPrefix + "csbtnView")
                   .Class("sf-line-button sf-view")
                   .Attr("title", EntityControlMessage.View.NiceToString())
-                  .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", findOptions.ToJS(options.PopupViewPrefix)).ToString())
+                  .Attr("onclick", JsModule.Finder["explore"](findOptions.ToJS(options.PopupViewPrefix)).ToString())
                   .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right")));
             }
 

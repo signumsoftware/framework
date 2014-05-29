@@ -39,7 +39,12 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(webTypeName);
 
-            return Constructor.VisualConstruct(this, type, "", VisualConstructStyle.View, null, null, true, null);
+            if (!type.IsIdentifiableEntity())
+                throw new InvalidOperationException("Only classes that inherit from IdentifiableEntity can be created using this Action"); 
+
+            var entity = (IdentifiableEntity)this.Construct(type);
+
+            return this.NormalPage(new NavigateOptions(entity));
         }
 
         public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
@@ -50,22 +55,16 @@ namespace Signum.Web.Controllers
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
             else
-            {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate, partialViewName, readOnly, showOperations ?? true, saveProtected);
-                if (result.GetType() == typeof(PartialViewResult))
-                    return (PartialViewResult)result;
-
-                if (result.GetType().IsEmbeddedEntity())
-                    throw new InvalidOperationException("PopupNavigate cannot be called for EmbeddedEntity {0}".Formato(result.GetType()));
-
-                if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
-                    throw new InvalidOperationException("Invalid result type for a Constructor");
-
-                entity = (IdentifiableEntity)result;
-            }
+                entity = (IdentifiableEntity)this.Construct(type);
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly, ShowOperations = showOperations ?? true });
+
+            return this.PopupOpen(new PopupNavigateOptions(tc)
+            {
+                PartialViewName = partialViewName,
+                ReadOnly = readOnly,
+                ShowOperations = showOperations ?? true
+            });
         }
 
         public PartialViewResult PopupView(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
@@ -76,25 +75,17 @@ namespace Signum.Web.Controllers
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
             else
-            {
-                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView, partialViewName, readOnly, showOperations ?? true, saveProtected);
-                if (result is PartialViewResult)
-                    return (PartialViewResult)result;
-                else
-                    throw new InvalidOperationException("Invalid result type for a Constructor");
-            }
-
+                entity = (IdentifiableEntity)this.Construct(type);
+        
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            var viewOptions = new PopupViewOptions(tc) 
-            { 
-                PartialViewName = partialViewName, 
+            return this.PopupOpen(new PopupViewOptions(tc)
+            {
+                PartialViewName = partialViewName,
                 ReadOnly = readOnly,
                 ShowOperations = showOperations ?? true,
                 SaveProtected = saveProtected
-            };
-
-            return this.PopupOpen(viewOptions);
+            });
         }
 
         [HttpPost]
@@ -106,13 +97,7 @@ namespace Signum.Web.Controllers
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
             else
-            {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView, partialViewName, readOnly, false, null);
-                if (result is PartialViewResult)
-                    return (PartialViewResult)result;
-                else
-                    throw new InvalidOperationException("Invalid result type for a Constructor");
-            }
+                entity = (IdentifiableEntity)this.Construct(type);
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
@@ -175,6 +160,43 @@ namespace Signum.Web.Controllers
             ViewData["options"] = options;
 
             return this.PartialView(Navigator.Manager.ValueLineBoxView, new Context(null, prefix));
+        }
+
+
+        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
+        {
+            IdentifiableEntity ident = entity as IdentifiableEntity;
+
+            if (ident == null)
+                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities");
+
+
+            switch (preferredStyle)
+            {
+                case VisualConstructStyle.PopupView:
+                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix))
+                    {
+                        PartialViewName = partialViewName,
+                        ReadOnly = readOnly,
+                        SaveProtected = saveProtected,
+                        ShowOperations = showOperations
+                    };
+                    return Navigator.PopupOpen(controller, viewOptions);
+                case VisualConstructStyle.PopupNavigate:
+                    var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix))
+                    {
+                        PartialViewName = partialViewName,
+                        ReadOnly = readOnly,
+                        ShowOperations = showOperations
+                    };
+                    return Navigator.PopupOpen(controller, navigateOptions);
+                case VisualConstructStyle.PartialView:
+                    return Navigator.PartialView(controller, ident, prefix, partialViewName);
+                case VisualConstructStyle.View:
+                    return Navigator.NormalPage(controller, new NavigateOptions(ident) { PartialViewName = partialViewName });
+                default:
+                    throw new InvalidOperationException();
+            }
         }
     }
 }

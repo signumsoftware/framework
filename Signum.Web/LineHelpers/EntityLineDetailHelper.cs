@@ -67,11 +67,11 @@ namespace Signum.Web
 
                 if (entityDetail.Type.IsEmbeddedEntity() && entityDetail.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
+                    TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)helper.ViewContext.Controller.Construct(entityDetail.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail), null));
                 }
 
-                sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "EntityLineDetail"));
+                sb.AddLine(entityDetail.ConstructorScript(JsModule.Lines, "EntityLineDetail"));
             }
 
             return sb.ToHtml();

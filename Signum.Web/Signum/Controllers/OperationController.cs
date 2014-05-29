@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())
@@ -62,7 +62,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
 
                 OperationLogic.ServiceDelete(entity, operationSymbol, null);
@@ -84,7 +84,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())

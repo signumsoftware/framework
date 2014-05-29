@@ -56,11 +56,11 @@ namespace Signum.Web
 
                 if (repeater.ElementType.IsEmbeddedEntity() && repeater.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), null));
                 }
 
-                sb.AddLine(repeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
+                sb.AddLine(repeater.ConstructorScript(JsModule.Lines, "EntityRepeater"));
             }
 
             return sb.ToHtml();

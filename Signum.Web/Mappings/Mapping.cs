@@ -663,7 +663,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity())
             {
                 if (runtimeInfo.IsNew || ctx.Value == null)
-                    return Constructor.Construct<T>();
+                    return ctx.Controller.Construct<T>();
 
                 return ctx.Value;
             }
@@ -671,7 +671,7 @@ namespace Signum.Web
             {
                 IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)ctx.Value;
 
-                var result = GetIdentifiableEntity(runtimeInfo, identifiable);
+                var result = GetIdentifiableEntity(ctx.Controller, runtimeInfo, identifiable);
 
                 if (result is Entity && runtimeInfo.Ticks != null)
                     ((Entity)(ModifiableEntity)result).ticks = runtimeInfo.Ticks.Value;
@@ -680,14 +680,14 @@ namespace Signum.Web
             }
         }
 
-        private static T GetIdentifiableEntity(RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
+        private static T GetIdentifiableEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
         {
             if (runtimeInfo.IsNew)
             {
                 if (identifiable != null && identifiable.IsNew)
                     return (T)(ModifiableEntity)identifiable;
                 else
-                    return Constructor.Construct<T>();
+                    return controller.Construct<T>();
             }
 
             if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
@@ -857,7 +857,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.EntityType)).ToLiteFat());
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)ctx.Controller.Construct(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)

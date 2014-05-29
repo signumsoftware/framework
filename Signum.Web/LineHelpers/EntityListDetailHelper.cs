@@ -64,11 +64,11 @@ namespace Signum.Web
 
                 if (listDetail.ElementType.IsEmbeddedEntity() && listDetail.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail), templateTC.Value.ToString()));
                 }
 
-                sb.AddLine(listDetail.ConstructorScript(JsFunction.LinesModule, "EntityListDetail"));
+                sb.AddLine(listDetail.ConstructorScript(JsModule.Lines, "EntityListDetail"));
             }
 
             var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelText, sb.ToHtml());

@@ -68,11 +68,11 @@ namespace Signum.Web
 
                 if (entityStrip.ElementType.IsEmbeddedEntity() && entityStrip.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true), null));
                 }
 
-                sb.AddLine(entityStrip.ConstructorScript(JsFunction.LinesModule, "EntityStrip"));
+                sb.AddLine(entityStrip.ConstructorScript(JsModule.Lines, "EntityStrip"));
             }
 
             return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelText, sb.ToHtml());

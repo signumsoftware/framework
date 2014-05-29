@@ -40,7 +40,7 @@ namespace Signum.Web
 
         public bool HasManyImplementations
         {
-            get 
+            get
             {
                 return Implementations != null && !Implementations.Value.IsByAll && Implementations.Value.Types.Count() > 1;
             }
@@ -55,7 +55,7 @@ namespace Signum.Web
         public bool Remove { get; set; }
         public bool ReadOnlyEntity { get; set; }
 
-        bool preserveViewData = false; 
+        bool preserveViewData = false;
         /// <summary>
         /// When rendering the line content, it will preserve the ViewData values except the Model
         /// </summary>
@@ -80,7 +80,7 @@ namespace Signum.Web
             JObject options = new JObject
             {
                 {"prefix", Prefix }
-            }; 
+            };
 
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName);
@@ -104,8 +104,8 @@ namespace Signum.Web
                 Type[] types = Implementations.Value.IsByAll ? ImplementedByAll :
                                Implementations.Value.Types.ToArray();
 
-                options.Add("types", new JArray(types == ImplementedByAll ? 
-                    new string[]{ ImplementedByAllKey } :
+                options.Add("types", new JArray(types == ImplementedByAll ?
+                    new string[] { ImplementedByAllKey } :
                     types.Select(t => Navigator.ResolveWebTypeName(t)).ToArray()));
 
                 options.Add("typeNiceNames", new JArray(types == ImplementedByAll ?
@@ -140,9 +140,9 @@ namespace Signum.Web
             return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }
 
-        internal Type CleanRuntimeType 
-        { 
-            get 
+        internal Type CleanRuntimeType
+        {
+            get
             {
                 if (UntypedValue == null)
                     return null;
@@ -151,89 +151,54 @@ namespace Signum.Web
             }
         }
 
-        public JsLineFunction AttachFunction;
+        public JsFunction AttachFunction;
 
-        public MvcHtmlString ConstructorScript(string module, string type)
+        public MvcHtmlString ConstructorScript(JsModule module, string type)
         {
-            var info = new JsLineFunction.LineInfo
-            {
-                Module = module,
-                Type = type,
-                Prefix = Prefix,
-                Options = OptionsJSInternal(),
-            };
-
-            var result = AttachFunction != null ? AttachFunction.SetOptions(info).ToString() :
-                JsLineFunction.BasicConstructor(info);
+            var result = AttachFunction != null ?
+                AttachConstructor(module, type) :
+                BasicConstructor(module, type);
 
             return new MvcHtmlString("<script>" + result + "</script>");
         }
-    }
 
-
-    public class JsLineFunction : JsFunction
-    {
-
-        /// <summary>
-        /// require("Signum/Lines", "module", function(Lines, mod) { mod.functionName(new Lines.EntityLine($("#Prefix")), arguments...); });
-        /// </summary>
-        public JsLineFunction(string module, string functionName, params object[] arguments) :
-            base(module, functionName, arguments)
+        string AttachConstructor(JsModule module, string type)
         {
-        }
+            var varModule = JsFunction.VarName(AttachFunction.Module);
 
-        LineInfo lineInfo; 
-        internal JsLineFunction SetOptions(LineInfo lineInfo)
-        {
-            this.lineInfo = lineInfo;
-            return this;
-        }
+            var varLines = JsFunction.VarName(module);
 
-        public override string ToString()
-        {
-            if (lineInfo == null)
-                throw new InvalidOperationException("Attempt to call JsLineFunction.ToString without LineInfo. Consider using JsFunction instead.");
+            var line = type.FirstLower();
 
-            var varModule = VarName(Module);
+            var args = AttachFunction.Arguments.ToString(a =>
+                a == JsFunction.This ? "that" :
+                a == this ? line :
+                JsonConvert.SerializeObject(a, AttachFunction.JsonSerializerSettings), ", ");
 
-            var varLines = VarName(lineInfo.Module);
-
-            var args = string.IsNullOrEmpty(Arguments) ? null : (", " + Arguments);
-
-            return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") {\r\n" +
-                "var " + lineInfo.Type + " = " + NewLine(varLines, lineInfo) + ";\r\n" +
-                varModule + "." + FunctionName + "(" + lineInfo.Type + args + ");\r\n" +
-                lineInfo.Type + ".ready();\r\n" +
+            var result = "require(['" + module + "', '" + AttachFunction.Module.Name + "'], function(" + varLines + ", " + varModule + ") {\r\n" +
+                "var " + line + " = " + NewLine(varLines, type) + ";\r\n" +
+                varModule + "." + AttachFunction.FunctionName + "(" + args + ");\r\n" +
+                line + ".ready();\r\n" +
                 "});";
+
+            if (!AttachFunction.Arguments.Contains(JsFunction.This))
+                return result;
+
+            return "(function(that) { " + result + "})(this)";
         }
 
-        public static string BasicConstructor(LineInfo lineInfo)
+        string BasicConstructor(JsModule module, string type)
         {
-            var varNameLines = VarName(lineInfo.Module);
+            var varNameLines = JsFunction.VarName(module);
 
-            var result = "require(['" + lineInfo.Module + "'], function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + ".ready(); });";
+            var result = "require(['" + module + "'], function(" + varNameLines + ") { " + NewLine(varNameLines, type) + ".ready(); });";
 
-            return result; 
+            return result;
         }
 
-        static string NewLine(string varLines, LineInfo lineInfo)
+        string NewLine(string varLines, string type)
         {
-            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.Prefix, lineInfo.Options.ToString());
-        }
-
-        public class LineInfo
-        {
-            public string Module; 
-            public string Type;
-            public string Prefix;
-            public JObject Options;
+            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, type, this.Prefix, this.OptionsJSInternal());
         }
     }
-   
 }
-
-//require("Lines", function(Lines) { new EntityLine($("#myLine")); });
-//require("Lines", "Blas" , function(Blas, Lines) { Blas.Attach(new EntityLine($("#myLine"))); });
-//require("Lines", "Blas" , function(Blas, Lines) { Blas.Attach(new EntityLine($("#myLine"), {num : "hola"})); });
-
-//require("Operations", function(Operations) { Operations.defaultClick({}); });

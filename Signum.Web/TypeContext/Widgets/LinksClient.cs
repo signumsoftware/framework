@@ -197,7 +197,7 @@ namespace Signum.Web
             JObject jsFindOptions = FindOptions.ToJS(TypeContextUtilities.Compose("New", Prefix));
 
             return new HtmlTag("a")
-                .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", jsFindOptions).ToString())
+                .Attr("onclick", JsModule.Finder["explore"](jsFindOptions).ToString())
                 .SetInnerText(Text);
         }
     }

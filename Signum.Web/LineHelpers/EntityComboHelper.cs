@@ -71,14 +71,14 @@ namespace Signum.Web
 
                 if (entityCombo.Type.IsEmbeddedEntity() && entityCombo.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone((object)Constructor.Construct(entityCombo.Type.CleanType()));
+                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone((object)helper.ViewContext.Controller.Construct(entityCombo.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityCombo, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityCombo, isTemplate: true), null));
                 }
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityCombo.Parent, RenderPopupMode.PopupInDiv, entityCombo));
 
-                sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));
+                sb.AddLine(entityCombo.ConstructorScript(JsModule.Lines, "EntityCombo"));
             }
 
             return helper.FormGroup(entityCombo, entityCombo.Prefix, entityCombo.LabelText, sb.ToHtml());

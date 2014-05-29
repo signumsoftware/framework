@@ -141,5 +141,5 @@
     }
 </div>
 <script type="text/javascript">
-    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});
+    require(["Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});
 </script>

@@ -65,10 +65,10 @@ namespace Signum.Web
 
                 if (entityList.ElementType.IsEmbeddedEntity() && entityList.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityList, isTemplate: true), null));
                 }
-                sb.AddLine(entityList.ConstructorScript(JsFunction.LinesModule, "EntityList"));
+                sb.AddLine(entityList.ConstructorScript(JsModule.Lines, "EntityList"));
             }
 
             return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelText, sb.ToHtml());

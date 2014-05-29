@@ -70,7 +70,7 @@ namespace Signum.Web
 
                  if (entityLine.Type.IsEmbeddedEntity() && entityLine.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
+                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)helper.ViewContext.Controller.Construct(entityLine.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
                 }
 
@@ -78,7 +78,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));
 
 
-                sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
+                sb.AddLine(entityLine.ConstructorScript(JsModule.Lines, "EntityLine"));
             }
 
             return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());
