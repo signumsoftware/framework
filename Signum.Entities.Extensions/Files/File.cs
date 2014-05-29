@@ -17,8 +17,8 @@ namespace Signum.Entities.Files
 
         public FileDN(string path)
         {
-            this.fileName = Path.GetFileName(path);
-            this.binaryFile = File.ReadAllBytes(path);
+            this.FileName = Path.GetFileName(path);
+            this.BinaryFile = File.ReadAllBytes(path);
         }
 
         [NotNullable, SqlDbType(Size = 254)]
