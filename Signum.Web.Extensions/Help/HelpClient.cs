@@ -27,7 +27,7 @@ namespace Signum.Web.Help
     public static class HelpClient
     {
         public static string ViewPrefix = "~/Help/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Help/Scripts/help"; 
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Help/Scripts/help"); 
 
         //pages        
         public static string IndexUrl =  ViewPrefix.Formato("Index");

@@ -33,8 +33,8 @@ namespace Signum.Web.Chart
     {
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
-        public static string Module = "Extensions/Signum.Web.Extensions/Chart/Scripts/Chart";
-        public static string ModuleScript = "Extensions/Signum.Web.Extensions/Chart/Scripts/ChartScript";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Chart/Scripts/Chart");
+        public static JsModule ModuleScript = new JsModule("Extensions/Signum.Web.Extensions/Chart/Scripts/ChartScript");
 
         public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
@@ -79,7 +79,7 @@ namespace Signum.Web.Chart
                     return null;
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                    Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
 
@@ -141,22 +141,22 @@ namespace Signum.Web.Chart
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd, canAggregate: chartRequest.GroupResults)
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.Controller.ControllerContext.HttpContext, qd, canAggregate: chartRequest.GroupResults)
                 .Select(fo => fo.ToFilter()).ToList();
         }
 
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qd, canAggregate: true/*chartRequest.GroupResults*/)
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.Controller.ControllerContext.HttpContext, qd, canAggregate: true/*chartRequest.GroupResults*/)
                     .Select(fo => fo.ToOrder()).ToList();
         }
 
@@ -180,7 +180,7 @@ namespace Signum.Web.Chart
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
                 Title = chartNewText,
                 Text = chartNewText,
-                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart"))
+                OnClick = Module["openChart"](ctx.Prefix,  ctx.Url.Action("Index", "Chart"))
             };
         }
 

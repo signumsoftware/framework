@@ -40,6 +40,6 @@
 <script language="javascript">
 
     $(function () {
-        @(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
+        @(ProfilerClient.Module["heavyListChart"](Model.HeavyDetailsToJson()));
     });
 </script>

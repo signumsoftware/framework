@@ -204,7 +204,7 @@ else
 
 <script>
     $(function () {
-        @(new JsFunction(TranslationClient.Module, "pluralAndGender"))
-        @(new JsFunction(TranslationClient.Module, "editAndRemember", TranslationClient.Translator is ITranslatorWithFeedback))
+        @(TranslationClient.Module["pluralAndGender"]())
+        @(TranslationClient.Module["editAndRemember"](TranslationClient.Translator is ITranslatorWithFeedback))
     });
 </script>

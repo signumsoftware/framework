@@ -79,7 +79,7 @@ namespace Signum.Web.Chart
 
                 OperationClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
                 {
-                    OnClick = ctx => new JsOperationFunction(ChartClient.Module, "deleteUserChart", Navigator.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName()))
+                    OnClick = ctx => ChartClient.Module["deleteUserChart"](ctx.Options(), Navigator.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName()))
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
@@ -154,7 +154,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     Title = uqNewText,
                     Text = uqNewText,
-                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c) => c.CreateUserChart())),
+                    OnClick = ChartClient.Module["createUserChart"](prefix, url.Action((ChartController c) => c.CreateUserChart())),
                 });
             }
 

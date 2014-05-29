@@ -2,10 +2,10 @@
 @using Signum.Web.Profiler
 @model HeavyProfilerEntry
 <h2>Profiler Entry (
-    @foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
+    @foreach (var e in Model.Follow(a => a.Parent).Skip(1).Reverse())
     {
         @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
-        }
+    }
     @Model.Index.ToString())
 </h2>
 @Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy(false))
@@ -83,11 +83,11 @@ else
 <br />
 @Html.ScriptCss("~/Profiler/Content/Profiler.css")
 @{ 
-    var fullTree = Model.FollowC(e => e.Parent).ToList();
+    var fullTree = Model.Follow(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 
 }
 <script type="text/javascript">
     $(function() {
-       @(new JsFunction(ProfilerClient.Module, "heavyDetailsChart", fullTree.HeavyDetailsToJson(), Model.Depth));
+       @(ProfilerClient.Module["heavyDetailsChart"](fullTree.HeavyDetailsToJson(), Model.Depth));
     });
 </script>

@@ -23,7 +23,7 @@ namespace Signum.Web.Translation
     public static class TranslationClient
     {
         public static string ViewPrefix = "~/Translation/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Translation/Scripts/Translation";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Translation/Scripts/Translation");
 
         public static ITranslator Translator; 
 

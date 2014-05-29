@@ -48,7 +48,7 @@
         @Html.EntityLine(uc, f => f.EntityType, el =>
    {
        el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-       el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity");
+       el.AttachFunction = ChartClient.Module["attachShowCurrentEntity"](el);
    })
         <p class="messageEntity col-sm-offset-2">
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)

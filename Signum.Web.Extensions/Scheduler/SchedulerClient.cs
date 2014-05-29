@@ -24,7 +24,7 @@ namespace Signum.Web.Scheduler
     public static class SchedulerClient
     {
         public static string ViewPrefix = "~/scheduler/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Scheduler/Scripts/Scheduler";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Scheduler/Scripts/Scheduler");
 
         public static void Start(bool simpleTask)
         {

@@ -38,7 +38,7 @@ namespace Signum.Web.AuthAdmin
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
-            var prp = PermissionAuthLogic.GetPermissionRules(role).ApplyChanges(ControllerContext, true, ""); ;
+            var prp = PermissionAuthLogic.GetPermissionRules(role).ApplyChanges(this, ""); ;
 
             PermissionAuthLogic.SetPermissionRules(prp.Value);
 
@@ -55,7 +55,7 @@ namespace Signum.Web.AuthAdmin
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
-            var prp = TypeAuthLogic.GetTypeRules(role).ApplyChanges(ControllerContext, true, ""); ;
+            var prp = TypeAuthLogic.GetTypeRules(role).ApplyChanges(this, ""); ;
 
             TypeAuthLogic.SetTypeRules(prp.Value);
 
@@ -74,7 +74,7 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(ControllerContext, true, prefix);
+            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(this, prefix);
 
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
@@ -96,7 +96,7 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var querys = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, true, prefix);
+            var querys = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(this, prefix);
 
             if (querys.HasErrors())
                 return querys.ToJsonModelState();
@@ -119,7 +119,7 @@ namespace Signum.Web.AuthAdmin
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var opers = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, true, prefix);
+            var opers = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(this, prefix);
 
             if (opers.HasErrors())
                 return opers.ToJsonModelState();

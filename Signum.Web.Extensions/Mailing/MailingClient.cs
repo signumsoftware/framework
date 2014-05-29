@@ -31,7 +31,7 @@ namespace Signum.Web.Mailing
     public static class MailingClient
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing");
 
         private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -117,7 +117,7 @@ namespace Signum.Web.Mailing
                     new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
-                        OnClick = ctx => new JsOperationFunction(Module, "createMailFromTemplate",
+                        OnClick = ctx => Module["createMailFromTemplate"](ctx.Options(),
                             new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
@@ -135,7 +135,7 @@ namespace Signum.Web.Mailing
                     {
                         new EntityOperationSettings(NewsletterOperation.RemoveRecipients)
                         {
-                            OnClick = ctx =>new JsOperationFunction(Module, "removeRecipients",
+                            OnClick = ctx => Module["removeRecipients"](ctx.Options(),
                                 new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
                                 ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
                         },

@@ -44,14 +44,14 @@ namespace Signum.Web.Notes
                 new MenuItem
                 {
                      CssClass = "sf-note-view",
-                     OnClick = new JsFunction(NoteClient.Module, "explore", ctx.Prefix, findOptions, url),
+                     OnClick = NoteClient.Module["explore"](ctx.Prefix, findOptions, url),
                      Text = NoteMessage.ViewNotes.NiceToString(),
                 },
 
                 new MenuItem
                 {
                     CssClass = "sf-note-create",
-                    OnClick = new JsFunction(NoteClient.Module, "createNote", ctx.Prefix, NoteOperation.CreateNoteFromEntity.Operation.Key, url),
+                    OnClick = NoteClient.Module["createNote"](ctx.Prefix, NoteOperation.CreateNoteFromEntity.Operation.Key, url),
                     Text = NoteMessage.CreateNote.NiceToString()
                 },
             }; 

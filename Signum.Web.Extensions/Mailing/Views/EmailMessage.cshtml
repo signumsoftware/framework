@@ -66,7 +66,7 @@
 
 <script>
     $(function () {
-        @(new JsFunction(MailingClient.Module, "initHtmlEditor", e.Compose("Body")))
+        @(MailingClient.Module["initHtmlEditor"](e.Compose("Body")))
     });
                 </script>
             }
@@ -88,7 +88,7 @@
 <script>
     $(function () {
         var iframe = $("@e.Compose("iframe")");
-        @(new JsFunction(MailingClient.Module, "activateIFrame", JsFunction.Literal("iframe")))
+        @(MailingClient.Module["activateIFrame"](JsFunction.Literal("iframe")))
     });
                             </script>
                         }

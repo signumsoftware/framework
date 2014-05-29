@@ -26,7 +26,7 @@ namespace Signum.Web.Reports
     public class ReportSpreadsheetClient
     {
         public static string ViewPrefix = "~/ReportSpreadsheet/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/ReportSpreadsheet/Scripts/Report";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/ReportSpreadsheet/Scripts/Report");
 
         public static bool ToExcelPlain { get; private set; }
         public static bool ExcelReport { get; private set; }
@@ -92,7 +92,7 @@ namespace Signum.Web.Reports
                         {
                             Title = report.ToString(),
                             Text = report.ToString(),
-                            OnClick = new JsFunction(Module, "toExcelReport", ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
+                            OnClick = Module["toExcelReport"](ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
                         });
                     }
                 }
@@ -106,7 +106,7 @@ namespace Signum.Web.Reports
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
-                    OnClick = new JsFunction(Module, "administerExcelReports", ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
+                    OnClick = Module["administerExcelReports"](ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
 
                 items.Add(new MenuItem
@@ -114,7 +114,7 @@ namespace Signum.Web.Reports
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"),
                     Title = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
-                    OnClick = new JsFunction(Module, "createExcelReports", ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
+                    OnClick = Module["createExcelReports"](ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
                 });
 
                 return new ToolBarButton[]
@@ -144,7 +144,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
+                OnClick = Module["toPlainExcel"](ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
             };
         }
 
@@ -155,7 +155,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
                 Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = new JsFunction(ChartClient.Module, "exportData", prefix,
+                OnClick = ChartClient.Module["exportData"](prefix,
                     url.Action((ChartController c) => c.Validate()),
                     url.Action((ChartController c) => c.ExportData())),
             };

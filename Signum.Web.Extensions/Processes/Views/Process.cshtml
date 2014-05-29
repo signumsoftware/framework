@@ -62,7 +62,7 @@
           {
     <script type="text/javascript">
         $(function () {
-            @(new JsFunction(ProcessesClient.Module, "refreshProgress", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
+            @(ProcessesClient.Module["refreshProgress"](e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
         })
     </script>
           }
@@ -70,7 +70,7 @@
           {
     <script type="text/javascript">
         $(function () {
-            @(new JsFunction(ProcessesClient.Module, "refreshPage", e.Prefix))
+            @(ProcessesClient.Module["refreshPage"](e.Prefix))
         })
     </script>
           }

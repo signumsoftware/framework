@@ -12,10 +12,10 @@
     <div class="row">
         <div class="col-sm-11">
             @Html.ValueLine(cc, c => c.Name)
-            @Html.FileLine(cc, c => c.Icon.Try(i => i.Retrieve()), a =>
+            @Html.FileLine(cc, c => c.Icon.Try(i => i.Retrieve()), fl =>
     {
-        a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
-        a.AttachFunction = new JsLineFunction(ChartClient.ModuleScript, "refreshIcon", imageRoute);
+        fl.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
+        fl.AttachFunction = ChartClient.ModuleScript["refreshIcon"](fl, imageRoute);
     })
             @Html.ValueLine(cc, c => c.GroupBy)
         </div>

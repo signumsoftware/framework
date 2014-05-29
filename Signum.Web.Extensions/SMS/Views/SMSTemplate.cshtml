@@ -30,7 +30,7 @@
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
-                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
+                ec.AttachFunction = SMSClient.Module["attachAssociatedType"](ec, Url.Action<SMSController>(s => s.GetLiteralsForType()));
             })
         </div>
 
@@ -45,8 +45,7 @@
         })
     
     <script>
-        @(new JsFunction(SMSClient.Module, "init",
-    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")),
+        @(SMSClient.Module["init"](Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")),
     Url.Action<SMSController>(s => s.GetDictionaries())))
     </script>
 }

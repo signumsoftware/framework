@@ -25,7 +25,7 @@ namespace Signum.Web.AuthAdmin
     public static class AuthAdminClient
     {
         public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/AuthAdmin/Scripts/AuthAdmin";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/AuthAdmin/Scripts/AuthAdmin");
 
         public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions)
         {
@@ -147,8 +147,8 @@ namespace Signum.Web.AuthAdmin
                     Text = AuthMessage.Save.NiceToString(),
                     Style = BootstrapStyle.Primary,
                     OnClick =  embedded?
-                      new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
-                      new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
+                      Module["postDialog"](ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
+                      Module["submitPage"](ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
                 }});
         }
 

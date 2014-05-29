@@ -117,6 +117,6 @@ else
 
 <script>
     $(function () {
-        @(new JsFunction(TranslationClient.Module, "editAndRemember", TranslationClient.Translator is ITranslatorWithFeedback))
+        @(TranslationClient.Module["editAndRemember"](TranslationClient.Translator is ITranslatorWithFeedback))
     });
 </script>

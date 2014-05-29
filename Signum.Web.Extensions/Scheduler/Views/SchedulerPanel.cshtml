@@ -12,8 +12,8 @@
     </div>
     <script>
         $(function () {
-                @(new JsFunction(SchedulerClient.Module, "initControlPanel"))
-            });
+            @(SchedulerClient.Module["initControlPanel"]())
+        });
     </script>
     <div id="schedulerMainDiv">
         <br />

@@ -13,6 +13,6 @@
 @Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable"))
 <script>
     $(function () {
-        @(new JsFunction(ProfilerClient.Module, "initStats"));
+        @(ProfilerClient.Module["initStats"]());
     });
 </script>

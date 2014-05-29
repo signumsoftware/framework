@@ -36,7 +36,7 @@
     @Html.EntityLine(e, f => f.EntityType, el =>
         {
             el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-            el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity");
+            el.AttachFunction = UserQueriesClient.Module["attachShowCurrentEntity"](el);
         })
     
     <p class="messageEntity col-sm-offset-2">

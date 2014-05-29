@@ -51,7 +51,7 @@ namespace Signum.Web.Alerts
 
             var items = alertList.Select(a => new MenuItem
             {
-                OnClick = new JsFunction(AlertClient.Module, "exploreAlerts", ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts"), url),
+                OnClick = AlertClient.Module["exploreAlerts"](ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts"), url),
                 CssClass = "sf-alert-view",
                 Html = 
                 new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()).ToHtml().Concat(
@@ -63,7 +63,7 @@ namespace Signum.Web.Alerts
             items.Add(new MenuItem
             {
                 CssClass = "sf-alert-create",
-                OnClick = new JsFunction(AlertClient.Module, "createAlert", ctx.Prefix, AlertOperation.CreateAlertFromEntity.Operation.Key, url),
+                OnClick = AlertClient.Module["createAlert"](ctx.Prefix, AlertOperation.CreateAlertFromEntity.Operation.Key, url),
                 Text = AlertMessage.CreateAlert.NiceToString(),
             }); 
 

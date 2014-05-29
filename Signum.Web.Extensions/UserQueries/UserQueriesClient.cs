@@ -30,7 +30,7 @@ namespace Signum.Web.UserQueries
         public const string QueryKey = "QueryKey";
 
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery");
 
         public static Mapping<QueryTokenDN> QueryTokenMapping = ctx =>
         {
@@ -93,11 +93,11 @@ namespace Signum.Web.UserQueries
                 {
                     new EntityOperationSettings(UserQueryOperation.Save)
                     {
-                        OnClick = ctx => new JsOperationFunction(Module, "saveUserQuery", ctx.Url.Action((UserQueriesController uq)=>uq.Save()))
+                        OnClick = ctx => Module["saveUserQuery"](ctx.Options(), ctx.Url.Action((UserQueriesController uq)=>uq.Save()))
                     },
                     new EntityOperationSettings(UserQueryOperation.Delete)
                     {
-                        OnClick = ctx => new JsOperationFunction(Module, "deleteUserQuery", Navigator.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName()))
+                        OnClick = ctx => Module["deleteUserQuery"](ctx.Options(), Navigator.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName()))
                     }
                 });
 
@@ -167,7 +167,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     Title = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
                     Text = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
-                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
+                    OnClick = Module["createUserQuery"](ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
                 });
             }
 

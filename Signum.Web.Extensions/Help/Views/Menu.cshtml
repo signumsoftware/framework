@@ -45,8 +45,8 @@
 </div>
 <div class="help_right">
    <!-- <a id="refresh" href="javascript:location.reload(true);">Refresca la página para wikificar correctamente el texto modificado</a> -->
-    <a id="edit-action" class="action" href="@(new JsFunction(HelpClient.Module, "edit"))">Editar</a>
+    <a id="edit-action" class="action" href="@(HelpClient.Module["edit"]())">Editar</a>
     <a id="syntax-action" class="action" style="display: none">Sintaxis</a>    
-    <a id="save-action" class="action" href="@(new JsFunction(HelpClient.Module, "save"))" style="display: none">Guardar</a>    
+    <a id="save-action" class="action" href="@(HelpClient.Module["save"]())" style="display: none">Guardar</a>    
 </div>
 <div class="clearall"></div>

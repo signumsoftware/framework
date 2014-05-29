@@ -25,7 +25,7 @@ namespace Signum.Web.Cache
     public static class CacheClient
     {
         public static string ViewPrefix = "~/Cache/Views/{0}.cshtml";
-        public static string Model = "Extensions/Signum.Web.Extensions/Cache/Scripts/Cache";
+        public static JsModule Model = new JsModule("Extensions/Signum.Web.Extensions/Cache/Scripts/Cache");
 
         public static void Start()
         {

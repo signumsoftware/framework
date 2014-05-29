@@ -28,7 +28,7 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
 
-        public static string Module = "Extensions/Signum.Web.Extensions/Files/Scripts/Files";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Files/Scripts/Files");
 
         public static void Start(bool filePath, bool file, bool embeddedFile)
         {
@@ -199,7 +199,7 @@ namespace Signum.Web.Files
         private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
         {
             string fileKey = TypeContextUtilities.Compose(ctx.Prefix, FileLineKeys.File);
-            HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+            HttpPostedFileBase hpf = ctx.Controller.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
             return hpf;
         }
 

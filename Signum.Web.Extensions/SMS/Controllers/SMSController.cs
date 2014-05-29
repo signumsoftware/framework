@@ -91,7 +91,7 @@ namespace Signum.Web.SMS
         {
             var prefixModel = Request["prefixModel"];
 
-            var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this.ControllerContext, true, prefixModel).Value;
+            var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this, prefixModel).Value;
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 

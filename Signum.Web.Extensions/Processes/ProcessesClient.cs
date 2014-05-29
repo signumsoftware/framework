@@ -26,7 +26,7 @@ namespace Signum.Web.Processes
     public static class ProcessesClient
     {
         public static string ViewPrefix = "~/processes/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Processes/Scripts/Processes"; 
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Processes/Scripts/Processes"); 
 
         public static void Start(bool packages, bool packageOperations)
         {
@@ -120,7 +120,7 @@ namespace Signum.Web.Processes
             }
 
             List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
-                coc => new JsOperationFunction(ProcessesClient.Module, "processFromMany")
+                coc => ProcessesClient.Module["processFromMany"](coc.Options())
                 )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
 
 

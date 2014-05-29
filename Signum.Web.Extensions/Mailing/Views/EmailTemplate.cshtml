@@ -67,6 +67,6 @@
 
 <script>
     $(function () {
-            @(new JsFunction(MailingClient.Module, "initReplacements"))
-        });
+        @(MailingClient.Module["initReplacements"]())
+    });
 </script>

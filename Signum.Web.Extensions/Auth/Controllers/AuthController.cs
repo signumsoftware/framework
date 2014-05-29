@@ -51,7 +51,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser()
         {
-            var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, UserMapping.NewUser).ValidateGlobal();
+            var context = this.ExtractEntity<UserDN>().ApplyChanges(this, UserMapping.NewUser).ValidateGlobal();
 
             if (context.HasErrors())
                 return context.ToJsonModelState();
@@ -75,7 +75,7 @@ namespace Signum.Web.Auth
         {
             var passPrefix = Request["passPrefix"];
 
-            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, true, passPrefix);
+            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this, passPrefix);
 
             UserDN user = this.ExtractLite<UserDN>()
                 .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
@@ -111,7 +111,7 @@ namespace Signum.Web.Auth
                     using (AuthLogic.Disable())
                         user = AuthLogic.RetrieveUser(username);
 
-                    var context = user.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
+                    var context = user.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
 
                     if (context.HasErrors())
                     {
@@ -130,7 +130,7 @@ namespace Signum.Web.Auth
                 }
                 else
                 {
-                    var context = UserDN.Current.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
+                    var context = UserDN.Current.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
                     if (context.HasErrors())
                     {
                         ModelState.FromContext(context);
@@ -254,7 +254,7 @@ namespace Signum.Web.Auth
 
                 var user = request.User;
 
-                var context = user.ApplyChanges(this.ControllerContext, UserMapping.ChangePassword, "").ValidateGlobal();
+                var context = user.ApplyChanges(this, UserMapping.ChangePassword, "").ValidateGlobal();
 
                 if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
                     !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())

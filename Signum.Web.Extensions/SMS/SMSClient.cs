@@ -27,7 +27,7 @@ namespace Signum.Web.SMS
     public static class SMSClient
     {
         public static string ViewPrefix = "~/SMS/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/SMS/Scripts/SMS";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/SMS/Scripts/SMS");
 
         public static void Start()
         {
@@ -53,21 +53,21 @@ namespace Signum.Web.SMS
                 {
                     new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
-                        OnClick = ctx => new JsOperationFunction(Module, "createSmsWithTemplateFromEntity",
+                        OnClick = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(),
                             ctx.Url.Action((SMSController sms)=>sms.CreateSMSMessageFromTemplate()), 
                             SmsTemplateFindOptions(ctx.Entity.GetType()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessagesFromTemplate)
                     {
-                        OnClick = ctx =>  new JsOperationFunction(Module, "sendMultipleSMSMessagesFromTemplate",
+                        OnClick = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(),
                             ctx.Url.Action((SMSController sms )=>sms.SendMultipleMessagesFromTemplate()), 
                             SmsTemplateFindOptions(DynamicQueryManager.Current.GetQuery(ctx.QueryName).EntityImplementations.Types.Single()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessage)
                     {
-                        OnClick = ctx => new JsOperationFunction(Module, "sentMultipleSms", ctx.Prefix, 
+                        OnClick = ctx => Module["sentMultipleSms"](ctx.Options(), ctx.Prefix, 
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleSMSMessagesModel()),
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleMessages()))
                     },

@@ -256,7 +256,7 @@ WriteLiteral("            ");
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
-                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
+                ec.AttachFunction = SMSClient.Module["attachAssociatedType"](ec, Url.Action<SMSController>(s => s.GetLiteralsForType()));
             }));
 
             
@@ -281,14 +281,14 @@ WriteLiteral(" class=\"sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1433), Tuple.Create("\"", 1474)
+WriteAttribute("value", Tuple.Create(" value=\"", 1417), Tuple.Create("\"", 1458)
             
             #line 39 "..\..\SMS\Views\SMSTemplate.cshtml"
-, Tuple.Create(Tuple.Create("", 1441), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+, Tuple.Create(Tuple.Create("", 1425), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1441), false)
+, 1425), false)
 );
 
 WriteLiteral(" />\r\n    </div>\r\n");
@@ -324,8 +324,7 @@ WriteLiteral("        ");
 
             
             #line 48 "..\..\SMS\Views\SMSTemplate.cshtml"
-    Write(new JsFunction(SMSClient.Module, "init",
-    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")),
+    Write(SMSClient.Module["init"](Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")),
     Url.Action<SMSController>(s => s.GetDictionaries())));
 
             
@@ -334,7 +333,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </script>\r\n");
 
             
-            #line 52 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 51 "..\..\SMS\Views\SMSTemplate.cshtml"
 }
 
             

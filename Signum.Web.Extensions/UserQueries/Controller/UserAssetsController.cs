@@ -61,7 +61,7 @@ namespace Signum.Web.UserQueries
 
             var preview = UserAssetsImporter.Preview(bytes);
 
-            preview.ApplyChanges(this.ControllerContext, mapping, "");
+            preview.ApplyChanges(this, mapping, "");
 
             UserAssetsImporter.Import(bytes, preview);
 

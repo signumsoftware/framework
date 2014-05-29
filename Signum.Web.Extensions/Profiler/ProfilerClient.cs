@@ -28,7 +28,7 @@ namespace Signum.Web.Profiler
     public static class ProfilerClient
     {
         public static string ViewPrefix = "~/Profiler/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Profiler/Scripts/Profiler";
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Profiler/Scripts/Profiler");
 
         public static void Start()
         {
