@@ -264,9 +264,9 @@ namespace Signum.Windows.Operations
         }
 
 
-        protected internal virtual IdentifiableEntity Construct(Type entityType, FrameworkElement element, List<object> args)
+        protected internal virtual IdentifiableEntity Construct(ConstructorContext ctx)
         {
-            var dic = (from oi in OperationInfos(entityType)
+            var dic = (from oi in OperationInfos(ctx.Type)
                        where oi.OperationType == OperationType.Constructor
                        let os = GetSettings<ConstructorSettings>(oi.OperationSymbol)
                        where os == null || os.IsVisible == null || os.IsVisible(oi)
@@ -274,8 +274,6 @@ namespace Signum.Windows.Operations
 
             if (dic.Count == 0)
                 return null;
-
-            var win = Window.GetWindow(element);
 
             OperationSymbol selected = null;
             if (dic.Count == 1)
@@ -289,16 +287,16 @@ namespace Signum.Windows.Operations
                     elementText: k => OperationClient.GetText(k),
                     title: SelectorMessage.ConstructorSelector.NiceToString(),
                     message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
-                    owner: win))
+                    owner: Window.GetWindow(ctx.Element)))
                     return null;
             }
 
             var pair = dic[selected];
 
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                return pair.OperationSettings.Constructor(pair.OperationInfo, win, args);
+                return pair.OperationSettings.Constructor(pair.OperationInfo, ctx);
             else
-                return Server.Return((IOperationServer s) => s.Construct(entityType, selected, args));
+                return Server.Return((IOperationServer s) => s.Construct(ctx.Type, selected, ctx.Args));
         }
 
 

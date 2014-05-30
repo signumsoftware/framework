@@ -39,27 +39,27 @@ namespace Signum.Web
         {
             args = args ?? new List<object>();
 
-            return Manager.SurroundConstruct(entityType, controller, args, Manager.ConstructCore);
+            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, args), Manager.ConstructCore);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, List<object> args, Func<ControllerBase, List<object>, T> constructor)
+        public static T SurroundConstruct<T>(this ControllerBase controller, Func<ConstructorContext, T> constructor)
             where T : ModifiableEntity
         {
-            return (T)SurroundConstruct(typeof(T), controller, args, (_type, _controller, _args) => constructor(_controller, _args));
+            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, null), constructor);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, Func<T> constructor)
+        public static T SurroundConstruct<T>(this ControllerBase controller, List<object> args, Func<ConstructorContext, T> constructor)
             where T : ModifiableEntity
         {
-            return (T)SurroundConstruct(typeof(T), controller, null, (_type, _controller, _args) => constructor());
+            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, args), constructor);
         }
 
-        public static ModifiableEntity SurroundConstruct(Type entityType, ControllerBase controller, List<object> args, Func<Type, ControllerBase, List<object>, ModifiableEntity> constructor)
+        public static ModifiableEntity SurroundConstruct(this ControllerBase controller, Type entityType, List<object> args, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            return Manager.SurroundConstruct(entityType, controller, args, constructor);
+            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, null), constructor);
         }
 
-        public static void Register<T>(Func<T> constructor) where T:ModifiableEntity
+        public static void Register<T>(Func<ConstructorContext, T> constructor) where T:ModifiableEntity
         {
             Manager.Constructors.Add(typeof(T), constructor);
         }
@@ -114,7 +114,24 @@ namespace Signum.Web
                 ")";
         }
     }
-    
+
+    public class ConstructorContext
+    {
+        public ConstructorContext(Type type, ControllerBase controller, List<object> args)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            this.Type = type;
+            this.Controller = controller;
+            this.Args = args ?? new List<object>();
+        }
+
+        public Type Type { get; private set; }
+        public ControllerBase Controller { get; private set; }
+        public List<object> Args { get; private set; }
+    }
+
     public class ConstructorManager
     {
         public ConstructorManager()
@@ -122,34 +139,34 @@ namespace Signum.Web
             PostConstructors += PostConstructors_AddFilterProperties;
         }
 
-        public event Func<Type, ControllerBase, List<object>, bool> PreConstructors;
+        public event Action<ConstructorContext> PreConstructors;
 
-        public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+        public Dictionary<Type, Func<ConstructorContext, ModifiableEntity>> Constructors = new Dictionary<Type, Func<ConstructorContext, ModifiableEntity>>();
 
-        public event Func<Type, ControllerBase, List<object>, ModifiableEntity, bool> PostConstructors;
+        public event Action<ConstructorContext, ModifiableEntity> PostConstructors;
 
-        public virtual ModifiableEntity ConstructCore(Type entityType, ControllerBase element = null, List<object> args = null)
+        public virtual ModifiableEntity ConstructCore(ConstructorContext ctx)
         {
-            Func<ModifiableEntity> c = Constructors.TryGetC(entityType);
+            Func<ConstructorContext, ModifiableEntity> c = Constructors.TryGetC(ctx.Type);
             if (c != null)
             {
-                ModifiableEntity result = c();
+                ModifiableEntity result = c(ctx);
                 if (result != null)
                     return result;
             }
 
-            if (entityType.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(entityType))
-                return OperationClient.Manager.ConstructSingle(entityType);
+            if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
+                return OperationClient.Manager.ConstructSingle(ctx.Type);
 
-            return (ModifiableEntity)Activator.CreateInstance(entityType, true);
+            return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
         }
 
-        public static bool PostConstructors_AddFilterProperties(Type type, ControllerBase controller, List<object> args, ModifiableEntity entity)
-        {   
-            HttpContextBase httpContext = controller.ControllerContext.HttpContext;
+        public static void PostConstructors_AddFilterProperties(ConstructorContext ctx, ModifiableEntity entity)
+        {
+            HttpContextBase httpContext = ctx.Controller.ControllerContext.HttpContext;
 
             if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
-                return false;
+                return;
 
             object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
@@ -158,7 +175,7 @@ namespace Signum.Web
             var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryDescription)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
-            var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            var pairs = from pi in ctx.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         join fo in filters on pi.Name equals fo.Token.Key
                         //where CanConvert(fo.Value, pi.PropertyType) && fo.Value != null
                         where fo.Value != null
@@ -167,30 +184,39 @@ namespace Signum.Web
             foreach (var p in pairs)
                 p.pi.SetValue(entity, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
 
-            return true;
+            return;
         }
 
-        public virtual ModifiableEntity SurroundConstruct(Type type, ControllerBase controller, List<object> args, 
-            Func<Type, ControllerBase, List<object>, ModifiableEntity> constructor)
+        public virtual ModifiableEntity SurroundConstruct(ConstructorContext ctx, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            args = args ?? new List<object>();
+            IDisposable disposable = null;
+            try
+            {
 
-            if (PreConstructors != null)
-                foreach (Func<Type, ControllerBase, List<object>, bool> pre in PreConstructors.GetInvocationList())
-                    if (!pre(type, controller, args))
-                        return null;
+                if (PreConstructors != null)
+                    foreach (Func<ConstructorContext, IDisposable> pre in PreConstructors.GetInvocationList())
+                    {
+                        disposable = Disposable.Combine(disposable, pre(ctx));
+                    }
 
-            var entity = constructor(type, controller, args);
+                var entity = constructor(ctx);
 
-            if (entity == null)
-                return null;
+                if (entity == null)
+                    return null;
 
-            if (PostConstructors != null)
-                foreach (Func<Type, ControllerBase, List<object>, ModifiableEntity, bool> post in PostConstructors.GetInvocationList())
-                    if (!post(type, controller, args, entity))
-                        return null;
+                if (PostConstructors != null)
+                    foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationList())
+                    {
+                        post(ctx, entity);
+                    }
 
-            return entity;
+                return entity;
+            }
+            finally
+            {
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
     }
 
