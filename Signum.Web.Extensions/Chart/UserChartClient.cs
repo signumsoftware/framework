@@ -115,7 +115,7 @@ namespace Signum.Web.Chart
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, UrlHelper url, object queryName, Type entityType, string prefix, Lite<UserChartDN> currentUserChart)
         {
-            if (!Navigator.IsNavigable(typeof(UserChartDN), null, isSearchEntity: true))
+            if (!Navigator.IsNavigable(typeof(UserChartDN), null, isSearch: true))
                 return new List<ToolBarButton>();
 
             var buttons = new List<ToolBarButton>();
@@ -146,7 +146,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
+            if (Navigator.IsCreable(typeof(UserChartDN), isSearch: true))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
                 items.Add(new MenuItem

@@ -68,7 +68,7 @@ namespace Signum.Web.Chart
             Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations.Value;
 
-            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true));
+            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearch: true));
         }
 
         [HttpPost]

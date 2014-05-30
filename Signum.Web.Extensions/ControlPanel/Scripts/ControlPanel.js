@@ -1,8 +1,8 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
-    function attachGridControl(gridRepeater, url, typesOptions) {
+    function attachGridControl(gridRepeater, url, types) {
         gridRepeater.creating = function (prefix) {
-            return Navigator.typeChooser(prefix.child("New"), typesOptions).then(function (type) {
+            return Navigator.typeChooser(prefix.child("New"), types).then(function (type) {
                 if (type == null)
                     return null;
 

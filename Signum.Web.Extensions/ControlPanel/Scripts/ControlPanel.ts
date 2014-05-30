@@ -6,10 +6,10 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import GridRepeater = require("Extensions/Signum.Web.Extensions/ControlPanel/Scripts/GridRepeater")
 
 
-export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: string, typesOptions: Navigator.ChooserOption[]) {
+export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: string, types: Entities.TypeInfo[]) {
 
     gridRepeater.creating = prefix => {
-        return Navigator.typeChooser(prefix.child("New"), typesOptions).then(type=> {
+        return Navigator.typeChooser(prefix.child("New"), types).then(type=> {
             if (type == null)
                 return null;
 

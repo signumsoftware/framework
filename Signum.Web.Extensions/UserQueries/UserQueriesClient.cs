@@ -136,7 +136,7 @@ namespace Signum.Web.UserQueries
             if (ctx.Prefix.HasText())
                 return null;
 
-            if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearchEntity: true))
+            if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearch: true))
                 return null;
 
             var items = new List<IMenuItem>();
@@ -160,7 +160,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
+            if (Navigator.IsCreable(typeof(UserQueryDN), isSearch: true))
             {
                 items.Add(new MenuItem
                 {

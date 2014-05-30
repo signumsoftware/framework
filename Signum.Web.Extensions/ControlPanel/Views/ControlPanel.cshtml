@@ -11,7 +11,7 @@
 {
     ControlPanelDN cp = (ControlPanelDN)Model;
     <h2>
-        @if (Navigator.IsNavigable(cp, null, isSearchEntity: true))
+        @if (Navigator.IsNavigable(cp, null, isSearch: true))
         { 
             <a href="@Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
         }
