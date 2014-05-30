@@ -49,7 +49,7 @@ namespace Signum.Web
             public string TimeFormat; 
         }
 
-        private static string ToJsDateFormat(string dateFormat)
+        public static string ToJsDateFormat(string dateFormat)
         {
             return parts.Replace(dateFormat, m =>
             {
