@@ -14,6 +14,7 @@ using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 using Signum.Web.Operations;
 using Signum.Engine.Operations;
+using Newtonsoft.Json;
 
 namespace Signum.Web
 {
@@ -66,11 +67,52 @@ namespace Signum.Web
 
     public class ConstructorClientManager
     {
-        public event Func<Type, ControllerBase, JsFunction> PreConstructors;
+        public object ExtraJsonParams = new object();
 
-        public Dictionary<Type, Func<ControllerBase, JsFunction>> Constructors = new Dictionary<Type, Func<ControllerBase, JsFunction>>();
+        //JsFunction should take a ExtraJsonParams in their arguments, and return a Promise<any> with the new ExtraJsonParams
+        public event Func<Type, JsFunction> GlobalPreConstructors;
 
+        public Dictionary<Type, JsFunction> PreConstructors = new Dictionary<Type, JsFunction>();
 
+        static readonly JsFunction[] Null = new JsFunction[0];
+
+        public string GetPreConstructorScript(Type type)
+        {
+            if (!type.IsIdentifiableEntity())
+                return null;
+
+            var pre = GlobalPreConstructors == null ? Enumerable.Empty<JsFunction>() : 
+                GlobalPreConstructors.GetInvocationList().Cast<Func<Type, JsFunction>>().Select(f=>f(type)).ToArray();
+
+            var result = PreConstructors.TryGetC(type);
+
+            if(result != null)
+                pre = pre.And(result);
+
+            if(pre.IsEmpty())
+                return null;
+
+            pre.Select(p=>JsFunction.VarName(p.Module));
+
+            return
+@"function(extraArgs){ 
+    return new Promise(function(resolve){
+        require([{moduleNames}], function({moduleVars}){
+            return {code}
+        });
+    });
+}".Replace("moduleNames", pre.ToString(js => "'" + js.Module.Name + "'", ", "))
+  .Replace("moduleVars", pre.ToString(js => JsFunction.VarName(js.Module), ", "))
+  .Replace("code", pre.Reverse().Aggregate("resolve(extraArgs)", (acum, js) => InvokeFunction(js) + "\r\n.then(function(extraArgs){ return " + acum + ";)"));
+
+        }
+
+        private string InvokeFunction(JsFunction func)
+        {
+            return JsFunction.VarName(func.Module) + "." + func.FunctionName + "(" +
+                func.Arguments.ToString(a => a == ExtraJsonParams ? "extraArgs" : JsonConvert.SerializeObject(a, func.JsonSerializerSettings), ", ") +
+                ")";
+        }
     }
     
     public class ConstructorManager

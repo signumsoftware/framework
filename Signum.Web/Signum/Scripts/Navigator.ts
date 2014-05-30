@@ -364,9 +364,9 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 }
 
 
-export function typeChooser(prefix: string, types: ChooserOption[]): Promise<string> {
-    return chooser(prefix, lang.signum.chooseAType, types)
-        .then(t=> t == null ? null : t.value);
+export function typeChooser(prefix: string, types: Entities.TypeInfo[]): Promise<string> {
+    return chooser(prefix, lang.signum.chooseAType, types, a=>a.niceName, a=>a.name)
+        .then(t=> t == null ? null : t.name);
 }
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {

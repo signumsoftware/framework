@@ -13,8 +13,8 @@ export interface EntityBaseOptions {
 
     autoCompleteUrl?: string;
 
-    types: string[];
-    typeNiceNames: string[];
+    types: Entities.TypeInfo[]; 
+
     isEmbedded: boolean;
     isReadonly: boolean;
     rootType?: string;
@@ -177,23 +177,22 @@ export class EntityBase {
         });
     }
 
-    typeChooser(): Promise<string> {
-        return Navigator.typeChooser(this.options.prefix,
-            this.options.types.map((t, i) => ({ value: t, toStr: this.options.typeNiceNames[i] })));
+    typeChooser(filter: (type : Entities.TypeInfo) => boolean): Promise<string> {
+        return Navigator.typeChooser(this.options.prefix, this.options.types.filter(filter));
     }
 
     singleType(): string {
         if (this.options.types.length != 1)
             throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
 
-        return this.options.types[0];
+        return this.options.types[0].name;
     }
 
     onCreating(prefix: string): Promise<Entities.EntityValue> {
         if (this.creating != null)
             return this.creating(prefix);
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(ti => ti.creable).then(type=> {
             if (type == null)
                 return null;
 
@@ -256,7 +255,7 @@ export class EntityBase {
         if (this.finding != null)
             return this.finding(prefix);
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(ti => ti.findable).then(type=> {
             if (type == null)
                 return null;
 
@@ -384,7 +383,7 @@ export class EntityLine extends EntityBase {
         var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.join(","), l: 5, q: term }));
+                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -492,7 +491,7 @@ export class EntityLineDetail extends EntityBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(t=>t.creable).then(type=> {
             if (type == null)
                 return null;
 
@@ -758,7 +757,7 @@ export class EntityListBase extends EntityBase {
         if (this.findingMany != null)
             return this.findingMany(prefix);
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(t => t.findable).then(type=> {
             if (type == null)
                 return null;
 
@@ -1031,7 +1030,7 @@ export class EntityListDetail extends EntityList {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(t => t.creable).then(type=> {
             if (type == null)
                 return null;
 
@@ -1102,7 +1101,7 @@ export class EntityRepeater extends EntityListBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser().then(type=> {
+        return this.typeChooser(t => t.creable).then(type=> {
             if (type == null)
                 return null;
 

@@ -334,8 +334,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
 
     function typeChooser(prefix, types) {
-        return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
-            return t == null ? null : t.value;
+        return exports.chooser(prefix, lang.signum.chooseAType, types, function (a) {
+            return a.niceName;
+        }, function (a) {
+            return a.name;
+        }).then(function (t) {
+            return t == null ? null : t.name;
         });
     }
     exports.typeChooser = typeChooser;

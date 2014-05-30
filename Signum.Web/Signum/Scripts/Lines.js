@@ -138,18 +138,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        EntityBase.prototype.typeChooser = function () {
-            var _this = this;
-            return Navigator.typeChooser(this.options.prefix, this.options.types.map(function (t, i) {
-                return ({ value: t, toStr: _this.options.typeNiceNames[i] });
-            }));
+        EntityBase.prototype.typeChooser = function (filter) {
+            return Navigator.typeChooser(this.options.prefix, this.options.types.filter(filter));
         };
 
         EntityBase.prototype.singleType = function () {
             if (this.options.types.length != 1)
                 throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
 
-            return this.options.types[0];
+            return this.options.types[0].name;
         };
 
         EntityBase.prototype.onCreating = function (prefix) {
@@ -157,7 +154,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 return this.creating(prefix);
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (ti) {
+                return ti.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
@@ -217,7 +216,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.finding != null)
                 return this.finding(prefix);
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (ti) {
+                return ti.findable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
@@ -338,7 +339,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
             if ($txt.length) {
                 this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.options.types.join(","), l: 5, q: term });
+                    return ({ types: _this.options.types.map(function (t) {
+                            return t.name;
+                        }).join(","), l: 5, q: term });
                 });
 
                 this.setupAutocomplete($txt);
@@ -451,7 +454,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
@@ -714,7 +719,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.findingMany != null)
                 return this.findingMany(prefix);
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.findable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
@@ -997,7 +1004,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
@@ -1063,7 +1072,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 

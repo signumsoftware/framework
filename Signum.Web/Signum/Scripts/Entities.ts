@@ -4,9 +4,6 @@ export var Keys = {
     tabId: "sfTabId",
     antiForgeryToken: "__RequestVerificationToken",
 
-    entityTypeNames: "sfEntityTypeNames",
-    entityTypeNiceNames: "sfEntityTypeNiceNames",
-
     runtimeInfo: "sfRuntimeInfo",
     staticInfo: "sfStaticInfo",
     toStr: "sfToStr",
@@ -18,6 +15,14 @@ export var Keys = {
     viewMode: "sfViewMode",
 };
 
+
+export interface TypeInfo {
+    name: string;
+    niceName: string;
+    creable?: boolean;
+    findable?: boolean;
+    preConstruct?: (extraJsonArgs: any) => Promise<any>;
+}
 
 export class RuntimeInfo {
     type: string;
@@ -94,11 +99,11 @@ export class EntityValue {
     toStr: string;
     link: string;
 
-    assertPrefixAndType(prefix: string, types: string[]) {
-        if (types.length == 0 && types[0] == "[All]")
+    assertPrefixAndType(prefix: string, types: TypeInfo[]) {
+        if (types == null) // All
             return;
 
-        if (types.indexOf(this.runtimeInfo.type) == -1)
+        if (!types.some(ti=> ti.name == this.runtimeInfo.type))
             throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
     }
 
@@ -122,7 +127,7 @@ export class EntityHtml extends EntityValue {
         this.prefix = prefix;
     }
 
-    assertPrefixAndType(prefix: string, types: string[]) {
+    assertPrefixAndType(prefix: string, types: TypeInfo[]) {
 
         super.assertPrefixAndType(prefix, types);
 

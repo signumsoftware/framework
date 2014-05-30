@@ -7,7 +7,7 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Implementations implementations = entityColumn.Implementations.Value;
-    bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true)));
+    bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearch: true)));
     bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];

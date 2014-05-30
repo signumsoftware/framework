@@ -143,9 +143,9 @@ namespace Signum.Web
         public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
            eb.Create &= 
-                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearchEntity: false) :
+                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearch: false) :
                 eb.Implementations.Value.IsByAll ? false :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearch: false));
                 
             eb.View &=
                 cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType, eb.PartialViewName) :
@@ -153,9 +153,9 @@ namespace Signum.Web
                 eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t, eb.PartialViewName));
 
             eb.Navigate &=
-              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, eb.PartialViewName, isSearchEntity: false) :
+              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, eb.PartialViewName, isSearch: false) :
               eb.Implementations.Value.IsByAll ? true :
-              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, eb.PartialViewName, isSearchEntity: false));
+              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, eb.PartialViewName, isSearch: false));
 
             eb.Find &=
                 cleanType.IsEmbeddedEntity() ? false :

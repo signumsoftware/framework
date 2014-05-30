@@ -72,9 +72,6 @@ namespace Signum.Web
             return JsFunction.SFControlThen(Prefix, functionCall);
         }
 
-        public static readonly Type[] ImplementedByAll = new Type[0];
-        public static readonly string ImplementedByAllKey = "[All]";
-
         protected virtual JObject OptionsJSInternal()
         {
             JObject options = new JObject
@@ -92,8 +89,7 @@ namespace Signum.Web
                 if (Implementations != null)
                     throw new ArgumentException("implementations should be null for EmbeddedEntities");
 
-                options.Add("types", new JArray(Navigator.ResolveWebTypeName(type)));
-                options.Add("typeNiceNames", new JArray(type.NiceName()));
+                options.Add("types", new JArray(type.ToJsTypeInfo(isSearch: false)));
 
                 PropertyRoute route = this.GetElementRoute();
                 options.Add("rootType", Navigator.ResolveWebTypeName(route.RootType));
@@ -101,16 +97,7 @@ namespace Signum.Web
             }
             else
             {
-                Type[] types = Implementations.Value.IsByAll ? ImplementedByAll :
-                               Implementations.Value.Types.ToArray();
-
-                options.Add("types", new JArray(types == ImplementedByAll ?
-                    new string[] { ImplementedByAllKey } :
-                    types.Select(t => Navigator.ResolveWebTypeName(t)).ToArray()));
-
-                options.Add("typeNiceNames", new JArray(types == ImplementedByAll ?
-                    new string[] { ImplementedByAllKey } :
-                    types.Select(t => t.NiceName()).ToArray()));
+                options.Add("types", Implementations.Value.ToJsTypeInfos(isSearch: false));
             }
 
             if (this.ReadOnly)
@@ -118,6 +105,8 @@ namespace Signum.Web
 
             return options;
         }
+
+      
 
         protected virtual PropertyRoute GetElementRoute()
         {
@@ -132,10 +121,7 @@ namespace Signum.Web
         public static Type[] ParseTypes(string types)
         {
             if (string.IsNullOrEmpty(types))
-                throw new ArgumentNullException("types");
-
-            if (types == ImplementedByAllKey)
-                return ImplementedByAll;
+                return null;
 
             return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }

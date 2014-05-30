@@ -209,7 +209,7 @@ namespace Signum.Web
         public QuickLinkView(Lite<IdentifiableEntity> liteEntity)
         {
             lite = liteEntity;
-            IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearchEntity: false);
+            IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearch: false);
             Text = lite.EntityType.NiceName();
             Name = Navigator.ResolveWebTypeName(liteEntity.EntityType);
         }

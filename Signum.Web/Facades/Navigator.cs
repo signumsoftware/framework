@@ -380,9 +380,9 @@ namespace Signum.Web
             return Manager.OnIsFindable(queryName);
         }
 
-        public static bool IsCreable(Type type, bool isSearchEntity = false)
+        public static bool IsCreable(Type type, bool isSearch = false)
         {
-            return Manager.OnIsCreable(type, isSearchEntity);
+            return Manager.OnIsCreable(type, isSearch);
         }
 
         public static bool IsReadOnly(Type type)
@@ -405,14 +405,14 @@ namespace Signum.Web
             return Manager.OnIsViewable(entity.GetType(), entity, partialViewName);
         }
 
-        public static bool IsNavigable(Type type, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(type, null, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, partialViewName, isSearch);
         }
 
-        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearch);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)
@@ -977,13 +977,13 @@ namespace Signum.Web
 
         public event Func<Type, bool> IsCreable;
 
-        internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
+        internal protected virtual bool OnIsCreable(Type type, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            if (!es.OnIsCreable(isSearchEntity))
+            if (!es.OnIsCreable(isSearch))
                 return false;
 
 
@@ -1049,13 +1049,13 @@ namespace Signum.Web
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
             return es != null &&
                 IsViewableBase(type, entity) &&
-                es.OnIsNavigable(partialViewName, isSearchEntity);
+                es.OnIsNavigable(partialViewName, isSearch);
         }
 
         internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity, string partialViewName)

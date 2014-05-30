@@ -198,7 +198,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.deleteFilter = deleteFilter;
 
     var SearchControl = (function () {
-        function SearchControl(element, _options) {
+        function SearchControl(element, _options, types) {
             this.keys = {
                 elems: "sfElems",
                 page: "sfPage",
@@ -451,7 +451,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }).toArray().join(","),
                 webQueryName: this.options.webQueryName,
                 prefix: this.options.prefix,
-                implementationsKey: this.prefix.child(Entities.Keys.entityTypeNames).get().val()
+                implementationsKey: this.types.map(function (a) {
+                    return a.name;
+                }).join(",")
             };
         };
 
@@ -802,7 +804,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 this.creating();
             else
-                this.getEntityType().then(function (type) {
+                this.typeChooseCreate().then(function (type) {
                     if (type == null)
                         return;
 
@@ -817,22 +819,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
         };
 
-        SearchControl.prototype.getEntityType = function () {
-            var names = this.prefix.child(Entities.Keys.entityTypeNames).get().val().split(",");
-            var niceNames = this.prefix.child(Entities.Keys.entityTypeNiceNames).get().val().split(",");
-
-            var options = names.map(function (p, i) {
-                return ({
-                    type: p,
-                    toStr: niceNames[i]
-                });
-            });
-            if (options.length == 1) {
-                return Promise.resolve(options[0].type);
-            }
-            return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(function (o) {
-                return o == null ? null : o.type;
-            });
+        SearchControl.prototype.typeChooseCreate = function () {
+            return Navigator.typeChooser(this.options.prefix, this.types.filter(function (t) {
+                return t.creable;
+            }));
         };
 
         SearchControl.prototype.requestDataForSearchPopupCreate = function () {

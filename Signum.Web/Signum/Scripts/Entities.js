@@ -9,8 +9,6 @@ define(["require", "exports"], function(require, exports) {
     exports.Keys = {
         tabId: "sfTabId",
         antiForgeryToken: "__RequestVerificationToken",
-        entityTypeNames: "sfEntityTypeNames",
-        entityTypeNiceNames: "sfEntityTypeNiceNames",
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
@@ -82,10 +80,13 @@ define(["require", "exports"], function(require, exports) {
             this.link = link;
         }
         EntityValue.prototype.assertPrefixAndType = function (prefix, types) {
-            if (types.length == 0 && types[0] == "[All]")
+            var _this = this;
+            if (types == null)
                 return;
 
-            if (types.indexOf(this.runtimeInfo.type) == -1)
+            if (!types.some(function (ti) {
+                return ti.name == _this.runtimeInfo.type;
+            }))
                 throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
         };
 

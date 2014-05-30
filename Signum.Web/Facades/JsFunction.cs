@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -164,13 +165,8 @@ namespace Signum.Web
         public string toStr; 
     }
 
-    public static class ChooserOptionExtensions
+    public static class JsExtensions
     {
-        public static ChooserOption ToChooserOption(this Type type)
-        {
-            return new ChooserOption(Navigator.ResolveWebTypeName(type), type.NiceName()); 
-        }
-
         public static ChooserOption ToChooserOption(this Enum enumValue)
         {
             return new ChooserOption(enumValue.ToString(), enumValue.NiceToString());
@@ -179,6 +175,32 @@ namespace Signum.Web
         public static ChooserOption ToChooserOption(this Symbol symbol)
         {
             return new ChooserOption(symbol.Key, symbol.NiceToString());
+        }
+
+        public static JArray ToJsTypeInfos(this Implementations implementations, bool isSearch)
+        {
+            if (implementations.IsByAll)
+                return null;
+
+            return new JArray(implementations.Types.Select(t => ToJsTypeInfo(t, isSearch)).ToArray());
+        }
+
+        public static JObject ToJsTypeInfo(this Type type, bool isSearch)
+        {
+            var result = new JObject()
+            {
+                {"name", Navigator.ResolveWebTypeName(type)},
+                {"niceName", type.NiceName()},
+                {"creable", Navigator.IsCreable(type, isSearch)},
+                {"findable", Navigator.IsFindable(type)},
+            };
+
+            var preConstruct = Constructor.ClientManager.GetPreConstructorScript(type);
+
+            if (preConstruct != null)
+                result.Add("preConstruct", preConstruct);
+
+            return result;
         }
     }
 }

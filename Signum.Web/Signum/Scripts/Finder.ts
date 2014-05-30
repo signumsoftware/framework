@@ -234,11 +234,12 @@ export class SearchControl {
 
     prefix: string;
     options: FindOptions;
+    types: Entities.TypeInfo[];
 
     creating: () => void;
     selectionChanged: (selected: Entities.EntityValue[]) => void;
 
-    constructor(element: JQuery, _options: FindOptions) {
+    constructor(element: JQuery, _options: FindOptions, types : Entities.TypeInfo[]) {
         element.data("SF-control", this);
 
         this.element = element;
@@ -481,7 +482,7 @@ export class SearchControl {
             liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(","),
             webQueryName: this.options.webQueryName,
             prefix: this.options.prefix,
-            implementationsKey: this.prefix.child(Entities.Keys.entityTypeNames).get().val()
+            implementationsKey: this.types.map(a=>a.name).join(","),
         };
     }
 
@@ -838,7 +839,7 @@ export class SearchControl {
         if (this.creating != null)
             this.creating();
         else
-            this.getEntityType().then(type => {
+            this.typeChooseCreate().then(type => {
                 if (type == null)
                     return;
 
@@ -853,18 +854,8 @@ export class SearchControl {
             });
     }
 
-    getEntityType(): Promise<string> {
-        var names = (<string>this.prefix.child(Entities.Keys.entityTypeNames).get().val()).split(",");
-        var niceNames = (<string>this.prefix.child(Entities.Keys.entityTypeNiceNames).get().val()).split(",");
-
-        var options = names.map((p, i) => ({
-            type: p,
-            toStr: niceNames[i]
-        }));
-        if (options.length == 1) {
-            return Promise.resolve(options[0].type);
-        }
-        return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o == null ? null : o.type);
+    typeChooseCreate(): Promise<string> {
+        return Navigator.typeChooser(this.options.prefix, this.types.filter(t=> t.creable));
     }
 
     requestDataForSearchPopupCreate() {
