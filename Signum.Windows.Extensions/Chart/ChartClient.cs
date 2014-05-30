@@ -70,9 +70,9 @@ namespace Signum.Windows.Chart
 
                 main.SetValue(processName, 9999, RegistryValueKind.DWord);
 
-                Constructor.Register<UserChartDN>((elem, args) =>
+                Constructor.Register<UserChartDN>(ctx =>
                 {
-                    MessageBox.Show(Window.GetWindow(elem),
+                    MessageBox.Show(Window.GetWindow(ctx.Element),
                         ChartMessage._0CanOnlyBeCreatedFromTheChartWindow.NiceToString().Formato(typeof(UserChartDN).NicePluralName()),
                         ChartMessage.CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);

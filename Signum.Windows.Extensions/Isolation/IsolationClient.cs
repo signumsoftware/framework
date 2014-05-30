@@ -30,7 +30,6 @@ namespace Signum.Windows.Isolation
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Constructor.Manager.PreConstructors += Constructor_PreConstructors;
-                Constructor.Manager.PostConstructors += Manager_PostConstructors;
 
                 WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
                     new IsolationWidget() { Order = -1 } : null;
@@ -102,31 +101,24 @@ namespace Signum.Windows.Isolation
             tb.Before(new Image { Stretch = Stretch.None, SnapsToDevicePixels = true, Source = GetIsolationIcon(iso) }); 
         }
 
-        static bool Manager_PostConstructors(Type type, FrameworkElement element, List<object> args, object result)
+
+        static IDisposable Constructor_PreConstructors(ConstructorContext ctx)
         {
-            var iden = result as IdentifiableEntity;
-
-            if (iden != null && MixinDeclarations.IsDeclared(type, typeof(IsolationMixin)) && iden.Isolation() == null)
+            if (MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)))
             {
-                iden.SetIsolation(args.TryGetArgC<Lite<IsolationDN>>());
-            }
-
-            return true;
-        }
-
-        static bool Constructor_PreConstructors(Type type, FrameworkElement element, List<object> args)
-        {
-            if (MixinDeclarations.IsDeclared(type, typeof(IsolationMixin)))
-            {
-                Lite<IsolationDN> isolation = GetIsolation(element);
+                Lite<IsolationDN> isolation = GetIsolation(ctx.Element);
 
                 if (isolation == null)
-                    return false;
+                {
+                    ctx.CancelConstruction = true;
+                    return null;
+                }
+                ctx.Args.Add(isolation);
 
-                args.Add(isolation);
+                return IsolationDN.OverrideIfNecessary(isolation);
             }
 
-            return true;
+            return null;
         }
 
         public static Lite<IsolationDN> GetIsolation(FrameworkElement element)

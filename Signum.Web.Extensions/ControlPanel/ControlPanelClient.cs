@@ -74,8 +74,7 @@ namespace Signum.Web.ControlPanel
                     new EmbeddedEntitySettings<LinkElementDN> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
-                Constructor.Manager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Owner = UserDN.Current.ToLite() });
+                Constructor.Register(ctx => new ControlPanelDN { Owner = UserDN.Current.ToLite() });
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
