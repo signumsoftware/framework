@@ -79,7 +79,7 @@ namespace Signum.Utilities.Reflection
 
     public class MemberEntry<T> : IMemberEntry
     {
-        public string Name{get; private set;}
+        public string Name {get; private set;}
         public MemberInfo MemberInfo { get; private set; }
         public Func<T, object> Getter { get; private set; }
         public Func<object, object> UntypedGetter { get; private set; }
