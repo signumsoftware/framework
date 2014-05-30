@@ -63,16 +63,10 @@ namespace Signum.Web.Extensions.Mailing.Views
         }
         public override void Execute()
         {
-WriteLiteral("\r\n<style");
-
-WriteLiteral(" type=\"text/css\"");
-
-WriteLiteral(">\r\n    .sf-email-message .sf-repeater-element\r\n    {\r\n        padding: 2px 10px;\r" +
-"\n    }\r\n\r\n        .sf-email-message .sf-repeater-element legend\r\n        {\r\n    " +
-"        float: left;\r\n            margin-right: 10px;\r\n        }\r\n</style>\r\n\r\n");
+WriteLiteral("\r\n");
 
             
-            #line 19 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 6 "..\..\Mailing\Views\EmailMessage.cshtml"
 Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 
             
@@ -81,7 +75,7 @@ Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 WriteLiteral("\r\n\r\n\r\n");
 
             
-            #line 22 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 9 "..\..\Mailing\Views\EmailMessage.cshtml"
  using (var e = Html.TypeContext<EmailMessageDN>())
 {
 
@@ -95,13 +89,13 @@ WriteLiteral(" class=\"sf-email-message\"");
 WriteLiteral(">\r\n\r\n");
 
             
-            #line 26 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 13 "..\..\Mailing\Views\EmailMessage.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 13 "..\..\Mailing\Views\EmailMessage.cshtml"
          using (var tabs = Html.Tabs(e))
         {
             if (e.Value.State != EmailMessageState.Created)
@@ -129,7 +123,7 @@ WriteLiteralTo(__razor_template_writer, ">\r\n");
 WriteLiteralTo(__razor_template_writer, "                    ");
 
             
-            #line 39 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 26 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLineDetail(e, f => f.From));
 
             
@@ -140,7 +134,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                    ");
 
             
-            #line 40 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityRepeater(e, f => f.Recipients));
 
             
@@ -151,7 +145,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                    ");
 
             
-            #line 41 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 28 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityRepeater(e, f => f.Attachments));
 
             
@@ -167,7 +161,7 @@ WriteLiteralTo(__razor_template_writer, ">\r\n                    <fieldset>\r\n
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 33 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.State));
 
             
@@ -178,7 +172,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 47 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 34 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.Sent));
 
             
@@ -189,7 +183,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 35 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(e, f => f.Exception));
 
             
@@ -200,7 +194,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 49 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 36 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(e, f => f.Template));
 
             
@@ -211,7 +205,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 50 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 37 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(e, f => f.Package));
 
             
@@ -222,7 +216,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 51 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 38 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.IsBodyHtml));
 
             
@@ -233,7 +227,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                        ");
 
             
-            #line 52 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 39 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.BodyHash));
 
             
@@ -245,7 +239,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n                    </fieldset>\r\n
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 57 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 44 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(e, f => f.Target));
 
             
@@ -256,7 +250,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 58 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 45 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.Subject));
 
             
@@ -265,13 +259,13 @@ WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.Subject));
 WriteLiteralTo(__razor_template_writer, "\r\n");
 
             
-            #line 59 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 59 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
              if (e.Value.State == EmailMessageState.Created)
             {
                 
@@ -279,7 +273,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
             #line default
             #line hidden
             
-            #line 61 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.Body, vl =>
            {
                vl.ValueLineType = ValueLineType.TextArea;
@@ -290,7 +284,7 @@ WriteTo(__razor_template_writer, Html.ValueLine(e, f => f.Body, vl =>
             #line default
             #line hidden
             
-            #line 65 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 52 "..\..\Mailing\Views\EmailMessage.cshtml"
              
 
 
@@ -302,7 +296,7 @@ WriteLiteralTo(__razor_template_writer, "<script>\r\n    $(function () {\r\n");
 WriteLiteralTo(__razor_template_writer, "        ");
 
             
-            #line 69 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 56 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, MailingClient.Module["initHtmlEditor"](e.Compose("Body")));
 
             
@@ -311,7 +305,7 @@ WriteTo(__razor_template_writer, MailingClient.Module["initHtmlEditor"](e.Compos
 WriteLiteralTo(__razor_template_writer, "\r\n    });\r\n                </script>\r\n");
 
             
-            #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 59 "..\..\Mailing\Views\EmailMessage.cshtml"
             }
             else
             {
@@ -328,7 +322,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n    });\r\n                </script
 WriteLiteralTo(__razor_template_writer, "<h3>");
 
             
-            #line 81 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 68 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, EmailMessageMessage.Message.NiceToString());
 
             
@@ -339,13 +333,13 @@ WriteLiteralTo(__razor_template_writer, ":</h3>\r\n");
 WriteLiteralTo(__razor_template_writer, "<div>\r\n");
 
             
-            #line 83 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 70 "..\..\Mailing\Views\EmailMessage.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 83 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 70 "..\..\Mailing\Views\EmailMessage.cshtml"
                          if (e.Value.IsBodyHtml)
                         {            
 
@@ -354,14 +348,14 @@ WriteLiteralTo(__razor_template_writer, "<div>\r\n");
             #line hidden
 WriteLiteralTo(__razor_template_writer, "<iframe");
 
-WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2726), Tuple.Create("\"", 2751)
+WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2481), Tuple.Create("\"", 2506)
             
-            #line 85 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 2731), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
+            #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
+, Tuple.Create(Tuple.Create("", 2486), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
             
             #line default
             #line hidden
-, 2731), false)
+, 2486), false)
 );
 
 WriteLiteralTo(__razor_template_writer, " style=\"width:90%\"");
@@ -371,7 +365,7 @@ WriteLiteralTo(__razor_template_writer, ">\r\n");
 WriteLiteralTo(__razor_template_writer, "                                ");
 
             
-            #line 86 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 73 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.Raw(body));
 
             
@@ -382,7 +376,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n                            </ifram
 WriteLiteralTo(__razor_template_writer, "<script>\r\n    $(function () {\r\n        var iframe = $(\"");
 
             
-            #line 90 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 77 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, e.Compose("iframe"));
 
             
@@ -393,7 +387,7 @@ WriteLiteralTo(__razor_template_writer, "\");\r\n");
 WriteLiteralTo(__razor_template_writer, "        ");
 
             
-            #line 91 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 78 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, MailingClient.Module["activateIFrame"](JsFunction.Literal("iframe")));
 
             
@@ -402,7 +396,7 @@ WriteTo(__razor_template_writer, MailingClient.Module["activateIFrame"](JsFuncti
 WriteLiteralTo(__razor_template_writer, "\r\n    });\r\n                            </script>\r\n");
 
             
-            #line 94 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 81 "..\..\Mailing\Views\EmailMessage.cshtml"
                         }
                         else
                         {
@@ -415,7 +409,7 @@ WriteLiteralTo(__razor_template_writer, "<pre>\r\n");
 WriteLiteralTo(__razor_template_writer, "                            ");
 
             
-            #line 98 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 85 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.Raw(HttpUtility.HtmlEncode(e.Value.Body)));
 
             
@@ -424,7 +418,7 @@ WriteTo(__razor_template_writer, Html.Raw(HttpUtility.HtmlEncode(e.Value.Body)))
 WriteLiteralTo(__razor_template_writer, "\r\n                        </pre>\r\n");
 
             
-            #line 100 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 87 "..\..\Mailing\Views\EmailMessage.cshtml"
                         }
 
             
@@ -433,7 +427,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n                        </pre>\r\n"
 WriteLiteralTo(__razor_template_writer, "            </div>\r\n");
 
             
-            #line 102 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 89 "..\..\Mailing\Views\EmailMessage.cshtml"
             }
 
             
@@ -443,7 +437,7 @@ WriteLiteralTo(__razor_template_writer, "            ");
 
 })
             
-            #line 103 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 90 "..\..\Mailing\Views\EmailMessage.cshtml"
                    );
 
 
@@ -463,7 +457,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n            <fieldset>\r\n         
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 115 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 102 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(ri, f => f.Reception));
 
             
@@ -474,7 +468,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 116 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 103 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(ri, f => f.UniqueId));
 
             
@@ -485,7 +479,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 117 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 104 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(ri, f => f.SentDate));
 
             
@@ -496,7 +490,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 118 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 105 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(ri, f => f.ReceivedDate));
 
             
@@ -507,7 +501,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 119 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 106 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(ri, f => f.DeletionDate));
 
             
@@ -516,7 +510,7 @@ WriteTo(__razor_template_writer, Html.ValueLine(ri, f => f.DeletionDate));
 WriteLiteralTo(__razor_template_writer, "\r\n\r\n            </fieldset>\r\n\r\n            <pre>");
 
             
-            #line 123 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 110 "..\..\Mailing\Views\EmailMessage.cshtml"
 WriteTo(__razor_template_writer, ri.Value.RawContent);
 
             
@@ -526,7 +520,7 @@ WriteLiteralTo(__razor_template_writer, "</pre>\r\n            ");
 
 })
             
-            #line 124 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 111 "..\..\Mailing\Views\EmailMessage.cshtml"
                    );
                 }
             }
@@ -538,7 +532,7 @@ WriteLiteralTo(__razor_template_writer, "</pre>\r\n            ");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 129 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 116 "..\..\Mailing\Views\EmailMessage.cshtml"
 }
 
             

@@ -46,7 +46,7 @@ else
 {
     <h2>@ViewBag.Title</h2>
     
-    using (Html.BeginForm())
+    using (Html.BeginForm((TranslationController c) => c.SaveSync(Model.LocalizedAssembly.Assembly.GetName().Name, culture.Name)))
     {
     <table id="results" style="width: 100%; margin: 0px" class="st" 
         data-pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())" 

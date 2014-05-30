@@ -162,7 +162,7 @@ WriteLiteral("</h2>\r\n");
             
             #line 48 "..\..\Translation\Views\Sync.cshtml"
     
-    using (Html.BeginForm())
+    using (Html.BeginForm((TranslationController c) => c.SaveSync(Model.LocalizedAssembly.Assembly.GetName().Name, culture.Name)))
     {
 
             
@@ -503,14 +503,14 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                        <textarea");
 
-WriteAttribute("name", Tuple.Create(" name=\"", 5324), Tuple.Create("\"", 5340)
+WriteAttribute("name", Tuple.Create(" name=\"", 5428), Tuple.Create("\"", 5444)
             
             #line 130 "..\..\Translation\Views\Sync.cshtml"
-, Tuple.Create(Tuple.Create("", 5331), Tuple.Create<System.Object, System.Int32>(elemName
+, Tuple.Create(Tuple.Create("", 5435), Tuple.Create<System.Object, System.Int32>(elemName
             
             #line default
             #line hidden
-, 5331), false)
+, 5435), false)
 );
 
 WriteLiteral(" style=\"width:90%\"");
@@ -789,14 +789,20 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                        <textarea");
 
+WriteAttribute("name", Tuple.Create(" name=\"", 7657), Tuple.Create("\"", 7673)
 WriteAttribute("name", Tuple.Create(" name=\"", 7655), Tuple.Create("\"", 7671)
+WriteAttribute("name", Tuple.Create(" name=\"", 7759), Tuple.Create("\"", 7775)
             
             #line 186 "..\..\Translation\Views\Sync.cshtml"
+, Tuple.Create(Tuple.Create("", 7664), Tuple.Create<System.Object, System.Int32>(elemName
 , Tuple.Create(Tuple.Create("", 7662), Tuple.Create<System.Object, System.Int32>(elemName
+, Tuple.Create(Tuple.Create("", 7766), Tuple.Create<System.Object, System.Int32>(elemName
             
             #line default
             #line hidden
+, 7664), false)
 , 7662), false)
+, 7766), false)
 );
 
 WriteLiteral(" style=\"width:90%\"");
@@ -890,14 +896,20 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
+WriteAttribute("value", Tuple.Create(" value=\"", 8223), Tuple.Create("\"", 8270)
 WriteAttribute("value", Tuple.Create(" value=\"", 8221), Tuple.Create("\"", 8268)
+WriteAttribute("value", Tuple.Create(" value=\"", 8325), Tuple.Create("\"", 8372)
             
             #line 201 "..\..\Translation\Views\Sync.cshtml"
+, Tuple.Create(Tuple.Create("", 8231), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
 , Tuple.Create(Tuple.Create("", 8229), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 8333), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
+, 8231), false)
 , 8229), false)
+, 8333), false)
 );
 
 WriteLiteral(" />\r\n");
