@@ -239,10 +239,12 @@ export class SearchControl {
     creating: () => void;
     selectionChanged: (selected: Entities.EntityValue[]) => void;
 
-    constructor(element: JQuery, _options: FindOptions, types : Entities.TypeInfo[]) {
+    constructor(element: JQuery, _options: FindOptions, types: Entities.TypeInfo[]) {
+
         element.data("SF-control", this);
 
         this.element = element;
+        this.types = types;
 
         this.options = $.extend({
             allowChangeColumns: true,
@@ -285,7 +287,6 @@ export class SearchControl {
             SF.Urls.addFilter);
 
         this.filterBuilder.addColumnClicked = () => this.addColumn();
-
 
         var $tblResults = this.element.find(".sf-search-results-container");
 
@@ -361,7 +362,7 @@ export class SearchControl {
                 this.fullScreen(e);
             });
 
-            this.prefix.child("btnSelected").get().click( e=> {
+            this.prefix.child("btnSelected").get().click(e=> {
                 this.ctxMenuInDropdown();
             });
         }
@@ -376,14 +377,18 @@ export class SearchControl {
             div.removeClass("table-responsive");
             div.css("overflow-x", "auto");
 
-            var divUp = $("<div>")
-                .attr("id",  this.options.prefix.child("divResults_Up"))
-                .css("overflow-x", "auto")
-                .css("overflow-y", "hidden")
-                .css("height", "15")
-                .insertBefore(div);
+            var divUp = this.options.prefix.child("divResults_Up").tryGet();
 
-            var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp)
+            if (!divUp.length) {
+                divUp = $("<div>")
+                    .attr("id", this.options.prefix.child("divResults_Up"))
+                    .css("overflow-x", "auto")
+                    .css("overflow-y", "hidden")
+                    .css("height", "15")
+                    .insertBefore(div);
+
+                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
+            }
 
             div.scroll(() => { this.syncSize(); divUp.scrollLeft(div.scrollLeft()); });
             divUp.scroll(() => { this.syncSize(); div.scrollLeft(divUp.scrollLeft()); });
@@ -482,7 +487,7 @@ export class SearchControl {
             liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(","),
             webQueryName: this.options.webQueryName,
             prefix: this.options.prefix,
-            implementationsKey: this.types.map(a=>a.name).join(","),
+            implementationsKey: this.types.map(a=> a.name).join(","),
         };
     }
 
@@ -561,7 +566,7 @@ export class SearchControl {
     }
 
     requestDataForSearchInUrl(): string {
-        var page = this.prefix.child(this.keys.page).get().val() || 1
+        var page = this.prefix.child(this.keys.page).tryGet().val() || 1
         var form = this.requestDataForSearch(RequestType.FullScreen, page);
 
         return $.param(form);
@@ -699,7 +704,7 @@ export class SearchControl {
         SF.ajaxPost({
             url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
-            async: false, 
+            async: false,
         }).then(html => { $tblHeaders.append(html); this.syncSize(); });
     }
 
@@ -774,7 +779,7 @@ export class SearchControl {
         this.element.on("dragenter", rowsSelector, onDragOver);
 
 
-        this.element.on("dragleave", rowsSelector, e =>  {
+        this.element.on("dragleave", rowsSelector, e => {
             $(e.currentTarget).removeClass("drag-left drag-right");
         });
 
@@ -838,23 +843,31 @@ export class SearchControl {
     onCreate() {
         if (this.creating != null)
             this.creating();
-        else
+        else {
+
             this.typeChooseCreate().then(type => {
-                if (type == null)
+                if (!type)
                     return;
 
-                var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
-                if (SF.isEmpty(this.options.prefix))
-                    Navigator.navigate(runtimeInfo, false);
-                else {
-                    var requestData = this.requestDataForSearchPopupCreate();
+                type.preConstruct().then(args => {
+                    if (!args)
+                        return;
 
-                    Navigator.navigatePopup(new Entities.EntityHtml(this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: requestData });
-                }
+                    args = $.extend(args, this.requestDataForSearchPopupCreate());
+
+                    var runtimeInfo = new Entities.RuntimeInfo(type.name, null, true);
+                    if (SF.isEmpty(this.options.prefix)) {
+                        Navigator.navigate(runtimeInfo, args, false);
+                    }
+                    else
+                        return Navigator.navigatePopup(new Entities.EntityHtml(this.options.prefix.child("Temp"), runtimeInfo),
+                            { requestExtraJsonData: args });
+                });
             });
+        }
     }
 
-    typeChooseCreate(): Promise<string> {
+    typeChooseCreate(): Promise<Entities.TypeInfo> {
         return Navigator.typeChooser(this.options.prefix, this.types.filter(t=> t.creable));
     }
 
@@ -918,7 +931,7 @@ export class FilterBuilder {
             else {
                 var $prevSelectedOption = $prevSelect.find("option:selected");
                 this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), () => this.addFilterClicked());
-                this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), ()  => this.addColumnClicked());
+                this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), () => this.addColumnClicked());
             }
         } else {
             this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), () => this.addFilterClicked());

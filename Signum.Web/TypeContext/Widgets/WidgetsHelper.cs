@@ -99,7 +99,7 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.Surround(new HtmlTag("ul").Class("sf-widgets")))
             {
-                foreach (Widget widget in widgets)
+                foreach (IWidget widget in widgets)
                 {
                     sb.AddLine(widget.ToHTml(helper));
                 }

@@ -2,6 +2,7 @@
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
 @using Signum.Entities.Reflection
+@using Newtonsoft.Json
 @model Context
 @{ 
     Model.ReadOnly = false; /*SearchControls Context should never inherit Readonly property of parent context */
@@ -133,8 +134,7 @@
     }
 </div>
 <script type="text/javascript">
-    require(["Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), 
-        @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))
-        @(MvcHtmlString.Create(implementations.ToJsTypeInfos(isSearch : true).ToString()))
-        ).ready();});
+    require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), 
+        @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString())),
+        @(MvcHtmlString.Create(JsonConvert.SerializeObject(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix))))).ready();});
 </script>

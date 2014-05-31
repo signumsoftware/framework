@@ -32,7 +32,7 @@ namespace Signum.Web
         {
         }
 
-        protected override JObject OptionsJSInternal()
+        protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             if(Create)

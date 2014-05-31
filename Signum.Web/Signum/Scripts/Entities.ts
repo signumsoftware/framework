@@ -21,7 +21,7 @@ export interface TypeInfo {
     niceName: string;
     creable?: boolean;
     findable?: boolean;
-    preConstruct?: (extraJsonArgs: any) => Promise<any>;
+    preConstruct?: (extraJsonArgs?: FormObject) => Promise<any>;
 }
 
 export class RuntimeInfo {

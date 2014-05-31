@@ -175,9 +175,8 @@ module SF {
         return clone;
     }
 
-
-
     export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
+
         return new Promise<any>((resolve, reject) => {
             settings.success = resolve;
             settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
@@ -187,6 +186,7 @@ module SF {
     }
 
     export function ajaxGet(settings: JQueryAjaxSettings): Promise<any> {
+
         return new Promise<any>((resolve, reject) => {
             settings.success = resolve;
             settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
@@ -201,7 +201,7 @@ module SF {
             Promise.resolve<void>(null));
     }
 
-    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
+   export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData))
@@ -217,7 +217,7 @@ module SF {
         (<HTMLFormElement>$form.attr("action", urlController)[0]).submit();
     }
 
-    export function submitOnly(urlController: string, requestExtraJsonData: any) {
+    export function submitOnly(urlController: string, requestExtraJsonData: any, openNewWindow?: boolean) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
@@ -226,6 +226,9 @@ module SF {
                 method: 'post',
                 action: urlController
             });
+
+        if (openNewWindow)
+            $form.attr("target", "_blank");
 
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
@@ -240,7 +243,7 @@ module SF {
 
         var currentForm = $("form");
         currentForm.after($form);
-
+        
         (<HTMLFormElement>$form[0]).submit();
         $form.remove();
 

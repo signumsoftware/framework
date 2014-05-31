@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Signum.Entities;
@@ -37,9 +38,12 @@ namespace Signum.Web
         /// <summary>
         /// File name of the Javascript / Typescript module as expected by Require.js
         /// </summary>
-        public JsModule(string moduleName)
+        public JsModule(string name)
         {
-            this.Name = Name;
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(name);
+
+            this.Name = name;
         }
 
         public JsFunctionConstructor this[string functionName]
@@ -48,6 +52,11 @@ namespace Signum.Web
             {
                 return args => new JsFunction(this, functionName, args);
             }
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 
@@ -89,9 +98,9 @@ namespace Signum.Web
         {
             var varName = VarName(Module);
 
-            var arguments = this.Arguments.ToString(a => a == This ? "that" : JsonConvert.SerializeObject(a, JsonSerializerSettings), ", "); 
+            var arguments = this.Arguments.ToString(a => a == This ? "that" : JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
 
-            var result = "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + this.Arguments + "); });";
+            var result = "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + arguments + "); });";
 
             if (!this.Arguments.Contains(This))
                 return result;
@@ -113,45 +122,14 @@ namespace Signum.Web
 
         public static object This = new object();
 
-        public static JsLiteral Literal(string jsText)
-        {
-            return new JsLiteral(jsText);
-        }
-
-        [JsonConverter(typeof(JsLiteralConverter))]
-        public class JsLiteral
-        {
-            public string JsText { get; private set; }
-
-            public JsLiteral(string jsText)
-            {
-                this.JsText = jsText;
-            }
-        }
-
-        class JsLiteralConverter : JsonConverter
-        {
-            public override bool CanConvert(Type objectType)
-            {
-                return typeof(JsLiteral) == objectType;
-            }
-
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            {
-                writer.WriteRaw(((JsLiteral)value).JsText);
-            }
-        }
+      
 
         public static string SFControlThen(string prefix, string functionCall)
         {
             return "$('#" + prefix + "').SFControl().then(function(c){c." + functionCall + ";})";
         }
     }
+
 
     public class ChooserOption
     {
@@ -177,30 +155,40 @@ namespace Signum.Web
             return new ChooserOption(symbol.Key, symbol.NiceToString());
         }
 
-        public static JArray ToJsTypeInfos(this Implementations implementations, bool isSearch)
+        public static ChooserOption ToChooserOption(this Lite<IIdentifiable> lite)
+        {
+            return new ChooserOption(lite.KeyLong(), lite.ToString());
+        }
+
+        public static JsTypeInfo[] ToJsTypeInfos(this Implementations implementations, bool isSearch, string prefix)
         {
             if (implementations.IsByAll)
                 return null;
 
-            return new JArray(implementations.Types.Select(t => ToJsTypeInfo(t, isSearch)).ToArray());
+            return implementations.Types.Select(t => ToJsTypeInfo(t, isSearch, prefix)).ToArray();
         }
 
-        public static JObject ToJsTypeInfo(this Type type, bool isSearch)
-        {
-            var result = new JObject()
+        public static JsTypeInfo ToJsTypeInfo(this Type type, bool isSearch, string prefix)
+        { 
+            var result = new JsTypeInfo()
             {
-                {"name", Navigator.ResolveWebTypeName(type)},
-                {"niceName", type.NiceName()},
-                {"creable", Navigator.IsCreable(type, isSearch)},
-                {"findable", Navigator.IsFindable(type)},
+                name = Navigator.ResolveWebTypeName(type),
+                niceName = type.NiceName(),
+                creable = Navigator.IsCreable(type, isSearch),
+                findable = Navigator.IsFindable(type),
+                preConstruct = new JRaw(Constructor.ClientManager.GetPreConstructorScript(new ClientConstructorContext(type, prefix)))
             };
 
-            var preConstruct = Constructor.ClientManager.GetPreConstructorScript(type);
-
-            if (preConstruct != null)
-                result.Add("preConstruct", preConstruct);
-
             return result;
+        }
+
+        public class JsTypeInfo
+        {
+            public string name;
+            public string niceName;
+            public bool creable;
+            public JRaw preConstruct;
+            public bool findable;
         }
     }
 }

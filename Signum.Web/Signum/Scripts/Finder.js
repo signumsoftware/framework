@@ -208,6 +208,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             element.data("SF-control", this);
 
             this.element = element;
+            this.types = types;
 
             this.options = $.extend({
                 allowChangeColumns: true,
@@ -333,9 +334,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 div.removeClass("table-responsive");
                 div.css("overflow-x", "auto");
 
-                var divUp = $("<div>").attr("id", this.options.prefix.child("divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
+                var divUp = this.options.prefix.child("divResults_Up").tryGet();
 
-                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
+                if (!divUp.length) {
+                    divUp = $("<div>").attr("id", this.options.prefix.child("divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
+
+                    var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
+                }
 
                 div.scroll(function () {
                     _this.syncSize();
@@ -531,7 +536,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var page = this.prefix.child(this.keys.page).get().val() || 1;
+            var page = this.prefix.child(this.keys.page).tryGet().val() || 1;
             var form = this.requestDataForSearch(2 /* FullScreen */, page);
 
             return $.param(form);
@@ -803,20 +808,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             if (this.creating != null)
                 this.creating();
-            else
+            else {
                 this.typeChooseCreate().then(function (type) {
-                    if (type == null)
+                    if (!type)
                         return;
 
-                    var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
-                    if (SF.isEmpty(_this.options.prefix))
-                        Navigator.navigate(runtimeInfo, false);
-                    else {
-                        var requestData = _this.requestDataForSearchPopupCreate();
+                    type.preConstruct().then(function (args) {
+                        if (!args)
+                            return;
 
-                        Navigator.navigatePopup(new Entities.EntityHtml(_this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: requestData });
-                    }
+                        args = $.extend(args, _this.requestDataForSearchPopupCreate());
+
+                        var runtimeInfo = new Entities.RuntimeInfo(type.name, null, true);
+                        if (SF.isEmpty(_this.options.prefix)) {
+                            Navigator.navigate(runtimeInfo, args, false);
+                        } else
+                            return Navigator.navigatePopup(new Entities.EntityHtml(_this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: args });
+                    });
                 });
+            }
         };
 
         SearchControl.prototype.typeChooseCreate = function () {

@@ -110,6 +110,9 @@ namespace Signum.Web
         {
             var tce = Cast(Visit(me.Expression));
 
+            if (tce.Value == null)
+                throw new InvalidOperationException("Impossible to access member {0} of null reference".Formato(me.Member.Name)); 
+
             if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
             {
                 var lite = tce.Value as Lite<IIdentifiable>;

@@ -157,12 +157,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return this.typeChooser(function (ti) {
                 return ti.creable;
             }).then(function (type) {
-                if (type == null)
+                if (!type)
                     return null;
 
-                var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                return type.preConstruct().then(function (extra) {
+                    if (!extra)
+                        return null;
 
-                return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
+                    var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.viewPopup(newEntity, _this.defaultViewOptions(extra));
+                });
             });
         };
 
@@ -196,7 +201,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.viewing != null)
                 return this.viewing(entityHtml);
 
-            return Navigator.viewPopup(entityHtml, this.defaultViewOptions());
+            return Navigator.viewPopup(entityHtml, this.defaultViewOptions(null));
         };
 
         EntityBase.prototype.find_click = function () {
@@ -219,24 +224,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return this.typeChooser(function (ti) {
                 return ti.findable;
             }).then(function (type) {
-                if (type == null)
+                if (!type)
                     return null;
 
                 return Finder.find({
-                    webQueryName: type,
+                    webQueryName: type.name,
                     prefix: prefix
                 });
             });
         };
 
-        EntityBase.prototype.defaultViewOptions = function () {
+        EntityBase.prototype.defaultViewOptions = function (extraJsonData) {
             return {
                 readOnly: this.options.isReadonly,
                 partialViewName: this.options.partialViewName,
                 validationOptions: {
                     rootType: this.options.rootType,
                     propertyRoute: this.options.propertyRoute
-                }
+                },
+                requestExtraJsonData: extraJsonData
             };
         };
 
@@ -364,7 +370,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix.child(Entities.Keys.toStr).get().val('');
 
             this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
-            this.visible(this.prefix.get().filter("ul.typeahead.dropdown-menu"), entityValue == null);
+            this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
             this.visible(this.prefix.child(Entities.Keys.toStr).tryGet(), entityValue == null);
         };
 
@@ -457,12 +463,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return this.typeChooser(function (t) {
                 return t.creable;
             }).then(function (type) {
-                if (type == null)
+                if (!type)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
 
@@ -477,7 +488,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (result.isLoaded())
                     return Promise.resolve(result);
 
-                return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, result.runtimeInfo), _this.defaultViewOptions());
+                return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, result.runtimeInfo), _this.defaultViewOptions(null));
             }).then(function (result) {
                 if (result) {
                     _this.setEntity(result);
@@ -726,7 +737,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return null;
 
                 return Finder.findMany({
-                    webQueryName: type,
+                    webQueryName: type.name,
                     prefix: prefix
                 });
             });
@@ -1010,9 +1021,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
         return EntityListDetail;
@@ -1078,9 +1094,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
 
@@ -1095,7 +1116,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return Promise.all(result.map(function (e) {
                     var itemPrefix = _this.reserveNextPrefix();
 
-                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions());
+                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions(null));
 
                     return promise.then(function (ev) {
                         _this.addEntity(ev, itemPrefix);

@@ -72,9 +72,9 @@ namespace Signum.Web
             return JsFunction.SFControlThen(Prefix, functionCall);
         }
 
-        protected virtual JObject OptionsJSInternal()
+        protected virtual Dictionary<string, object> OptionsJSInternal()
         {
-            JObject options = new JObject
+            var options = new Dictionary<string, object>
             {
                 {"prefix", Prefix }
             };
@@ -89,7 +89,7 @@ namespace Signum.Web
                 if (Implementations != null)
                     throw new ArgumentException("implementations should be null for EmbeddedEntities");
 
-                options.Add("types", new JArray(type.ToJsTypeInfo(isSearch: false)));
+                options.Add("types", new[] { type.ToJsTypeInfo(isSearch: false, prefix: Prefix) });
 
                 PropertyRoute route = this.GetElementRoute();
                 options.Add("rootType", Navigator.ResolveWebTypeName(route.RootType));
@@ -97,7 +97,7 @@ namespace Signum.Web
             }
             else
             {
-                options.Add("types", Implementations.Value.ToJsTypeInfos(isSearch: false));
+                options.Add("types", Implementations.Value.ToJsTypeInfos(isSearch: false, prefix : Prefix));
             }
 
             if (this.ReadOnly)
@@ -184,7 +184,7 @@ namespace Signum.Web
 
         string NewLine(string varLines, string type)
         {
-            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, type, this.Prefix, this.OptionsJSInternal());
+            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, type, this.Prefix, JsonConvert.SerializeObject(this.OptionsJSInternal()));
         }
     }
 }

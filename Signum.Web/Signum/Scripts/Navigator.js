@@ -12,13 +12,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.requestPartialView = requestPartialView;
 
-    function navigate(runtimeInfo, openNewWindow) {
+    function navigate(runtimeInfo, extraJsonArguments, openNewWindow) {
         var url = runtimeInfo.isNew ? SF.Urls.create.replace("MyType", runtimeInfo.type) : SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
-        if (openNewWindow)
-            window.open(url, "_blank");
-        else
-            window.location.href = url;
+        if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
+            SF.submitOnly(url, extraJsonArguments, openNewWindow);
+        } else {
+            if (openNewWindow)
+                window.open(url, "_blank");
+            else
+                window.location.href = url;
+        }
     }
     exports.navigate = navigate;
 
@@ -338,8 +342,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return a.niceName;
         }, function (a) {
             return a.name;
-        }).then(function (t) {
-            return t == null ? null : t.name;
         });
     }
     exports.typeChooser = typeChooser;

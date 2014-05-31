@@ -329,6 +329,9 @@ namespace Signum.Web.Operations
         {
             return OperationInfos(type).Any(oi =>
             {
+                if (oi.OperationType != OperationType.Constructor)
+                    return false;
+
                 var os = GetSettings<ConstructorSettings>(oi.OperationSymbol);
                 return os == null || os.IsVisible == null || os.IsVisible(oi);
             });

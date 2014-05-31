@@ -21,9 +21,9 @@ namespace Signum.Web
     public static class Constructor
     {
         public static ConstructorManager Manager;
-        public static ConstructorClientManager ClientManager;
+        public static ClientConstructorManager ClientManager;
 
-        public static void Start(ConstructorManager manager, ConstructorClientManager clientManager)
+        public static void Start(ConstructorManager manager, ClientConstructorManager clientManager)
         {
             Manager = manager;
             ClientManager = clientManager;
@@ -37,8 +37,6 @@ namespace Signum.Web
 
         public static ModifiableEntity Construct(this ControllerBase controller, Type entityType, List<object> args = null)
         {
-            args = args ?? new List<object>();
-
             return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, args), Manager.ConstructCore);
         }
 
@@ -65,46 +63,79 @@ namespace Signum.Web
         }
     }
 
-    public class ConstructorClientManager
+
+    public class ClientConstructorContext
     {
-        public object ExtraJsonParams = new object();
+        public ClientConstructorContext(Type type, string prefix)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            this.Type = type;
+            this.Prefix = prefix;
+        }
+
+        public Type Type { get; private set; }
+        public HtmlHelper Helper { get; private set; }
+        public string Prefix { get; private set; }
+    }
+
+    public class ClientConstructorManager
+    {
+        public static object ExtraJsonParams = new object();
 
         //JsFunction should take a ExtraJsonParams in their arguments, and return a Promise<any> with the new ExtraJsonParams
-        public event Func<Type, JsFunction> GlobalPreConstructors;
+        public event Func<ClientConstructorContext, JsFunction> GlobalPreConstructors;
 
-        public Dictionary<Type, JsFunction> PreConstructors = new Dictionary<Type, JsFunction>();
+        public Dictionary<Type, Func<ClientConstructorContext, JsFunction>> PreConstructors = new Dictionary<Type, Func<ClientConstructorContext, JsFunction>>();
 
         static readonly JsFunction[] Null = new JsFunction[0];
 
-        public string GetPreConstructorScript(Type type)
+        public string GetPreConstructorScript(ClientConstructorContext ctx)
         {
-            if (!type.IsIdentifiableEntity())
-                return null;
+            if (!ctx.Type.IsIdentifiableEntity())
+                return Default();
 
-            var pre = GlobalPreConstructors == null ? Enumerable.Empty<JsFunction>() : 
-                GlobalPreConstructors.GetInvocationList().Cast<Func<Type, JsFunction>>().Select(f=>f(type)).ToArray();
+            var concat = GlobalPreConstructors + PreConstructors.TryGetC(ctx.Type);
 
-            var result = PreConstructors.TryGetC(type);
+            if (concat == null)
+                return Default();
 
-            if(result != null)
-                pre = pre.And(result);
+            var pre = GlobalPreConstructors.GetInvocationList()
+                .Cast<Func<ClientConstructorContext, JsFunction>>()
+                .Select(f => f(ctx)).NotNull().ToArray();
 
             if(pre.IsEmpty())
-                return null;
+                return Default();
 
-            pre.Select(p=>JsFunction.VarName(p.Module));
+            var modules = pre.Select(p => p.Module).Distinct();
 
-            return
+            var code = pre.Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
+@"if(extraArgs == null) return Promise.resolve(null);
+" + InvokeFunction(js) + @"
+.then(function(extraArgs){ 
+" + acum.Indent(4) + @"
+});"); 
+
+            var result =
 @"function(extraArgs){ 
     return new Promise(function(resolve){
         require([{moduleNames}], function({moduleVars}){
-            return {code}
+            extraArgs = extraArgs || {};
+{code}
         });
     });
-}".Replace("moduleNames", pre.ToString(js => "'" + js.Module.Name + "'", ", "))
-  .Replace("moduleVars", pre.ToString(js => JsFunction.VarName(js.Module), ", "))
-  .Replace("code", pre.Reverse().Aggregate("resolve(extraArgs)", (acum, js) => InvokeFunction(js) + "\r\n.then(function(extraArgs){ return " + acum + ";)"));
+}".Replace("{moduleNames}", modules.ToString(m => "'" + m.Name + "'", ", "))
+  .Replace("{moduleVars}", modules.ToString(m => JsFunction.VarName(m), ", "))
+  .Replace("{code}", code.Indent(12));
 
+
+            return result;
+        }
+
+        private string Default()
+        {
+            return @"function(extraArgs){ return Promise.resolve(extraArgs || {}); }"; 
         }
 
         private string InvokeFunction(JsFunction func)
@@ -139,7 +170,7 @@ namespace Signum.Web
             PostConstructors += PostConstructors_AddFilterProperties;
         }
 
-        public event Action<ConstructorContext> PreConstructors;
+        public event Func<ConstructorContext, IDisposable> PreConstructors;
 
         public Dictionary<Type, Func<ConstructorContext, ModifiableEntity>> Constructors = new Dictionary<Type, Func<ConstructorContext, ModifiableEntity>>();
 

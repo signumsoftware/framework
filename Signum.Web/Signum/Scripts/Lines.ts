@@ -177,7 +177,7 @@ export class EntityBase {
         });
     }
 
-    typeChooser(filter: (type : Entities.TypeInfo) => boolean): Promise<string> {
+    typeChooser(filter: (type: Entities.TypeInfo) => boolean): Promise<Entities.TypeInfo> {
         return Navigator.typeChooser(this.options.prefix, this.options.types.filter(filter));
     }
 
@@ -193,13 +193,19 @@ export class EntityBase {
             return this.creating(prefix);
 
         return this.typeChooser(ti => ti.creable).then(type=> {
-            if (type == null)
+            if (!type)
                 return null;
 
-            var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
-                new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+            return type.preConstruct().then(extra => {
 
-            return Navigator.viewPopup(newEntity, this.defaultViewOptions());
+                if (!extra)
+                    return null;
+
+                var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
+                    new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                return Navigator.viewPopup(newEntity, this.defaultViewOptions(extra));
+            });
         });
     }
 
@@ -234,7 +240,7 @@ export class EntityBase {
         if (this.viewing != null)
             return this.viewing(entityHtml);
 
-        return Navigator.viewPopup(entityHtml, this.defaultViewOptions());
+        return Navigator.viewPopup(entityHtml, this.defaultViewOptions(null));
     }
 
     find_click(): Promise<string> {
@@ -256,24 +262,25 @@ export class EntityBase {
             return this.finding(prefix);
 
         return this.typeChooser(ti => ti.findable).then(type=> {
-            if (type == null)
+            if (!type)
                 return null;
 
             return Finder.find({
-                webQueryName: type,
+                webQueryName: type.name,
                 prefix: prefix,
             });
         });
     }
 
-    defaultViewOptions(): Navigator.ViewPopupOptions {
+    defaultViewOptions(extraJsonData: any): Navigator.ViewPopupOptions {
         return {
             readOnly: this.options.isReadonly,
             partialViewName: this.options.partialViewName,
             validationOptions: {
                 rootType: this.options.rootType,
                 propertyRoute: this.options.propertyRoute,
-            }
+            },
+            requestExtraJsonData : extraJsonData,
         };
     }
 
@@ -405,7 +412,7 @@ export class EntityLine extends EntityBase {
         this.prefix.child(Entities.Keys.toStr).get().val('');
         
         this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
-        this.visible(this.prefix.get().filter("ul.typeahead.dropdown-menu"), entityValue == null);
+        this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
         this.visible(this.prefix.child(Entities.Keys.toStr).tryGet(), entityValue == null);
     }
 
@@ -492,12 +499,17 @@ export class EntityLineDetail extends EntityBase {
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
         return this.typeChooser(t=>t.creable).then(type=> {
-            if (type == null)
+            if (!type)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+            type.preConstruct().then(args=> {
+                if (!args)
+                    return null;
 
-            return Navigator.requestPartialView(newEntity, this.defaultViewOptions());
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                return Navigator.requestPartialView(newEntity, this.defaultViewOptions(args));
+            });
         });
     }
 
@@ -511,7 +523,7 @@ export class EntityLineDetail extends EntityBase {
             if (result.isLoaded())
                 return Promise.resolve(<Entities.EntityHtml>result);
 
-            return Navigator.requestPartialView(new Entities.EntityHtml(this.options.prefix, result.runtimeInfo), this.defaultViewOptions());
+            return Navigator.requestPartialView(new Entities.EntityHtml(this.options.prefix, result.runtimeInfo), this.defaultViewOptions(null));
         }).then(result => {
                 if (result) {
                     this.setEntity(result);
@@ -762,7 +774,7 @@ export class EntityListBase extends EntityBase {
                 return null;
 
             return Finder.findMany({
-                webQueryName: type,
+                webQueryName: type.name,
                 prefix: prefix,
             });
         });
@@ -1034,9 +1046,14 @@ export class EntityListDetail extends EntityList {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+            type.preConstruct().then(args=> {
+                if (!args)
+                    return null;
 
-            return Navigator.requestPartialView(newEntity, this.defaultViewOptions());
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                return Navigator.requestPartialView(newEntity, this.defaultViewOptions(args));
+            }); 
         });
     }
 }
@@ -1105,9 +1122,14 @@ export class EntityRepeater extends EntityListBase {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+            type.preConstruct().then(args=> {
+                if (!args)
+                    return null;
 
-            return Navigator.requestPartialView(newEntity, this.defaultViewOptions());
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                return Navigator.requestPartialView(newEntity, this.defaultViewOptions(args));
+            }); 
         });
     }
 
@@ -1124,7 +1146,7 @@ export class EntityRepeater extends EntityListBase {
                         var itemPrefix = this.reserveNextPrefix();
 
                         var promise = e.isLoaded() ? Promise.resolve(<Entities.EntityHtml>e) :
-                            Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), this.defaultViewOptions())
+                            Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), this.defaultViewOptions(null))
 
                         return promise.then(
                             ev=> { this.addEntity(ev, itemPrefix); this.freeReservedPrefix(itemPrefix); return itemPrefix; },

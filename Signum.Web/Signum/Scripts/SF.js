@@ -221,7 +221,7 @@ var SF;
     }
     SF.submit = submit;
 
-    function submitOnly(urlController, requestExtraJsonData) {
+    function submitOnly(urlController, requestExtraJsonData, openNewWindow) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
@@ -229,6 +229,9 @@ var SF;
             method: 'post',
             action: urlController
         });
+
+        if (openNewWindow)
+            $form.attr("target", "_blank");
 
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {

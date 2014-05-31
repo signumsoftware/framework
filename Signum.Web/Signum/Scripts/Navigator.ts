@@ -23,15 +23,19 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
     return requestHtml(entityHtml, viewOptions);
 }
 
-export function navigate(runtimeInfo: Entities.RuntimeInfo, openNewWindow?: boolean) {
+export function navigate(runtimeInfo: Entities.RuntimeInfo, extraJsonArguments? : any, openNewWindow?: boolean) {
     var url = runtimeInfo.isNew ?
         SF.Urls.create.replace("MyType", runtimeInfo.type) :
         SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
-    if (openNewWindow)
-        window.open(url, "_blank");
-    else
-        window.location.href = url;
+    if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
+        SF.submitOnly(url, extraJsonArguments, openNewWindow);
+    } else {
+        if (openNewWindow)
+            window.open(url, "_blank");
+        else
+            window.location.href = url;
+    }
 }
 
 export interface NavigatePopupOptions extends ViewOptionsBase {
@@ -364,9 +368,8 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 }
 
 
-export function typeChooser(prefix: string, types: Entities.TypeInfo[]): Promise<string> {
-    return chooser(prefix, lang.signum.chooseAType, types, a=>a.niceName, a=>a.name)
-        .then(t=> t == null ? null : t.name);
+export function typeChooser(prefix: string, types: Entities.TypeInfo[]): Promise<Entities.TypeInfo> {
+    return chooser(prefix, lang.signum.chooseAType, types, a=>a.niceName, a=>a.name);
 }
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
