@@ -31,6 +31,11 @@ label > input[type=checkbox]
 .input-group.time
 {
     max-width: 100px;
+}
+
+.input-group.time[data-show-seconds=true]
+{
+    max-width: 120px;
 } 
 
 
