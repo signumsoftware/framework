@@ -29,6 +29,8 @@ namespace Signum.Engine.Isolation
 
     public static class IsolationLogic
     {
+        public static ResetLazy<List<Lite<IsolationDN>>> Isolations;
+
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -56,6 +58,9 @@ namespace Signum.Engine.Isolation
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+
+                Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationDN>(),
+                    new InvalidateWith(typeof(IsolationDN)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
             }
@@ -109,7 +114,17 @@ namespace Signum.Engine.Isolation
                 giRegisterFilterQuery.GetInvoker(item)(); 
             }
 
-            
+            Schema.Current.EntityEvents<IsolationDN>().FilterQuery += query =>
+            {
+                if (IsolationDN.Current == null || ExecutionMode.InGlobal)
+                    return query;
+
+                Expression<Func<IsolationDN, bool>> filter = a => a.ToLite() == IsolationDN.Current;
+
+                filter = (Expression<Func<IsolationDN, bool>>)DbQueryProvider.Clean(filter, false, null);
+
+                return query.Where(filter);
+            };
         }
 
 

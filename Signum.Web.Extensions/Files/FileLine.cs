@@ -65,7 +65,7 @@ namespace Signum.Web.Files
             Remove = false;
         }
 
-        protected override JObject OptionsJSInternal()
+        protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             result.Add("asyncUpload", AsyncUpload);

@@ -75,7 +75,7 @@
 <script>
     $(function () {
         var iframe = $("@e.Compose("iframe")");
-        @(MailingClient.Module["activateIFrame"](JsFunction.Literal("iframe")))
+        @(MailingClient.Module["activateIFrame"](new Newtonsoft.Json.Linq.JRaw("iframe")))
     });
                             </script>
                         }

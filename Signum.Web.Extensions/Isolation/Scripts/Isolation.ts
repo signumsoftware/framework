@@ -1,0 +1,47 @@
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
+import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
+
+export function addIsolationPrefilter(isolationKey: string)
+{
+    $.ajaxPrefilter((options, originalOptions, jqXHR) => {
+
+        var data = originalOptions.data;
+
+        options.data = $.param($.extend({}, data, { Isolation: getCurrentIsolation(data.prefix || "") }));
+    });
+}
+
+
+export function getIsolation(extraJsonData: any, prefix: string, title: string, isolations: Navigator.ChooserOption[]) : Promise<any> {
+
+    var iso = getCurrentIsolation(prefix);
+
+    if (iso != null)
+        return Promise.resolve(<any>$.extend(extraJsonData, { Isolation: iso }));
+
+    return Navigator.chooser(prefix, title, isolations).then(co=> {
+        if (!co)
+            return null;
+
+        return <any>$.extend(extraJsonData, { Isolation: co.value })
+    });
+}
+
+function getCurrentIsolation(prefix: string) {
+
+    while (true) {
+        var elem = prefix.child("Isolation").tryGet();
+
+        if (elem.length)
+            return elem.val();
+
+        if (prefix)
+            prefix = prefix.parent();
+        else
+            return null;
+    }
+}

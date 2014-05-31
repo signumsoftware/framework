@@ -185,7 +185,7 @@ Write(Html.GridRepater(tc, cp => cp.Parts, grid =>
             grid.PartialViewName = ControlPanelClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
             grid.AttachFunction = ControlPanelClient.Module["attachGridControl"](grid,
                Url.Action("AddNewPart", "ControlPanel"),
-               ControlPanelClient.PanelPartViews.Keys.Select(t => t.ToJsTypeInfo(isSearch: false)).ToArray());
+               ControlPanelClient.PanelPartViews.Keys.Select(t => t.ToJsTypeInfo(isSearch: false, prefix: grid.Prefix)).ToArray());
         }));
 
             

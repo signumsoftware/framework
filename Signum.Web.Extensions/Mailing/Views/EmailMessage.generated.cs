@@ -348,14 +348,14 @@ WriteLiteralTo(__razor_template_writer, "<div>\r\n");
             #line hidden
 WriteLiteralTo(__razor_template_writer, "<iframe");
 
-WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2481), Tuple.Create("\"", 2506)
+WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2465), Tuple.Create("\"", 2490)
             
             #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 2486), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
+, Tuple.Create(Tuple.Create("", 2470), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
             
             #line default
             #line hidden
-, 2486), false)
+, 2470), false)
 );
 
 WriteLiteralTo(__razor_template_writer, " style=\"width:90%\"");
@@ -388,7 +388,7 @@ WriteLiteralTo(__razor_template_writer, "        ");
 
             
             #line 78 "..\..\Mailing\Views\EmailMessage.cshtml"
-WriteTo(__razor_template_writer, MailingClient.Module["activateIFrame"](JsFunction.Literal("iframe")));
+WriteTo(__razor_template_writer, MailingClient.Module["activateIFrame"](new Newtonsoft.Json.Linq.JRaw("iframe")));
 
             
             #line default

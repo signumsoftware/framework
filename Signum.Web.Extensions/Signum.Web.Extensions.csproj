@@ -175,6 +175,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PanelPartViewAdmin.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Isolation\IsolationClient.cs" />
+    <Compile Include="Isolation\IsolationWidgetHelper.cs" />
     <Compile Include="Files\Views\FileRepository.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1036,6 +1038,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <TypeScriptCompile Include="Isolation\Scripts\Isolation.ts" />
     <Content Include="Files\Content\Files.css" />
     <Content Include="Files\Images\loading.gif" />
     <TypeScriptCompile Include="Files\Scripts\Files.ts" />
