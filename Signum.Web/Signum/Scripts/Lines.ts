@@ -502,7 +502,7 @@ export class EntityLineDetail extends EntityBase {
             if (!type)
                 return null;
 
-            type.preConstruct().then(args=> {
+            return type.preConstruct().then(args=> {
                 if (!args)
                     return null;
 
@@ -1046,7 +1046,7 @@ export class EntityListDetail extends EntityList {
             if (type == null)
                 return null;
 
-            type.preConstruct().then(args=> {
+            return type.preConstruct().then(args=> {
                 if (!args)
                     return null;
 
@@ -1122,7 +1122,7 @@ export class EntityRepeater extends EntityListBase {
             if (type == null)
                 return null;
 
-            type.preConstruct().then(args=> {
+            return type.preConstruct().then(args=> {
                 if (!args)
                     return null;
 
@@ -1248,7 +1248,7 @@ export class EntityStrip extends EntityList {
         var $txt = this.prefix.child(Entities.Keys.toStr).get().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.join(","), l: 5, q: term }));
+                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -1282,7 +1282,7 @@ export class EntityStrip extends EntityList {
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
-        var li = $("<li id='" + itemPrefix.child(EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" +
+        var li = $("<li id='" + itemPrefix.child(EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + " input-group'>" +
             (this.options.navigate ?
             ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
             ("<span class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) +

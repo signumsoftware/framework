@@ -199,7 +199,13 @@ namespace Signum.Web
             if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
                 return;
 
+            if (!(entity is IdentifiableEntity))
+                return;
+
             object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
+
+            if (entity.GetType() != queryName as Type)
+                return;
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
