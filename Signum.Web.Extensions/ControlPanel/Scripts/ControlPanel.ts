@@ -20,7 +20,7 @@ export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: 
                     rootType: gridRepeater.options.rootType,
                     propertyRoute: gridRepeater.options.propertyRoute,
                     partialViewName: gridRepeater.options.partialViewName,
-                    newPartType: type,
+                    newPartType: type.name,
                 }
             }).then(html=> {
                 var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));

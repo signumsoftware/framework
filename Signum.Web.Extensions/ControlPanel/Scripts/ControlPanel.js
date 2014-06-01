@@ -13,7 +13,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         rootType: gridRepeater.options.rootType,
                         propertyRoute: gridRepeater.options.propertyRoute,
                         partialViewName: gridRepeater.options.partialViewName,
-                        newPartType: type
+                        newPartType: type.name
                     }
                 }).then(function (html) {
                     var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
