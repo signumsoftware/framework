@@ -36,7 +36,6 @@ namespace Signum.Web.Operations
         }
 
         public Func<OperationInfo, bool> IsVisible { get; set; }
-        public Func<ConstructorOperationContext, IdentifiableEntity> Constructor { get; set; }
     }
 
     public class EntityOperationGroup
@@ -104,12 +103,8 @@ namespace Signum.Web.Operations
         public string Prefix { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public UrlHelper Url { get; set; }
-    }
 
-    public class ConstructorOperationContext : OperationContext
-    {
-        public VisualConstructStyle PreferredStyle { get; set; }
-        public ControllerBase Controller { get; set; }
+        public abstract JsOperationOptions Options();
     }
 
     public class EntityOperationContext : OperationContext
@@ -121,7 +116,7 @@ namespace Signum.Web.Operations
         public ViewMode ViewButtons { get; internal set; }
         public bool ShowOperations { get; set; }
 
-        public JsOperationOptions Options()
+        public override JsOperationOptions Options()
         {
             var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
@@ -150,7 +145,7 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings OperationSettings { get; set; }
         public string CanExecute { get; set; }
 
-        public JsOperationOptions Options()
+        public override JsOperationOptions Options()
         {
             var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
