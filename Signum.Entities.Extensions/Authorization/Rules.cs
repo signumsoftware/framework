@@ -70,24 +70,10 @@ namespace Signum.Entities.Authorization
             get { return conditions; }
             set { Set(ref conditions, value); }
         }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            this.Conditions.ForEach((a, i) => a.Order = i); 
-
-            base.PreSaving(ref graphModified);
-        }
-
-        protected override void PostRetrieving()
-        {
-            this.Conditions.Sort(a => a.Order);
-
-            base.PostRetrieving();
-        }
     }
 
     [Serializable]
-    public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN>
+    public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN> , IOrderedEntity
     {
         TypeConditionSymbol condition;
         [NotNullValidator]
@@ -97,7 +83,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref condition, value); }
         }
 
-
         TypeAllowed allowed;
         public TypeAllowed Allowed
         {
@@ -106,7 +91,7 @@ namespace Signum.Entities.Authorization
         }
 
         int order;
-        public int Order
+        int IOrderedEntity.Order
         {
             get { return order; }
             set { Set(ref order, value); }

@@ -170,20 +170,6 @@ namespace Signum.Entities.Disconnected
             return result;
         }
 
-        protected override void PreSaving(ref bool graphModified)
-        {
-            if (Copies != null)
-                copies.ForEach((a, i) => a.Order = i);
-
-            base.PreSaving(ref graphModified);
-        }
-
-        protected override void PostRetrieving()
-        {
-            copies.Sort(a => a.Order);
-            base.PostRetrieving();
-        }
-
         static Expression<Func<DisconnectedExportDN, int>> CalculateTotalExpression =
             stat =>
                 stat.Lock.Value +
@@ -234,7 +220,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedExportTableDN : EmbeddedEntity
+    public class DisconnectedExportTableDN : EmbeddedEntity, IOrderedEntity
     {
         Lite<TypeDN> type;
         [NotNullValidator]
@@ -268,7 +254,7 @@ namespace Signum.Entities.Disconnected
         }
 
         int order;
-        public int Order
+        int IOrderedEntity.Order
         {
             get { return order; }
             set { Set(ref order, value); }
