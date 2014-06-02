@@ -6,7 +6,7 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
-import CKEDITOR = require("ckeditor"); 
+import CKEDITOR = require("ckeditor");
 
 
 var cssClassActive = "sf-email-inserttoken-targetactive";
@@ -15,7 +15,7 @@ var onInsertToken: (string) => void;
 
 export function initReplacements() {
     var self = this;
-    
+
     $(".sf-email-replacements-container").on("focus", ".sf-email-inserttoken-target", function () {
         setTokenTargetFocus($(this));
     });
@@ -128,7 +128,7 @@ function updateHtmlEditorTextArea(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].updateElement();
 };
 
-export function initHtmlEditor(idTargetTextArea: string, culture : string) {
+export function initHtmlEditor(idTargetTextArea: string, culture: string) {
 
     CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
     CKEDITOR.replace(idTargetTextArea);
@@ -147,7 +147,7 @@ export function initHtmlEditor(idTargetTextArea: string, culture : string) {
     CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
     CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
     CKEDITOR.instances[idTargetTextArea].on('simpleuploads.finishedUpload', changed);
-    
+
 };
 
 export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: string) {
@@ -232,43 +232,36 @@ export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: stri
     });
 }
 
+function getDocument(iframe: HTMLIFrameElement) {
+    var doc = iframe.document;
+
+    if (iframe.contentDocument)
+        return iframe.contentDocument; // For NS6
+
+    else if (iframe.contentWindow)
+        return iframe.contentWindow.document; // For IE5.5 and IE6
+
+    return doc;
+}
 
 export function activateIFrame($iframe: JQuery) {
-    var iframe = <HTMLIFrameElement>$iframe[0]
+    var iframe = <HTMLIFrameElement>$iframe[0];
 
-        var doc = iframe.document;
-    if (iframe.contentDocument)
-        doc = iframe.contentDocument; // For NS6
-    else if (iframe.contentWindow)
-        doc = iframe.contentWindow.document; // For IE5.5 and IE6
+    var doc = getDocument(iframe);
 
     doc.open();
     doc.writeln($iframe.text());
     doc.close();
 
-    var container = $iframe.contents().find("body");
-    if (container.length == 0)
-        container = $iframe.contents();
-
-    var currHeight = 0;
-    function fixHeight() {
-        var newHeight = container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100; 
-
-        if (Math.abs(currHeight - newHeight) > 100) {
-            $iframe.css("height", newHeight);
-            currHeight = newHeight;
-        }
-    }
-
-    fixHeight();
+    //fixHeight();
     $(window).resize(function () {
-        setTimeout(fixHeight, 500);
+        //setTimeout(fixHeight, 500);
+        iframe.height = doc.body.scrollHeight + "px";
     });
 }
 
 
-export function createMailFromTemplate(options: Operations.EntityOperationOptions, findOptions: Finder.FindOptions, url: string)
-{
+export function createMailFromTemplate(options: Operations.EntityOperationOptions, findOptions: Finder.FindOptions, url: string) {
     Finder.find(findOptions).then(entity => {
         if (entity == null)
             return;
@@ -277,7 +270,7 @@ export function createMailFromTemplate(options: Operations.EntityOperationOption
             keys: entity.runtimeInfo.key(),
             controllerUrl: url
         }, options));
-    }); 
+    });
 }
 
 
@@ -290,7 +283,7 @@ export function removeRecipients(options: Operations.EntityOperationOptions, new
         options.controllerUrl = url;
 
         Operations.executeDefault(options);
-    }); 
+    });
 }
 
 

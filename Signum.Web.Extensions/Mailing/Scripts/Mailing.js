@@ -228,40 +228,30 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     exports.initHtmlEditorWithTokens = initHtmlEditorWithTokens;
 
+    function getDocument(iframe) {
+        var doc = iframe.document;
+
+        if (iframe.contentDocument)
+            return iframe.contentDocument;
+        else if (iframe.contentWindow)
+            return iframe.contentWindow.document;
+
+        return doc;
+    }
+
     function activateIFrame($iframe) {
         var iframe = $iframe[0];
 
-        var doc = iframe.document;
-        if (iframe.contentDocument)
-            doc = iframe.contentDocument; // For NS6
-        else if (iframe.contentWindow)
-            doc = iframe.contentWindow.document; // For IE5.5 and IE6
+        var doc = getDocument(iframe);
 
         doc.open();
         doc.writeln($iframe.text());
         doc.close();
 
-        var container = $iframe.contents().find("body");
-        if (container.length == 0)
-            container = $iframe.contents();
-
-        var currHeight = 0;
-        function fixHeight() {
-            var newHeight = container.children().toArray().map(function (a) {
-                return $(a).height();
-            }).reduce(function (a, b) {
-                return a + b;
-            }, 0) + 100;
-
-            if (Math.abs(currHeight - newHeight) > 100) {
-                $iframe.css("height", newHeight);
-                currHeight = newHeight;
-            }
-        }
-
-        fixHeight();
+        //fixHeight();
         $(window).resize(function () {
-            setTimeout(fixHeight, 500);
+            //setTimeout(fixHeight, 500);
+            iframe.height = doc.body.scrollHeight + "px";
         });
     }
     exports.activateIFrame = activateIFrame;
