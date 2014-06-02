@@ -27,23 +27,23 @@ namespace Signum.Engine.Authorization
             new Execute(UserOperation.SaveNew)
             {
                 FromStates = { UserState.New },
-                ToState = UserState.Created,
-                Execute = (u, _) => { u.State = UserState.Created; },
+                ToState = UserState.Saved,
+                Execute = (u, _) => { u.State = UserState.Saved; },
                 AllowsNew = true,
                 Lite = false
             }.Register();
 
             new Execute(UserOperation.Save)
             {
-                FromStates = { UserState.Created },
-                ToState = UserState.Created,
+                FromStates = { UserState.Saved },
+                ToState = UserState.Saved,
                 Execute = (u, _) => { },
                 Lite = false
             }.Register();
 
             new Execute(UserOperation.Disable)
             {
-                FromStates = { UserState.Created },
+                FromStates = { UserState.Saved },
                 ToState = UserState.Disabled,
                 Execute = (u, _) =>
                 {
@@ -57,11 +57,11 @@ namespace Signum.Engine.Authorization
             new Execute(UserOperation.Enable)
             {
                 FromStates = { UserState.Disabled },
-                ToState = UserState.Created,
+                ToState = UserState.Saved,
                 Execute = (u, _) =>
                 {
                     u.AnulationDate = null;
-                    u.State = UserState.Created;
+                    u.State = UserState.Saved;
                 },
                 AllowsNew = false,
                 Lite = true

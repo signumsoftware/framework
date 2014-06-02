@@ -149,7 +149,7 @@ namespace Signum.Entities.Authorization
     {
         [Ignore]
         New = -1,
-        Created,
+        Saved,
         Disabled,
     }
 
