@@ -173,7 +173,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         }).join('');
 
         exports.getPathPrefixes(prefix).forEach(function (currPrefix) {
+<<<<<<< HEAD
             var summary = currPrefix.child(exports.globalValidationSummary).tryGet();
+=======
+            var summary = valOptions["errorSummaryId"] ? $('#' + valOptions["errorSummaryId"]) : $('#' + SF.compose(currPrefix, exports.globalValidationSummary));
+>>>>>>> ValidatorErrorSummaryId
 
             if (summary.length) {
                 var ul = summary.children("ul." + exports.validationSummary);
