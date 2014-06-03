@@ -160,9 +160,16 @@ namespace Signum.Engine.Mailing.Pop3
 
             message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
           
-            FillAddressesCollection(message.CC, message.Headers["cc"]);
             FillAddressesCollection(message.To, message.Headers["to"]);
+            FillAddressesCollection(message.CC, message.Headers["cc"]);
             FillAddressesCollection(message.Bcc, message.Headers["bcc"]);
+
+            var deliveredTo = message.Headers["delivered-to"];
+
+            if (!message.To.Concat(message.CC).Concat(message.Bcc).Any(m => m.Address == deliveredTo))
+            {
+                message.Bcc.Add(new MailAddress(deliveredTo));
+            }
 
             foreach (AlternateView view in message.AlternateViews)
             {
