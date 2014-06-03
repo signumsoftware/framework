@@ -168,9 +168,9 @@ export class FileLine extends Lines.EntityBase {
 
         this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
-        this.prefix.child(Entities.Keys.entityState).get().val(entityState);
+        this.prefix.child(Entities.Keys.entityState).tryGet().val(entityState);
 
-        this.prefix.child("frame").get().remove();
+        this.prefix.child("frame").tryGet().remove();
     }
 
     onChanged() {
@@ -189,7 +189,7 @@ export class FileLine extends Lines.EntityBase {
         this.prefix.child('DivOld').get().toggle(hasEntity);
         this.prefix.child('DivNew').get().toggle(!hasEntity);
 
-        this.prefix.child("btnRemove").get().toggle(hasEntity);
+        this.prefix.child("btnRemove").tryGet().toggle(hasEntity);
     }
 
     getLink(itemPrefix?: string): string {

@@ -73,10 +73,10 @@
                      }
     <script type="text/javascript">
         (function () {
-            $("#" + SF.compose("@crc.Prefix", "sfFullScreen")).on("mousedown", function (e) {
+            "@crc.Prefix".child("sfFullScreen").get().on("mousedown", function (e) {
                     $("#@containerId").SFControl().fullScreen();
-                });
-            })();
+             });
+         })();
     </script>
     }
 }
