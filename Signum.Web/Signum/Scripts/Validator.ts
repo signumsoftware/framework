@@ -193,7 +193,7 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
 
     getPathPrefixes(prefix).forEach(currPrefix=> {
 
-        var summary = currPrefix.child(globalValidationSummary).tryGet()
+        var summary = valOptions["errorSummaryId"] ? $('#' + valOptions["errorSummaryId"]) : currPrefix.child(globalValidationSummary).tryGet();
 
         if (summary.length) {
             var ul = summary.children("ul." + validationSummary);

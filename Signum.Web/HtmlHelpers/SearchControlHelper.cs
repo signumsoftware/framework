@@ -23,6 +23,7 @@ namespace Signum.Web
     {
         public string Prefix;
         public ToolBarButton[] ToolBarButton { get; set; }
+        public bool AvoidFullScreenButton { get; set; }
     }
 
     public class CountSearchControl
@@ -32,7 +33,6 @@ namespace Signum.Web
         public string QueryLabelText { get; set; }
         public string Href { get; set; }
     }
-
 
     public static class SearchControlHelper
     {
@@ -66,10 +66,11 @@ namespace Signum.Web
             if (!options.ToolBarButton.IsNullOrEmpty())
                 viewData[ViewDataKeys.ManualToolbarButtons] = options.ToolBarButton;
 
+            if (options.AvoidFullScreenButton)
+                viewData[ViewDataKeys.AvoidFullScreenButton] = true;
+
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
-
-       
 
         private static MvcHtmlString CountSearchControlInternal(FindOptions findOptions, Web.CountSearchControl options)
         {
