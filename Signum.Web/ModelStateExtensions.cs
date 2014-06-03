@@ -10,9 +10,10 @@ namespace Signum.Web
 {
     public static class ModelStateExtensions
     {
-        public static void FromContext(this ModelStateDictionary modelState, MappingContext context)
+        public static void FromContext(this ModelStateDictionary modelState, MappingContext context, bool append = false)
         {
-            modelState.Clear();
+            if (!append)
+                modelState.Clear();
 
             if (context.GlobalErrors.Count > 0)
                 foreach (var p in context.GlobalErrors)
@@ -20,9 +21,10 @@ namespace Signum.Web
                         modelState.AddModelError(p.Key, v, context.GlobalInputs.TryGetC(p.Key));
         }
 
-        public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form)
+        public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form, bool append = false)
         {
-            modelState.Clear();
+            if (!append)
+                modelState.Clear();
 
             if (errors != null)
                 foreach (var p in errors)
