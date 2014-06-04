@@ -5,5 +5,5 @@
 {
     sc.FormGroupStyle = FormGroupStyle.SrOnly;
     @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; })
-    @Html.ValueLine(sc, c => c.Type, vl => { vl.Visible = false; vl.WriteHiddenOnReadonly = true; })
+    @Html.HiddenLine(sc, c => c.Type)
 }

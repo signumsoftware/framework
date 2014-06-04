@@ -17,6 +17,6 @@
         AllowSelection = false,
         SearchOnLoad = true,
     };
-
-    @Html.SearchControl(uq, fo, new Context(null, Model.Prefix));
+    
+    @Html.SearchControl(uq, fo, new Context(null, Model.Prefix), sc => sc.AvoidFullScreenButton = true);
 }
