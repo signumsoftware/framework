@@ -533,5 +533,17 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 //tr.Commit();
             }
         }
+
+        [TestMethod]
+        public void UpdateExplicitInterfaceImplementedField()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                 Database.Query<AlbumDN>()
+                     .UnsafeUpdate()
+                     .Set(a=>((ISecretContainer)a).Secret, a=>"Hi")
+                     .Execute();
+            }
+        }
     }
 }

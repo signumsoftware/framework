@@ -369,7 +369,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class AlbumDN : Entity
+    public class AlbumDN : Entity, ISecretContainer
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -426,11 +426,23 @@ namespace Signum.Test.Environment
             set { Set(ref state, value); }
         }
 
+        string secret;
+        string ISecretContainer.Secret
+        {
+            get { return secret; }
+            set { Set(ref secret, value); }
+        }
+
         static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public interface ISecretContainer
+    {
+        string Secret { get; set; } 
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
