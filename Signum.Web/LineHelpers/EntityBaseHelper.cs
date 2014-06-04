@@ -92,16 +92,11 @@ namespace Signum.Web
 
         private static ViewDataDictionary GetViewData(HtmlHelper helper, EntityBase line, TypeContext tc)
         {
-            ViewDataDictionary vdd;
+            ViewDataDictionary vdd = new ViewDataDictionary(tc);
+            
             if (line.PreserveViewData)
-            {
-                vdd = helper.ViewData;
-                vdd.Model = tc;
-            }
-            else
-            {
-                vdd = new ViewDataDictionary(tc);
-            }
+                vdd.AddRange(helper.ViewData);
+            
             return vdd;
         }
 
