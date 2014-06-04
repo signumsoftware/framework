@@ -239,6 +239,33 @@ namespace Signum.Web
 
             return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
         }
+
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            return helper.HiddenLine(tc, property, null);
+        }
+
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HiddenLine> settingsModifier)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            HiddenLine hl = new HiddenLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Common.FireCommonTasks(hl);
+
+            if (settingsModifier != null)
+                settingsModifier(hl);
+
+            return Hidden(helper, hl);
+        }
+
+        public static MvcHtmlString Hidden(this HtmlHelper helper, HiddenLine hiddenLine)
+        {
+            if (hiddenLine.ReadOnly)
+                return helper.Span(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", "form-control");
+
+            return helper.Hidden(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", hiddenLine.ValueHtmlProps);
+        }
     }
 
     public class ValueLineConfigurator

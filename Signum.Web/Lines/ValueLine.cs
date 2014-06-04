@@ -53,4 +53,14 @@ namespace Signum.Web
 
         public bool InlineCheckbox { get; set; }
     }
+
+    public class HiddenLine : BaseLine
+    {
+        public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
+
+        public HiddenLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
+        {
+        }
+    }
 }
