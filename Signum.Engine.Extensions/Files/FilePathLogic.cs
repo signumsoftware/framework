@@ -129,7 +129,7 @@ namespace Signum.Engine.Files
 
         public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeSymbol fileType, string fullPath)
         {
-            if (!fullPath.StartsWith(repository.FullPhysicalPrefix))
+            if (!fullPath.StartsWith(repository.FullPhysicalPrefix, StringComparison.InvariantCultureIgnoreCase))
                 throw new InvalidOperationException("The File {0} doesn't belong to the repository {1}".Formato(fullPath, repository.PhysicalPrefix));
 
             return new FilePathDN
