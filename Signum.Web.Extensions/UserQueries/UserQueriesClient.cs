@@ -146,7 +146,7 @@ namespace Signum.Web.UserQueries
             if (url.HasText() && url.Contains("UQ"))
                 currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
-            foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
+            foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName).OrderBy(a => a.ToString()))
             {
                 items.Add(new MenuItem
                 {

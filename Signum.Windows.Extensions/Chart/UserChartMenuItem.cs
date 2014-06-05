@@ -92,7 +92,7 @@ namespace Signum.Windows.Chart
             
             if (UserCharts.Count > 0)
             {
-                foreach (Lite<UserChartDN> uc in UserCharts)
+                foreach (Lite<UserChartDN> uc in UserCharts.OrderBy(a => a.ToString()))
                 {
                     MenuItem mi = new MenuItem()
                     {

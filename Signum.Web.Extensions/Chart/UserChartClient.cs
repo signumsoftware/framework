@@ -132,7 +132,7 @@ namespace Signum.Web.Chart
 
             var items = new List<IMenuItem>();
 
-            foreach (var uc in UserChartLogic.GetUserCharts(queryName))
+            foreach (var uc in UserChartLogic.GetUserCharts(queryName).OrderBy(a => a.ToString()))
             {
                 items.Add(new MenuItem
                 {

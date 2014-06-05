@@ -161,7 +161,7 @@ namespace Signum.Windows.UserQueries
 
                 if (userQueries.Count > 0)
                 {
-                    foreach (Lite<UserQueryDN> report in userQueries)
+                    foreach (Lite<UserQueryDN> report in userQueries.OrderBy(a=>a.ToString()))
                     {
                         MenuItem mi = new MenuItem()
                         {
