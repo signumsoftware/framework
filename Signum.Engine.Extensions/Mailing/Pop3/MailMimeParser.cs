@@ -166,7 +166,7 @@ namespace Signum.Engine.Mailing.Pop3
 
             var deliveredTo = message.Headers["delivered-to"];
 
-            if (!message.To.Concat(message.CC).Concat(message.Bcc).Any(m => m.Address == deliveredTo))
+            if (deliveredTo!= null && !message.To.Concat(message.CC).Concat(message.Bcc).Any(m => m.Address == deliveredTo))
             {
                 message.Bcc.Add(new MailAddress(deliveredTo));
             }
