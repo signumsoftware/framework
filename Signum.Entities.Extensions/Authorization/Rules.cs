@@ -10,7 +10,7 @@ using System.Reflection;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class RuleDN<R, A> : IdentifiableEntity
+    public class RuleDN<R, A> : Entity
         where R: IdentifiableEntity
     {
         Lite<RoleDN> role;

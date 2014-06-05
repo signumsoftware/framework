@@ -110,7 +110,7 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".Formato(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
-                subConnector.ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.ForceOnStart, fr =>
+                subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, CacheLogic.ForceOnStart, fr =>
                     {
                         if (reader == null)
                             reader = new SimpleReader(fr, EntityCache.NewRetriever());

@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class UserChartDN : IdentifiableEntity, IChartBase, IHasEntitytype, IUserAssetEntity
+    public class UserChartDN : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
     {
         public UserChartDN() { }
         public UserChartDN(object queryName)
