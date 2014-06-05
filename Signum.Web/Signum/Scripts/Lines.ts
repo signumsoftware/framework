@@ -544,7 +544,8 @@ export interface EntityListBaseOptions extends EntityBaseOptions {
 }
 
 export class EntityListBase extends EntityBase {
-    static key_indexes = "sfIndexes";
+    static key_index = "sfIndex";
+    static key_rowId = "sfRowId";
 
     options: EntityListBaseOptions;
     finding: (prefix: string) => Promise<Entities.EntityValue>;  // DEPRECATED!
@@ -731,7 +732,7 @@ export class EntityListBase extends EntityBase {
     }
 
     getNextPosIndex(): string {
-        return ";" + (this.getLastPosIndex() + 1).toString();
+        return (this.getLastPosIndex() + 1).toString();
     }
 
     canAddItems() {
@@ -823,12 +824,11 @@ export class EntityListBase extends EntityBase {
     }
 
     getPosIndex(itemPrefix: string) {
-        return parseInt(itemPrefix.child(EntityListBase.key_indexes).get().val().after(";"));
+        return parseInt(itemPrefix.child(EntityListBase.key_index).get().val());
     }
 
     setPosIndex(itemPrefix: string, newIndex: number) {
-        var $indexes = itemPrefix.child(EntityListBase.key_indexes).get();
-        $indexes.val($indexes.val().before(";") + ";" + newIndex.toString());
+        var $indexes = itemPrefix.child(EntityListBase.key_index).get().val(newIndex.toString());
     }
 }
 
@@ -916,7 +916,8 @@ export class EntityList extends EntityListBase {
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
 
-        this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_indexes), this.getNextPosIndex()));
+        this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_index), this.getNextPosIndex()));
+        this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_rowId), ""));
         this.inputGroup.before(SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), entityValue.runtimeInfo.toString()));
         this.inputGroup.before(SF.hiddenDiv(itemPrefix.child(EntityList.key_entity), ""));
 
@@ -955,7 +956,8 @@ export class EntityList extends EntityListBase {
         itemPrefix.child(Entities.Keys.runtimeInfo).get().remove();
         itemPrefix.child(Entities.Keys.toStr).get().remove();
         itemPrefix.child(EntityList.key_entity).tryGet().remove();
-        itemPrefix.child(EntityList.key_indexes).tryGet().remove();
+        itemPrefix.child(EntityList.key_index).tryGet().remove();
+        itemPrefix.child(EntityList.key_rowId).tryGet().remove();
     }
 
     moveUp_click() {
@@ -1085,7 +1087,8 @@ export class EntityRepeater extends EntityListBase {
             (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") +
             (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") +
             "</div></legend>" +
-            SF.hiddenInput(itemPrefix.child(EntityListBase.key_indexes), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") +
             SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) +
             "<div id='" + itemPrefix.child(EntityRepeater.key_entity) + "' class='sf-line-entity'>" +
             "</div>" + //sfEntity
@@ -1196,7 +1199,8 @@ export class EntityTabRepeater extends EntityRepeater {
         var header = $("<li id='" + itemPrefix.child(EntityTabRepeater.key_repeaterItem) + "' class='" + EntityTabRepeater.key_repeaterItemClass + "'>" +
             "<a data-toggle='tab' href='#" + itemPrefix.child(EntityBase.key_entity) + "' >" +
             "<span>" + entityValue.toStr + "</span>" +
-            SF.hiddenInput(itemPrefix.child(EntityListBase.key_indexes), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") +
             SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) +
             (this.options.reorder ? ("<span id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") +
             (this.options.reorder ? ("<span id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") +
@@ -1286,7 +1290,8 @@ export class EntityStrip extends EntityList {
             (this.options.navigate ?
             ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
             ("<span class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) +
-            SF.hiddenInput(itemPrefix.child(EntityStrip.key_indexes), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityStrip.key_index), this.getNextPosIndex()) +
+            SF.hiddenInput(itemPrefix.child(EntityStrip.key_rowId), "") +
             SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) +
             "<div id='" + itemPrefix.child(EntityStrip.key_entity) + "' style='display:none'></div>" +
             "<span>" + (

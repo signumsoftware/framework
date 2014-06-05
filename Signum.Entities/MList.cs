@@ -27,6 +27,7 @@ namespace Signum.Entities
             get { return this.innerList.All(a => a.RowId == null); }
         }
 
+        [Serializable]
         public struct RowIdValue : IEquatable<RowIdValue>, IComparable<RowIdValue>, ISerializable
         {
             public readonly int? RowId;
@@ -110,6 +111,12 @@ namespace Signum.Entities
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }
+        }
+
+        public virtual void InnerListModified()
+        {
+            this.SetSelfModified();
+            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
@@ -586,7 +593,6 @@ namespace Signum.Entities
         {
             return new MList<T>(collection); 
         }
-
     }
 
     public interface IOrderedEntity

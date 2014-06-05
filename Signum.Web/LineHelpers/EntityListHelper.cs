@@ -65,7 +65,7 @@ namespace Signum.Web
 
                 if (entityList.ElementType.IsEmbeddedEntity() && entityList.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityList.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityList, isTemplate: true), null));
                 }
                 sb.AddLine(entityList.ConstructorScript(JsModule.Lines, "EntityList"));
@@ -78,7 +78,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityList, itemTC, itemTC.Index));
+            sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityList, itemTC));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

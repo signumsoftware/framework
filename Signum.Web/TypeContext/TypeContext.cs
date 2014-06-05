@@ -327,16 +327,18 @@ namespace Signum.Web
     public class TypeElementContext<T> : TypeContext<T>
     {
         public int Index { get; private set; }
+        public int? RowId { get; private set; }
 
-        public TypeElementContext(T value, TypeContext parent, int index)
+        public TypeElementContext(T value, TypeContext parent, int index, int? rowId)
             : base(value, parent, index.ToString(), parent.PropertyRoute.Add("Item"))
         {
             this.Index = index;
+            this.RowId = rowId;
         }
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeElementContext<T>((T)newValue, (TypeContext)Parent, Index);
+            return new TypeElementContext<T>((T)newValue, (TypeContext)Parent, Index, RowId);
         }
     }
     #endregion

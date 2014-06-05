@@ -111,11 +111,10 @@ namespace Signum.Web
 
     
 
-        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        public static MvcHtmlString WriteIndex<T>(HtmlHelper helper, EntityListBase listBase, TypeElementContext<T> itemTC)
         {
-            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
-                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "",
-                itemIndex.ToString()));
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index).Concat(
+                   helper.Hidden(itemTC.Compose(EntityListBaseKeys.RowId), itemTC.RowId));
         }
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
