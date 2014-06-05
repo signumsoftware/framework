@@ -121,7 +121,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMList(MListExpression ml)
         {
-            var proj = binder.MListProjection(ml);
+            var proj = binder.MListProjection(ml, withRowId: true);
 
             var newProj = (ProjectionExpression)this.Visit(proj);
 

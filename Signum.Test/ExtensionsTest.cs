@@ -33,6 +33,7 @@ namespace Signum.Test
         int a = 0;
 
         public void A() { a++; }
-        public void B() { a *= 2; } 
+        public void B() { a *= 2; }
+
     }
 }

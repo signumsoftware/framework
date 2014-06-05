@@ -104,11 +104,20 @@ namespace Signum.Engine.Maps
             return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
         }
 
-        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder)
+        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, bool withRowId)
         {
             var rowId = RowIdExpression(tableAlias);
 
-            return Field.GetExpression(tableAlias, binder, rowId);
+            var exp = Field.GetExpression(tableAlias, binder, rowId); 
+
+            if(!withRowId)
+                return exp;
+ 
+            var type = this.Field.FieldType;
+
+            var ci = typeof(MList<>.RowIdValue).MakeGenericType(type).GetConstructor(new[] { type, typeof(int) });
+
+            return Expression.New(ci, exp, rowId);
         }
 
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)

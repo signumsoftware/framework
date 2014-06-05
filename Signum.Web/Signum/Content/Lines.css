@@ -394,7 +394,7 @@ ul.dropdown-menu > li > a.disabled
 /*Override absurd width for popups on sm*/
 @media (min-width: 768px)
 {
-    .modal-dialog:not(.modal-dialog)
+    .modal-dialog:not(.modal-sm)
     {
         min-width: 730px;
     }

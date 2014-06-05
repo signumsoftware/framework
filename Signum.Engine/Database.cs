@@ -768,7 +768,7 @@ namespace Signum.Engine
                 {
                     Schema.Current.OnPreUnsafeDelete<T>(query);
 
-                    int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -787,7 +787,7 @@ namespace Signum.Engine
                 {
                     Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent));
 
-                    int rows = DbQueryProvider.Single.Delete(mlistQuery, cm => cm.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Delete(mlistQuery, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -830,7 +830,7 @@ namespace Signum.Engine
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreUnsafeUpdate(update);
-                    int rows = DbQueryProvider.Single.Update(update, cr => cr.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Update(update, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -854,7 +854,7 @@ namespace Signum.Engine
                 {
                     Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.Table(typeof(E));
-                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -877,7 +877,7 @@ namespace Signum.Engine
                 {
                     Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c=>c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }

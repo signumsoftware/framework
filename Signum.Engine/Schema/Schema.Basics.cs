@@ -888,7 +888,7 @@ namespace Signum.Engine.Maps
     {
         public class PrimaryKeyColumn : IColumn
         {
-            string IColumn.Name { get { return SqlBuilder.PrimaryKeyName; } }
+            public string Name { get { return SqlBuilder.PrimaryKeyName; } }
             bool IColumn.Nullable { get { return false; } }
             SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
             string IColumn.UdtTypeName { get { return null; } }

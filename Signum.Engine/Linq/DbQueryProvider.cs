@@ -105,11 +105,11 @@ namespace Signum.Engine.Linq
             return scalar;
         }
 
-        internal R Delete<R>(IQueryable query, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
+        internal R Delete<R>(IQueryable query, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
-            CommandResult cr;
+            SqlPreCommandSimple cr;
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
@@ -126,11 +126,11 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
 
-        internal R Update<R>(IUpdateable updateable, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
+        internal R Update<R>(IUpdateable updateable, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
-            CommandResult cr;
+            SqlPreCommandSimple cr;
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
@@ -147,11 +147,11 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
 
-        internal R Insert<R>(IQueryable query, LambdaExpression constructor, ITable table, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
+        internal R Insert<R>(IQueryable query, LambdaExpression constructor, ITable table, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
-            CommandResult cr;
+            SqlPreCommandSimple cr;
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
