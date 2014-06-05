@@ -76,10 +76,10 @@ namespace Signum.Engine.Cache
                     if (args.Type != SqlNotificationType.Change)
                         throw new InvalidOperationException(
                             "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \r\n{3}"
-                            .Formato(args.Type, args.Source, args.Info, tr.GetMainPreCommand().PlainSql()));
+                            .Formato(args.Type, args.Source, args.Info, tr.MainCommand.PlainSql()));
 
                     if (args.Info == SqlNotificationInfo.PreviousFire)
-                        throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.GetMainPreCommand().PlainSql() } } };
+                        throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.MainCommand.PlainSql() } } };
 
                     if (CacheLogic.LogWriter != null)
                         CacheLogic.LogWriter.WriteLine("Change ToListWithInvalidations {0} {1}".Formato(typeof(T).TypeName()), exceptionContext);
