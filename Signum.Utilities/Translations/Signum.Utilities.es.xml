@@ -5,6 +5,8 @@
   </Type>
   <Type Name="CollectionMessage">
     <Member Name="And" Description=" y " />
+    <Member Name="MoreThanOne0Found" Description="Más de un {0} encontrado" />
+    <Member Name="No0Found" Description="Ningún {0} encontrado" />
     <Member Name="Or" Description=" o " />
   </Type>
   <Type Name="ConsoleMessage">

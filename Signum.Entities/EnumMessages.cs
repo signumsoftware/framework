@@ -242,8 +242,8 @@ Lose changes?")]
         noActionsFound,
         [Description("Save changes before or press cancel")]
         saveChangesBeforeOrPressCancel,
-        [Description("Loose current changes?")]
-        looseCurrentChanges,
+        [Description("Lose current changes?")]
+        loseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
         [Description("Seach for results")]
