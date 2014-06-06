@@ -123,6 +123,16 @@ namespace Signum.Utilities
 
             return result;
         }
+
+        public static void Apply<T>(ObservableCollection<Node<T>> collection, Action<ObservableCollection<Node<T>>> action)
+        {
+            action(collection);
+
+            foreach (var item in collection)
+            {
+                Apply(item.Children, action);
+            }
+        }
     }
 
     public class Node<T> : INotifyPropertyChanged
