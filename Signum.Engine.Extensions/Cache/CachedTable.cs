@@ -621,9 +621,11 @@ namespace Signum.Engine.Cache
 
         ResetLazy<Dictionary<int, Dictionary<int, object>>> relationalRows;
 
+        static ParameterExpression result = Expression.Parameter(typeof(T));
+
         Func<FieldReader, object> rowReader;
-        Expression<Func<object, IRetriever, T>> activatorExpression;
-        Func<object, IRetriever, T> activator;
+        Expression<Func<object, IRetriever, MList<T>.RowIdValue>> activatorExpression;
+        Func<object, IRetriever, MList<T>.RowIdValue> activator;
         Func<object, int> parentIdGetter;
         Func<object, int> rowIdGetter;
 
@@ -657,11 +659,15 @@ namespace Signum.Engine.Cache
                 List<Expression> instructions = new List<Expression>();
 
                 instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
-                instructions.Add(ctr.MaterializeField(table.Field));
+                instructions.Add(Expression.Assign(result, ctr.MaterializeField(table.Field)));
 
-                var block = Expression.Block(table.Field.FieldType, new[] { ctr.origin }, instructions);
+                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(int)});
 
-                activatorExpression = Expression.Lambda<Func<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
+                instructions.Add(Expression.New(ci, result, ctr.GetTupleProperty(table.PrimaryKey)));
+
+                var block = Expression.Block(typeof(MList<T>.RowIdValue), new[] { ctr.origin, result }, instructions);
+
+                activatorExpression = Expression.Lambda<Func<object, IRetriever, MList<T>.RowIdValue>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
 
                 activator = activatorExpression.Compile();
 
@@ -730,7 +736,7 @@ namespace Signum.Engine.Cache
                 result = new MList<T>(dic.Count);
                 foreach (var obj in dic.Values)
                 {
-                    result.Add(activator(obj, retriever));
+                    result.InnerList.Add(activator(obj, retriever));
                 }
             }
 
