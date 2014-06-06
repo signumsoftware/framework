@@ -66,11 +66,11 @@ else
            
             foreach (var route in instance.RouteConflicts)
             {
-
+                var propertyString = route.Key.Item1.PropertyString().Replace("/", "[" + route.Key.Item2 + "].");
             <tr>
                 <th class="leftCell">@TranslationMessage.Property.NiceToString()
                 </th>
-                <th>@route.Key.PropertyString()</th>
+                <th>@propertyString</th>
             </tr>
                 foreach (var mc in route.Value)
                 {
@@ -79,7 +79,7 @@ else
                 <td class="monospaceCell">
                     @if (mc.Key.Equals(defaultCulture))
                     {
-                        string originalName = defaultCulture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
+                        string originalName = defaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
                         <textarea name="@originalName" style="display:none" >@route.Value.Single(kvp => kvp.Key.Equals(defaultCulture)).Value.Original</textarea>
                     }
                     <span>@mc.Value.Original</span>
@@ -93,7 +93,7 @@ else
                 var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
 
 
-                string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
+                string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
                 if (translations.Count() == 1)
                 {       
                     <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>

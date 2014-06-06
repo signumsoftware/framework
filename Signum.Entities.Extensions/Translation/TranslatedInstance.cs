@@ -37,6 +37,13 @@ namespace Signum.Entities.Translation
             set { Set(ref propertyRoute, value); }
         }
 
+        int? rowId;
+        public int? RowId
+        {
+            get { return rowId; }
+            set { Set(ref rowId, value); }
+        }
+
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string translatedText;
         [StringLengthValidator(AllowNulls = false)]

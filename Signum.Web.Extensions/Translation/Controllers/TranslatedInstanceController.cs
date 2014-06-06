@@ -79,19 +79,24 @@ namespace Signum.Web.Translation.Controllers
         }
 
 
-        static Regex regex = new Regex(@"^(?<lang>[^#]+)#(?<instance>[^#]+)#(?<route>[^#]+)$");
+        static Regex regexRecord = new Regex(@"^(?<lang>[^#]+)#(?<instance>[^#]+)#(?<route>[^#]+)$");
+        static Regex regexIndexer = new Regex(@"\[(?<num>\d+)\]\."); 
+
 
         private List<TranslationRecord> GetTranslationRecords(Type type)
         {
             var list = (from k in Request.Form.AllKeys
-                        let m = regex.Match(k)
+                        let m = regexRecord.Match(k)
                         where m.Success
+                        let route = m.Groups["route"].Value
                         select new TranslationRecord
                         {
                             Culture = CultureInfo.GetCultureInfo(m.Groups["lang"].Value),
                             Key = new LocalizedInstanceKey(
-                                PropertyRoute.Parse(type, m.Groups["route"].Value), 
-                                Lite.Parse(m.Groups["instance"].Value)),
+                                PropertyRoute.Parse(type, regexIndexer.Replace(route, "/")),
+                                Lite.Parse(m.Groups["instance"].Value),
+                                regexIndexer.Match(route).Let(mi => mi.Success ? int.Parse(mi.Groups["num"].Value) : (int?)null)
+                                ),
                             TranslatedText = Request.Form[k].DefaultText(null),
                         }).ToList();
 

@@ -34,7 +34,7 @@ namespace Signum.Web.Translation
 
 
         private static TypeInstancesChanges TranslateInstances(ITranslator translator, Type type, CultureInfo targetCulture, List<InstanceChanges> instances)
-                {
+        {
             List<IGrouping<CultureInfo, PropertyRouteConflict>> memberGroups = (from t in instances
                                                                                 from rcKVP in t.RouteConflicts
                                                                                 from rc in rcKVP.Value
@@ -53,8 +53,6 @@ namespace Signum.Web.Translation
                 Instances = instances
             };
         }
-
-    
     }
 
     public class TypeInstancesChanges
