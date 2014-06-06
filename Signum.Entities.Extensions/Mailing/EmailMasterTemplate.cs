@@ -24,7 +24,7 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value); }
         }
 
-        [NotifyCollectionChanged]
+        [NotifyCollectionChanged, NotNullable]
         MList<EmailMasterTemplateMessageDN> messages = new MList<EmailMasterTemplateMessageDN>();
         public MList<EmailMasterTemplateMessageDN> Messages
         {
