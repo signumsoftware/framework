@@ -260,7 +260,7 @@ namespace Signum.Engine.Translation
             
             PropertyRoute route = element.ElementRoute.Continue(property); 
 
-            return TranslatedField(element.Lite, route,  fallback);
+            return TranslatedField(element.Lite, route, element.RowId, fallback);
         }
 
         public static string TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string>> property, string fallbackString) where T : IdentifiableEntity
