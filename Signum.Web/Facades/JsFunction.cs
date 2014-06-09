@@ -98,14 +98,17 @@ namespace Signum.Web
         {
             var varName = VarName(Module);
 
-            var arguments = this.Arguments.ToString(a => a == This ? "that" : JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
+            var arguments = this.Arguments.ToString(a =>
+                a == This ? "that" : 
+                a == Event ? "e" :                
+                JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
 
             var result = "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + arguments + "); });";
 
-            if (!this.Arguments.Contains(This))
+            if (!this.Arguments.Contains(This) || this.Arguments.Contains(Event))
                 return result;
 
-            return "(function(that) { " + result + "})(this)";
+            return "(function(that, e) { " + result + "})(this, event)";
         }
 
         internal static string VarName(JsModule module)
@@ -121,6 +124,7 @@ namespace Signum.Web
         }
 
         public static object This = new object();
+        public static object Event = new object();
 
       
 
