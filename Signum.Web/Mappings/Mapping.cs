@@ -1077,31 +1077,27 @@ namespace Signum.Web
     public class MListDictionaryMapping<S, K> : BaseMListMapping<S>
         where S : ModifiableEntity
     {
+        Expression<Func<S, K>> GetKeyExpression;
         Func<S, K> GetKey;
 
-        public string Route { get; set; }
 
         public Func<S, bool> FilterElements;
 
         public Mapping<K> KeyPropertyMapping { get; set; }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
+            : this(getKeyExpression, Mapping.New<S>())
         {
-            this.GetKey = getKey;
-
-            this.KeyPropertyMapping = Mapping.New<K>();
-
-            this.Route = route;
+          
         }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression, Mapping<S> elementMapping)
             : base(elementMapping)
         {
-            this.GetKey = getKey;
+            this.GetKey = getKeyExpression.Compile();
+            this.GetKeyExpression = getKeyExpression;
 
             this.KeyPropertyMapping = Mapping.New<K>();
-
-            this.Route = route;
         }
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
@@ -1115,11 +1111,15 @@ namespace Signum.Web
 
                 var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-                PropertyRoute route = ctx.PropertyRoute.Add("Item");
+                PropertyRoute route = ctx.PropertyRoute.Add("Item").Continue(GetKeyExpression);
+
+                string[] namesToAppend = Reflector.GetMemberList(GetKeyExpression).Select(MemberAccessGatherer.GetName).NotNull().ToArray();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
-                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, Route), null, route, itemCtx);
+                    var tce = new TypeContextExpression(new PropertyInfo[0], typeof(S), itemCtx.PropertyRoute, itemCtx.Value);
+
+                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, namesToAppend), null, route, itemCtx);
 
                     subContext.Value = KeyPropertyMapping(subContext);
 
