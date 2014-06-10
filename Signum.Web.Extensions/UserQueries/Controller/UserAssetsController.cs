@@ -51,7 +51,7 @@ namespace Signum.Web.UserQueries
         }
 
         static Mapping<UserAssetPreviewModel> mapping = new EntityMapping<UserAssetPreviewModel>(false)
-            .SetProperty(m=>m.Lines, new MListDictionaryMapping<UserAssetPreviewLine, Guid>(a=>a.Guid, "Guid")
+            .SetProperty(m=>m.Lines, new MListDictionaryMapping<UserAssetPreviewLine, Guid>(a=>a.Guid)
                 .SetElementMapping(new EntityMapping<UserAssetPreviewLine>(false).CreateProperty(a=>a.OverrideEntity)));
 
         [HttpPost]
