@@ -197,5 +197,18 @@ namespace Signum.Web
 
             return base.VisitMethodCall(m);
         }
+
+        internal static string GetName(MemberInfo m)
+        {
+            if (m is PropertyInfo || m is FieldInfo)
+            {
+                if (m.DeclaringType.IsLite() && (m.Name == "EntityOrNull" || m.Name == "Entity"))
+                    return null;
+
+                return m.Name;
+            }
+
+            return null;
+        }
     }
 }
