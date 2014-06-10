@@ -13,7 +13,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Authorization
 {
-    public static class PasswordExpiresLogic
+    public static class PasswordExpirationLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
                         return null;
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
-                        return AuthMessage.PasswordNearExpired.NiceToString();
+                        return AuthMessage.YourPasswordIsNearExpiration.NiceToString();
 
                     return null;
                 });
