@@ -78,7 +78,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityList, itemTC));
+            sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

@@ -100,7 +100,7 @@ namespace Signum.Web
                             itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
                 }
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityStrip, itemTC));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
