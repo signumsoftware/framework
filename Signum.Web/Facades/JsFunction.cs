@@ -108,7 +108,7 @@ namespace Signum.Web
             if (!this.Arguments.Contains(This) && !this.Arguments.Contains(Event))
                 return result;
 
-            return "(function(that, e) { e.preventDefault(); " + result + "})(this, event)";
+            return "(function(that, e) { " + result + " })(this, event)";
         }
 
         internal static string VarName(JsModule module)
