@@ -3,7 +3,6 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
-
 export interface ViewOptionsBase {
     controllerUrl?: string;
     partialViewName?: string;
@@ -23,10 +22,12 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
     return requestHtml(entityHtml, viewOptions);
 }
 
-export function navigate(runtimeInfo: Entities.RuntimeInfo, extraJsonArguments? : any, openNewWindow?: boolean) {
+export function navigate(runtimeInfo: Entities.RuntimeInfo, extraJsonArguments?: any, openNewWindowOrEvent?: any) {
     var url = runtimeInfo.isNew ?
         SF.Urls.create.replace("MyType", runtimeInfo.type) :
         SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
+
+    var openNewWindow = isOpenNewWindow(openNewWindowOrEvent);
 
     if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
         SF.submitOnly(url, extraJsonArguments, openNewWindow);
@@ -36,6 +37,20 @@ export function navigate(runtimeInfo: Entities.RuntimeInfo, extraJsonArguments? 
         else
             window.location.href = url;
     }
+}
+
+export function isOpenNewWindow(openNewWindowOrEvent: any): boolean {
+    if (openNewWindowOrEvent == null)
+        return false;
+
+    if (typeof openNewWindowOrEvent === "boolean")
+        return <boolean>openNewWindowOrEvent;
+
+    var event = <MouseEvent>openNewWindowOrEvent;
+    if (event.which === undefined)
+        throw new Error("openNewWindowOrEvent shold be a boolean or an Event");
+
+    return event.which == 2 || event.ctrlKey;
 }
 
 export interface NavigatePopupOptions extends ViewOptionsBase {
@@ -142,11 +157,11 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
         });
     }, viewOptions.onPopupLoaded).then(pair=> {
 
-        if (!pair.isOk)
-            return null;
+            if (!pair.isOk)
+                return null;
 
-        return pair.entityHtml;
-    }); 
+            return pair.entityHtml;
+        });
 }
 
 export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
@@ -159,7 +174,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
 
     var panelPopup = entityHtml.getChild("panelPopup");
 
-    var okButtonId =  entityHtml.prefix.child("btnOk");
+    var okButtonId = entityHtml.prefix.child("btnOk");
 
     return openModal(panelPopup, button => {
         var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
@@ -179,18 +194,18 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
         }
     }, shown).then(pair => {
 
-        var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
-        entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
-        entityHtml.html = pair.modalDiv;
-       
-        return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
-    });
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
+            entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
+            entityHtml.html = pair.modalDiv;
 
-} 
+            return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
+        });
+
+}
 
 export function openModal(modalDiv: JQuery,
     canClose?: (button: HTMLElement) => Promise<boolean>,
-    shown? : (modalDiv : JQuery) => void
+    shown?: (modalDiv: JQuery) => void
     ): Promise<{ button: HTMLElement; modalDiv: JQuery }> {
 
     if (!canClose)
@@ -228,7 +243,7 @@ export function openModal(modalDiv: JQuery,
             keyboard: false,
             backdrop: "static",
         });
-    }); 
+    });
 }
 
 export function requestAndReload(prefix: string, options?: ViewOptionsBase): Promise<Entities.EntityHtml> {
@@ -248,20 +263,20 @@ export function requestAndReload(prefix: string, options?: ViewOptionsBase): Pro
     });
 }
 
-export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfo {
+export function getRuntimeInfoValue(prefix: string): Entities.RuntimeInfo {
     if (!prefix)
         return Entities.RuntimeInfo.getFromPrefix(prefix);
 
-    var mainControl = $("#{0}_divMainControl".format(prefix)); 
+    var mainControl = $("#{0}_divMainControl".format(prefix));
 
     return Entities.RuntimeInfo.parse(mainControl.data("runtimeinfo"));
 }
 
-export function getMainControl(prefix: string) : JQuery {
+export function getMainControl(prefix: string): JQuery {
     return $(prefix ? "#{0}_divMainControl".format(prefix) : "#divMainControl");
 }
 
-export function hasChanges(prefix: string) : boolean {
+export function hasChanges(prefix: string): boolean {
     return getMainControl(prefix).hasClass("sf-changed");
 }
 
@@ -283,7 +298,7 @@ export function closePopup(prefix: string): void {
     tempDiv.modal("hide");//should remove automatically
 }
 
-export function reloadPopup(entityHtml : Entities.EntityHtml) {
+export function reloadPopup(entityHtml: Entities.EntityHtml) {
 
     var panelPopupId = entityHtml.prefix.child("panelPopup");
 
@@ -297,7 +312,7 @@ export function reload(entityHtml: Entities.EntityHtml): void {
         reloadPopup(entityHtml);
 }
 
-export function isNavigatePopup(prefix: string) : boolean {
+export function isNavigatePopup(prefix: string): boolean {
 
     if (SF.isEmpty(prefix))
         return false;
@@ -306,7 +321,7 @@ export function isNavigatePopup(prefix: string) : boolean {
 }
 
 
-function checkValidation(validatorOptions: Validator.ValidationOptions, allowErrors: AllowErrors):  Promise<Validator.ValidationResult> {
+function checkValidation(validatorOptions: Validator.ValidationOptions, allowErrors: AllowErrors): Promise<Validator.ValidationResult> {
 
     return Validator.validate(validatorOptions).then(result=> {
 
@@ -369,7 +384,7 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 
 
 export function typeChooser(prefix: string, types: Entities.TypeInfo[]): Promise<Entities.TypeInfo> {
-    return chooser(prefix, lang.signum.chooseAType, types, a=>a.niceName, a=>a.name);
+    return chooser(prefix, lang.signum.chooseAType, types, a=> a.niceName, a=> a.name);
 }
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
@@ -396,17 +411,16 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
     options.forEach(o=> $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>')
         .data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody));
 
-    var modalDiv = createBootstrapModal({ titleText: title,  prefix: prefix, body: modalBody, titleClose: true });
+    var modalDiv = createBootstrapModal({ titleText: title, prefix: prefix, body: modalBody, titleClose: true });
 
-    var option : T; 
+    var option: T;
     return openModal(modalDiv,
         button => { option = <T>$(button).data("option"); return Promise.resolve(true); })
         .then(pair=> option);
 }
 
-export interface BootstrapModalOptions
-{
-    prefix : string;
+export interface BootstrapModalOptions {
+    prefix: string;
 
     title?: JQuery;
     titleText?: string;
@@ -419,7 +433,7 @@ export interface BootstrapModalOptions
     footerCancelId?: string;
 }
 
-export function createBootstrapModal(options: BootstrapModalOptions) : JQuery {
+export function createBootstrapModal(options: BootstrapModalOptions): JQuery {
     var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + options.prefix.child("panelPopup") + '">'
         + '<div class="modal-dialog modal-sm" >'
         + '<div class="modal-content">'
@@ -489,25 +503,25 @@ export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
         controllerUrl: SF.Urls.valueLineBox,
         requestExtraJsonData: options,
     })
-        .then(eHtml=> openEntityHtmlModal(eHtml))
-        .then(pair => {
-            if (!pair.isOk)
-                return null;
+    .then(eHtml=> openEntityHtmlModal(eHtml))
+    .then(pair => {
+        if (!pair.isOk)
+            return null;
 
-            var html = pair.entityHtml.html;
+        var html = pair.entityHtml.html;
 
-            var date = html.find(options.prefix.child("Date"));
-            var time = html.find(options.prefix.child("Time"));
+        var date = html.find(options.prefix.child("Date"));
+        var time = html.find(options.prefix.child("Time"));
 
-            if (date.length && time.length)
-                return date.val() + " " + time.val();
+        if (date.length && time.length)
+            return date.val() + " " + time.val();
 
-            var input = pair.entityHtml.html.find(":input:not(:button)");
-            if (input.length != 1)
-                throw new Error("{0} inputs found in ValueLineBox".format(input.length));
+        var input = pair.entityHtml.html.find(":input:not(:button)");
+        if (input.length != 1)
+            throw new Error("{0} inputs found in ValueLineBox".format(input.length));
 
-            return input.val();
-        });
+        return input.val();
+    });
 }
 
 

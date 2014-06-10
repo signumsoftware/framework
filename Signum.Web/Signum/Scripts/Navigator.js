@@ -12,8 +12,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.requestPartialView = requestPartialView;
 
-    function navigate(runtimeInfo, extraJsonArguments, openNewWindow) {
+    function navigate(runtimeInfo, extraJsonArguments, openNewWindowOrEvent) {
         var url = runtimeInfo.isNew ? SF.Urls.create.replace("MyType", runtimeInfo.type) : SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
+
+        var openNewWindow = exports.isOpenNewWindow(openNewWindowOrEvent);
 
         if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
             SF.submitOnly(url, extraJsonArguments, openNewWindow);
@@ -25,6 +27,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
     }
     exports.navigate = navigate;
+
+    function isOpenNewWindow(openNewWindowOrEvent) {
+        if (openNewWindowOrEvent == null)
+            return false;
+
+        if (typeof openNewWindowOrEvent === "boolean")
+            return openNewWindowOrEvent;
+
+        var event = openNewWindowOrEvent;
+        if (event.which === undefined)
+            throw new Error("openNewWindowOrEvent shold be a boolean or an Event");
+
+        return event.which == 2 || event.ctrlKey;
+    }
+    exports.isOpenNewWindow = isOpenNewWindow;
 
     function navigatePopup(entityHtml, viewOptions) {
         viewOptions = $.extend({

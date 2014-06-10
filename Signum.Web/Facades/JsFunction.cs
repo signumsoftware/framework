@@ -105,10 +105,10 @@ namespace Signum.Web
 
             var result = "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + arguments + "); });";
 
-            if (!this.Arguments.Contains(This) || this.Arguments.Contains(Event))
+            if (!this.Arguments.Contains(This) && !this.Arguments.Contains(Event))
                 return result;
 
-            return "(function(that, e) { " + result + "})(this, event)";
+            return "(function(that, e) { e.preventDefault(); " + result + "})(this, event)";
         }
 
         internal static string VarName(JsModule module)
