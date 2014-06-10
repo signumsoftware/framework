@@ -563,7 +563,7 @@ once("stringExtensions", () => {
             result = $(context).filter(selector);
 
         if (result.length > 1)
-            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this.toString()));
 
         return result;
     };
