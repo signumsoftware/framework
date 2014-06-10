@@ -166,7 +166,7 @@ function insertLiteral() {
         );
 }
 
-export function createSmsWithTemplateFromEntity(options: Operations.EntityOperationOptions, url: string,
+export function createSmsWithTemplateFromEntity(options: Operations.EntityOperationOptions, event: MouseEvent, url: string,
     smsTemplateFindOptions: Finder.FindOptions) {
 
     Finder.find(smsTemplateFindOptions).then(ev => {
@@ -176,12 +176,12 @@ export function createSmsWithTemplateFromEntity(options: Operations.EntityOperat
         options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
         options.controllerUrl = url;
 
-        Operations.constructFromDefault(options);
+        Operations.constructFromDefault(options, event);
     }); 
 }
 
 
-export function sendMultipleSMSMessagesFromTemplate(options: Operations.OperationOptions, url: string,
+export function sendMultipleSMSMessagesFromTemplate(options: Operations.OperationOptions, event: MouseEvent, url: string,
     smsTemplateFindOptions: Finder.FindOptions) {
 
     Finder.find(smsTemplateFindOptions).then(ev => {
@@ -191,11 +191,11 @@ export function sendMultipleSMSMessagesFromTemplate(options: Operations.Operatio
         options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
         options.controllerUrl = url;
 
-        Operations.constructFromManyDefault(options);
+        Operations.constructFromManyDefault(options, event);
     });
 }
 
-export function sentMultipleSms(options: Operations.OperationOptions, prefix: string, urlModel: string, urlOperation: string) {
+export function sentMultipleSms(options: Operations.OperationOptions, event: MouseEvent, prefix: string, urlModel: string, urlOperation: string) {
     var prefixModel = prefix.child("New");
     Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
         controllerUrl: urlModel
@@ -206,7 +206,7 @@ export function sentMultipleSms(options: Operations.OperationOptions, prefix: st
         options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, Validator.getFormValuesHtml(eHtml));
             options.controllerUrl = urlOperation;
 
-            Operations.constructFromManyDefault(options);
+            Operations.constructFromManyDefault(options, event);
         });
 }
 

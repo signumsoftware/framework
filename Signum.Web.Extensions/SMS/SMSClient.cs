@@ -53,21 +53,21 @@ namespace Signum.Web.SMS
                 {
                     new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
-                        OnClick = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(),
+                        OnClick = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms)=>sms.CreateSMSMessageFromTemplate()), 
                             SmsTemplateFindOptions(ctx.Entity.GetType()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessagesFromTemplate)
                     {
-                        OnClick = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(),
+                        OnClick = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms )=>sms.SendMultipleMessagesFromTemplate()), 
                             SmsTemplateFindOptions(DynamicQueryManager.Current.GetQuery(ctx.QueryName).EntityImplementations.Types.Single()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessage)
                     {
-                        OnClick = ctx => Module["sentMultipleSms"](ctx.Options(), ctx.Prefix, 
+                        OnClick = ctx => Module["sentMultipleSms"](ctx.Options(), JsFunction.Event, ctx.Prefix, 
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleSMSMessagesModel()),
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleMessages()))
                     },

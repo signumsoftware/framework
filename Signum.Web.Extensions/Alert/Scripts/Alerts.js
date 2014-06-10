@@ -7,8 +7,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.exploreAlerts = exploreAlerts;
 
-    function createAlert(prefix, operationKey, updateUrl) {
-        Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(function () {
+    function createAlert(event, prefix, operationKey, updateUrl) {
+        Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }, event).then(function () {
             return updateAlerts(prefix, updateUrl);
         });
     }
