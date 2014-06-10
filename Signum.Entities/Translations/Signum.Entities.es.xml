@@ -146,7 +146,7 @@
     <Member Name="find" Description="Buscar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
     <Member Name="loading" Description="Cargando..." />
-    <Member Name="looseCurrentChanges" Description="¿Perder cambios?" />
+    <Member Name="loseCurrentChanges" Description="¿Perder cambios?" />
     <Member Name="moveDown" Description="Bajar" />
     <Member Name="moveUp" Description="Subir" />
     <Member Name="navigate" Description="Navegar" />

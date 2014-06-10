@@ -172,7 +172,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
             return canClose(true);
 
         } else {
-            if (main.hasClass("sf-changed") && !confirm(lang.signum.looseCurrentChanges))
+            if (main.hasClass("sf-changed") && !confirm(lang.signum.loseCurrentChanges))
                 return Promise.resolve(false);
 
             return canClose(false);
