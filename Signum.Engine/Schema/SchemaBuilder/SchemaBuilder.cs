@@ -516,14 +516,16 @@ namespace Signum.Engine.Maps
         {
             Type elementType = route.Type.ElementType();
 
-            Type type = route.Parent.Type;
+
+            if (!typeof(Entity).IsAssignableFrom(table.Type))
+                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not inherit from Entity. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
             TableMList relationalTable = new TableMList(route.Type)
             {
                 Name = GenerateTableNameCollection(table, name),
                 BackReference = new FieldReference(table.Type)
                 {
-                    Name = GenerateBackReferenceName(type),
+                    Name = GenerateBackReferenceName(table.Type),
                     ReferenceTable = table
                 },
                 PrimaryKey = new TableMList.PrimaryKeyColumn(),

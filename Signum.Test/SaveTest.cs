@@ -130,6 +130,74 @@ namespace Signum.Test
             }
         }
 
+
+        [TestMethod]
+        public void SmartSaveMList()
+        {
+            using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<AlbumDN>())
+            using (OperationLogic.AllowSave<ArtistDN>())
+            {
+                var maxRowId = Database.MListQuery((AlbumDN a) => a.Songs).Max(a => a.RowId);
+
+                var artist = Database.Query<ArtistDN>().First();
+
+                var album = new AlbumDN
+                {
+                    Name = "Test album",
+                    Author = artist,
+                    Year = 2000,
+                    Songs = { new SongDN { Name = "Song 1" } },
+                    State = AlbumState.Saved,
+                };
+
+                Assert.IsNull(album.Songs.InnerList[0].RowId);
+                //Insert and row-id is set
+                album.Save();
+                Assert.IsNotNull(album.Songs.InnerList[0].RowId);
+                Assert.IsTrue(album.Songs.InnerList[0].RowId > maxRowId); 
+
+
+                album.Songs.Add(new SongDN { Name = "Song 2" });
+
+                Assert.IsNull(album.Songs.InnerList[1].RowId);
+
+                album.Save();
+                //Insert and row-id is set
+                Assert.IsNotNull(album.Songs.InnerList[1].RowId);
+
+                var song = album.Songs.InnerList[0];
+
+                album.Songs.Remove(song.Value);
+                //Delete
+                album.Save();
+
+                {
+                    var album2 = album.ToLite().Retrieve();
+
+                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
+                    Assert.IsTrue(album.Songs.InnerList[0].RowId == album2.Songs.InnerList[0].RowId);
+                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
+                }
+
+                album.Songs[0].Name += "*";
+                //Update
+                album.Save();
+
+                {
+                    var album2 = album.ToLite().Retrieve();
+                    
+                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
+                    Assert.IsTrue(album.Songs.InnerList[0].RowId == album2.Songs.InnerList[0].RowId);
+                    Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
+                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
+                }
+
+                //tr.Commit();
+            }
+        }
+
+
         [TestMethod]
         public void SaveManyMList()
         {

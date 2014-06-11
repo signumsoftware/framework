@@ -284,7 +284,7 @@ namespace Signum.Web.Operations
         {
             return new ToolBarButton
             {
-                Id = ctx.OperationInfo.OperationSymbol.Key,
+                Id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_")),
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
@@ -306,7 +306,7 @@ namespace Signum.Web.Operations
                 case OperationType.Delete:
                     return JsModule.Operations["deleteDefault"](ctx.Options());
                 case OperationType.ConstructorFrom:
-                    return JsModule.Operations["constructFromDefault"](ctx.Options());
+                    return JsModule.Operations["constructFromDefault"](ctx.Options(), JsFunction.Event);
                 default:
                     throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(
                         ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
@@ -361,7 +361,7 @@ namespace Signum.Web.Operations
                      CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t)))
                  }
                  where os == null || os.IsVisible == null || os.IsVisible(coc)
-                 select CreateContextual(coc, _coc => JsModule.Operations["constructFromManyDefault"](_coc.Options())))
+                 select CreateContextual(coc, _coc => JsModule.Operations["constructFromManyDefault"](_coc.Options(), JsFunction.Event)))
                  .OrderBy(a => a.Order)
                  .Cast<IMenuItem>()
                  .ToList();
@@ -428,7 +428,7 @@ namespace Signum.Web.Operations
                 case OperationType.Delete:
                     return JsModule.Operations["deleteDefaultContextual"](ctx.Options());
                 case OperationType.ConstructorFrom:
-                    return JsModule.Operations["constructFromDefaultContextual"](ctx.Options());
+                    return JsModule.Operations["constructFromDefaultContextual"](ctx.Options(), JsFunction.Event);
                 default:
                     throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
@@ -438,7 +438,7 @@ namespace Signum.Web.Operations
         {
             return new MenuItem
             {
-                Id = ctx.OperationInfo.OperationSymbol.Key,
+                Id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_")),
 
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 

@@ -74,7 +74,7 @@ export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: E
 }
 
 
-export function constructFromDefault(options: EntityOperationOptions): Promise<void> {
+export function constructFromDefault(options: EntityOperationOptions, openNewWindowOrEvent : any): Promise<void> {
     options = $.extend({
         avoidValidate: false,
         validationOptions: {},
@@ -85,44 +85,66 @@ export function constructFromDefault(options: EntityOperationOptions): Promise<v
         return Promise.reject("confirmation");
 
     return entityIsValidOrLite(options)
-        .then(() => constructFromAjax(options))
-        .then(eHtml=> openPopup(eHtml));
+        .then(() => {
+            if (Navigator.isOpenNewWindow(openNewWindowOrEvent))
+                constructFromSubmit(options);
+            else
+                return constructFromAjax(options, getNewPrefix(options)).then(eHtml=> openPopup(eHtml));
+        });
 }
 
-export function constructFromAjax(options: EntityOperationOptions, newPrefix?: string) : Promise<Entities.EntityHtml>  {
+export function constructFromAjax(options: EntityOperationOptions, newPrefix: string) : Promise<Entities.EntityHtml>  {
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFrom,
         isLite: true,
     }, options);
-
-    if (!newPrefix)
-        newPrefix = getNewPrefix(options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options, newPrefix) })
         .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
 }
 
-export function constructFromDefaultContextual(options: OperationOptions, newPrefix?: string): Promise<void> {
-    if (!confirmIfNecessary(options))
-        return Promise.reject("confirmation");
-
-    return constructFromAjaxContextual(options).then(eHtml=> {
-        markCells(options.prefix);
-        return openPopup(eHtml);
-    });
-}
-
-export function constructFromAjaxContextual(options: OperationOptions, newPrefix?: string, runtimeInfo?: Entities.RuntimeInfo): Promise<Entities.EntityHtml> {
+export function constructFromSubmit(options: EntityOperationOptions) : void {
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFrom,
         isLite: true,
     }, options);
 
-    if (!newPrefix)
-        newPrefix = getNewPrefix(options);
+    SF.submitOnly(options.controllerUrl, entityRequestData(options, ""), true);
+}
+
+
+export function constructFromDefaultContextual(options: OperationOptions, openNewWindowOrEvent: any): Promise<void> {
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    if (Navigator.isOpenNewWindow(openNewWindowOrEvent)) {
+        markCells(options.prefix);
+        constructFromSubmitContextual(options);
+    } else {
+        return constructFromAjaxContextual(options, getNewPrefix(options)).then(eHtml=> {
+            markCells(options.prefix);
+            return openPopup(eHtml);
+        });
+    }
+}
+
+export function constructFromAjaxContextual(options: OperationOptions, newPrefix: string, runtimeInfo?: Entities.RuntimeInfo): Promise<Entities.EntityHtml> {
+    options = $.extend({
+        controllerUrl: SF.Urls.operationConstructFrom,
+        isLite: true,
+    }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, newPrefix, runtimeInfo) })
         .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+}
+
+export function constructFromSubmitContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfo): void {
+    options = $.extend({
+        controllerUrl: SF.Urls.operationConstructFrom,
+        isLite: true,
+    }, options);
+
+    SF.submitOnly(options.controllerUrl, contextualRequestData(options, "", runtimeInfo), true);
 }
 
 export function deleteDefault(options: EntityOperationOptions) : Promise <void> {
@@ -175,32 +197,39 @@ export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: En
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, null, runtimeInfo) });
 }
 
-export function constructFromManyDefault(options: OperationOptions, newPrefix?: string): Promise<void> {
-    options = $.extend({
-        controllerUrl: SF.Urls.operationConstructFromMany,
-    }, options);
+export function constructFromManyDefault(options: OperationOptions, openNewWindowOrEvent: any): Promise<void> {
 
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
 
-    return constructFromManyAjax(options).then(eHtml=> {
+    if (Navigator.isOpenNewWindow(openNewWindowOrEvent)) {
         markCells(options.prefix);
-        return openPopup(eHtml);
-    });
+        constructFromManySubmit(options);
+    } else {
+        return constructFromManyAjax(options, getNewPrefix(options)).then(eHtml=> {
+            markCells(options.prefix);
+            return openPopup(eHtml);
+        });
+    }
 }
 
-export function constructFromManyAjax(options: OperationOptions, newPrefix?: string): Promise<Entities.EntityHtml> {
+export function constructFromManyAjax(options: OperationOptions, newPrefix: string): Promise<Entities.EntityHtml> {
     options = $.extend({
         isLite: true,
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
-
-    if (!newPrefix)
-        newPrefix = getNewPrefix(options);
-
     return SF.ajaxPost({ url: options.controllerUrl, data: constructFromManyRequestData(options, newPrefix) })
         .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+}
+
+export function constructFromManySubmit(options: OperationOptions): void {
+    options = $.extend({
+        isLite: true,
+        controllerUrl: SF.Urls.operationConstructFromMany,
+    }, options);
+
+    SF.submitOnly(options.controllerUrl, constructFromManyRequestData(options, ""), true);
 }
 
 export function confirmIfNecessary(options: OperationOptions): boolean {

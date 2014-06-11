@@ -58,14 +58,7 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled)
-            {
-                if (OnClick != null)
-                    a.Attr("onclick", OnClick.ToString());
-
-                a.Attr("href", Href.DefaultText("javascript:void(0)"));
-            }
-            else
+            if (!Enabled)
                 a.Attr("disabled", "disabled");
 
             var result = new HtmlTag("div").Class("btn-group").InnerHtml(a);
@@ -77,7 +70,10 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            return result;
+            var script = OnClick == null ? MvcHtmlString.Empty :
+                MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+
+            return result.ToHtml().Concat(script);
         }
 
         public IMenuItem ToMenuItem()
@@ -145,17 +141,10 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled)
-            {
-                if (OnClick != null)
-                    a.Attr("onclick", OnClick.ToString());
-
-                a.Attr("href", Href.DefaultText("#"));
-            }
-            else
+            if (!Enabled)
                 a.Attr("disabled", "disabled");
 
-            var result = new HtmlTag("li").InnerHtml(a);
+            var result = new HtmlTag("li").InnerHtml(a.ToHtml());
 
             if (Tooltip.HasText())
             {
@@ -164,7 +153,10 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            return result;
+            var script = OnClick == null ? MvcHtmlString.Empty :
+                MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+            
+            return result.ToHtml().Concat(script);
         }
     }
 }

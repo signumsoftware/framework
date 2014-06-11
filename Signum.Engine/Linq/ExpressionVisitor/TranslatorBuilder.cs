@@ -44,19 +44,16 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
-            List<DbParameter> parameters;
-            string sql = QueryFormatter.Format(proj.Select, out parameters);
+            var command = QueryFormatter.Format(proj.Select);
 
             var result = new TranslateResult<T>
             {
                 EagerProjections = eagerChildProjections,
                 LazyChildProjections = lazyChildProjections,
 
-                CommandText = sql,
+                MainCommand = command,
 
                 ProjectorExpression = lambda,
-
-                Parameters = parameters,
 
                 Unique = proj.UniqueFunction,
             };
@@ -73,58 +70,56 @@ namespace Signum.Engine.Linq
             if(!type.IsInstantiationOf(typeof(KeyValuePair<,>)))
                 throw new InvalidOperationException("All child projections should create KeyValuePairs");
 
-            return miBuildChildPrivate.GetInvoker(type.GetGenericArguments())(childProj);
-        }
-
-        static GenericInvoker<Func<ChildProjectionExpression, IChildProjection>> miBuildChildPrivate = new GenericInvoker<Func<ChildProjectionExpression, IChildProjection>>(proj => BuildChildPrivate<int, bool>(proj));
-
-        static IChildProjection BuildChildPrivate<K, V>(ChildProjectionExpression childProj)
-        {
-            var proj = childProj.Projection;
-
             Scope scope = new Scope
             {
                 Alias = proj.Select.Alias,
                 Positions = proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
             };
 
-            Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
 
-            List<DbParameter> parameters;
-            string sql = QueryFormatter.Format(proj.Select, out parameters);
+            var types = type.GetGenericArguments();
 
+            IChildProjection result;
             if (childProj.IsLazyMList)
-                return new LazyChildProjection<K, V>
-                {
-                    Token = childProj.Token,
+            {
+                types[1] = types[1].GetGenericArguments()[0];
 
-                    CommandText = sql,
-                    ProjectorExpression = lambda,
-
-                    Parameters = parameters,
-                };
+                result = giLazyChild.GetInvoker(types)(proj.Projector, scope); 
+            }
             else
-                return new EagerChildProjection<K, V>
-                {
-                    Token = childProj.Token,
+            {
+                result = giEagerChild.GetInvoker(types)(proj.Projector, scope); 
+            }
 
-                    CommandText = sql,
-                    ProjectorExpression = lambda,
+            result.Token = childProj.Token; 
+            result.Command = QueryFormatter.Format(proj.Select);
 
-                    Parameters = parameters,
-                };
+            return result;
         }
 
-        public static CommandResult BuildCommandResult(CommandExpression command)
+        static GenericInvoker<Func<Expression, Scope, IChildProjection>> giLazyChild = 
+            new GenericInvoker<Func<Expression, Scope, IChildProjection>>((proj, scope) => LazyChild<int, bool>(proj, scope));
+        static IChildProjection LazyChild<K, V>(Expression projector, Scope scope)
         {
-            List<DbParameter> parameters;
-            string sql = QueryFormatter.Format(command, out parameters);
-
-            return new CommandResult
+            return new LazyChildProjection<K, V>
             {
-                Parameters = parameters,
-                CommandText = sql,
-            }; 
+                ProjectorExpression = ProjectionBuilder.Build<KeyValuePair<K, MList<V>.RowIdValue>>(projector, scope),
+            };
+        }
+        
+        static GenericInvoker<Func<Expression, Scope, IChildProjection>> giEagerChild =
+            new GenericInvoker<Func<Expression, Scope, IChildProjection>>((proj, scope) => EagerChild<int, bool>(proj, scope));
+        static IChildProjection EagerChild<K, V>(Expression projector, Scope scope)
+        {
+            return new EagerChildProjection<K, V>
+            {
+                ProjectorExpression = ProjectionBuilder.Build<KeyValuePair<K, V>>(projector, scope),
+            };
+        }
+
+        public static SqlPreCommandSimple BuildCommandResult(CommandExpression command)
+        {
+            return QueryFormatter.Format(command);
         }
 
         public class LazyChildProjectionGatherer : DbExpressionVisitor

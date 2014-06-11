@@ -401,7 +401,9 @@ namespace Signum.Windows
                 }
             }
 
-            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString(entityColumn.Implementations.Value.IsByAll ? "[All]" : entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString()
+                .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
+                .Formato(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :

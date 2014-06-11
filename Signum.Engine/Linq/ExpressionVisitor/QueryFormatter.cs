@@ -73,14 +73,14 @@ namespace Signum.Engine.Linq
             objectNameOptions = ObjectName.CurrentOptions;
         }
 
-        static internal string Format(Expression expression, out List<DbParameter> getParameters)
+        static internal SqlPreCommandSimple Format(Expression expression)
         {
             QueryFormatter qf = new QueryFormatter();
             qf.Visit(expression);
 
-            getParameters = qf.parameterExpressions.Values.Select(pi => pi.Parameter).ToList();
+            var parameters = qf.parameterExpressions.Values.Select(pi => pi.Parameter).ToList();
 
-            return qf.sb.ToString();
+            return new  SqlPreCommandSimple(qf.sb.ToString(), parameters); 
         }
 
         protected enum Indentation

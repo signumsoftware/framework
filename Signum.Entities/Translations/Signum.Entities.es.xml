@@ -8,11 +8,7 @@
     <Member Name="Sum" Description="Suma" />
   </Type>
   <Type Name="CalendarMessage">
-    <Member Name="CalendarClose" Description="Cerrar" />
-    <Member Name="CalendarNext" Description="Sig" />
-    <Member Name="CalendarPrevious" Description="Ant" />
-    <Member Name="CalendarToday" Description="Hoy" />
-    <Member Name="ShowCalendar" Description="Mostrar calendario" />
+    <Member Name="Today" Description="Hoy" />
   </Type>
   <Type Name="Case">
     <Member Name="Lowercase" Description="Minúsculas" />
@@ -140,32 +136,37 @@
   <Type Name="IUserDN" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
+    <Member Name="cancel" Description="Cancelar" />
     <Member Name="chooseAType" Description="Elija un tipo" />
     <Member Name="chooseAValue" Description="Elija un valor" />
     <Member Name="create" Description="Crear" />
-    <Member Name="editColumnName" Description="Editar nombre de columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
     <Member Name="find" Description="Buscar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
     <Member Name="loading" Description="Cargando..." />
-    <Member Name="loseChanges" Description="Hay cambios que no han sido guardados. &#xD;&#xA;¿Perder cambios?" />
+    <Member Name="loseCurrentChanges" Description="¿Perder cambios?" />
     <Member Name="moveDown" Description="Bajar" />
     <Member Name="moveUp" Description="Subir" />
     <Member Name="navigate" Description="Navegar" />
+    <Member Name="newEntity" Description="Nueva entidad" />
+    <Member Name="noActionsFound" Description="No hay acciónes" />
     <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
-    <Member Name="noResults" Description="No se encontraron resultados" />
-    <Member Name="onlyOneElement" Description="Puede seleccionar un único elemento" />
+    <Member Name="ok" Description="Aceptar" />
     <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
     <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
+    <Member Name="renameColumn" Description="Cambiar el nombre de columna" />
     <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
     <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
+    <Member Name="saveChangesBeforeOrPressCancel" Description="Guardar los cambios antes o pulse Cancelar" />
     <Member Name="saved" Description="Guardado" />
     <Member Name="search" Description="Búsqueda" />
-    <Member Name="searchControlMenuSelected" Description="seleccionado" />
+    <Member Name="searchForResults" Description="Busque para obtener resultados" />
+    <Member Name="Selected" Description="Seleccionado" />
+    <Member Name="selectOnlyOneElement" Description="Seleccione sólo un elemento" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
     <Member Name="view" Description="Ver" />
@@ -183,9 +184,6 @@
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Entidad modelo" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" />
-  <Type Name="MultiEnumDN" Description="Multi enum" PluralDescription="Multi enums">
-    <Member Name="Key" Description="Clave" />
-  </Type>
   <Type Name="NormalControlMessage">
     <Member Name="New" Description="Nuevo" />
     <Member Name="Save" Description="Guardar" />
@@ -209,7 +207,6 @@
     <Member Name="ThereAreChangesContinue" Description="Existen cambios no guardados y se perderán.&#xD;&#xA;&#xD;&#xA;&#x9;¿Continuamos?" />
     <Member Name="ThereAreErrors" Description="Hay errores" />
   </Type>
-  <Type Name="OperationDN" Description="Operación" />
   <Type Name="OperationLogDN" Description="Registro de la operación">
     <Member Name="Duration" Description="Duración" />
     <Member Name="End" Description="Final" />
@@ -232,6 +229,7 @@
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
+  <Type Name="OperationSymbol" Description="Símbolo Operación" />
   <Type Name="OrderType" Description="Tipo de orden">
     <Member Name="Ascending" Description="Ascendente" />
     <Member Name="Descending" Description="Descendente" />
@@ -280,13 +278,13 @@
   <Type Name="SearchMessage">
     <Member Name="_01of2Results" Description="{0} - {1} de {2} resultado[s]." />
     <Member Name="_0Results" Description="{0} resultado[s]." />
+    <Member Name="AddColumn" Description="Añadir columna" />
+    <Member Name="AddFilter" Description="Añadir filtro" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
     <Member Name="Create" Description="Crear" />
-    <Member Name="CreateNew" Description="Crear nueva" />
+    <Member Name="CreateNew0" Description="Crear nuev[m:o|f:a] {0}" />
+    <Member Name="DeleteFilter" Description="Borrar filtro" />
     <Member Name="Field" Description="Campo" />
-    <Member Name="FilterBuilder_AddColumn" Description="Añadir columna" />
-    <Member Name="FilterBuilder_AddFilter" Description="Añadir filtro" />
-    <Member Name="FilterBuilder_DeleteFilter" Description="Eliminar filtro" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
@@ -298,7 +296,7 @@
     <Member Name="NoActionsFound" Description="No se encontraron acciones" />
     <Member Name="NoColumnSelected" Description="Ninguna columna seleccionada" />
     <Member Name="NoFiltersSpecified" Description="Ningún filtro especificado" />
-    <Member Name="NoResults" Description="No hay resultados" />
+    <Member Name="NoResultsFound" Description="No se encontraron resultados" />
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operación" />
     <Member Name="Operations" Description="Operaciones" />
@@ -323,6 +321,15 @@
     <Member Name="PleaseSelectAType" Description="Por favor seleccione uno de los siguientes tipos: " />
     <Member Name="TypeSelector" Description="Selector de tipo" />
     <Member Name="ValueMustBeSpecifiedFor0" Description="Se debe indicar un valor para {0}" />
+  </Type>
+  <Type Name="SemiSymbol" Description="Semisímbolo">
+    <Member Name="FieldInfo" Description="Información de campo" />
+    <Member Name="Key" Description="Clave" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="Symbol" Description="Símbolo">
+    <Member Name="FieldInfo" Description="Información de campo" />
+    <Member Name="Key" Description="Clave" />
   </Type>
   <Type Name="SynchronizerMessage">
     <Member Name="_0HasBeenRenamedIn1" Description="    ¿'{0}' ha sido renombrada en {1}?" />
@@ -377,24 +384,6 @@
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="El número de {0} está siendo multiplicado por {1}" />
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
-  </Type>
-  <Type Name="ValueLineBoxModel" Description="Valor línea Box">
-    <Member Name="BoolValue" Description="Valor bool" />
-    <Member Name="BoxType" Description="Tipo caja" />
-    <Member Name="DateValue" Description="Valor de fecha" />
-    <Member Name="DecimalValue" Description="Valor decimal" />
-    <Member Name="FieldName" Description="Nombre del campo" />
-    <Member Name="IntValue" Description="Valor int" />
-    <Member Name="IsNullable" Description="Es anulable" />
-    <Member Name="StringValue" Description="Valor de cadena" />
-    <Member Name="TopText" Description="Texto superior" />
-  </Type>
-  <Type Name="ValueLineBoxType" Description="Valor línea tipo caja">
-    <Member Name="Boolean" Description="Boolean" />
-    <Member Name="DateTime" Description="Fecha hora" />
-    <Member Name="Decimal" Description="Decimal" />
-    <Member Name="Integer" Description="Número entero" />
-    <Member Name="String" Description="Cadena" />
   </Type>
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />

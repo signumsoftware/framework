@@ -92,16 +92,11 @@ namespace Signum.Web
 
         private static ViewDataDictionary GetViewData(HtmlHelper helper, EntityBase line, TypeContext tc)
         {
-            ViewDataDictionary vdd;
+            ViewDataDictionary vdd = new ViewDataDictionary(tc);
+            
             if (line.PreserveViewData)
-            {
-                vdd = helper.ViewData;
-                vdd.Model = tc;
-            }
-            else
-            {
-                vdd = new ViewDataDictionary(tc);
-            }
+                vdd.AddRange(helper.ViewData);
+            
             return vdd;
         }
 
@@ -116,11 +111,10 @@ namespace Signum.Web
 
     
 
-        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        public static MvcHtmlString WriteIndex<T>(HtmlHelper helper, TypeElementContext<T> itemTC)
         {
-            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
-                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "",
-                itemIndex.ToString()));
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index).Concat(
+                   helper.Hidden(itemTC.Compose(EntityListBaseKeys.RowId), itemTC.RowId));
         }
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);

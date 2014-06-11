@@ -203,7 +203,8 @@ namespace Signum.Web
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityComboKeys.Combo,
-            EntityListBaseKeys.Indexes,
+            EntityListBaseKeys.Index,
+            EntityListBaseKeys.RowId,
             EntityListBaseKeys.List
         };
 
@@ -923,7 +924,7 @@ namespace Signum.Web
 
             var indexPrefixes = ctx.Inputs.IndexPrefixes();
 
-            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).Try(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Index)) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.Prefix, index), null, route, ctx);
 
@@ -951,34 +952,62 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                MList<S> oldList = ctx.Value;
+                var dic = ctx.Value.InnerList == null ? new Dictionary<int, S>() :
+                    ctx.Value.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a.Value);
 
-                MList<S> newList = new MList<S>();
+                var newList = new List<MList<S>.RowIdValue>();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).Try(s => s.Split(new[] { ';' })[0]).ToInt();
+                    int? rowId = itemCtx.Inputs.TryGetC(EntityListBaseKeys.RowId).ToInt();
 
-                    if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
-                        itemCtx.Value = oldList[oldIndex.Value];
+                    if (rowId.HasValue)
+                    {
+                        var oldValue = dic.GetOrThrow(rowId.Value, "No RowID {0} found");
 
-                    itemCtx.Value = ElementMapping(itemCtx);
+                        itemCtx.Value = oldValue;
+                        itemCtx.Value = ElementMapping(itemCtx);
 
-                    ctx.AddChild(itemCtx);
-                    if (itemCtx.Value != null)
-                        newList.Add(itemCtx.Value);
+                        ctx.AddChild(itemCtx);
+
+                        if (itemCtx.Value != null)
+                        {
+                            var val = itemCtx.SupressChange ? oldValue : itemCtx.Value;
+
+                            if (oldValue.Equals(val))
+                                newList.Add(new MList<S>.RowIdValue(val, rowId.Value));
+                            else
+                                newList.Add(new MList<S>.RowIdValue(val));
+                        }
+                    }
+                    else
+                    {
+                        itemCtx.Value = ElementMapping(itemCtx);
+                        ctx.AddChild(itemCtx);
+                        if (itemCtx.Value != null && !itemCtx.SupressChange)
+                            newList.Add(new MList<S>.RowIdValue(itemCtx.Value));
+                    }
                 }
 
-                if (AreEqual(newList, oldList))
-                    return oldList;
+                if(!AreEqual(newList, ctx.Value == null? null: ctx.Value.InnerList))
+                {
+                    Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
 
-                return newList;
+                    if(ctx.Value == null)
+                        ctx.Value = new MList<S>();
+
+                    ctx.Value.InnerList.Clear();
+                    ctx.Value.InnerList.AddRange(newList);
+                    ctx.Value.InnerListModified();
+                }
+
+                return ctx.Value;
             }
         }
 
-        private bool AreEqual(MList<S> newList, MList<S> oldList)
+        private bool AreEqual(List<MList<S>.RowIdValue> newList, List<MList<S>.RowIdValue> oldList)
         {
             if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
                 return true;
@@ -986,7 +1015,19 @@ namespace Signum.Web
             if (newList == null || oldList == null)
                 return false;
 
-            return newList.SequenceEqual(oldList);
+            if (newList.Count != oldList.Count)
+                return false;
+
+            //Ordering the elements by RowId could remove some false modifications due to database indeterminism
+            //but we can not be sure if order matters, and at the end the order from HTML should be respected
+            for (int i = 0; i < newList.Count; i++)
+            {
+                if (newList[i].RowId != oldList[i].RowId ||
+                   !object.Equals(newList[i].Value, oldList[i].Value))
+                    return false;
+            }
+
+            return true;
         }
 
     }
@@ -1022,7 +1063,8 @@ namespace Signum.Web
                     if (!itemCtx.SupressChange && !object.Equals(list[i], itemCtx.Value))
                         Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
 
-                    list[i] = itemCtx.Value;
+                    if (!list[i].Equals(itemCtx.Value))
+                        list[i] = itemCtx.Value;
 
                     i++;
                 }
@@ -1035,31 +1077,27 @@ namespace Signum.Web
     public class MListDictionaryMapping<S, K> : BaseMListMapping<S>
         where S : ModifiableEntity
     {
+        Expression<Func<S, K>> GetKeyExpression;
         Func<S, K> GetKey;
 
-        public string Route { get; set; }
 
         public Func<S, bool> FilterElements;
 
         public Mapping<K> KeyPropertyMapping { get; set; }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
+            : this(getKeyExpression, Mapping.New<S>())
         {
-            this.GetKey = getKey;
-
-            this.KeyPropertyMapping = Mapping.New<K>();
-
-            this.Route = route;
+          
         }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression, Mapping<S> elementMapping)
             : base(elementMapping)
         {
-            this.GetKey = getKey;
+            this.GetKey = getKeyExpression.Compile();
+            this.GetKeyExpression = getKeyExpression;
 
             this.KeyPropertyMapping = Mapping.New<K>();
-
-            this.Route = route;
         }
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
@@ -1073,11 +1111,15 @@ namespace Signum.Web
 
                 var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-                PropertyRoute route = ctx.PropertyRoute.Add("Item");
+                PropertyRoute route = ctx.PropertyRoute.Add("Item").Continue(GetKeyExpression);
+
+                string[] namesToAppend = Reflector.GetMemberList(GetKeyExpression).Select(MemberAccessGatherer.GetName).NotNull().ToArray();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
-                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, Route), null, route, itemCtx);
+                    var tce = new TypeContextExpression(new PropertyInfo[0], typeof(S), itemCtx.PropertyRoute, itemCtx.Value);
+
+                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, namesToAppend), null, route, itemCtx);
 
                     subContext.Value = KeyPropertyMapping(subContext);
 

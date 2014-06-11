@@ -68,7 +68,7 @@ namespace Signum.Web
 
                 if (entityStrip.ElementType.IsEmbeddedEntity() && entityStrip.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true), null));
                 }
 
@@ -100,7 +100,7 @@ namespace Signum.Web
                             itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
                 }
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

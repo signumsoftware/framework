@@ -64,7 +64,7 @@ namespace Signum.Web
 
                 if (repeater.ElementType.IsEmbeddedEntity() && repeater.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)repeater.Parent, 0);
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)repeater.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(repeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, repeater), templateTC.Value.ToString()));
                 }
 
@@ -87,7 +87,7 @@ namespace Signum.Web
                 {
                     sb.Add(new HtmlTag("span").SetInnerText(itemTC.Value.ToString()));
 
-                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC, itemTC.Index));
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                     sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                     if (repeater.Reorder)

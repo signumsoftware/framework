@@ -1174,7 +1174,7 @@ namespace Signum.Engine.Linq
                     Expression result = Completed(ee).GetBinding(fi);
 
                     if (result is MListExpression)
-                        return MListProjection((MListExpression)result);
+                        return MListProjection((MListExpression)result, withRowId: false);
                     
                     return result;
                 }
@@ -1189,7 +1189,7 @@ namespace Signum.Engine.Linq
                     Expression result = eee.GetBinding(fi);
 
                     if (result is MListExpression)
-                        return MListProjection((MListExpression)result);
+                        return MListProjection((MListExpression)result, withRowId: false);
                     
                     return result;
                 }
@@ -1204,7 +1204,7 @@ namespace Signum.Engine.Linq
                     Expression result = mee.GetBinding(fi);
 
                     if (result is MListExpression)
-                        return MListProjection((MListExpression)result);
+                        return MListProjection((MListExpression)result, withRowId: false);
 
                     return result;
                 }
@@ -2200,22 +2200,27 @@ namespace Signum.Engine.Linq
             return exp.Reverse().Aggregate((ac, e) => Expression.Coalesce(e, ac));
         }
 
-        internal ProjectionExpression MListProjection(MListExpression mle)
+        internal ProjectionExpression MListProjection(MListExpression mle, bool withRowId)
         {
             TableMList relationalTable = mle.TableMList;
 
             Alias tableAlias = NextTableAlias(mle.TableMList.Name);
             TableExpression tableExpression = new TableExpression(tableAlias, relationalTable);
 
-            Expression projector = relationalTable.FieldExpression(tableAlias, this);
+            Expression projector = relationalTable.FieldExpression(tableAlias, this, withRowId);
 
             Alias sourceAlias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, sourceAlias); // no Token
 
             var where = SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias));
+
+            var projectType = withRowId ?
+                typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdValue).MakeGenericType(mle.Type.ElementType())) :
+                mle.Type;
+
             var proj = new ProjectionExpression(
                 new SelectExpression(sourceAlias, false, null, pc.Columns, tableExpression, where, null, null, 0),
-                 pc.Projector, null, mle.Type);
+                 pc.Projector, null, projectType);
 
             return proj;
         }
