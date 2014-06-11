@@ -10,9 +10,10 @@ export function exploreAlerts(prefix : string, findOptions : Finder.FindOptions,
     Finder.explore(findOptions).then(() => updateAlerts(prefix, updateUrl)); 
 }
 
-export function createAlert(prefix: string, operationKey: string, updateUrl: string) {
+export function createAlert(event: MouseEvent, prefix: string, operationKey: string, updateUrl: string) {
 
-    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(() => updateAlerts(prefix, updateUrl));
+    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }, event)
+        .then(() => updateAlerts(prefix, updateUrl));
 }
 
 function updateAlerts(prefix: string, updateUrl: string) {

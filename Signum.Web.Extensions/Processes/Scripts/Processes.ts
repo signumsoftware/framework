@@ -60,8 +60,8 @@ export function refreshProgress(idProcess: string, prefix: string, getProgressUr
         , 500);
 }
 
-export function processFromMany(options: Operations.EntityOperationOptions ) : Promise<void> {
+export function processFromMany(options: Operations.EntityOperationOptions, event: MouseEvent) : Promise<void> {
     options.controllerUrl = SF.Urls.processFromMany; 
 
-    return Operations.constructFromManyDefault(options); 
+    return Operations.constructFromManyDefault(options, event); 
 }

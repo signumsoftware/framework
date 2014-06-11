@@ -905,12 +905,12 @@
     <Resource Include="Images\fondoLogin.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\bcerrar.png" />
-    <Resource Include="Images\bminimizar.png" />
+    <Resource Include="Images\bclose.png" />
+    <Resource Include="Images\bminimize.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\bcerrar-on.png" />
-    <Resource Include="Images\bminimizar-on.png" />
+    <Resource Include="Images\bclose-on.png" />
+    <Resource Include="Images\bminimize-on.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\document_view.png" />

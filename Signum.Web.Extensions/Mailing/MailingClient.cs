@@ -117,7 +117,7 @@ namespace Signum.Web.Mailing
                     new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
-                        OnClick = ctx => Module["createMailFromTemplate"](ctx.Options(),
+                        OnClick = ctx => Module["createMailFromTemplate"](ctx.Options(), JsFunction.Event, 
                             new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }

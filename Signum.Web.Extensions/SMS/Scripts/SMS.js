@@ -150,7 +150,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         $message.val($message.val().substring(0, $message[0].selectionStart) + selected + $message.val().substring($message[0].selectionEnd));
     }
 
-    function createSmsWithTemplateFromEntity(options, url, smsTemplateFindOptions) {
+    function createSmsWithTemplateFromEntity(options, event, url, smsTemplateFindOptions) {
         Finder.find(smsTemplateFindOptions).then(function (ev) {
             if (!ev)
                 return;
@@ -158,12 +158,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
             options.controllerUrl = url;
 
-            Operations.constructFromDefault(options);
+            Operations.constructFromDefault(options, event);
         });
     }
     exports.createSmsWithTemplateFromEntity = createSmsWithTemplateFromEntity;
 
-    function sendMultipleSMSMessagesFromTemplate(options, url, smsTemplateFindOptions) {
+    function sendMultipleSMSMessagesFromTemplate(options, event, url, smsTemplateFindOptions) {
         Finder.find(smsTemplateFindOptions).then(function (ev) {
             if (!ev)
                 return;
@@ -171,12 +171,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             options.requestExtraJsonData = { template: ev.runtimeInfo.key() };
             options.controllerUrl = url;
 
-            Operations.constructFromManyDefault(options);
+            Operations.constructFromManyDefault(options, event);
         });
     }
     exports.sendMultipleSMSMessagesFromTemplate = sendMultipleSMSMessagesFromTemplate;
 
-    function sentMultipleSms(options, prefix, urlModel, urlOperation) {
+    function sentMultipleSms(options, event, prefix, urlModel, urlOperation) {
         var prefixModel = prefix.child("New");
         Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
             controllerUrl: urlModel
@@ -187,7 +187,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, Validator.getFormValuesHtml(eHtml));
             options.controllerUrl = urlOperation;
 
-            Operations.constructFromManyDefault(options);
+            Operations.constructFromManyDefault(options, event);
         });
     }
     exports.sentMultipleSms = sentMultipleSms;

@@ -10,8 +10,8 @@ export function explore(prefix: string, options: Finder.FindOptions, urlUpdate: 
         .then(() => updateNotes(prefix, urlUpdate));
 }
 
-export function createNote(prefix: string, operationKey: string, urlUpdate: string) {
-    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true })
+export function createNote(event: MouseEvent, prefix: string, operationKey: string, urlUpdate: string) {
+    Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }, event)
         .then(() => updateNotes(prefix, urlUpdate));
 }
 

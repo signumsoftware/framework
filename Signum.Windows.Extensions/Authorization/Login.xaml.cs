@@ -23,15 +23,14 @@ namespace Signum.Windows.Authorization
         public Login()
         {
             this.InitializeComponent();
-            //estas instanciacniones están aquí porque en este punto todavía no se ha registrado el schema de Uri
-            //para "pack", ya que el login se hace un poco antes de lanzarse el registro de la aplicación. Una manera de evitarlo
-            //sería poner esta línea:
+            //the assignments are here becouse, at this point, the Uri schema has not been registered
+            //for "pack", since this is done after app registration. One way to avoid it would be addding:
             //UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
-            //en primer lugar en el Main de Program.cs de la solución.
-            _minimizarFocus = ExtensionsImageLoader.GetImageSortName("bminimizar-on.png");
-            _minimizarNoFocus = ExtensionsImageLoader.GetImageSortName("bminimizar.png");
-            _cerrarFocus = ExtensionsImageLoader.GetImageSortName("bcerrar-on.png");
-            _cerrarNoFocus = ExtensionsImageLoader.GetImageSortName("bcerrar.png");
+            //in the first line of Main method in Program.cs.
+            _minimizeFocus = ExtensionsImageLoader.GetImageSortName("bminimize-on.png");
+            _minimizeNoFocus = ExtensionsImageLoader.GetImageSortName("bminimize.png");
+            _closeFocus = ExtensionsImageLoader.GetImageSortName("bclose-on.png");
+            _closeNoFocus = ExtensionsImageLoader.GetImageSortName("bclose.png");
             SettingNewPassword = false;
             ReLogin = false;
         }
@@ -44,10 +43,8 @@ namespace Signum.Windows.Authorization
             {
                 reLogin = value;
                 this.tbUserName.IsReadOnly = value;
-               
             }
         }
-
 
         public string UserName
         {
@@ -61,18 +58,19 @@ namespace Signum.Windows.Authorization
             set { tbPassword.Password = value; }
         }
 
-
         public string NewPassword
         {
             get { return tbNewPassword1.Password; }
             set { tbNewPassword1.Password = value; }
         }
+
         public string NewPassword2
         {
             get { return tbNewPassword2.Password; }
             set { tbNewPassword2.Password = value; }
         }
-        private GridLength rowHeight ;
+
+        private GridLength rowHeight;
         private bool settingNewPassword;
         public bool SettingNewPassword
         {
@@ -131,12 +129,12 @@ namespace Signum.Windows.Authorization
             tbNewPassword1.Focus();
         }
 
-        private BitmapSource _minimizarFocus;
-        private BitmapSource _minimizarNoFocus;
-        private BitmapSource _cerrarFocus;
-        private BitmapSource _cerrarNoFocus;
+        private BitmapSource _minimizeFocus;
+        private BitmapSource _minimizeNoFocus;
+        private BitmapSource _closeFocus;
+        private BitmapSource _closeNoFocus;
 
-        public  event EventHandler LoginClicked;
+        public event EventHandler LoginClicked;
 
         private void btLogin_Click(object sender, RoutedEventArgs e)
         {
@@ -168,20 +166,20 @@ namespace Signum.Windows.Authorization
 
         private void EntraMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iMinimizar.Source = _minimizarFocus;
+            iMinimizar.Source = _minimizeFocus;
         }
         private void SaleMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iMinimizar.Source = _minimizarNoFocus;
+            iMinimizar.Source = _minimizeNoFocus;
         }
 
         private void EntraCerrar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iCerrar.Source = _cerrarFocus;
+            iCerrar.Source = _closeFocus;
         }
         private void SaleCerrar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iCerrar.Source = _cerrarNoFocus;
+            iCerrar.Source = _closeNoFocus;
         }
 
         protected override AutomationPeer OnCreateAutomationPeer()

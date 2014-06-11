@@ -7,8 +7,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.explore = explore;
 
-    function createNote(prefix, operationKey, urlUpdate) {
-        Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }).then(function () {
+    function createNote(event, prefix, operationKey, urlUpdate) {
+        Operations.constructFromDefault({ prefix: prefix, operationKey: operationKey, isLite: true }, event).then(function () {
             return exports.updateNotes(prefix, urlUpdate);
         });
     }

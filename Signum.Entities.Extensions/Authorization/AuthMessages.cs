@@ -90,8 +90,7 @@ namespace Signum.Entities.Authorization
         PasswordHasBeenChangedSuccessfully,
         [Description("The password must have a value")]
         PasswordMustHaveAValue,
-        [Description("Your password is near to expired")]
-        PasswordNearExpired,
+        YourPasswordIsNearExpiration,
         PasswordsAreDifferent,
         PasswordsDoNotMatch,
 

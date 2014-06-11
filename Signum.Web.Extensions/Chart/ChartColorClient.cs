@@ -38,7 +38,7 @@ namespace Signum.Web.Chart
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("ChartPalette"),
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)
-                            .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related, "Related",
+                            .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related,
                                 new EntityMapping<ChartColorDN>(false)
                                     .SetProperty(m => m.Color, ctx=>
                                     {

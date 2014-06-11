@@ -57,10 +57,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Navigator", "
     }
     exports.refreshProgress = refreshProgress;
 
-    function processFromMany(options) {
+    function processFromMany(options, event) {
         options.controllerUrl = SF.Urls.processFromMany;
 
-        return Operations.constructFromManyDefault(options);
+        return Operations.constructFromManyDefault(options, event);
     }
     exports.processFromMany = processFromMany;
 });

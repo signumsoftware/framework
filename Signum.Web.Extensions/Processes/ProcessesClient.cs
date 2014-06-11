@@ -120,7 +120,7 @@ namespace Signum.Web.Processes
             }
 
             List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
-                coc => ProcessesClient.Module["processFromMany"](coc.Options())
+                coc => ProcessesClient.Module["processFromMany"](coc.Options(), JsFunction.Event)
                 )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
 
 
