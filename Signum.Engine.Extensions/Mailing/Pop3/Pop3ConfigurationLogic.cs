@@ -327,7 +327,8 @@ namespace Signum.Engine.Mailing.Pop3
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
-            if (!dup.Recipients.OrderBy(a => a.GetHashCode()).SequenceEqual(email.Recipients.OrderBy(a => a.GetHashCode())))
+            if (!dup.Recipients.Where(a=>a.Kind != EmailRecipientKind.Bcc).OrderBy(a => a.GetHashCode())
+                .SequenceEqual(email.Recipients.Where(a => a.Kind != EmailRecipientKind.Bcc).OrderBy(a => a.GetHashCode())))
                 return false;
 
             if (!dup.From.Equals(email.From))
