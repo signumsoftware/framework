@@ -58,6 +58,7 @@ namespace Signum.Web
         public static readonly Context Default = new Context(null, null)
         {
             FormGroupStyle = FormGroupStyle.LabelColumns,
+            FormGroupSize = FormGroupSize.Normal,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
             PlaceholderLabels = false,
@@ -68,6 +69,23 @@ namespace Signum.Web
         {
             get { return formGroupStyle ?? Parent.FormGroupStyle; }
             set { formGroupStyle = value; }
+        }
+
+        FormGroupSize? formGroupSize;
+        public FormGroupSize FormGroupSize
+        {
+            get { return formGroupSize ?? Parent.FormGroupSize; }
+            set { formGroupSize = value; }
+        }
+
+        public string FormGroupSizeCss 
+        {
+            get 
+            {
+                return FormGroupSize == FormGroupSize.Normal ? "form-md" :
+                    FormGroupSize == FormGroupSize.Small ? "form-sm" :
+                    "form-xs";
+            }
         }
 
         bool? placeholderLabels;
@@ -194,6 +212,15 @@ namespace Signum.Web
         SrOnly,
         LabelColumns,
     }
+
+    public enum FormGroupSize
+    { 
+        Normal,
+        Small,
+        ExtraSmall
+    }
+
+
 
     #region TypeContext
     public abstract class TypeContext : Context
