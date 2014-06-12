@@ -20,7 +20,7 @@ namespace Signum.Web
 
     public class ToolBarButton
     {
-        public string Id { get; set; }
+        public string Id { get; private set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }
@@ -33,11 +33,13 @@ namespace Signum.Web
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
 
-        public ToolBarButton()
+        public ToolBarButton(string prefix, string idToAppend)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
+            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
         }
+
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
@@ -58,6 +60,9 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
+            if (Href != null)
+                a.Attr("href", Href);
+
             if (!Enabled)
                 a.Attr("disabled", "disabled");
 
@@ -70,17 +75,20 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            var script = OnClick == null ? MvcHtmlString.Empty :
-                MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+            var html = result.ToHtml();
 
-            return result.ToHtml().Concat(script);
+            if (OnClick == null)
+                return html;
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+
+            return html.Concat(script);
         }
 
         public IMenuItem ToMenuItem()
         {
-            var result = new MenuItem
+            var result = new MenuItem(Id)
             {
-                Id = Id,
                 Text = Text,
                 Tooltip = Tooltip,
                 Title = Title,
@@ -118,10 +126,11 @@ namespace Signum.Web
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
 
-        public MenuItem()
+        public MenuItem(string id)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
+            this.Id = id;
         }
 
         public MvcHtmlString ToHtml()
@@ -141,6 +150,9 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
+            if (Href != null)
+                a.Attr("href", Href);
+
             if (!Enabled)
                 a.Attr("disabled", "disabled");
 
@@ -153,10 +165,14 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            var script = OnClick == null ? MvcHtmlString.Empty :
-                MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
-            
-            return result.ToHtml().Concat(script);
+            var html = result.ToHtml();
+
+            if (OnClick == null)
+                return html;
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+
+            return html.Concat(script);
         }
     }
 }

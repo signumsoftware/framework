@@ -70,12 +70,12 @@ namespace Signum.Web.Operations
         public static ActionResult DefaultExecuteResult(this ControllerBase controller, IdentifiableEntity entity, string prefix = null)
         {
             if (prefix == null)
-                prefix = controller.Prefix(); 
+                prefix = controller.Prefix();
 
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult(); 
+                return new ContentResult();
 
             if (prefix.HasText())
             {
@@ -109,7 +109,7 @@ namespace Signum.Web.Operations
             if (!request[ViewDataKeys.AvoidReturnRedirect].HasText())
                 return controller.RedirectHttpOrAjax(Navigator.FindRoute(type));
 
-            return new ContentResult(); 
+            return new ContentResult();
         }
 
         public static ActionResult DefaultConstructResult(this ControllerBase controller, IdentifiableEntity entity, string newPrefix = null)
@@ -120,7 +120,7 @@ namespace Signum.Web.Operations
                 return new ContentResult();
 
             if (newPrefix == null)
-                newPrefix = request["newPrefix"]; 
+                newPrefix = request["newPrefix"];
 
             if (entity.Modified == ModifiedState.SelfModified)
                 controller.ViewData[ViewDataKeys.WriteEntityState] = true;
@@ -144,7 +144,7 @@ namespace Signum.Web.Operations
 
         public static OperationSymbol GetOperationKeyAssert(this Controller controller)
         {
-            var operationFullKey = controller.Request.RequestContext.HttpContext.Request["operationFullKey"]; 
+            var operationFullKey = controller.Request.RequestContext.HttpContext.Request["operationFullKey"];
 
             var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(operationFullKey);
 
@@ -228,19 +228,20 @@ namespace Signum.Web.Operations
             }
 
             List<ToolBarButton> buttons = new List<ToolBarButton>();
-            Dictionary<EntityOperationGroup, ToolBarDropDown> groups = new Dictionary<EntityOperationGroup,ToolBarDropDown>();
+            Dictionary<EntityOperationGroup, ToolBarDropDown> groups = new Dictionary<EntityOperationGroup, ToolBarDropDown>();
 
             foreach (var eoc in operations)
             {
                 EntityOperationGroup group = GetDefaultGroup(eoc);
 
-                if(group != null)
+                if (group != null)
                 {
                     var cm = groups.GetOrCreate(group, () =>
                     {
-                        var tbm = new ToolBarDropDown
+                        var id = group == EntityOperationGroup.Create ? "tmConstructors" : "";
+
+                        var tbm = new ToolBarDropDown(ctx.Prefix, id)
                         {
-                            Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
                             Title = group.Description(),
                             Text = group.Description(),
                             CssClass = group.CssClass,
@@ -253,7 +254,7 @@ namespace Signum.Web.Operations
                         return tbm;
                     });
 
-                   cm.Items.Add(CreateToolBarButton(eoc, group).ToMenuItem());
+                    cm.Items.Add(CreateToolBarButton(eoc, group).ToMenuItem());
                 }
                 else
                 {
@@ -266,7 +267,7 @@ namespace Signum.Web.Operations
                 item.Items = item.Items.OrderBy(a => ((MenuItem)a).Order).ToList();
             }
 
-            return buttons.OrderBy(a=>a.Order).ToArray();
+            return buttons.OrderBy(a => a.Order).ToArray();
         }
 
         private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
@@ -282,15 +283,13 @@ namespace Signum.Web.Operations
 
         protected internal virtual ToolBarButton CreateToolBarButton(EntityOperationContext ctx, EntityOperationGroup group)
         {
-            return new ToolBarButton
+            return new ToolBarButton(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_")),
-
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
-                Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
+                Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
@@ -436,10 +435,10 @@ namespace Signum.Web.Operations
 
         public virtual MenuItem CreateContextual(ContextualOperationContext ctx, Func<ContextualOperationContext, JsFunction> defaultClick)
         {
-            return new MenuItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_")),
+            var id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"));
 
+            return new MenuItem(id)
+            {
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
@@ -452,6 +451,6 @@ namespace Signum.Web.Operations
             };
         }
 
-        
+
     }
 }
