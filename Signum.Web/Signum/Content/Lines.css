@@ -229,7 +229,7 @@ ul.nav-tabs
     height: 20px;
 }
 
-.form-xs .form-group 
+.form-group.form-xs 
 {
     margin-bottom: 6px;
 }
@@ -240,35 +240,12 @@ ul.nav-tabs
     font-size: 16px;
 }
 
-
-.form-horizontal.form-xs .control-label, 
-.form-horizontal.form-xs .radio, 
-.form-horizontal.form-xs .checkbox, 
-.form-horizontal.form-xs .radio-inline, 
-.form-horizontal.form-xs .checkbox-inline,
-.form-horizontal.form-xs .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
-}
-
 .form-horizontal .form-xs .control-label, 
 .form-horizontal .form-xs .radio, 
 .form-horizontal .form-xs .checkbox, 
 .form-horizontal .form-xs .radio-inline, 
 .form-horizontal .form-xs .checkbox-inline,
 .form-horizontal .form-xs .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
-}
-
-.form-xs .form-horizontal .control-label, 
-.form-xs .form-horizontal .radio, 
-.form-xs .form-horizontal .checkbox, 
-.form-xs .form-horizontal .radio-inline, 
-.form-xs .form-horizontal .checkbox-inline,
-.form-xs .form-horizontal .form-control-static  {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0px;
@@ -293,7 +270,7 @@ ul.nav-tabs
     padding: 4px 6px;
 }
 
-.form-sm .form-group 
+.form-group.form-sm 
 {
     margin-bottom: 5px;
 }
@@ -304,34 +281,12 @@ ul.nav-tabs
     font-size: 18px;
 }
 
-.form-horizontal.form-sm .control-label, 
-.form-horizontal.form-sm .radio, 
-.form-horizontal.form-sm .checkbox, 
-.form-horizontal.form-sm .radio-inline, 
-.form-horizontal.form-sm .checkbox-inline,
-.form-horizontal.form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 5px;
-}
-
 .form-horizontal .form-sm .control-label, 
 .form-horizontal .form-sm .radio, 
 .form-horizontal .form-sm .checkbox, 
 .form-horizontal .form-sm .radio-inline, 
 .form-horizontal .form-sm .checkbox-inline,
 .form-horizontal .form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 5px;
-}
-
-.form-sm .form-horizontal .control-label, 
-.form-sm .form-horizontal .radio, 
-.form-sm .form-horizontal .checkbox, 
-.form-sm .form-horizontal .radio-inline, 
-.form-sm .form-horizontal .checkbox-inline,
-.form-sm .form-horizontal .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 5px;
