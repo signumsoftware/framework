@@ -164,5 +164,15 @@ namespace Signum.Engine.Isolation
 
             return IsolationDN.OverrideIfNecessary(Lite.Parse<IsolationDN>(headers.GetHeader<string>(val)));
         }
+
+        public static IEnumerable<T> WhereCurrentIsolationInMemory<T>(this IEnumerable<T> collection) where T : Entity
+        {
+            var curr = IsolationDN.Current;
+
+            if (curr == null || strategies[typeof(T)] == IsolationStrategy.None)
+                return collection;
+
+            return collection.Where(a => a.Isolation().Is(curr));
+        }
     }
 }

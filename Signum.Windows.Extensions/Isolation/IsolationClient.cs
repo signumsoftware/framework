@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Windows.Controls;
 using System.ServiceModel;
+using System.Windows.Threading;
 
 namespace Signum.Windows.Isolation
 {
@@ -81,9 +82,17 @@ namespace Signum.Windows.Isolation
 
                 if (iso != null)
                 {
+                    AssertSecondaryThread();
+
                     IsolationDN.CurrentThreadVariable.Value = iso;
                 }
             }
+        }
+
+        private static void AssertSecondaryThread()
+        {
+            if (Application.Current.Dispatcher == Dispatcher.CurrentDispatcher)
+                throw new InvalidOperationException("Isolation can not be set in the main Thread");
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
@@ -114,6 +123,8 @@ namespace Signum.Windows.Isolation
                     return null;
                 }
                 ctx.Args.Add(isolation);
+
+                AssertSecondaryThread();
 
                 return IsolationDN.OverrideIfNecessary(isolation);
             }
