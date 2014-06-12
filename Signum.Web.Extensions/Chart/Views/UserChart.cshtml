@@ -46,22 +46,28 @@
         var entityTypePrefix = uc.SubContext(a => a.EntityType).Prefix;
         
         @Html.EntityLine(uc, f => f.EntityType, el =>
-   {
-       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-       el.AttachFunction = ChartClient.Module["attachShowCurrentEntity"](el);
-   })
+        {
+            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+            el.AttachFunction = ChartClient.Module["attachShowCurrentEntity"](el);
+        })
+
         <p class="messageEntity col-sm-offset-2">
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
 
-        <div class="repeater-inline form-inline form-sm sf-filters-list ">
-            @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
-        </div>
+        using(var sc= uc.SubContext())
+        {
+            sc.FormGroupSize = FormGroupSize.Small;
+            
+            <div class="repeater-inline form-inline sf-filters-list ">
+                @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
+            </div>
 
-        <div class="repeater-inline form-inline form-sm sf-filters-list">
-            @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
-        </div>
-
+            <div class="repeater-inline form-inline sf-filters-list">
+                @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
+            </div>
+        }
+    
         <div id="@uc.Compose("sfChartBuilderContainer")">
             @Html.Partial(ChartClient.ChartBuilderView, uc.Value)
         </div>

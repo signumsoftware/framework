@@ -24,7 +24,7 @@ namespace Signum.Web.Selenium
     {
         public static string ButtonLocator(this IEntityButtonContainer container, string buttonId)
         {
-            return container.ContainerLocator() + " #" + (container.Prefix != null ? container.Prefix + "_" : "") + buttonId;
+            return container.ContainerLocator() + " #" + "_".CombineIfNotEmpty(container.Prefix, buttonId);
         }
 
         public static string OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)

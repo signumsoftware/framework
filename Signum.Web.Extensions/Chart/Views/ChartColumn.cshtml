@@ -75,9 +75,10 @@
         <td />
         }
         <td colspan="1">
-            <div class="form-inline form-sm">
+            <div class="form-inline">
                 @using (var sc = tc.SubContext())
                 {
+                    sc.FormGroupSize = FormGroupSize.Small;
                     sc.FormGroupStyle = FormGroupStyle.Basic;
                     
                     @Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")
