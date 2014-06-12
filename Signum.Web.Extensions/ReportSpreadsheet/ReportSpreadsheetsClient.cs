@@ -88,7 +88,7 @@ namespace Signum.Web.Reports
 
                     foreach (Lite<ExcelReportDN> report in reports)
                     {
-                        items.Add(new MenuItem
+                        items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfExcelReport"+report.Id))
                         {
                             Title = report.ToString(),
                             Text = report.ToString(),
@@ -99,19 +99,17 @@ namespace Signum.Web.Reports
 
                 items.Add(new MenuItemSeparator());
 
-                var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key(); 
+                var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key();
 
-                items.Add(new MenuItem
+                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"))
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
                     OnClick = Module["administerExcelReports"](ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
 
-                items.Add(new MenuItem
+                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"))
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"),
                     Title = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
                     OnClick = Module["createExcelReports"](ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
@@ -119,9 +117,8 @@ namespace Signum.Web.Reports
 
                 return new ToolBarButton[]
                 {
-                    new ToolBarDropDown
+                    new ToolBarDropDown(ctx.Prefix, "tmExcel")
                     { 
-                        Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
                         Title = "Excel", 
                         Text = "Excel",
                         Items = items
@@ -139,9 +136,8 @@ namespace Signum.Web.Reports
 
         private static ToolBarButton PlainExcel(QueryButtonContext ctx)
         {
-            return new ToolBarButton
+            return new ToolBarButton(ctx.Prefix, "sfToExcelPlain")
             {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = Module["toPlainExcel"](ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
@@ -150,9 +146,8 @@ namespace Signum.Web.Reports
 
         internal static ToolBarButton UserChartButton(UrlHelper url, string prefix)
         {
-            return new ToolBarButton
+            return new ToolBarButton(prefix, "qbUserChartExportData")
             {
-                Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
                 Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = ChartClient.Module["exportData"](prefix,

@@ -60,16 +60,14 @@ namespace Signum.Web.Chart
                     var typeName = Navigator.ResolveWebTypeName(entity.Type.ToType());
                     return new[]
                     {
-                        new ToolBarButton
+                        new ToolBarButton(ctx.Prefix, "ebChartColorSave")
                         {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorSave"),
                             Text = ChartMessage.SavePalette.NiceToString(),
                             Style = BootstrapStyle.Primary,
                             OnClick = Module["savePalette"](ctx.Url.Action<ColorChartController>(pc => pc.SavePalette(typeName)))
                         },
-                        new ToolBarButton
+                        new ToolBarButton(ctx.Prefix, "ebChartColorCreate")
                         {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorCreate"),
                             Text =ChartMessage.NewPalette.NiceToString(),
                             Href = RouteHelper.New().Action<ColorChartController>(cc => cc.CreateNewPalette(typeName))
                         }
