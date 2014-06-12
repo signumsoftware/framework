@@ -134,7 +134,7 @@ namespace Signum.Web.Chart
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName).OrderBy(a => a.ToString()))
             {
-                items.Add(new MenuItem
+                items.Add(new MenuItem("sfUserChart"+uc.Id)
                 {
                     Text = uc.ToString(),
                     Title = uc.ToString(),
@@ -149,7 +149,7 @@ namespace Signum.Web.Chart
             if (Navigator.IsCreable(typeof(UserChartDN), isSearch: true))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
-                items.Add(new MenuItem
+                items.Add(new MenuItem("createUserChart")
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     Title = uqNewText,
@@ -161,7 +161,7 @@ namespace Signum.Web.Chart
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string ucEditText = ChartMessage.EditUserChart.NiceToString();
-                items.Add(new MenuItem
+                items.Add(new MenuItem("qbUserChartEdit")
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     Title = ucEditText,
@@ -172,9 +172,8 @@ namespace Signum.Web.Chart
 
             string ucUserChartText = typeof(UserChartDN).NicePluralName();
 
-            return new ToolBarDropDown
+            return new ToolBarDropDown(prefix,"tmUserCharts")
             {
-                Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
                 Title = ucUserChartText,
                 Text = ucUserChartText,
                 Items = items

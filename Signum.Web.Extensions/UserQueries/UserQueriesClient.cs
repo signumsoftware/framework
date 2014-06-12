@@ -148,7 +148,7 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName).OrderBy(a => a.ToString()))
             {
-                items.Add(new MenuItem
+                items.Add(new MenuItem("sfUserQuery"+uq.Id)
                 {
                     Text = uq.ToString(),
                     Title = uq.ToString(),
@@ -162,9 +162,8 @@ namespace Signum.Web.UserQueries
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearch: true))
             {
-                items.Add(new MenuItem
+                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"))
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     Title = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
                     Text = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
                     OnClick = Module["createUserQuery"](ctx.Prefix, ctx.Url.Action("Create", "UserQueries"))
@@ -173,9 +172,8 @@ namespace Signum.Web.UserQueries
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                items.Add(new MenuItem
+                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"))
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
                     Title = UserQueryMessage.UserQueries_Edit.NiceToString(),
                     Text = UserQueryMessage.UserQueries_Edit.NiceToString(),
                     Href = Navigator.NavigateRoute(currentUserQuery)
@@ -185,9 +183,8 @@ namespace Signum.Web.UserQueries
             string uqUserQueriesText = UserQueryMessage.UserQueries_UserQueries.NiceToString();
             return new ToolBarButton[]
             {
-                new ToolBarDropDown
+                new ToolBarDropDown(ctx.Prefix, "tmUserQueries")
                 { 
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
                     Title = uqUserQueriesText,
                     Text = uqUserQueriesText,
                     Items = items

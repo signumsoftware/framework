@@ -139,7 +139,8 @@ namespace Signum.Web.AuthAdmin
         private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
             where T : ModifiableEntity
         {
-            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] {  new ToolBarButton 
+            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] { 
+                new ToolBarButton (ctx.Prefix,partialViewName)
                 { 
                     Text = AuthMessage.Save.NiceToString(),
                     Style = BootstrapStyle.Primary,
