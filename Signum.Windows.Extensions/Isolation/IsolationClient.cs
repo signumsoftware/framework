@@ -124,8 +124,6 @@ namespace Signum.Windows.Isolation
                 }
                 ctx.Args.Add(isolation);
 
-                AssertSecondaryThread();
-
                 return IsolationDN.OverrideIfNecessary(isolation);
             }
 
