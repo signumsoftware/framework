@@ -14,58 +14,55 @@ namespace Signum.Utilities
     public static class Extensions
     {
         #region Parse Number
-        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer)
+        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
             int result;
-            if (int.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (int.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer)
+        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
             long result;
-            if (long.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (long.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer)
+        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
             short result;
-            if (short.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (short.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands)
+        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
         {
             float result;
-            if (float.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (float.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands)
+        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
         {
             double result;
-            if (double.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (double.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number,CultureInfo ci=null)
+        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo ci = null)
         {
             decimal result;
-            if (ci == null)
-                ci = CultureInfo.CurrentCulture;
-
-            if (decimal.TryParse(str, ns,ci , out result))
+            if (decimal.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
