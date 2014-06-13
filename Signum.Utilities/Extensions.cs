@@ -59,10 +59,13 @@ namespace Signum.Utilities
                 return null;
         }
 
-        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number)
+        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number,CultureInfo ci=null)
         {
             decimal result;
-            if (decimal.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
+            if (ci == null)
+                ci = CultureInfo.CurrentCulture;
+
+            if (decimal.TryParse(str, ns,ci , out result))
                 return result;
             else
                 return null;
