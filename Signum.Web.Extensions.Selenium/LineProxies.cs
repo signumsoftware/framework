@@ -96,7 +96,12 @@ namespace Signum.Web.Selenium
             return ReflectionTools.Parse(StringValue, type);
         }
 
-        public void SetValue(object value, string format)
+        public T GetValue<T>()
+        {
+            return ReflectionTools.Parse<T>(StringValue); 
+        }
+
+        public void SetValue(object value, string format = null)
         {
             StringValue = value == null ? null :
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
