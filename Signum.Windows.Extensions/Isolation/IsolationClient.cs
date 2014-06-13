@@ -68,31 +68,28 @@ namespace Signum.Windows.Isolation
                     return null;
                 };
 
-                Navigator.Manager.TaskNormalWindow += Manager_TaskNormalWindow;
+                Async.OnShowInAnotherThread += Async_OnShowInAnotherThread;
+
                 Navigator.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
             }
         }
 
-        static void Manager_TaskNormalWindow(NormalWindow win, ModifiableEntity ent)
+        static Action<Window> Async_OnShowInAnotherThread()
         {
-            var ident = ent as IdentifiableEntity;
-            if (ident != null)
+            Lite<IsolationDN> current = IsolationDN.Current;
+
+            return win =>
             {
-                var iso = ident.TryIsolation();
+                if (Application.Current.Dispatcher == Dispatcher.CurrentDispatcher)
+                    throw new InvalidOperationException("Isolation can not be set in the main Thread");
 
-                if (iso != null)
-                {
-                    AssertSecondaryThread();
+                var entity = win.DataContext as IdentifiableEntity;
 
-                    IsolationDN.CurrentThreadVariable.Value = iso;
-                }
-            }
-        }
+                if(entity != null)
+                    current = current ?? entity.TryIsolation();
 
-        private static void AssertSecondaryThread()
-        {
-            if (Application.Current.Dispatcher == Dispatcher.CurrentDispatcher)
-                throw new InvalidOperationException("Isolation can not be set in the main Thread");
+                IsolationDN.CurrentThreadVariable.Value = current;
+            }; 
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
