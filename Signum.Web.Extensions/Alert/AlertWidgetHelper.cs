@@ -49,7 +49,7 @@ namespace Signum.Web.Alerts
                 new { Count = CountAlerts(ident.ToLite(), "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 
-            var items = alertList.Select(a => new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfAlertExplore"))
+            var items = alertList.Select(a => new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfAlertExplore_" + a.Property))
             {
                 OnClick = AlertClient.Module["exploreAlerts"](ctx.Prefix, GetFindOptions(ident, a.Property).ToJS(ctx.Prefix, "alerts"), url),
                 CssClass = "sf-alert-view",

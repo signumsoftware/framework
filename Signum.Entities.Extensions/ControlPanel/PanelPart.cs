@@ -120,7 +120,6 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [DescriptionOptions(DescriptionOptions.None)]
     public enum PanelStyle
     {
         Default,
