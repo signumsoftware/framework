@@ -49,23 +49,23 @@ namespace Signum.Web.AuthAdmin
 
                 if (properties)
                     Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
-                        Mapping.New<PropertyAllowed>(), "Resource_Path", true);
+                        Mapping.New<PropertyAllowed>(), true);
 
                 if (queries)
                 {
                     QueryClient.Start();
 
                     Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key,
-                        Mapping.New<bool>(), "Resource_Key", true);
+                        Mapping.New<bool>(), true);
                 }
 
                 if (operations)
                     Register<OperationRulePack, OperationAllowedRule, OperationSymbol, OperationAllowed, OperationSymbol>("operations", a => a.Resource,
-                        Mapping.New<OperationAllowed>(), "Resource", true);
+                        Mapping.New<OperationAllowed>(), true);
 
                 if (permissions)
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionSymbol, bool, PermissionSymbol>("permissions", a => a.Resource,
-                        Mapping.New<bool>(), "Resource", false);
+                        Mapping.New<bool>(), false);
 
                 LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
@@ -90,7 +90,7 @@ namespace Signum.Web.AuthAdmin
                 Mapping.ParseHtmlBool(dic["None"]));
         }
 
-        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey, Mapping<A> allowedMapping, string getKeyRoute, bool embedded)
+        static void Register<T, AR, R, A, K>(string partialViewName, Expression<Func<AR, K>> getKey, Mapping<A> allowedMapping, bool embedded)
             where T : BaseRulePack<AR>
             where AR : AllowedRule<R, A>, new()
             where R : IdentifiableEntity
@@ -104,10 +104,8 @@ namespace Signum.Web.AuthAdmin
                 PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .SetProperty(m => m.Rules,
-                        new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
-                        {
-                            ElementMapping = new EntityMapping<AR>(false).SetProperty(p => p.Allowed, allowedMapping)
-                        })
+                        new MListDictionaryMapping<AR, K>(getKey,
+                            new EntityMapping<AR>(false).SetProperty(p => p.Allowed, allowedMapping)))
             });
 
             RegisterSaveButton<T>(partialViewName, embedded);
@@ -123,9 +121,8 @@ namespace Signum.Web.AuthAdmin
                 PartialViewName = e => viewPrefix.Formato("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
                     .SetProperty(m => m.Rules,
-                        new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource, "Resource")
-                        {
-                            ElementMapping = new EntityMapping<TypeAllowedRule>(false)
+                        new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource,
+                            new EntityMapping<TypeAllowedRule>(false)
                             .SetProperty(p => p.Allowed, ctx => new TypeAllowedAndConditions(
                                 ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
                                 ctx.Inputs.SubDictionary("Conditions").IndexSubDictionaries().Select(d =>
@@ -133,7 +130,7 @@ namespace Signum.Web.AuthAdmin
                                         SymbolLogic<TypeConditionSymbol>.ToSymbol(d["ConditionName"]),
                                         ParseTypeAllowed(d.SubDictionary("Allowed")))
                                    ).ToReadOnly()))
-                        })
+                        ))
             });
 
             RegisterSaveButton<TypeRulePack>("types", false);
@@ -142,7 +139,8 @@ namespace Signum.Web.AuthAdmin
         private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
             where T : ModifiableEntity
         {
-            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] {  new ToolBarButton 
+            ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) => new[] { 
+                new ToolBarButton (ctx.Prefix,partialViewName)
                 { 
                     Text = AuthMessage.Save.NiceToString(),
                     Style = BootstrapStyle.Primary,

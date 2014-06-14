@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Isolation
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation=true)]
     public class IsolationDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

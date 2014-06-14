@@ -10,7 +10,7 @@
 @using (var e = Html.TypeContext<UserQueryDN>())
 {
     e.LabelColumns = new BsColumn(2);
-    
+
     object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
     ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
     
@@ -24,8 +24,8 @@
     @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
     @Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
-                 new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
-                 Html.Span(null, query.Value.Name, "form-control-static"))
+                     new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                     Html.Span(null, query.Value.Name, "form-control-static"))
 
     }
     
@@ -34,28 +34,35 @@
     var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
         
     @Html.EntityLine(e, f => f.EntityType, el =>
-        {
-            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-            el.AttachFunction = UserQueriesClient.Module["attachShowCurrentEntity"](el);
-        })
+    {
+        el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+        el.AttachFunction = UserQueriesClient.Module["attachShowCurrentEntity"](el);
+    })
     
     <p class="messageEntity col-sm-offset-2">
         @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
     </p>
+    
     @Html.ValueLine(e, f => f.WithoutFilters)
 
-    <div class="repeater-inline form-inline form-sm sf-filters-list ">
+    using (var sc = e.SubContext())
+    {
+        sc.FormGroupSize = FormGroupSize.Small;
+        
+    <div class="repeater-inline form-inline sf-filters-list ">
         @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     </div>
 
     @Html.ValueLine(e, f => f.ColumnsMode)
-    <div class="repeater-inline form-inline form-sm sf-filters-list">
+    <div class="repeater-inline form-inline sf-filters-list">
         @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
     </div>
     
-    <div class="repeater-inline form-inline form-sm sf-filters-list">
+    <div class="repeater-inline form-inline sf-filters-list">
         @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
     </div>
+    }
+
     @Html.ValueLine(e, f => f.PaginationMode)
     @Html.ValueLine(e, f => f.ElementsPerPage)
 }

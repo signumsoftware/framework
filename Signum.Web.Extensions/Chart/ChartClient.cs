@@ -175,9 +175,8 @@ namespace Signum.Web.Chart
 
             string chartNewText = ChartMessage.Chart.NiceToString();
 
-            return new ToolBarButton
+            return new ToolBarButton(ctx.Prefix, "qbChartNew")
             {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
                 Title = chartNewText,
                 Text = chartNewText,
                 OnClick = Module["openChart"](ctx.Prefix,  ctx.Url.Action("Index", "Chart"))

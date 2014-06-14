@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Windows.Controls;
 using System.ServiceModel;
+using System.Windows.Threading;
 
 namespace Signum.Windows.Isolation
 {
@@ -67,23 +68,28 @@ namespace Signum.Windows.Isolation
                     return null;
                 };
 
-                Navigator.Manager.TaskNormalWindow += Manager_TaskNormalWindow;
+                Async.OnShowInAnotherThread += Async_OnShowInAnotherThread;
+
                 Navigator.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
             }
         }
 
-        static void Manager_TaskNormalWindow(NormalWindow win, ModifiableEntity ent)
+        static Action<Window> Async_OnShowInAnotherThread()
         {
-            var ident = ent as IdentifiableEntity;
-            if (ident != null)
-            {
-                var iso = ident.TryIsolation();
+            Lite<IsolationDN> current = IsolationDN.Current;
 
-                if (iso != null)
-                {
-                    IsolationDN.CurrentThreadVariable.Value = iso;
-                }
-            }
+            return win =>
+            {
+                if (Application.Current.Dispatcher == Dispatcher.CurrentDispatcher)
+                    throw new InvalidOperationException("Isolation can not be set in the main Thread");
+
+                var entity = win.DataContext as IdentifiableEntity;
+
+                if(entity != null)
+                    current = current ?? entity.TryIsolation();
+
+                IsolationDN.CurrentThreadVariable.Value = current;
+            }; 
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)

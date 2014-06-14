@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Processes
 {
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-    public class PackageDN : IdentifiableEntity, IProcessDataDN
+    public class PackageDN : Entity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
         string name;
