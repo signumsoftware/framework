@@ -57,8 +57,8 @@ namespace Signum.Web.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings ContextualFromMany { get; private set; }
         public ContextualOperationSettings Contextual { get; private set; }
+        public ContextualOperationSettings ContextualFromMany { get; private set; }
         public double Order { get; set; }
 
         public EntityOperationSettings(IOperationSymbolContainer symbol)
@@ -121,7 +121,7 @@ namespace Signum.Web.Operations
             var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
 
             return result;
         }

@@ -520,15 +520,32 @@ namespace Signum.Engine.Maps
             if (!typeof(Entity).IsAssignableFrom(table.Type))
                 throw new InvalidOperationException("Type '{0}' has field '{1}' but does not inherit from Entity. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
+            FieldValue order = null;
+            if(Settings.FieldAttributes(route).OfType<PreserveOrderAttribute>().Any())
+            {
+                var pair = Settings.GetSqlDbTypePair(typeof(int));
+
+                order = new FieldValue(typeof(int))
+                {
+                    Name = "Order",
+                    SqlDbType = pair.SqlDbType,
+                    UdtTypeName = pair.UdtTypeName,
+                    Nullable = false,
+                    Size = Settings.GetSqlSize(route, pair.SqlDbType),
+                    Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                };
+            }
+
             TableMList relationalTable = new TableMList(route.Type)
             {
                 Name = GenerateTableNameCollection(table, name),
+                PrimaryKey = new TableMList.PrimaryKeyColumn(),
                 BackReference = new FieldReference(table.Type)
                 {
                     Name = GenerateBackReferenceName(table.Type),
                     ReferenceTable = table
                 },
-                PrimaryKey = new TableMList.PrimaryKeyColumn(),
+                Order = order,
                 Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 

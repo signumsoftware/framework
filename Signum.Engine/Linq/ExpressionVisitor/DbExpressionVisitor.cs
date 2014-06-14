@@ -291,9 +291,10 @@ namespace Signum.Engine.Linq
         {
             var rowId = Visit(mle.RowId);
             var parent = (EntityExpression)Visit(mle.Parent);
+            var order = Visit(mle.Order);
             var element = Visit(mle.Element);
-            if (rowId != mle.RowId || parent != mle.Parent || element != mle.Parent)
-                return new MListElementExpression(rowId, parent, element, mle.Table);
+            if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element)
+                return new MListElementExpression(rowId, parent, order, element, mle.Table);
             return mle;
         }
 

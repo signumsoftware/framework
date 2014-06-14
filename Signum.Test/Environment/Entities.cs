@@ -397,7 +397,7 @@ namespace Signum.Test.Environment
             set { Set(ref author, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<SongDN> songs = new MList<SongDN>();
         public MList<SongDN> Songs
         {

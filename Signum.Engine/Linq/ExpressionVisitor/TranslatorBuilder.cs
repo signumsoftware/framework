@@ -476,10 +476,18 @@ namespace Signum.Engine.Linq
             {
                 Type type = mle.Type;
 
-                var init = Expression.MemberInit(Expression.New(type),
+                var bindings = new List<MemberAssignment> 
+                {
                     Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId)),
                     Expression.Bind(type.GetProperty("Parent"), Visit(mle.Parent)),
-                    Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
+                };
+
+                if (mle.Order != null)
+                    bindings.Add(Expression.Bind(type.GetProperty("Order"), Visit(mle.Order)));
+
+                bindings.Add(Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
+
+                var init = Expression.MemberInit(Expression.New(type), bindings);
 
                 return Expression.Condition(SmartEqualizer.NotEqualNullable(Visit(mle.RowId.Nullify()), NullId),
                     init,

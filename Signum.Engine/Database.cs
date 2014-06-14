@@ -890,6 +890,7 @@ namespace Signum.Engine
     public class MListElement<E, V> where E : IdentifiableEntity
     {
         public int RowId { get; set; }
+        public int Order { get; set; }
         public E Parent { get; set; }
         public V Element { get; set; }
     }

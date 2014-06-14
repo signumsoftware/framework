@@ -365,22 +365,28 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression RowId;
         public readonly EntityExpression Parent;
+        public readonly Expression Order;
         public readonly Expression Element;
 
         public readonly TableMList Table;
 
-        public MListElementExpression(Expression rowId, EntityExpression parent, Expression element, TableMList table)
+        public MListElementExpression(Expression rowId, EntityExpression parent, Expression order, Expression element, TableMList table)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;
             this.Parent = parent;
+            this.Order = order;
             this.Element = element;
             this.Table = table;
         }
 
         public override string ToString()
         {
-            return "MListElement({0})\r\n{{\r\nParent={1},\r\nElement={2}}})".Formato(RowId, Parent, Element);
+            return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".Formato(
+                RowId.NiceToString(), 
+                Parent.NiceToString(), 
+                Order == null ? Order.NiceToString() : null, 
+                Element.NiceToString());
         }
     }
 }

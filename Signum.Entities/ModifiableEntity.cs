@@ -37,7 +37,7 @@ namespace Signum.Entities
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
 
-            if (value is IMList && !((IMList)value).IsNew && !object.ReferenceEquals(value, field))
+            if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
                 throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
 
             INotifyCollectionChanged col = field as INotifyCollectionChanged;

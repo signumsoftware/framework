@@ -85,6 +85,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 {
                     Parent = mle.Parent,
                     Element = mle.Element,
+                    Order = mle.Order,
                 });
                 //tr.Commit();
             }
@@ -104,6 +105,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                             Parent = mle.Parent,
                             Element = mle.Element,
                             RowId = mle.RowId + 1000,
+                            Order = mle.Order,
                         });
                 }
                 //tr.Commit();

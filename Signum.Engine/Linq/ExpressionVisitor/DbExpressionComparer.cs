@@ -514,6 +514,7 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && Compare(a.RowId, b.RowId)
                 && Compare(a.Element, b.Element)
+                && Compare(a.Order, b.Order)
                 && Compare(a.Parent, b.Parent);
         }
 

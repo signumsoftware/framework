@@ -952,8 +952,10 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                var dic = ctx.Value.InnerList == null ? new Dictionary<int, S>() :
-                    ctx.Value.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a.Value);
+                IMListPrivate<S> mlistPriv = ctx.Value;
+
+                var dic = mlistPriv == null ? new Dictionary<int, MList<S>.RowIdValue>() :
+                    mlistPriv.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a);
 
                 var newList = new List<MList<S>.RowIdValue>();
 
@@ -967,17 +969,17 @@ namespace Signum.Web
                     {
                         var oldValue = dic.GetOrThrow(rowId.Value, "No RowID {0} found");
 
-                        itemCtx.Value = oldValue;
+                        itemCtx.Value = oldValue.Value;
                         itemCtx.Value = ElementMapping(itemCtx);
 
                         ctx.AddChild(itemCtx);
 
                         if (itemCtx.Value != null)
                         {
-                            var val = itemCtx.SupressChange ? oldValue : itemCtx.Value;
+                            var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
 
                             if (oldValue.Equals(val))
-                                newList.Add(new MList<S>.RowIdValue(val, rowId.Value));
+                                newList.Add(new MList<S>.RowIdValue(val, rowId.Value, oldValue.OldIndex));
                             else
                                 newList.Add(new MList<S>.RowIdValue(val));
                         }
@@ -991,16 +993,16 @@ namespace Signum.Web
                     }
                 }
 
-                if(!AreEqual(newList, ctx.Value == null? null: ctx.Value.InnerList))
+                if (!AreEqual(newList, mlistPriv == null ? null : mlistPriv.InnerList))
                 {
                     Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
 
-                    if(ctx.Value == null)
-                        ctx.Value = new MList<S>();
+                    if (ctx.Value == null)
+                        mlistPriv = ctx.Value = new MList<S>();
 
-                    ctx.Value.InnerList.Clear();
-                    ctx.Value.InnerList.AddRange(newList);
-                    ctx.Value.InnerListModified();
+                    mlistPriv.InnerList.Clear();
+                    mlistPriv.InnerList.AddRange(newList);
+                    mlistPriv.InnerListModified();
                 }
 
                 return ctx.Value;

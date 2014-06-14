@@ -14,13 +14,10 @@ using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
-    public interface IMList
-    {
-        bool IsNew { get; }
-    }
+
 
     [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
-    public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged, IMList
+    public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged, IMListPrivate<T>
     {
         public bool IsNew
         {
@@ -31,18 +28,21 @@ namespace Signum.Entities
         public struct RowIdValue : IEquatable<RowIdValue>, IComparable<RowIdValue>, ISerializable
         {
             public readonly int? RowId;
-            public readonly T Value; 
+            public readonly T Value;
+            public readonly int? OldIndex; 
 
             public RowIdValue(T value)
             {
                 this.Value = value;
                 this.RowId = null;
+                this.OldIndex = null;
             }
 
-            public RowIdValue(T value, int rowId)
+            public RowIdValue(T value, int rowId, int? oldIndex)
             {
                 this.Value = value;
                 this.RowId = rowId;
+                this.OldIndex = oldIndex;
             }
 
             public bool Equals(RowIdValue other)
@@ -72,18 +72,25 @@ namespace Signum.Entities
 
             public override string ToString()
             {
-                return "({0}) {1}".Formato(RowId == null ? "New" : RowId.Value.ToString(), Value);
+                var pre = RowId == null ? "New" : RowId.Value.ToString(); 
+
+                if(this.OldIndex != null)
+                    pre += " Ix: " + this.OldIndex;
+
+                return "({0}) {1}".Formato(pre, Value);
             }
 
             private RowIdValue(SerializationInfo info, StreamingContext ctxt)
             {
                 this.RowId = null;
                 this.Value = default(T);
+                this.OldIndex = null;
                 foreach (SerializationEntry item in info)
                 {
                     switch (item.Name)
                     {
                         case "rowid": this.RowId = (int?)item.Value; break;
+                        case "oldindex": this.OldIndex = (int?)item.Value; break;
                         case "value": this.Value = (T)item.Value; break;
                         default: throw new InvalidOperationException("Unexpected SerializationEntry");
                     }
@@ -93,6 +100,7 @@ namespace Signum.Entities
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
                 info.AddValue("rowid", this.RowId, typeof(int?));
+                info.AddValue("oldindex", this.OldIndex, typeof(int?));
                 info.AddValue("value", this.Value, typeof(T));
             }
         }
@@ -111,12 +119,6 @@ namespace Signum.Entities
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }
-        }
-
-        public virtual void InnerListModified()
-        {
-            this.SetSelfModified();
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
@@ -239,6 +241,8 @@ namespace Signum.Entities
             where S : IComparable<S>
         {
             innerList.Sort((a, b) => element(a.Value).CompareTo(element(b.Value)));
+            if (WrongPosition())
+                this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -246,18 +250,24 @@ namespace Signum.Entities
             where S : IComparable<S>
         {
             innerList.Sort((a, b) => element(b.Value).CompareTo(element(a.Value)));
+            if (WrongPosition()) 
+                this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(Comparison<T> comparison)
         {
             innerList.Sort((a, b) => comparison(a.Value, b.Value));
+            if (WrongPosition()) 
+                this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(IComparer<T> comparer)
         {
             innerList.Sort((a, b) => comparer.Compare(a.Value, b.Value));
+            if (WrongPosition()) 
+                this.SetSelfModified(); 
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
@@ -272,7 +282,9 @@ namespace Signum.Entities
                 if (this.innerList.Contains(list[i]))
                 {
                     var index = this.innerList.FindIndex(a => object.Equals(a, list[i].Value));
+
                     list[i] = this.innerList[index];
+
                     this.innerList.RemoveAt(index);
                 }
                 else
@@ -283,11 +295,21 @@ namespace Signum.Entities
 
             innerList = list;
 
-            if (modified)
+            if (modified || WrongPosition())
                 SetSelfModified();
 
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             return modified;
+        }
+
+        private bool WrongPosition()
+        {
+            for (int i = 0; i < innerList.Count; i++)
+            {
+                if (innerList[i].OldIndex.HasValue && innerList[i].OldIndex != i)
+                    return true;
+            }
+            return false;
         }
 
         public void Clear()
@@ -534,36 +556,60 @@ namespace Signum.Entities
 
         #endregion 
 
-        protected internal override void PreSaving(ref bool graphModified)
-        {
-            if (typeof(IOrderedEntity).IsAssignableFrom(typeof(T)))
-            {
-                this.ForEach((o, i) => ((IOrderedEntity)o).Order = i);
-            }
-        }
-
-        protected internal override void PostRetrieving()
-        {
-            if (typeof(IOrderedEntity).IsAssignableFrom(typeof(T)))
-            {
-                this.Sort(a => ((IOrderedEntity)a).Order);
-            }
-        }
-
-        public List<RowIdValue> InnerList
+        List<RowIdValue> IMListPrivate<T>.InnerList
         {
             get { return this.innerList; }
         }
 
-        public void SetRowId(int index, int rowId)
+        void IMListPrivate.InnerListModified()
+        {
+            this.SetSelfModified();
+            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        void IMListPrivate.SetRowId(int index, int rowId)
         {
             var prev = this.innerList[index]; 
 
             if(prev.RowId.HasValue)
                 throw new InvalidOperationException("Index {0} already as RowId".Formato(index));
 
-            this.innerList[index] = new RowIdValue(prev.Value, rowId);
+            this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }
+
+        void IMListPrivate.SetOldIndex(int index)
+        {
+            var prev = this.innerList[index];
+
+            this.innerList[index] = new RowIdValue(prev.Value, prev.RowId.Value, index);
+        }
+
+        void IMListPrivate.ExecutePostRetrieving()
+        {
+            this.PostRetrieving(); 
+        }
+
+        protected internal override void PostRetrieving()
+        {
+            if (this.innerList.Any(a => a.OldIndex.HasValue))
+                this.innerList.Sort(a => a.OldIndex.Value);
+        }
+    }
+
+    public interface IMListPrivate
+    {
+        bool IsNew { get; }
+
+        void ExecutePostRetrieving();
+        void SetOldIndex(int index);
+        void SetRowId(int index, int rowId);
+
+        void InnerListModified(); 
+    }
+
+    public interface IMListPrivate<T>  : IMListPrivate
+    {
+        List<MList<T>.RowIdValue> InnerList { get; }
     }
 
     internal sealed class MListDebugging<T>
@@ -595,8 +641,11 @@ namespace Signum.Entities
         }
     }
 
-    public interface IOrderedEntity
-    {
-        int Order { get; set; }
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    public sealed class PreserveOrderAttribute : Attribute
+    {  
+        public PreserveOrderAttribute()
+        {
+        }
     }
 }

@@ -794,9 +794,10 @@ namespace Signum.Engine.Maps
                 }
             }
 
+            internal bool hasOrder = false;
             internal bool isEmbeddedEntity = false;
             internal Func<string, string> sqlUpdate;
-            public Func<Entity, T, int, Forbidden, string, List<DbParameter>> UpdateParameters;
+            public Func<Entity, int, T, int, Forbidden, string, List<DbParameter>> UpdateParameters;
             public ConcurrentDictionary<int, Action<List<MListUpdate>>> updateCache =
                 new ConcurrentDictionary<int, Action<List<MListUpdate>>>();
 
@@ -812,7 +813,10 @@ namespace Signum.Engine.Maps
                         for (int i = 0; i < num; i++)
                         {
                             var pair = list[i];
-                            parameters.AddRange(UpdateParameters(pair.Entity, pair.Item, pair.RowId, pair.Forbidden, i.ToString()));
+
+                            var row = pair.MList.InnerList[pair.Index]; 
+
+                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId.Value, row.Value, pair.Index, pair.Forbidden, i.ToString()));
                         }
                         new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
                     };
@@ -823,20 +827,20 @@ namespace Signum.Engine.Maps
             {
                 public readonly Entity Entity;
                 public readonly Forbidden Forbidden;
-                public readonly T Item;
-                public readonly int RowId;
+                public readonly IMListPrivate<T> MList;
+                public readonly int Index;
 
-                public MListUpdate(EntityForbidden ef, T item, int rowId)
+                public MListUpdate(EntityForbidden ef, MList<T> mlist, int index)
                 {
                     this.Entity = ef.Entity;
                     this.Forbidden = ef.Forbidden;
-                    this.Item = item;
-                    this.RowId = rowId;
+                    this.MList = mlist;
+                    this.Index = index;
                 }
             }
 
             internal Func<string, bool, string> sqlInsert;
-            public Func<Entity, T, Forbidden, string, List<DbParameter>> InsertParameters;
+            public Func<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters;
             public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
                 new ConcurrentDictionary<int, Action<List<MListInsert>>>();
 
@@ -851,9 +855,11 @@ namespace Signum.Engine.Maps
 
                             string sql = sqlInsert("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
 
-                            var parameters = InsertParameters(pair.Entity, pair.MList[pair.Index], pair.Forbidden, "");
+                            var parameters = InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, "");
 
                             pair.MList.SetRowId(pair.Index, (int)new SqlPreCommandSimple(sql, parameters).ExecuteScalar());
+                            if (this.hasOrder)
+                                pair.MList.SetOldIndex(pair.Index);
                         };
                     else
                     {
@@ -868,7 +874,7 @@ namespace Signum.Engine.Maps
                             for (int i = 0; i < num; i++)
                             {
                                 var pair = list[i];
-                                result.AddRange(InsertParameters(pair.Entity, pair.MList[pair.Index], pair.Forbidden, i.ToString()));
+                                result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, i.ToString()));
                             }
 
                             DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
@@ -878,6 +884,9 @@ namespace Signum.Engine.Maps
                                 var pair = list[i];
 
                                 pair.MList.SetRowId(pair.Index,(int)dt.Rows[i][0]);
+
+                                if (this.hasOrder)
+                                    pair.MList.SetOldIndex(pair.Index);
                             }
                         };
                     }
@@ -888,7 +897,7 @@ namespace Signum.Engine.Maps
             {
                 public readonly Entity Entity;
                 public readonly Forbidden Forbidden; 
-                public readonly MList<T> MList;
+                public readonly IMListPrivate<T> MList;
                 public readonly int Index;
 
                 public MListInsert(EntityForbidden ef, MList<T> mlist, int index)
@@ -921,7 +930,9 @@ namespace Signum.Engine.Maps
                         continue;
 
                     for (int i = 0; i < collection.Count; i++)
+                    {
                         toInsert.Add(new MListInsert(ef, collection, i));
+                    }
                 }
 
                 toInsert.SplitStatements(list => GetInsert(list.Count)(list));
@@ -948,24 +959,35 @@ namespace Signum.Engine.Maps
                         if (collection.Modified == ModifiedState.Clean)
                             continue;
 
-                        var list = collection.InnerList;
+                        var innerList = ((IMListPrivate<T>)collection).InnerList;
 
-                        var exceptions = list.Select(a => a.RowId).NotNull().ToArray();
+                        var exceptions = innerList.Select(a => a.RowId).NotNull().ToArray();
 
                         if (exceptions.IsEmpty())
                             toDelete.Add(ef.Entity);
                         else
                             toDeleteExcept.Add(new MListDelete(ef.Entity, exceptions));
 
-                        if (isEmbeddedEntity)
+                        if (isEmbeddedEntity || hasOrder)
                         {
-                            foreach (var item in list.Where(a => a.RowId.HasValue && ((ModifiableEntity)(object)a.Value).IsGraphModified))
-                                toUpdate.Add(new MListUpdate(ef, item.Value, item.RowId.Value));
+                            for (int i = 0; i < innerList.Count; i++)
+                            {
+                                var row = innerList[i];
+
+                                if(row.RowId.HasValue)
+                                {
+                                    if(hasOrder  && row.OldIndex != i ||
+                                       isEmbeddedEntity && ((ModifiableEntity)(object)row.Value).IsGraphModified)
+                                    {
+                                        toUpdate.Add(new MListUpdate(ef, collection, i));
+                                    }
+                                }
+                            }
                         }
 
-                        for (int i = 0; i < collection.Count; i++)
+                        for (int i = 0; i < innerList.Count; i++)
                         {
-                            if (collection.InnerList[i].RowId == null)
+                            if (innerList[i].RowId == null)
                                 toInsert.Add(new MListInsert(ef, collection, i));
                         }
                     }
@@ -997,9 +1019,9 @@ namespace Signum.Engine.Maps
 
                 if (parent.IsNew)
                 {
-                    return collection.Select(e =>
+                    return collection.Select((e, i) =>
                     {
-                        var parameters = InsertParameters(parent, e, new Forbidden(new HashSet<IdentifiableEntity> { parent }), "");
+                        var parameters = InsertParameters(parent, e, i, new Forbidden(new HashSet<IdentifiableEntity> { parent }), "");
                         parameters.RemoveAt(0); // wont be replaced, generating @idParent
                         return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
                     }).Combine(Spacing.Simple);
@@ -1008,7 +1030,7 @@ namespace Signum.Engine.Maps
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
                         new SqlPreCommandSimple(sqlDelete(""), new List<DbParameter> { DeleteParameter(parent, "") }),
-                        collection.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
+                        collection.Select((e, i) => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, i, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
         }
@@ -1049,6 +1071,7 @@ namespace Signum.Engine.Maps
 
             var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
             var paramItem = Expression.Parameter(typeof(T), "item");
+            var paramOrder = Expression.Parameter(typeof(int), "order");
             var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
             var paramPostfix = Expression.Parameter(typeof(string), "postfix");
             
@@ -1058,6 +1081,8 @@ namespace Signum.Engine.Maps
                 var assigments = new List<Expression>();
 
                 BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
+                if (this.Order != null)
+                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramPostfix);
                 Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
 
                 result.sqlInsert = (post, output) => "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
@@ -1065,12 +1090,13 @@ namespace Signum.Engine.Maps
                     output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
                     trios.ToString(p => p.ParameterName + post, ", "));
 
-                var expr = Expression.Lambda<Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>>>(
-                    Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramItem, paramForbidden, paramPostfix);
+                var expr = Expression.Lambda<Func<IdentifiableEntity, T, int, Forbidden, string, List<DbParameter>>>(
+                    Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramItem, paramOrder, paramForbidden, paramPostfix);
 
                 result.InsertParameters = expr.Compile();
             }
 
+            result.hasOrder = this.Order != null; 
             result.isEmbeddedEntity = typeof(EmbeddedEntity).IsAssignableFrom(this.Field.FieldType);
 
             if (result.isEmbeddedEntity)
@@ -1084,6 +1110,8 @@ namespace Signum.Engine.Maps
                 string rowId = "rowId";
 
                 //BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
+                if (this.Order != null)
+                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramPostfix);
                 Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
 
                 result.sqlUpdate = post => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".Formato(Name,
@@ -1096,9 +1124,8 @@ namespace Signum.Engine.Maps
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, Table.fiId)));
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, paramRowId));
 
-                var expr = Expression.Lambda<Func<IdentifiableEntity, T, int, Forbidden, string, List<DbParameter>>>(
-                    Table.CreateBlock(parameters, assigments), paramIdent, paramItem, paramRowId, paramForbidden, paramPostfix);
-
+                var expr = Expression.Lambda<Func<IdentifiableEntity, int, T, int, Forbidden, string, List<DbParameter>>>(
+                    Table.CreateBlock(parameters, assigments), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramPostfix);
                 result.UpdateParameters = expr.Compile();
             }
 

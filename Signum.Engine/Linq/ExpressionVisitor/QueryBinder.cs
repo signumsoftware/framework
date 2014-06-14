@@ -1249,6 +1249,7 @@ namespace Signum.Engine.Linq
 	                {
                         case "RowId": return mle.RowId;
                         case "Parent": return mle.Parent;
+                        case "Order": return mle.Order;
                         case "Element": return mle.Element;
                         default: 
                              throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".Formato(m.Member));

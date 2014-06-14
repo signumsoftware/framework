@@ -905,6 +905,7 @@ namespace Signum.Engine.Maps
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
+        public FieldValue Order { get; set; }
         public Field Field { get; set; }
 
         public Type CollectionType { get; private set; }
@@ -924,7 +925,14 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
+            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference }; 
+
+            if(Order != null)
+                cols.Add(Order); 
+
+            cols.AddRange(Field.Columns());
+
+            Columns = cols.ToDictionary(a => a.Name);
         }
 
         public List<Index> GeneratAllIndexes()

@@ -151,22 +151,24 @@ namespace Signum.Test
                     State = AlbumState.Saved,
                 };
 
-                Assert.IsNull(album.Songs.InnerList[0].RowId);
+                var innerList = ((IMListPrivate<SongDN>)album.Songs).InnerList;
+
+                Assert.IsNull(innerList[0].RowId);
                 //Insert and row-id is set
                 album.Save();
-                Assert.IsNotNull(album.Songs.InnerList[0].RowId);
-                Assert.IsTrue(album.Songs.InnerList[0].RowId > maxRowId); 
+                Assert.IsNotNull(innerList[0].RowId);
+                Assert.IsTrue(innerList[0].RowId > maxRowId); 
 
 
                 album.Songs.Add(new SongDN { Name = "Song 2" });
 
-                Assert.IsNull(album.Songs.InnerList[1].RowId);
+                Assert.IsNull(innerList[1].RowId);
 
                 album.Save();
                 //Insert and row-id is set
-                Assert.IsNotNull(album.Songs.InnerList[1].RowId);
+                Assert.IsNotNull(innerList[1].RowId);
 
-                var song = album.Songs.InnerList[0];
+                var song = innerList[0];
 
                 album.Songs.Remove(song.Value);
                 //Delete
@@ -176,7 +178,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
 
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(album.Songs.InnerList[0].RowId == album2.Songs.InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
 
@@ -188,7 +190,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
                     
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(album.Songs.InnerList[0].RowId == album2.Songs.InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
@@ -197,6 +199,65 @@ namespace Signum.Test
             }
         }
 
+        [TestMethod]
+        public void SmartSaveMListOrder()
+        {
+            using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<AlbumDN>())
+            using (OperationLogic.AllowSave<ArtistDN>())
+            {
+                var artist = Database.Query<ArtistDN>().First();
+
+                var album = new AlbumDN
+                {
+                    Name = "Test album",
+                    Author = artist,
+                    Year = 2000,
+                    Songs = { new SongDN { Name = "Song 0" }, new SongDN { Name = "Song 1" }, new SongDN { Name = "Song 2" }, },
+                    State = AlbumState.Saved,
+                };
+
+                album.Save();
+
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a=>a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                    new Dictionary<int, string> { { 0, "Song 0" }, { 1, "Song 1" }, { 2, "Song 2" } });
+
+                var ids = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
+
+                album.Songs.SortDescending(a => a.Name);
+
+                album.Save();
+
+                var ids2 = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
+
+                AssertSequenceEquals(ids.OrderBy(), ids2.OrderBy());
+
+
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                    new Dictionary<int, string> { { 0, "Song 2" }, { 1, "Song 1" }, { 2, "Song 0" } });
+
+
+                var s3 = album.Songs[0];
+
+                album.Songs.RemoveAt(0);
+
+                album.Songs.Insert(1, s3);
+
+                album.Save();
+
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                    new Dictionary<int, string> { { 0, "Song 1" }, { 1, "Song 2" }, { 2, "Song 0" } });
+
+                AssertSequenceEquals(album.ToLite().Retrieve().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
+
+                 //tr.Commit();
+            }
+        }
+
+        void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
+        {
+            Assert.IsTrue(one.SequenceEqual(two));
+        }
 
         [TestMethod]
         public void SaveManyMList()
