@@ -14,7 +14,7 @@ namespace Signum.Engine.Maps
     public class Index
     {
         public ITable Table { get; private set; }
-        public IColumn[] Columns { get; internal set; }
+        public IColumn[] Columns { get; private set; }
 
         public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {

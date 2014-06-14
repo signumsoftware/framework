@@ -90,8 +90,12 @@ namespace Signum.Web
 
             var attrs = context is BaseLine ? ((BaseLine)context).FormGroupHtmlProps : null;
 
+            var formSize = context.FormGroupSize == FormGroupSize.Normal ? "form-md" : 
+                context.FormGroupSize == FormGroupSize.Small ? "form-sm" : 
+                "form-xs";
+
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Class("form-group").Attrs(attrs)))
+            using (sb.Surround(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(attrs)))
             {
                 var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 

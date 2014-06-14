@@ -211,7 +211,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
 
             modalDiv.modal({
-                keyboard: false,
+                keyboard: true,
                 backdrop: "static"
             });
         });

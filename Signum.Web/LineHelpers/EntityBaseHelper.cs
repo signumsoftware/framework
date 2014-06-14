@@ -111,7 +111,7 @@ namespace Signum.Web
 
     
 
-        public static MvcHtmlString WriteIndex<T>(HtmlHelper helper, EntityListBase listBase, TypeElementContext<T> itemTC)
+        public static MvcHtmlString WriteIndex<T>(HtmlHelper helper, TypeElementContext<T> itemTC)
         {
             return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index).Concat(
                    helper.Hidden(itemTC.Compose(EntityListBaseKeys.RowId), itemTC.RowId));

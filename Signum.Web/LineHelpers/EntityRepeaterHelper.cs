@@ -84,7 +84,7 @@ namespace Signum.Web
                     }
                 }
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, repeater));

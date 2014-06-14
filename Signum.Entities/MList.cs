@@ -376,7 +376,7 @@ namespace Signum.Entities
 
         public void RemoveAt(int index)
         {
-            RowIdValue item = innerList[index];
+            T item = innerList[index].Value;
             innerList.RemoveAt(index);
             SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));

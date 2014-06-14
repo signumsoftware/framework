@@ -175,10 +175,17 @@ namespace Signum.Engine.Maps
 
                 if (attachedFields.Any())
                 {
-                    foreach (var ui in result.OfType<UniqueIndex>())
+                    result = result.Select(ix =>
                     {
-                        ui.Columns = ui.Columns.Concat(attachedFields).ToArray();
-                    }
+                        var ui = ix as UniqueIndex;
+                        if (ui == null)
+                            return ix;
+
+                        return new UniqueIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                        {
+                            Where = ui.Where
+                        };
+                    }).ToList();
                 }
             }
 

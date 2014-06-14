@@ -87,7 +87,7 @@ namespace Signum.Web
                 {
                     sb.Add(new HtmlTag("span").SetInnerText(itemTC.Value.ToString()));
 
-                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC));
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                     sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                     if (repeater.Move)

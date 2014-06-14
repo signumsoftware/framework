@@ -12,10 +12,15 @@ namespace Signum.Web
     {
         public List<IMenuItem> Items { get; set; }
 
+        public ToolBarDropDown(string prefix, string idToAppend)
+            : base(prefix, idToAppend)
+        {
+        }
+
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using(sb.Surround(new HtmlTag("div").Class("btn-group")))
+            using (sb.Surround(new HtmlTag("div").Class("btn-group")))
             {
                 var a = new HtmlTag("a")
                     .Id(Id)
@@ -28,7 +33,7 @@ namespace Signum.Web
                     .Attrs(HtmlProps);
 
                 if (!Enabled)
-                    a.Attr("disabled", "disabled");  
+                    a.Attr("disabled", "disabled");
 
                 using (sb.Surround(a))
                 {

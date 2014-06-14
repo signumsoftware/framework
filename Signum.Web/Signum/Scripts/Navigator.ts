@@ -240,7 +240,7 @@ export function openModal(modalDiv: JQuery,
             });
 
         modalDiv.modal({
-            keyboard: false,
+            keyboard: true,
             backdrop: "static",
         });
     });
