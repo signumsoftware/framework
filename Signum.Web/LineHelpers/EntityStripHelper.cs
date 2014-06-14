@@ -108,7 +108,7 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("span")))
                 {
-                    if (entityStrip.Reorder)
+                    if (entityStrip.Move)
                     {
                         sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
                         sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));

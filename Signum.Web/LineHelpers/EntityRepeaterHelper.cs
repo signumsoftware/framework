@@ -77,7 +77,7 @@ namespace Signum.Web
                     if (repeater.Remove)
                         sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));
 
-                    if (repeater.Reorder)
+                    if (repeater.Move)
                     {
                         sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
                         sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));

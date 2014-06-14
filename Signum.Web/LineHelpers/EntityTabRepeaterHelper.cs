@@ -90,7 +90,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.WriteIndex(helper, repeater, itemTC));
                     sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-                    if (repeater.Reorder)
+                    if (repeater.Move)
                     {
                         sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "span", isVertical: false));
                         sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "span", isVertical: false));

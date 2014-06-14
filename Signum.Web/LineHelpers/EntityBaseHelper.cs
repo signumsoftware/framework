@@ -273,7 +273,7 @@ namespace Signum.Web
 
         public static MvcHtmlString MoveUp(HtmlHelper helper, EntityListBase listBase, bool btn)
         {
-            if (!listBase.Reorder)
+            if (!listBase.Move)
                 return MvcHtmlString.Empty;
 
             return new HtmlTag("a", listBase.Compose("btnUp"))
@@ -298,7 +298,7 @@ namespace Signum.Web
 
         public static MvcHtmlString MoveDown(HtmlHelper helper, EntityListBase listBase, bool btn)
         {
-            if (!listBase.Reorder)
+            if (!listBase.Move)
                 return MvcHtmlString.Empty;
 
             return new HtmlTag("a", listBase.Compose("btnDown"))
