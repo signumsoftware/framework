@@ -50,24 +50,27 @@ namespace Signum.Windows.Operations
                 {
                     var lite = coc.SearchControl.SelectedItems.Single();
 
-                    switch (coc.OperationInfo.OperationType)
+                    if (coc.ConfirmMessage())
                     {
-                        case OperationType.Execute:
-                            Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.OperationSymbol)); 
-                            break;
-                        case OperationType.Delete:
-                            Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.OperationSymbol));
-                            break;
-                        case OperationType.ConstructorFrom:
-                            {
-                                var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol));
-                                if (Navigator.IsNavigable(result, true))
-                                    Navigator.Navigate(result);
+                        switch (coc.OperationInfo.OperationType)
+                        {
+                            case OperationType.Execute:
+                                Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.OperationSymbol));
                                 break;
-                            }
-                        case OperationType.Constructor:
-                        case OperationType.ConstructorFromMany:
-                            throw new InvalidOperationException("Unexpected operation type");
+                            case OperationType.Delete:
+                                Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.OperationSymbol));
+                                break;
+                            case OperationType.ConstructorFrom:
+                                {
+                                    var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol));
+                                    if (Navigator.IsNavigable(result, true))
+                                        Navigator.Navigate(result);
+                                    break;
+                                }
+                            case OperationType.Constructor:
+                            case OperationType.ConstructorFromMany:
+                                throw new InvalidOperationException("Unexpected operation type");
+                        }
                     }
                 }
             };

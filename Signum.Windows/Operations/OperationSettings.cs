@@ -54,6 +54,7 @@ namespace Signum.Windows.Operations
     {
         private Entities.OperationSymbol item;
 
+        public Func<EntityOperationContext, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
 
@@ -91,6 +92,17 @@ namespace Signum.Windows.Operations
 
         public IdentifiableEntity Entity { get; set; }
         public EntityOperationSettings OperationSettings { get; set; }
+
+        public bool ConfirmMessage()
+        {
+            string message = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
+
+            if (message == null)
+                return true;
+
+            return MessageBox.Show(Window.GetWindow(EntityControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK; 
+        }
     }
 
     public class ConstructorSettings : OperationSettings
@@ -106,6 +118,7 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationSettings : OperationSettings
     {
+        public Func<ContextualOperationContext, string> ConfirmMessage { get; set; }
         public Action<ContextualOperationContext> Click { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public double Order { get; set; }
@@ -128,5 +141,17 @@ namespace Signum.Windows.Operations
         public OperationInfo OperationInfo { get; set; }
         public string CanExecute { get; set; }
         public ContextualOperationSettings OperationSettings { get; set; }
+
+        public bool ConfirmMessage()
+        {
+            string message = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete && Entities.Length > 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() :
+                OperationInfo.OperationType == OperationType.Delete && Entities.Length == 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
+
+            if (message == null)
+                return true;
+
+            return MessageBox.Show(Window.GetWindow(SearchControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK;
+        }
     }
 }
