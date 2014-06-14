@@ -23,7 +23,7 @@ namespace Signum.Entities.Translation
             set { Set(ref user, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<TranslatorUserCultureDN> cultures = new MList<TranslatorUserCultureDN>();
         [NotNullValidator, NoRepeatValidator]
         public MList<TranslatorUserCultureDN> Cultures

@@ -2,5 +2,5 @@
 @using (var tc = Html.TypeContext<TranslatorUserDN>())
 {
     @Html.EntityLine(tc, t => t.User)
-    @Html.EntityRepeater(tc, t => t.Cultures, er => er.Reorder = true)
+    @Html.EntityRepeater(tc, t => t.Cultures, er => er.Move = true)
 }

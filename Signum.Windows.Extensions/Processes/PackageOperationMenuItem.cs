@@ -53,9 +53,12 @@ namespace Signum.Windows.Processes
                      });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IProcessServer s) => s.CreatePackageOperation(coc.Entities.ToList(), coc.OperationInfo.OperationSymbol));
+                    if (coc.ConfirmMessage())
+                    {
+                        IIdentifiable entity = Server.Return((IProcessServer s) => s.CreatePackageOperation(coc.Entities.ToList(), coc.OperationInfo.OperationSymbol));
 
-                    Navigator.Navigate(entity);
+                        Navigator.Navigate(entity);
+                    }
                 }
             };
 

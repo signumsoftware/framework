@@ -29,9 +29,9 @@ namespace Signum.Engine.SMS
             SMSUpdatePackageDN package = (SMSUpdatePackageDN)executingProcess.Data;
 
             executingProcess.ForEachLine(package.SMSMessages().Where(sms => sms.State == SMSMessageState.Sent && !sms.UpdatePackageProcessed), sms =>
-                {
-                    sms.Execute(SMSMessageOperation.UpdateStatus);
-                });
+            {
+                sms.Execute(SMSMessageOperation.UpdateStatus);
+            });
         }
     }
 }

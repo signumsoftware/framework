@@ -661,9 +661,12 @@ namespace Signum.Engine.Cache
                 instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
                 instructions.Add(Expression.Assign(result, ctr.MaterializeField(table.Field)));
 
-                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(int)});
+                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(int), typeof(int?)});
 
-                instructions.Add(Expression.New(ci, result, ctr.GetTupleProperty(table.PrimaryKey)));
+                var order = table.Order == null ? Expression.Constant(null, typeof(int?)) : 
+                     ctr.GetTupleProperty(table.Order).Nullify();
+
+                instructions.Add(Expression.New(ci, result, ctr.GetTupleProperty(table.PrimaryKey), order));
 
                 var block = Expression.Block(typeof(MList<T>.RowIdValue), new[] { ctr.origin, result }, instructions);
 
@@ -734,10 +737,13 @@ namespace Signum.Engine.Cache
             else
             {
                 result = new MList<T>(dic.Count);
+                var innerList = ((IMListPrivate<T>)result).InnerList;
                 foreach (var obj in dic.Values)
                 {
-                    result.InnerList.Add(activator(obj, retriever));
+                    innerList.Add(activator(obj, retriever));
                 }
+                ((IMListPrivate)result).ExecutePostRetrieving();
+                
             }
 
             CachedTableConstructor.resetModifiedAction(retriever, result);

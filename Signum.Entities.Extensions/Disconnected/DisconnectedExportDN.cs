@@ -59,7 +59,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<DisconnectedExportTableDN> copies = new MList<DisconnectedExportTableDN>();
         public MList<DisconnectedExportTableDN> Copies
         {
@@ -220,7 +220,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedExportTableDN : EmbeddedEntity, IOrderedEntity
+    public class DisconnectedExportTableDN : EmbeddedEntity
     {
         Lite<TypeDN> type;
         [NotNullValidator]
@@ -251,13 +251,6 @@ namespace Signum.Entities.Disconnected
         {
             get { return errors; }
             set { Set(ref errors, value); }
-        }
-
-        int order;
-        int IOrderedEntity.Order
-        {
-            get { return order; }
-            set { Set(ref order, value); }
         }
     }
 }

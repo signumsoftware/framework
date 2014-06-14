@@ -248,7 +248,7 @@ namespace Signum.Engine.Translation
 
             var lite = entity.ToLite();
 
-            foreach (var item in mlist(entity).InnerList)
+            foreach (var item in ((IMListPrivate<T>)mlist(entity)).InnerList)
             {
                 yield return new TranslatableElement<T>(lite, route, item);
             }

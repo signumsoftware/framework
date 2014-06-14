@@ -49,7 +49,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<DisconnectedImportTableDN> copies = new MList<DisconnectedImportTableDN>();
         public MList<DisconnectedImportTableDN> Copies
         {
@@ -164,7 +164,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedImportTableDN : EmbeddedEntity, IOrderedEntity
+    public class DisconnectedImportTableDN : EmbeddedEntity
     {
         Lite<TypeDN> type;
         [NotNullValidator]
@@ -209,13 +209,6 @@ namespace Signum.Entities.Disconnected
             {
                 return InsertedRows + UpdatedRows;
             }
-        }
-
-        int order;
-        int IOrderedEntity.Order
-        {
-            get { return order; }
-            set { Set(ref order, value); }
         }
     }
 }
