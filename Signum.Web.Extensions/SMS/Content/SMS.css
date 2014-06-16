@@ -27,14 +27,6 @@
     float: left;
     margin-top: 8px;
 }
-#sfTemplateLiterals
-{
-    float: left;
-    margin: 5px 20px 0 10px;    
-}
-#sfTemplateLiterals .sf-field {
-    min-width: inherit;    
-}
 #sfLiterals
 {
     min-width: 105px;

@@ -32,6 +32,7 @@ namespace Signum.Web.Extensions.SMS.Views
     
     #line default
     #line hidden
+    using Signum.Entities;
     
     #line 2 "..\..\SMS\Views\SMSMessage.cshtml"
     using Signum.Entities.SMS;
@@ -209,26 +210,22 @@ WriteLiteral(" class=\"sf-sms-chars-left\"");
 
 WriteLiteral("></span></p>\r\n            </div>\r\n");
 
-WriteLiteral("            <div>\r\n                <input");
-
-WriteLiteral(" type=\"button\"");
-
-WriteLiteral(" class=\"sf-button sf-sms-remove-chars\"");
-
-WriteAttribute("value", Tuple.Create(" value=\"", 1549), Tuple.Create("\"", 1608)
             
-            #line 41 "..\..\SMS\Views\SMSMessage.cshtml"
-  , Tuple.Create(Tuple.Create("", 1557), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
+            #line 40 "..\..\SMS\Views\SMSMessage.cshtml"
+            
             
             #line default
             #line hidden
-, 1557), false)
-);
-
-WriteLiteral(" />\r\n            </div>\r\n");
+            
+            #line 40 "..\..\SMS\Views\SMSMessage.cshtml"
+       Write(Html.FormGroup(e, "", "", new HtmlTag("input").Attr("type", "button").Attr("value", SmsMessage.RemoveNonValidCharacters.NiceToString()).Class("btn sf-button sf-sms-remove-chars").ToHtml()));
 
             
-            #line 43 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line default
+            #line hidden
+            
+            #line 40 "..\..\SMS\Views\SMSMessage.cshtml"
+                                                                                                                                                                                                         
         }
 
             
@@ -239,20 +236,20 @@ WriteLiteral("    </div>\r\n");
 WriteLiteral("    <br />\r\n");
 
             
-            #line 46 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 44 "..\..\SMS\Views\SMSMessage.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 46 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 44 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created)));
 
             
             #line default
             #line hidden
             
-            #line 46 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 44 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                                                    
 
     if (e.Value.State != SMSMessageState.Created)
@@ -262,28 +259,28 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
             #line default
             #line hidden
             
-            #line 50 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 48 "..\..\SMS\Views\SMSMessage.cshtml"
    Write(Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 50 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 48 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                      
         
             
             #line default
             #line hidden
             
-            #line 51 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 49 "..\..\SMS\Views\SMSMessage.cshtml"
    Write(Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 51 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 49 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                   
     }
 }
@@ -296,7 +293,7 @@ WriteLiteral("\r\n<script>\r\n");
 WriteLiteral("    ");
 
             
-            #line 56 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 54 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(new JsFunction(SMSClient.Module, "init", 
     Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
     Url.Action<SMSController>(s => s.GetDictionaries())));

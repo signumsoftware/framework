@@ -470,11 +470,11 @@ WriteLiteralTo(__razor_template_writer, "    ");
            );
         if (!nc.Value.IsNew)
         {
-            //tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
-            //   {
-            //       FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-            //       SearchOnLoad = true,
-            //   }, new Context(nc, "ncSent")));
+            tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
+               {
+                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                   SearchOnLoad = true,
+               }, new Context(nc, "ncSent")));
         }  
     }
     
