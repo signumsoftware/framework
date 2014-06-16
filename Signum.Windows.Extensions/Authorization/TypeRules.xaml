@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
+    xmlns:se="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     xmlns:seb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
     xmlns:seb2="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
@@ -59,7 +60,7 @@
 
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb2:PropertyRouteDN}}" />
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="{m:LocTypePlural {x:Type seb:OperationDN}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="{m:LocTypePlural {x:Type se:OperationSymbol}}" />
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb2:QueryDN}}" />
             </Grid>
         </ScrollViewer>
