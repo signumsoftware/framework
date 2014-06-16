@@ -129,6 +129,11 @@ namespace Signum.Engine.Scheduler
                     Execute = (c, _) => { },
                 }.Register();
 
+                new Graph<HolidayCalendarDN>.Delete(HolidayCalendarOperation.Delete)
+                {
+                    Delete = (c, _) => { c.Delete(); },
+                }.Register();
+
                 new Graph<ScheduledTaskDN>.Execute(ScheduledTaskOperation.Save)
                 {
                     AllowsNew = true,

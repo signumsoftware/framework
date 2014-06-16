@@ -66,6 +66,7 @@ namespace Signum.Entities.Scheduler
     public static class HolidayCalendarOperation
     {
         public static readonly ExecuteSymbol<HolidayCalendarDN> Save = OperationSymbol.Execute<HolidayCalendarDN>();
+        public static readonly DeleteSymbol<HolidayCalendarDN> Delete = OperationSymbol.Delete<HolidayCalendarDN>();
     }
 
     [Serializable]
