@@ -80,7 +80,9 @@ namespace Signum.Web
             if (OnClick == null)
                 return html;
 
-            var script = MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+            TypeContext.AssertId(this.Id);
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
 
             return html.Concat(script);
         }
@@ -113,7 +115,7 @@ namespace Signum.Web
 
     public class MenuItem : IMenuItem
     {
-        public string Id { get; set; }
+        public string Id { get; private set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }
@@ -170,7 +172,9 @@ namespace Signum.Web
             if (OnClick == null)
                 return html;
 
-            var script = MvcHtmlString.Create("<script>$('#" + Id + "').click(function(event){ " + OnClick.ToString() + " })</script>");
+            TypeContext.AssertId(this.Id);
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
 
             return html.Concat(script);
         }

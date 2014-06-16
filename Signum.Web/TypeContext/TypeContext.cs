@@ -15,6 +15,7 @@ using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 using System.Web.WebPages;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -274,6 +275,12 @@ namespace Signum.Web
         }
 
         internal abstract TypeContext Clone(object newValue);
+
+        internal static void AssertId(string id)
+        {
+            if (!Regex.IsMatch(id, @"^[A-Za-z][A-Za-z0-9-_]*$"))
+                throw new InvalidOperationException("'{0}' is not a valid HTML id".Formato(id));
+        }
     }
     #endregion
 
