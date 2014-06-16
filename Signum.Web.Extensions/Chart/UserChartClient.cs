@@ -149,9 +149,8 @@ namespace Signum.Web.Chart
             if (Navigator.IsCreable(typeof(UserChartDN), isSearch: true))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
-                items.Add(new MenuItem(prefix, "createUserChart")
+                items.Add(new MenuItem(prefix, "qbUserhartNew")
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     Title = uqNewText,
                     Text = uqNewText,
                     OnClick = ChartClient.Module["createUserChart"](prefix, url.Action((ChartController c) => c.CreateUserChart())),
@@ -163,7 +162,6 @@ namespace Signum.Web.Chart
                 string ucEditText = ChartMessage.EditUserChart.NiceToString();
                 items.Add(new MenuItem(prefix, "qbUserChartEdit")
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     Title = ucEditText,
                     Text = ucEditText,
                     Href = Navigator.NavigateRoute(currentUserChart)
