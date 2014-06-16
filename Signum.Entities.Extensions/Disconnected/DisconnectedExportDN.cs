@@ -10,7 +10,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Disconnected
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class DisconnectedExportDN : IdentifiableEntity
+    public class DisconnectedExportDN : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate

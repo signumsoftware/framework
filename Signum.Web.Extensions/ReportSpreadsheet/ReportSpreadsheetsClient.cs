@@ -88,7 +88,7 @@ namespace Signum.Web.Reports
 
                     foreach (Lite<ExcelReportDN> report in reports)
                     {
-                        items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfExcelReport"+report.Id))
+                        items.Add(new MenuItem(ctx.Prefix, "sfExcelReport" + report.Id)
                         {
                             Title = report.ToString(),
                             Text = report.ToString(),
@@ -101,14 +101,14 @@ namespace Signum.Web.Reports
 
                 var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key();
 
-                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"))
+                items.Add(new MenuItem(ctx.Prefix, "qbReportAdminister")
                 {
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
                     OnClick = Module["administerExcelReports"](ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
 
-                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"))
+                items.Add(new MenuItem(ctx.Prefix, "qbReportCreate")
                 {
                     Title = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),

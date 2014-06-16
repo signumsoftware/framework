@@ -148,7 +148,7 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName).OrderBy(a => a.ToString()))
             {
-                items.Add(new MenuItem("sfUserQuery"+uq.Id)
+                items.Add(new MenuItem(ctx.Prefix, "sfUserQuery"+uq.Id)
                 {
                     Text = uq.ToString(),
                     Title = uq.ToString(),
@@ -162,7 +162,7 @@ namespace Signum.Web.UserQueries
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearch: true))
             {
-                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"))
+                items.Add(new MenuItem(ctx.Prefix, "qbUserQueryNew")
                 {
                     Title = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
                     Text = UserQueryMessage.UserQueries_CreateNew.NiceToString(),
@@ -172,7 +172,7 @@ namespace Signum.Web.UserQueries
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                items.Add(new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"))
+                items.Add(new MenuItem(ctx.Prefix, "qbUserQueryEdit")
                 {
                     Title = UserQueryMessage.UserQueries_Edit.NiceToString(),
                     Text = UserQueryMessage.UserQueries_Edit.NiceToString(),
