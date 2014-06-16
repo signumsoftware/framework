@@ -58,7 +58,7 @@ namespace Signum.Web
         public static readonly Context Default = new Context(null, null)
         {
             FormGroupStyle = FormGroupStyle.LabelColumns,
-            FormGroupSize = FormGroupSize.Normal,
+            FormGroupSize = FormGroupSize.Small,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
             PlaceholderLabels = false,
