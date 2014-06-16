@@ -136,6 +136,12 @@ namespace Signum.Engine.Scheduler
                     Execute = (st, _) => { },
                 }.Register();
 
+                new Graph<ScheduledTaskDN>.Delete(ScheduledTaskOperation.Delete)
+                {
+                    Delete = (st, _) => { st.OperationLogs().UnsafeDelete(); st.Delete(); },
+                }.Register();
+
+
                 new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
                     Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())

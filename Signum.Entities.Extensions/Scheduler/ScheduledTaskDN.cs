@@ -70,6 +70,7 @@ namespace Signum.Entities.Scheduler
     public static class ScheduledTaskOperation
     {
         public static readonly ExecuteSymbol<ScheduledTaskDN> Save = OperationSymbol.Execute<ScheduledTaskDN>();
+        public static readonly DeleteSymbol<ScheduledTaskDN> Delete = OperationSymbol.Delete<ScheduledTaskDN>();
     }
 
     public enum TaskMessage
