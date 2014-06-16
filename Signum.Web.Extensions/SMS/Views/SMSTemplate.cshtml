@@ -24,25 +24,25 @@
     @Html.ValueLine(tc, s => s.MessageLengthExceeded)
     
     <div class="clearall"></div>
-    <div id="sfTemplateLiterals">
-        <div class="form-inline">
-            @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
-            {
-                ec.Data = SMSLogic.RegisteredDataObjectProviders();
-                ec.ComboHtmlProperties["class"] = "sf-associated-type";
-                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
-            })
-        </div>
-
-        @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
-        <br />
-        <input type="button" class="sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
+    <div class="col-sm-5 row">
+        @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
+        {
+            ec.LabelColumns = new BsColumn(5);
+            ec.Data = SMSLogic.RegisteredDataObjectProviders();
+            ec.ComboHtmlProperties["class"] = "sf-associated-type";
+            ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType", Url.Action<SMSController>(s => s.GetLiteralsForType()));
+        })
+        
+        @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").Class("form-control").ToHtml())
+        <input type="button" class="btn sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
     </div>
     
-    @Html.EntityTabRepeater(tc, e => e.Messages, er =>
-        {
-            er.PreserveViewData = true;
-        })
+    <div class="col-sm-7">
+        @Html.EntityTabRepeater(tc, e => e.Messages, er =>
+            {
+                er.PreserveViewData = true;
+            })
+    </div>
     
     <script>
         @(new JsFunction(SMSClient.Module, "init",
