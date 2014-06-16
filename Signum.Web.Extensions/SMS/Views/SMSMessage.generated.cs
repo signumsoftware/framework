@@ -91,7 +91,7 @@ WriteLiteral("\r\n\r\n");
 Write(Html.ValueLine(e, s => s.MessageID, vl =>
     {
         vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
+        vl.ReadOnly = true; 
     }));
 
             
@@ -294,8 +294,7 @@ WriteLiteral("    ");
 
             
             #line 54 "..\..\SMS\Views\SMSMessage.cshtml"
-Write(new JsFunction(SMSClient.Module, "init", 
-    Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
+Write(SMSClient.Module["init"](Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")), 
     Url.Action<SMSController>(s => s.GetDictionaries())));
 
             

@@ -109,7 +109,7 @@ WriteLiteral("\r\n\r\n        <div");
 
 WriteLiteral(" class=\"sf-sms-edit-container\"");
 
-WriteLiteral(">\r\n");
+WriteLiteral("> \r\n");
 
 WriteLiteral("            ");
 
@@ -150,14 +150,14 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"btn sf-button sf-sms-remove-chars\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1138), Tuple.Create("\"", 1197)
+WriteAttribute("value", Tuple.Create(" value=\"", 1139), Tuple.Create("\"", 1198)
             
             #line 29 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-      , Tuple.Create(Tuple.Create("", 1146), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
+      , Tuple.Create(Tuple.Create("", 1147), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
             
             #line default
             #line hidden
-, 1146), false)
+, 1147), false)
 );
 
 WriteLiteral(" />\r\n            </div>\r\n        </div>\r\n    </div>\r\n");

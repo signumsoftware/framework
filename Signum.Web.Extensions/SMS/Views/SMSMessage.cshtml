@@ -11,7 +11,7 @@
     @Html.ValueLine(e, s => s.MessageID, vl =>
     {
         vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
+        vl.ReadOnly = true; 
     })
     @Html.EntityLine(e, s => s.Template, vl =>
     {

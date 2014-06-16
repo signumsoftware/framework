@@ -82,7 +82,7 @@ WriteLiteral("\r\n");
             #line 7 "..\..\Mailing\Views\Newsletter.cshtml"
  using (var nc = Html.TypeContext<NewsletterDN>())
 {  
-    using(var tabs = Html.Tabs(nc))
+    using(var tabs = Html.Tabs(nc)) 
     {
         tabs.Tab("emTabMain", typeof(NewsletterDN).NiceName(), 
             
@@ -314,14 +314,14 @@ WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
             #line hidden
 WriteLiteralTo(__razor_template_writer, "\"");
 
-WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2151), Tuple.Create("\"", 2208)
+WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2152), Tuple.Create("\"", 2209)
             
             #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                           , Tuple.Create(Tuple.Create("", 2159), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                                           , Tuple.Create(Tuple.Create("", 2160), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2159), false)
+, 2160), false)
 );
 
 WriteLiteralTo(__razor_template_writer, " />\r\n");
@@ -442,18 +442,18 @@ WriteLiteralTo(__razor_template_writer, "\r\n            <script");
 
 WriteLiteralTo(__razor_template_writer, " type=\"text/javascript\"");
 
-WriteLiteralTo(__razor_template_writer, ">\r\n                $(function () {\r\n");
+WriteLiteralTo(__razor_template_writer, ">\r\n                 $(function () {\r\n");
 
 WriteLiteralTo(__razor_template_writer, "                    ");
 
             
             #line 66 "..\..\Mailing\Views\Newsletter.cshtml"
-WriteTo(__razor_template_writer, new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).Prefix, UICulture));
+WriteTo(__razor_template_writer, MailingClient.Module["initHtmlEditorWithTokens"](nc.SubContext(e => e.Text).Prefix, UICulture));
 
             
             #line default
             #line hidden
-WriteLiteralTo(__razor_template_writer, "\r\n                });\r\n            </script>\r\n        </div>\r\n");
+WriteLiteralTo(__razor_template_writer, ";\r\n                });\r\n            </script>\r\n        </div>\r\n");
 
             
             #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
@@ -470,11 +470,11 @@ WriteLiteralTo(__razor_template_writer, "    ");
            );
         if (!nc.Value.IsNew)
         {
-            //tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
-            //   {
-            //       FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-            //       SearchOnLoad = true,
-            //   }, new Context(nc, "ncSent")));
+            tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
+               {
+                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                   SearchOnLoad = true,
+               }, new Context(nc, "ncSent")));
         }  
     }
     
@@ -482,13 +482,13 @@ WriteLiteralTo(__razor_template_writer, "    ");
             
             #line default
             #line hidden
-WriteLiteral("<script>\r\n    $(function () {\r\n");
+WriteLiteral("<script>\r\n     $(function () {\r\n");
 
 WriteLiteral("        ");
 
             
             #line 84 "..\..\Mailing\Views\Newsletter.cshtml"
-    Write(new JsFunction(MailingClient.Module, "initReplacements"));
+    Write(MailingClient.Module["initReplacements"]());
 
             
             #line default

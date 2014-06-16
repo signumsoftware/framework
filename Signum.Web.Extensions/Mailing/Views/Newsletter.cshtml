@@ -6,7 +6,7 @@
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
-    using(var tabs = Html.Tabs(nc))
+    using(var tabs = Html.Tabs(nc)) 
     {
         tabs.Tab("emTabMain", typeof(NewsletterDN).NiceName(), @<text>
     @Html.ValueLine(nc, n => n.Name)
