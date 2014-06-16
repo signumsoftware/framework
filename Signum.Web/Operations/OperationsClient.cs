@@ -435,9 +435,7 @@ namespace Signum.Web.Operations
 
         public virtual MenuItem CreateContextual(ContextualOperationContext ctx, Func<ContextualOperationContext, JsFunction> defaultClick)
         {
-            var id = TypeContextUtilities.Compose(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"));
-
-            return new MenuItem(id)
+            return new MenuItem(ctx.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
                 Style = EntityOperationSettings.Style(ctx.OperationInfo),
 

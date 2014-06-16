@@ -87,7 +87,7 @@ namespace Signum.Web
 
         public IMenuItem ToMenuItem()
         {
-            var result = new MenuItem(Id)
+            var result = new MenuItem(Id, "")
             {
                 Text = Text,
                 Tooltip = Tooltip,
@@ -126,11 +126,11 @@ namespace Signum.Web
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
 
-        public MenuItem(string id)
+        public MenuItem(string prefix, string idToAppend)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
-            this.Id = id;
+            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
         }
 
         public MvcHtmlString ToHtml()
