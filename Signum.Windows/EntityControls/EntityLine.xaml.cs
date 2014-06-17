@@ -31,7 +31,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityLine : EntityBase
     {
-        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> AutoCompleting;
+        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
 
         public static readonly DependencyProperty AutoCompleteProperty =
             DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
@@ -70,7 +70,7 @@ namespace Signum.Windows
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public bool CanAutoComplete()
+        public bool CanAutocomplete()
         {
             return !Common.GetIsReadOnly(this) && Autocomplete;
         }
@@ -78,8 +78,8 @@ namespace Signum.Windows
         private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
         {
             IEnumerable value;
-            if (AutoCompleting != null)
-                value = AutoCompleting(arg);
+            if (Autocompleting != null)
+                value = Autocompleting(arg);
             else
                 value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
 
@@ -96,7 +96,7 @@ namespace Signum.Windows
         {
             if (e.IsCommit)
             {
-                if (CanAutoComplete())
+                if (CanAutocomplete())
                     SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
 
                 autoCompleteTextBox.Visibility = Visibility.Hidden;
@@ -111,7 +111,7 @@ namespace Signum.Windows
 
         public void ActivateAutoComplete()
         {
-            if (CanAutoComplete() && autoCompleteTextBox.Visibility != Visibility.Visible)
+            if (CanAutocomplete() && autoCompleteTextBox.Visibility != Visibility.Visible)
             {
                 autoCompleteTextBox.Visibility = Visibility.Visible;
                 autoCompleteTextBox.Text = Entity.Try(a => a.ToString());
@@ -143,16 +143,6 @@ namespace Signum.Windows
                 e.Handled = true;
             }
         }
-
-        //private void autoCompleteTextBox_KeyDown(object sender, KeyEventArgs e)
-        //{
-        //    if (e.Key == Key.Escape)
-        //    {
-        //        autoCompleteTextBox.Visibility = Visibility.Hidden;
-        //        autoCompleteTextBox.Close();
-        //        e.Handled = true; 
-        //    }
-        //}
 
         private void cc_MouseDown(object sender, MouseButtonEventArgs e)
         {

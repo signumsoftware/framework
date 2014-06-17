@@ -907,4 +907,70 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type m:EntityStripContentBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type m:EntityStripContentBase}">
+                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+						                HorizontalAlignment="Stretch"  />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type m:EntityStripContentControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type m:EntityStripContentControl}">
+                    <Border Margin="1,1,1,1" Padding="3,0,3,0"  
+                                SnapsToDevicePixels="True"  
+                                BorderThickness="1,1,1,1" CornerRadius="3,3,3,3" 
+                                x:Name="border" Grid.IsSharedSizeScope="False">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource BlueBackground}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BlueBorder}"/>
+                                <Style.Triggers>
+                                    <Trigger  Property="m:Common.IsReadOnly" Value="true">
+                                        <Setter Property="Background" Value="{DynamicResource GrayBackground}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BlackBorder}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter 
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+						        HorizontalAlignment="Left" 
+                                VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" MinWidth="24">
+                                <Button x:Name="PART_View" Style="{DynamicResource RoundButton}"                                      
+                                        Content="{DynamicResource View}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.View}}"
+                                        Visibility="{Binding ViewVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityStrip}}}"/>
+                                <Button x:Name="PART_RemoveButton"
+                                        Style="{StaticResource RoundButton}" 
+                                        Content="{StaticResource Remove}" 
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.Remove}}"
+                                        Visibility="{Binding RemoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityStrip}}}" />
+                                <Button x:Name="PART_MoveUp" Style="{DynamicResource RoundButton}" 
+                                        Content="{DynamicResource Up}" 
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveUp}}"
+                                        Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityStrip}}}"/>
+                                <Button x:Name="PART_MoveDown" Style="{DynamicResource RoundButton}"                                      
+                                        Content="{DynamicResource Down}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveDown}}"
+                                        Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityStrip}}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
