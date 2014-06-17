@@ -157,8 +157,15 @@ ul.sf-strip-vertical>li>.form-control
 {
     list-style: none;
     padding: 0px;
-    margin-bottom: 7px;
+    
+    margin-bottom: 7px; /*sf-strip-horizontal*/
 }
+
+    .sf-strip.sf-strip-vertical
+    {
+        margin-top: 7px;  /*sf-strip-vertical*/
+    }
+
 
 .sf-strip-horizontal > li > *
 {
@@ -220,6 +227,10 @@ ul.nav-tabs
 .form-xs .form-control
 {
     padding: 0px 3px;
+}
+
+.form-xs :not(textarea).form-control
+{
     height: 20px;
 }
 
@@ -239,6 +250,11 @@ ul.nav-tabs
 {
     margin-bottom: 0px;
 }
+
+    .form-xs .sf-strip.sf-strip-vertical
+    {
+        margin-top: 0px;  /*sf-strip-vertical*/
+    }
 
 .form-group.form-xs 
 {
@@ -267,6 +283,10 @@ ul.nav-tabs
 .form-sm .form-control
 {
     padding: 3px 6px;
+}
+
+.form-sm :not(textarea).form-control
+{
     height: 30px;
 }
 
@@ -285,6 +305,11 @@ ul.nav-tabs
 {
     margin-bottom: 4px;
 }
+
+    .form-sm .sf-strip.sf-strip-vertical
+    {
+        margin-top: 6px;  /*sf-strip-vertical*/
+    }
 
 .form-group.form-sm 
 {
@@ -334,7 +359,7 @@ ul.nav-tabs
 .form-vertical .form-control
 {
     display: block;
-    width: 100%;
+    width: initial;
     vertical-align: baseline;
 }
 
