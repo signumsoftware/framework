@@ -25,6 +25,8 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
+        public static Func<ITaskDN, IDisposable> ApplySession;
+
         static Expression<Func<ITaskDN, IQueryable<ScheduledTaskLogDN>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogDN>().Where(a => a.Task == ct);
         public static IQueryable<ScheduledTaskLogDN> Executions(this ITaskDN e)
@@ -297,9 +299,23 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
+        public static IDisposable OnApplySession(ITaskDN task)
+        {
+            if (ApplySession == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (Func<ITaskDN, IDisposable> item in ApplySession.GetInvocationList())
+            {
+                result = Disposable.Combine(result, item(task));
+            }
+            return result;
+        }
+
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
+            using (ApplySession(task))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {
