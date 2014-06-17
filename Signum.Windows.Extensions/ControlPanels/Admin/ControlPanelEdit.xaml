@@ -20,7 +20,7 @@
 
         <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"/>
         <m:EntityLine m:Common.Route="Owner" Grid.Column="0" Grid.Row="1"/>
-        <m:EntityLine m:Common.Route="EntityType"  Grid.Column="0" Grid.Row="2" AutoCompleting="EntityType_AutoCompleting" Find="False"/>
+        <m:EntityLine m:Common.Route="EntityType"  Grid.Column="0" Grid.Row="2" Autocompleting="EntityType_AutoCompleting" Find="False"/>
         <m:ValueLine m:Common.Route="HomePagePriority" Grid.Column="1" Grid.Row="1"/>
         <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False" Grid.Row="3" Grid.ColumnSpan="2">
             <m:EntityRepeater.ItemContainerStyle>
