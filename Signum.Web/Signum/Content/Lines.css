@@ -157,6 +157,7 @@ ul.sf-strip-vertical>li>.form-control
 {
     list-style: none;
     padding: 0px;
+    margin-bottom: 7px;
 }
 
 .sf-strip-horizontal > li > *
@@ -234,6 +235,11 @@ ul.nav-tabs
     height: 20px;
 }
 
+.form-xs .sf-strip
+{
+    margin-bottom: 0px;
+}
+
 .form-group.form-xs 
 {
     margin-bottom: 6px;
@@ -273,6 +279,11 @@ ul.nav-tabs
 .form-sm .input-group .input-group-addon
 {
     padding: 4px 6px;
+}
+
+.form-sm .sf-strip
+{
+    margin-bottom: 4px;
 }
 
 .form-group.form-sm 
