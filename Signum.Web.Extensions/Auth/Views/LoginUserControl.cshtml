@@ -1,8 +1,22 @@
-﻿@if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser) )
-{   
-    @Html.ActionLink(AuthMessage.Logout.NiceToString() + " " + UserDN.Current, "Logout" , "Auth", null, new Dictionary<string, object> { 
-        {"class", "sf-logout"},
-        {"data-user", UserDN.Current.UserName },
+﻿@if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser))
+{
+    @Html.WebMenu(new WebMenuItem
+    {
+        Class = "sf-user",
+        Text = UserDN.Current.UserName,
+        Children = 
+        {
+            new WebMenuItem
+            {
+                Text = AuthMessage.ChangePassword.NiceToString(),
+                Link= Url.Action((AuthController a)=>a.ChangePassword()),
+            },            
+            new WebMenuItem
+            {
+                Text = AuthMessage.Logout.NiceToString(),
+                Link= Url.Action((AuthController a)=>a.Logout()),
+            },
+        }
     });
 }
 else
