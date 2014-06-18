@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.Patterns
 {
@@ -38,9 +39,17 @@ namespace Signum.Entities.Patterns
                 return false;
 
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToModifyLockedEntity0.NiceToString().Formato(this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToSet0InLockedEntity1.NiceToString().Formato(ReflectionTools.BasePropertyInfo(property).NiceName(), this.ToString()));
 
             return base.Set<T>(ref field, value, automaticPropertyName);
+        }
+
+        protected override void ChildCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
+        {
+            if (this.locked)
+                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString().Formato(sender.GetType().ElementType().NicePluralName(), this.ToString()));
+
+            base.ChildCollectionChanged(sender, args);
         }
 
         public IDisposable AllowTemporalUnlock()
@@ -53,7 +62,9 @@ namespace Signum.Entities.Patterns
 
     public enum EntityMessage
     {
-        [Description("Attempt to modify locked entity {0}")]
-        AttemptToModifyLockedEntity0
+        [Description("Attempt to set {0} in locked entity {1}")]
+        AttemptToSet0InLockedEntity1,
+        [Description("Attempt to add/remove {0} in locked entity {1}")]
+        AttemptToAddRemove0InLockedEntity1
     }
 }
