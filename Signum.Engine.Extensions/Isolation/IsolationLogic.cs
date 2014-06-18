@@ -18,6 +18,8 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using System.ServiceModel.Channels;
 using System.ServiceModel;
+using Signum.Engine.Scheduler;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Isolation
 {
@@ -63,12 +65,18 @@ namespace Signum.Engine.Isolation
                     new InvalidateWith(typeof(IsolationDN)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
+                SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
             }
         }
 
         static IDisposable ProcessLogic_ApplySession(ProcessDN process)
         {
             return IsolationDN.OverrideIfNecessary(process.Data.TryIsolation());
+        }
+
+        static IDisposable SchedulerLogic_ApplySession(ITaskDN task)
+        {
+            return IsolationDN.OverrideIfNecessary(task.TryIsolation());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)
