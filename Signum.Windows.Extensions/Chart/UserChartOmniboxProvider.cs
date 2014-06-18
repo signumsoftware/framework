@@ -20,7 +20,7 @@ namespace Signum.Windows.Chart
     {
         public override OmniboxResultGenerator<UserChartOmniboxResult> CreateGenerator()
         {
-            return new UserChartOmniboxResultGenerator((subString, limit) => Server.Return((IChartServer cs) => cs.AutoCompleteUserChart(subString, limit)));
+            return new UserChartOmniboxResultGenerator((subString, limit) => Server.Return((IChartServer cs) => cs.AutocompleteUserChart(subString, limit)));
         }
 
         public override void RenderLines(UserChartOmniboxResult result, InlineCollection lines)

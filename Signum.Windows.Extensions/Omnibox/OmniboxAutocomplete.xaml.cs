@@ -31,7 +31,7 @@ namespace Signum.Windows.Omnibox
             this.autoCompleteTb.Delay = TimeSpan.FromMilliseconds(100);
         }
 
-        private IEnumerable AutoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
+        private IEnumerable AutocompleteTextBox_Autocompleting(string arg, CancellationToken ct)
         {
             return OmniboxParser.Results(arg, ct);
         }

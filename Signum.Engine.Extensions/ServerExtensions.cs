@@ -247,7 +247,7 @@ namespace Signum.Services
             () => UserChartLogic.GetUserChartsEntity(entityType));
         }
 
-        public List<Lite<UserChartDN>> AutoCompleteUserChart(string subString, int limit)
+        public List<Lite<UserChartDN>> AutocompleteUserChart(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ChartLogic.Autocomplete(subString, limit));
@@ -289,7 +289,7 @@ namespace Signum.Services
             () => UserQueryLogic.GetUserQueriesEntity(entityType));
         }
 
-        public List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit)
+        public List<Lite<UserQueryDN>> AutocompleteUserQueries(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => UserQueryLogic.Autocomplete(subString, limit));
