@@ -315,11 +315,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChangePasswordSuccess.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Auth\Views\CreateUserAccount.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CreateUserAccount.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Auth\Views\Login.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1367,10 +1362,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Views\Web.config" />
-    <None Include="Auth\Views\CreateUserAccount.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CreateUserAccount.generated.cs</LastGenOutput>
-    </None>
     <None Include="Auth\Views\ChangePassword.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChangePassword.generated.cs</LastGenOutput>
