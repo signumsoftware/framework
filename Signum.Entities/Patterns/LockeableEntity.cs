@@ -39,7 +39,7 @@ namespace Signum.Entities.Patterns
                 return false;
 
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToSet0InLockedEntity1.NiceToString().Formato(ReflectionTools.BasePropertyInfo(property).NiceName(), this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToSet0InLockedEntity1.NiceToString(this.GetType().GetProperty(automaticPropertyName, flags).NiceName(), this.ToString()));
 
             return base.Set<T>(ref field, value, automaticPropertyName);
         }
@@ -47,7 +47,7 @@ namespace Signum.Entities.Patterns
         protected override void ChildCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
         {
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString().Formato(sender.GetType().ElementType().NicePluralName(), this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToAddRemove0InLockedEntity1.NiceToString(sender.GetType().ElementType().NicePluralName(), this.ToString()));
 
             base.ChildCollectionChanged(sender, args);
         }
