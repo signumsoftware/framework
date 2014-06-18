@@ -39,10 +39,10 @@
                                     <ColumnDefinition Width="Auto"/>
                                     
                                 </Grid.ColumnDefinitions>
-                                <m:AutoCompleteTextBox Margin="2 2 0 0"
-                                x:Name="autoCompleteTextBox"
-                                AutoCompleting="autoCompleteTextBox_AutoCompleting" 
-                                Closed="autoCompleteTextBox_Closed"
+                                <m:AutocompleteTextBox Margin="2 2 0 0"
+                                x:Name="autocompleteTextBox"
+                                AutoCompleting="autocompleteTextBox_Autocompleting" 
+                                Closed="autocompleteTextBox_Closed"
                                 Visibility="Hidden" HorizontalAlignment="Stretch" MinWidth="80"/>
                                 <Button x:Name="btCreate" Grid.Column="1" Click="btCreate_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc {x:Static d:OperationMessage.Create}}"
                                     Content="{StaticResource Create}"/>

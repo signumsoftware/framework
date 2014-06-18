@@ -33,19 +33,19 @@ namespace Signum.Windows
     {
         public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
 
-        public static readonly DependencyProperty AutoCompleteProperty =
+        public static readonly DependencyProperty AutocompleteProperty =
             DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
         public bool Autocomplete
         {
-            get { return (bool)GetValue(AutoCompleteProperty); }
-            set { SetValue(AutoCompleteProperty, value); }
+            get { return (bool)GetValue(AutocompleteProperty); }
+            set { SetValue(AutocompleteProperty, value); }
         }
 
-        int autoCompleteElements = 5;
-        public int AutoCompleteElements
+        int autocompleteElements = 5;
+        public int AutocompleteElements
         {
-            get { return autoCompleteElements; }
-            set { autoCompleteElements = value; }
+            get { return autocompleteElements; }
+            set { autocompleteElements = value; }
         }
 
         public EntityLine()
@@ -75,47 +75,47 @@ namespace Signum.Windows
             return !Common.GetIsReadOnly(this) && Autocomplete;
         }
 
-        private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
+        private IEnumerable autocompleteTextBox_Autocompleting(string arg, CancellationToken ct)
         {
             IEnumerable value;
             if (Autocompleting != null)
                 value = Autocompleting(arg);
             else
-                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutocompleteElements);
 
             return value;
         }
 
-        private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
+        private void autocompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
-            autoCompleteTextBox.Visibility = Visibility.Hidden;
+            autocompleteTextBox.Visibility = Visibility.Hidden;
             cc.Focus();
         }
 
-        private void autoCompleteTextBox_Closed(object sender, CloseEventArgs e)
+        private void autocompleteTextBox_Closed(object sender, CloseEventArgs e)
         {
             if (e.IsCommit)
             {
                 if (CanAutocomplete())
-                    SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+                    SetEntityUserInteraction(Server.Convert(autocompleteTextBox.SelectedItem, Type));
 
-                autoCompleteTextBox.Visibility = Visibility.Hidden;
+                autocompleteTextBox.Visibility = Visibility.Hidden;
                 cc.Focus();
             }
             else
             {
                 if (e.Reason != CloseReason.LostFocus)
-                    autoCompleteTextBox.Visibility = Visibility.Hidden;
+                    autocompleteTextBox.Visibility = Visibility.Hidden;
             }
         }
 
-        public void ActivateAutoComplete()
+        public void ActivateAutocomplete()
         {
-            if (CanAutocomplete() && autoCompleteTextBox.Visibility != Visibility.Visible)
+            if (CanAutocomplete() && autocompleteTextBox.Visibility != Visibility.Visible)
             {
-                autoCompleteTextBox.Visibility = Visibility.Visible;
-                autoCompleteTextBox.Text = Entity.Try(a => a.ToString());
-                autoCompleteTextBox.SelectAndFocus();
+                autocompleteTextBox.Visibility = Visibility.Visible;
+                autocompleteTextBox.Text = Entity.Try(a => a.ToString());
+                autocompleteTextBox.SelectAndFocus();
             }
         }
 
@@ -123,7 +123,7 @@ namespace Signum.Windows
         {
             if (e.Key == Key.F2)
             {
-                ActivateAutoComplete();
+                ActivateAutocomplete();
                 e.Handled = true;
             }
         }
@@ -132,14 +132,14 @@ namespace Signum.Windows
         private void cc_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             doubleClicked = true; 
-            ActivateAutoComplete();
+            ActivateAutocomplete();
         }
 
         private void cc_GotFocus(object sender, RoutedEventArgs e)
         {
             if (Entity == null)
             {
-                ActivateAutoComplete();
+                ActivateAutocomplete();
                 e.Handled = true;
             }
         }
@@ -153,7 +153,7 @@ namespace Signum.Windows
             }
 
             if (!cc.Focus())
-                ActivateAutoComplete();
+                ActivateAutocomplete();
         }
 
         protected override AutomationPeer OnCreateAutomationPeer()
@@ -185,7 +185,7 @@ namespace Signum.Windows
 
             base.Dispatcher.BeginInvoke(DispatcherPriority.Input, new DispatcherOperationCallback(obj =>
             {
-                ((EntityLine)base.Owner).ActivateAutoComplete();
+                ((EntityLine)base.Owner).ActivateAutocomplete();
                 return null;
             }), null);
 

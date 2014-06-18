@@ -26,19 +26,19 @@ namespace Signum.Windows
     {
         public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
 
-        public static readonly DependencyProperty AutoCompleteProperty =
+        public static readonly DependencyProperty AutocompleteProperty =
             DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityStrip), new FrameworkPropertyMetadata(true));
         public bool Autocomplete
         {
-            get { return (bool)GetValue(AutoCompleteProperty); }
-            set { SetValue(AutoCompleteProperty, value); }
+            get { return (bool)GetValue(AutocompleteProperty); }
+            set { SetValue(AutocompleteProperty, value); }
         }
 
-        int autoCompleteElements = 5;
-        public int AutoCompleteElements
+        int autocompleteElements = 5;
+        public int AutocompleteElements
         {
-            get { return autoCompleteElements; }
-            set { autoCompleteElements = value; }
+            get { return autocompleteElements; }
+            set { autocompleteElements = value; }
         }
 
         public static readonly DependencyProperty OrientationProperty =
@@ -235,7 +235,7 @@ namespace Signum.Windows
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
             
-            autoCompleteTextBox.Visibility = CanAutocomplete().ToVisibility();
+            autocompleteTextBox.Visibility = CanAutocomplete().ToVisibility();
             RemoveVisibility = this.CanRemove().ToVisibility();
             MoveVisibility = this.Move.ToVisibility();
             ViewVisibility = this.View.ToVisibility();
@@ -251,24 +251,24 @@ namespace Signum.Windows
             return Autocomplete && !Common.GetIsReadOnly(this);
         }
 
-        private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
+        private IEnumerable autocompleteTextBox_Autocompleting(string arg, CancellationToken ct)
         {
             IEnumerable value;
             if (Autocompleting != null)
                 value = Autocompleting(arg);
             else
-                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutocompleteElements);  
 
             return value;
         }
 
-        private void autoCompleteTextBox_Closed(object sender, CloseEventArgs e)
+        private void autocompleteTextBox_Closed(object sender, CloseEventArgs e)
         {
             if (e.IsCommit)
             {
                 if (CanAutocomplete())
                 { 
-                    object value = Server.Convert(autoCompleteTextBox.SelectedItem, Type);
+                    object value = Server.Convert(autocompleteTextBox.SelectedItem, Type);
 
                     if (value != null)
                     {
@@ -278,15 +278,15 @@ namespace Signum.Windows
                     }
                 }
 
-                autoCompleteTextBox.Text = "";
-                autoCompleteTextBox.SelectEnd();
+                autocompleteTextBox.Text = "";
+                autocompleteTextBox.SelectEnd();
             }
             else
             { 
             }
         }
 
-        private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
+        private void autocompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
         }
     }
