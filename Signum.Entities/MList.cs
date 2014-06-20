@@ -70,6 +70,16 @@ namespace Signum.Entities
                 return ((IComparable<T>)this.Value).CompareTo(other.Value);
             }
 
+            public override int GetHashCode()
+            {
+                return Value == null ? 0 : Value.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is RowIdValue && base.Equals((RowIdValue)obj);
+            }
+
             public override string ToString()
             {
                 var pre = RowId == null ? "New" : RowId.Value.ToString(); 
@@ -281,7 +291,7 @@ namespace Signum.Entities
 			{
                 if (this.innerList.Contains(list[i]))
                 {
-                    var index = this.innerList.FindIndex(a => object.Equals(a, list[i].Value));
+                    var index = this.innerList.IndexOf(list[i]);
 
                     list[i] = this.innerList[index];
 
