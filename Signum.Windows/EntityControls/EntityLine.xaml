@@ -56,10 +56,10 @@
                     VerticalContentAlignment="Center"
                     HorizontalAlignment="Stretch" 
                     VerticalAlignment="Stretch" />
-                <m:AutoCompleteTextBox 
-                    x:Name="autoCompleteTextBox"
-                    AutoCompleting="autoCompleteTextBox_AutoCompleting" 
-                    Closed="autoCompleteTextBox_Closed"
+                <m:AutocompleteTextBox 
+                    x:Name="autocompleteTextBox"
+                    AutoCompleting="autocompleteTextBox_Autocompleting" 
+                    Closed="autocompleteTextBox_Closed"
                     Margin="-2,1,-2,-2"
                     Visibility="Hidden"/>
             </Grid>

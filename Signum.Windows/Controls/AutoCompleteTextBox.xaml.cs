@@ -19,10 +19,10 @@ using System.Threading.Tasks;
 namespace Signum.Windows
 {
     //http://www.lazarciuc.ro/ioan/2008/06/01/auto-complete-for-textboxes-in-wpf/
-    public partial class AutoCompleteTextBox : UserControl
+    public partial class AutocompleteTextBox : UserControl
     {
         public static readonly RoutedEvent ClosedEvent =
-            EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Bubble, typeof(ClosedEventHandler), typeof(AutoCompleteTextBox));
+            EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Bubble, typeof(ClosedEventHandler), typeof(AutocompleteTextBox));
         public event ClosedEventHandler Closed
         {
             add { AddHandler(ClosedEvent, value); }
@@ -32,7 +32,7 @@ namespace Signum.Windows
         public event Func<string, CancellationToken, IEnumerable> AutoCompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutoCompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
+            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutocompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutocompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
         public object SelectedItem
         {
             get { return (object)GetValue(SelectedItemProperty); }
@@ -40,7 +40,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty MinTypedCharactersProperty =
-            DependencyProperty.Register("MinTypedCharacters", typeof(int), typeof(AutoCompleteTextBox), new UIPropertyMetadata(1));
+            DependencyProperty.Register("MinTypedCharacters", typeof(int), typeof(AutocompleteTextBox), new UIPropertyMetadata(1));
         public int MinTypedCharacters
         {
             get { return (int)GetValue(MinTypedCharactersProperty); }
@@ -49,7 +49,7 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty AllowFreeTextProperty =
-            DependencyProperty.Register("AllowFreeText", typeof(bool), typeof(AutoCompleteTextBox), new UIPropertyMetadata(false));
+            DependencyProperty.Register("AllowFreeText", typeof(bool), typeof(AutocompleteTextBox), new UIPropertyMetadata(false));
         public bool AllowFreeText
         {
             get { return (bool)GetValue(AllowFreeTextProperty); }
@@ -57,7 +57,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ItemTemplateProperty =
-            DependencyProperty.Register("ItemTemplate", typeof(DataTemplate), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+            DependencyProperty.Register("ItemTemplate", typeof(DataTemplate), typeof(AutocompleteTextBox), new UIPropertyMetadata(null));
         public DataTemplate ItemTemplate
         {
             get { return (DataTemplate)GetValue(ItemTemplateProperty); }
@@ -65,7 +65,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ItemTemplateSelectorProperty =
-           DependencyProperty.Register("ItemTemplateSelector", typeof(DataTemplateSelector), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+           DependencyProperty.Register("ItemTemplateSelector", typeof(DataTemplateSelector), typeof(AutocompleteTextBox), new UIPropertyMetadata(null));
         public DataTemplateSelector ItemTemplateSelector
         {
             get { return (DataTemplateSelector)GetValue(ItemTemplateSelectorProperty); }
@@ -80,7 +80,7 @@ namespace Signum.Windows
             set { delayTimer.Interval = value; }
         }
         
-        public AutoCompleteTextBox()
+        public AutocompleteTextBox()
         {
             InitializeComponent();
             delayTimer.Interval = TimeSpan.FromMilliseconds(300);
@@ -116,9 +116,12 @@ namespace Signum.Windows
                 else
                 {
                     lstBox.ItemsSource = res.Result;
+                    
                     if (lstBox.Items.Count > 0)
                     {
                         lstBox.SelectedIndex = -1;
+                        pop.Width = lstBox.Width;
+                        pop.Height = lstBox.Height;
                         pop.IsOpen = true;
                     }
                     else
@@ -347,14 +350,14 @@ namespace Signum.Windows
 
         protected override AutomationPeer OnCreateAutomationPeer()
         {
-            return new AutoCompleteAutomationPeer(this);
+            return new AutocompleteAutomationPeer(this);
         }
 
     }
 
-    public class AutoCompleteAutomationPeer : UserControlAutomationPeer, IValueProvider
+    public class AutocompleteAutomationPeer : UserControlAutomationPeer, IValueProvider
     {
-        public AutoCompleteAutomationPeer(AutoCompleteTextBox ac)
+        public AutocompleteAutomationPeer(AutocompleteTextBox ac)
             : base(ac)
         {
         }
@@ -362,7 +365,7 @@ namespace Signum.Windows
         protected override List<AutomationPeer> GetChildrenCore()
         {
             List<AutomationPeer> childrenCore = new List<AutomationPeer>();
-            AutoCompleteTextBox owner = (AutoCompleteTextBox)base.Owner;
+            AutocompleteTextBox owner = (AutocompleteTextBox)base.Owner;
             if (owner.pop.IsOpen)
             {
                 AutomationPeer item = UIElementAutomationPeer.CreatePeerForElement(owner.lstBox);
@@ -384,12 +387,12 @@ namespace Signum.Windows
 
         public bool IsReadOnly
         {
-            get { return !((AutoCompleteTextBox)base.Owner).IsEnabled; }
+            get { return !((AutocompleteTextBox)base.Owner).IsEnabled; }
         }
 
         public void SetValue(string value)
         {
-            AutoCompleteTextBox ac = ((AutoCompleteTextBox)base.Owner);
+            AutocompleteTextBox ac = ((AutocompleteTextBox)base.Owner);
             ac.Text = value;
             ac.delayTimer_Tick(null, null);
             if (ac.AllowFreeText && ac.lstBox.Items.Count == 0)
@@ -398,7 +401,7 @@ namespace Signum.Windows
 
         public string Value
         {
-            get { return ((AutoCompleteTextBox)base.Owner).Text; }
+            get { return ((AutocompleteTextBox)base.Owner).Text; }
         }
     }
 
@@ -428,7 +431,7 @@ namespace Signum.Windows
         }
 
         public CloseEventArgs(CloseReason reason)
-            : base(AutoCompleteTextBox.ClosedEvent)
+            : base(AutocompleteTextBox.ClosedEvent)
         {
             Reason = reason;
         }

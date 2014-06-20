@@ -68,6 +68,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return result;
         };
 
+        EntityBase.prototype.getOrRequestEntityHtml = function () {
+            var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
+
+            if (runtimeInfo == null)
+                return Promise.resolve(null);
+
+            var div = this.containerDiv();
+
+            var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo, this.getToString(), this.getLink());
+
+            result.html = div.children();
+
+            if (result.isLoaded())
+                return Promise.resolve(result);
+
+            return Navigator.requestPartialView(result, this.defaultViewOptions(null));
+        };
+
         EntityBase.prototype.getLink = function (itemPrefix) {
             return null;
         };
