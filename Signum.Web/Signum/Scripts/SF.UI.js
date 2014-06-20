@@ -265,36 +265,52 @@ var SF;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
 
-    function onVisible(element, callback) {
+    function onVisible(element, callbackVisible) {
         if (element.length == 0)
             throw Error("element is empty");
+
+        if (element.closest("[id$=_sfEntity]").length) {
+            return;
+        }
 
         var pane = element.closest(".tab-pane");
         if (pane.length) {
             var id = pane[0].id;
 
             if (pane.hasClass("active") || !id) {
-                callback(element);
+                callbackVisible(element);
                 return;
             }
 
             var tab = pane.parent().parent().find("a[data-toggle=tab][href=#" + id + "]");
 
             if (!tab.length) {
-                callback(element);
+                callbackVisible(element);
                 return;
             }
 
             tab.on("shown.bs.tab", function (e) {
-                if (callback)
-                    callback(element);
-                callback = null;
+                if (callbackVisible)
+                    callbackVisible(element);
+                callbackVisible = null;
             });
         } else {
-            callback(element);
+            callbackVisible(element);
         }
     }
     SF.onVisible = onVisible;
+
+    function onHidden(element, callbackHidden) {
+        var tab = element.closest(".tab-pane");
+
+        if (tab.length)
+            throw new Error("not implemented");
+
+        element.closest(".modal").on("hide.bs.modal", function () {
+            callbackHidden(element);
+        });
+    }
+    SF.onHidden = onHidden;
 })(SF || (SF = {}));
 
 once("removeKeyPress", function () {
