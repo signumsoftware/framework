@@ -56,6 +56,24 @@ namespace Signum.Engine.Translation
                     .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
                     gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance, a.RowId))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
+
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                {
+                    var s = Schema.Current;
+
+                    var prs = (from t in s.Tables.Keys
+                             from pr in PropertyRoute.GenerateRoutes(t)
+                             where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string)
+                             && s.Settings.FieldAttributes(pr).OfType<TranslateFieldAttribute>().Any() && 
+                             !s.Settings.FieldAttributes(pr).OfType<IgnoreAttribute>().Any()
+                             select pr).ToList();
+
+                    foreach (var pr in prs)
+                    {
+                        AddRoute(pr);
+                    }
+
+                };
             }
         }
 
@@ -71,9 +89,6 @@ namespace Signum.Engine.Translation
 
             if (route.Type != typeof(string))
                 throw new InvalidOperationException("Only string routes can be traducibles");
-
-            if (route.Follow(a => a.Parent).Any(a => a.PropertyRouteType == PropertyRouteType.MListItems))
-                throw new NotImplementedException("MList elements are not traducible yet");
 
             TraducibleRoutes.GetOrCreate(route.RootType).Add(route); 
         }
@@ -230,15 +245,12 @@ namespace Signum.Engine.Translation
                     select ti).UnsafeDelete();
         }
 
-
         public static string TranslatedField<T>(this T entity, Expression<Func<T, string>> property) where T : IdentifiableEntity
         {
             string fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
 
             return entity.ToLite().TranslatedField(property, fallbackString);
         }
-
-     
 
         public static IEnumerable<TranslatableElement<T>> TranslatedMList<E, T>(this E entity, Expression<Func<E, MList<T>>> mlistProperty) where E : IdentifiableEntity
         {
