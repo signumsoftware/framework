@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
-using Signum.Entities.ControlPanel;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Entities.UserQueries
 {

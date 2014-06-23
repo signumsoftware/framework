@@ -15,11 +15,11 @@ using Signum.Engine;
 using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
 using System.Web.Script.Serialization;
-using Signum.Engine.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
+using Signum.Engine.Excel;
 
 namespace Signum.Web.Chart
 {

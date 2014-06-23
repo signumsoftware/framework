@@ -144,36 +144,41 @@
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\UserTicketClient.cs" />
-    <Compile Include="ControlPanel\GridRepeaterHelper.cs" />
-    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.generated.cs">
+    <Compile Include="Dashboard\GridRepeaterHelper.cs" />
+    <Compile Include="Dashboard\Views\Admin\DashboardAdmin.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
+      <DependentUpon>DashboardAdmin.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\CountSearchControlPart.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\CountSearchControlPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\CountUserQueryElement.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\CountUserQueryElement.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountUserQueryElement.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\LinkElement.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\LinkElement.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkElement.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\LinkListPart.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\LinkListPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkListPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\PanelPartViewAdmin.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\PanelPartViewAdmin.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PanelPartViewAdmin.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Dashboard\Views\Admin\SearchControlPart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
@@ -187,7 +192,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="Dashboard\DashboardOmniboxProvider.cs" />
     <Compile Include="Mailing\Controllers\MailingController.cs" />
     <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
       <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
@@ -468,47 +473,42 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\SearchControlPart.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="ControlPanel\Views\Admin\UserChartPart.generated.cs">
+    <Compile Include="Dashboard\Views\Admin\UserChartPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\ControlPanel.generated.cs">
+    <Compile Include="Dashboard\Views\Dashboard.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ControlPanel.cshtml</DependentUpon>
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\CountSearchControlPart.generated.cs">
+    <Compile Include="Dashboard\Views\CountSearchControlPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\LinkListPart.generated.cs">
+    <Compile Include="Dashboard\Views\LinkListPart.generated.cs">
       <DependentUpon>LinkListPart.cshtml</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="ControlPanel\Views\PanelPartView.generated.cs">
+    <Compile Include="Dashboard\Views\PanelPartView.generated.cs">
       <DependentUpon>PanelPartView.cshtml</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="ControlPanel\Views\SearchControlPart.generated.cs">
+    <Compile Include="Dashboard\Views\SearchControlPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\UserChartPart.generated.cs">
+    <Compile Include="Dashboard\Views\UserChartPart.generated.cs">
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="ControlPanel\Views\_ViewStart.generated.cs">
+    <Compile Include="Dashboard\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -672,8 +672,8 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Profiler\ProfilerFilterAttribute.cs" />
-    <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
-    <Compile Include="ControlPanel\ControlPanelClient.cs" />
+    <Compile Include="Dashboard\Controllers\DashboardController.cs" />
+    <Compile Include="Dashboard\DashboardClient.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
     <Compile Include="Files\FileLine.cs" />
     <Compile Include="Files\Controllers\FileController.cs" />
@@ -727,12 +727,12 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReportSpreadsheet\Views\ExcelReport.generated.cs">
+    <Compile Include="Excel\Views\ExcelReport.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ExcelReport.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ReportSpreadsheet\Views\_ViewStart.generated.cs">
+    <Compile Include="Excel\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -901,8 +901,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ReportSpreadsheet\ReportSpreadsheetsClient.cs" />
-    <Compile Include="ReportSpreadsheet\Controllers\ReportController.cs" />
+    <Compile Include="Excel\ExcelClient.cs" />
+    <Compile Include="Excel\Controllers\ReportController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
     <Compile Include="Combine\CombineClient.cs" />
@@ -1011,25 +1011,25 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartRequestView.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Content\ControlPanel.css" />
-    <TypeScriptCompile Include="ControlPanel\Scripts\ControlPanel.ts" />
-    <TypeScriptCompile Include="ControlPanel\Scripts\GridRepeater.ts" />
-    <Content Include="ControlPanel\Views\LinkListPart.cshtml">
+    <Content Include="Dashboard\Content\Dashboard.css" />
+    <TypeScriptCompile Include="Dashboard\Scripts\Dashboard.ts" />
+    <TypeScriptCompile Include="Dashboard\Scripts\GridRepeater.ts" />
+    <Content Include="Dashboard\Views\LinkListPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>LinkListPart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\PanelPartView.cshtml">
+    <Content Include="Dashboard\Views\PanelPartView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PanelPartView.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\UserChartPart.cshtml">
+    <Content Include="Dashboard\Views\UserChartPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartPart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\_ViewStart.cshtml">
+    <Content Include="Dashboard\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
@@ -1073,11 +1073,11 @@
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Cache\Views\Web.config" />
-    <Content Include="ControlPanel\Views\SearchControlPart.cshtml">
+    <Content Include="Dashboard\Views\SearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControlPart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\CountSearchControlPart.cshtml">
+    <Content Include="Dashboard\Views\CountSearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CountSearchControlPart.generated.cs</LastGenOutput>
     </Content>
@@ -1087,9 +1087,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
+    <Content Include="Dashboard\Views\Admin\SearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>SearchControlPart.cs</LastGenOutput>
+      <LastGenOutput>SearchControlPart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\ChartBuilder.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1127,7 +1127,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\Admin\UserChartPart.cshtml">
+    <Content Include="Dashboard\Views\Admin\UserChartPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartPart.generated.cs</LastGenOutput>
     </Content>
@@ -1270,7 +1270,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailMasterTemplateMessage.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\Admin\PanelPartViewAdmin.cshtml">
+    <Content Include="Dashboard\Views\Admin\PanelPartViewAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PanelPartViewAdmin.generated.cs</LastGenOutput>
     </Content>
@@ -1294,7 +1294,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <None Include="ReportSpreadsheet\Views\_ViewStart.cshtml">
+    <None Include="Excel\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
@@ -1302,7 +1302,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>HolidayCalendar.generated.cs</LastGenOutput>
     </None>
-    <TypeScriptCompile Include="ReportSpreadsheet\Scripts\Report.ts" />
+    <TypeScriptCompile Include="Excel\Scripts\Excel.ts" />
     <TypeScriptCompile Include="Scheduler\Scripts\Scheduler.ts" />
     <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1351,13 +1351,13 @@
     <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
-    <Content Include="ControlPanel\Views\Web.config" />
+    <Content Include="Dashboard\Views\Web.config" />
     <Content Include="Help\Views\Web.config" />
     <Content Include="Mailing\Views\Web.config" />
     <Content Include="Processes\Views\Web.config" />
     <Content Include="Profiler\Views\Web.config" />
     <Content Include="UserQueries\Views\Web.config" />
-    <Content Include="ReportSpreadsheet\Views\Web.config" />
+    <Content Include="Excel\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -1402,27 +1402,27 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DateSpan.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\ControlPanel.cshtml">
+    <None Include="Dashboard\Views\Dashboard.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ControlPanel.generated.cs</LastGenOutput>
+      <LastGenOutput>Dashboard.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\Admin\ControlPanelAdmin.cshtml">
+    <None Include="Dashboard\Views\Admin\DashboardAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ControlPanelAdmin.generated.cs</LastGenOutput>
+      <LastGenOutput>DashboardAdmin.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\Admin\LinkElement.cshtml">
+    <None Include="Dashboard\Views\Admin\LinkElement.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>LinkElement.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\Admin\LinkListPart.cshtml">
+    <None Include="Dashboard\Views\Admin\LinkListPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>LinkListPart.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\Admin\CountUserQueryElement.cshtml">
+    <None Include="Dashboard\Views\Admin\CountUserQueryElement.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CountUserQueryElement.generated.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\Admin\CountSearchControlPart.cshtml">
+    <None Include="Dashboard\Views\Admin\CountSearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CountSearchControlPart.generated.cs</LastGenOutput>
     </None>
@@ -1592,7 +1592,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserQuery.generated.cs</LastGenOutput>
     </None>
-    <None Include="ReportSpreadsheet\Views\ExcelReport.cshtml">
+    <None Include="Excel\Views\ExcelReport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ExcelReport.generated.cs</LastGenOutput>
     </None>

@@ -1,0 +1,11 @@
+﻿<UserControl x:Class="Signum.Windows.Dashboard.UserQueryPartView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:swuq="clr-namespace:Signum.Windows.UserQueries"
+    xmlns:d="clr-namespace:Signum.Entities.Dashboard;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="{x:Type d:UserQueryPartDN}"
+    MinWidth="300">
+    <m:SearchControl x:Name="seachControl" ShowHeader="False" ShowFooter="False" 
+                     swuq:UserQueryClient.UserQuery="{Binding UserQuery}"/>
+</UserControl>

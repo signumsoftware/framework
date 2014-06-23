@@ -131,7 +131,7 @@ WriteLiteral("            ");
 
             
             #line 15 "..\..\Processes\Views\ProcessPanel.cshtml"
-        Write(ProcessesClient.Module["initControlPanel"](Url.Action((ProcessController p) => p.View())));
+        Write(ProcessesClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())));
 
             
             #line default

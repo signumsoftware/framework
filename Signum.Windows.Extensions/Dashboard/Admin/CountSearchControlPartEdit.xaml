@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="Signum.Windows.Dashboard.Admin.CountSearchControlPartEdit"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Dashboard;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="{x:Type d:CountSearchControlPartDN}"
+    MinWidth="300">
+    <StackPanel>
+        <m:EntityRepeater m:Common.Route="UserQueries">
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid m:Common.LabelVisible="False" HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="60"/>
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <m:ValueLine m:Common.Route="Label" Grid.Column="0" />
+                        <m:EntityLine m:Common.Route="UserQuery" Grid.Column="1" />
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
+    </StackPanel>
+</UserControl>

@@ -1,9 +1,0 @@
-﻿@using Signum.Entities.ControlPanel
-@using Signum.Web.ControlPanel
-@using Signum.Entities.Reports
-
-@using (var tc = Html.TypeContext<LinkElementDN>())
-{
-    @Html.ValueLine(tc, l => l.Label)
-    @Html.ValueLine(tc, l => l.Link)
-}

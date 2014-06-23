@@ -13,7 +13,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Chart;
-using Signum.Entities.Reports;
 using Signum.Entities;
 using Signum.Entities.UserQueries;
 using Signum.Windows.Basics;

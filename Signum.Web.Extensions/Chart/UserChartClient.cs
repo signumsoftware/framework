@@ -10,7 +10,6 @@ using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
-using Signum.Web.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine;
@@ -20,6 +19,7 @@ using Signum.Engine.Chart;
 using Signum.Web.Basic;
 using Signum.Web.Operations;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Web.Excel;
 
 namespace Signum.Web.Chart
 {
@@ -121,8 +121,8 @@ namespace Signum.Web.Chart
             var buttons = new List<ToolBarButton>();
             buttons.Add(UserCharButton(url, queryName, prefix, currentUserChart));
 
-            if (ReportSpreadsheetClient.ToExcelPlain)
-                buttons.Add(ReportSpreadsheetClient.UserChartButton(url, prefix)); 
+            if (ExcelClient.ToExcelPlain)
+                buttons.Add(ExcelClient.UserChartButton(url, prefix)); 
 
             return buttons;
         }

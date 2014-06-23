@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows;
 using Microsoft.Win32;
 using Signum.Entities;
-using Signum.Entities.ControlPanel;
+using Signum.Entities.Dashboard;
 using Signum.Entities.UserQueries;
 using Signum.Services;
 using Signum.Utilities;

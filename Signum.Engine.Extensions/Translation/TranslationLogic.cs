@@ -26,7 +26,6 @@ namespace Signum.Engine.Translation
             return TranslatorUserExpression.Evaluate(entity);
         }
 
-        
   
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {

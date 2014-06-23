@@ -6,7 +6,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Windows.Chart;
 using Signum.Entities.Chart;
 using System.Reflection;
-using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows;

@@ -13,7 +13,6 @@ using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
 using Signum.Entities.Chart;
-using Signum.Windows.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows.Data;

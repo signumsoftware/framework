@@ -8,12 +8,11 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.Reflection;
-using Signum.Entities.Reports;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
-using Signum.Entities.ControlPanel;
+using Signum.Entities.Dashboard;
 using Signum.Entities.Chart;
 
 namespace Signum.Entities.UserQueries

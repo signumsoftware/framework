@@ -6,7 +6,6 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Services;
 using Signum.Entities.Basics;
-using Signum.Entities.Reports;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 

@@ -10,7 +10,6 @@ using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
-using Signum.Web.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine;
