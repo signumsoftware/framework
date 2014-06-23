@@ -97,13 +97,13 @@ namespace Signum.Web
         }
 
 
-        public static MvcHtmlString GridRepater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
+        public static MvcHtmlString GridRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : ModifiableEntity, IGridEntity
         {
-            return helper.EntityRepeater(tc, property, null);
+            return helper.GridRepeater(tc, property, null);
         }
 
-        public static MvcHtmlString GridRepater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<GridRepeater> settingsModifier)
+        public static MvcHtmlString GridRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<GridRepeater> settingsModifier)
             where S : ModifiableEntity, IGridEntity
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
