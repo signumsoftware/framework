@@ -3,7 +3,7 @@
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-export function initControlPanel(url: string) {
+export function initDashboard(url: string) {
     $("#sfSchedulerDisable , #sfSchedulerEnable").click(function (e) {
         e.preventDefault();
         $.post($(this).attr("href"));

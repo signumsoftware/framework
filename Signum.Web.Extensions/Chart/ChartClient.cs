@@ -15,7 +15,6 @@ using System.Web.Routing;
 using System.Web.Mvc;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Web.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Chart;
 using Signum.Engine.Authorization;

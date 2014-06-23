@@ -12,7 +12,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
-using Signum.Entities.Reports;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Reflection;

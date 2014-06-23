@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
-using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;

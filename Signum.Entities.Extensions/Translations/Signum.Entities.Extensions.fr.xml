@@ -164,14 +164,14 @@
     <Member Name="f" Description="Construit un nouveau {0}" />
     <Member Name="m" Description="Construit un nouveau {0}" />
   </Type>
-  <Type Name="ControlPanelDN" Description="Panneau de commande">
+  <Type Name="DashboardDN" Description="Panneau de commande">
     <Member Name="DisplayName" Description="Nom d'affichage" />
     <Member Name="HomePage" Description="Page d'accueil" />
     <Member Name="NumberOfColumns" Description="Nombre de colonnes" />
     <Member Name="Parts" Description="Pièces" />
     <Member Name="Related" Description="Liées" />
   </Type>
-  <Type Name="ControlPanelMessage">
+  <Type Name="DashboardMessage">
     <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Partie {0} est dans la colonne {1} mais le panneau à uniquement {2} colonnes" />
     <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Partie {0} se trouve dans la colonne {1}  ligne {2} qui dispose déjà d'autres parties" />
     <Member Name="Rows0DontHaveAnyParts" Description="Il n'y a pas toutes les parties en rangées {{{0}}}" />

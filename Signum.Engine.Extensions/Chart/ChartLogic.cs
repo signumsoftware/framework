@@ -14,7 +14,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
-using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Reflection;

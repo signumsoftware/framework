@@ -18,8 +18,7 @@ using Signum.Entities.Basics;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
-using Signum.Engine.Reports;
-using Signum.Entities.Reports;
+using Signum.Engine.Excel;
 
 namespace Signum.Engine.Translation
 {

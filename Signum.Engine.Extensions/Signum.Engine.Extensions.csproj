@@ -118,7 +118,7 @@
     </Compile>
     <Compile Include="Chart\ChartScriptLogic.cs" />
     <Compile Include="Chart\UserChartLogic.cs" />
-    <Compile Include="ControlPanel\ControlPanelLogic.cs" />
+    <Compile Include="Dashboard\DashboardLogic.cs" />
     <Compile Include="Disconnected\DisconnectedTools.cs" />
     <Compile Include="Disconnected\LocalBackupManager.cs" />
     <Compile Include="Disconnected\ImportManager.cs" />
@@ -157,11 +157,11 @@
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reports\ExcelGenerator.cs" />
-    <Compile Include="Reports\CellBuilder.cs" />
-    <Compile Include="Reports\ExcelExtensions.cs" />
-    <Compile Include="Reports\PlainExcelGenerator.cs" />
-    <Compile Include="Reports\ReportSpreedsheetsLogic.cs" />
+    <Compile Include="Excel\ExcelGenerator.cs" />
+    <Compile Include="Excel\CellBuilder.cs" />
+    <Compile Include="Excel\ExcelExtensions.cs" />
+    <Compile Include="Excel\PlainExcelGenerator.cs" />
+    <Compile Include="Excel\ReportSpreedsheetsLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
     <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />
@@ -196,7 +196,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Help\SignumFrameworkHelp.xsd" />
     <None Include="Chart\ChartScripts\charts.psd" />
-    <EmbeddedResource Include="Reports\plainExcelTemplate.xlsx" />
+    <EmbeddedResource Include="Excel\plainExcelTemplate.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Help\Sample.xml" />
@@ -221,8 +221,8 @@
     <Content Include="Chart\ChartScripts\StackedColumns.xml" />
     <Content Include="Chart\ChartScripts\StackedLines.xml" />
     <Content Include="Chart\ChartScripts\WorldMap.xml" />
-    <Content Include="Reports\DocumentFormat.OpenXml.dll" />
-    <Content Include="Reports\DocumentFormat.OpenXml.xml" />
+    <Content Include="Excel\DocumentFormat.OpenXml.dll" />
+    <Content Include="Excel\DocumentFormat.OpenXml.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

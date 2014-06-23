@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Reports;
+using Signum.Entities.Excel;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Web.Selenium;

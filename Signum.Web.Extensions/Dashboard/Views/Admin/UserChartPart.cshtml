@@ -1,0 +1,11 @@
+﻿@using System.Configuration
+@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+@using Signum.Entities.DynamicQuery
+@using Signum.Web.Chart
+
+@using(var tc = Html.TypeContext<UserChartPartDN>())
+{
+    @Html.EntityLine(tc, ucp => ucp.UserChart, el => el.Create = false)
+    @Html.ValueLine(tc, ucp => ucp.ShowData)
+}

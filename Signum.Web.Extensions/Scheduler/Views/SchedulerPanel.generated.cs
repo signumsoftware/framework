@@ -137,7 +137,7 @@ WriteLiteral("            ");
 
             
             #line 15 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-        Write(SchedulerClient.Module["initControlPanel"]());
+        Write(SchedulerClient.Module["initDashboard"]());
 
             
             #line default

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Selenium;
 using Signum.Entities.Chart;
-using Signum.Entities.ControlPanel;
 using Signum.Utilities;
 using Signum.Web.Selenium;
 

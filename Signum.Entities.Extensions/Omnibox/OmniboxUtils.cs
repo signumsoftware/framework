@@ -186,8 +186,8 @@ namespace Signum.Entities.Omnibox
         Omnibox_UserChart,
         [Description("UserQuery")]
         Omnibox_UserQuery,
-        [Description("ControlPanel")]
-        Omnibox_ControlPanel,
+        [Description("Dashboard")]
+        Omnibox_Dashboard,
         [Description("Value")]
         Omnibox_Value,
         Unknown,

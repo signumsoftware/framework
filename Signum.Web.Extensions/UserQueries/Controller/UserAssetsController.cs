@@ -16,7 +16,6 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Specialized;
 using System.IO;
-using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
