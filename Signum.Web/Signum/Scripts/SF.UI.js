@@ -167,7 +167,7 @@ var SF;
 })(SF || (SF = {}));
 
 $(function () {
-    $(document).on("change", "select, input", function () {
+    $(document).on("change", "select, input, textarea", function () {
         SF.setHasChanges($(this));
     });
 });
@@ -301,11 +301,6 @@ var SF;
     SF.onVisible = onVisible;
 
     function onHidden(element, callbackHidden) {
-        var tab = element.closest(".tab-pane");
-
-        if (tab.length)
-            throw new Error("not implemented");
-
         element.closest(".modal").on("hide.bs.modal", function () {
             callbackHidden(element);
         });

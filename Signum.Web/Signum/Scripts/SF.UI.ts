@@ -172,7 +172,7 @@ module SF {
 
 
 $(function () {
-    $(document).on("change", "select, input", function () {
+    $(document).on("change", "select, input, textarea", function () {
         SF.setHasChanges($(this));
     });
 });
@@ -296,11 +296,6 @@ module SF {
     }
 
     export function onHidden(element: JQuery, callbackHidden: (element: JQuery) => void) {
-
-        var tab = element.closest(".tab-pane");
-
-        if (tab.length)
-            throw new Error("not implemented");
 
         element.closest(".modal")
             .on("hide.bs.modal", () => {
