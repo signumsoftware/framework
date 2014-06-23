@@ -35,7 +35,7 @@
     
     }
     
-    @Html.GridRepater(tc, cp => cp.Parts, grid =>
+    @Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
             grid.PartialViewName = DashboardClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
             grid.AttachFunction = DashboardClient.Module["attachGridControl"](grid,
