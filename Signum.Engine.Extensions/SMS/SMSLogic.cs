@@ -626,8 +626,12 @@ namespace Signum.Engine.SMS
                     catch (Exception e)
                     {
                         var ex = e.LogException();
-                        m.Exception = ex.ToLite();
-                        m.Save();
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            m.Exception = ex.ToLite();
+                            m.Save();
+                            tr.Commit();
+                        }
                         throw;
                     }
                 }
