@@ -286,7 +286,7 @@ namespace Signum.Web.Selenium
 
         public void QueryButtonClick(string id)
         {
-            Selenium.Click(QueryButtonLocator(id));
+            Selenium.MouseUp(QueryButtonLocator(id));
         }
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
