@@ -10,7 +10,7 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 export function saveNew(options: Operations.EntityOperationOptions, url: string) {
     options.controllerUrl = url;
     options.avoidValidate = true;
-    Operations.executeDefault(options); 
+    Operations.executeDefault(options);
 }
 
 
@@ -20,14 +20,14 @@ export function setPassword(options: Operations.EntityOperationOptions, urlModel
 
     Navigator.viewPopup(Entities.EntityHtml.withoutType(passPrefix), {
         controllerUrl: urlModel,
-        allowErrors : Navigator.AllowErrors.No
+        allowErrors: Navigator.AllowErrors.No
     }).then(eHtml => {
-            if (eHtml == null)
-                return;
+        if (eHtml == null)
+            return;
 
         options.requestExtraJsonData = $.extend({ passPrefix: passPrefix }, Validator.getFormValuesHtml(eHtml));
-            options.controllerUrl = urlSetPassword;
+        options.controllerUrl = urlSetPassword;
 
-            Operations.executeDefault(options);
-        });
+        Operations.executeDefault(options);
+    });
 }
