@@ -620,12 +620,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static string FormatTable(this string[,] table)
-        {
-            return FormatTable(table, true);
-        }
-
-        public static string FormatTable(this string[,] table, bool longHeaders)
+        public static string FormatTable(this string[,] table, bool longHeaders = true, string separator = " ")
         {
             int width = table.GetLength(0);
             int height = table.GetLength(1);
@@ -633,7 +628,7 @@ namespace Signum.Utilities
 
             int[] lengths = 0.To(width).Select(i => Math.Max(3, start.To(height).Max(j => table[i, j].Length))).ToArray();
 
-            return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), " ")).ToString("\r\n");
+            return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), separator)).ToString("\r\n");
         }
 
         public static void WriteFormattedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title, bool longHeaders)

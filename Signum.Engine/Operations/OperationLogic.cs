@@ -478,6 +478,38 @@ namespace Signum.Engine.Operations
             return result;
         }
 
+        public static Graph<T>.Construct FindConstruct<T>(Enum operationKey) 
+            where T : class, IIdentifiable
+        {
+            return (Graph<T>.Construct)FindOperation(typeof(T), operationKey);
+        }
+
+        public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(Enum operationKey) 
+            where T : class, IIdentifiable
+            where F : class, IIdentifiable
+        {
+            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), operationKey);
+        }
+
+        public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(Enum operationKey)
+            where T : class, IIdentifiable
+            where F : class, IIdentifiable
+        {
+            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), operationKey);
+        }
+
+        public static Graph<T>.Execute FindExecute<T>(Enum operationKey)
+            where T : class, IIdentifiable
+        {
+            return (Graph<T>.Execute)FindOperation(typeof(T), operationKey);
+        }
+
+        public static Graph<T>.Delete FindDelete<T>(Enum operationKey)
+            where T : class, IIdentifiable
+        {
+            return (Graph<T>.Delete)FindOperation(typeof(T), operationKey);
+        }
+
         static T AssertLite<T>(this T result)
              where T : IEntityOperation
         {
