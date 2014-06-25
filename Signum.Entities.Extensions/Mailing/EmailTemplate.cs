@@ -164,11 +164,13 @@ namespace Signum.Entities.Mailing
         {
             if (sender == messages)
             {
-                foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = null;
+                if (args.OldItems != null)
+                    foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
+                        item.Template = null;
 
-                foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = this;
+                if (args.NewItems != null)
+                    foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
+                        item.Template = this;
             }
         }
 
