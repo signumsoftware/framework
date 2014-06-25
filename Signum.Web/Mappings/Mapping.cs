@@ -1005,9 +1005,12 @@ namespace Signum.Web
                     if (ctx.Value == null)
                         mlistPriv = ctx.Value = new MList<S>();
 
+                    var added = newList.Select(a=>a.Value).Except(mlistPriv.InnerList.Select(a=>a.Value)).ToList();
+                    var removed = mlistPriv.InnerList.Select(a=>a.Value).Except(newList.Select(a=>a.Value)).ToList();
+
                     mlistPriv.InnerList.Clear();
                     mlistPriv.InnerList.AddRange(newList);
-                    mlistPriv.InnerListModified();
+                    mlistPriv.InnerListModified(added, removed);
                 }
 
                 return ctx.Value;
