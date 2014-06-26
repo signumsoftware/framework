@@ -68,7 +68,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
