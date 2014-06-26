@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Drawing;
+using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
@@ -73,6 +74,11 @@ namespace Signum.Entities.Basics
         public string ARGBHex()
         {
             return "#" + A.ToString("X2") + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
+        }
+
+        public string RGBAExpression()
+        {
+            return  "rgb({0:X2}, {1:X2}, {2:X2}, {3})".Formato(R, G, B, (A / 255.0));
         }
 
         public override string ToString()
