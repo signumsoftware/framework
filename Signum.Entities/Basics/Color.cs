@@ -29,6 +29,11 @@ namespace Signum.Entities.Basics
             return new ColorDN { Argb = argb };
         }
 
+        public static ColorDN FromRGBHex(string htmlColor)
+        {
+            return ColorDN.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
+        }
+
         int argb;
         public int Argb
         {

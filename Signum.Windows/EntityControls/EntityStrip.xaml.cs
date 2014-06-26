@@ -237,7 +237,7 @@ namespace Signum.Windows
             
             autocompleteTextBox.Visibility = CanAutocomplete().ToVisibility();
             RemoveVisibility = this.CanRemove().ToVisibility();
-            MoveVisibility = this.Move.ToVisibility();
+            MoveVisibility = this.CanMove().ToVisibility();
             ViewVisibility = this.View.ToVisibility();
         }
 
