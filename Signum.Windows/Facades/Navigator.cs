@@ -284,11 +284,12 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
 
-            TypeDN.SetTypeNameAndResolveType(
-                t => Server.ServerTypes.GetOrThrow(t).CleanName,
-                Server.TryGetType,
-                t => Server.ServerTypes.GetOrThrow(t),
-                tdn => Server.GetType(tdn.CleanName));
+            if (!Server.OfflineMode)
+                TypeDN.SetTypeNameAndResolveType(
+                    t => Server.ServerTypes.GetOrThrow(t).CleanName,
+                    Server.TryGetType,
+                    t => Server.ServerTypes.GetOrThrow(t),
+                    tdn => Server.GetType(tdn.CleanName));
         }
         
         public event Action Initializing;
@@ -297,9 +298,12 @@ namespace Signum.Windows
         {
             if (!initialized)
             {
-                //Looking for a better place to do this
-                PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = DynamicQueryServer.GetExtensionToken;
+                if (!Server.OfflineMode)
+                {
+                    //Looking for a better place to do this
+                    PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
+                    QueryToken.EntityExtensions = DynamicQueryServer.GetExtensionToken;
+                }
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
