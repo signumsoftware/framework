@@ -221,7 +221,7 @@ export class ChartBuilder extends Finder.SearchControl {
         var data = $chartContainer.data("json");
         ChartUtils.fillAllTokenValueFuntions(data);
 
-        $(".sf-chart-redraw-onchange", this.$chartControl).each((i, element) => {
+        $(".sf-chart-redraw-onchange[id]", this.$chartControl).each((i, element) => {
             var $element = $(element);
             var name = $element.attr("id");
             if (!SF.isEmpty(this.options.prefix)) {

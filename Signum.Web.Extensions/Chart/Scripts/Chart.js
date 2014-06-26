@@ -219,7 +219,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var data = $chartContainer.data("json");
             ChartUtils.fillAllTokenValueFuntions(data);
 
-            $(".sf-chart-redraw-onchange", this.$chartControl).each(function (i, element) {
+            $(".sf-chart-redraw-onchange[id]", this.$chartControl).each(function (i, element) {
                 var $element = $(element);
                 var name = $element.attr("id");
                 if (!SF.isEmpty(_this.options.prefix)) {
