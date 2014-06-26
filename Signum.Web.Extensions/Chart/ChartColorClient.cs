@@ -39,15 +39,7 @@ namespace Signum.Web.Chart
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)
                             .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related,
                                 new EntityMapping<ChartColorDN>(false)
-                                    .SetProperty(m => m.Color, ctx=>
-                                    {
-                                        var input = ctx.Inputs["Rgb"];
-                                        int rgb;
-                                        if(input.HasText() && int.TryParse(input, System.Globalization.NumberStyles.HexNumber, null, out rgb))
-                                            return ColorDN.FromARGB(255, rgb);
-
-                                        return null;
-                                    })
+                                    .CreateProperty(m => m.Color)
                                     .CreateProperty(c => c.Related)))
                     }
                 });

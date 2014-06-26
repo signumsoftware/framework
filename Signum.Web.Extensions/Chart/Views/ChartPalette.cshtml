@@ -13,12 +13,10 @@
 @using (var cpt = Html.TypeContext<ChartPaletteModel>())
 {
     @Html.HiddenRuntimeInfo(cpt, cp => cp.Type)
-    <table class="table" style="width:auto">
+    <table class="table form-vertical" style="width:auto">
         <thead>
             <tr>
                 <th>Color
-                </th>
-                <th>Hex
                 </th>
                 <th>Id
                 </th>
@@ -31,16 +29,8 @@
             {  
                 <tr>
                     <td>
-                        <div class="sf-chart-color-box">
-                        </div>
-                    </td>
-                    <td>
-                        <div class="input-group">
-                            <span class="input-group-addon">#</span>
-                            @Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.Try(c => c.ToColor().ToHtml().Substring(1)),
-                              new { maxlength = 6, size = 6, @class = "sf-chart-color-input form-control" })
-                        </div>
                         @Html.HiddenRuntimeInfo(clc, cl => cl.Related)
+                        @Html.ValueLine(clc, c=>c.Color, vl=> vl.FormGroupStyle = FormGroupStyle.SrOnly)
                     </td>
                     <td>
                         @clc.Value.Related.Id
