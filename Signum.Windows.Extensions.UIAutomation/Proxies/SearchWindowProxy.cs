@@ -84,6 +84,8 @@ namespace Signum.Windows.UIAutomation
         public void Ok()
         {
             OkButton.ButtonInvoke();
+            Element.Wait(() => this.IsClosed,
+                () => "Waiting for SearchWindow {0} to close after Ok pressed".Formato(Element.Current.Name));
         }
 
         public AutomationElement OkCapture(int? timeout = null)
