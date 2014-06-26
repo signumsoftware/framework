@@ -43,13 +43,13 @@ namespace Signum.Windows
 
         protected override void UpdateVisibility()
         {
-            btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
-            btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
-            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
-            btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
-            btUp.Visibility = Move ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
-            btDown.Visibility = Move ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
+            btCreate.Visibility = CanCreate().ToVisibility();
+            btFind.Visibility = CanFind().ToVisibility();
+            btView.Visibility = CanView().ToVisibility();
+            btNavigate.Visibility = CanNavigate().ToVisibility();
+            btRemove.Visibility = CanRemove().ToVisibility();
+            btUp.Visibility = this.CanMove() ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
+            btDown.Visibility = this.CanMove() ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
         }
 
         static EntityList()
