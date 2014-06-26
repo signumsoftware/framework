@@ -87,12 +87,26 @@ namespace Signum.Web
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", 
                     new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
 
-            sbOptions.Add(new HtmlTag("option")
+            var optionTag = new HtmlTag("option")
                     .Id(itemTC.Compose(EntityBaseKeys.ToStr))
                     .Class("sf-entity-list-option")
                     .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
-                    .SetInnerText(itemTC.Value.TryToString())
-                    .ToHtml(TagRenderMode.Normal));
+                    .SetInnerText(itemTC.Value.TryToString());
+
+            if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+            {
+                int? idOrNull = null;
+                Type type = itemTC.Value.GetType();
+                if (type.IsLite())
+                    idOrNull = ((Lite<IIdentifiable>)itemTC.Value).IdOrNull;
+
+                if (type.IsIdentifiableEntity())
+                    idOrNull = ((IdentifiableEntity)(object)itemTC.Value).IdOrNull;
+
+                optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
+            }
+        
+            sbOptions.Add(optionTag.ToHtml(TagRenderMode.Normal));
 
             return sb.ToHtml();
         }
