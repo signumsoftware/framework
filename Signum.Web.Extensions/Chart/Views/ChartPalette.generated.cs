@@ -208,26 +208,6 @@ WriteLiteral("        </tbody>\r\n    </table>\r\n");
 
             
             #line 45 "..\..\Chart\Views\ChartPalette.cshtml"
-      
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <script>\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 47 "..\..\Chart\Views\ChartPalette.cshtml"
-    Write(ChartColorClient.Module["init"]());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </script>\r\n");
-
-            
-            #line 49 "..\..\Chart\Views\ChartPalette.cshtml"
 }
 
             
