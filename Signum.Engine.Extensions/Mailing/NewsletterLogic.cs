@@ -121,30 +121,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static string AssertTokens(object queryName, string content)
-        {
-            List<string> tokens = FindTokens(content);
-
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            var str = tokens.Select(t =>
-            {
-                try
-                {
-                    QueryUtils.Parse(t, qd, canAggregate: false);
-                    return null;
-                }
-                catch (Exception e)
-                {
-                    return e.Message;
-                }
-            }).NotNull().ToString("\r\n");
-
-            if (str.HasText())
-                return str;
-
-            return null;
-        }
 
         static void Newsletter_PreSaving(NewsletterDN newsletter, ref bool graphModified)
         {
@@ -153,24 +129,6 @@ namespace Signum.Engine.Mailing
 
             newsletter.Subject = EmailTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
             newsletter.Text = EmailTemplateParser.Parse(newsletter.Text, qd, null).ToString();
-        }
-
-        public static List<QueryToken> GetTokens(object queryName, string content)
-        {
-            List<string> tokens = FindTokens(content);
-
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            List<string> errors = new List<string>();
-            return tokens.Select(t => QueryUtils.Parse(t, qd, canAggregate: false)).ToList();
-        }
-
-        public static readonly Regex TokenRegex = new Regex(@"\{(?<token>[^\}]*)\}");
-
-        private static List<string> FindTokens(string content)
-        {
-            List<string> tokens = TokenRegex.Matches(content)
-                .Cast<Match>().Select(m => m.Groups["token"].Value).ToList();
-            return tokens;
         }
     }
 
@@ -282,9 +240,9 @@ namespace Signum.Engine.Mailing
 
             using (ExecutionMode.Global())
             {
-                list.Add(QueryUtils.Parse("Entity", qd, false));
-                list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, false));
-                list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, false));
+                list.Add(QueryUtils.Parse("Entity", qd, 0));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, SubTokensOptions.CanElement));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, 0));
 
                 EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
                 EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
@@ -307,8 +265,8 @@ namespace Signum.Engine.Mailing
                 QueryName = queryName,
                 Filters = new List<Filter>
                 { 
-                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd, canAggregate: false),  FilterOperation.EqualTo, newsletter.ToLite()),
-                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd, canAggregate: false), FilterOperation.EqualTo, false),
+                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd, SubTokensOptions.CanElement),  FilterOperation.EqualTo, newsletter.ToLite()),
+                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd, SubTokensOptions.CanElement), FilterOperation.EqualTo, false),
                 },
                 Orders = new List<Order>(),
                 Columns = columns,

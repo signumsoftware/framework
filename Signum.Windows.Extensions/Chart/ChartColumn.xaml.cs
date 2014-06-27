@@ -118,7 +118,7 @@ namespace Signum.Windows.Chart
 
             var desc = this.VisualParents().OfType<ChartBuilder>().First().Description;
 
-            return QueryUtils.SubTokens(token, desc, canAggregate: ct.IsGroupKey == false);
+            return QueryUtils.SubTokens(token, desc, SubTokensOptions.CanElement |  (ct.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
         }
 
         private void UpdateGroup()

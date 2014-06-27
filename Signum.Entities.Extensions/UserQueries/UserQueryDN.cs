@@ -184,15 +184,15 @@ namespace Signum.Entities.UserQueries
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(this, description, canAggregate: false);
+                    f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(this, description, canAggregate: false);
+                    c.ParseData(this, description, SubTokensOptions.CanElement);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(this, description, canAggregate: false);
+                    o.ParseData(this, description, SubTokensOptions.CanElement);
         }
 
         public void SetFilterValues()
@@ -322,11 +322,11 @@ namespace Signum.Entities.UserQueries
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             try
             {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
+                token = QueryUtils.Parse(tokenString, description, options);
             }
             catch (Exception e)
             {
@@ -393,9 +393,9 @@ namespace Signum.Entities.UserQueries
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -453,9 +453,9 @@ namespace Signum.Entities.UserQueries
             DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
             DisplayName = DisplayName;
         }
 
@@ -527,9 +527,9 @@ namespace Signum.Entities.UserQueries
             set { Set(ref index, value); }
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options);
 
             if (token.TryToken != null)
             {

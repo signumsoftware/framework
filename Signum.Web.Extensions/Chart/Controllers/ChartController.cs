@@ -84,14 +84,21 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, int options)
         {
             ChartRequest request = this.ExtractChartRequestCtx(null).Value;
+
+            SubTokensOptions ops = (SubTokensOptions)options;
+            if (request.GroupResults)
+                ops = ops | SubTokensOptions.CanAggregate;
+            else
+                ops = ops & ~SubTokensOptions.CanAggregate;
+        
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, ops);
 
             var combo = FinderController.CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, this.Prefix()),
-                ChartClient.GetQueryTokenBuilderSettings(qd, request.GroupResults, isKey : false));
+                ChartClient.GetQueryTokenBuilderSettings(qd, ops));
 
             return Content(combo.ToHtmlString());
         }
@@ -108,7 +115,7 @@ namespace Signum.Web.Chart
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
-                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: request.GroupResults);
+                fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.GroupResults ? SubTokensOptions.CanAggregate : 0));
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 

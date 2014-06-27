@@ -158,7 +158,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Filters.ToList())
                         {
                             QueryTokenDN token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "{0} {1}".Formato(item.Operation, item.ValueString)))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".Formato(item.Operation, item.ValueString)))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
@@ -176,7 +176,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Columns.ToList())
                         {
                             QueryTokenDN token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, item.DisplayName.HasText() ? "'{0}'".Formato(item.DisplayName) : null))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".Formato(item.DisplayName) : null))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: ; return table.DeleteSqlSync(uq);
@@ -194,7 +194,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Orders.ToList())
                         {
                             QueryTokenDN token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, item.OrderType.ToString()))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.OrderType.ToString()))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);

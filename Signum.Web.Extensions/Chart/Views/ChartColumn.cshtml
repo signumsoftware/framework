@@ -59,9 +59,11 @@
         }
         <td>
             <div class="sf-query-token">
-                @Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
-                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],
-                tc.Value.ParentChart.GroupResults, tc.Value.IsGroupKey == true))
+                @Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), new QueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription],
+               SubTokensOptions.CanElement | (tc.Value.ParentChart.GroupResults && !tc.Value.IsGroupKey == true ? SubTokensOptions.CanAggregate : 0))
+                {
+                    ControllerUrl = null,
+                })
             </div>
             <a class="sf-chart-token-config-trigger">@ChartMessage.Chart_ToggleInfo.NiceToString()</a>
         </td>

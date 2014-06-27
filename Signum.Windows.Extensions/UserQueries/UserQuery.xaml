@@ -28,7 +28,7 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilder_SubTokensEvent" />
+                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderFilters_SubTokensEvent" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
                                   ItemsSource="{Binding Token.TryToken, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">

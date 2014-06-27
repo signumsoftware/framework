@@ -23,7 +23,6 @@
 }
 <div id="@Model.Compose("sfChartControl")" 
     class="sf-search-control sf-chart-control" 
-    data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
     data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
     data-prefix="@Model.Prefix"
     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(Model.Prefix)))"
@@ -34,7 +33,8 @@
     <div>
         @{
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
-            ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey: false);
+            ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription, 
+                SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (Model.Value.GroupResults ? SubTokensOptions.CanAggregate : 0));
             Html.RenderPartial(Navigator.Manager.FilterBuilderView);
         }
 

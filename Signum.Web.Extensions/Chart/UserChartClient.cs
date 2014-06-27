@@ -34,7 +34,7 @@ namespace Signum.Web.Chart
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
 
-                Mapping<QueryTokenDN> qtMapping = ctx =>
+                Func<SubTokensOptions, Mapping<QueryTokenDN>> qtMapping = ops=>ctx =>
                 {
                     string tokenStr = UserQueries.UserQueriesHelper.GetTokenString(ctx);
 
@@ -44,7 +44,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults));
+                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, ops | (chart.GroupResults ? SubTokensOptions.CanAggregate : 0)));
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -60,13 +60,13 @@ namespace Signum.Web.Chart
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
                                     .CreateProperty(a=>a.Operation)
                                     .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             })
                             .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
                             {
                                 ElementMapping = new EntityMapping<QueryOrderDN>(false)
                                     .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             })
                     }
                 });

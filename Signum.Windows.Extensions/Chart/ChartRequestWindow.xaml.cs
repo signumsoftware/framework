@@ -129,7 +129,7 @@ namespace Signum.Windows.Chart
             if (cr == null || chartRenderer.Description == null)
                 return new List<QueryToken>();
 
-            return token.SubTokens(chartRenderer.Description, canAggregate: cr.GroupResults);
+            return token.SubTokens(chartRenderer.Description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (cr.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
