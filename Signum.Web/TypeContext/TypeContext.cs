@@ -205,12 +205,34 @@ namespace Signum.Web
         }
     }
 
+    /// <summary>
+    /// Nomenclature from http://getbootstrap.com/css/#forms
+    /// </summary>
     public enum FormGroupStyle
     {
+        /// <summary>
+        /// Unaffected by FormGroupSize
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         Basic,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         BasicDown,
+
+        /// <summary>
+        /// Requires form-vertical / form-inline container
+        /// </summary>
         SrOnly,
+
+        /// <summary>
+        /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
+        /// </summary>
         LabelColumns,
     }
 
