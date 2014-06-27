@@ -320,6 +320,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.onAutocompleteSelected = function (entityValue) {
             throw new Error("onAutocompleteSelected is abstract");
         };
+
+        EntityBase.prototype.getNiceName = function (typeName) {
+            var t = this.options.types.filter(function (a) {
+                return a.name == typeName;
+            });
+
+            return t.length ? t[0].niceName : typeName;
+        };
         EntityBase.key_entity = "sfEntity";
         return EntityBase;
     })();
@@ -907,7 +915,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var select = this.prefix.child(EntityList.key_list).get();
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
 
-            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).appendTo(select);
+            var ri = entityValue.runtimeInfo;
+
+            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).attr('title', this.options.isEmbedded ? null : (this.getNiceName(ri.type) + (ri.id ? " " + ri.id : null))).appendTo(select);
         };
 
         EntityList.prototype.remove_click = function () {
