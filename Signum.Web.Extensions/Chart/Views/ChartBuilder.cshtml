@@ -12,7 +12,6 @@
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    
-    
     <div id="@chart.Compose("sfChartBuilder")" class="row sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)))">
 
         <div class="col-lg-2">
@@ -55,7 +54,7 @@
                                 </th>
                                 @if (chart.Value.ChartScript.GroupBy == GroupByChart.Optional)
                                 {
-                                    <th class="sf-chart-token-narrow">@ChartMessage.Chart_Group.NiceToString()
+                                    <th class="">@ChartMessage.Chart_Group.NiceToString()
                                     </th>
                                 }
                                 <th class="sf-chart-token-wide">Token
