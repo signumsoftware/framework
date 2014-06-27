@@ -180,7 +180,7 @@ namespace Signum.Web
 
             sb.AddLine(new HtmlTag("script").InnerHtml(MvcHtmlString.Create(
 @" $(function(){
-        $('#" + valueLine.Prefix + @"').parent().colorpicker({format: 'argb'})" + (valueLine.ReadOnly ? ".colorpicker('disable')" : null) + @";
+        $('#" + valueLine.Prefix + @"').parent().colorpicker()" + (valueLine.ReadOnly ? ".colorpicker('disable')" : null) + @";
    });")));
 
             return sb.ToHtml();
