@@ -112,7 +112,7 @@ namespace Signum.Entities.Chart
 
             if (pi.Is(() => Script))
             {
-                if (!Regex.IsMatch(Script, @"^\s*function\s+DrawChart\s*\(\s*chart\s*,\s*data\s*\)\s*{.*}\s*$", RegexOptions.Singleline))
+                if (!Regex.IsMatch(Script, @"function\s+DrawChart\s*\(\s*chart\s*,\s*data\s*\)", RegexOptions.Singleline))
                 {
                     return "{0} should be a definition of function DrawChart(chart, data)".Formato(pi.NiceName());
                 }
