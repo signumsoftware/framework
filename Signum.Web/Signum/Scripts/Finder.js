@@ -1023,14 +1023,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.FilterBuilder = FilterBuilder;
 
     (function (QueryTokenBuilder) {
-        function init(containerId, webQueryName, controllerUrl, requestExtraJsonData) {
+        function init(containerId, webQueryName, controllerUrl, options, requestExtraJsonData) {
             $("#" + containerId).on("change", "select", function () {
-                tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+                tokenChanged($(this), webQueryName, controllerUrl, options, requestExtraJsonData);
             });
         }
         QueryTokenBuilder.init = init;
 
-        function tokenChanged($selectedCombo, webQueryName, controllerUrl, requestExtraJsonData) {
+        function tokenChanged($selectedCombo, webQueryName, controllerUrl, options, requestExtraJsonData) {
             var prefix = $selectedCombo.attr("id").before("ddlTokens_");
             if (prefix.endsWith("_"))
                 prefix = prefix.substr(0, prefix.length - 1);
@@ -1051,7 +1051,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 webQueryName: webQueryName,
                 tokenName: tokenName,
                 index: index,
-                prefix: prefix
+                prefix: prefix,
+                options: options
             }, requestExtraJsonData);
 
             SF.ajaxPost({

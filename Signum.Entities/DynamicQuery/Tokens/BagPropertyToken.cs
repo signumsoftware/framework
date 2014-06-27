@@ -49,9 +49,9 @@ namespace Signum.Entities.DynamicQuery
             return result.BuildLite().Nullify();
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
+            return SubTokensBase(PropertyInfo.PropertyType, options, GetImplementations());
         }
 
         public override Implementations? GetImplementations()

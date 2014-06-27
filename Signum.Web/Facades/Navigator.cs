@@ -759,19 +759,19 @@ namespace Signum.Web
         protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, canAggregate);
+                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, SubTokensOptions.CanAnyAll| SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         public virtual void SetSearchViewableAndCreable(FindOptions findOptions, QueryDescription description)

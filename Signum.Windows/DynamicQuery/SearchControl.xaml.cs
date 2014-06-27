@@ -463,7 +463,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return arg.SubTokens(Description, canAggregate: false);
+            return arg.SubTokens(Description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)

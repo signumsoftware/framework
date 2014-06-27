@@ -63,7 +63,7 @@ namespace Signum.Entities.DynamicQuery
             throw new InvalidOperationException("ColumnToken {0} not found on replacements".Formato(this));
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
@@ -82,7 +82,7 @@ namespace Signum.Entities.DynamicQuery
                     return DateTimeProperties(this, DateTimePrecision.Days);
             }
 
-            return SubTokensBase(Column.Type, Column.Implementations);
+            return SubTokensBase(Column.Type, options, Column.Implementations);
         }
 
         public override Implementations? GetImplementations()

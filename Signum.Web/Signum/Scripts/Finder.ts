@@ -1052,13 +1052,13 @@ export class FilterBuilder {
 
 export module QueryTokenBuilder {
 
-    export function init(containerId: string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function init(containerId: string, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
         $("#" + containerId).on("change", "select", function () {
-            tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+            tokenChanged($(this), webQueryName, controllerUrl, options, requestExtraJsonData);
         });
     }
 
-    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
 
         var prefix = $selectedCombo.attr("id").before("ddlTokens_");
         if (prefix.endsWith("_"))
@@ -1080,7 +1080,8 @@ export module QueryTokenBuilder {
             webQueryName: webQueryName,
             tokenName: tokenName,
             index: index,
-            prefix: prefix
+            prefix: prefix,
+            options: options
         }, requestExtraJsonData);
 
         SF.ajaxPost({
