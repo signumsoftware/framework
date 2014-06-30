@@ -39,10 +39,10 @@ var SF;
         }
 
         jQuery.fn.SFControlFullfill = function (val) {
-            fulllFill(this, val);
+            fullFill(this, val);
         };
 
-        function fulllFill(jq, control) {
+        function fullFill(jq, control) {
             if (jq.length == 0)
                 throw new Error("impossible to fulfill SFControl from no elements");
 
@@ -52,7 +52,7 @@ var SF;
             if (!jq.hasClass("SF-control-container"))
                 throw Error("this element has not SF-control");
 
-            if (jq.data("SF-control"))
+            if (!jq.data("SF-control"))
                 throw Error("SF-control not set yet");
 
             var queue = jq.data("SF-queue");

@@ -49,11 +49,11 @@ module SF {
         }
 
         jQuery.fn.SFControlFullfill = function (val : any) {
-            fulllFill<any>(this, val);
+            fullFill<any>(this, val);
         };
 
 
-        function fulllFill<T>(jq: JQuery, control: T){
+        function fullFill<T>(jq: JQuery, control: T){
          
             if (jq.length == 0)
                 throw new Error("impossible to fulfill SFControl from no elements");
@@ -64,7 +64,7 @@ module SF {
             if (!jq.hasClass("SF-control-container"))
                 throw Error("this element has not SF-control");
 
-            if (jq.data("SF-control"))
+            if (!jq.data("SF-control"))
                 throw Error("SF-control not set yet");
 
             var queue: { (value: T): void }[] = jq.data("SF-queue");
