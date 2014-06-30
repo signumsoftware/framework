@@ -35,8 +35,8 @@ export function deleteUserChart(options: Operations.EntityOperationOptions, url:
 
     Operations.deleteAjax(options).then(a=> {
         if (!options.prefix)
-            location.href = url; 
-    }); 
+            location.href = url;
+    });
 }
 
 export function createUserChart(prefix: string, url: string) {
@@ -45,75 +45,211 @@ export function createUserChart(prefix: string, url: string) {
 }
 
 export function exportData(prefix: string, validateUrl: string, exportUrl: string) {
-    getFor(prefix).then(cb=> cb.exportData(validateUrl, exportUrl)); 
+    getFor(prefix).then(cb=> cb.exportData(validateUrl, exportUrl));
 }
 
 
 
-export function getFor(prefix: string): Promise<ChartBuilder> {
-    return prefix.child("sfChartBuilderContainer").get().SFControl<ChartBuilder>();
-};
+export interface ChartBuilderOptions {
+    webQueryName: string;
+    prefix: string;
+    updateChartBuilderUrl: string;
+}
 
-export class ChartBuilder extends Finder.SearchControl {
-    exceptionLine: number;
-    $chartControl: JQuery;
-    reDrawOnUpdateBuilder: boolean;
+export class ChartBuilder {
 
-    public _create() {
+    options: ChartBuilderOptions;
 
-        this.$chartControl = this.element.closest(".sf-chart-control");
+    container: JQuery;
 
-        this.filterBuilder = new Finder.FilterBuilder(
-            this.prefix.child("tblFilterBuilder").get(),
-            this.options.prefix,
-            this.options.webQueryName,
-            this.$chartControl.attr("data-add-filter-url"));
+    isDrawn = (isEquiv: boolean) => false;
+    fastRedraw = () => { };
 
-        $(document).on("click", ".sf-chart-img", e => {
+    constructor(options: ChartBuilderOptions) {
+
+        this.options = options;
+
+        this.container = options.prefix.child("sfChartBuilderContainer").get();
+        this.container.data("SF-control", this);
+
+        this.container.on("click", ".sf-chart-img", e => {
             var img = $(e.currentTarget);
             img.closest(".sf-chart-type").find(".sf-chart-type-value").val(img.attr("data-related"));
 
+            var isFastRedraw = this.isDrawn(img.hasClass("sf-chart-img-equiv"));
 
-            var $resultsContainer = this.$chartControl.find(".sf-search-results-container");
-            if (img.hasClass("sf-chart-img-equiv")) {
-                if ($resultsContainer.find("svg").length > 0) {
-                    this.reDrawOnUpdateBuilder = true;
-                }
-            }
-            else {
-                $resultsContainer.html("");
-            }
+            this.updateChartBuilder().then(() => {
+                if (isFastRedraw)
+                    this.fastRedraw();
+            });
+        });
 
+        this.container.on("change", ".sf-chart-group-trigger", e=> {
+            this.container.find(".sf-chart-group-results").val($(e.currentTarget).is(":checked").toString());
             this.updateChartBuilder();
         });
 
-        $(document).on("change", ".sf-chart-group-trigger", e=> {
-            this.element.find(".sf-chart-group-results").val($(e.currentTarget).is(":checked").toString());
-            this.updateChartBuilder();
-        });
-
-        $(document).on("click", ".sf-chart-token-config-trigger", e => {
+        this.container.on("click", ".sf-chart-token-config-trigger", e => {
             $(e.currentTarget).closest(".sf-chart-token").next().toggle();
         });
 
-        $(document).on("change", ".sf-query-token select", e => {
+        this.container.on("change", ".sf-query-token select", e => {
             var token = $(e.currentTarget);
-            var id = token.attr("id"); 
+            var id = token.attr("id");
             Finder.QueryTokenBuilder.clearChildSubtokenCombos(token, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
             this.updateChartBuilder(token.closest("tr").attr("data-token"));
         });
 
-        $(this.$chartControl).on("change", ".sf-chart-redraw-onchange", () => {
-            this.reDraw();
+        this.container.SFControlFullfill(this);
+    }
+
+    updateChartBuilder(tokenChanged?: string): Promise<void> {
+        var data = this.requestData();
+        if (!SF.isEmpty(tokenChanged)) {
+            data["lastTokenChanged"] = tokenChanged;
+        }
+
+        return SF.ajaxPost({
+            url: this.options.updateChartBuilderUrl,
+            data: data,
+        }).then((result) => {
+                this.container.html(result);
+            });
+    }
+
+    requestData(): FormObject {
+
+        var result = this.container.find(":input").serializeObject();
+
+        result["webQueryName"] = this.options.webQueryName;
+
+        return result;
+    }
+}
+
+
+export function getFor(prefix: string): Promise<ChartRequest> {
+    return prefix.child("sfChartControl").get().SFControl<ChartRequest>();
+};
+
+
+export interface ChartRequestOptions extends ChartBuilderOptions {
+    prefix: string;
+
+    addFilterUrl: string;
+    fullScreenUrl: string;
+    drawUrl: string;
+    openUrl: string;
+
+    orders?: Finder.OrderOption[];
+
+    mode: ChartRequestMode
+}
+
+export enum ChartRequestMode {
+    Complete,
+    Chart,
+    Data
+}
+
+
+export class ChartRequest {
+
+    options: ChartRequestOptions;
+    filterBuilder: Finder.FilterBuilder;
+    chartBuilder: ChartBuilder;
+    exceptionLine: number;
+    chartControl: JQuery;
+    divResults: JQuery;
+
+    serializeOrders() {
+        return Finder.serializeOrders(this.options.orders);
+    }
+
+    public constructor(options: ChartRequestOptions) {
+
+        this.options = options;
+
+        this.chartControl = options.prefix.child("sfChartControl").get();
+        this.chartControl.data("SF-control", this);
+
+        this.divResults = options.prefix.child("divResults").get();
+
+        this.filterBuilder = new Finder.FilterBuilder(
+            this.options.prefix.child("tblFilterBuilder").get(),
+            this.options.prefix,
+            this.options.webQueryName,
+            this.options.addFilterUrl);
+
+        this.chartBuilder = new ChartBuilder(this.options);
+
+        if (this.options.mode == ChartRequestMode.Complete) {
+
+            this.chartBuilder.isDrawn = (isEqiv) => {
+
+                if (isEqiv && this.divResults.find("svg").length > 0)
+                    return true;
+
+                this.divResults.html("");
+                return false;
+            };
+
+            this.chartBuilder.fastRedraw = () => this.reDraw();
+
+            $(this.chartControl).on("change", ".sf-chart-redraw-onchange", () => {
+                this.reDraw();
+            });
+
+
+
+            this.options.prefix.child("qbDraw").get().click(e => {
+                e.preventDefault();
+                this.request();
+            });
+
+            window.changeTextArea = (value, runtimeInfo) => {
+                if ($("#ChartScript_sfRuntimeInfo").val() == runtimeInfo) {
+                    var $textArea = this.chartControl.find("textarea.sf-chart-currentScript");
+
+                    $textArea.val(value);
+                    this.reDraw();
+                }
+            };
+
+            window.getExceptionNumber = () => {
+                if (this.exceptionLine == null || this.exceptionLine == undefined)
+                    return null;
+
+                var temp = this.exceptionLine;
+                this.exceptionLine = null;
+                return temp;
+            };
+
+            this.options.prefix.child("qbEdit").get().on("click", e => {
+                e.preventDefault();
+                var $textArea = this.chartControl.find("textarea.sf-chart-currentScript");
+                var win = window.open($textArea.data("url"));
+            });
+
+        } else {
+            this.request();
+        }
+
+        this.options.prefix.child("sfFullScreen").get().on("mousedown", e => {
+            e.preventDefault();
+            this.fullScreen(e);
         });
 
-        $(document).on("click", ".sf-chart-draw", e => {
-            e.preventDefault();
-            var drawBtn = $(e.currentTarget);
-            SF.ajaxPost({
-                url: drawBtn.attr("data-url"),
-                data: this.requestData(),
-            }).then((result) => {
+
+        this.chartControl.SFControlFullfill(this);
+    }
+
+
+    request() {
+        SF.ajaxPost({
+            url: this.options.drawUrl,
+            data: $.extend(this.requestData(), { "mode": this.options.mode })
+        }).then((result) => {
                 if (typeof result === "object") {
                     if (typeof result.ModelState != "undefined") {
                         var modelState = result.ModelState;
@@ -123,74 +259,30 @@ export class ChartBuilder extends Finder.SearchControl {
                 }
                 else {
                     Validator.showErrors({}, null);
-                    this.$chartControl.find(".sf-search-results-container").html(result);
-                    this.initOrders();
-                    this.reDraw();
+                    this.chartControl.find(".sf-search-results-container").html(result);
+
+                    if (this.options.mode == ChartRequestMode.Complete || this.options.mode == ChartRequestMode.Data) {
+                        this.initOrders();
+                    }
+
+                    if (this.options.mode == ChartRequestMode.Complete || this.options.mode == ChartRequestMode.Chart) {
+                        this.reDraw();
+                    }
                 }
             });
-        });
-
-
-        window.changeTextArea =  (value, runtimeInfo) => {
-            if ($("#ChartScript_sfRuntimeInfo").val() == runtimeInfo) {
-                var $textArea = this.element.find("textarea.sf-chart-currentScript");
-
-                $textArea.val(value);
-                this.reDraw();
-            }
-        };
-
-        window.getExceptionNumber = () => {
-            if (this.exceptionLine == null || this.exceptionLine == undefined)
-                return null;
-
-            var temp = this.exceptionLine;
-            this.exceptionLine = null;
-            return temp;
-        };
-
-        $(document).on("click", ".sf-chart-script-edit", e => {
-            e.preventDefault();
-
-            var $textArea = this.element.find("textarea.sf-chart-currentScript");
-
-            var win = window.open($textArea.data("url"));
-        });
-
-        $(document).on("mousedown", this.prefix.child("sfFullScreen"), e => {
-            e.preventDefault();
-            this.fullScreen(e);
-        });
     }
 
     requestData(): FormObject {
 
-        var result = this.$chartControl.find(":input:not(#webQueryName)").serializeObject();
+        var result = this.chartBuilder.requestData();
 
-        result["webQueryName"] = this.options.webQueryName;
         result["filters"] = this.filterBuilder.serializeFilters();
         result["orders"] = this.serializeOrders();
 
         return result;
     }
 
-    updateChartBuilder(tokenChanged?: string) {
-        var $chartBuilder = this.$chartControl.find(".sf-chart-builder");
-        var data = this.requestData();
-        if (!SF.isEmpty(tokenChanged)) {
-            data["lastTokenChanged"] = tokenChanged;
-        }
-        $.ajax({
-            url: $chartBuilder.attr("data-url"),
-            data: data,
-        }).then((result) => {
-            $chartBuilder.replaceWith(result);
-            if (this.reDrawOnUpdateBuilder) {
-                this.reDraw();
-                this.reDrawOnUpdateBuilder = false;
-            }
-        });
-    }
+
 
 
     showError(e, __baseLineNumber__, chart) {
@@ -214,14 +306,14 @@ export class ChartBuilder extends Finder.SearchControl {
     }
 
     reDraw() {
-        var $chartContainer = this.$chartControl.find(".sf-chart-container");
+        var $chartContainer = this.chartControl.find(".sf-chart-container");
 
         $chartContainer.html("");
 
         var data = $chartContainer.data("json");
         ChartUtils.fillAllTokenValueFuntions(data);
 
-        $(".sf-chart-redraw-onchange[id]", this.$chartControl).each((i, element) => {
+        $(".sf-chart-redraw-onchange[id]", this.chartControl).each((i, element) => {
             var $element = $(element);
             var name = $element.attr("id");
             if (!SF.isEmpty(this.options.prefix)) {
@@ -243,9 +335,9 @@ export class ChartBuilder extends Finder.SearchControl {
         var width = $chartContainer.width();
         var height = $chartContainer.height();
 
-        var code = "(" + this.$chartControl.find('textarea.sf-chart-currentScript').val() + ")";
+        var code = "(" + this.chartControl.find('textarea.sf-chart-currentScript').val() + ")";
 
-        var chart = d3.select('#' + this.$chartControl.attr("id") + " .sf-chart-container")
+        var chart = d3.select('#' + this.chartControl.attr("id") + " .sf-chart-container")
             .append('svg:svg').attr('width', width).attr('height', height);
 
 
@@ -283,7 +375,7 @@ export class ChartBuilder extends Finder.SearchControl {
     exportData(validateUrl, exportUrl) {
         var data = this.requestData();
 
-        if (Validator.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data}))
+        if (Validator.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }))
             SF.submitOnly(exportUrl, data);
     }
 
@@ -298,8 +390,7 @@ export class ChartBuilder extends Finder.SearchControl {
     fullScreen(evt) {
         evt.preventDefault();
 
-        var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url") ||
-            this.$chartControl.attr("data-fullscreen-url");
+        var url = this.options.fullScreenUrl;
 
         url += (url.indexOf("?") < 0 ? "?" : "&") + $.param(this.requestData());
 
@@ -312,9 +403,9 @@ export class ChartBuilder extends Finder.SearchControl {
     }
 
     initOrders() {
-        this.prefix.child("tblResults").get().on("click", "th", e => {
-            this.newSortOrder($(e.currentTarget), e.shiftKey);
-            this.$chartControl.find(".sf-chart-draw").click();
+        this.options.prefix.child("tblResults").get().on("click", "th", e => {
+            Finder.SearchControl.newSortOrder(this.options.orders, $(e.currentTarget), e.shiftKey);
+            this.chartControl.find(".sf-chart-draw").click();
             return false;
         });
     }
@@ -323,20 +414,18 @@ export class ChartBuilder extends Finder.SearchControl {
 
         $chartContainer.find('[data-click]').click(e=> {
 
-            var url = $chartContainer.attr('data-open-url');
+            var url = this.options.openUrl;
 
             var win = window.open("about:blank");
 
-            var $chartControl = $chartContainer.closest(".sf-chart-control");
-            getFor($chartControl.attr("data-prefix")).then(cb=> {
-                var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-                options += "&webQueryName=" + cb.options.webQueryName;
-                options += "&orders=" + cb.serializeOrders();
-                options += "&filters=" + cb.filterBuilder.serializeFilters();
-                options += $(e.currentTarget).data("click");
+            var options = this.chartControl.find(":input").not(this.chartControl.find(".sf-filters-list :input")).serialize();
+            options += "&webQueryName=" + this.options.webQueryName;
+            options += "&orders=" + this.serializeOrders();
+            options += "&filters=" + this.filterBuilder.serializeFilters();
+            options += $(e.currentTarget).data("click");
 
-                win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
-            }); 
+            win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+
         });
     }
 }

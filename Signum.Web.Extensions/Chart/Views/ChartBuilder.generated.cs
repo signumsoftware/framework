@@ -120,17 +120,6 @@ WriteAttribute("id", Tuple.Create(" id=\"", 456), Tuple.Create("\"", 493)
 
 WriteLiteral(" class=\"row sf-chart-builder\"");
 
-WriteLiteral(" data-url=\"");
-
-            
-            #line 15 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                                                  Write(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"");
-
 WriteLiteral(">\r\n\r\n        <div");
 
 WriteLiteral(" class=\"col-lg-2\"");
@@ -220,54 +209,53 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                        <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1548), Tuple.Create("\"", 1632)
+WriteAttribute("class", Tuple.Create(" class=\"", 1456), Tuple.Create("\"", 1540)
             
             #line 32 "..\..\Chart\Views\ChartBuilder.cshtml"
-, Tuple.Create(Tuple.Create("", 1556), Tuple.Create<System.Object, System.Int32>(ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)
+, Tuple.Create(Tuple.Create("", 1464), Tuple.Create<System.Object, System.Int32>(ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)
             
             #line default
             #line hidden
-, 1556), false)
+, 1464), false)
 );
 
-WriteLiteral(" \r\n                    data-related=\"");
+WriteLiteral(" \r\n                            data-related=\"");
 
             
             #line 33 "..\..\Chart\Views\ChartBuilder.cshtml"
-                              Write(new RuntimeInfo(script).ToString());
+                                      Write(new RuntimeInfo(script).ToString());
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteAttribute("title", Tuple.Create("  title=\"", 1708), Tuple.Create("\"", 1772)
+WriteAttribute("title", Tuple.Create("  title=\"", 1624), Tuple.Create("\"", 1688)
             
             #line 33 "..\..\Chart\Views\ChartBuilder.cshtml"
-  , Tuple.Create(Tuple.Create("", 1717), Tuple.Create<System.Object, System.Int32>(script.ToString() + "\r\n" + script.ColumnsStructure
+          , Tuple.Create(Tuple.Create("", 1633), Tuple.Create<System.Object, System.Int32>(script.ToString() + "\r\n" + script.ColumnsStructure
             
             #line default
             #line hidden
-, 1717), false)
+, 1633), false)
 );
 
 WriteLiteral(">\r\n                            <img");
 
-WriteAttribute("src", Tuple.Create(" src=\"", 1808), Tuple.Create("\"", 2012)
+WriteAttribute("src", Tuple.Create(" src=\"", 1724), Tuple.Create("\"", 1903)
             
             #line 34 "..\..\Chart\Views\ChartBuilder.cshtml"
-, Tuple.Create(Tuple.Create("", 1814), Tuple.Create<System.Object, System.Int32>(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
-                        Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString()))
+, Tuple.Create(Tuple.Create("", 1730), Tuple.Create<System.Object, System.Int32>(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") : Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString()))
             
             #line default
             #line hidden
-, 1814), false)
+, 1730), false)
 );
 
 WriteLiteral(" />\r\n                        </div>\r\n");
 
             
-            #line 37 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 36 "..\..\Chart\Views\ChartBuilder.cshtml"
                         }
 
             
@@ -280,7 +268,7 @@ WriteLiteral(" class=\"clearall\"");
 WriteLiteral(">\r\n                        </div>\r\n");
 
             
-            #line 40 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 39 "..\..\Chart\Views\ChartBuilder.cshtml"
                     }
 
             
@@ -305,7 +293,7 @@ WriteLiteral(" class=\"panel-title\"");
 WriteLiteral(">");
 
             
-            #line 47 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 46 "..\..\Chart\Views\ChartBuilder.cshtml"
                                        Write(ChartMessage.Chart_ChartSettings.NiceToString());
 
             
@@ -327,7 +315,7 @@ WriteLiteral(" class=\"sf-chart-token-narrow\"");
 WriteLiteral(">");
 
             
-            #line 53 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 52 "..\..\Chart\Views\ChartBuilder.cshtml"
                                                              Write(ChartMessage.Chart_Dimension.NiceToString());
 
             
@@ -340,7 +328,7 @@ WriteLiteral(" class=\"\"");
 WriteLiteral(">");
 
             
-            #line 55 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 54 "..\..\Chart\Views\ChartBuilder.cshtml"
                                         Write(ChartMessage.Chart_Group.NiceToString());
 
             
@@ -354,13 +342,13 @@ WriteLiteral(">Token\r\n                                </th>\r\n               
 "\n                        </thead>\r\n                        <tbody>\r\n");
 
             
-            #line 62 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 61 "..\..\Chart\Views\ChartBuilder.cshtml"
                             
             
             #line default
             #line hidden
             
-            #line 62 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 61 "..\..\Chart\Views\ChartBuilder.cshtml"
                              foreach (var column in chart.TypeElementContext(a => a.Columns))
                             {
                                 
@@ -368,28 +356,28 @@ WriteLiteral(">Token\r\n                                </th>\r\n               
             #line default
             #line hidden
             
-            #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 63 "..\..\Chart\Views\ChartBuilder.cshtml"
                            Write(Html.HiddenRuntimeInfo(column));
 
             
             #line default
             #line hidden
             
-            #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 63 "..\..\Chart\Views\ChartBuilder.cshtml"
                                                                
                                 
             
             #line default
             #line hidden
             
-            #line 65 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
                            Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription));
 
             
             #line default
             #line hidden
             
-            #line 65 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
                                                                                                                                           
                             }
 
@@ -406,7 +394,7 @@ WriteLiteral(" style=\"display:none\"");
 WriteLiteral(" data-url=\"");
 
             
-            #line 70 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 69 "..\..\Chart\Views\ChartBuilder.cshtml"
                                                                                    Write(Navigator.NavigateRoute(chart.Value.ChartScript));
 
             
@@ -419,16 +407,16 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 71 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 70 "..\..\Chart\Views\ChartBuilder.cshtml"
                Write(chart.Value.ChartScript.Script);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </textarea>\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("\r\n                </textarea>\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 76 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 75 "..\..\Chart\Views\ChartBuilder.cshtml"
 }
             
             #line default

@@ -107,38 +107,23 @@ WriteLiteral("\r\n\r\n");
 
     using (var crc = new TypeContext<ChartRequest>(request, tc.Prefix))
     {
-        var containerId = crc.Compose("sfChartBuilderContainer");
-
-        ResultTable resultTable = ChartLogic.ExecuteChart(request);
-
 
             
             #line default
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 673), Tuple.Create("\"", 708)
+WriteAttribute("id", Tuple.Create(" id=\"", 533), Tuple.Create("\"", 568)
             
-            #line 24 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 678), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
+            #line 20 "..\..\Dashboard\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 538), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
             
             #line default
             #line hidden
-, 678), false)
+, 538), false)
 );
 
-WriteLiteral(" class=\"sf-search-control sf-chart-control\"");
-
-WriteLiteral(" data-prefix=\"");
-
-            
-            #line 24 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                                                                                Write(crc.Prefix);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"");
+WriteLiteral(" class=\"sf-chart-control SF-control-container\"");
 
 WriteLiteral(">\r\n        <div");
 
@@ -149,7 +134,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 26 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 22 "..\..\Dashboard\Views\UserChartPart.cshtml"
        Write(Html.HiddenRuntimeInfo(crc));
 
             
@@ -160,7 +145,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 27 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 23 "..\..\Dashboard\Views\UserChartPart.cshtml"
        Write(Html.Hidden(crc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
                     (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
@@ -170,13 +155,13 @@ WriteLiteral("            ");
 WriteLiteral("\r\n");
 
             
-            #line 29 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 25 "..\..\Dashboard\Views\UserChartPart.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 29 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 25 "..\..\Dashboard\Views\UserChartPart.cshtml"
               
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
         ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
@@ -189,7 +174,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 33 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 29 "..\..\Dashboard\Views\UserChartPart.cshtml"
        Write(Html.Partial(Navigator.Manager.FilterBuilderView, crc));
 
             
@@ -197,22 +182,24 @@ WriteLiteral("            ");
             #line hidden
 WriteLiteral("\r\n            <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1483), Tuple.Create("\"", 1500)
+WriteAttribute("id", Tuple.Create(" id=\"", 1320), Tuple.Create("\"", 1364)
             
-            #line 34 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1488), Tuple.Create<System.Object, System.Int32>(containerId
+            #line 30 "..\..\Dashboard\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 1325), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 1488), false)
+, 1325), false)
 );
+
+WriteLiteral(" class=\"SF-control-container\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("                ");
 
             
-            #line 35 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 31 "..\..\Dashboard\Views\UserChartPart.cshtml"
            Write(Html.Partial(ChartClient.ChartBuilderView, crc));
 
             
@@ -225,190 +212,51 @@ WriteLiteral(" type=\"text/javascript\"");
 WriteLiteral(">\r\n                require([\"");
 
             
-            #line 38 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 34 "..\..\Dashboard\Views\UserChartPart.cshtml"
                      Write(ChartClient.Module);
 
             
             #line default
             #line hidden
-WriteLiteral("\"], function (Chart) {\r\n                     var findOptions = ");
+WriteLiteral("\"], function (Chart) {\r\n                    var options = ");
 
             
-            #line 39 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                   Write(MvcHtmlString.Create(uc.ToJS().ToString()));
+            #line 35 "..\..\Dashboard\Views\UserChartPart.cshtml"
+                              Write(MvcHtmlString.Create(uc.ToRequest().ToChartRequest(Url, tc.Prefix, tc.Value.ShowData ?  ChartRequestMode.data: ChartRequestMode.chart).ToString()));
 
             
             #line default
             #line hidden
-WriteLiteral(";\r\n\r\n                     var chartBuilder = new Chart.ChartBuilder($(\'#");
+WriteLiteral(";\r\n                    new Chart.ChartRequest(options);\r\n                 });\r\n  " +
+"          </script>\r\n        </div>    \r\n        <div");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 1914), Tuple.Create("\"", 1947)
+            
+            #line 40 "..\..\Dashboard\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 1919), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+            
+            #line default
+            #line hidden
+, 1919), false)
+);
+
+WriteLiteral(" class=\"sf-search-results-container\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
 
             
             #line 41 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                                              Write(containerId);
+       Write(JavascriptMessage.searchForResults.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\'), $.extend({ prefix: \'");
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 41 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                                                                                  Write(crc.Prefix);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\' }, findOptions));\r\n\r\n");
-
-            
-            #line 43 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                     
-            
-            #line default
-            #line hidden
-            
-            #line 43 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                      if (!tc.Value.ShowData)
-                     {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                         ");
-
-WriteLiteral("\r\n                     chartBuilder.reDraw();\r\n                        ");
-
-WriteLiteral("\r\n");
-
-            
-            #line 48 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                     }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                 });\r\n            </script>\r\n        </div>\r\n        <div");
-
-WriteAttribute("id", Tuple.Create(" id=\"", 2209), Tuple.Create("\"", 2246)
-            
-            #line 52 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2214), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
-            
-            #line default
-            #line hidden
-, 2214), false)
-);
-
-WriteLiteral(">\r\n            <div");
-
-WriteLiteral(" class=\"sf-chart-container\"");
-
-WriteAttribute("style", Tuple.Create(" style=\"", 2293), Tuple.Create("\"", 2348)
-, Tuple.Create(Tuple.Create("", 2301), Tuple.Create("display:", 2301), true)
-            
-            #line 53 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2309), Tuple.Create<System.Object, System.Int32>(tc.Value.ShowData ? "none" : "block"
-            
-            #line default
-            #line hidden
-, 2309), false)
-);
-
-WriteLiteral(" \r\n                    data-open-url=\"");
-
-            
-            #line 54 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                               Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.Prefix)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"");
-
-WriteLiteral(" \r\n                    data-fullscreen-url=\"");
-
-            
-            #line 55 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                     Write(Url.Action<ChartController>(cc => cc.FullScreen(crc.Prefix)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"");
-
-WriteLiteral("\r\n                    data-json=\"");
-
-            
-            #line 56 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                          Write(Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"");
-
-WriteLiteral(">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
-
-            
-            #line 60 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                     if (tc.Value.ShowData)
-                     {
-                         ViewData[ViewDataKeys.Results] = resultTable;
-                         ViewData[ViewDataKeys.Navigate] = false;
-
-                         QuerySettings settings = Navigator.QuerySettings(request.QueryName);
-                         ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => settings.GetFormatter(c.c.Column));
-
-    
-            
-            #line default
-            #line hidden
-            
-            #line 68 "..\..\Dashboard\Views\UserChartPart.cshtml"
-Write(Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, tc.Prefix)));
-
-            
-            #line default
-            #line hidden
-            
-            #line 68 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                                                                                                       
-                     }
-                     else
-                     {
-                         MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
-                     }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <script");
-
-WriteLiteral(" type=\"text/javascript\"");
-
-WriteLiteral(">\r\n        (function () {\r\n            \"");
-
-            
-            #line 76 "..\..\Dashboard\Views\UserChartPart.cshtml"
-        Write(crc.Prefix);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\".child(\"sfFullScreen\").get().on(\"mousedown\", function (e) {\r\n                   " +
-" $(\"#");
-
-            
-            #line 77 "..\..\Dashboard\Views\UserChartPart.cshtml"
-                   Write(containerId);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\").SFControl().fullScreen();\r\n             });\r\n         })();\r\n    </script>\r\n");
-
-            
-            #line 81 "..\..\Dashboard\Views\UserChartPart.cshtml"
+            #line 44 "..\..\Dashboard\Views\UserChartPart.cshtml"
     }
 }
 
