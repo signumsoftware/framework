@@ -36,6 +36,8 @@ namespace Signum.Engine.Cache
 
         public static bool AssertOnStart = true;
 
+        public static bool DropStaleServices = true;
+
         public static bool IsLocalDB = false;
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -252,6 +254,21 @@ namespace Signum.Engine.Cache
                     AssertNonIntegratedSecurity(currentUser);
                 }
 
+                if (DropStaleServices)
+                {
+                    //to avoid massive logs with SqlQueryNotificationStoredProcedure
+                    //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
+                    var staleServices = (from s in Database.View<SysServiceQueues>()
+                                         where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[dbo].[" + p.name + "]" == s.activation_procedure)
+                                         select s.name).ToList();
+
+                    foreach (var s in staleServices)
+                    {
+                        new SqlPreCommandSimple("DROP SERVICE [{0}]".Formato(s)).ExecuteNonQuery();
+                        new SqlPreCommandSimple("DROP QUEUE [{0}]".Formato(s)).ExecuteNonQuery();
+                    }
+                }
+
                 foreach (var database in Schema.Current.DatabaseNames())
                 {
                     try
@@ -287,7 +304,7 @@ namespace Signum.Engine.Cache
                 return true;
             }, true);
 
-            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
+            AppDomain.CurrentDomain.DomainUnload += (o, a) => Shutdown();
 
             registered = true;
         }
