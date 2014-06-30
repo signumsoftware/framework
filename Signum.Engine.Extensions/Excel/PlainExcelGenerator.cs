@@ -27,7 +27,7 @@ namespace Signum.Engine.Excel
 
         static PlainExcelGenerator()
         {
-            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Reports.plainExcelTemplate.xlsx"));
+            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Excel.plainExcelTemplate.xlsx"));
         }
 
         public static void SetTemplate(Stream templateStream)
