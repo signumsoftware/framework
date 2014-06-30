@@ -303,7 +303,8 @@ namespace Signum.Engine.DynamicQuery
         public bool IsProjection;
         public bool Inherit = true;
 
-        public Implementations? AllImplementations;
+        public Implementations? ForceImplementations;
+        public PropertyRoute ForcePropertyRoute;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -343,11 +344,13 @@ namespace Signum.Engine.DynamicQuery
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
-                else
-                {
-                    result.Implementations = AllImplementations;
-                }
 
+                if (ForcePropertyRoute != null)
+                    result.PropertyRoute = ForcePropertyRoute;
+
+                if (ForceImplementations != null)
+                    result.Implementations = ForceImplementations;
+              
                 result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
 
                 return result;
