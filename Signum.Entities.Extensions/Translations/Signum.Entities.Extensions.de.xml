@@ -162,14 +162,14 @@
     <Member Name="f" Description="Erstellt eine neue {0}" />
     <Member Name="m" Description="Erstellt eine neue {0}" />
   </Type>
-  <Type Name="ControlPanelDN" Description="Steuerung des Systems">
+  <Type Name="DashboardDN" Description="Steuerung des Systems">
     <Member Name="DisplayName" Description="Name" />
     <Member Name="HomePage" Description="Homepage" />
     <Member Name="NumberOfColumns" Description="Anzahl der Spalten" />
     <Member Name="Parts" Description="Teile" />
     <Member Name="Related" Description="Im Zusammenhang mit" />
   </Type>
-  <Type Name="ControlPanelMessage">
+  <Type Name="DashboardMessage">
     <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Teil {0} ist in Spalte {1} aber Feld hat nur {2} Spalten" />
     <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Teil {0} ist in Spalte {1} der Zeile {2}, die bereits andere Teile enthält" />
     <Member Name="Rows0DontHaveAnyParts" Description="Es gibt keine Teile in den Zeilen {{{0}}}" />

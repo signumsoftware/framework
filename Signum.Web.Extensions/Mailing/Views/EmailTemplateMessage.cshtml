@@ -16,7 +16,7 @@
             vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         })
         <div class="sf-template-message-insert-container">
-            @Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription]))
+            @Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
             <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-basic"  value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
             <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-if" data-block="if" value="if" />
             <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-block="foreach" value="foreach" />

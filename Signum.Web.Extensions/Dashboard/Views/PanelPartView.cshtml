@@ -1,0 +1,25 @@
+﻿@using System.Configuration
+@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+@model PanelPartDN
+
+@{ 
+    string prefix = "r{0}c{1}".Formato(Model.Row, Model.StartColumn);
+    DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
+}
+<div class="panel panel-@Model.Style.ToString().ToLower()">
+    <div class="panel-heading">
+        @Model.ToString()
+        @if (config.FullScreenLink)
+        {
+            <a id="@TypeContextUtilities.Compose(prefix, "sfFullScreen")" class="sf-ftbl-header-fullscreen" href="#">
+                <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        }
+    </div>
+
+    <div class="panel-body">
+        @{ Html.RenderPartial(config.FrontEnd, TypeContextUtilities.UntypedNew(Model.Content, prefix)); }
+    </div>
+
+</div>

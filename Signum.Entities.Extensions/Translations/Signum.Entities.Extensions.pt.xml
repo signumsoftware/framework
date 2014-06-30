@@ -170,14 +170,14 @@
     <Member Name="f" Description="Constrói uma nova {0}" />
     <Member Name="m" Description="Constrói um novo {0}" />
   </Type>
-  <Type Name="ControlPanelDN" Description="Painel de control">
+  <Type Name="DashboardDN" Description="Painel de control">
     <Member Name="DisplayName" Description="Mostrar Nome" />
     <Member Name="HomePage" Description="Home Page" />
     <Member Name="NumberOfColumns" Description="Número de colunas" />
     <Member Name="Parts" Description="Peças" />
     <Member Name="Related" Description="Relacionados" />
   </Type>
-  <Type Name="ControlPanelMessage">
+  <Type Name="DashboardMessage">
     <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Parte {0} está na coluna {1}, mas o painel só tem {2} colunas" />
     <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Parte {0} está na coluna {1} da linha {2} que já possui outras partes" />
     <Member Name="Rows0DontHaveAnyParts" Description="Não há nada nas linhas {{{0}}}" />

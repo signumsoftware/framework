@@ -16,8 +16,6 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Reports;
-using Signum.Engine.Reports;
 using Signum.Engine.SMS;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
@@ -30,13 +28,15 @@ using Signum.Engine.Profiler;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using Signum.Engine.Operations;
-using Signum.Entities.ControlPanel;
-using Signum.Engine.ControlPanel;
+using Signum.Entities.Dashboard;
+using Signum.Engine.Dashboard;
 using Signum.Entities.Scheduler;
+using Signum.Entities.Excel;
+using Signum.Engine.Excel;
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IDashboardServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
@@ -247,7 +247,7 @@ namespace Signum.Services
             () => UserChartLogic.GetUserChartsEntity(entityType));
         }
 
-        public List<Lite<UserChartDN>> AutoCompleteUserChart(string subString, int limit)
+        public List<Lite<UserChartDN>> AutocompleteUserChart(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ChartLogic.Autocomplete(subString, limit));
@@ -259,19 +259,19 @@ namespace Signum.Services
         public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportSpreadsheetsLogic.GetExcelReports(queryName));
+                () => ExcelLogic.GetExcelReports(queryName));
         }
 
         public byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportSpreadsheetsLogic.ExecuteExcelReport(excelReport, request));
+                () => ExcelLogic.ExecuteExcelReport(excelReport, request));
         }
 
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportSpreadsheetsLogic.ExecutePlainExcel(request));
+                () => ExcelLogic.ExecutePlainExcel(request));
         }
 
         #endregion
@@ -289,7 +289,7 @@ namespace Signum.Services
             () => UserQueryLogic.GetUserQueriesEntity(entityType));
         }
 
-        public List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit)
+        public List<Lite<UserQueryDN>> AutocompleteUserQueries(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => UserQueryLogic.Autocomplete(subString, limit));
@@ -330,23 +330,23 @@ namespace Signum.Services
         }
         #endregion
 
-        #region IControlPanelServer
-        public ControlPanelDN GetHomePageControlPanel()
+        #region IDashboardServer
+        public DashboardDN GetHomePageDashboard()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ControlPanelLogic.GetHomePageControlPanel());
+                () => DashboardLogic.GetHomePageDashboard());
         }
 
-        public List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)
+        public List<Lite<DashboardDN>> GetDashboardEntity(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ControlPanelLogic.GetControlPanelsEntity(entityType));
+                () => DashboardLogic.GetDashboardEntity(entityType));
         }
 
-        public List<Lite<ControlPanelDN>> AutocompleteControlPanel(string subString, int limit)
+        public List<Lite<DashboardDN>> AutocompleteDashboard(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                  () => ControlPanelLogic.Autocomplete(subString, limit));
+                  () => DashboardLogic.Autocomplete(subString, limit));
         }
         #endregion
 

@@ -129,72 +129,46 @@ Write(Html.HiddenRuntimeInfo(cpt, cp => cp.Type));
             #line hidden
 WriteLiteral("    <table");
 
-WriteLiteral(" class=\"table\"");
+WriteLiteral(" class=\"table form-vertical\"");
 
 WriteLiteral(" style=\"width:auto\"");
 
-WriteLiteral(@">
-        <thead>
-            <tr>
-                <th>Color
-                </th>
-                <th>Hex
-                </th>
-                <th>Id
-                </th>
-                <th>Text
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-");
+WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n                <th>Color\r\n                " +
+"</th>\r\n                <th>Id\r\n                </th>\r\n                <th>Text\r\n" +
+"                </th>\r\n            </tr>\r\n        </thead>\r\n        <tbody>\r\n");
 
             
-            #line 30 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 28 "..\..\Chart\Views\ChartPalette.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 30 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 28 "..\..\Chart\Views\ChartPalette.cshtml"
              foreach (TypeContext<ChartColorDN> clc in cpt.TypeElementContext(cp => cp.Colors))
             {  
 
             
             #line default
             #line hidden
-WriteLiteral("                <tr>\r\n                    <td>\r\n                        <div");
-
-WriteLiteral(" class=\"sf-chart-color-box\"");
-
-WriteLiteral(">\r\n                        </div>\r\n                    </td>\r\n                   " +
-" <td>\r\n                        <div");
-
-WriteLiteral(" class=\"input-group\"");
-
-WriteLiteral(">\r\n                            <span");
-
-WriteLiteral(" class=\"input-group-addon\"");
-
-WriteLiteral(">#</span>\r\n");
-
-WriteLiteral("                            ");
-
-            
-            #line 40 "..\..\Chart\Views\ChartPalette.cshtml"
-                       Write(Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.Try(c => c.ToColor().ToHtml().Substring(1)),
-                              new { maxlength = 6, size = 6, @class = "sf-chart-color-input form-control" }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                        </div>\r\n");
+WriteLiteral("                <tr>\r\n                    <td>\r\n");
 
 WriteLiteral("                        ");
 
             
-            #line 43 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 32 "..\..\Chart\Views\ChartPalette.cshtml"
                    Write(Html.HiddenRuntimeInfo(clc, cl => cl.Related));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("                        ");
+
+            
+            #line 33 "..\..\Chart\Views\ChartPalette.cshtml"
+                   Write(Html.ValueLine(clc, c=>c.Color, vl=> vl.FormGroupStyle = FormGroupStyle.SrOnly));
 
             
             #line default
@@ -204,7 +178,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
 WriteLiteral("                        ");
 
             
-            #line 46 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 36 "..\..\Chart\Views\ChartPalette.cshtml"
                    Write(clc.Value.Related.Id);
 
             
@@ -215,7 +189,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
 WriteLiteral("                        ");
 
             
-            #line 49 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 39 "..\..\Chart\Views\ChartPalette.cshtml"
                    Write(clc.Value.Related.ToString());
 
             
@@ -224,7 +198,7 @@ WriteLiteral("                        ");
 WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
             
-            #line 52 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 42 "..\..\Chart\Views\ChartPalette.cshtml"
             }
 
             
@@ -233,27 +207,7 @@ WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 WriteLiteral("        </tbody>\r\n    </table>\r\n");
 
             
-            #line 55 "..\..\Chart\Views\ChartPalette.cshtml"
-      
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <script>\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 57 "..\..\Chart\Views\ChartPalette.cshtml"
-    Write(ChartColorClient.Module["init"]());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </script>\r\n");
-
-            
-            #line 59 "..\..\Chart\Views\ChartPalette.cshtml"
+            #line 45 "..\..\Chart\Views\ChartPalette.cshtml"
 }
 
             

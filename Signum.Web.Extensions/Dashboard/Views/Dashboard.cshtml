@@ -1,0 +1,56 @@
+﻿@using System.Configuration
+@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+
+@section head
+{
+    @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
+}
+
+@using (Html.BeginForm("DoPostBack", "Signum", "POST"))
+{
+    DashboardDN cp = (DashboardDN)Model;
+    <h2>
+        @if (Navigator.IsNavigable(cp, null, isSearch: true))
+        { 
+            <a href="@Navigator.NavigateRoute(typeof(DashboardDN), cp.Id)">@cp.DisplayName</a>
+        }
+        else
+        {
+            @cp.DisplayName
+        }
+    </h2>
+    
+    
+        if (!cp.Parts.IsNullOrEmpty())
+        {
+            foreach (var gr in cp.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
+            {
+                var lastEnd = 0;
+    <div class="row row-control-panel">
+        @foreach (var part in gr.OrderBy(a=>a.StartColumn))
+        {
+            var offset = part.StartColumn - lastEnd;
+            <div class="part-control-panel col-sm-@part.Columns @(offset == 0 ? null : "col-sm-offset-" + offset)">
+                @Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part)
+
+            </div>
+            lastEnd = part.StartColumn + part.Columns;
+        }
+    </div>
+            }
+        }
+
+        if (cp.AutoRefreshPeriod != null)
+        {
+    <script type="text/javascript">
+        $(function () {
+            setTimeout(function () {
+                window.location.href = window.location.href;
+            }, @(cp.AutoRefreshPeriod.Value * 1000));
+        });
+    </script>
+        }
+}
+
+

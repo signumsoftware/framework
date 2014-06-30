@@ -231,14 +231,17 @@ namespace Signum.Engine.Mailing.Pop3
 
                                     if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
                                     {
-                                        var dup = duplicate.Retrieve();
+                                        var dup = duplicate.Entity;
 
                                         email.AssignEntities(dup);
+
+                                        if (AssociateDuplicateEmail != null)
+                                            AssociateDuplicateEmail(email, dup);
                                     }
                                     else
                                     {
-                                        if (AssociateWithEntities != null)
-                                            AssociateWithEntities(email);
+                                        if (AssociateNewEmail != null)
+                                            AssociateNewEmail(email);
                                     }
 
                                     email.Save();
@@ -321,7 +324,7 @@ namespace Signum.Engine.Mailing.Pop3
                 att.File = dup.Attachments.FirstEx(a => a.Similar(att)).File;
 
             email.From.EmailOwner = dup.From.EmailOwner;
-            foreach (var rec in email.Recipients)
+            foreach (var rec in email.Recipients.Where(a => a.Kind != EmailRecipientKind.Bcc))
                 rec.EmailOwner = dup.Recipients.FirstEx(a => a.GetHashCode() == rec.GetHashCode()).EmailOwner;
         }
 
@@ -340,7 +343,8 @@ namespace Signum.Engine.Mailing.Pop3
             return true;
         }
 
-        public static Action<EmailMessageDN> AssociateWithEntities;
+        public static Action<EmailMessageDN> AssociateNewEmail;
+        public static Action<EmailMessageDN, EmailMessageDN> AssociateDuplicateEmail;
 
         private static EmailMessageDN ToEmailMessage(MailMessage mm, string rawContent, string uniqueId, Lite<Pop3ReceptionDN> reception)
         {

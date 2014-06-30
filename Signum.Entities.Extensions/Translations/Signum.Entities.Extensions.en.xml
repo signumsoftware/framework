@@ -135,7 +135,7 @@
     <Member Name="UserCharts" Description="User charts" />
     <Member Name="ViewPalette" Description="View palette" />
   </Type>
-  <Type Name="ControlPanelMessage">
+  <Type Name="DashboardMessage">
     <Member Name="CreateNewPart" Description="Create new part" />
     <Member Name="YouMustSaveThePanelBeforeAddingParts" Description="You must save the panel before adding parts" />
     <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Part {0} is in column {1} but panel has only {2} columns" />

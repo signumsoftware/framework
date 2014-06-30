@@ -67,4 +67,10 @@ namespace Signum.Entities.Translation
             return "{0} {1} {2}".Formato(culture, instance, propertyRoute);
         }
     }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class TranslateFieldAttribute : Attribute
+    {
+      
+    }
 }

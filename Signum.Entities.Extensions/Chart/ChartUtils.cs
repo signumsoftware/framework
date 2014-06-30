@@ -397,6 +397,8 @@ namespace Signum.Entities.Chart
         SavePalette,
         NewPalette,
         Data,
+        ChooseABasePalette,
+        DeletePalette,
     }
 
 }

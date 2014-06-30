@@ -17,7 +17,7 @@
         <m:ValueLine m:Common.Route="DisplayName" />
         <m:EntityLine m:Common.Route="Owner"  />
         <m:ValueLine m:Common.Route="WithoutFilters"/>
-        <m:EntityLine m:Common.Route="EntityType" AutoCompleting="EntityType_AutoCompleting" Find="False" />
+        <m:EntityLine m:Common.Route="EntityType" Autocompleting="EntityType_AutoCompleting" Find="False" />
         <TextBox Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}" IsReadOnly="True" x:Name="tbCurrentEntity" BorderThickness="0" Background="{x:Null}"/>
         <m:EntityRepeater m:Common.Route="Filters" IsEnabled="{Binding WithoutFilters, Converter={x:Static m:Converters.Not}}"  Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" >
             <m:EntityRepeater.EntityTemplate>
@@ -28,7 +28,7 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilder_SubTokensEvent" />
+                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderFilters_SubTokensEvent" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
                                   ItemsSource="{Binding Token.TryToken, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">

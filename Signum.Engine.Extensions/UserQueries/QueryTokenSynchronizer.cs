@@ -62,7 +62,7 @@ namespace Signum.Engine.UserQueries
             replacements.GetOrCreate(key)[oldPartsList.ToString(".")] = newPartsList.ToString(".");
         }
 
-        static bool TryParseRemember(Replacements replacements, string tokenString, QueryDescription qd, bool canAggregate, out QueryToken result)
+        static bool TryParseRemember(Replacements replacements, string tokenString, QueryDescription qd, SubTokensOptions options, out QueryToken result)
         {
             string[] parts = tokenString.Split('.');
 
@@ -71,7 +71,7 @@ namespace Signum.Engine.UserQueries
             {
                 string part = parts[i];
 
-                QueryToken newResult = QueryUtils.SubToken(result, qd, canAggregate, part);
+                QueryToken newResult = QueryUtils.SubToken(result, qd, options, part);
 
                 if (newResult != null)
                 {
@@ -81,8 +81,8 @@ namespace Signum.Engine.UserQueries
                 {
                     if (i == 0)
                     {
-                        var entity = QueryUtils.SubToken(result, qd, canAggregate, "Entity");
-                        QueryToken newSubResult = QueryUtils.SubToken(entity, qd, canAggregate, part);
+                        var entity = QueryUtils.SubToken(result, qd, options, "Entity");
+                        QueryToken newSubResult = QueryUtils.SubToken(entity, qd, options, part);
 
                         if (newSubResult != null)
                         {
@@ -94,11 +94,11 @@ namespace Signum.Engine.UserQueries
 
                     if (Replacements.AutoRepacement != null)
                     {
-                        Replacements.Selection? sel = Replacements.AutoRepacement(part, result.SubTokens(qd, canAggregate).Select(a => a.Key).ToList());
+                        Replacements.Selection? sel = Replacements.AutoRepacement(part, result.SubTokens(qd, options).Select(a => a.Key).ToList());
 
                         if (sel != null && sel.Value.NewValue != null)
                         {
-                            newResult = QueryUtils.SubToken(result, qd, canAggregate, sel.Value.NewValue);
+                            newResult = QueryUtils.SubToken(result, qd, options, sel.Value.NewValue);
 
                             if (newResult != null)
                             {
@@ -128,7 +128,7 @@ namespace Signum.Engine.UserQueries
                     {
                         string subPart = subParts[j];
 
-                        QueryToken subNewResult = QueryUtils.SubToken(result, qd, canAggregate, subPart);
+                        QueryToken subNewResult = QueryUtils.SubToken(result, qd, options, subPart);
 
                         if (subNewResult == null)
                             return false;
@@ -296,7 +296,7 @@ namespace Signum.Engine.UserQueries
             });
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenDN token, QueryDescription qd, bool canAggregate, string remainingText, bool allowRemoveToken = true)
+        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenDN token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken = true)
         {
             SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + token.TokenString);
             Console.WriteLine(" " + remainingText);
@@ -305,7 +305,7 @@ namespace Signum.Engine.UserQueries
                 return FixTokenResult.Nothing;
 
             QueryToken resultToken;
-            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, canAggregate, remainingText, allowRemoveToken);
+            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, options, remainingText, allowRemoveToken);
 
             if (result == FixTokenResult.Fix)
                 token = new QueryTokenDN(resultToken);
@@ -313,12 +313,12 @@ namespace Signum.Engine.UserQueries
             return result;
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, bool canAggregate, string remainingText, bool allowRemoveToken = true)
+        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken = true)
         {
             string[] parts = original.Split('.');
 
             QueryToken current;
-            if (TryParseRemember(replacements, original, qd, canAggregate, out current))
+            if (TryParseRemember(replacements, original, qd, options, out current))
             {
                 if (current.FullKey() != original)
                 {
@@ -333,7 +333,7 @@ namespace Signum.Engine.UserQueries
 
             while (true)
             {
-                var result = SelectInteractive(ref current, qd, canAggregate, allowRemoveToken);
+                var result = SelectInteractive(ref current, qd, options, allowRemoveToken);
                 switch (result)
                 {
                     case UserAssetTokenAction.DeleteEntity:
@@ -367,7 +367,7 @@ namespace Signum.Engine.UserQueries
             }
         }
 
-        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, bool canAggegate, bool allowRemoveToken)
+        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken)
         {
             var top = Console.CursorTop;
 
@@ -376,7 +376,7 @@ namespace Signum.Engine.UserQueries
                 if (Console.Out == null)
                     throw new InvalidOperationException("Impossible to synchronize without interactive Console");
 
-                var subTokens = token.SubTokens(qd, canAggegate).OrderBy(a => a.Parent != null).ThenBy(a => a.Key).ToList();
+                var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenBy(a => a.Key).ToList();
 
                 int startingIndex = 0;
 

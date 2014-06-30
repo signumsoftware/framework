@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="Signum.Windows.Dashboard.LinkListPartView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Dashboard;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="{x:Type d:LinkListPartDN}"
+    MinWidth="300">
+    <ItemsControl ItemsSource="{Binding Links}" Grid.IsSharedSizeScope="True">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type d:LinkElementDN}">
+                <TextBlock Margin="4,2">
+                    <Hyperlink NavigateUri="{Binding Link}" Click="Hyperlink_Click_1">
+                        <TextBlock Text="{Binding Label}"/>
+                    </Hyperlink>
+                </TextBlock>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

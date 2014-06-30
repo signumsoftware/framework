@@ -9,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
-using Signum.Entities.Reports;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Windows;

@@ -12,8 +12,7 @@
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    
-    
-    <div id="@chart.Compose("sfChartBuilder")" class="row sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)))">
+    <div id="@chart.Compose("sfChartBuilder")" class="row sf-chart-builder">
 
         <div class="col-lg-2">
             <div class="sf-chart-type panel panel-default">
@@ -31,9 +30,8 @@
                         foreach (var script in group)
                         { 
                         <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" 
-                    data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
-                            <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
-                        Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
+                            data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
+                            <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") : Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
                         </div>
                         }
                         <div class="clearall">
@@ -53,11 +51,8 @@
                             <tr>
                                 <th class="sf-chart-token-narrow">@ChartMessage.Chart_Dimension.NiceToString()
                                 </th>
-                                @if (chart.Value.ChartScript.GroupBy == GroupByChart.Optional)
-                                {
-                                    <th class="sf-chart-token-narrow">@ChartMessage.Chart_Group.NiceToString()
-                                    </th>
-                                }
+                                <th class="">@ChartMessage.Chart_Group.NiceToString()
+                                </th>
                                 <th class="sf-chart-token-wide">Token
                                 </th>
                             </tr>
@@ -73,7 +68,7 @@
                 </div>
                 <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.NavigateRoute(chart.Value.ChartScript)">
                     @chart.Value.ChartScript.Script
-            </textarea>
+                </textarea>
             </div>
         </div>
     </div>

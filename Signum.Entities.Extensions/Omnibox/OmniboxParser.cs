@@ -261,9 +261,4 @@ namespace Signum.Entities.Omnibox
         String,
         Entity,
     }
-
-    public static class OmniboxPermission
-    {
-        public static readonly PermissionSymbol OmniboxInAssemblyLanguage = new PermissionSymbol();
-    }
 }

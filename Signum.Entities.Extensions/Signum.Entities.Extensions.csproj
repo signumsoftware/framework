@@ -97,7 +97,7 @@
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
-    <Compile Include="ControlPanel\ControlPanelOmniboxResultGenerator.cs" />
+    <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Isolation\IsolationDN.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
@@ -124,9 +124,9 @@
     <Compile Include="Chart\ChartUtils.cs" />
     <Compile Include="Chart\IChartServer.cs" />
     <Compile Include="Chart\UserChart.cs" />
-    <Compile Include="ControlPanel\ControlPanelDN.cs" />
-    <Compile Include="ControlPanel\IControlPanelServer.cs" />
-    <Compile Include="ControlPanel\PanelPart.cs" />
+    <Compile Include="Dashboard\DashboardDN.cs" />
+    <Compile Include="Dashboard\IDashboardServer.cs" />
+    <Compile Include="Dashboard\PanelPart.cs" />
     <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
@@ -162,10 +162,10 @@
     <Compile Include="Profiler\ProfilerPermissions.cs" />
     <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />
-    <Compile Include="Reports\ExcelReportDN.cs" />
+    <Compile Include="Excel\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserQueries\FilterValueConverter.cs" />
-    <Compile Include="Reports\IExcelReportServer.cs" />
+    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryDN.cs" />
     <Compile Include="Scheduler\HolidayCalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />

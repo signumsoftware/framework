@@ -41,14 +41,14 @@ namespace Signum.Web.Notes
 
             List<IMenuItem> items = new List<IMenuItem>()
             {
-                new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfNoteView"))
+                new MenuItem(ctx.Prefix, "sfNoteView")
                 {
                      CssClass = "sf-note-view",
                      OnClick = NoteClient.Module["explore"](ctx.Prefix, findOptions, url),
                      Text = NoteMessage.ViewNotes.NiceToString(),
                 },
 
-                new MenuItem(TypeContextUtilities.Compose(ctx.Prefix, "sfNoteCreate"))
+                new MenuItem(ctx.Prefix, "sfNoteCreate")
                 {
                     CssClass = "sf-note-create",
                     OnClick = NoteClient.Module["createNote"](JsFunction.Event, ctx.Prefix, NoteOperation.CreateNoteFromEntity.Operation.Key, url),

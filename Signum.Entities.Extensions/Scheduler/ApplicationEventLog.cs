@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Signum.Entities.Extensions.Scheduler
+namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ApplicationEventLogDN : Entity

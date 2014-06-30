@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Windows.Reports;
 using Signum.Entities;
 using Signum.Services;
 using System.Reflection;

@@ -11,7 +11,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
-using Signum.Entities.ControlPanel;
+using Signum.Entities.Dashboard;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Services;

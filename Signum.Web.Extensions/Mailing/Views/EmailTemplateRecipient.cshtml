@@ -24,6 +24,6 @@
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
     {
     @Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, SearchControlHelper.GetQueryTokenBuilderSettings(
-            (QueryDescription)ViewData[ViewDataKeys.QueryDescription])))
+            (QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanElement)))
     }
 }

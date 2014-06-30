@@ -40,6 +40,12 @@ namespace Signum.Web.Extensions.Mailing.Views
     #line hidden
     using Signum.Entities;
     
+    #line 6 "..\..\Mailing\Views\Newsletter.cshtml"
+    using Signum.Entities.DynamicQuery;
+    
+    #line default
+    #line hidden
+    
     #line 1 "..\..\Mailing\Views\Newsletter.cshtml"
     using Signum.Entities.Mailing;
     
@@ -70,7 +76,7 @@ namespace Signum.Web.Extensions.Mailing.Views
         public override void Execute()
         {
             
-            #line 6 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 7 "..\..\Mailing\Views\Newsletter.cshtml"
 Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 
             
@@ -79,10 +85,10 @@ Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 WriteLiteral("\r\n");
 
             
-            #line 7 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
  using (var nc = Html.TypeContext<NewsletterDN>())
 {  
-    using(var tabs = Html.Tabs(nc))
+    using(var tabs = Html.Tabs(nc)) 
     {
         tabs.Tab("emTabMain", typeof(NewsletterDN).NiceName(), 
             
@@ -95,7 +101,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 12 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 13 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, n => n.Name));
 
             
@@ -106,7 +112,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 13 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 14 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true));
 
             
@@ -117,7 +123,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 15 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 16 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.EntityCombo(nc, n => n.SmtpConfig));
 
             
@@ -128,7 +134,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 16 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, n => n.From));
 
             
@@ -139,7 +145,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 18 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, n => n.DisplayFrom));
 
             
@@ -150,7 +156,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n\r\n");
 WriteLiteralTo(__razor_template_writer, "    ");
 
             
-            #line 19 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 20 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.EntityLine(nc, e => e.Query));
 
             
@@ -159,13 +165,13 @@ WriteTo(__razor_template_writer, Html.EntityLine(nc, e => e.Query));
 WriteLiteralTo(__razor_template_writer, "\r\n\r\n");
 
             
-            #line 21 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 22 "..\..\Mailing\Views\Newsletter.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 21 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 22 "..\..\Mailing\Views\Newsletter.cshtml"
      if (nc.Value.State == NewsletterState.Sent)
             {
         
@@ -173,14 +179,14 @@ WriteLiteralTo(__razor_template_writer, "\r\n\r\n");
             #line default
             #line hidden
             
-            #line 23 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, n => n.Subject, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 23 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                      
 
             
@@ -195,7 +201,7 @@ WriteLiteralTo(__razor_template_writer, ">\r\n");
 WriteLiteralTo(__razor_template_writer, "                ");
 
             
-            #line 27 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 28 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.Raw(nc.Value.Text));
 
             
@@ -204,7 +210,7 @@ WriteTo(__razor_template_writer, Html.Raw(nc.Value.Text));
 WriteLiteralTo(__razor_template_writer, "\r\n            </div>\r\n        </fieldset>\r\n");
 
             
-            #line 30 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 31 "..\..\Mailing\Views\Newsletter.cshtml"
             }
             else if (nc.Value.IsNew)
             {
@@ -221,7 +227,7 @@ WriteLiteralTo(__razor_template_writer, ">\r\n");
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 34 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 35 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Subject));
 
             
@@ -232,7 +238,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 35 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 36 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Text, vl => vl.ValueLineType = ValueLineType.TextArea));
 
             
@@ -241,7 +247,7 @@ WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Text, vl => vl.ValueL
 WriteLiteralTo(__razor_template_writer, "\r\n        </div>\r\n");
 
             
-            #line 37 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 38 "..\..\Mailing\Views\Newsletter.cshtml"
             }
             else
             {
@@ -266,53 +272,80 @@ WriteLiteralTo(__razor_template_writer, " class=\"sf-email-replacements-panel\""
 
 WriteLiteralTo(__razor_template_writer, ">\r\n                    <legend>Replacements</legend>\r\n");
 
-WriteLiteralTo(__razor_template_writer, "                    ");
-
             
-            #line 47 "..\..\Mailing\Views\Newsletter.cshtml"
-WriteTo(__razor_template_writer, Html.QueryTokenBuilder(null, nc, MailingClient.GetQueryTokenBuilderSettings(queryDescription)));
+            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
+                    
+            
+            #line default
+            #line hidden
+            
+            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
+                     using (var sc = new Context(nc, "qtb"))
+                    {
+                        
+            
+            #line default
+            #line hidden
+            
+            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
+WriteTo(__razor_template_writer, Html.QueryTokenBuilder(null, sc, MailingClient.GetQueryTokenBuilderSettings(queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)));
 
             
             #line default
             #line hidden
-WriteLiteralTo(__razor_template_writer, "\r\n                    <input");
+            
+            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                                                                 
+
+            
+            #line default
+            #line hidden
+WriteLiteralTo(__razor_template_writer, "                        <input");
 
 WriteLiteralTo(__razor_template_writer, " type=\"button\"");
 
-WriteLiteralTo(__razor_template_writer, " class=\"sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled\"");
+WriteLiteralTo(__razor_template_writer, " disabled=\"disabled\"");
+
+WriteLiteralTo(__razor_template_writer, " class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
+"n-basic\"");
 
 WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
 
             
-            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                    WriteTo(__razor_template_writer, nc.Prefix);
+            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                       WriteTo(__razor_template_writer, sc.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteralTo(__razor_template_writer, "\"");
 
-WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2027), Tuple.Create("\"", 2084)
+WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2247), Tuple.Create("\"", 2304)
             
-            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                        , Tuple.Create(Tuple.Create("", 2035), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                           , Tuple.Create(Tuple.Create("", 2255), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2035), false)
+, 2255), false)
 );
 
-WriteLiteralTo(__razor_template_writer, " />\r\n                    <input");
+WriteLiteralTo(__razor_template_writer, " />\r\n");
+
+WriteLiteralTo(__razor_template_writer, "                        <input");
 
 WriteLiteralTo(__razor_template_writer, " type=\"button\"");
 
-WriteLiteralTo(__razor_template_writer, " class=\"sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled\"");
+WriteLiteralTo(__razor_template_writer, " disabled=\"disabled\"");
+
+WriteLiteralTo(__razor_template_writer, " class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
+"n-if\"");
 
 WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
 
             
-            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                 WriteTo(__razor_template_writer, nc.Prefix);
+            #line 52 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                    WriteTo(__razor_template_writer, sc.Prefix);
 
             
             #line default
@@ -323,17 +356,22 @@ WriteLiteralTo(__razor_template_writer, " data-block=\"if\"");
 
 WriteLiteralTo(__razor_template_writer, " value=\"if\"");
 
-WriteLiteralTo(__razor_template_writer, " />\r\n                    <input");
+WriteLiteralTo(__razor_template_writer, " />\r\n");
+
+WriteLiteralTo(__razor_template_writer, "                        <input");
 
 WriteLiteralTo(__razor_template_writer, " type=\"button\"");
 
-WriteLiteralTo(__razor_template_writer, " class=\"sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled\"");
+WriteLiteralTo(__razor_template_writer, " disabled=\"disabled\"");
+
+WriteLiteralTo(__razor_template_writer, " class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
+"n-foreach\"");
 
 WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
 
             
-            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                      WriteTo(__razor_template_writer, nc.Prefix);
+            #line 53 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                         WriteTo(__razor_template_writer, sc.Prefix);
 
             
             #line default
@@ -344,17 +382,22 @@ WriteLiteralTo(__razor_template_writer, " data-block=\"foreach\"");
 
 WriteLiteralTo(__razor_template_writer, " value=\"foreach\"");
 
-WriteLiteralTo(__razor_template_writer, " />\r\n                    <input");
+WriteLiteralTo(__razor_template_writer, " />\r\n");
+
+WriteLiteralTo(__razor_template_writer, "                        <input");
 
 WriteLiteralTo(__razor_template_writer, " type=\"button\"");
 
-WriteLiteralTo(__razor_template_writer, " class=\"sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled\"");
+WriteLiteralTo(__razor_template_writer, " disabled=\"disabled\"");
+
+WriteLiteralTo(__razor_template_writer, " class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
+"n-any\"");
 
 WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
 
             
-            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                  WriteTo(__razor_template_writer, nc.Prefix);
+            #line 54 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                     WriteTo(__razor_template_writer, sc.Prefix);
 
             
             #line default
@@ -365,12 +408,21 @@ WriteLiteralTo(__razor_template_writer, " data-block=\"any\"");
 
 WriteLiteralTo(__razor_template_writer, " value=\"any\"");
 
-WriteLiteralTo(__razor_template_writer, " />\r\n                </fieldset>\r\n            </div>\r\n");
+WriteLiteralTo(__razor_template_writer, " />\r\n");
+
+            
+            #line 55 "..\..\Mailing\Views\Newsletter.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteralTo(__razor_template_writer, "                </fieldset>\r\n            </div>\r\n");
 
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 54 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 58 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target"));
 
             
@@ -381,7 +433,7 @@ WriteLiteralTo(__razor_template_writer, "\r\n");
 WriteLiteralTo(__razor_template_writer, "            ");
 
             
-            #line 55 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 59 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Text, vl =>
                     {
                         vl.ValueLineType = ValueLineType.TextArea;
@@ -392,12 +444,16 @@ WriteTo(__razor_template_writer, Html.ValueLine(nc, e => e.Text, vl =>
             
             #line default
             #line hidden
-WriteLiteralTo(__razor_template_writer, "\r\n            <script>\r\n                $(function () {\r\n");
+WriteLiteralTo(__razor_template_writer, "\r\n            <script");
+
+WriteLiteralTo(__razor_template_writer, " type=\"text/javascript\"");
+
+WriteLiteralTo(__razor_template_writer, ">\r\n                 $(function () {\r\n");
 
 WriteLiteralTo(__razor_template_writer, "                    ");
 
             
-            #line 63 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 67 "..\..\Mailing\Views\Newsletter.cshtml"
 WriteTo(__razor_template_writer, MailingClient.Module["initHtmlEditorWithTokens"](nc.SubContext(e => e.Text).Prefix, UICulture));
 
             
@@ -406,7 +462,7 @@ WriteTo(__razor_template_writer, MailingClient.Module["initHtmlEditorWithTokens"
 WriteLiteralTo(__razor_template_writer, ";\r\n                });\r\n            </script>\r\n        </div>\r\n");
 
             
-            #line 67 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 71 "..\..\Mailing\Views\Newsletter.cshtml"
             }
 
             
@@ -416,7 +472,7 @@ WriteLiteralTo(__razor_template_writer, "    ");
 
 })
             
-            #line 68 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 72 "..\..\Mailing\Views\Newsletter.cshtml"
            );
         if (!nc.Value.IsNew)
         {
@@ -432,12 +488,12 @@ WriteLiteralTo(__razor_template_writer, "    ");
             
             #line default
             #line hidden
-WriteLiteral("<script>\r\n    $(function () {\r\n");
+WriteLiteral("<script>\r\n     $(function () {\r\n");
 
 WriteLiteral("        ");
 
             
-            #line 81 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 85 "..\..\Mailing\Views\Newsletter.cshtml"
     Write(MailingClient.Module["initReplacements"]());
 
             
@@ -446,7 +502,7 @@ WriteLiteral("        ");
 WriteLiteral(";\r\n    });\r\n</script>\r\n");
 
             
-            #line 84 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 88 "..\..\Mailing\Views\Newsletter.cshtml"
 }
 
             

@@ -20,6 +20,6 @@ namespace Signum.Services
         List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit);
+        List<Lite<UserQueryDN>> AutocompleteUserQueries(string subString, int limit);
     }
 }

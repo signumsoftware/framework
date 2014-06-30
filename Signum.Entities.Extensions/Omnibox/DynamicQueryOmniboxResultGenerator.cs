@@ -74,7 +74,7 @@ namespace Signum.Entities.Omnibox
                     {
                         QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
 
-                        foreach (var qt in QueryUtils.SubTokens(null, description, canAggregate: false))
+                        foreach (var qt in QueryUtils.SubTokens(null, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         {
                             yield return new DynamicQueryOmniboxResult
                             {
@@ -119,7 +119,7 @@ namespace Signum.Entities.Omnibox
                 {
                     if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.Item2.All(a => ((QueryToken)a.Value).ToString().ToOmniboxPascal() == a.Text))
                     {
-                        foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription, canAggregate: false))
+                        foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         {
                             result.Add(new FilterQuery(distance, syntax, qt, tokenMatches));
                         }
@@ -338,7 +338,7 @@ namespace Signum.Entities.Omnibox
 
             bool isPascal = OmniboxUtils.IsPascalCasePattern(omniboxToken.Value);
 
-            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.ToString().ToOmniboxPascal(), "translations");
+            var dic = QueryUtils.SubTokens(queryToken, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement).ToDictionary(qt => qt.ToString().ToOmniboxPascal(), "translations");
 
             var matches = OmniboxUtils.Matches(dic, qt => qt.IsAllowed() == null, omniboxToken.Value, isPascal);
 

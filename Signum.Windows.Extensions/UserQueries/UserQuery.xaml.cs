@@ -12,7 +12,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
-using Signum.Entities.Reports;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Reflection;
@@ -51,9 +50,14 @@ namespace Signum.Windows.UserQueries
             tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey);
         }
 
+        private List<QueryToken> QueryTokenBuilderFilters_SubTokensEvent(QueryToken token)
+        {
+            return token.SubTokens(QueryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
+        }
+
         private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken token)
         {
-            return token.SubTokens(QueryDescription, canAggregate: false);
+            return token.SubTokens(QueryDescription, SubTokensOptions.CanElement);
         }
 
         IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)

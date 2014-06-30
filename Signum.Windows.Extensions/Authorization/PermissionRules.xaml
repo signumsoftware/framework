@@ -31,7 +31,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="{m:LocType {x:Type d:PermissionDN}}" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="{m:LocType {x:Type d:PermissionSymbol}}" DisplayMemberBinding="{Binding Resource}" />
                     <GridViewColumn Header="{m:Loc {x:Static d:AuthAdminMessage.Allow}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

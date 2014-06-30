@@ -1,0 +1,9 @@
+﻿@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+
+@using (var tc = Html.TypeContext<CountUserQueryElementDN>())
+{
+    @Html.ValueLine(tc, cuq => cuq.Label)
+    @Html.EntityLine(tc, cuq => cuq.UserQuery, el=>el.FormGroupHtmlProps.Add("style", "max-width:300px"))
+    @Html.ValueLine(tc, cuq => cuq.Href)
+}

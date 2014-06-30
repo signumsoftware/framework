@@ -69,10 +69,15 @@ namespace Signum.Web.Selenium
             container.Selenium.Click(container.ButtonLocator(idButton) + ":not([disabled])");
         }
 
+        public static void ButtonMouseUp(this IEntityButtonContainer container, string idButton)
+        {
+            container.Selenium.MouseUp(container.ButtonLocator(idButton) + ":not([disabled])");
+        }
+
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : IdentifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonMouseUp(symbol.Operation.KeyWeb());
         }
 
         public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
@@ -131,7 +136,7 @@ namespace Signum.Web.Selenium
         public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
             where T : IdentifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonMouseUp(symbol.Operation.KeyWeb());
 
             container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
 
@@ -141,7 +146,7 @@ namespace Signum.Web.Selenium
         public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, string prefix = "New")
             where T : ModifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonMouseUp(symbol.Operation.KeyWeb());
 
             var popup = new PopupControl<T>(container.Selenium, prefix);
 

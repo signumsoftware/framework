@@ -25,6 +25,8 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
+        public static Func<ITaskDN, IDisposable> ApplySession;
+
         static Expression<Func<ITaskDN, IQueryable<ScheduledTaskLogDN>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogDN>().Where(a => a.Task == ct);
         public static IQueryable<ScheduledTaskLogDN> Executions(this ITaskDN e)
@@ -70,6 +72,7 @@ namespace Signum.Engine.Scheduler
                 if (!imp2.Equals(imp2))
                     throw new InvalidOperationException("Implementations of ScheduledTaskDN.Task should be the same as in ScheduledTaskLogDN.Task");
 
+                PermissionAuthLogic.RegisterPermissions(SchedulerPermission.ViewSchedulerPanel);
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
@@ -129,12 +132,23 @@ namespace Signum.Engine.Scheduler
                     Execute = (c, _) => { },
                 }.Register();
 
+                new Graph<HolidayCalendarDN>.Delete(HolidayCalendarOperation.Delete)
+                {
+                    Delete = (c, _) => { c.Delete(); },
+                }.Register();
+
                 new Graph<ScheduledTaskDN>.Execute(ScheduledTaskOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (st, _) => { },
                 }.Register();
+
+                new Graph<ScheduledTaskDN>.Delete(ScheduledTaskOperation.Delete)
+                {
+                    Delete = (st, _) => { st.OperationLogs().UnsafeDelete(); st.Delete(); },
+                }.Register();
+
 
                 new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
@@ -297,9 +311,23 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
+        public static IDisposable OnApplySession(ITaskDN task)
+        {
+            if (ApplySession == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (Func<ITaskDN, IDisposable> item in ApplySession.GetInvocationList())
+            {
+                result = Disposable.Combine(result, item(task));
+            }
+            return result;
+        }
+
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
+            using (ApplySession(task))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {

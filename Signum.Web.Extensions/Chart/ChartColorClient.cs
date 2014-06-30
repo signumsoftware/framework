@@ -10,7 +10,6 @@ using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
-using Signum.Web.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine;
@@ -40,15 +39,7 @@ namespace Signum.Web.Chart
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)
                             .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related,
                                 new EntityMapping<ChartColorDN>(false)
-                                    .SetProperty(m => m.Color, ctx=>
-                                    {
-                                        var input = ctx.Inputs["Rgb"];
-                                        int rgb;
-                                        if(input.HasText() && int.TryParse(input, System.Globalization.NumberStyles.HexNumber, null, out rgb))
-                                            return ColorDN.FromARGB(255, rgb);
-
-                                        return null;
-                                    })
+                                    .CreateProperty(m => m.Color)
                                     .CreateProperty(c => c.Related)))
                     }
                 });
@@ -60,16 +51,26 @@ namespace Signum.Web.Chart
                     var typeName = Navigator.ResolveWebTypeName(entity.Type.ToType());
                     return new[]
                     {
-                        new ToolBarButton(ctx.Prefix, "ebChartColorSave")
+                        new ToolBarButton(ctx.Prefix, "savePalette")
                         {
                             Text = ChartMessage.SavePalette.NiceToString(),
                             Style = BootstrapStyle.Primary,
                             OnClick = Module["savePalette"](ctx.Url.Action<ColorChartController>(pc => pc.SavePalette(typeName)))
                         },
-                        new ToolBarButton(ctx.Prefix, "ebChartColorCreate")
+                        new ToolBarButton(ctx.Prefix, "newPalette")
                         {
                             Text =ChartMessage.NewPalette.NiceToString(),
-                            Href = RouteHelper.New().Action<ColorChartController>(cc => cc.CreateNewPalette(typeName))
+                            OnClick = Module["createPalette"](
+                            ctx.Url.Action<ColorChartController>(pc => pc.CreateNewPalette(typeName)),
+                            ChartColorLogic.Palettes.Keys,
+                            ChartMessage.ChooseABasePalette.NiceToString())
+                        },
+                        new ToolBarButton(ctx.Prefix, "deletePalette")
+                        {
+                            Text =ChartMessage.DeletePalette.NiceToString(),
+                            Style = BootstrapStyle.Danger,
+                            OnClick = Module["deletePalette"](
+                            ctx.Url.Action<ColorChartController>(pc => pc.DeletePalette(typeName)))
                         }
                     };
                 });

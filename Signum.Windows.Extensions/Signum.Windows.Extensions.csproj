@@ -193,45 +193,45 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
-    <Compile Include="ControlPanels\ControlPanelSelector.xaml.cs">
-      <DependentUpon>ControlPanelSelector.xaml</DependentUpon>
+    <Compile Include="Dashboard\DashboardSelector.xaml.cs">
+      <DependentUpon>DashboardSelector.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\ControlPanelWindow.xaml.cs">
-      <DependentUpon>ControlPanelWindow.xaml</DependentUpon>
+    <Compile Include="Dashboard\DashboardWindow.xaml.cs">
+      <DependentUpon>DashboardWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\PartView\UserChartPartView.xaml.cs">
+    <Compile Include="Dashboard\PartView\UserChartPartView.xaml.cs">
       <DependentUpon>UserChartPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\PartView\LinkListPartView.xaml.cs">
+    <Compile Include="Dashboard\PartView\LinkListPartView.xaml.cs">
       <DependentUpon>LinkListPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\PartView\CountSearchControlPartView.xaml.cs">
+    <Compile Include="Dashboard\PartView\CountSearchControlPartView.xaml.cs">
       <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
-    <Compile Include="ControlPanels\PartView\UserQueryPartView.xaml.cs">
+    <Compile Include="Dashboard\DashboardOmniboxProvider.cs" />
+    <Compile Include="Dashboard\PartView\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
+    <Compile Include="Dashboard\Admin\CountSearchControlPartEdit.xaml.cs">
       <DependentUpon>CountSearchControlPartEdit.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\Admin\LinkListPartEdit.xaml.cs">
+    <Compile Include="Dashboard\Admin\LinkListPartEdit.xaml.cs">
       <DependentUpon>LinkListPartEdit.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\Admin\UserChartPartEdit.xaml.cs">
+    <Compile Include="Dashboard\Admin\UserChartPartEdit.xaml.cs">
       <DependentUpon>UserChartPartEdit.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\Admin\UserQueryPartEdit.xaml.cs">
+    <Compile Include="Dashboard\Admin\UserQueryPartEdit.xaml.cs">
       <DependentUpon>UserQueryPartEdit.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\ControlPanelClient.cs" />
-    <Compile Include="ControlPanels\ControlPanelView.xaml.cs">
-      <DependentUpon>ControlPanelView.xaml</DependentUpon>
+    <Compile Include="Dashboard\DashboardClient.cs" />
+    <Compile Include="Dashboard\DashboardView.xaml.cs">
+      <DependentUpon>DashboardView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\StackColumnPanel.cs" />
+    <Compile Include="Dashboard\StackColumnPanel.cs" />
     <Compile Include="Converters.cs" />
-    <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
-      <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
+    <Compile Include="Dashboard\Admin\DashboardEdit.xaml.cs">
+      <DependentUpon>DashboardEdit.xaml</DependentUpon>
     </Compile>
     <Compile Include="Disconnected\UploadProgress.xaml.cs">
       <DependentUpon>UploadProgress.xaml</DependentUpon>
@@ -362,11 +362,11 @@
     <Compile Include="UserQueries\UserQuery.xaml.cs">
       <DependentUpon>UserQuery.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ExcelReport.xaml.cs">
+    <Compile Include="Excel\ExcelReport.xaml.cs">
       <DependentUpon>ExcelReport.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\PlainExcelMenuItem.cs" />
-    <Compile Include="Reports\ReportMenuItem.cs" />
+    <Compile Include="Excel\PlainExcelMenuItem.cs" />
+    <Compile Include="Excel\ReportMenuItem.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -376,7 +376,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ReportClient.cs" />
+    <Compile Include="Excel\ReportClient.cs" />
     <Compile Include="Scheduler\HolidayCalendar.xaml.cs">
       <DependentUpon>HolidayCalendar.xaml</DependentUpon>
     </Compile>
@@ -570,51 +570,51 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
+    <Page Include="Dashboard\Admin\DashboardEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\ControlPanelSelector.xaml">
+    <Page Include="Dashboard\DashboardSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\ControlPanelWindow.xaml">
+    <Page Include="Dashboard\DashboardWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\PartView\UserChartPartView.xaml">
+    <Page Include="Dashboard\PartView\UserChartPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\PartView\LinkListPartView.xaml">
+    <Page Include="Dashboard\PartView\LinkListPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\PartView\CountSearchControlPartView.xaml">
+    <Page Include="Dashboard\PartView\CountSearchControlPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\PartView\UserQueryPartView.xaml">
+    <Page Include="Dashboard\PartView\UserQueryPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml">
+    <Page Include="Dashboard\Admin\CountSearchControlPartEdit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\Admin\LinkListPartEdit.xaml">
+    <Page Include="Dashboard\Admin\LinkListPartEdit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\Admin\UserChartPartEdit.xaml">
+    <Page Include="Dashboard\Admin\UserChartPartEdit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\Admin\UserQueryPartEdit.xaml">
+    <Page Include="Dashboard\Admin\UserQueryPartEdit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\ControlPanelView.xaml">
+    <Page Include="Dashboard\DashboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -774,7 +774,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Reports\ExcelReport.xaml">
+    <Page Include="Excel\ExcelReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

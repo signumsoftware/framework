@@ -1,0 +1,12 @@
+﻿@using Signum.Engine
+@using Signum.Entities.Excel
+@using Signum.Entities.Basics
+@using Signum.Entities.Files
+@using Signum.Web.Files
+
+@using (var e = Html.TypeContext<ExcelReportDN>())
+{
+    @Html.EntityLine(e, f => f.Query, el => { el.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.DisplayName)
+    @Html.FileLine(e, f => f.File)
+}

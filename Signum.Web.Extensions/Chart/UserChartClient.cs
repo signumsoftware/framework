@@ -10,7 +10,6 @@ using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
-using Signum.Web.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine;
@@ -20,6 +19,7 @@ using Signum.Engine.Chart;
 using Signum.Web.Basic;
 using Signum.Web.Operations;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Web.Excel;
 
 namespace Signum.Web.Chart
 {
@@ -34,7 +34,7 @@ namespace Signum.Web.Chart
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
 
-                Mapping<QueryTokenDN> qtMapping = ctx =>
+                Func<SubTokensOptions, Mapping<QueryTokenDN>> qtMapping = ops=>ctx =>
                 {
                     string tokenStr = UserQueries.UserQueriesHelper.GetTokenString(ctx);
 
@@ -44,7 +44,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults));
+                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, ops | (chart.GroupResults ? SubTokensOptions.CanAggregate : 0)));
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -60,13 +60,13 @@ namespace Signum.Web.Chart
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
                                     .CreateProperty(a=>a.Operation)
                                     .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             })
                             .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
                             {
                                 ElementMapping = new EntityMapping<QueryOrderDN>(false)
                                     .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             })
                     }
                 });
@@ -121,8 +121,8 @@ namespace Signum.Web.Chart
             var buttons = new List<ToolBarButton>();
             buttons.Add(UserCharButton(url, queryName, prefix, currentUserChart));
 
-            if (ReportSpreadsheetClient.ToExcelPlain)
-                buttons.Add(ReportSpreadsheetClient.UserChartButton(url, prefix)); 
+            if (ExcelClient.ToExcelPlain)
+                buttons.Add(ExcelClient.UserChartButton(url, prefix)); 
 
             return buttons;
         }
@@ -134,7 +134,7 @@ namespace Signum.Web.Chart
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName).OrderBy(a => a.ToString()))
             {
-                items.Add(new MenuItem("sfUserChart"+uc.Id)
+                items.Add(new MenuItem(prefix, "sfUserChart" + uc.Id)
                 {
                     Text = uc.ToString(),
                     Title = uc.ToString(),
@@ -149,9 +149,8 @@ namespace Signum.Web.Chart
             if (Navigator.IsCreable(typeof(UserChartDN), isSearch: true))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
-                items.Add(new MenuItem("createUserChart")
+                items.Add(new MenuItem(prefix, "qbUserhartNew")
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     Title = uqNewText,
                     Text = uqNewText,
                     OnClick = ChartClient.Module["createUserChart"](prefix, url.Action((ChartController c) => c.CreateUserChart())),
@@ -161,9 +160,8 @@ namespace Signum.Web.Chart
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string ucEditText = ChartMessage.EditUserChart.NiceToString();
-                items.Add(new MenuItem("qbUserChartEdit")
+                items.Add(new MenuItem(prefix, "qbUserChartEdit")
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     Title = ucEditText,
                     Text = ucEditText,
                     Href = Navigator.NavigateRoute(currentUserChart)

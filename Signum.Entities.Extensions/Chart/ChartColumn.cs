@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
-using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;
@@ -242,10 +241,10 @@ namespace Signum.Entities.Chart
             DisplayName = displayName;
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (token != null)
-                token.ParseData(context, description, canAggregate);
+                token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
         internal Column CreateColumn()

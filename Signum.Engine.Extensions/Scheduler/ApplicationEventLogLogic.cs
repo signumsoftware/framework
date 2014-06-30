@@ -15,10 +15,10 @@ using System.Reflection;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Engine.Exceptions;
-using Signum.Entities.Extensions.Scheduler;
+using Signum.Entities.Scheduler;
 using Signum.Engine.Authorization;
 
-namespace Signum.Engine.Extensions.Scheduler
+namespace Signum.Engine.Scheduler
 {
     public static class ApplicationEventLogLogic
     {
