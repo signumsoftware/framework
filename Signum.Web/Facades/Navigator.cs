@@ -706,7 +706,6 @@ namespace Signum.Web
             SetDefaultOrder(findOptions, description);
 
             controller.ViewData.Model = new Context(null, "");
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -820,7 +819,6 @@ namespace Signum.Web
             SetDefaultOrder(findOptions, desc);
 
             controller.ViewData.Model = context;
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.FindMode] = mode;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
