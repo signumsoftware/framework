@@ -61,6 +61,12 @@ module SF {
             if (jq.length > 1)
                 throw new Error("impossible to fulfill SFControl from more than one element");
 
+            if (!jq.hasClass("SF-control-container"))
+                throw Error("this element has not SF-control");
+
+            if (jq.data("SF-control"))
+                throw Error("SF-control not set yet");
+
             var queue: { (value: T): void }[] = jq.data("SF-queue");
 
             if (queue) {
