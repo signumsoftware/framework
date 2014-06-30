@@ -68,7 +68,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -813,9 +813,14 @@ namespace Signum.Web
         }
     }
 
-
-    public class LiteMapping<S> where S : class, IIdentifiable
+    public interface ILiteMapping
     {
+        bool AvoidEntityMapping { get; set; }
+    }
+
+    public class LiteMapping<S>: ILiteMapping where S : class, IIdentifiable
+    {
+        public bool AvoidEntityMapping { get; set; }
         public Mapping<S> EntityMapping { get; set; }
 
         public LiteMapping()
@@ -873,7 +878,7 @@ namespace Signum.Web
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)
         {
             //commented out because of Lite<FileDN/FilePathDN>
-            if (!EntityHasChanges(ctx))
+            if (AvoidEntityMapping || !EntityHasChanges(ctx))
                 return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
@@ -1000,9 +1005,12 @@ namespace Signum.Web
                     if (ctx.Value == null)
                         mlistPriv = ctx.Value = new MList<S>();
 
+                    var added = newList.Select(a=>a.Value).Except(mlistPriv.InnerList.Select(a=>a.Value)).ToList();
+                    var removed = mlistPriv.InnerList.Select(a=>a.Value).Except(newList.Select(a=>a.Value)).ToList();
+
                     mlistPriv.InnerList.Clear();
                     mlistPriv.InnerList.AddRange(newList);
-                    mlistPriv.InnerListModified();
+                    mlistPriv.InnerListModified(added, removed);
                 }
 
                 return ctx.Value;
@@ -1079,13 +1087,11 @@ namespace Signum.Web
     public class MListDictionaryMapping<S, K> : BaseMListMapping<S>
         where S : ModifiableEntity
     {
-        Expression<Func<S, K>> GetKeyExpression;
+        MemberInfo[] MemberList;
         Func<S, K> GetKey;
-
+        public Mapping<K> KeyMapping { get; set; }
 
         public Func<S, bool> FilterElements;
-
-        public Mapping<K> KeyPropertyMapping { get; set; }
 
         public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
             : this(getKeyExpression, Mapping.New<S>())
@@ -1097,9 +1103,28 @@ namespace Signum.Web
             : base(elementMapping)
         {
             this.GetKey = getKeyExpression.Compile();
-            this.GetKeyExpression = getKeyExpression;
 
-            this.KeyPropertyMapping = Mapping.New<K>();
+            var body = RemoveToLite(getKeyExpression.Body);
+
+            this.MemberList = Reflector.GetMemberListBase(body);
+
+            this.KeyMapping =  Mapping.New<K>();
+
+            if (body != getKeyExpression.Body)
+                ((ILiteMapping)this.KeyMapping.Target).AvoidEntityMapping = true;
+        }
+
+        private Expression RemoveToLite(Expression body)
+        {
+            if (body.Type.IsLite() && body.NodeType == ExpressionType.Call)
+            {
+                MethodCallExpression mce = body as MethodCallExpression;
+
+                if (mce != null && mce.Method.Name.StartsWith("ToLite") & mce.Method.DeclaringType == typeof(Lite))
+                    return mce.Arguments[0];
+            }
+
+            return body;
         }
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
@@ -1113,9 +1138,9 @@ namespace Signum.Web
 
                 var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-                PropertyRoute route = ctx.PropertyRoute.Add("Item").Continue(GetKeyExpression);
+                PropertyRoute route = ctx.PropertyRoute.Add("Item").Continue(MemberList);
 
-                string[] namesToAppend = Reflector.GetMemberList(GetKeyExpression).Select(MemberAccessGatherer.GetName).NotNull().ToArray();
+                string[] namesToAppend = MemberList.Select(MemberAccessGatherer.GetName).NotNull().ToArray();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
@@ -1123,7 +1148,7 @@ namespace Signum.Web
 
                     SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, namesToAppend), null, route, itemCtx);
 
-                    subContext.Value = KeyPropertyMapping(subContext);
+                    subContext.Value = KeyMapping(subContext);
 
                     itemCtx.Value = dic[subContext.Value];
 

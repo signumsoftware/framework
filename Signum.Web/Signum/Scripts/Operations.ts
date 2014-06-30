@@ -49,7 +49,7 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
         .then(result=> {
-            assertModelStateErrors(result, options.prefix);
+            Validator.assertModelStateErrors(result, options.prefix);
             return Entities.EntityHtml.fromHtml(options.prefix, result)
         });
 }
@@ -317,20 +317,6 @@ export function baseRequestData(options: OperationOptions, newPrefix?: string) {
         formValues["sfAvoidReturnView"] = true;
 
     return $.extend(formValues, options.requestExtraJsonData);
-}
-
-
-export function assertModelStateErrors(operationResult: any, prefix: string) {
-    if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
-        return false;
-
-    var modelState = operationResult.ModelState;
-
-    Validator.showErrors({ prefix: prefix }, modelState);
-
-    SF.Notify.error(lang.signum.error, 2000);
-
-    throw modelState;
 }
 
 export function entityIsValidOrLite(options: EntityOperationOptions) : Promise<void> {

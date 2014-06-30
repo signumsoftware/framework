@@ -103,7 +103,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var clone = new Entities.EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr, entityHtml.link);
 
-            clone.html = SF.cloneWithValues(entityHtml.html);
+            clone.html = entityHtml.html.clone(true);
 
             return openPopupView(clone, viewOptions);
         }

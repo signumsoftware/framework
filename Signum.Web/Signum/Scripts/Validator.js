@@ -107,6 +107,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     }
     exports.isModelState = isModelState;
 
+    function assertModelStateErrors(result, prefix) {
+        if (!exports.isModelState(result))
+            return;
+
+        var modelState = result.ModelState;
+
+        exports.showErrors({ prefix: prefix }, modelState);
+
+        SF.Notify.error(lang.signum.error, 2000);
+
+        throw modelState;
+    }
+    exports.assertModelStateErrors = assertModelStateErrors;
+
     function showErrors(valOptions, modelState) {
         valOptions = $.extend({
             prefix: "",

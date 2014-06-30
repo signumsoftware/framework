@@ -126,7 +126,7 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
 
         var clone = new Entities.EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr, entityHtml.link);
 
-        clone.html = SF.cloneWithValues(entityHtml.html);
+        clone.html = entityHtml.html.clone(true);
 
         return openPopupView(clone, viewOptions);
     }

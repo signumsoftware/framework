@@ -48,9 +48,16 @@ namespace Signum.Entities
             if (typeof(T) != this.Type)
                 throw new InvalidOperationException("Type mismatch between {0} and {1}".Formato(typeof(T).TypeName(), this.Type.TypeName())); 
 
-            var result = this; 
+            var list = Reflector.GetMemberList(propertyRoute);
 
-            foreach (var mi in Reflector.GetMemberList(propertyRoute))
+            return Continue(list);
+        }
+
+        public PropertyRoute Continue(MemberInfo[] list)
+        {
+            var result = this;
+
+            foreach (var mi in list)
             {
                 result = result.Add(mi);
             }

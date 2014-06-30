@@ -162,19 +162,6 @@ module SF {
         return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
     }
 
-    export function cloneWithValues(elements: JQuery): JQuery {
-        var clone = elements.clone(true);
-
-        var sourceSelect = elements.filter("select").add(elements.find("select"));
-        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
-
-        for (var i = 0, l = sourceSelect.length; i < l; i++) {
-            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
-        }
-
-        return clone;
-    }
-
     export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
 
         return new Promise<any>((resolve, reject) => {
@@ -654,5 +641,25 @@ interface DataTransfer {
 
 
 
+https://github.com/spencertipping/jquery.fix.clone/blob/master/jquery.fix.clone.js
 
+(function (original) {
+    jQuery.fn.clone = function () {
+        var result = original.apply(this, arguments),
+            my_textareas = this.find('textarea').add(this.filter('textarea')),
+            result_textareas = result.find('textarea').add(result.filter('textarea')),
+            my_selects = this.find('select').add(this.filter('select')),
+            result_selects = result.find('select').add(result.filter('select'));
+
+        for (var i = 0, l = my_textareas.length; i < l; ++i) $(result_textareas[i]).val($(my_textareas[i]).val());
+        for (var i = 0, l = my_selects.length; i < l; ++i) {
+            for (var j = 0, m = my_selects[i].options.length; j < m; ++j) {
+                if (my_selects[i].options[j].selected === true) {
+                    result_selects[i].options[j].selected = true;
+                }
+            }
+        }
+        return result;
+    };
+})(jQuery.fn.clone);
 

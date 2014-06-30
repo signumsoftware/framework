@@ -142,14 +142,11 @@ namespace Signum.Web
                    new HtmlTag("p").Class("form-control-static").InnerHtml(val));
         }
 
-        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)
         {
-            return new QueryTokenBuilderSettings
+            return new QueryTokenBuilderSettings(qd, options)
             {
-                CanAggregate = false,
-                QueryDescription = qd,
-                Decorators = new Action<QueryToken, HtmlTag>(CanColumnDecorator) +
-                 new Action<QueryToken, HtmlTag>(CanFilterDecorator),
+                Decorators = new Action<QueryToken, HtmlTag>(CanColumnDecorator) + new Action<QueryToken, HtmlTag>(CanFilterDecorator),
                 ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Finder"),
                 RequestExtraJSonData = null
             };

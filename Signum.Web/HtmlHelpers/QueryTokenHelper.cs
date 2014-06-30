@@ -11,9 +11,17 @@ namespace Signum.Web
 {
     public class QueryTokenBuilderSettings
     {
-        public bool CanAggregate;
+        public QueryTokenBuilderSettings(QueryDescription descripton, SubTokensOptions options)
+        {
+            this.QueryDescription = descripton;
+            this.Options = options;
+        }
+
+        public readonly QueryDescription QueryDescription;
+        public readonly SubTokensOptions Options;
+
         public Action<QueryToken, HtmlTag> Decorators;
-        public QueryDescription QueryDescription;
+
         public JObject RequestExtraJSonData;
         public string ControllerUrl;
     }
@@ -30,9 +38,12 @@ namespace Signum.Web
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
 
-            sb.Add(MvcHtmlString.Create("<script>" + JsModule.Finder["QueryTokenBuilder.init"](context.Prefix,
-                Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, settings.RequestExtraJSonData).ToString()
-                + "</script>")); 
+            if (settings.ControllerUrl.HasText())
+            {
+                sb.Add(MvcHtmlString.Create("<script>" + JsModule.Finder["QueryTokenBuilder.init"](context.Prefix,
+                    Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, (int)settings.Options, settings.RequestExtraJSonData).ToString()
+                    + "</script>"));
+            }
         
             return sb.ToHtml();     
         }
@@ -58,7 +69,7 @@ namespace Signum.Web
             if (previous != null && AllowSubTokens != null && !AllowSubTokens(previous))
                 return MvcHtmlString.Create("");
 
-            var queryTokens = previous.SubTokens(settings.QueryDescription, settings.CanAggregate);
+            var queryTokens = previous.SubTokens(settings.QueryDescription, settings.Options);
 
             if (queryTokens.IsEmpty())
                 return new HtmlTag("input")

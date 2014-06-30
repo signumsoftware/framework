@@ -74,7 +74,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
             {
@@ -91,7 +91,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
+            return SubTokensBase(PropertyInfo.PropertyType, options, GetImplementations());
         }
 
         public override Implementations? GetImplementations()
@@ -130,7 +130,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return PropertyInfo.NiceName() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return PropertyInfo.NiceName();
         }
 
         public override QueryToken Clone()

@@ -65,7 +65,7 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanElement);
             return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
         }
 
@@ -109,7 +109,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+                fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -126,13 +126,13 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int options)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+            var token = QueryUtils.Parse(tokenName, qd, (SubTokensOptions)options);
 
-            var combo = CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, prefix), SearchControlHelper.GetQueryTokenBuilderSettings(qd));
+            var combo = CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, prefix), SearchControlHelper.GetQueryTokenBuilderSettings(qd, (SubTokensOptions)options));
 
             return Content(combo.ToHtmlString());
         }

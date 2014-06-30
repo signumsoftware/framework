@@ -62,9 +62,9 @@ namespace Signum.Entities.DynamicQuery
         public override string Unit { get { return isProjection? null: unit; } }
         public string ElementUnit { get { return isProjection?  unit: null; } }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return base.SubTokensBase(type, implementations);  
+            return base.SubTokensBase(type, options, implementations);  
         }
 
         public static Func<Type, string, Expression, Expression> BuildExtension;

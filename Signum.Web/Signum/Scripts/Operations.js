@@ -27,7 +27,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }, options);
 
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }).then(function (result) {
-            exports.assertModelStateErrors(result, options.prefix);
+            Validator.assertModelStateErrors(result, options.prefix);
             return Entities.EntityHtml.fromHtml(options.prefix, result);
         });
     }
@@ -321,20 +321,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(formValues, options.requestExtraJsonData);
     }
     exports.baseRequestData = baseRequestData;
-
-    function assertModelStateErrors(operationResult, prefix) {
-        if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
-            return false;
-
-        var modelState = operationResult.ModelState;
-
-        Validator.showErrors({ prefix: prefix }, modelState);
-
-        SF.Notify.error(lang.signum.error, 2000);
-
-        throw modelState;
-    }
-    exports.assertModelStateErrors = assertModelStateErrors;
 
     function entityIsValidOrLite(options) {
         if (options.isLite || options.avoidValidate)

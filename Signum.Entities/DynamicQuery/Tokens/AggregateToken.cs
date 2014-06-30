@@ -109,7 +109,7 @@ namespace Signum.Entities.DynamicQuery
             get { return AggregateFunction.ToString(); }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }

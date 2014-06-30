@@ -15,6 +15,7 @@ using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 using System.Web.WebPages;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -58,7 +59,7 @@ namespace Signum.Web
         public static readonly Context Default = new Context(null, null)
         {
             FormGroupStyle = FormGroupStyle.LabelColumns,
-            FormGroupSize = FormGroupSize.Normal,
+            FormGroupSize = FormGroupSize.Small,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
             PlaceholderLabels = false,
@@ -204,12 +205,34 @@ namespace Signum.Web
         }
     }
 
+    /// <summary>
+    /// Nomenclature from http://getbootstrap.com/css/#forms
+    /// </summary>
     public enum FormGroupStyle
     {
+        /// <summary>
+        /// Unaffected by FormGroupSize
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         Basic,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         BasicDown,
+
+        /// <summary>
+        /// Requires form-vertical / form-inline container
+        /// </summary>
         SrOnly,
+
+        /// <summary>
+        /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
+        /// </summary>
         LabelColumns,
     }
 
@@ -274,6 +297,12 @@ namespace Signum.Web
         }
 
         internal abstract TypeContext Clone(object newValue);
+
+        internal static void AssertId(string id)
+        {
+            if (!Regex.IsMatch(id, @"^[A-Za-z][A-Za-z0-9-_]*$"))
+                throw new InvalidOperationException("'{0}' is not a valid HTML id".Formato(id));
+        }
     }
     #endregion
 
