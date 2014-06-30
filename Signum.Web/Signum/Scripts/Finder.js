@@ -158,7 +158,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).join(";"); //List of filter names "token1,operation1,value1;token2,operation2,value2"
         }
         if (findOptions.orders != null) {
-            requestData["orders"] = serializeOrders(findOptions.orders);
+            requestData["orders"] = exports.serializeOrders(findOptions.orders);
         }
         if (findOptions.columns != null) {
             requestData["columns"] = findOptions.columns.map(function (c) {
@@ -180,6 +180,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return (f.orderType == 0 /* Ascending */ ? "" : "-") + f.columnName;
         }).join(";");
     }
+    exports.serializeOrders = serializeOrders;
 
     function deleteFilter(trId) {
         var $tr = $("tr#" + trId);
@@ -254,7 +255,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.allowOrder) {
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    _this.newSortOrder($(e.currentTarget), e.shiftKey);
+                    SearchControl.newSortOrder(_this.options.orders, $(e.currentTarget), e.shiftKey);
                     _this.search();
                     return false;
                 });
@@ -580,7 +581,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.serializeOrders = function () {
-            return serializeOrders(this.options.orders);
+            return exports.serializeOrders(this.options.orders);
         };
 
         SearchControl.prototype.serializeColumns = function () {
@@ -618,12 +619,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return SearchControl.liteKeys(this.selectedItems());
         };
 
-        SearchControl.prototype.newSortOrder = function ($th, multiCol) {
+        SearchControl.newSortOrder = function (orders, $th, multiCol) {
             SF.ContextMenu.hideContextMenu();
 
             var columnName = $th.data("column-name");
 
-            var cols = this.options.orders.filter(function (o) {
+            var cols = orders.filter(function (o) {
                 return o.columnName == columnName;
             });
             var col = cols.length == 0 ? null : cols[0];
@@ -631,16 +632,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var oposite = col == null ? 0 /* Ascending */ : col.orderType == 0 /* Ascending */ ? 1 /* Descending */ : 0 /* Ascending */;
             var $sort = $th.find("span.sf-header-sort");
             if (!multiCol) {
-                this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+                $th.closest("thead").find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
                 $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
-                this.options.orders = [{ columnName: columnName, orderType: oposite }];
+
+                while (orders.length > 0)
+                    orders.pop();
+
+                orders.push({ columnName: columnName, orderType: oposite });
             } else {
                 if (col !== null) {
                     col.orderType = oposite;
                     $sort.removeClass("asc desc").addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
                 } else {
-                    this.options.orders.push({ columnName: columnName, orderType: oposite });
-                    $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
+                    orders.push({ columnName: columnName, orderType: oposite });
+                    $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc").addClass("l" + (orders.length - 1 % 4));
                 }
             }
         };
@@ -862,12 +867,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.SearchControl = SearchControl;
 
     var FilterBuilder = (function () {
-        function FilterBuilder(element, prefix, webQueryName, url) {
+        function FilterBuilder(element, prefix, webQueryName, addFilterUrl) {
             var _this = this;
             this.element = element;
             this.prefix = prefix;
             this.webQueryName = webQueryName;
-            this.url = url;
+            this.addFilterUrl = addFilterUrl;
             this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
             this.element.on("sf-new-subtokens-combo", function (event) {
@@ -957,7 +962,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var self = this;
             SF.ajaxPost({
-                url: this.url,
+                url: this.addFilterUrl,
                 data: data,
                 async: false
             }).then(function (filterHtml) {
