@@ -130,7 +130,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return PropertyInfo.NiceName() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return PropertyInfo.NiceName();
         }
 
         public override QueryToken Clone()
