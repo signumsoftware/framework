@@ -49,7 +49,11 @@
                 <span class="glyphicon glyphicon glyphicon-filter"></span>
             </a>
         }
-        <button type="button" class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")" onclick="@JsFunction.SFControlThen(prefix, "search()")" >@SearchMessage.Search.NiceToString()</button>
+        <button type="button" class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")">@SearchMessage.Search.NiceToString()</button>
+        <script type="text/javascript">
+            $("#@Model.Compose("qbSearch")").click(function(e){ $("#@Model.Compose("sfSearchControl")").SFControl().then(function(c){c.search();}) });
+            $("#@Model.Compose("tblFilterBuilder")").keyup(function(e){ if (e.which == 13) { $("#@Model.Compose("qbSearch")").click(); } });
+        </script>
 
         @if (findOptions.Create)
         {
