@@ -32,32 +32,29 @@
     <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
         <th>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
         </th>
-        @if (tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
-        {
-            <td style="text-align: center">
-                @if (tc.Value.GroupByVisible)
+        <td style="text-align: center">
+            @if (tc.Value.GroupByVisible)
+            {
+                var groupCheck = new HtmlTag("input")
+                    .IdName(tc.Compose("group"))
+                    .Attr("type", "checkbox")
+                    .Attr("value", "True")
+                    .Class("sf-chart-group-trigger");
+
+                if (!tc.Value.GroupByEnabled)
                 {
-                    var groupCheck = new HtmlTag("input")
-                        .IdName(tc.Compose("group"))
-                        .Attr("type", "checkbox")
-                        .Attr("value", "True")
-                        .Class("sf-chart-group-trigger");
-
-                    if (!tc.Value.GroupByEnabled)
-                    {
-                        groupCheck.Attr("disabled", "disabled");
-                    }
-
-                    bool groupResults = tc.Value.GroupByChecked;
-                    if (groupResults)
-                    {
-                        groupCheck.Attr("checked", "checked");
-                    }
-                    @groupCheck.ToHtmlSelf()
-                    @Html.Hidden(tc.Compose("group"), groupResults)
+                    groupCheck.Attr("disabled", "disabled");
                 }
-            </td>
-        }
+
+                bool groupResults = tc.Value.GroupByChecked;
+                if (groupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                @groupCheck.ToHtmlSelf()
+                @Html.Hidden(tc.Compose("group"), groupResults)
+            }
+        </td>
         <td>
             <div class="sf-query-token">
                 @Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), new QueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription],
@@ -74,10 +71,8 @@
     
     <tr class="sf-chart-token-config" style="display: none">
         <td />
-        @if (tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
-        {
-            <td />
-        }
+
+        <td />
         <td colspan="1">
             <div class="form-vertical">
                 @using (var sc = tc.SubContext())
@@ -86,17 +81,17 @@
                     sc.FormGroupStyle = FormGroupStyle.Basic;
                     <div class="row">
                         <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")</div>
-                        @if(sc.Value.ScriptColumn.Parameter1 != null)
+                        @if (sc.Value.ScriptColumn.Parameter1 != null)
                         {
-                        <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1))</div>
+                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1))</div>
                         }
-                        @if(sc.Value.ScriptColumn.Parameter2 != null)
+                        @if (sc.Value.ScriptColumn.Parameter2 != null)
                         {
-                        <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2))</div>
+                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2))</div>
                         }
                         @if (sc.Value.ScriptColumn.Parameter3 != null)
                         {
-                        <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3))</div>
+                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3))</div>
                         }
 
                         @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))

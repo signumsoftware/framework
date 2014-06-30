@@ -192,97 +192,72 @@ WriteLiteral(">\r\n        <th>");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </th>\r\n");
-
-            
-            #line 35 "..\..\Chart\Views\ChartColumn.cshtml"
-        
-            
-            #line default
-            #line hidden
-            
-            #line 35 "..\..\Chart\Views\ChartColumn.cshtml"
-         if (tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <td");
+WriteLiteral("\r\n        </th>\r\n        <td");
 
 WriteLiteral(" style=\"text-align: center\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 38 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 36 "..\..\Chart\Views\ChartColumn.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 36 "..\..\Chart\Views\ChartColumn.cshtml"
+             if (tc.Value.GroupByVisible)
+            {
+                var groupCheck = new HtmlTag("input")
+                    .IdName(tc.Compose("group"))
+                    .Attr("type", "checkbox")
+                    .Attr("value", "True")
+                    .Class("sf-chart-group-trigger");
+
+                if (!tc.Value.GroupByEnabled)
+                {
+                    groupCheck.Attr("disabled", "disabled");
+                }
+
+                bool groupResults = tc.Value.GroupByChecked;
+                if (groupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
                 
             
             #line default
             #line hidden
             
-            #line 38 "..\..\Chart\Views\ChartColumn.cshtml"
-                 if (tc.Value.GroupByVisible)
-                {
-                    var groupCheck = new HtmlTag("input")
-                        .IdName(tc.Compose("group"))
-                        .Attr("type", "checkbox")
-                        .Attr("value", "True")
-                        .Class("sf-chart-group-trigger");
-
-                    if (!tc.Value.GroupByEnabled)
-                    {
-                        groupCheck.Attr("disabled", "disabled");
-                    }
-
-                    bool groupResults = tc.Value.GroupByChecked;
-                    if (groupResults)
-                    {
-                        groupCheck.Attr("checked", "checked");
-                    }
-                    
-            
-            #line default
-            #line hidden
-            
-            #line 56 "..\..\Chart\Views\ChartColumn.cshtml"
-               Write(groupCheck.ToHtmlSelf());
+            #line 54 "..\..\Chart\Views\ChartColumn.cshtml"
+           Write(groupCheck.ToHtmlSelf());
 
             
             #line default
             #line hidden
             
-            #line 56 "..\..\Chart\Views\ChartColumn.cshtml"
-                                            
-                    
+            #line 54 "..\..\Chart\Views\ChartColumn.cshtml"
+                                        
+                
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Chart\Views\ChartColumn.cshtml"
-               Write(Html.Hidden(tc.Compose("group"), groupResults));
+            #line 55 "..\..\Chart\Views\ChartColumn.cshtml"
+           Write(Html.Hidden(tc.Compose("group"), groupResults));
 
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Chart\Views\ChartColumn.cshtml"
-                                                                   
-                }
+            #line 55 "..\..\Chart\Views\ChartColumn.cshtml"
+                                                               
+            }
 
             
             #line default
             #line hidden
-WriteLiteral("            </td>\r\n");
-
-            
-            #line 60 "..\..\Chart\Views\ChartColumn.cshtml"
-        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <td>\r\n            <div");
+WriteLiteral("        </td>\r\n        <td>\r\n            <div");
 
 WriteLiteral(" class=\"sf-query-token\"");
 
@@ -291,7 +266,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 63 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 60 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(Html.QueryTokenDNBuilder(tc.SubContext(a => a.Token), new QueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription],
                SubTokensOptions.CanElement | (tc.Value.ParentChart.GroupResults && !tc.Value.IsGroupKey == true ? SubTokensOptions.CanAggregate : 0))
                 {
@@ -308,7 +283,7 @@ WriteLiteral(" class=\"sf-chart-token-config-trigger\"");
 WriteLiteral(">");
 
             
-            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 66 "..\..\Chart\Views\ChartColumn.cshtml"
                                                 Write(ChartMessage.Chart_ToggleInfo.NiceToString());
 
             
@@ -317,7 +292,7 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
 
             
-            #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
     
    
     
@@ -331,32 +306,7 @@ WriteLiteral(" class=\"sf-chart-token-config\"");
 
 WriteLiteral(" style=\"display: none\"");
 
-WriteLiteral(">\r\n        <td />\r\n");
-
-            
-            #line 77 "..\..\Chart\Views\ChartColumn.cshtml"
-        
-            
-            #line default
-            #line hidden
-            
-            #line 77 "..\..\Chart\Views\ChartColumn.cshtml"
-         if (tc.Value.ParentChart.ChartScript.GroupBy == GroupByChart.Optional)
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <td />\r\n");
-
-            
-            #line 80 "..\..\Chart\Views\ChartColumn.cshtml"
-        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <td");
+WriteLiteral(">\r\n        <td />\r\n\r\n        <td />\r\n        <td");
 
 WriteLiteral(" colspan=\"1\"");
 
@@ -367,13 +317,13 @@ WriteLiteral(" class=\"form-vertical\"");
 WriteLiteral(">\r\n");
 
             
-            #line 83 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 78 "..\..\Chart\Views\ChartColumn.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 83 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 78 "..\..\Chart\Views\ChartColumn.cshtml"
                  using (var sc = tc.SubContext())
                 {
                     sc.FormGroupSize = FormGroupSize.Small;
@@ -393,7 +343,7 @@ WriteLiteral(" class=\"col-sm-4\"");
 WriteLiteral(">");
 
             
-            #line 88 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 83 "..\..\Chart\Views\ChartColumn.cshtml"
                                          Write(Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange"));
 
             
@@ -402,92 +352,92 @@ WriteLiteral(">");
 WriteLiteral("</div>\r\n");
 
             
-            #line 89 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 84 "..\..\Chart\Views\ChartColumn.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 89 "..\..\Chart\Views\ChartColumn.cshtml"
-                         if(sc.Value.ScriptColumn.Parameter1 != null)
+            #line 84 "..\..\Chart\Views\ChartColumn.cshtml"
+                         if (sc.Value.ScriptColumn.Parameter1 != null)
                         {
 
             
             #line default
             #line hidden
-WriteLiteral("                        <div");
+WriteLiteral("                            <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">");
+
+            
+            #line 86 "..\..\Chart\Views\ChartColumn.cshtml"
+                                             Write(Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1)));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</div>\r\n");
+
+            
+            #line 87 "..\..\Chart\Views\ChartColumn.cshtml"
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        ");
+
+            
+            #line 88 "..\..\Chart\Views\ChartColumn.cshtml"
+                         if (sc.Value.ScriptColumn.Parameter2 != null)
+                        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                            <div");
+
+WriteLiteral(" class=\"col-sm-4\"");
+
+WriteLiteral(">");
+
+            
+            #line 90 "..\..\Chart\Views\ChartColumn.cshtml"
+                                             Write(Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2)));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</div>\r\n");
 
             
             #line 91 "..\..\Chart\Views\ChartColumn.cshtml"
-                                         Write(Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1)));
+                        }
 
             
             #line default
             #line hidden
-WriteLiteral("</div>\r\n");
+WriteLiteral("                        ");
 
             
             #line 92 "..\..\Chart\Views\ChartColumn.cshtml"
-                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                        ");
-
-            
-            #line 93 "..\..\Chart\Views\ChartColumn.cshtml"
-                         if(sc.Value.ScriptColumn.Parameter2 != null)
-                        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                        <div");
-
-WriteLiteral(" class=\"col-sm-4\"");
-
-WriteLiteral(">");
-
-            
-            #line 95 "..\..\Chart\Views\ChartColumn.cshtml"
-                                         Write(Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</div>\r\n");
-
-            
-            #line 96 "..\..\Chart\Views\ChartColumn.cshtml"
-                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                        ");
-
-            
-            #line 97 "..\..\Chart\Views\ChartColumn.cshtml"
                          if (sc.Value.ScriptColumn.Parameter3 != null)
                         {
 
             
             #line default
             #line hidden
-WriteLiteral("                        <div");
+WriteLiteral("                            <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">");
 
             
-            #line 99 "..\..\Chart\Views\ChartColumn.cshtml"
-                                         Write(Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3)));
+            #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
+                                             Write(Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3)));
 
             
             #line default
@@ -495,7 +445,7 @@ WriteLiteral(">");
 WriteLiteral("</div>\r\n");
 
             
-            #line 100 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 95 "..\..\Chart\Views\ChartColumn.cshtml"
                         }
 
             
@@ -504,13 +454,13 @@ WriteLiteral("</div>\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 102 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 97 "..\..\Chart\Views\ChartColumn.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 102 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 97 "..\..\Chart\Views\ChartColumn.cshtml"
                          if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
@@ -522,14 +472,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 108 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 103 "..\..\Chart\Views\ChartColumn.cshtml"
                        Write(ColorLink(sc, type.UnNullify()));
 
             
             #line default
             #line hidden
             
-            #line 108 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 103 "..\..\Chart\Views\ChartColumn.cshtml"
                                                             ;
                             }
                             else
@@ -545,14 +495,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 118 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 113 "..\..\Chart\Views\ChartColumn.cshtml"
                        Write(ColorLink(sc, item.Value));
 
             
             #line default
             #line hidden
             
-            #line 118 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 113 "..\..\Chart\Views\ChartColumn.cshtml"
                                                       ;
                                     }
                                 }
@@ -565,7 +515,7 @@ WriteLiteral("\r\n");
 WriteLiteral("\r\n                    </div>\r\n");
 
             
-            #line 125 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 120 "..\..\Chart\Views\ChartColumn.cshtml"
                 }
 
             
@@ -574,7 +524,7 @@ WriteLiteral("\r\n                    </div>\r\n");
 WriteLiteral("            </div>\r\n        </td>\r\n    </tr>\r\n");
 
             
-            #line 129 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 124 "..\..\Chart\Views\ChartColumn.cshtml"
 }
 
             
