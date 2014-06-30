@@ -153,13 +153,20 @@ namespace Signum.Web
             }
             else
             {
-                return ValueLineHelper.ValueLine(helper, new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                var vl = new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                 {
                     FormGroupStyle = FormGroupStyle.None,
                     ReadOnly = filterOption.Frozen,
                     Format = filterOption.Token.Format,
                     UnitText = filterOption.Token.Unit,
-                });
+                }; 
+
+                if (filterOption.Token.Type.UnNullify().IsEnum)
+                {
+                    vl.EnumComboItems = ValueLine.CreateComboItems(EnumEntity.GetValues(vl.Type.UnNullify()), vl.UntypedValue == null || vl.Type.IsNullable());
+                }
+
+                return ValueLineHelper.ValueLine(helper, vl);
             }
             
             throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));
