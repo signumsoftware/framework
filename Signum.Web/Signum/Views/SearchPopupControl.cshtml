@@ -8,6 +8,17 @@
                 {
                     <button type="button" class="close sf-close-button">×</button>
                 }
+                else
+                {
+                    <div style="float: right">
+                        <div class="btn-group">
+                            <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button">@JavascriptMessage.ok.NiceToString()</button>
+                        </div>
+                        <div class="btn-group">
+                            <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>
+                        </div>
+                    </div>
+                }
                 <h4>
                     <span class="sf-entity-title">@ViewBag.Title</span>
                     <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen" href="#">
@@ -25,17 +36,6 @@
                 }
                 @Html.ValidationSummaryAjax(Model)
             </div>
-            @if (ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find))
-            {
-                <div class="modal-footer">
-                    <div class="btn-group">
-                        <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button">@JavascriptMessage.ok.NiceToString()</button>
-                    </div>
-                    <div class="btn-group">
-                        <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>
-                    </div>
-                </div>
-            }
         </div>
     </div>
 </div>
