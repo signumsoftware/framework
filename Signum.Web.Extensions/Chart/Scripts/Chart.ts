@@ -310,7 +310,7 @@ export class ChartRequest {
 
         $chartContainer.html("");
 
-        var data = $chartContainer.data("json");
+        var data = JSON.parse($chartContainer.attr("data-json"));
         ChartUtils.fillAllTokenValueFuntions(data);
 
         $(".sf-chart-redraw-onchange[id]", this.chartControl).each((i, element) => {
