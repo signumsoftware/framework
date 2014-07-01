@@ -869,8 +869,10 @@ export class EntityList extends EntityListBase {
 
         list.change(() => this.selection_Changed());
 
-        if (list.height() < this.shownButton.height())
-            list.css("min-height", this.shownButton.height());
+        SF.onVisible(list).then(() => {
+            if (list.height() < this.shownButton.height())
+                list.css("min-height", this.shownButton.height());
+        });
 
         this.selection_Changed();
     }

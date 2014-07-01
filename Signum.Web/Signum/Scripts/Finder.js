@@ -855,7 +855,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var $button = this.options.prefix.child("qbSearch").get();
 
-            SF.onVisible($button, function () {
+            SF.onVisible($button).then(function () {
                 if (!_this.searchOnLoadFinished) {
                     $button.click();
                     _this.searchOnLoadFinished = true;
