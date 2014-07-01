@@ -835,8 +835,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return _this.selection_Changed();
             });
 
-            if (list.height() < this.shownButton.height())
-                list.css("min-height", this.shownButton.height());
+            SF.onVisible(list).then(function () {
+                if (list.height() < _this.shownButton.height())
+                    list.css("min-height", _this.shownButton.height());
+            });
 
             this.selection_Changed();
         };

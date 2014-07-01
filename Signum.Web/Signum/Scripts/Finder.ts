@@ -889,7 +889,7 @@ export class SearchControl {
     searchOnLoad() {
         var $button = this.options.prefix.child("qbSearch").get();
 
-        SF.onVisible($button, () => {
+        SF.onVisible($button).then(() => {
             if (!this.searchOnLoadFinished) {
                 $button.click();
                 this.searchOnLoadFinished = true;
