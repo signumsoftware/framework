@@ -239,7 +239,12 @@ namespace Signum.Web.Chart
 
             ChartRequest chart = ctx.Value;
             if (lastTokenChanged != null)
-                chart.Columns[lastTokenChanged.Value].TokenChanged();
+            {
+                if (lastTokenChanged == -1)
+                    chart.ChartScript.SyncronizeColumns(chart, changeParameters: true); 
+                else
+                    chart.Columns[lastTokenChanged.Value].TokenChanged();
+            }
 
             return ctx;
         }

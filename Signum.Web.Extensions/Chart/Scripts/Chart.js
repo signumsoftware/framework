@@ -67,7 +67,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                 var isFastRedraw = _this.isDrawn(img.hasClass("sf-chart-img-equiv"));
 
-                _this.updateChartBuilder().then(function () {
+                _this.updateChartBuilder("-1").then(function () {
                     if (isFastRedraw)
                         _this.fastRedraw();
                 });

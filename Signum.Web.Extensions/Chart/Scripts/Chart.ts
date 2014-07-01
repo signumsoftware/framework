@@ -78,7 +78,7 @@ export class ChartBuilder {
 
             var isFastRedraw = this.isDrawn(img.hasClass("sf-chart-img-equiv"));
 
-            this.updateChartBuilder().then(() => {
+            this.updateChartBuilder("-1").then(() => {
                 if (isFastRedraw)
                     this.fastRedraw();
             });
