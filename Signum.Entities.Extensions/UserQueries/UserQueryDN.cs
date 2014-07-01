@@ -71,7 +71,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
@@ -79,7 +79,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref filters, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
@@ -94,7 +94,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columnsMode, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryColumnDN> columns = new MList<QueryColumnDN>();
         public MList<QueryColumnDN>  Columns
         {
@@ -123,29 +123,6 @@ namespace Signum.Entities.UserQueries
         {
             get { return guid; }
             set { Set(ref guid, value); }
-        }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            if (Orders != null)
-                Orders.ForEach((o, i) => o.Index = i);
-
-            if (Columns != null)
-                Columns.ForEach((c, i) => c.Index = i);
-
-            if (Filters != null)
-                Filters.ForEach((f, i) => f.Index = i);
-        }
-
-        protected override void PostRetrieving()
-        {
-            base.PostRetrieving();
-
-            Orders.Sort(a => a.Index);
-            Columns.Sort(a => a.Index);
-            Filters.Sort(a => a.Index);
         }
 
         static readonly Expression<Func<UserQueryDN, string>> ToStringExpression = e => e.displayName;
@@ -373,13 +350,6 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value); }
         }
 
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
-
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Orden",
@@ -431,13 +401,6 @@ namespace Signum.Entities.UserQueries
         {
             get { return displayName.DefaultText(null); }
             set { Set(ref displayName, value); }
-        }
-
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
         }
 
         public XElement ToXml(IToXmlContext ctx)
@@ -518,13 +481,6 @@ namespace Signum.Entities.UserQueries
         {
             get { return value; }
             set { this.value = value; }
-        }
-
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
         }
 
         public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)

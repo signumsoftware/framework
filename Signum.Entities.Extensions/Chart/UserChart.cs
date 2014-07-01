@@ -96,7 +96,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
         MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
         public MList<ChartColumnDN> Columns
         {
@@ -112,7 +112,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
@@ -120,7 +120,7 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
@@ -166,26 +166,8 @@ namespace Signum.Entities.Chart
             ToQueryDN = toQueryDN;
         }
 
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            if (Orders != null)
-                Orders.ForEach((o, i) => o.Index = i);
-
-            if (Columns != null)
-                Columns.ForEach((c, i) => c.Index = i);
-
-            if (Filters != null)
-                Filters.ForEach((f, i) => f.Index = i);
-        }
-
         protected override void PostRetrieving()
         {
-            Orders.Sort(a => a.Index);
-            Columns.Sort(a => a.Index);
-            Filters.Sort(a => a.Index);
-
             chartScript.SyncronizeColumns(this, changeParameters: false);
         }
 

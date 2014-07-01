@@ -50,7 +50,7 @@ namespace Signum.Entities.Chart
             set { Set(ref groupBy, value); }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
         MList<ChartScriptColumnDN> columns = new MList<ChartScriptColumnDN>();
         public MList<ChartScriptColumnDN> Columns
         {
@@ -123,8 +123,6 @@ namespace Signum.Entities.Chart
 
         protected override void PreSaving(ref bool graphModified)
         {
-            Columns.ForEach((c, i) => c.Index = i);
-
             string from = Columns.Where(a => a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
             string to = Columns.Where(a => !a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
 
@@ -135,8 +133,6 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            Columns.Sort(c => c.Index);
-            
             base.PostRetrieving();
         }
 
@@ -315,13 +311,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartScriptColumnDN : EmbeddedEntity       
     {
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
-
         [NotNullable, SqlDbType(Size = 80)]
         string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
