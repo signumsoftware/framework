@@ -327,7 +327,7 @@ namespace Signum.Engine.Scheduler
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
-            using (ApplySession(task))
+            using (OnApplySession(task))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {
