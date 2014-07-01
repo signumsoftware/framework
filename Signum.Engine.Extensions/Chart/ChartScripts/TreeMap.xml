@@ -69,30 +69,28 @@
       .attr('shape-rendering', 'initial')
       .attr("width", function(d) { return Math.max(0, d.dx ); })
       .attr("height", function(d) { return Math.max(0, d.dy); })
-    //  .style("stroke", function(d) { return (d.item.folder.color || color(d.item.folder)); })
-    //  .style("stroke-width", padding)
-    //  .style("fill", "transparent")
-  .style("fill", function(d) { return  d.item.folder.color || color(d.item.folder); });
+      .style("fill", function(d) { return  d.item.folder.color || color(d.item.folder); })    
+      .append('svg:title')
+      .text(function(d) { return  d.item.folder.niceToString();});
   
   node.filter(function(d) {return !!d.item.c1;}).append("rect")
       .attr('shape-rendering', 'initial')
       .attr("width", function(d) { return Math.max(0, d.dx); })
       .attr("height", function(d) { return Math.max(0, d.dy ); })
-      //.style("stroke", function(d) { return (d.item.c0.color || color(d.c0.folder)); })
-      //.style("stroke-width", padding)
-      //.style("fill", "transparent")
       .style("fill", function(d) { return  d.item.c0.color || color(d.item.c0); })
-      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+      .attr('data-click', function(p) { return getClickKeys(p.item, data.columns); })
       .append('svg:title')
-      .text(function(d) { return  d.item.c0.niceToString() + d.item.c1 ? (  ': ' + d.item.c1.niceToString()) : null;});
+      .text(function(d) { return  d.item.c0.niceToString() + ': ' + d.item.c1.niceToString();});
 
   node.filter(function(d) {return !!d.item.c1;}).append("text")
       .attr("text-anchor", "middle")
       .attr('dominant-baseline', 'middle')
       .attr("dx",function(d) { return d.dx/2; })
       .attr("dy",function(d) { return d.dy/2; })
-      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
-      .text(function(d) { return d.item.c0.niceToString().substring(0,d.dy/6); });
+      .attr('data-click', function(p) { return getClickKeys(p.item, data.columns); })
+      .text(function(d) { return d.item.c0.niceToString().substring(0,d.dy/6); })
+      .append('svg:title')
+      .text(function(d) { return  d.item.c0.niceToString() + ': ' + d.item.c1.niceToString();});
   
 }]]></Script>
 </ChartScript>
