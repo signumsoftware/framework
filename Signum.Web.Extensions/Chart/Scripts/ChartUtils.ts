@@ -261,6 +261,50 @@ module ChartUtils {
                 .text(function (d) { return d; });
         }
     }
+
+
+    export function toTree<T>(elements: T[], getKey : (elem: T)=> string,  getParent: (elem: T) => T): Node<T>[]{
+
+        var root = { item: null, children: [] }; 
+
+        var dic: { [key: string]: Node<T> } = {}; 
+
+        function getOrCreateNode(elem: T) {
+
+            var key = getKey(elem);
+
+            if (dic[key]) 
+                return dic[key];
+
+            var node = { item: elem, children: [] }; 
+
+            var parent = getParent(elem);
+
+            if (parent) {
+                var parentNode = getOrCreateNode(parent);
+
+                parentNode.children.push(node);
+            } else {
+                root.children.push(node);
+            }
+
+            dic[key] = node;
+
+            return node;
+        }
+
+        elements.forEach(getOrCreateNode);
+
+        return root.children;
+    }
+
+
+    export interface Node<T> {
+        item: T;
+        children: Node<T>[]; 
+    }
+
+
 }
 
 module D3 {
