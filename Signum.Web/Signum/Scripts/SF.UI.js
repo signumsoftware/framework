@@ -271,40 +271,51 @@ var SF;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
 
-    function onVisible(element, callbackVisible) {
+    function onVisible(element) {
         if (element.length == 0)
             throw Error("element is empty");
 
         if (element.closest("[id$=_sfEntity]").length) {
-            return;
+            return Promise.reject("In sfEntity");
         }
 
-        var pane = element.closest(".tab-pane");
-        if (pane.length) {
+        var modal = element.closest(".modal");
+
+        var onModalVisible = modal.length == 0 ? Promise.resolve(element) : onEventOnce(modal, "shown.bs.modal");
+
+        return onModalVisible.then(function () {
+            var pane = element.closest(".tab-pane");
+            if (!pane.length)
+                return element;
+
             var id = pane[0].id;
 
-            if (pane.hasClass("active") || !id) {
-                callbackVisible(element);
-                return;
-            }
+            if (pane.hasClass("active") || !id)
+                return element;
 
             var tab = pane.parent().parent().find("a[data-toggle=tab][href=#" + id + "]");
 
-            if (!tab.length) {
-                callbackVisible(element);
-                return;
-            }
+            if (!tab.length)
+                return element;
 
-            tab.on("shown.bs.tab", function (e) {
-                if (callbackVisible)
-                    callbackVisible(element);
-                callbackVisible = null;
-            });
-        } else {
-            callbackVisible(element);
-        }
+            return onEventOnce(tab, "shown.bs.tab");
+        });
     }
     SF.onVisible = onVisible;
+
+    function onEventOnce(element, eventName) {
+        return new Promise(function (resolve) {
+            var onEvent;
+
+            onEvent = function () {
+                element.off(eventName, onEvent);
+                resolve(element);
+            };
+
+            element.on(eventName, onEvent);
+        });
+    }
+    SF.onEventOnce = onEventOnce;
 
     function onHidden(element, callbackHidden) {
         element.closest(".modal").on("hide.bs.modal", function () {
