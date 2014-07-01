@@ -271,7 +271,7 @@ namespace Signum.Entities.Chart
             return Columns.ZipOrDefault(chartBase.Columns, (s, c) =>
             {
                 if (s == null)
-                    return false;
+                    return c.Token == null;
 
                 if (c == null || c.Token == null)
                     return s.IsOptional;

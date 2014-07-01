@@ -322,12 +322,14 @@ export class ChartRequest {
             var nameParts = name.split('_');
             if (nameParts.length == 3 && nameParts[0] == "Columns") {
                 var column = data.columns["c" + nameParts[1]];
-                switch (nameParts[2]) {
-                    case "DisplayName": column.title = $element.val(); break;
-                    case "Parameter1": column.parameter1 = $element.val(); break;
-                    case "Parameter2": column.parameter2 = $element.val(); break;
-                    case "Parameter3": column.parameter3 = $element.val(); break;
-                    default: break;
+                if (column) { //fast change
+                    switch (nameParts[2]) {
+                        case "DisplayName": column.title = $element.val(); break;
+                        case "Parameter1": column.parameter1 = $element.val(); break;
+                        case "Parameter2": column.parameter2 = $element.val(); break;
+                        case "Parameter3": column.parameter3 = $element.val(); break;
+                        default: break;
+                    }
                 }
             }
         });
