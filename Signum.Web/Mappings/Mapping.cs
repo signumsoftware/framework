@@ -521,6 +521,11 @@ namespace Signum.Web
         {
             get { return null; }
         }
+
+        public override string ToString()
+        {
+            return this.PropertyValidator.PropertyInfo.PropertyName();
+        }
     }
 
     class MixinPropertyMapping<T, M, P> : IPropertyMapping<T, P>
@@ -557,6 +562,11 @@ namespace Signum.Web
         public Type MixinType
         {
             get { return typeof(M); }
+        }
+
+        public override string ToString()
+        {
+            return "[" + typeof(M).TypeName() + "] " + this.PropertyValidator.PropertyInfo.PropertyName();
         }
     }
 
