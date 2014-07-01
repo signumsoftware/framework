@@ -65,7 +65,7 @@ namespace Signum.Engine.Authorization
             if (AvoidAutomaticUpgradeCollection == null)
                 return operation;
 
-            AvoidAutomaticUpgradeCollection.Add(operation.Key);
+            AvoidAutomaticUpgradeCollection.Add(operation.OperationSymbol);
 
             return operation;
         }
