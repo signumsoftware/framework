@@ -31,14 +31,6 @@ namespace Signum.Windows.Dashboard
             set { DataContext = value; }
         }
 
-        public static readonly DependencyProperty CurrentEntityProperty =
-         DependencyProperty.Register("CurrentEntity", typeof(IdentifiableEntity), typeof(DashboardWindow), new PropertyMetadata(null));
-        public IdentifiableEntity CurrentEntity
-        {
-            get { return (IdentifiableEntity)GetValue(CurrentEntityProperty); }
-            set { SetValue(CurrentEntityProperty, value); }
-        }
-
         public DashboardWindow()
         {   
             DashboardPermission.ViewDashboard.Authorize();

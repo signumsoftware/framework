@@ -479,14 +479,14 @@ namespace Signum.Entities.UserAssets
         {
             if (value.HasText() && value.StartsWith(CurrentEntityKey))
             {
-                string after = value.Substring(CurrentEntityKey.Length);
+                string after = value.Substring(CurrentEntityKey.Length).Trim();
 
                 string[] parts = after.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
                 result = currentEntityVariable.Value;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0} can not be evaluated without a CurrentEntityConverter.SerCurrentEntity context".Formato(value));
+                    return null;
 
                 foreach (var part in parts)
                 {

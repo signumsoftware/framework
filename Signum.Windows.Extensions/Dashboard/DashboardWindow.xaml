@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
         xmlns:swcp="clr-namespace:Signum.Windows.Dashboard"
+        xmlns:swua="clr-namespace:Signum.Windows.UserAssets"
         SizeToContent="WidthAndHeight"
 	    ResizeMode="CanResizeWithGrip" 
 	    WindowStartupLocation="CenterScreen" 
@@ -24,8 +25,8 @@
                     </StackPanel>
                 </Border>
             </Border>
-            <m:EntityTitle x:Name="entityTile" DockPanel.Dock="Top" DataContext="{Binding CurrentEntity, ElementName=me}" 
-                           Visibility="{Binding CurrentEntity, ElementName=me, Converter={x:Static m:Converters.NullToVisibility}}" />
+            <m:EntityTitle x:Name="entityTile" DockPanel.Dock="Top" DataContext="{Binding Path=(swua:UserAssetsClient.CurrentEntity), ElementName=me}" 
+                           Visibility="{Binding Path=(swua:UserAssetsClient.CurrentEntity), ElementName=me, Converter={x:Static m:Converters.NullToVisibility}}" />
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
                 <m:DataBorder>
                     <swcp:DashboardView/>

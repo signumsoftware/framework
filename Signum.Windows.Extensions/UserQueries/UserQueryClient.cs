@@ -39,11 +39,14 @@ namespace Signum.Windows.UserQueries
         {
             UserQueryPermission.ViewUserQuery.Authorize();
 
+            var currentEntity = UserAssetsClient.GetCurrentEntity(s);
+
             var csc = s as CountSearchControl;
             if (csc != null)
             {
-                csc.QueryName = QueryClient.queryNames[uc.Query.Key];
-                UserQueryClient.ToCountSearchControl(uc, csc);
+                csc.QueryName = QueryClient.GetQueryName(uc.Query.Key);
+                using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+                    UserQueryClient.ToCountSearchControl(uc, csc);
                 csc.Search();
                 return;
             }
@@ -51,7 +54,8 @@ namespace Signum.Windows.UserQueries
             var sc = s as SearchControl;
             if (sc != null && sc.ShowHeader == false)
             {
-                sc.QueryName = QueryClient.queryNames[uc.Query.Key];
+                sc.QueryName = QueryClient.GetQueryName(uc.Query.Key);
+                using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
                 UserQueryClient.ToSearchControl(uc, sc);
                 sc.Search();
                 return;

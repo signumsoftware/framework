@@ -20,7 +20,7 @@ namespace Signum.Windows.UserAssets
     public static class UserAssetsClient
     {
         public static readonly DependencyProperty CurrentEntityProperty =
-            DependencyProperty.RegisterAttached("CurrentEntity", typeof(IdentifiableEntity), typeof(UserAssetsClient), new PropertyMetadata(null));
+            DependencyProperty.RegisterAttached("CurrentEntity", typeof(IdentifiableEntity), typeof(UserAssetsClient), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         public static IdentifiableEntity GetCurrentEntity(DependencyObject obj)
         {
             return (IdentifiableEntity)obj.GetValue(CurrentEntityProperty);

@@ -128,7 +128,7 @@ namespace Signum.Windows.Dashboard
 
                 if (cp.EntityType != null)
                 {
-                    win.CurrentEntity = currentEntity;
+                    UserAssetsClient.SetCurrentEntity(win, currentEntity);
                 }
 
                 win.DataContext = controlPanel.Retrieve();
