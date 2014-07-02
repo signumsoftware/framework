@@ -17,6 +17,8 @@ namespace Signum.Web.UserAssets
     {
         public static string ViewPrefix = "~/UserAssets/Views/{0}.cshtml";
 
+        public static JsModule Module = new JsModule("UserAssets"); 
+
         internal static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))

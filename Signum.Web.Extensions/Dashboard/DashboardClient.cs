@@ -51,8 +51,6 @@ namespace Signum.Web.Dashboard
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserQueriesClient.Start();
-
                 Navigator.RegisterArea(typeof(DashboardClient));
 
                 UserAssetsClient.Start();

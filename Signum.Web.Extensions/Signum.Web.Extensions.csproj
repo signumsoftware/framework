@@ -1355,6 +1355,7 @@
     <Content Include="Translation\Content\Translation.css" />
     <TypeScriptCompile Include="Translation\Scripts\Translation.ts" />
     <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
+    <TypeScriptCompile Include="UserAssets\Scripts\UserAssets.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Dashboard\Views\Web.config" />

@@ -18,15 +18,6 @@ export function openChart(prefix: string, url: string) {
         SF.submit(url, sc.requestDataForSearch(Finder.RequestType.FindOptions)));
 }
 
-export function attachShowCurrentEntity(el: Lines.EntityLine) {
-    var showOnEntity = function () {
-        el.element.closest(".form-group").next("p.messageEntity").toggle( !!el.getRuntimeInfo());
-    };
-
-    showOnEntity();
-
-    el.entityChanged = showOnEntity;
-}
 
 export function deleteUserChart(options: Operations.EntityOperationOptions, url: string) {
     options.avoidReturnRedirect = true;

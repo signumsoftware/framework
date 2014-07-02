@@ -40,7 +40,18 @@ namespace Signum.Entities.UserQueries
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value); }
+            set
+            {
+                if (Set(ref entityType, value) && value == null)
+                    Disposition = null;
+            }
+        }
+
+        UserAssetDisposition? disposition;
+        public UserAssetDisposition? Disposition
+        {
+            get { return disposition; }
+            set { Set(ref disposition, value); }
         }
 
         Lite<IdentifiableEntity> owner;
@@ -143,6 +154,15 @@ namespace Signum.Entities.UserQueries
 
             if (pi.Is(() => Filters) && WithoutFilters && Filters.Any())
                 return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
+
+            if (pi.Is(() => Disposition))
+            {
+                if (Disposition == null && EntityType != null)
+                    return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
+
+                if (Disposition != null && EntityType == null)
+                    return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
+            }
 
             return base.PropertyValidation(pi);
         }
@@ -427,6 +447,8 @@ namespace Signum.Entities.UserQueries
         {
             return "{0} {1} {2}".Formato(token, operation, ValueString);
         }
+
+      
     }
 
     public static class UserQueryUtils

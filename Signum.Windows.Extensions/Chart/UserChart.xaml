@@ -13,6 +13,7 @@
         <m:EntityLine m:Common.Route="Owner"  />
         <m:EntityLine m:Common.Route="EntityType" Autocompleting="EntityType_AutoCompleting" Find="False" />
         <TextBox Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}" IsReadOnly="True" x:Name="tbCurrentEntity" BorderThickness="0" Background="{x:Null}"/>
+        <m:ValueLine m:Common.Route="Disposition" Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}"/>
         <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" ButtonsOrientation="Horizontal" Move="True" MinHeight="100">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>

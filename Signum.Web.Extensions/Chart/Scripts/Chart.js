@@ -11,17 +11,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     exports.openChart = openChart;
 
-    function attachShowCurrentEntity(el) {
-        var showOnEntity = function () {
-            el.element.closest(".form-group").next("p.messageEntity").toggle(!!el.getRuntimeInfo());
-        };
-
-        showOnEntity();
-
-        el.entityChanged = showOnEntity;
-    }
-    exports.attachShowCurrentEntity = attachShowCurrentEntity;
-
     function deleteUserChart(options, url) {
         options.avoidReturnRedirect = true;
         if (!Operations.confirmIfNecessary(options))

@@ -29,7 +29,18 @@ namespace Signum.Entities.Dashboard
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set { Set(ref entityType, value); }
+            set
+            {
+                if (Set(ref entityType, value) && value == null)
+                    Disposition = null;
+            }
+        }
+
+        UserAssetDisposition disposition;
+        public UserAssetDisposition Disposition
+        {
+            get { return disposition; }
+            set { Set(ref disposition, value); }
         }
 
         Lite<IdentifiableEntity> owner;
@@ -195,7 +206,20 @@ namespace Signum.Entities.Dashboard
             Owner = element.Attribute("Owner").Try(a => Lite.Parse<IdentifiableEntity>(a.Value));
             HomePagePriority = element.Attribute("HomePagePriority").Try(a => int.Parse(a.Value));
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        }
 
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Disposition))
+            {
+                if (Disposition == null && EntityType != null)
+                    return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
+
+                if (Disposition != null && EntityType == null)
+                    return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 

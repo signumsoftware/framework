@@ -1,6 +1,7 @@
 ﻿@using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
 @using System.Reflection
+@using Signum.Web.UserAssets
 
 @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
 
@@ -24,12 +25,15 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 @Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false)
             </div>
-            <div class="col-sm-6">
-                @Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); })
+            <div class="col-sm-4">
+                @Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); el.AttachFunction = UserAssetsClient.Module["attachShowCurrentEntity"](el); })
             </div>
+             <div class="col-sm-4">
+                 @Html.ValueLine(sc, f => f.Disposition)
+             </div>
         </div>
     </div>
     

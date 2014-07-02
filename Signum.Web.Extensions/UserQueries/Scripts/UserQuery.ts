@@ -25,16 +25,6 @@ once("SF-UserQuery", () => {
     });
 });
 
-export function attachShowCurrentEntity(el: Lines.EntityLine) {
-    var showOnEntity = function () {
-        el.element.closest(".form-group").next("p.messageEntity").toggle(!!el.getRuntimeInfo());
-    };
-
-    showOnEntity();
-
-    el.entityChanged = showOnEntity;
-}
-
 export function deleteUserQuery(options: Operations.EntityOperationOptions, urlRedirect: string) {
 
     options.avoidReturnRedirect = true;

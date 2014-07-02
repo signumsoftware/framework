@@ -10,7 +10,6 @@ namespace Signum.Web.UserAssets
 {
     public static class UserAssetsHelper
     {
-
         public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryTokenBuilderSettings settings)
         {
             if (ctx.Value.Try(qt => qt.ParseException) != null)
