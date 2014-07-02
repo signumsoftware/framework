@@ -105,15 +105,15 @@ namespace Signum.Engine.UserQueries
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
-                uq => uq.Owner.RefersTo(UserDN.Current));
+            TypeConditionLogic.RegisterCompile<UserQueryDN>(typeCondition,
+                uq => uq.Owner.RefersTo(UserDN.Current)); 
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<UserQueryDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 

@@ -118,7 +118,7 @@ namespace Signum.Engine.Chart
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserChartDN>(typeCondition, uq => uq.Owner.RefersTo(UserDN.Current));
+            TypeConditionLogic.RegisterCompile<UserChartDN>(typeCondition, uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
 
@@ -126,7 +126,7 @@ namespace Signum.Engine.Chart
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserChartDN>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+            TypeConditionLogic.RegisterCompile<UserChartDN>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)

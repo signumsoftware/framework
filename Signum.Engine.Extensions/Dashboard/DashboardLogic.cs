@@ -172,7 +172,7 @@ namespace Signum.Engine.Dashboard
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<DashboardDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
@@ -189,7 +189,7 @@ namespace Signum.Engine.Dashboard
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<DashboardDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,

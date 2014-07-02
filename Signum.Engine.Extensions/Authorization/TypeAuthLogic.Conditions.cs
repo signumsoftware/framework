@@ -231,8 +231,28 @@ namespace Signum.Engine.Authorization
             if (max < allowed)
                 return false;
 
+            var inMemory = IsAllowedInMemory<T>(entity, tac, allowed, inUserInterface);
+            if (inMemory.HasValue)
+                return inMemory.Value;
+         
             using (DisableQueryFilter())
                 return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
+        }
+
+        private static bool? IsAllowedInMemory<T>(T entity, TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : IdentifiableEntity
+        {
+            foreach (var cond in tac.Conditions.Reverse())
+            {
+                var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition);
+
+                if (func == null)
+                    return null;
+
+                if (func(entity))
+                    return cond.Allowed.Get(inUserInterface) >= allowed;
+            }
+
+            return tac.Fallback.Get(inUserInterface) >= allowed;
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -419,7 +439,7 @@ namespace Signum.Engine.Authorization
 
             var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
             {
-                var lambda = TypeConditionLogic.GetExpression(type, tacRule.TypeCondition);
+                var lambda = TypeConditionLogic.GetCondition(type, tacRule.TypeCondition);
 
                 var exp = (Expression)Expression.Invoke(lambda, entity);
 
@@ -447,7 +467,7 @@ namespace Signum.Engine.Authorization
 
             var list = (from line in tac.Conditions
                         select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(TypeConditionSymbol)),
-                        Expression.Invoke(TypeConditionLogic.GetExpression(type, line.TypeCondition), entity),
+                        Expression.Invoke(TypeConditionLogic.GetCondition(type, line.TypeCondition), entity),
                         Expression.Constant(line.Allowed))).ToArray();
 
             Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)), list);
