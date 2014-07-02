@@ -29,9 +29,9 @@ namespace Signum.Engine.Dashboard
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserQueryLogic.Start(sb, dqm);
-
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
+
+                UserAssetLogLogic.Register<DashboardDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardDN));
 
@@ -202,6 +202,8 @@ namespace Signum.Engine.Dashboard
             var result = Dashboards.Value.GetOrThrow(dashboard);
 
             result.AssertAllowed(TypeAllowedBasic.Read, true);
+
+            result.LogUserAsset();
 
             return result;
         }

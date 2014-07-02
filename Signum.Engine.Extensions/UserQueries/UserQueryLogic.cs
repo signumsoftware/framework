@@ -33,6 +33,8 @@ namespace Signum.Engine.UserQueries
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
+                UserAssetLogLogic.Register<UserQueryDN>(sb, dqm);
+
                 UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
@@ -123,6 +125,8 @@ namespace Signum.Engine.UserQueries
 
             result.AssertAllowed(TypeAllowedBasic.Read, true);
 
+            result.LogUserAsset();
+
             return result;
         }
 
@@ -142,7 +146,6 @@ namespace Signum.Engine.UserQueries
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
-    
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {

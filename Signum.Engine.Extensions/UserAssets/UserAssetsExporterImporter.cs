@@ -263,6 +263,4 @@ namespace Signum.Engine.UserAssets
             return new T { Guid = guid };
         }
     }
-
- 
 }
