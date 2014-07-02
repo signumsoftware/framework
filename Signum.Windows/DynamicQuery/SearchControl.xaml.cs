@@ -383,8 +383,12 @@ namespace Signum.Windows
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
-                ColumnOptions.Add(new ColumnOption(FilterColumn));
-                ColumnOptionsMode = ColumnOptionsMode.Remove;
+
+                if (QueryUtils.IsColumnToken(FilterColumn))
+                {
+                    ColumnOptions.Add(new ColumnOption(FilterColumn));
+                    ColumnOptionsMode = ColumnOptionsMode.Remove;
+                }
                 if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
                     SearchOnLoad = true;
             }
