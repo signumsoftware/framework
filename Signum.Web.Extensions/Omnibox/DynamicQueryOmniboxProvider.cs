@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Omnibox
 {

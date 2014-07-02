@@ -14,6 +14,7 @@ using Signum.Web.Controllers;
 using Signum.Engine.Dashboard;
 using Signum.Engine.Authorization;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserAssets;
 
 namespace Signum.Web.Dashboard
 {

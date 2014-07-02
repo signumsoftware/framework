@@ -16,7 +16,7 @@ namespace Signum.Web.Chart
     {
         public override OmniboxResultGenerator<UserChartOmniboxResult> CreateGenerator()
         {
-            return new UserChartOmniboxResultGenerator(ChartLogic.Autocomplete);
+            return new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(UserChartOmniboxResult result)

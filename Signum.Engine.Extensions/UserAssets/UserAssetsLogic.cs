@@ -13,15 +13,16 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Reflection;
-using Signum.Entities.UserQueries;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
+using Signum.Entities.UserAssets;
+using Signum.Entities.UserQueries;
 
-namespace Signum.Engine.UserQueries
+namespace Signum.Engine.UserAssets
 {
     public static class UserAssetsExporter
     {

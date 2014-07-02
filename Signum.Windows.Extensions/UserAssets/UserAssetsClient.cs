@@ -8,16 +8,28 @@ using System.Windows;
 using Microsoft.Win32;
 using Signum.Entities;
 using Signum.Entities.Dashboard;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Windows.Authorization;
 using Signum.Windows.Omnibox;
 
-namespace Signum.Windows.UserQueries
+namespace Signum.Windows.UserAssets
 {
     public static class UserAssetsClient
     {
+        public static readonly DependencyProperty CurrentEntityProperty =
+            DependencyProperty.RegisterAttached("CurrentEntity", typeof(IdentifiableEntity), typeof(UserAssetsClient), new PropertyMetadata(null));
+        public static IdentifiableEntity GetCurrentEntity(DependencyObject obj)
+        {
+            return (IdentifiableEntity)obj.GetValue(CurrentEntityProperty);
+        }
+        public static void SetCurrentEntity(DependencyObject obj, IdentifiableEntity value)
+        {
+            obj.SetValue(CurrentEntityProperty, value);
+        }
+
         internal static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))

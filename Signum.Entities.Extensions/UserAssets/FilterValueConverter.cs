@@ -13,9 +13,8 @@ using Signum.Services;
 using Signum.Entities.Authorization;
 using System.Collections;
 using System.Reflection;
-using Signum.Entities.Chart;
 
-namespace Signum.Entities.UserQueries
+namespace Signum.Entities.UserAssets
 {
     public static class FilterValueConverter
     {
@@ -450,22 +449,16 @@ namespace Signum.Entities.UserQueries
 
         static readonly ThreadVariable<IdentifiableEntity> currentEntityVariable = Statics.ThreadVariable<IdentifiableEntity>("currentFilterValueEntity");
 
-        public static void SetFilterValues(IEnumerable<QueryFilterDN> filters, IdentifiableEntity currentEntity)
+        public static IDisposable SetCurrentEntity(IdentifiableEntity currentEntity)
         {
             if (currentEntity == null)
-                throw new InvalidOperationException("currentEntity is null"); 
+                throw new InvalidOperationException("currentEntity is null");
 
-            try
-            {
-                currentEntityVariable.Value = currentEntity;
+            var old = currentEntityVariable.Value;
 
-                foreach (var f in filters)
-                    f.SetValue();
-            }
-            finally
-            {
-                currentEntityVariable.Value = null;
-            }
+            currentEntityVariable.Value = currentEntity;
+
+            return new Disposable(() => currentEntityVariable.Value = old);
         }
 
         public string TryToString(object value, Type type, out string result)
@@ -493,7 +486,7 @@ namespace Signum.Entities.UserQueries
                 result = currentEntityVariable.Value;
 
                 if (result == null)
-                    return null;
+                    throw new InvalidOperationException("{0} can not be evaluated without a CurrentEntityConverter.SerCurrentEntity context".Formato(value));
 
                 foreach (var part in parts)
                 {

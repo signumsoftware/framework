@@ -8,7 +8,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 
-namespace Signum.Entities.UserQueries
+namespace Signum.Entities.UserAssets
 {
     [Serializable]
     public class UserAssetPreviewModel : ModelEntity

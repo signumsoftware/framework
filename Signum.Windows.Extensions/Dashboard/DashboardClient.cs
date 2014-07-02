@@ -17,7 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
-using Signum.Windows.UserQueries;
+using Signum.Windows.UserAssets;
 
 namespace Signum.Windows.Dashboard
 {
@@ -128,10 +128,6 @@ namespace Signum.Windows.Dashboard
 
                 if (cp.EntityType != null)
                 {
-                    var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
-
-                    CurrentEntityConverter.SetFilterValues(filters, currentEntity);
-
                     win.CurrentEntity = currentEntity;
                 }
 

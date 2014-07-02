@@ -11,7 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.Chart;
 using Signum.Utilities.Reflection;
-using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
 

@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.UserQueries.Views
+namespace Signum.Web.Extensions.UserAssets.Views
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Signum.Web.Extensions.UserQueries.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/UserQueries/Views/_ViewStart.cshtml")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/UserAssets/Views/_ViewStart.cshtml")]
     public partial class ViewStart : System.Web.Mvc.ViewStartPage
     {
         public ViewStart()
@@ -40,7 +40,7 @@ namespace Signum.Web.Extensions.UserQueries.Views
         public override void Execute()
         {
             
-            #line 1 "..\..\UserQueries\Views\_ViewStart.cshtml"
+            #line 1 "..\..\UserAssets\Views\_ViewStart.cshtml"
   
     Layout = "~/Views/Shared/_Layout.cshtml";
 

@@ -13,6 +13,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Signum.Entities.Translation;
 using System.Reflection;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Mailing
 {

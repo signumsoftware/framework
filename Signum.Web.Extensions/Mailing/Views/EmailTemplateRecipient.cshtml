@@ -1,6 +1,7 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.DynamicQuery
-@using Signum.Web.UserQueries
+@using Signum.Web.UserAssets
+
 @using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
 {
     using (var sc = tc.SubContext())

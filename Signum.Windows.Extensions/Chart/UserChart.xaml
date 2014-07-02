@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
-    xmlns:uq="clr-namespace:Signum.Windows.UserQueries"
+    xmlns:ua="clr-namespace:Signum.Windows.UserAssets"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="{x:Type dn:UserChartDN}">
     <StackPanel>
@@ -22,7 +22,7 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" />
+                        <ua:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
                                   ItemsSource="{Binding Token.TryToken, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
@@ -48,7 +48,7 @@
                             <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <uq:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
+                        <ua:QueryTokenDNBuilder m:Common.Route="Token" SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
                         <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
                     </Grid>
                 </DataTemplate>

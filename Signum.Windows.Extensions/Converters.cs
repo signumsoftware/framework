@@ -13,6 +13,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Extensions
 {

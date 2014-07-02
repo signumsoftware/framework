@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="ChartUtils.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
     ChartUtils;
     colorbrewer;
 
@@ -13,7 +13,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
-            el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
+            el.element.closest(".form-group").next("p.messageEntity").toggle(!!el.getRuntimeInfo());
         };
 
         showOnEntity();
@@ -278,23 +278,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 var nameParts = name.split('_');
                 if (nameParts.length == 3 && nameParts[0] == "Columns") {
                     var column = data.columns["c" + nameParts[1]];
-                    if (column) {
-                        switch (nameParts[2]) {
-                            case "DisplayName":
-                                column.title = $element.val();
-                                break;
-                            case "Parameter1":
-                                column.parameter1 = $element.val();
-                                break;
-                            case "Parameter2":
-                                column.parameter2 = $element.val();
-                                break;
-                            case "Parameter3":
-                                column.parameter3 = $element.val();
-                                break;
-                            default:
-                                break;
-                        }
+
+                    if (!column)
+                        data.columns["c" + nameParts[1]] = column = {};
+
+                    switch (nameParts[2]) {
+                        case "DisplayName":
+                            column.title = $element.val();
+                            break;
+                        case "Parameter1":
+                            column.parameter1 = $element.val();
+                            break;
+                        case "Parameter2":
+                            column.parameter2 = $element.val();
+                            break;
+                        case "Parameter3":
+                            column.parameter3 = $element.val();
+                            break;
+                        default:
+                            break;
                     }
                 }
             });

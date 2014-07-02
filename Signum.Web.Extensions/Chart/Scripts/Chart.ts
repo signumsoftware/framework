@@ -20,7 +20,7 @@ export function openChart(prefix: string, url: string) {
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
     var showOnEntity = function () {
-        el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
+        el.element.closest(".form-group").next("p.messageEntity").toggle( !!el.getRuntimeInfo());
     };
 
     showOnEntity();
@@ -322,14 +322,16 @@ export class ChartRequest {
             var nameParts = name.split('_');
             if (nameParts.length == 3 && nameParts[0] == "Columns") {
                 var column = data.columns["c" + nameParts[1]];
-                if (column) { //fast change
-                    switch (nameParts[2]) {
-                        case "DisplayName": column.title = $element.val(); break;
-                        case "Parameter1": column.parameter1 = $element.val(); break;
-                        case "Parameter2": column.parameter2 = $element.val(); break;
-                        case "Parameter3": column.parameter3 = $element.val(); break;
-                        default: break;
-                    }
+
+                if (!column)
+                    data.columns["c" + nameParts[1]] = column = {}; 
+
+                switch (nameParts[2]) {
+                    case "DisplayName": column.title = $element.val(); break;
+                    case "Parameter1": column.parameter1 = $element.val(); break;
+                    case "Parameter2": column.parameter2 = $element.val(); break;
+                    case "Parameter3": column.parameter3 = $element.val(); break;
+                    default: break;
                 }
             }
         });

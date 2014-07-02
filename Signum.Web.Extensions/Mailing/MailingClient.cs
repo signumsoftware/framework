@@ -24,6 +24,8 @@ using Signum.Entities.UserQueries;
 using Signum.Web.Operations;
 using Signum.Web.UserQueries;
 using System.Text.RegularExpressions;
+using Signum.Entities.UserAssets;
+using Signum.Web.UserAssets;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -91,7 +93,7 @@ namespace Signum.Web.Mailing
                         MappingDefault = new EntityMapping<EmailTemplateContactDN>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
-                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+                                string tokenStr = UserAssetsHelper.GetTokenString(ctx);
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             }),
                     },
@@ -102,7 +104,7 @@ namespace Signum.Web.Mailing
                         MappingDefault = new EntityMapping<EmailTemplateRecipientDN>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
-                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+                                string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             })

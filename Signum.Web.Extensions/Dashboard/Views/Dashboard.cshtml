@@ -1,7 +1,7 @@
 ﻿@using System.Configuration
 @using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
-
+@using Signum.Entities.UserAssets
 @section head
 {
     @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
@@ -10,6 +10,9 @@
 @using (Html.BeginForm("DoPostBack", "Signum", "POST"))
 {
     DashboardDN cp = (DashboardDN)Model;
+
+    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+    
     <h2>
         @if (Navigator.IsNavigable(cp, null, isSearch: true))
         { 
@@ -22,8 +25,8 @@
     </h2>
     
     
-        if (!cp.Parts.IsNullOrEmpty())
-        {
+    using(cp.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+    {
             foreach (var gr in cp.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
             {
                 var lastEnd = 0;

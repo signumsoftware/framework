@@ -49,7 +49,7 @@ namespace Signum.Web.Extensions.UserQueries.Views
     using Signum.Web;
     
     #line 3 "..\..\UserQueries\Views\QueryColumn.cshtml"
-    using Signum.Web.UserQueries;
+    using Signum.Web.UserAssets;
     
     #line default
     #line hidden

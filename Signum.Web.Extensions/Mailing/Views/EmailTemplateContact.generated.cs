@@ -49,7 +49,7 @@ namespace Signum.Web.Extensions.Mailing.Views
     #line hidden
     
     #line 3 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Web.UserQueries;
+    using Signum.Web.UserAssets;
     
     #line default
     #line hidden

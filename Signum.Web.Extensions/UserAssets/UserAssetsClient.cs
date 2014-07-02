@@ -5,15 +5,18 @@ using System.Reflection;
 using System.Web;
 using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Web.Omnibox;
-using Signum.Web.UserQueries;
+using Signum.Web.UserAssets;
+using Signum.Web.Extensions.UserAssets;
 
-namespace Signum.Web.Extensions.UserQueries
+namespace Signum.Web.UserAssets
 {
     public class UserAssetsClient
     {
+        public static string ViewPrefix = "~/UserAssets/Views/{0}.cshtml";
+
         internal static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))

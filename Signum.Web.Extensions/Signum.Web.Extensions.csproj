@@ -875,17 +875,23 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="UserQueries\Controller\UserAssetsController.cs" />
-    <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
-    <Compile Include="UserQueries\UserAssetsClient.cs" />
-    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
-    <Compile Include="UserQueries\UserQueriesClient.cs" />
-    <Compile Include="UserQueries\UserQueriesHelper.cs" />
-    <Compile Include="UserQueries\Views\ImportUserAsset.generated.cs">
+    <Compile Include="UserAssets\Controller\UserAssetsController.cs" />
+    <Compile Include="UserAssets\UserAssetsHelper.cs" />
+    <Compile Include="UserAssets\Views\ImportUserAsset.generated.cs">
       <DependentUpon>ImportUserAsset.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="UserAssets\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
+    <Compile Include="UserAssets\UserAssetsClient.cs" />
+    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
+    <Compile Include="UserQueries\UserQueriesClient.cs" />
+    <Compile Include="UserQueries\UserQueriesHelper.cs" />
     <Compile Include="UserQueries\Views\QueryColumn.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1543,10 +1549,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Sync.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="UserQueries\Views\ImportUserAsset.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Translation\Views\IndexInstance.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>IndexInstance.generated.cs</LastGenOutput>
@@ -1576,6 +1578,15 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="SMS\Views\Web.config" />
+    <Content Include="UserAssets\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="UserAssets\Views\Web.config" />
+    <Content Include="UserAssets\Views\ImportUserAsset.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
+    </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>

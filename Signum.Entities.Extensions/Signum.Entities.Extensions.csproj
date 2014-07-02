@@ -149,8 +149,9 @@
     <Compile Include="Notes\Note.cs" />
     <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
-    <Compile Include="UserQueries\IUserAssetsServer.cs" />
-    <Compile Include="UserQueries\UserAssets.cs" />
+    <Compile Include="UserAssets\IUserAssetsServer.cs" />
+    <Compile Include="UserAssets\QueryToken.cs" />
+    <Compile Include="UserAssets\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\EntityOmniboxResultGenerator.cs" />
@@ -164,7 +165,7 @@
     <Compile Include="UserQueries\IUserQueryServer.cs" />
     <Compile Include="Excel\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserQueries\FilterValueConverter.cs" />
+    <Compile Include="UserAssets\FilterValueConverter.cs" />
     <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryDN.cs" />
     <Compile Include="Scheduler\HolidayCalendarDN.cs" />

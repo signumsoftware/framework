@@ -39,6 +39,12 @@ namespace Signum.Web.Extensions.Dashboard.Views
     
     #line default
     #line hidden
+    
+    #line 4 "..\..\Dashboard\Views\Dashboard.cshtml"
+    using Signum.Entities.UserAssets;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
@@ -57,8 +63,6 @@ namespace Signum.Web.Extensions.Dashboard.Views
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
-
 DefineSection("head", () => {
 
 WriteLiteral("\r\n");
@@ -84,19 +88,22 @@ WriteLiteral("\r\n");
 {
     DashboardDN cp = (DashboardDN)Model;
 
+    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+    
+
             
             #line default
             #line hidden
 WriteLiteral("    <h2>\r\n");
 
             
-            #line 14 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 14 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
          if (Navigator.IsNavigable(cp, null, isSearch: true))
         { 
 
@@ -105,20 +112,20 @@ WriteLiteral("    <h2>\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 376), Tuple.Create("\"", 435)
+WriteAttribute("href", Tuple.Create(" href=\"", 489), Tuple.Create("\"", 548)
             
-            #line 16 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 383), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardDN), cp.Id)
+            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create("", 496), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardDN), cp.Id)
             
             #line default
             #line hidden
-, 383), false)
+, 496), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 16 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
                                                                       Write(cp.DisplayName);
 
             
@@ -127,7 +134,7 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n");
 
             
-            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
         else
         {
@@ -136,14 +143,14 @@ WriteLiteral("</a>\r\n");
             #line default
             #line hidden
             
-            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
        Write(cp.DisplayName);
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
                            
         }
 
@@ -153,11 +160,11 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("    </h2>\r\n");
 
             
-            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 26 "..\..\Dashboard\Views\Dashboard.cshtml"
     
     
-        if (!cp.Parts.IsNullOrEmpty())
-        {
+    using(cp.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+    {
             foreach (var gr in cp.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
             {
                 var lastEnd = 0;
@@ -172,13 +179,13 @@ WriteLiteral(" class=\"row row-control-panel\"");
 WriteLiteral(">\r\n");
 
             
-            #line 31 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 31 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
          foreach (var part in gr.OrderBy(a=>a.StartColumn))
         {
             var offset = part.StartColumn - lastEnd;
@@ -188,23 +195,23 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 922), Tuple.Create("\"", 1019)
-, Tuple.Create(Tuple.Create("", 930), Tuple.Create("part-control-panel", 930), true)
-, Tuple.Create(Tuple.Create(" ", 948), Tuple.Create("col-sm-", 949), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1089), Tuple.Create("\"", 1186)
+, Tuple.Create(Tuple.Create("", 1097), Tuple.Create("part-control-panel", 1097), true)
+, Tuple.Create(Tuple.Create(" ", 1115), Tuple.Create("col-sm-", 1116), true)
             
-            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 956), Tuple.Create<System.Object, System.Int32>(part.Columns
-            
-            #line default
-            #line hidden
-, 956), false)
-            
-            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create(" ", 969), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
+            #line 37 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create("", 1123), Tuple.Create<System.Object, System.Int32>(part.Columns
             
             #line default
             #line hidden
-, 970), false)
+, 1123), false)
+            
+            #line 37 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create(" ", 1136), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
+            
+            #line default
+            #line hidden
+, 1137), false)
 );
 
 WriteLiteral(">\r\n");
@@ -212,7 +219,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 35 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
            Write(Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part));
 
             
@@ -221,7 +228,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n\r\n            </div>\r\n");
 
             
-            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 41 "..\..\Dashboard\Views\Dashboard.cshtml"
             lastEnd = part.StartColumn + part.Columns;
         }
 
@@ -231,7 +238,7 @@ WriteLiteral("\r\n\r\n            </div>\r\n");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 41 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 44 "..\..\Dashboard\Views\Dashboard.cshtml"
             }
         }
 
@@ -249,7 +256,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 " window.location.href = window.location.href;\r\n            }, ");
 
             
-            #line 50 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 53 "..\..\Dashboard\Views\Dashboard.cshtml"
            Write(cp.AutoRefreshPeriod.Value * 1000);
 
             
@@ -258,7 +265,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 WriteLiteral(");\r\n        });\r\n    </script>\r\n");
 
             
-            #line 53 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 56 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
 }
 
