@@ -33,18 +33,31 @@ namespace Signum.Web.Chart
 
             ChartColorLogic.SavePalette(palette);
 
-            return Redirect(Url.Action<ColorChartController>(cc => cc.Colors(typeName)));
+            return Navigator.NormalControl(this, palette);
         }
 
         public ActionResult CreateNewPalette(string typeName)
         {
             Type type = Navigator.ResolveType(typeName);
 
-            ChartColorLogic.CreateNewPalette(type);
+            ChartColorLogic.CreateNewPalette(type, Request["palette"]);
 
-            return Redirect(Url.Action<ColorChartController>(cc => cc.Colors(typeName)));
+            var model = ChartColorLogic.GetPalette(type);
+
+            return Navigator.NormalControl(this, model);
         }
 
         #endregion 
+    
+        public ActionResult DeletePalette(string typeName)
+        {
+            Type type = Navigator.ResolveType(typeName);
+
+            ChartColorLogic.DeletePalette(type);
+
+            var model = ChartColorLogic.GetPalette(type);
+
+            return Navigator.NormalControl(this, model);
+        }
     }
 }

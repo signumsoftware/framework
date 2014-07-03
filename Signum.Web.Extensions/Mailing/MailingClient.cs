@@ -42,7 +42,7 @@ namespace Signum.Web.Mailing
             var queryName = QueryLogic.ToQueryName(((Lite<QueryDN>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, canAggregate: false));
+            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
         public static void Start(bool newsletter, bool pop3Config)
@@ -177,14 +177,12 @@ namespace Signum.Web.Mailing
             }
         }
 
-        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)
         {
-            return new QueryTokenBuilderSettings
+            return new QueryTokenBuilderSettings(qd, options)
             {
-                CanAggregate = false,
                 ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Mailing"),
                 Decorators = MailingDecorators,
-                QueryDescription = qd,
                 RequestExtraJSonData = null,
             };
         }

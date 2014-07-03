@@ -55,7 +55,7 @@ namespace Signum.Engine.Mailing
         {
             return new List<Filter>
             {
-                new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, Entity.ToLite())
+                new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, Entity.ToLite())
             };
         }
     }

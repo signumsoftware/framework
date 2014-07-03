@@ -71,7 +71,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
@@ -79,7 +79,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref filters, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
@@ -94,7 +94,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columnsMode, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryColumnDN> columns = new MList<QueryColumnDN>();
         public MList<QueryColumnDN>  Columns
         {
@@ -123,29 +123,6 @@ namespace Signum.Entities.UserQueries
         {
             get { return guid; }
             set { Set(ref guid, value); }
-        }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            if (Orders != null)
-                Orders.ForEach((o, i) => o.Index = i);
-
-            if (Columns != null)
-                Columns.ForEach((c, i) => c.Index = i);
-
-            if (Filters != null)
-                Filters.ForEach((f, i) => f.Index = i);
-        }
-
-        protected override void PostRetrieving()
-        {
-            base.PostRetrieving();
-
-            Orders.Sort(a => a.Index);
-            Columns.Sort(a => a.Index);
-            Filters.Sort(a => a.Index);
         }
 
         static readonly Expression<Func<UserQueryDN, string>> ToStringExpression = e => e.displayName;
@@ -184,15 +161,15 @@ namespace Signum.Entities.UserQueries
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(this, description, canAggregate: false);
+                    f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(this, description, canAggregate: false);
+                    c.ParseData(this, description, SubTokensOptions.CanElement);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(this, description, canAggregate: false);
+                    o.ParseData(this, description, SubTokensOptions.CanElement);
         }
 
         public void SetFilterValues()
@@ -322,11 +299,11 @@ namespace Signum.Entities.UserQueries
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             try
             {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
+                token = QueryUtils.Parse(tokenString, description, options);
             }
             catch (Exception e)
             {
@@ -373,13 +350,6 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value); }
         }
 
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
-
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Orden",
@@ -393,9 +363,9 @@ namespace Signum.Entities.UserQueries
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -433,13 +403,6 @@ namespace Signum.Entities.UserQueries
             set { Set(ref displayName, value); }
         }
 
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
-
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
@@ -453,9 +416,9 @@ namespace Signum.Entities.UserQueries
             DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
             DisplayName = DisplayName;
         }
 
@@ -520,16 +483,9 @@ namespace Signum.Entities.UserQueries
             set { this.value = value; }
         }
 
-        int index;
-        public int Index
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
-
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
-        {
-            token.ParseData(context, description, canAggregate);
+            token.ParseData(context, description, options);
 
             if (token.TryToken != null)
             {

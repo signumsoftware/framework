@@ -102,9 +102,15 @@ namespace Signum.Entities.Chart
             if (enumValues != null)
                 return enumValues;
 
-            string error = EnumValueList.TryParse(valueDefinition, out enumValues);
-            if (error.HasText())
-                throw new FormatException(error);
+            lock (this)
+            {
+                if (enumValues != null)
+                    return enumValues;
+
+                string error = EnumValueList.TryParse(valueDefinition, out enumValues);
+                if (error.HasText())
+                    throw new FormatException(error);
+            }
 
             return enumValues;
         }
@@ -118,9 +124,16 @@ namespace Signum.Entities.Chart
 
             if (numberInterval != null)
                 return numberInterval;
-            string error = NumberInterval.TryParse(valueDefinition, out numberInterval);
-            if (error.HasText())
-                throw new FormatException(error);
+
+            lock (this)
+            {
+                if (numberInterval != null)
+                    return numberInterval;
+
+                string error = NumberInterval.TryParse(valueDefinition, out numberInterval);
+                if (error.HasText())
+                    throw new FormatException(error);
+            }
 
             return numberInterval;
         }

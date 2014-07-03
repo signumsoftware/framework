@@ -241,5 +241,39 @@ var ChartUtils;
         return Rule;
     })();
     ChartUtils.Rule = Rule;
+
+    function toTree(elements, getKey, getParent) {
+        var root = { item: null, children: [] };
+
+        var dic = {};
+
+        function getOrCreateNode(elem) {
+            var key = getKey(elem);
+
+            if (dic[key])
+                return dic[key];
+
+            var node = { item: elem, children: [] };
+
+            var parent = getParent(elem);
+
+            if (parent) {
+                var parentNode = getOrCreateNode(parent);
+
+                parentNode.children.push(node);
+            } else {
+                root.children.push(node);
+            }
+
+            dic[key] = node;
+
+            return node;
+        }
+
+        elements.forEach(getOrCreateNode);
+
+        return root.children;
+    }
+    ChartUtils.toTree = toTree;
 })(ChartUtils || (ChartUtils = {}));
 //# sourceMappingURL=ChartUtils.js.map

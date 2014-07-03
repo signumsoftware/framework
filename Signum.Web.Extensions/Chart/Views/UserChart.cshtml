@@ -68,14 +68,14 @@
             </div>
         }
     
-        <div id="@uc.Compose("sfChartBuilderContainer")">
+        <div id="@uc.Compose("sfChartBuilderContainer")" class="SF-control-container">
             @Html.Partial(ChartClient.ChartBuilderView, uc.Value)
         </div>
         
         <script type="text/javascript">
             $(function(){
                 require(["@ChartClient.Module"], function(Chart) {
-                    new Chart.ChartBuilder($("#@uc.Compose("sfChartBuilderContainer")"), @MvcHtmlString.Create(uc.Value.ToJS().ToString())).ready();
+                    new Chart.ChartBuilder(@MvcHtmlString.Create(uc.Value.ToChartBuilder(Url, uc.Prefix).ToString()));
                 });
             });
         </script>

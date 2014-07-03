@@ -97,13 +97,6 @@ namespace Signum.Entities.Chart
             get { return parameter3; }
             set { if (Set(ref parameter3, value))NotifyChange(false); }
         }
-
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
       
         [Ignore]
         internal IChartBase parentChart;
@@ -241,10 +234,10 @@ namespace Signum.Entities.Chart
             DisplayName = displayName;
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (token != null)
-                token.ParseData(context, description, canAggregate);
+                token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
         internal Column CreateColumn()

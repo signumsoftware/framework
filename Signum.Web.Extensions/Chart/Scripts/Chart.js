@@ -1,11 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="ChartUtils.ts"/>
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
     ChartUtils;
     colorbrewer;
@@ -54,143 +48,199 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.exportData = exportData;
 
-    function getFor(prefix) {
-        return prefix.child("sfChartBuilderContainer").get().SFControl();
-    }
-    exports.getFor = getFor;
-    ;
-
-    var ChartBuilder = (function (_super) {
-        __extends(ChartBuilder, _super);
-        function ChartBuilder() {
-            _super.apply(this, arguments);
-        }
-        ChartBuilder.prototype._create = function () {
+    var ChartBuilder = (function () {
+        function ChartBuilder(options) {
             var _this = this;
-            this.$chartControl = this.element.closest(".sf-chart-control");
+            this.isDrawn = function (isEquiv) {
+                return false;
+            };
+            this.fastRedraw = function () {
+            };
+            this.options = options;
 
-            this.filterBuilder = new Finder.FilterBuilder(this.prefix.child("tblFilterBuilder").get(), this.options.prefix, this.options.webQueryName, this.$chartControl.attr("data-add-filter-url"));
+            this.container = options.prefix.child("sfChartBuilderContainer").get();
+            this.container.data("SF-control", this);
 
-            $(document).on("click", ".sf-chart-img", function (e) {
+            this.container.on("click", ".sf-chart-img", function (e) {
                 var img = $(e.currentTarget);
                 img.closest(".sf-chart-type").find(".sf-chart-type-value").val(img.attr("data-related"));
 
-                var $resultsContainer = _this.$chartControl.find(".sf-search-results-container");
-                if (img.hasClass("sf-chart-img-equiv")) {
-                    if ($resultsContainer.find("svg").length > 0) {
-                        _this.reDrawOnUpdateBuilder = true;
-                    }
-                } else {
-                    $resultsContainer.html("");
-                }
+                var isFastRedraw = _this.isDrawn(img.hasClass("sf-chart-img-equiv"));
 
+                _this.updateChartBuilder("-1").then(function () {
+                    if (isFastRedraw)
+                        _this.fastRedraw();
+                });
+            });
+
+            this.container.on("change", ".sf-chart-group-trigger", function (e) {
+                _this.container.find(".sf-chart-group-results").val($(e.currentTarget).is(":checked").toString());
                 _this.updateChartBuilder();
             });
 
-            $(document).on("change", ".sf-chart-group-trigger", function (e) {
-                _this.element.find(".sf-chart-group-results").val($(e.currentTarget).is(":checked").toString());
-                _this.updateChartBuilder();
-            });
-
-            $(document).on("click", ".sf-chart-token-config-trigger", function (e) {
+            this.container.on("click", ".sf-chart-token-config-trigger", function (e) {
                 $(e.currentTarget).closest(".sf-chart-token").next().toggle();
             });
 
-            $(document).on("change", ".sf-query-token select", function (e) {
+            this.container.on("change", ".sf-query-token select", function (e) {
                 var token = $(e.currentTarget);
                 var id = token.attr("id");
                 Finder.QueryTokenBuilder.clearChildSubtokenCombos(token, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
                 _this.updateChartBuilder(token.closest("tr").attr("data-token"));
             });
 
-            $(this.$chartControl).on("change", ".sf-chart-redraw-onchange", function () {
-                _this.reDraw();
-            });
+            this.container.SFControlFullfill(this);
+        }
+        ChartBuilder.prototype.updateChartBuilder = function (tokenChanged) {
+            var _this = this;
+            var data = this.requestData();
+            if (!SF.isEmpty(tokenChanged)) {
+                data["lastTokenChanged"] = tokenChanged;
+            }
 
-            $(document).on("click", ".sf-chart-draw", function (e) {
-                e.preventDefault();
-                var drawBtn = $(e.currentTarget);
-                SF.ajaxPost({
-                    url: drawBtn.attr("data-url"),
-                    data: _this.requestData()
-                }).then(function (result) {
-                    if (typeof result === "object") {
-                        if (typeof result.ModelState != "undefined") {
-                            var modelState = result.ModelState;
-                            Validator.showErrors({}, modelState);
-                            SF.Notify.error(lang.signum.error, 2000);
-                        }
-                    } else {
-                        Validator.showErrors({}, null);
-                        _this.$chartControl.find(".sf-search-results-container").html(result);
-                        _this.initOrders();
-                        _this.reDraw();
-                    }
-                });
-            });
-
-            window.changeTextArea = function (value, runtimeInfo) {
-                if ($("#ChartScript_sfRuntimeInfo").val() == runtimeInfo) {
-                    var $textArea = _this.element.find("textarea.sf-chart-currentScript");
-
-                    $textArea.val(value);
-                    _this.reDraw();
-                }
-            };
-
-            window.getExceptionNumber = function () {
-                if (_this.exceptionLine == null || _this.exceptionLine == undefined)
-                    return null;
-
-                var temp = _this.exceptionLine;
-                _this.exceptionLine = null;
-                return temp;
-            };
-
-            $(document).on("click", ".sf-chart-script-edit", function (e) {
-                e.preventDefault();
-
-                var $textArea = _this.element.find("textarea.sf-chart-currentScript");
-
-                var win = window.open($textArea.data("url"));
-            });
-
-            $(document).on("mousedown", this.prefix.child("sfFullScreen"), function (e) {
-                e.preventDefault();
-                _this.fullScreen(e);
+            return SF.ajaxPost({
+                url: this.options.updateChartBuilderUrl,
+                data: data
+            }).then(function (result) {
+                _this.container.html(result);
             });
         };
 
         ChartBuilder.prototype.requestData = function () {
-            var result = this.$chartControl.find(":input:not(#webQueryName)").serializeObject();
+            var result = this.container.find(":input").serializeObject();
 
             result["webQueryName"] = this.options.webQueryName;
+
+            return result;
+        };
+        return ChartBuilder;
+    })();
+    exports.ChartBuilder = ChartBuilder;
+
+    function getFor(prefix) {
+        return prefix.child("sfChartControl").get().SFControl();
+    }
+    exports.getFor = getFor;
+    ;
+
+    (function (ChartRequestMode) {
+        ChartRequestMode[ChartRequestMode["Complete"] = 0] = "Complete";
+        ChartRequestMode[ChartRequestMode["Chart"] = 1] = "Chart";
+        ChartRequestMode[ChartRequestMode["Data"] = 2] = "Data";
+    })(exports.ChartRequestMode || (exports.ChartRequestMode = {}));
+    var ChartRequestMode = exports.ChartRequestMode;
+
+    var ChartRequest = (function () {
+        function ChartRequest(options) {
+            var _this = this;
+            this.options = options;
+
+            this.chartControl = options.prefix.child("sfChartControl").get();
+            this.chartControl.data("SF-control", this);
+
+            this.divResults = options.prefix.child("divResults").get();
+
+            this.filterBuilder = new Finder.FilterBuilder(this.options.prefix.child("tblFilterBuilder").get(), this.options.prefix, this.options.webQueryName, this.options.addFilterUrl);
+
+            this.chartBuilder = new ChartBuilder(this.options);
+
+            if (this.options.mode == 0 /* Complete */) {
+                this.chartBuilder.isDrawn = function (isEqiv) {
+                    if (isEqiv && _this.divResults.find("svg").length > 0)
+                        return true;
+
+                    _this.divResults.html("");
+                    return false;
+                };
+
+                this.chartBuilder.fastRedraw = function () {
+                    return _this.reDraw();
+                };
+
+                $(this.chartControl).on("change", ".sf-chart-redraw-onchange", function () {
+                    _this.reDraw();
+                });
+
+                this.options.prefix.child("qbDraw").get().click(function (e) {
+                    e.preventDefault();
+                    _this.request();
+                });
+
+                window.changeTextArea = function (value, runtimeInfo) {
+                    if ($("#ChartScript_sfRuntimeInfo").val() == runtimeInfo) {
+                        var $textArea = _this.chartControl.find("textarea.sf-chart-currentScript");
+
+                        $textArea.val(value);
+                        _this.reDraw();
+                    }
+                };
+
+                window.getExceptionNumber = function () {
+                    if (_this.exceptionLine == null || _this.exceptionLine == undefined)
+                        return null;
+
+                    var temp = _this.exceptionLine;
+                    _this.exceptionLine = null;
+                    return temp;
+                };
+
+                this.options.prefix.child("qbEdit").get().on("click", function (e) {
+                    e.preventDefault();
+                    var $textArea = _this.chartControl.find("textarea.sf-chart-currentScript");
+                    var win = window.open($textArea.data("url"));
+                });
+            } else {
+                this.request();
+            }
+
+            this.options.prefix.child("sfFullScreen").get().on("mousedown", function (e) {
+                e.preventDefault();
+                _this.fullScreen(e);
+            });
+
+            this.chartControl.SFControlFullfill(this);
+        }
+        ChartRequest.prototype.serializeOrders = function () {
+            return Finder.serializeOrders(this.options.orders);
+        };
+
+        ChartRequest.prototype.request = function () {
+            var _this = this;
+            SF.ajaxPost({
+                url: this.options.drawUrl,
+                data: $.extend(this.requestData(), { "mode": this.options.mode })
+            }).then(function (result) {
+                if (typeof result === "object") {
+                    if (typeof result.ModelState != "undefined") {
+                        var modelState = result.ModelState;
+                        Validator.showErrors({}, modelState);
+                        SF.Notify.error(lang.signum.error, 2000);
+                    }
+                } else {
+                    Validator.showErrors({}, null);
+                    _this.chartControl.find(".sf-search-results-container").html(result);
+
+                    if (_this.options.mode == 0 /* Complete */ || _this.options.mode == 2 /* Data */) {
+                        _this.initOrders();
+                    }
+
+                    if (_this.options.mode == 0 /* Complete */ || _this.options.mode == 1 /* Chart */) {
+                        _this.reDraw();
+                    }
+                }
+            });
+        };
+
+        ChartRequest.prototype.requestData = function () {
+            var result = this.chartBuilder.requestData();
+
             result["filters"] = this.filterBuilder.serializeFilters();
             result["orders"] = this.serializeOrders();
 
             return result;
         };
 
-        ChartBuilder.prototype.updateChartBuilder = function (tokenChanged) {
-            var _this = this;
-            var $chartBuilder = this.$chartControl.find(".sf-chart-builder");
-            var data = this.requestData();
-            if (!SF.isEmpty(tokenChanged)) {
-                data["lastTokenChanged"] = tokenChanged;
-            }
-            $.ajax({
-                url: $chartBuilder.attr("data-url"),
-                data: data
-            }).then(function (result) {
-                $chartBuilder.replaceWith(result);
-                if (_this.reDrawOnUpdateBuilder) {
-                    _this.reDraw();
-                    _this.reDrawOnUpdateBuilder = false;
-                }
-            });
-        };
-
-        ChartBuilder.prototype.showError = function (e, __baseLineNumber__, chart) {
+        ChartRequest.prototype.showError = function (e, __baseLineNumber__, chart) {
             var message = e.toString();
 
             var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
@@ -210,16 +260,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
         };
 
-        ChartBuilder.prototype.reDraw = function () {
+        ChartRequest.prototype.reDraw = function () {
             var _this = this;
-            var $chartContainer = this.$chartControl.find(".sf-chart-container");
+            var $chartContainer = this.chartControl.find(".sf-chart-container");
 
             $chartContainer.html("");
 
-            var data = $chartContainer.data("json");
+            var data = JSON.parse($chartContainer.attr("data-json"));
             ChartUtils.fillAllTokenValueFuntions(data);
 
-            $(".sf-chart-redraw-onchange", this.$chartControl).each(function (i, element) {
+            $(".sf-chart-redraw-onchange[id]", this.chartControl).each(function (i, element) {
                 var $element = $(element);
                 var name = $element.attr("id");
                 if (!SF.isEmpty(_this.options.prefix)) {
@@ -228,21 +278,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 var nameParts = name.split('_');
                 if (nameParts.length == 3 && nameParts[0] == "Columns") {
                     var column = data.columns["c" + nameParts[1]];
-                    switch (nameParts[2]) {
-                        case "DisplayName":
-                            column.title = $element.val();
-                            break;
-                        case "Parameter1":
-                            column.parameter1 = $element.val();
-                            break;
-                        case "Parameter2":
-                            column.parameter2 = $element.val();
-                            break;
-                        case "Parameter3":
-                            column.parameter3 = $element.val();
-                            break;
-                        default:
-                            break;
+                    if (column) {
+                        switch (nameParts[2]) {
+                            case "DisplayName":
+                                column.title = $element.val();
+                                break;
+                            case "Parameter1":
+                                column.parameter1 = $element.val();
+                                break;
+                            case "Parameter2":
+                                column.parameter2 = $element.val();
+                                break;
+                            case "Parameter3":
+                                column.parameter3 = $element.val();
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             });
@@ -250,9 +302,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var width = $chartContainer.width();
             var height = $chartContainer.height();
 
-            var code = "(" + this.$chartControl.find('textarea.sf-chart-currentScript').val() + ")";
+            var code = "(" + this.chartControl.find('textarea.sf-chart-currentScript').val() + ")";
 
-            var chart = d3.select('#' + this.$chartControl.attr("id") + " .sf-chart-container").append('svg:svg').attr('width', width).attr('height', height);
+            var chart = d3.select('#' + this.chartControl.attr("id") + " .sf-chart-container").append('svg:svg').attr('width', width).attr('height', height);
 
             var func;
             var __baseLineNumber__;
@@ -284,14 +336,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 this.exceptionLine = -1;
         };
 
-        ChartBuilder.prototype.exportData = function (validateUrl, exportUrl) {
+        ChartRequest.prototype.exportData = function (validateUrl, exportUrl) {
             var data = this.requestData();
 
             if (Validator.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }))
                 SF.submitOnly(exportUrl, data);
         };
 
-        ChartBuilder.prototype.requestProcessedData = function () {
+        ChartRequest.prototype.requestProcessedData = function () {
             return {
                 webQueryName: this.options.webQueryName,
                 filters: this.filterBuilder.serializeFilters(),
@@ -299,10 +351,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             };
         };
 
-        ChartBuilder.prototype.fullScreen = function (evt) {
+        ChartRequest.prototype.fullScreen = function (evt) {
             evt.preventDefault();
 
-            var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url") || this.$chartControl.attr("data-fullscreen-url");
+            var url = this.options.fullScreenUrl;
 
             url += (url.indexOf("?") < 0 ? "?" : "&") + $.param(this.requestData());
 
@@ -313,35 +365,33 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }
         };
 
-        ChartBuilder.prototype.initOrders = function () {
+        ChartRequest.prototype.initOrders = function () {
             var _this = this;
-            this.prefix.child("tblResults").get().on("click", "th", function (e) {
-                _this.newSortOrder($(e.currentTarget), e.shiftKey);
-                _this.$chartControl.find(".sf-chart-draw").click();
+            this.options.prefix.child("tblResults").get().on("click", "th", function (e) {
+                Finder.SearchControl.newSortOrder(_this.options.orders, $(e.currentTarget), e.shiftKey);
+                _this.chartControl.find(".sf-chart-draw").click();
                 return false;
             });
         };
 
-        ChartBuilder.prototype.bindMouseClick = function ($chartContainer) {
+        ChartRequest.prototype.bindMouseClick = function ($chartContainer) {
+            var _this = this;
             $chartContainer.find('[data-click]').click(function (e) {
-                var url = $chartContainer.attr('data-open-url');
+                var url = _this.options.openUrl;
 
                 var win = window.open("about:blank");
 
-                var $chartControl = $chartContainer.closest(".sf-chart-control");
-                exports.getFor($chartControl.attr("data-prefix")).then(function (cb) {
-                    var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-                    options += "&webQueryName=" + cb.options.webQueryName;
-                    options += "&orders=" + cb.serializeOrders();
-                    options += "&filters=" + cb.filterBuilder.serializeFilters();
-                    options += $(e.currentTarget).data("click");
+                var options = _this.chartControl.find(":input").not(_this.chartControl.find(".sf-filters-list :input")).serialize();
+                options += "&webQueryName=" + _this.options.webQueryName;
+                options += "&orders=" + _this.serializeOrders();
+                options += "&filters=" + _this.filterBuilder.serializeFilters();
+                options += $(e.currentTarget).data("click");
 
-                    win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
-                });
+                win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
             });
         };
-        return ChartBuilder;
-    })(Finder.SearchControl);
-    exports.ChartBuilder = ChartBuilder;
+        return ChartRequest;
+    })();
+    exports.ChartRequest = ChartRequest;
 });
 //# sourceMappingURL=Chart.js.map

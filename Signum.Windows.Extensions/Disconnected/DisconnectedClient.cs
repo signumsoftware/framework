@@ -31,8 +31,6 @@ namespace Signum.Windows.Disconnected
 
         static Dictionary<Type, StrategyPair> strategies;
 
-        public static bool OfflineMode { get; set; }
-
         public static DisconnectedExportDN LastExport;
      
 
@@ -54,7 +52,7 @@ namespace Signum.Windows.Disconnected
 
                 Navigator.Manager.IsCreable += type =>
                 {
-                    if (OfflineMode)
+                    if (Server.OfflineMode)
                         return strategies[type].Upload != Upload.None;
                     else
                         return true;
@@ -81,7 +79,7 @@ namespace Signum.Windows.Disconnected
         {
             Upload upload = strategies[type].Upload;
 
-            if (OfflineMode)
+            if (Server.OfflineMode)
             {
                 if (upload == Upload.None)
                     return false;

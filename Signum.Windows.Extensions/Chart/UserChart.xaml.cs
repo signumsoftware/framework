@@ -58,7 +58,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return token.SubTokens(QueryDescription, canAggregate: cr.GroupResults);
+            return token.SubTokens(QueryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement  | (cr.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
         private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
@@ -67,7 +67,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return token.SubTokens(QueryDescription, canAggregate: cr.GroupResults);
+            return token.SubTokens(QueryDescription, SubTokensOptions.CanElement | (cr.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
         IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)

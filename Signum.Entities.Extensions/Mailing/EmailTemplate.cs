@@ -211,10 +211,10 @@ namespace Signum.Entities.Mailing
         {
             if (Recipients != null)
                 foreach (var r in Recipients.Where(r => r.Token != null))
-                    r.Token.ParseData(this, queryDescription, false);
+                    r.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
 
             if (From != null && From.Token != null)
-                From.Token.ParseData(this, queryDescription, false);
+                From.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
         }
     }
 
