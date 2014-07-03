@@ -12,6 +12,7 @@ using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Selenium
 {
