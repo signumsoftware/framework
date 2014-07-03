@@ -227,7 +227,7 @@ namespace Signum.Entities.DynamicQuery
             var result = SubTokensBasic(token, qd, options);
 
             if ((options & SubTokensOptions.CanAggregate) != 0)
-                result.AddRange(AggregateTokens(token, qd));
+                result.InsertRange(0, AggregateTokens(token, qd));
 
             return result;
         }
