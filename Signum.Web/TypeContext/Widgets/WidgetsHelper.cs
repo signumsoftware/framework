@@ -11,7 +11,7 @@ namespace Signum.Web
 {
     public interface IWidget
     {
-        MvcHtmlString ToHTml(HtmlHelper helper);
+        MvcHtmlString ToHtml(HtmlHelper helper);
     }
 
     public class Widget : IWidget
@@ -31,7 +31,7 @@ namespace Signum.Web
         public MvcHtmlString Html { get; set; }
         public List<IMenuItem> Items { get; set; }
 
-        public MvcHtmlString ToHTml(HtmlHelper helper)
+        public MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.Surround("li"))
@@ -78,11 +78,24 @@ namespace Signum.Web
         public string Prefix; 
     }
 
+
+    public interface IEmbeddedWidget
+    {
+        MvcHtmlString ToHtml(HtmlHelper helper);
+        EmbeddedWidgetPostion Position { get;  }
+    }
+
+    public enum EmbeddedWidgetPostion 
+    {
+        Top,
+        Bottom,
+    }
+
     public static class WidgetsHelper
     {
         public static event Func<WidgetContext, IWidget> GetWidget;
 
-        public static MvcHtmlString RenderWidgetsForEntity(this HtmlHelper helper, WidgetContext ctx)
+        public static MvcHtmlString RenderWidgets(this HtmlHelper helper, WidgetContext ctx)
         {
             if (GetWidget == null)
                 return MvcHtmlString.Empty;
@@ -101,10 +114,45 @@ namespace Signum.Web
             {
                 foreach (IWidget widget in widgets)
                 {
-                    sb.AddLine(widget.ToHTml(helper));
+                    sb.AddLine(widget.ToHtml(helper));
                 }
             }
             return sb.ToHtml();
         }
+
+        public static event Func<WidgetContext, IEmbeddedWidget> GetEmbeddedWidget;
+
+        public static IDisposable RenderEmbeddedWidget(this HtmlHelper helper, WidgetContext ctx)
+        {
+            if (GetEmbeddedWidget == null)
+                return null;
+
+            List<IEmbeddedWidget> widgets = GetEmbeddedWidget.GetInvocationList()
+                .Cast<Func<WidgetContext, IEmbeddedWidget>>()
+                .Select(d => d(ctx))
+                .NotNull()
+                .ToList();
+
+            if (widgets.IsNullOrEmpty())
+                return null;
+
+
+            foreach (var item in widgets.Where(a=>a.Position == EmbeddedWidgetPostion.Top))
+            {
+                helper.ViewContext.Writer.Write(item.ToHtml(helper).ToString());
+            }
+
+
+            return new Disposable(() =>
+            {
+                foreach (var item in widgets.Where(a => a.Position == EmbeddedWidgetPostion.Bottom))
+                {
+                    helper.ViewContext.Writer.Write(item.ToHtml(helper).ToString());
+                }
+            }); 
+        }
+
+
     }
+
 }

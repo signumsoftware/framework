@@ -828,26 +828,26 @@ namespace Signum.Windows
             }
         }
 
-        public event Func<object, ButtonBarEventArgs, List<FrameworkElement>> GetButtonBarElementGlobal;
-        public Dictionary<Type, Func<object, ButtonBarEventArgs, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type,Func<object, ButtonBarEventArgs, FrameworkElement>>();
+        public event Func<ModifiableEntity, ButtonBarEventArgs, List<FrameworkElement>> GetButtonBarElementGlobal;
+        public Dictionary<Type, Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type, Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>>();
 
-        public void RegisterGetButtonBarElement<T>(Func<T, ButtonBarEventArgs, FrameworkElement> action)
+        public void RegisterGetButtonBarElement<T>(Func<T, ButtonBarEventArgs, FrameworkElement> action) where T: ModifiableEntity
         {
-            Func<object, ButtonBarEventArgs, FrameworkElement> casted = (obj, args) => action((T)obj, args);
+            Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement> casted = (obj, args) => action((T)obj, args);
 
             var prev = GetButtonBarElementByType.TryGetC(typeof(T));
 
             GetButtonBarElementByType[typeof(T)] = prev + casted;
         }
 
-        internal List<FrameworkElement> GetToolbarButtons(object entity, ButtonBarEventArgs ctx)
+        internal List<FrameworkElement> GetToolbarButtons(ModifiableEntity entity, ButtonBarEventArgs ctx)
         {
             List<FrameworkElement> elements = new List<FrameworkElement>();
 
             if (GetButtonBarElementGlobal != null)
             {
                 elements.AddRange(GetButtonBarElementGlobal.GetInvocationList()
-                    .Cast<Func<object, ButtonBarEventArgs, List<FrameworkElement>>>()
+                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, List<FrameworkElement>>>()
                     .Select(d => d(entity, ctx))
                     .NotNull().SelectMany(d => d).NotNull().ToList());
             }
@@ -856,7 +856,7 @@ namespace Signum.Windows
             if(getButtons != null)
             {
                 elements.AddRange(getButtons.GetInvocationList()
-                    .Cast<Func<object, ButtonBarEventArgs, FrameworkElement>>()
+                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>>()
                     .Select(d => d(entity, ctx))
                     .NotNull().ToList());
             }
@@ -867,6 +867,24 @@ namespace Signum.Windows
             }
 
             return elements.OrderBy(Common.GetOrder).ToList();
+        }
+
+
+        public event Func<ModifiableEntity, ButtonBarEventArgs, EmbeddedWidget> OnGetEmbeddedWigets;
+
+        internal List<EmbeddedWidget> GetEmbeddedWigets(ModifiableEntity entity, ButtonBarEventArgs ctx)
+        {
+            List<EmbeddedWidget> elements = new List<EmbeddedWidget>();
+
+            if (OnGetEmbeddedWigets != null)
+            {
+                elements.AddRange(OnGetEmbeddedWigets.GetInvocationList()
+                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, EmbeddedWidget>>()
+                    .Select(d => d(entity, ctx))
+                    .NotNull().ToList());
+            }
+
+            return elements.ToList();
         }
 
         protected internal virtual void OpenIndependentWindow<W>(Func<W> windowConstructor, Action<W> afterShown, EventHandler closed) where W : Window
@@ -895,5 +913,18 @@ namespace Signum.Windows
 
             return Application.Current.Windows.Cast<Window>().FirstOrDefault(a => a.IsActive);
         }
+    }
+
+    public class EmbeddedWidget
+    {
+        public FrameworkElement Control;
+        public EmbeddedWidgetPostion Position;
+        public int Order = 0; 
+    }
+
+    public enum EmbeddedWidgetPostion
+    {
+        Top,
+        Bottom,
     }
 }
