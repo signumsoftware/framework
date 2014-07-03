@@ -993,7 +993,7 @@ namespace Signum.Web
                         {
                             var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
 
-                            if (oldValue.Equals(val))
+                            if (oldValue.Value.Equals(val))
                                 newList.Add(new MList<S>.RowIdValue(val, rowId.Value, oldValue.OldIndex));
                             else
                                 newList.Add(new MList<S>.RowIdValue(val));
