@@ -12,257 +12,225 @@ using Signum.Web.Lines;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using System.Text.RegularExpressions;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Web
 {
-    public class DatePickerOptions
-    {
-        public static DatePickerOptions Default = new DatePickerOptions();
-        
-        public bool IsDefault()
-        {
-            return this.ChangeMonth == Default.ChangeMonth &&
-                   this.ChangeYear == Default.ChangeYear &&
-                   this.FirstDay == Default.FirstDay &&
-                   this.YearRange == Default.YearRange &&
-                   this.ShowOn == Default.ShowOn &&
-                   this.ButtonImageOnly == Default.ButtonImageOnly &&
-                   this.ButtonText == Default.ButtonText &&
-                   this.ButtonImageSrc == Default.ButtonImageSrc &&
-                   this.MinDate == Default.MinDate &&
-                   this.MaxDate == Default.MaxDate &&
-                   this.ConstrainInput == Default.ConstrainInput;
-        }
-
-        public string Format { get; set; }
-
-        public static string JsDateFormat(string dateFormat)
-        {
-            switch (dateFormat)
-            {
-                case "d":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-                case "D":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
-                case "f":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "F":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "g":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "G":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "m":
-                case "M":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern;
-                case "r":
-                case "R":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.RFC1123Pattern;
-                case "s":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.SortableDateTimePattern;
-                case "t":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "T":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "u":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern;
-                case "U":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "y":
-                case "Y":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern;
-            }
-            return dateFormat;
-        }
-
-        bool changeMonth = true;
-        public bool ChangeMonth
-        {
-            get { return changeMonth; }
-            set { changeMonth = value; }
-        }
-
-        bool changeYear = true;
-        public bool ChangeYear
-        {
-            get { return changeYear; }
-            set { changeYear = value; }
-        }
-
-        int firstDay = 1;
-        public int FirstDay
-        {
-            get { return firstDay; }
-            set { firstDay = value; }
-        }
-
-        string yearRange = "-90:+10";
-        public string YearRange
-        {
-            get { return yearRange; }
-            set { yearRange = value; }
-        }
-
-        string showOn = "button";
-        public string ShowOn
-        {
-            get { return showOn; }
-            set { showOn = value; }
-        }
-
-        bool buttonImageOnly = true;
-        public bool ButtonImageOnly
-        {
-            get { return buttonImageOnly; }
-            set { buttonImageOnly = value; }
-        }
-
-        string buttonText = CalendarMessage.ShowCalendar.NiceToString();
-        public string ButtonText
-        {
-            get { return buttonText; }
-            set { buttonText = value; }
-        }
-
-        string buttonImageSrc = VirtualPathUtility.ToAbsolute("~/Signum/Images/calendar.png");
-        public string ButtonImageSrc
-        {
-            get { return buttonImageSrc; }
-            set { buttonImageSrc = value; }
-        }
-
-        string minDate;
-        public string MinDate
-        {
-            get { return minDate; }
-            set { minDate = value; }
-        }
-
-        string maxDate;
-        public string MaxDate
-        {
-            get { return maxDate; }
-            set { maxDate = value; }
-        }
-
-        bool constrainInput;
-        public bool ConstrainInput
-        {
-            get { return constrainInput; }
-            set { constrainInput = value; }
-        }
-
-        public static string DefaultCulture
-        {
-            get { return CultureInfo.CurrentCulture.Name.Substring(0, 2); }
-        }
-
-        public override string ToString()
-        {
-            return "{" + 
-                "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}{11}".Formato(
-                    ChangeMonth ? "true" : "false",
-                    ChangeYear ? "true" : "false",
-                    FirstDay,
-                    YearRange,
-                    ShowOn,
-                    ButtonImageOnly ? "true" : "false",
-                    ButtonText,
-                    ButtonImageSrc,
-                    ConstrainInput ? "true" : "false",
-                    (MinDate.HasText() ? ", minDate: " + MinDate : ""),
-                    (MaxDate.HasText() ? ", maxDate: " + MaxDate : ""),
-                    (Format.HasText() ? ", dateFormat: '" + JsDateFormat(Format) + "'" : "") + 
-                "}");
-        }
-    }
-
     public static class CalendarHelper
     {
-        public static MvcHtmlString Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
+        static readonly Regex parts = new Regex(@"(\w)\1{0,}");
+
+        public static DateTimeFormat SplitDateTimeFormat(string dateTimeFormat, CultureInfo culture = null)
         {
-            StringBuilder sb = new StringBuilder();
+            if (culture == null)
+                culture = CultureInfo.CurrentCulture;
 
-            sb.AppendLine(
-                "<script type=\"text/javascript\">" + 
-                //"$(function(){\n" +
-                "$(\"#" + elementId + "\").datepicker(" + settings.ToString() +");" + 
-                //"});\n" +
-                "</script>");
+            string customFormat = Customize(dateTimeFormat, culture.DateTimeFormat);
 
-            return MvcHtmlString.Create(sb.ToString());
+            var matches = parts.Matches(customFormat).Cast<Match>();
+
+            if (matches.All(m => IsDate(m.Value)))
+                return new DateTimeFormat { DateFormat = customFormat, TimeFormat = null };
+
+            var max = matches.Where(m => IsDate(m.Value)).Max(a => a.Index + a.Length);
+
+            if (matches.Any(m => !IsDate(m.Value) && m.Index < max))
+                throw new FormatException("Impossible to split {0} in Date and Time".Formato(dateTimeFormat));
+
+            var min = matches.Where(m => !IsDate(m.Value)).Min(a => a.Index);
+
+            return new DateTimeFormat { DateFormat = customFormat.Substring(0, max), TimeFormat = customFormat.Substring(min) };
         }
 
-        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public struct DateTimeFormat
         {
-            return helper.HourMinute(tc, property, null);
+            public string DateFormat;
+            public string TimeFormat; 
         }
 
-        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HourMinuteLine> settingsModifier)
+        public static string ToJsDateFormat(string dateFormat)
         {
-            TypeContext<S> context = Common.WalkExpression(tc, property);
-
-            HourMinuteLine line = new HourMinuteLine(typeof(S), context.Value, context, null, context.PropertyRoute);
-
-            Common.FireCommonTasks(line);
-
-            if (settingsModifier != null)
-                settingsModifier(line);
-
-            return HourMinuteInternal(helper, line);
+            return parts.Replace(dateFormat, m =>
+            {
+                switch (m.Value)
+                {
+                    case "d": return "d";
+                    case "dd": return "dd";
+                    case "ddd": return "D";
+                    case "dddd": return "DD";
+                    case "M": return "m";
+                    case "MM": return "mm";
+                    case "MMM": return "M";
+                    case "MMMM": return "MM";
+                    case "yy": return "yy";
+                    case "yyyy": return "yyyy";
+                    default: throw new InvalidOperationException("Unexpected part " + parts);
+                }
+            }); 
         }
 
-        private static MvcHtmlString HourMinuteInternal(HtmlHelper helper, HourMinuteLine line)
+        private static bool IsDate(string part)
         {
-            if (!line.Visible || (line.HideIfNull && line.UntypedValue == null))
-                return MvcHtmlString.Empty;
+            switch (part)
+            {
+                case "d": 
+                case "dd": 
+                case "ddd": 
+                case "dddd": 
+                case "M":
+                case "MM": 
+                case "MMM": 
+                case "MMMM": 
+                case "yy":
+                case "yyyy": return true;
+                default: return false;
+            }
+        }
+
+        private static string Customize(string format, DateTimeFormatInfo info)
+        {
+            if (format == null)
+                return info.ShortDatePattern + " " + info.ShortTimePattern;
+
+            switch (format)
+            {
+                case "d": return info.ShortDatePattern;
+                case "D": return info.LongDatePattern;
+                case "f": return info.LongDatePattern + " " + info.ShortTimePattern;
+                case "F": return info.FullDateTimePattern;
+                case "g": return info.ShortDatePattern + " " + info.ShortTimePattern;
+                case "G": return info.ShortDatePattern + " " + info.LongTimePattern;
+                case "m":
+                case "M": return info.MonthDayPattern;
+                case "r":
+                case "R": return info.RFC1123Pattern;
+                case "s": return info.SortableDateTimePattern;
+                case "t": return info.ShortTimePattern;
+                case "T": return info.LongTimePattern;
+                case "u": return info.UniversalSortableDateTimePattern;
+                case "U": return info.FullDateTimePattern;
+                case "y":
+                case "Y": return info.YearMonthPattern;
+                default: return format;
+            }
+        }
+
+        public static MvcHtmlString DateTimePicker(this HtmlHelper helper, string name, bool formGroup, DateTime? value, string dateTimeFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        {
+            var dateFormat = SplitDateTimeFormat(dateTimeFormat, culture);
+
+            if (dateFormat.TimeFormat == null)
+                return helper.DatePicker(name, formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps);
+
+            if(dateFormat.DateFormat == null)
+                return helper.TimePicker(name, formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div", name).Class("date-time")))
+            {
+                sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
+                sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
+            }
+            return sb.ToHtml();
+        }
 
-            TimeSpan? time = null;
+        public static MvcHtmlString DatePicker(this HtmlHelper helper, string name, bool formGroup, DateTime? value, string dateTimeFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        {
+            var dateFormat = SplitDateTimeFormat(dateTimeFormat, culture);
+
+            return helper.DatePicker(name, formGroup, value == null ? "" : value.Value.ToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture);
+        }
+
+        public static MvcHtmlString DatePicker(this HtmlHelper helper, string name, bool inputGroup, string value, string jsFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentCulture;
+
+            var input = new HtmlTag("input")
+                .IdName(name)
+                .Attr("type", "text")
+                .Class("form-control")               
+                .Attrs(htmlProps)
+                .Attr("value", value);
+               
+            if(!inputGroup)
+                return AttachDatePicker(input, culture, jsFormat);
             
-            DateTime? dateValue = line.UntypedValue as DateTime?;
-            if (dateValue != null)
-                time = dateValue.TrySS(d => d.ToUserInterface()).TrySS(d => d.TimeOfDay);
-            else
-                time = line.UntypedValue as TimeSpan?;
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(AttachDatePicker(new HtmlTag("div").Class("input-group date"), culture, jsFormat)))
+            {
+                sb.Add(input);
 
-            WriteField(sb, helper, line, QueryTokenMessage.Hour.NiceToString(), "Hour", time == null ? "" : time.Value.ToString("hh")); 
-
-            sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
-
-            WriteField(sb, helper, line, QueryTokenMessage.Minute.NiceToString(), "Minute", time == null ? "" : time.Value.ToString("mm")); 
+                using (sb.Surround(new HtmlTag("span").Class("input-group-addon")))
+                    sb.Add(new HtmlTag("span").Class("glyphicon glyphicon-calendar"));
+            }
 
             return sb.ToHtml();
         }
 
-        private static void WriteField(HtmlStringBuilder sb, HtmlHelper helper, HourMinuteLine line, string label, string name, string value)
+        private static HtmlTag AttachDatePicker(HtmlTag tag, CultureInfo culture, string jsFormat)
         {
-            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+            return tag.Attr("data-provide", "datepicker")
+               .Attr("data-date-language", culture.TwoLetterISOLanguageName)
+               .Attr("data-date-week-start", ((int)culture.DateTimeFormat.FirstDayOfWeek).ToString())
+               .Attr("data-date-autoclose", "true")
+               .Attr("data-date-format", jsFormat)
+               .Attr("data-date-today-btn", "linked")
+               .Attr("data-date-today-highlight", "true");
+        }
+
+        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, TimeSpan? ts, string dateFormat, CultureInfo culture = null, IDictionary<string, object> htmlProps = null)
+        {
+            if (dateFormat == null)
+                dateFormat = "HH:mm";
+
+            var stringValue = ts == null ? "" : DateTime.Today.Add(ts.Value).ToString(dateFormat, culture);
+
+            if (dateFormat.Contains("f") || dateFormat.Contains("F"))
+                return helper.TextBox(name, stringValue, new { @class = "form-control" });
+
+            return helper.TimePicker(name, formGroup, stringValue, dateFormat, htmlProps: htmlProps);
+        }
+
+        public static MvcHtmlString TimePicker(this HtmlHelper helper, string name, bool formGroup, string value, string dateFormat, IDictionary<string, object> htmlProps = null)
+        {
+            if (dateFormat.Contains("f") || dateFormat.Contains("F"))
             {
-                if (line.LabelVisible)
-                    sb.Add(new HtmlTag("div").Class("sf-label-line").SetInnerText(label));
-
-                using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                {
-                    if (line.ReadOnly)
-                    {
-                        sb.Add(new HtmlTag("span").Class("sf-value-line").SetInnerText(value));
-
-                        if (line.WriteHiddenOnReadonly)
-                            sb.Add(helper.Hidden(line.Compose(name), value));
-                    }
-                    else
-                    {
-                        line.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + line.ValueHtmlProps.TryGetC("onblur");
-
-                        line.ValueHtmlProps["size"] = "2";
-                        line.ValueHtmlProps["class"] = "sf-value-line";
-
-                        sb.Add(helper.TextBox(line.Compose(name), value, line.ValueHtmlProps));
-                    }
-                }
+                htmlProps["class"] += " form-control";
+                return helper.TextBox(TypeContextUtilities.Compose(name, "Time"), value, htmlProps);
             }
+
+            var input = new HtmlTag("input")
+                .IdName(name)
+                .Attr("type", "text")
+                .Class("form-control")
+                .Attrs(htmlProps)
+                .Attr("value", value);
+
+            if (!formGroup)
+                return AttachTimePiceker(input, dateFormat);
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(AttachTimePiceker(new HtmlTag("div").Class("input-group time"), dateFormat)))
+            {
+                sb.Add(input);
+
+                using (sb.Surround(new HtmlTag("span").Class("input-group-addon")))
+                    sb.Add(new HtmlTag("span").Class("glyphicon glyphicon-time"));
+            }
+
+            return sb.ToHtml();
+        }
+
+        static HtmlTag AttachTimePiceker(HtmlTag tag, string format)
+        {
+            return tag.Attr("data-provide", "timepicker")
+             .Attr("data-minute-step", "1")
+             .Attr("data-second-step", "1")
+             .Attr("data-show-meridian", false.ToString().ToLower())
+             .Attr("data-show-seconds", (format.Contains("s")).ToString().ToLower())
+             .Attr("data-hours-two-digits", (format.Contains("hh") || format.Contains("HH")).ToString().ToLower());
         }
     }
 }

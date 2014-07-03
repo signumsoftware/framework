@@ -12,30 +12,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.requestPartialView = requestPartialView;
 
-    function navigate(runtimeInfo, openNewWindow) {
+    function navigate(runtimeInfo, extraJsonArguments, openNewWindow) {
         var url = runtimeInfo.isNew ? SF.Urls.create.replace("MyType", runtimeInfo.type) : SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
-        if (openNewWindow)
-            window.open(url, "_blank");
-        else
-            window.location.href = url;
+        if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
+            SF.submitOnly(url, extraJsonArguments, openNewWindow);
+        } else {
+            if (openNewWindow)
+                window.open(url, "_blank");
+            else
+                window.location.href = url;
+        }
     }
     exports.navigate = navigate;
-
-    function createTempDiv(entityHtml) {
-        var tempDivId = SF.compose(entityHtml.prefix, "Temp");
-
-        $("body").append(SF.hiddenDiv(tempDivId, ""));
-
-        var tempDiv = $("#" + tempDivId);
-
-        tempDiv.html(entityHtml.html);
-
-        SF.triggerNewContent(tempDiv);
-
-        return tempDivId;
-    }
-    exports.createTempDiv = createTempDiv;
 
     function navigatePopup(entityHtml, viewOptions) {
         viewOptions = $.extend({
@@ -43,7 +32,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: "",
             requestExtraJsonData: null,
             readOnly: false,
-            onPopupLoaded: null
+            onPopupLoaded: null,
+            showOperations: true
         }, viewOptions);
 
         if (entityHtml.isLoaded())
@@ -56,24 +46,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.navigatePopup = navigatePopup;
 
     function openNavigatePopup(entityHtml, viewOptions) {
-        var tempDivId = exports.createTempDiv(entityHtml);
+        entityHtml.getChild("panelPopup").data("sf-navigate", true);
 
-        var tempDiv = $("#" + tempDivId);
-
-        var result = new Promise(function (resolve) {
-            tempDiv.popup({
-                onCancel: function () {
-                    $("#" + tempDivId).remove(); // could be reloaded
-
-                    resolve(null);
-                }
-            });
+        return exports.openEntityHtmlModal(entityHtml, null, viewOptions.onPopupLoaded).then(function () {
+            return null;
         });
-
-        if (viewOptions.onPopupLoaded != null)
-            viewOptions.onPopupLoaded(tempDiv);
-
-        return result;
     }
 
     (function (AllowErrors) {
@@ -89,6 +66,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             partialViewName: null,
             requestExtraJsonData: null,
             readOnly: false,
+            saveProtected: null,
+            showOperations: true,
             avoidClone: false,
             avoidValidate: false,
             allowErrors: 0 /* Ask */,
@@ -119,78 +98,108 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.viewPopup = viewPopup;
 
     function openPopupView(entityHtml, viewOptions) {
-        var tempDivId = exports.createTempDiv(entityHtml);
+        entityHtml.getChild("panelPopup").data("sf-navigate", false);
 
-        var tempDiv = $("#" + tempDivId);
+        return exports.openEntityHtmlModal(entityHtml, function (isOk) {
+            if (!isOk)
+                return Promise.resolve(true);
 
-        return new Promise(function (resolve) {
-            tempDiv.popup({
-                onOk: function () {
-                    var continuePromise = viewOptions.avoidValidate ? Promise.resolve(true) : checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(function (valResult) {
-                        if (valResult == null)
-                            return false;
+            if (viewOptions.avoidValidate)
+                return Promise.resolve(true);
 
-                        entityHtml.hasErrors = !valResult.isValid;
-                        entityHtml.link = valResult.newLink;
-                        entityHtml.toStr = valResult.newToStr;
+            return checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(function (valResult) {
+                if (valResult == null)
+                    return false;
 
-                        return true;
-                    });
+                entityHtml.hasErrors = !valResult.isValid;
+                entityHtml.link = valResult.newLink;
+                entityHtml.toStr = valResult.newToStr;
 
-                    continuePromise.then(function (result) {
-                        if (result) {
-                            var newTempDiv = $("#" + tempDivId);
-                            var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
-                            if ($mainControl.length > 0) {
-                                entityHtml.runtimeInfo = Entities.RuntimeInfo.parse($mainControl.data("runtimeinfo"));
-                            }
-
-                            newTempDiv.popup('restoreTitle');
-                            newTempDiv.popup('destroy');
-                            entityHtml.html = newTempDiv.children();
-                            newTempDiv.remove();
-
-                            resolve(entityHtml);
-                        }
-                    });
-                },
-                onCancel: function () {
-                    $("#" + tempDivId).remove();
-
-                    resolve(null);
-                }
+                return true;
             });
+        }, viewOptions.onPopupLoaded).then(function (pair) {
+            if (!pair.isOk)
+                return null;
 
-            if (viewOptions.onPopupLoaded != null)
-                viewOptions.onPopupLoaded(tempDiv);
+            return pair.entityHtml;
         });
     }
 
-    function basicPopupView(entityHtml, onOk) {
-        var tempDivId = exports.createTempDiv(entityHtml);
+    function openEntityHtmlModal(entityHtml, canClose, shown) {
+        if (!canClose)
+            canClose = function () {
+                return Promise.resolve(true);
+            };
 
-        var tempDiv = $("#" + tempDivId);
+        var panelPopup = entityHtml.getChild("panelPopup");
+
+        var okButtonId = entityHtml.prefix.child("btnOk");
+
+        return exports.openModal(panelPopup, function (button) {
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
+            if (button.id == okButtonId) {
+                if ($(button).hasClass("sf-save-protected") && main.hasClass("sf-changed")) {
+                    alert(lang.signum.saveChangesBeforeOrPressCancel);
+                    return Promise.resolve(false);
+                }
+
+                return canClose(true);
+            } else {
+                if (main.hasClass("sf-changed") && !confirm(lang.signum.looseCurrentChanges))
+                    return Promise.resolve(false);
+
+                return canClose(false);
+            }
+        }, shown).then(function (pair) {
+            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
+            entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
+            entityHtml.html = pair.modalDiv;
+
+            return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
+        });
+    }
+    exports.openEntityHtmlModal = openEntityHtmlModal;
+
+    function openModal(modalDiv, canClose, shown) {
+        if (!canClose)
+            canClose = function () {
+                return Promise.resolve(true);
+            };
+
+        $("body").append(modalDiv);
 
         return new Promise(function (resolve) {
-            tempDiv.popup({
-                onOk: function () {
-                    onOk($("#" + tempDivId)).then(function (result) {
-                        if (result) {
-                            var newTempDiv = $("#" + tempDivId);
-                            $("#" + tempDivId).remove();
-                            resolve(null);
-                        }
-                    });
-                },
-                onCancel: function () {
-                    var newTempDiv = $("#" + tempDivId);
-                    $("#" + tempDivId).remove();
-                    resolve(null);
-                }
+            var button = null;
+            modalDiv.on("click", ".sf-close-button", function (event) {
+                event.preventDefault();
+
+                button = this;
+
+                canClose(button).then(function (result) {
+                    if (result) {
+                        modalDiv.modal("hide");
+                    }
+                });
+            });
+
+            modalDiv.on("hidden.bs.modal", function (event) {
+                modalDiv.remove();
+
+                resolve({ button: button, modalDiv: modalDiv });
+            });
+
+            if (shown)
+                modalDiv.on("shown.bs.modal", function (event) {
+                    shown(modalDiv);
+                });
+
+            modalDiv.modal({
+                keyboard: false,
+                backdrop: "static"
             });
         });
     }
-    exports.basicPopupView = basicPopupView;
+    exports.openModal = openModal;
 
     function requestAndReload(prefix, options) {
         options = $.extend({
@@ -233,39 +242,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.getEmptyEntityHtml = getEmptyEntityHtml;
 
     function reloadMain(entityHtml) {
-        var $elem = $("#divNormalControl");
+        var $elem = $("#divMainPage");
         $elem.html(entityHtml.html);
-        SF.triggerNewContent($elem);
     }
     exports.reloadMain = reloadMain;
 
     function closePopup(prefix) {
-        var tempDivId = SF.compose(prefix, "Temp");
+        var tempDivId = prefix.child("Temp");
 
         var tempDiv = $("#" + tempDivId);
 
-        var popupOptions = tempDiv.popup();
-
-        tempDiv.popup("destroy");
-
-        tempDiv.remove();
+        tempDiv.modal("hide"); //should remove automatically
     }
     exports.closePopup = closePopup;
 
     function reloadPopup(entityHtml) {
-        var tempDivId = SF.compose(entityHtml.prefix, "Temp");
+        var panelPopupId = entityHtml.prefix.child("panelPopup");
 
-        var tempDiv = $("#" + tempDivId);
-
-        var popupOptions = tempDiv.popup();
-
-        tempDiv.popup("destroy");
-
-        tempDiv.html(entityHtml.html);
-
-        SF.triggerNewContent(tempDiv);
-
-        tempDiv.popup(popupOptions);
+        $("#" + panelPopupId).html(entityHtml.html.filter("#" + panelPopupId).children());
     }
     exports.reloadPopup = reloadPopup;
 
@@ -281,13 +275,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (SF.isEmpty(prefix))
             return false;
 
-        var tempDivId = SF.compose(prefix, "Temp");
-
-        var tempDiv = $("#" + tempDivId);
-
-        var popupOptions = tempDiv.popup();
-
-        return popupOptions.onOk == null;
+        return prefix.child("panelPopup").get().data("sf-navigate");
     }
     exports.isNavigatePopup = isNavigatePopup;
 
@@ -337,6 +325,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (options.readOnly == true)
             obj["readOnly"] = options.readOnly;
 
+        if (options.saveProtected != null)
+            obj["saveProtected"] = options.saveProtected;
+
+        if (options.showOperations != true)
+            obj["showOperations"] = false;
+
         if (!SF.isEmpty(options.partialViewName))
             obj["partialViewName"] = options.partialViewName;
 
@@ -344,8 +338,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
 
     function typeChooser(prefix, types) {
-        return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
-            return t == null ? null : t.value;
+        return exports.chooser(prefix, lang.signum.chooseAType, types, function (a) {
+            return a.niceName;
+        }, function (a) {
+            return a.name;
         });
     }
     exports.typeChooser = typeChooser;
@@ -354,8 +350,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (options.length == 1) {
             return Promise.resolve(options[0]);
         }
-
-        var tempDivId = SF.compose(prefix, "Temp");
 
         if (getStr == null) {
             getStr = function (a) {
@@ -369,34 +363,50 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             };
         }
 
-        var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'.format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
-
+        var modalBody = $("<div>");
         options.forEach(function (o) {
-            return div.append($('<button type="button" class="sf-chooser-button"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)));
+            return $('<button type="button" class="sf-chooser-button sf-close-button btn btn-default"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)).appendTo(modalBody);
         });
 
-        $("body").append(SF.hiddenDiv(tempDivId, div));
+        var modalDiv = exports.createBootstrapModal({ titleText: title, prefix: prefix, body: modalBody, titleClose: true });
 
-        var tempDiv = $("#" + tempDivId);
-
-        SF.triggerNewContent(tempDiv);
-
-        return new Promise(function (resolve, reject) {
-            tempDiv.on("click", ":button", function () {
-                var option = $(this).data("option");
-                tempDiv.remove();
-                resolve(option);
-            });
-
-            tempDiv.popup({
-                onCancel: function () {
-                    tempDiv.remove();
-                    resolve(null);
-                }
-            });
+        var option;
+        return exports.openModal(modalDiv, function (button) {
+            option = $(button).data("option");
+            return Promise.resolve(true);
+        }).then(function (pair) {
+            return option;
         });
     }
     exports.chooser = chooser;
+
+    function createBootstrapModal(options) {
+        var result = $('<div class="modal fade" tabindex="-1" role="dialog" id="' + options.prefix.child("panelPopup") + '">' + '<div class="modal-dialog modal-sm" >' + '<div class="modal-content">' + (options.title || options.titleText || options.titleClose ? ('<div class="modal-header"></div>') : '') + '<div class="modal-body"></div>' + (options.footer || options.footerOkId || options.footerCancelId ? ('<div class="modal-footer"></div>') : '') + '</div>' + '</div>' + '</div>');
+
+        if (options.titleClose)
+            result.find(".modal-header").append('<button type="button" class="close sf-close-button" aria-hidden="true">×</button>');
+
+        if (options.title)
+            result.find(".modal-header").append(options.title);
+
+        if (options.titleText)
+            result.find(".modal-header").append($('<h4 class="modal-title"></h4>').text(options.titleText));
+
+        if (options.body)
+            result.find(".modal-body").append(options.body);
+
+        if (options.footer)
+            result.find(".modal-footer").append(options.footer);
+
+        if (options.footerOkId)
+            result.find(".modal-footer").append($('<button class="btn btn-primary sf-entity-button sf-close-button sf-ok-button)">)').attr("id", options.footerOkId).text(lang.signum.ok));
+
+        if (options.footerCancelId)
+            result.find(".modal-footer").append($('<button class="btn btn-primary sf-entity-button sf-close-button sf-ok-button)">)').attr("id", options.footerCancelId).text(lang.signum.cancel));
+
+        return result;
+    }
+    exports.createBootstrapModal = createBootstrapModal;
 
     (function (ValueLineType) {
         ValueLineType[ValueLineType["Boolean"] = 0] = "Boolean";
@@ -410,32 +420,30 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     var ValueLineType = exports.ValueLineType;
 
     function valueLineBox(options) {
-        return new Promise(function (resolve) {
-            requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
-                controllerUrl: SF.Urls.valueLineBox,
-                requestExtraJsonData: options
-            }).then(function (eHtml) {
-                var result = null;
-                exports.basicPopupView(eHtml, function (div) {
-                    var input = div.find(":input:not(:button)");
-                    if (input.length != 1)
-                        throw new Error("{0} inputs found in ValueLineBox".format(input.length));
+        return requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+            controllerUrl: SF.Urls.valueLineBox,
+            requestExtraJsonData: options
+        }).then(function (eHtml) {
+            return exports.openEntityHtmlModal(eHtml);
+        }).then(function (pair) {
+            if (!pair.isOk)
+                return null;
 
-                    result = input.val();
-                    return Promise.resolve(true);
-                }).then(function () {
-                    return resolve(result);
-                });
-            });
+            var html = pair.entityHtml.html;
+
+            var date = html.find(options.prefix.child("Date"));
+            var time = html.find(options.prefix.child("Time"));
+
+            if (date.length && time.length)
+                return date.val() + " " + time.val();
+
+            var input = pair.entityHtml.html.find(":input:not(:button)");
+            if (input.length != 1)
+                throw new Error("{0} inputs found in ValueLineBox".format(input.length));
+
+            return input.val();
         });
     }
     exports.valueLineBox = valueLineBox;
-
-    once("widgetToggler", function () {
-        return $(document).on("click", ".sf-widget-toggler", function (evt) {
-            SF.Dropdowns.toggle(evt, this, 1);
-            return false;
-        });
-    });
 });
 //# sourceMappingURL=Navigator.js.map

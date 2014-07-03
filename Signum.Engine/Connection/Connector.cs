@@ -86,7 +86,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".Formato(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
-                            p.Value.TryCC(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
+                            p.Value.Try(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
                 log.WriteLine();
             }
         }

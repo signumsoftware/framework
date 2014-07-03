@@ -71,6 +71,7 @@ namespace Signum.Engine.DynamicQuery
             //AssertQueryAllowed(queryName);
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
+    
 
         T Execute<T>(string description, object queryName, Func<DynamicQueryBucket, T> executor)
         {
@@ -81,7 +82,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     var qb = GetQuery(queryName);
 
-                    return executor(qb); 
+                    return executor(qb);
                 }
                 catch (Exception e)
                 {

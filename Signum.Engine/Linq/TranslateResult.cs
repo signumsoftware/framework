@@ -115,6 +115,7 @@ namespace Signum.Engine.Linq
                         var results = lookUp[kvp.Key];
 
                         kvp.Value.AddRange(results);
+                        kvp.Value.PostRetrieving();
                         kvp.Value.Modified = ms;
                     }
                 }

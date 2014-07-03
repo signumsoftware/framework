@@ -402,12 +402,12 @@ namespace Signum.Engine.Linq
         {
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".Formato(
                 IsDistinct ? "DISTINCT " : "",
-                Top.TryCC(t => "TOP {0} ".Formato(t.NiceToString())),
-                Columns.TryCC(c => c.ToString(", ")),
-                From.TryCC(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
-                Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
-                OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
-                GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
+                Top.Try(t => "TOP {0} ".Formato(t.NiceToString())),
+                Columns.Try(c => c.ToString(", ")),
+                From.Try(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                Where.Try(a => "WHERE " + a.NiceToString() + "\r\n"),
+                OrderBy.Try(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
+                GroupBy.Try(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
                 SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
                 Alias);
         }
@@ -1032,7 +1032,7 @@ namespace Signum.Engine.Linq
             return "DELETE {0}\r\nFROM {1}\r\n{2}".Formato(
                 Table.Name, 
                 Source.NiceToString(), 
-                Where.TryCC(w => "WHERE " + w.NiceToString())); 
+                Where.Try(w => "WHERE " + w.NiceToString())); 
         }
     }
 
@@ -1058,7 +1058,7 @@ namespace Signum.Engine.Linq
                 Table.Name,
                 Assigments.ToString("\r\n"),
                 Source.NiceToString(),
-                Where.TryCC(w => "WHERE " + w.NiceToString()));
+                Where.Try(w => "WHERE " + w.NiceToString()));
         }
     }
 

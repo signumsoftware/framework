@@ -17,7 +17,7 @@ namespace Signum.Web
     {
         public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IIdentifiable> lite)
         {
-            return helper.Hidden(name, lite.Key());
+            return helper.Hidden(name, lite.KeyLong());
         }
 
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)

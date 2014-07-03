@@ -22,12 +22,15 @@ namespace Signum.Windows
         public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
             var disp = Dispatcher.CurrentDispatcher;
-           
+
+            var context = Statics.ExportThreadContext();
             Action action = () =>
             {
                 try
                 {
-                    backgroundThread();
+                    using (Statics.SetThreadContext(context))
+                        backgroundThread();
+
                     if (endAction != null)
                         disp.Invoke(DispatcherPriority.Normal, endAction);
                 }
@@ -157,6 +160,16 @@ namespace Signum.Windows
             }
 
             return threadWindows.Any();
+        }
+
+        internal static System.Windows.Controls.Control GetCurrentWindow()
+        {
+            var win = threadWindows.TryGetC(Thread.CurrentThread);
+
+            if (win == null)
+                return null;
+            
+            return win;
         }
     }
 }

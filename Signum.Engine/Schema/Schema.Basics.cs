@@ -158,13 +158,29 @@ namespace Signum.Engine.Maps
 
         public List<Index> GeneratAllIndexes()
         {
-            var result = Fields.SelectMany(f => f.Value.Field.GeneratIndexes(this)).ToList();
-
+            IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
             if (Mixins != null)
-                result.AddRange(Mixins.SelectMany(f => f.Value.GeneratIndexes(this)).ToList());
+                fields = fields.Concat(Mixins.Values.SelectMany(m => m.Fields.Values));
+
+            var result = fields.SelectMany(f => f.Field.GeneratIndexes(this)).ToList();
 
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
+
+            if (result.OfType<UniqueIndex>().Any())
+            {
+                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToAllUniqueIndexesAttribute>() != null)
+                   .SelectMany(f => Index.GetColumnsFromFields(f.Field))
+                   .ToList();
+
+                if (attachedFields.Any())
+                {
+                    foreach (var ui in result.OfType<UniqueIndex>())
+                    {
+                        ui.Columns = ui.Columns.Concat(attachedFields).ToArray();
+                    }
+                }
+            }
 
             return result;
         }
@@ -179,13 +195,13 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public IEnumerable<RelationalTable> RelationalTables()
+        public IEnumerable<TableMList> TablesMList()
         {
-            var tables = Fields.Values.SelectMany(a => a.Field.RelationalTables(a.Getter)).ToList();
+            var tables = Fields.Values.SelectMany(a => a.Field.TablesMList(a.Getter)).ToList();
 
             if (Mixins != null)
                 tables.AddRange(from m in Mixins.Values
-                                from rt in m.RelationalTables(m.Getter)
+                                from rt in m.TablesMList(m.Getter)
                                 select rt);
 
             return tables; 
@@ -197,7 +213,7 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnDatabase(databaseName);
 
-            foreach (var item in RelationalTables())
+            foreach (var item in TablesMList())
                 item.ToDatabase(databaseName);
         }
 
@@ -205,7 +221,7 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnSchema(schemaName);
 
-            foreach (var item in RelationalTables())
+            foreach (var item in TablesMList())
                 item.ToSchema(schemaName);
         }
     }
@@ -258,7 +274,7 @@ namespace Signum.Engine.Maps
 
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
-        internal abstract IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter); 
+        internal abstract IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter); 
     }
 
     public enum IndexType
@@ -362,9 +378,9 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -406,9 +422,9 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -498,9 +514,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return EmbeddedFields.Values.SelectMany(e => e.Field.RelationalTables(obj =>
+            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList(obj =>
             {
                 var embedded = getter(obj);
 
@@ -563,7 +579,7 @@ namespace Signum.Engine.Maps
 
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
-            return this.Fields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
+            throw new InvalidOperationException();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -577,9 +593,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Fields.Values.SelectMany(e => e.Field.RelationalTables(ident => e.Getter(getter(ident))));
+            return Fields.Values.SelectMany(e => e.Field.TablesMList(ident => e.Getter(getter(ident))));
         }
 
         internal MixinEntity Getter(IdentifiableEntity ident)
@@ -653,9 +669,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -686,9 +702,9 @@ namespace Signum.Engine.Maps
             });
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -742,9 +758,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -755,13 +771,13 @@ namespace Signum.Engine.Maps
         public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public ImplementationColumn Column { get; set; }
-        public ImplementationColumn ColumnTypes { get; set; }
+        public ImplementationColumn ColumnType { get; set; }
 
         public FieldImplementedByAll(Type fieldType) : base(fieldType) { }
 
         public override IEnumerable<IColumn> Columns()
         {
-            return new[] { Column, ColumnTypes };
+            return new[] { Column, ColumnType };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -787,14 +803,14 @@ namespace Signum.Engine.Maps
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType == Maps.IndexType.None)
-                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnTypes) };
+                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
 
             return base.GeneratIndexes(table);
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            return Enumerable.Empty<RelationalTable>();
+            return Enumerable.Empty<TableMList>();
         }
     }
 
@@ -813,19 +829,19 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList : Field, IFieldFinder
     {
-        public RelationalTable RelationalTable { get; set; }
+        public TableMList TableMList { get; set; }
 
         public FieldMList(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
-            return "Coleccion\r\n{0}".Formato(RelationalTable.ToString().Indent(2));
+            return "Coleccion\r\n{0}".Formato(TableMList.ToString().Indent(2));
         }
 
         public Field GetField(MemberInfo member)
         {
             if (member.Name == "Item")
-                return RelationalTable.Field;
+                return TableMList.Field;
 
             throw new InvalidOperationException("{0} not supported by MList field".Formato(member.Name));
         }
@@ -833,7 +849,7 @@ namespace Signum.Engine.Maps
         public Field TryGetField(MemberInfo member)
         {
             if (member.Name == "Item")
-                return RelationalTable.Field;
+                return TableMList.Field;
 
             return null;
         }
@@ -853,22 +869,22 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            foreach (var kvp in RelationalTable.Field.GetTables())
+            foreach (var kvp in TableMList.Field.GetTables())
             {
                 kvp.Value.IsCollection = true;
                 yield return kvp;
             }
         }
 
-        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
         {
-            RelationalTable.FullGetter = getter;
+            TableMList.FullGetter = getter;
 
-            return new[] { RelationalTable };
+            return new[] { TableMList };
         }
     }
 
-    public partial class RelationalTable : ITable, IFieldFinder, ITablePrivate
+    public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     {
         public class PrimaryKeyColumn : IColumn
         {
@@ -896,7 +912,7 @@ namespace Signum.Engine.Maps
 
         public Func<IdentifiableEntity, object> FullGetter { get; internal set; }
 
-        public RelationalTable(Type collectionType)
+        public TableMList(Type collectionType)
         {
             this.CollectionType = collectionType;
         }

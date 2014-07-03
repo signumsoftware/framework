@@ -41,7 +41,8 @@ namespace Signum.Entities.Reflection
             DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
 
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
-            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsOperationMessageOrQuery;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsQuery;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsSymbolContainer;
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
 
             DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
@@ -77,9 +78,16 @@ namespace Signum.Entities.Reflection
              return t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
-        static DescriptionOptions? DescriptionManager_IsOperationMessageOrQuery(Type t)
+        static DescriptionOptions? DescriptionManager_IsQuery(Type t)
         {
-            return t.IsEnum && (t.Name.EndsWith("Operation") || t.Name.EndsWith("Query")) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+            return t.IsEnum && t.Name.EndsWith("Query") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
+
+        static DescriptionOptions? DescriptionManager_IsSymbolContainer(Type t)
+        {
+            return t.IsAbstract && t.IsSealed && 
+                t.GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Any(a => typeof(Symbol).IsAssignableFrom(a.FieldType) || typeof(IOperationSymbolContainer).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)
@@ -155,7 +163,7 @@ namespace Signum.Entities.Reflection
         {
             Dictionary<string, PropertyInfo> properties = new Dictionary<string,PropertyInfo>();
 
-            foreach (var t in type.FollowC(t => t.BaseType).Reverse())
+            foreach (var t in type.Follow(t => t.BaseType).Reverse())
             {
                 foreach (var pi in PublicInstanceDeclaredPropertiesInOrder(t))
 	            {
@@ -181,7 +189,7 @@ namespace Signum.Entities.Reflection
 
         public static MemberInfo[] GetMemberListBase(Expression e)
         {
-            return e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
+            return e.Follow(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
         }
 
         static Expression NextExpression(Expression e)
@@ -355,6 +363,10 @@ namespace Signum.Entities.Reflection
                 DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
                 if (datetimePrecission != null)
                     return datetimePrecission.FormatString;
+
+                TimeSpanPrecissionValidatorAttribute timeSpanPrecission = pp.Validators.OfType<TimeSpanPrecissionValidatorAttribute>().SingleOrDefaultEx();
+                if (timeSpanPrecission != null)
+                    return timeSpanPrecission.FormatString;
 
                 DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)

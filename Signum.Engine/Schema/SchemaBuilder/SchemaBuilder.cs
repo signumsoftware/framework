@@ -83,7 +83,7 @@ namespace Signum.Engine.Maps
         {
             Schema schema = Schema.Current;
 
-            RelationalTable table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).RelationalTable;
+            TableMList table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
             IColumn[] columns = Split(table, fields);
 
@@ -192,12 +192,12 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
                 if (type.IsAbstract)
-                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
                 if (!Reflector.IsIdentifiableEntity(type))
-                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
 
-                foreach (var t in type.FollowC(a => a.BaseType))
+                foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
                         throw new InvalidOperationException("Type {0} is not marked as serializable".Formato(t.TypeName()));
 
@@ -208,7 +208,7 @@ namespace Signum.Engine.Maps
                 string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
 
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
@@ -248,7 +248,7 @@ namespace Signum.Engine.Maps
         {
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
              .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
-             .Select(m => m.SingleAttribute<ExpressionFieldAttribute>().TryCC(a => a.Name) ?? m.Name + "Expression").ToList();
+             .Select(m => m.SingleAttribute<ExpressionFieldAttribute>().Try(a => a.Name) ?? m.Name + "Expression").ToList();
 
             var fields = methodBase.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));
@@ -334,7 +334,7 @@ namespace Signum.Engine.Maps
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
 
-            KindOfField kof = GetKindOfField(route).ThrowIfNullS("Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
+            KindOfField kof = GetKindOfField(route).ThrowIfNull("Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
 
             if(kof == KindOfField.MList && inMList)
                 throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".Formato(route, route.Type.TypeName(), kof));
@@ -470,7 +470,7 @@ namespace Signum.Engine.Maps
 
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
-            CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().TryCS(s => s.Strategy) ?? 
+            CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().Try(s => s.Strategy) ?? 
                 CombineStrategy.Switch;
 
             return new FieldImplementedBy(route.Type)
@@ -501,7 +501,7 @@ namespace Signum.Engine.Maps
                     Nullable = nullable,
                     ReferenceTable = null,
                 },
-                ColumnTypes = new ImplementationColumn
+                ColumnType = new ImplementationColumn
                 {
                     Name = preName.Add("Type").ToString(),
                     Nullable = nullable,
@@ -518,7 +518,7 @@ namespace Signum.Engine.Maps
 
             Type type = route.Parent.Type;
 
-            RelationalTable relationalTable = new RelationalTable(route.Type)
+            TableMList relationalTable = new TableMList(route.Type)
             {
                 Name = GenerateTableNameCollection(table, name),
                 BackReference = new FieldReference(table.Type)
@@ -526,7 +526,7 @@ namespace Signum.Engine.Maps
                     Name = GenerateBackReferenceName(type),
                     ReferenceTable = table
                 },
-                PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
+                PrimaryKey = new TableMList.PrimaryKeyColumn(),
                 Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 
@@ -534,7 +534,7 @@ namespace Signum.Engine.Maps
 
             return new FieldMList(route.Type)
             {
-                RelationalTable = relationalTable,
+                TableMList = relationalTable,
             };
         }
 

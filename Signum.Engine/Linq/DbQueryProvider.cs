@@ -135,9 +135,10 @@ namespace Signum.Engine.Linq
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
                 Expression cleaned = Clean(updateable.Query.Expression, true, log);
+
                 var binder = new QueryBinder(aliasGenerator);
                 log.Switch("Bind");
-                CommandExpression update = binder.BindUpdate(cleaned, updateable.PartSelector, updateable.SetterExpressions);
+                CommandExpression update = binder.BindUpdate(cleaned, updateable.PartSelector,  updateable.SetterExpressions );
                 CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, aliasGenerator, log);
                 CommandExpression updateSimplified = CommandSimplifier.Simplify(updateOptimized, removeSelectRowCount, aliasGenerator);
                 log.Switch("TR");

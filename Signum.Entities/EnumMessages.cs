@@ -118,29 +118,27 @@ Lose changes?")]
     public enum SearchMessage
     {
         ChooseTheDisplayNameOfTheNewColumn,
-        CreateNew,
         Field,
         [Description("Add column")]
-        FilterBuilder_AddColumn,
+        AddColumn,
         [Description("Add filter")]
-        FilterBuilder_AddFilter,
-        [Description("Delete Filter")]
-        FilterBuilder_DeleteFilter,
+        AddFilter,
+        [Description("Delete filter")]
+        DeleteFilter,
         Filters,
         Find,
         [Description("Finder of {0}")]
         FinderOf0,
         Name,
-        [Description("New Column")]
+        [Description("New column")]
         NewColumn,
-        [Description("New Column's Name")]
+        [Description("New column's Name")]
         NewColumnSName,
-        [Description("New Filter")]
+        [Description("New filter")]
         NewFilter,
         NoActionsFound,
         NoColumnSelected,
         NoFiltersSpecified,
-        NoResults,
         [Description("of")]
         Of,
         Operation,
@@ -159,6 +157,8 @@ Lose changes?")]
         _01of2Results,
         Search,
         Create,
+        [Description("Create new {0}")]
+        CreateNew0,
         [Description("All")]
         SearchControl_Pagination_All,
         SelectAnElement,
@@ -169,7 +169,8 @@ Lose changes?")]
         [Description("View Selected")]
         ViewSelected,
         Operations,
-        Processes
+        Processes,
+        NoResultsFound
     }
 
     public enum SelectorMessage
@@ -212,26 +213,21 @@ Lose changes?")]
 
 
     public enum CalendarMessage
-    {
-        [Description("Done")]
-        CalendarClose,
-        [Description("Next")]
-        CalendarNext,
-        [Description("Prev")]
-        CalendarPrevious,
+    {  
         [Description("Today")]
-        CalendarToday,
-        ShowCalendar
+        Today,
     }
 
     public enum JavascriptMessage
     {
+        [Description("Choose a type")]
         chooseAType,
+        [Description("Choose a value")]
         chooseAValue,
         [Description("Add filter")]
         addFilter,
-        [Description("Edit column name")]
-        editColumnName,
+        [Description("Rename column")]
+        renameColumn,
         [Description("Enter the new column name")]
         enterTheNewColumnName,
         [Description("Error")]
@@ -242,15 +238,18 @@ Lose changes?")]
         hideFilters,
         [Description("Loading...")]
         loading,
-        [Description(@"There are changes that haven't been saved. 
-Lose changes?")]
-        loseChanges,
+        [Description("No actions found")]
+        noActionsFound,
+        [Description("Save changes before or press cancel")]
+        saveChangesBeforeOrPressCancel,
+        [Description("Loose current changes?")]
+        looseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
-        [Description("No results found")]
-        noResults,
-        [Description("You can select only one element")]
-        onlyOneElement,
+        [Description("Seach for results")]
+        searchForResults,
+        [Description("Select only one element")]
+        selectOnlyOneElement,
         [Description("There are errors in the entity, you want to continue?")]
         popupErrors,
         [Description("There are errors in the entity")]
@@ -265,8 +264,8 @@ Lose changes?")]
         saved,
         [Description("Search")]
         search,
-        [Description("selected")]
-        searchControlMenuSelected,
+        [Description("Selected")]
+        Selected,
         [Description("Select a token")]
         selectToken,
         [Description("Show filters")]
@@ -285,6 +284,12 @@ Lose changes?")]
         moveUp,
         [Description("Navigate")]
         navigate,
+        [Description("New entity")]
+        newEntity,
+        [Description("Ok")]
+        ok,
+        [Description("Cancel")]
+        cancel,
     }
 
     public enum QuickLinkMessage

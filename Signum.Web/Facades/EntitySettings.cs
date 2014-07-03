@@ -25,12 +25,12 @@ namespace Signum.Web
         public abstract Delegate UntypedMappingLine { get; }
         public abstract Delegate UntypedMappingMain { get; }
 
-        internal abstract bool OnIsCreable(bool isSearchEntity);
+        internal abstract bool OnIsCreable(bool isSearch);
         internal abstract bool OnIsViewable(string partialViewName);
-        internal abstract bool OnIsNavigable(string partialViewName, bool isSearchEntity);
+        internal abstract bool OnIsNavigable(string partialViewName, bool isSearch);
         internal abstract bool OnIsReadonly();
 
-        public ViewOverrides ViewOverrides { get; set; }
+        public abstract IViewOverrides GetViewOverrides();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
 
@@ -65,6 +65,9 @@ namespace Signum.Web
 
         public override string OnPartialViewName(ModifiableEntity entity)
         {
+            if (PartialViewName == null)
+                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+
             return PartialViewName((T)entity);
         }
         
@@ -97,9 +100,9 @@ namespace Signum.Web
                     break;
 
                 case EntityKind.String:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = false;
-                    IsNavigable = EntityWhen.IsSearchEntity;
+                    IsNavigable = EntityWhen.IsSearch;
                     MappingMain = new EntityMapping<T>(true).GetValue;
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
@@ -112,7 +115,7 @@ namespace Signum.Web
                     break;
 
                 case EntityKind.Main:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
@@ -137,9 +140,9 @@ namespace Signum.Web
             }
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsCreable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsViewable(string partialViewName)
@@ -150,17 +153,30 @@ namespace Signum.Web
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearch)
         {
             if (partialViewName == null && PartialViewName == null)
                 return false;
 
-            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsNavigable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsReadonly()
         {
             return IsReadonly;
+        }
+
+
+        ViewOverrides<T> viewOverride;
+
+        public ViewOverrides<T> CreateViewOverride()
+        {
+            return viewOverride ?? (viewOverride = new ViewOverrides<T>());
+        }
+
+        public override IViewOverrides GetViewOverrides()
+        {
+            return viewOverride;
         }
     }
 
@@ -186,6 +202,9 @@ namespace Signum.Web
 
         public override string OnPartialViewName(ModifiableEntity entity)
         {
+            if (PartialViewName == null)
+                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+
             return PartialViewName((T)entity);
         }
         
@@ -197,10 +216,10 @@ namespace Signum.Web
             IsCreable = true;
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            if (isSearchEntity)
-                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearchEntity");
+            if (isSearch)
+                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearch");
 
             return IsCreable;
         }
@@ -213,7 +232,7 @@ namespace Signum.Web
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearch)
         {
             return false;
         }
@@ -232,12 +251,17 @@ namespace Signum.Web
 
             return ModelEntity.GetImplementations(route); 
         }
+
+        public override IViewOverrides GetViewOverrides()
+        {
+ 	        return null; //not implemented
+        }
     }
 
     public enum EntityWhen
     {
         Always = 3,
-        IsSearchEntity = 2,
+        IsSearch = 2,
         IsLine = 1,
         Never = 0,
     }

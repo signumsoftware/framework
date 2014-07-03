@@ -18,15 +18,13 @@ namespace Signum.Web.Controllers
             
             PropertyRoute route = (rootType.HasText() || propertyRoute.HasText()) ? PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute) : PropertyRoute.Root(mod.GetType());
 
-            MappingContext context = mod.UntypedApplyChanges(ControllerContext, admin: true, route: route).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
+            MappingContext context = mod.UntypedApplyChanges(this, route: route).UntypedValidateGlobal();
 
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
             string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;
             string newToStr = context.UntypedValue.ToString();
 
-            return JsonAction.ModelState(ModelState, newToStr, newLink);
+            return context.ToJsonModelState(newToStr, newLink);
         }
     }
 }

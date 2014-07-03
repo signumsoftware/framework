@@ -9,8 +9,6 @@ define(["require", "exports"], function(require, exports) {
     exports.Keys = {
         tabId: "sfTabId",
         antiForgeryToken: "__RequestVerificationToken",
-        entityTypeNames: "sfEntityTypeNames",
-        entityTypeNiceNames: "sfEntityTypeNiceNames",
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
@@ -61,21 +59,12 @@ define(["require", "exports"], function(require, exports) {
             return this.type + ";" + this.id;
         };
 
-        RuntimeInfo.getHiddenInput = function (prefix, context) {
-            var result = $('#' + SF.compose(prefix, exports.Keys.runtimeInfo), context);
-
-            if (result.length != 1)
-                throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, exports.Keys.runtimeInfo)));
-
-            return result;
-        };
-
         RuntimeInfo.getFromPrefix = function (prefix, context) {
-            return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+            return RuntimeInfo.parse(prefix.child(exports.Keys.runtimeInfo).get().val());
         };
 
         RuntimeInfo.setFromPrefix = function (prefix, runtimeInfo, context) {
-            RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null ? "" : runtimeInfo.toString());
+            prefix.child(exports.Keys.runtimeInfo).get().val(runtimeInfo == null ? "" : runtimeInfo.toString());
         };
         return RuntimeInfo;
     })();
@@ -91,10 +80,13 @@ define(["require", "exports"], function(require, exports) {
             this.link = link;
         }
         EntityValue.prototype.assertPrefixAndType = function (prefix, types) {
-            if (types.length == 0 && types[0] == "[All]")
+            var _this = this;
+            if (types == null)
                 return;
 
-            if (types.indexOf(this.runtimeInfo.type) == -1)
+            if (!types.some(function (ti) {
+                return ti.name == _this.runtimeInfo.type;
+            }))
                 throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
         };
 
@@ -128,6 +120,14 @@ define(["require", "exports"], function(require, exports) {
 
         EntityHtml.prototype.loadHtml = function (htmlText) {
             this.html = $('<div/>').html(htmlText).contents();
+        };
+
+        EntityHtml.prototype.getChild = function (pathPart) {
+            return this.prefix.child(pathPart).get(this.html);
+        };
+
+        EntityHtml.prototype.tryGetChild = function (pathPart) {
+            return this.prefix.child(pathPart).tryGet(this.html);
         };
 
         EntityHtml.fromHtml = function (prefix, htmlText) {

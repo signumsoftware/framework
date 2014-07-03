@@ -158,8 +158,8 @@ namespace Signum.Utilities
         {
             if (line.Contains('-'))
             {
-                int? from = line.Before('-').TryCS(s => s.HasText() ? GetIndex(s) : (int?)null);
-                int? to = line.After('-').TryCS(s => s.HasText() ? GetIndex(s) : (int?)null);
+                int? from = line.Before('-').Try(s => s.HasText() ? GetIndex(s) : (int?)null);
+                int? to = line.After('-').Try(s => s.HasText() ? GetIndex(s) : (int?)null);
 
                 if (from == null && to == null)
                     return Enumerable.Empty<WithDescription<V>>();

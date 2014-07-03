@@ -24,16 +24,31 @@ namespace Signum.Web
     {
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html)
         {
-            return new HtmlTag("div")
-                    .Id("sfGlobalValidationSummary")
-                    .ToHtml();
+            return new HtmlTag("div", "sfGlobalValidationSummary").ToHtml();
         }
 
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return new HtmlTag("div")
-                .Id(context.Compose("sfGlobalValidationSummary"))
-                .ToHtml();
+            return new HtmlTag("div", context.Compose("sfGlobalValidationSummary")).ToHtml();
+        }
+
+        public static MvcHtmlString ValudationSummaryStatic(this HtmlHelper html)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div", "sfGlobalValidationSummary")))
+            {
+                if (html.ViewData.ModelState.Any(x => x.Value.Errors.Any()))
+                {
+                    using (sb.Surround(new HtmlTag("ul").Class("validaton-summary alert alert-danger")))
+                    {
+                        foreach (var str in html.ViewData.ModelState.SelectMany(a => a.Value.Errors))
+                        {
+                            sb.Add(new HtmlTag("li").SetInnerText(str.ErrorMessage));
+                        }
+                    }
+                }
+            }
+            return sb.ToHtml();
         }
 
         public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)
@@ -50,81 +65,78 @@ namespace Signum.Web
             }).Attrs(htmlAttributes).ToHtmlSelf();
         }
 
-        public static MvcHtmlString FieldString(this HtmlHelper html, string label, string value)
+        public static MvcHtmlString FormGroupStatic(this HtmlHelper html, Context context, string controlId, string label, string text)
         {
-            var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("sf-value-line").ToHtml();
-            return Field(html, label, span);
+            var span = html.FormControlStatic(controlId, text);
+            return FormGroup(html, context, controlId, label, span);
         }
 
-        public static MvcHtmlString Field(this HtmlHelper html, string label, MvcHtmlString value)
+        public static MvcHtmlString FormControlStatic(this HtmlHelper html, string controlId, string text, IDictionary<string, object> htmlProps = null)
         {
-            HtmlTag field = new HtmlTag("div")
-                                    .Class("sf-field");
-
-            HtmlTag labelLine = new HtmlTag("div")
-                                    .Class("sf-label-line")
-                                    .SetInnerText(label);
-
-            HtmlTag valueLine = new HtmlTag("div")
-                        .Class("sf-value-container")
-                        .InnerHtml(value);
-
-            field.InnerHtml(labelLine.ToHtml().Concat(valueLine.ToHtml()));
-
-            return field.ToHtml();
+            return new HtmlTag("p").Id(controlId).SetInnerText(text).Class("form-control-static").Attrs(htmlProps).ToHtml();
         }
 
-        public static IDisposable FieldInline(this HtmlHelper html)
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, Func<object, HelperResult> value)
         {
-            return FieldInline(html, null);
+            StringWriter writer = new StringWriter();
+            value(null).WriteTo(writer);
+            return FormGroup(html, context, controlId, label, MvcHtmlString.Create(writer.ToString()));
         }
 
-        public static IDisposable FieldInline(this HtmlHelper html, string fieldTitle)
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, MvcHtmlString value)
         {
-            TextWriter writer = html.ViewContext.Writer;
+            if (context.FormGroupStyle == FormGroupStyle.None)
+                return value;
 
-            HtmlTag div = new HtmlTag("div").Class("sf-field");
+            var attrs = context is BaseLine ? ((BaseLine)context).FormGroupHtmlProps : null;
 
-            writer.Write(div.ToHtml(TagRenderMode.StartTag));
-            if (fieldTitle != null)
-                writer.Write(new HtmlTag("label").Class("sf-label-line").SetInnerText(fieldTitle).ToHtml(TagRenderMode.Normal));
-
-            HtmlTag div2 = new HtmlTag("div").Class("sf-value-container sf-value-inline");
-            writer.Write(div2.ToHtml(TagRenderMode.StartTag));
-
-            return new Disposable(() =>
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div").Class("form-group").Attrs(attrs)))
             {
-                writer.Write(div2.ToHtml(TagRenderMode.EndTag));
-                writer.Write(div.ToHtml(TagRenderMode.EndTag));
-            }); 
-        }
+                var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 
-        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
-        {
-            return CheckBox(html, name, value, enabled, null);
-        }
+                if (context.FormGroupStyle == FormGroupStyle.SrOnly)
+                    lbl.Class("sr-only");
+                else if (context.FormGroupStyle == FormGroupStyle.LabelColumns)
+                    lbl.Class("control-label").Class(context.LabelColumns.ToString());
 
-        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled, IDictionary<string, object> htmlAttributes)
+                if (context.FormGroupStyle != FormGroupStyle.BasicDown)
+                    sb.AddLine(lbl);
+
+                using (context.FormGroupStyle == FormGroupStyle.LabelColumns ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
+                {
+                    sb.AddLine(value);
+                }
+
+                if (context.FormGroupStyle == FormGroupStyle.BasicDown)
+                    sb.AddLine(lbl);
+            }
+
+            return sb.ToHtml();
+        }
+        
+
+        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool isChecked, bool enabled, IDictionary<string, object> htmlAttributes = null)
         {
             if (htmlAttributes == null)
                 htmlAttributes = new Dictionary<string, object>();
 
             if (enabled)
-                return html.CheckBox(name, value, htmlAttributes);
+                return html.CheckBox(name, isChecked, htmlAttributes); //MVC CheckBox only applied disabled=disabled to the checkbox, not to the hidden value
             else
             {
                 HtmlTag checkbox = new HtmlTag("input")
-                                        .Id(name)
-                                        .Attrs(new
-                                        {
-                                            type = "checkbox",
-                                            name = name,
-                                            value = (value ? "true" : "false"),
-                                            disabled = "disabled"
-                                        })
-                                        .Attrs(htmlAttributes);
+                    .Id(name)
+                    .Attrs(new
+                    {
+                        type = "checkbox",
+                        name = name,
+                        value = (isChecked ? "true" : "false"),
+                        disabled = "disabled"
+                    })
+                    .Attrs(htmlAttributes);
 
-                if (value)
+                if (isChecked)
                     checkbox.Attr("checked", "checked");
 
                 HtmlTag hidden = new HtmlTag("input")
@@ -133,7 +145,7 @@ namespace Signum.Web
                         {
                             type = "hidden",
                             name = name,
-                            value = (value ? "true" : "false"),
+                            value = (isChecked ? "true" : "false"),
                             disabled = "disabled"
                         });
 
@@ -141,14 +153,11 @@ namespace Signum.Web
             }
         }
 
-        public static MvcHtmlString InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
+        public static TabContainer Tabs(this HtmlHelper html, TypeContext ctx, string containerId = "tabs")
         {
-            return new HtmlTag("input")
-                            .Id(id)
-                            .Attrs(new { type = inputType, name = id, value = value })
-                            .Attrs(htmlAttributes)
-                            .ToHtmlSelf();
+            return new TabContainer(html, ctx, containerId);
         }
+
 
         /// <summary>
         /// Returns a "label" label that is used to show the name of a field in a form
@@ -269,7 +278,7 @@ namespace Signum.Web
         {
             var encoded = HttpUtility.HtmlEncode(text);
 
-            if(values == null)
+            if (values == null)
                 return new MvcHtmlString(encoded);
 
             return new MvcHtmlString(string.Format(encoded,
@@ -282,36 +291,6 @@ namespace Signum.Web
                 settings = new JsonSerializerSettings() { Converters = { new LiteJavaScriptConverter() } };
 
             return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
-        }
-
-        public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText, int? marginTop = 10)
-        { 
-            var pContent = new HtmlTag("span").Class("ui-icon ui-icon-info").Attr("style", "float: left; margin-right: .3em;").ToHtml();
-            
-            if (strongText.HasText())
-                pContent = pContent.Concat(new HtmlTag("strong").SetInnerText(strongText).ToHtml());
-            
-            pContent = pContent.Concat(new MvcHtmlString(normalText));
-
-            return new HtmlTag("div").Class("ui-state-highlight ui-corner-all")
-                .Attr("style", "margin-top: {0}px; padding: 0 .7em; padding: 10px;".Formato(marginTop))
-                .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
-                .ToHtml();
-        }
-
-        public static MvcHtmlString JQueryError(this HtmlHelper helper, string strongText, string normalText)
-        {
-            var pContent = new HtmlTag("span").Class("ui-icon ui-icon-alert").Attr("style", "float: left; margin-right: .3em;").ToHtml();
-
-            if (strongText.HasText())
-                pContent = pContent.Concat(new HtmlTag("strong").SetInnerText(strongText).ToHtml());
-
-            pContent = pContent.Concat(new MvcHtmlString(normalText));
-
-            return new HtmlTag("div").Class("ui-state-error ui-corner-all")
-                .Attr("style", "margin-top: 10px; padding: 0 .7em; padding: 10px;")
-                .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
-                .ToHtml();
         }
     }
 }

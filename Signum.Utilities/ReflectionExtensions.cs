@@ -112,7 +112,7 @@ namespace Signum.Utilities
 
             return ft.GetInterfaces().PreAnd(ft)
                 .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .TryCC(ti => ti.GetGenericArguments()[0]);
+                .Try(ti => ti.GetGenericArguments()[0]);
         }
 
         public static bool IsExtensionMethod(this MethodInfo m)
@@ -135,6 +135,11 @@ namespace Signum.Utilities
 
             return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, propertyInfo.PropertyType, arguments, null);
+        }
+
+        public static bool IsStaticClass(this Type type)
+        {
+            return type.IsAbstract && type.IsSealed;
         }
     }
 }

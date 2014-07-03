@@ -408,6 +408,22 @@ namespace Signum.Entities
         }
 
         #endregion 
+
+        protected internal override void PreSaving(ref bool graphModified)
+        {
+            if (typeof(IOrderedEntity).IsAssignableFrom(typeof(T)))
+            {
+                this.ForEach((o, i) => ((IOrderedEntity)o).Order = i);
+            }
+        }
+
+        protected internal override void PostRetrieving()
+        {
+            if (typeof(IOrderedEntity).IsAssignableFrom(typeof(T)))
+            {
+                this.Sort(a => ((IOrderedEntity)a).Order);
+            }
+        }
     }
 
     internal sealed class MListDebugging<T>
@@ -438,5 +454,10 @@ namespace Signum.Entities
             return new MList<T>(collection); 
         }
 
+    }
+
+    public interface IOrderedEntity
+    {
+        int Order { get; set; }
     }
 }

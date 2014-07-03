@@ -18,25 +18,24 @@ namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(Enum key)
+        public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.Key = key; 
+            this.OperationSymbol = symbol.Operation; 
         }
 
-        public Enum Key { get; private set; }
+        public OperationSymbol OperationSymbol { get; private set; }
 
         public string Text { get; set; }
     }
 
     public class ConstructorSettings : OperationSettings
     {
-        public ConstructorSettings(Enum operationKey)
-            : base(operationKey)
+        public ConstructorSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 
-        public Func<ConstructorOperationContext, ViewResultBase> VisualConstructor { get; set; }
-        public Func<ConstructorOperationContext, IdentifiableEntity> Constructor { get; set; }
+        public Func<OperationInfo, bool> IsVisible { get; set; }
     }
 
     public class EntityOperationGroup
@@ -62,38 +61,40 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings Contextual { get; private set; }
         public double Order { get; set; }
 
-        public EntityOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public EntityOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
-            this.Contextual = new ContextualOperationSettings(operationKey);
-            this.ContextualFromMany = new ContextualOperationSettings(operationKey); 
+            this.Contextual = new ContextualOperationSettings(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings(symbol); 
         }
 
         static EntityOperationSettings()
         {
-            CssClass = _ => "sf-operation";
+            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+                oi.OperationType == OperationType.Execute && oi.OperationSymbol.Key.EndsWith(".Save") ? BootstrapStyle.Primary :
+                BootstrapStyle.Default;
         }
 
-        public static Func<Enum, string> CssClass { get; set; }
+        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 
         public Func<EntityOperationContext, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
-        public Func<EntityOperationContext, JsOperationFunction> OnClick { get; set; }
+        public Func<EntityOperationContext, JsFunction> OnClick { get; set; }
     }
 
     public class ContextualOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings(Enum operationKey)
-            : base(operationKey)
+        public ContextualOperationSettings(IOperationSymbolContainer symbol)
+            : base(symbol)
         {
         }
 
         public double Order { get; set; }
         public Func<ContextualOperationContext, string> ConfirmMessage { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
-        public Func<ContextualOperationContext, JsOperationFunction> OnClick { get; set; }
+        public Func<ContextualOperationContext, JsFunction> OnClick { get; set; }
 
     }
 
@@ -102,12 +103,8 @@ namespace Signum.Web.Operations
         public string Prefix { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public UrlHelper Url { get; set; }
-    }
 
-    public class ConstructorOperationContext : OperationContext
-    {
-        public VisualConstructStyle PreferredStyle { get; set; }
-        public ControllerBase Controller { get; set; }
+        public abstract JsOperationOptions Options();
     }
 
     public class EntityOperationContext : OperationContext
@@ -119,9 +116,9 @@ namespace Signum.Web.Operations
         public ViewMode ViewButtons { get; internal set; }
         public bool ShowOperations { get; set; }
 
-        public JsOperationOptions Options()
+        public override JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix) { isLite = OperationInfo.Lite };
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -148,9 +145,9 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings OperationSettings { get; set; }
         public string CanExecute { get; set; }
 
-        public JsOperationOptions Options()
+        public override JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix){ isLite = OperationInfo.Lite};
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -161,9 +158,9 @@ namespace Signum.Web.Operations
 
     public class JsOperationOptions
     {
-        public JsOperationOptions(Enum operationKey, string prefix)
+        public JsOperationOptions(OperationSymbol operation, string prefix)
         {
-            this.operationKey = OperationDN.UniqueKey(operationKey);
+            this.operationKey = operation.Key;
             this.prefix = prefix;
         }
 
@@ -177,37 +174,5 @@ namespace Signum.Web.Operations
         public string confirmMessage;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string controllerUrl; 
-    }
-
-    public class JsOperationFunction : JsFunction
-    {
-        /// <summary>
-        /// require("module", function(mod) { mod.functionName(operationOptions, arguments...); }
-        /// </summary>
-        public JsOperationFunction(string module, string functionName, params object[] arguments) :
-            base(module, functionName, arguments)
-        {
-        }
-
-        JsOperationOptions operationOptions;
-        internal JsOperationFunction SetOptions(JsOperationOptions operationOptions)
-        {
-            this.operationOptions = operationOptions;
-            return this;
-        }
-
-        public override string ToString()
-        {
-            if (operationOptions == null)
-                throw new InvalidOperationException("Attempt to call JsOperationFunction.ToString without JsOperationFunction. Consider using JsFunction instead.");
-
-            var varName = VarName(Module);
-
-            var options = JsonConvert.SerializeObject(this.operationOptions, JsonSerializerSettings);
-
-            var args = string.IsNullOrEmpty(Arguments) ? null : (", " + Arguments);
-
-            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + options + args + "); });";
-        }
     }
 }

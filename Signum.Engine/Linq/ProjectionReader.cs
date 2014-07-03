@@ -119,7 +119,7 @@ namespace Signum.Engine.Linq
         public IEnumerator<T> GetEnumerator()
         {
             return Interlocked.Exchange(ref enumerator, null)
-                .ThrowIfNullC("Cannot enumerate more than once");
+                .ThrowIfNull("Cannot enumerate more than once");
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -51,13 +51,14 @@ namespace Signum.Web
             Autocomplete = false;
         }
 
-        protected override JObject OptionsJSInternal()
+        protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
 
             if (AutocompleteUrl.HasText())
                 result.Add("autoCompleteUrl", AutocompleteUrl);
 
+            result.Add("vertical", Vertical);
             return result;
         }
     }

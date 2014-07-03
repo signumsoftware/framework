@@ -13,90 +13,48 @@ using Newtonsoft.Json.Linq;
 
 namespace Signum.Web
 {
-   
-
     static class QuickLinkWidgetHelper
     {  
-        internal static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
+        internal static IWidget CreateWidget(WidgetContext ctx)
         {
-            if (identifiable.IsNew)
+            var ident = ctx.Entity as IdentifiableEntity;
+
+            if(ident == null || ident.IsNew)
                 return null;
 
-            List<QuickLink> quicklinks = LinksClient.GetForEntity(identifiable.ToLiteFat(), partialViewName, prefix);
+            List<QuickLink> quicklinks = LinksClient.GetForEntity(ident.ToLiteFat(), ctx.PartialViewName, ctx.Prefix);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-menu-button sf-widget-content sf-quicklinks")))
+            return new Widget 
             {
-                foreach (var q in quicklinks)
-                {
-                    using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
-                    {
-                        content.Add(q.Execute());
-                    }
-                }
-            }
-
-            HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-quicklink-toggler").Attr("title", QuickLinkMessage.Quicklinks.NiceToString())))
-            {
-                label.Add(new HtmlTag("span")
-                    .Class("ui-icon ui-icon-star")
-                    .InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml())
-                    .ToHtml());
-
-                label.Add(new HtmlTag("span")
-                    .Class("sf-widget-count")
-                    .SetInnerText(quicklinks.Count.ToString())
-                    .ToHtml());
-            }
-
-            return new WidgetItem
-            {
-                Id = TypeContextUtilities.Compose(prefix, "quicklinksWidget"),
-                Label = label.ToHtml(),
-                Content = content.ToHtml()
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "quicklinksWidget"),
+                Class = "sf-quicklinks",
+                Title = QuickLinkMessage.Quicklinks.NiceToString(),
+                IconClass = "glyphicon glyphicon-star",
+                Text = quicklinks.Count.ToString(),
+                Items = quicklinks.OrderBy(a=>a.Order).Cast<IMenuItem>().ToList(),
+                Active = true,
             };
         }
     }
 
     static class QuickLinkContextualMenu
     {
-        internal static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
+        internal static List<IMenuItem> ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
                 return null;
 
-            List<QuickLink> quicklinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
-            if (quicklinks == null || quicklinks.Count == 0)
+            List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
+            if (quickLinks.IsNullOrEmpty())
                 return null;
 
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-quicklinks")))
-            {
-                string ctxItemClass = "sf-search-ctxitem";
+            List<IMenuItem> menuItems = new List<IMenuItem>();
+            menuItems.Add(new MenuItemHeader(QuickLinkMessage.Quicklinks.NiceToString()));
+            menuItems.AddRange(quickLinks);
 
-                content.AddLine(new HtmlTag("li")
-                    .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(
-                        new HtmlTag("span").InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml()))
-                    );
-
-                foreach (var q in quicklinks)
-                {
-                    using (content.Surround(new HtmlTag("li").Class(ctxItemClass)))
-                    {
-                        content.Add(q.Execute());
-                    }
-                }
-            }
-
-            return new ContextualItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemQuickLinks"),
-                Content = content.ToHtml().ToString()
-            };
+            return menuItems;
         }
     }
 
@@ -153,7 +111,7 @@ namespace Signum.Web
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (widget)
-                    WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? QuickLinkWidgetHelper.CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
+                    WidgetsHelper.GetWidget += QuickLinkWidgetHelper.CreateWidget;
 
                 if (contextualItems)
                     ContextualItemsHelper.GetContextualItemsForLites += QuickLinkContextualMenu.ContextualItemsHelper_GetContextualItemsForLite;
@@ -161,16 +119,22 @@ namespace Signum.Web
         }
     }
 
-    public abstract class QuickLink : ToolBarButton
+    public abstract class QuickLink : IMenuItem
     {
+        public string Prefix { get; set; }
+        public bool IsVisible { get; set; }
+        public string Text { get; set; }
+        public double Order { get; set; }
+        public string Name { get; set; }
+
         public QuickLink()
         {
-            DivCssClass = "sf-quicklink";
         }
 
-        public string Prefix { get; set; }
-
-        public bool IsVisible { get; set; }
+        public MvcHtmlString ToHtml()
+        {
+            return new HtmlTag("li").Class("sf-quick-link").Attr("data-name", Name).InnerHtml(Execute());
+        }
 
         public abstract MvcHtmlString Execute();
     }
@@ -178,11 +142,18 @@ namespace Signum.Web
     public class QuickLinkAction : QuickLink
     {
         public string Url { get; set; }
-        
-        public QuickLinkAction(string text, string url)
+
+
+        public QuickLinkAction(Enum nameAndText, string url): this
+            (nameAndText.ToString(), nameAndText.NiceToString(), url)
+        {
+        }
+
+        public QuickLinkAction(string name, string text, string url)
         {
             Text = text;
             Url = url;
+            Name = name; 
             IsVisible = true;
         }
 
@@ -201,6 +172,7 @@ namespace Signum.Web
             FindOptions = findOptions;
             IsVisible = Navigator.IsFindable(findOptions.QueryName);
             Text = QueryUtils.GetNiceName(findOptions.QueryName);
+            Name = Navigator.ResolveWebQueryName(findOptions.QueryName);
         }
 
         public QuickLinkFind(object queryName, string columnName, object value, bool hideColumn) :
@@ -210,7 +182,7 @@ namespace Signum.Web
                 SearchOnLoad = true,
                 ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
                 ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
-                FilterMode = FilterMode.Hidden,
+                ShowFilters = false,
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption(columnName, value),
@@ -225,7 +197,7 @@ namespace Signum.Web
             JObject jsFindOptions = FindOptions.ToJS(TypeContextUtilities.Compose("New", Prefix));
 
             return new HtmlTag("a")
-                .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", jsFindOptions).ToString())
+                .Attr("onclick", JsModule.Finder["explore"](jsFindOptions).ToString())
                 .SetInnerText(Text);
         }
     }
@@ -237,8 +209,9 @@ namespace Signum.Web
         public QuickLinkView(Lite<IdentifiableEntity> liteEntity)
         {
             lite = liteEntity;
-            IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearchEntity: false);
+            IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearch: false);
             Text = lite.EntityType.NiceName();
+            Name = Navigator.ResolveWebTypeName(liteEntity.EntityType);
         }
 
         public override MvcHtmlString Execute()

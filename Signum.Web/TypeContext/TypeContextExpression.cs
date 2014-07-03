@@ -110,6 +110,9 @@ namespace Signum.Web
         {
             var tce = Cast(Visit(me.Expression));
 
+            if (tce.Value == null)
+                throw new InvalidOperationException("Impossible to access member {0} of null reference".Formato(me.Member.Name)); 
+
             if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
             {
                 var lite = tce.Value as Lite<IIdentifiable>;
@@ -148,8 +151,6 @@ namespace Signum.Web
             return base.VisitUnary(u);
         }
 
-        static string[] tryies = new string[] { "TryCC", "TryCS", "TrySS", "TrySC" };
-
         static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IIdentifiable> lite) => lite.Entity);
         
         static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
@@ -169,7 +170,7 @@ namespace Signum.Web
                     tce.Route.Add(piEntity), obj);
             }
 
-            if (m.Method.DeclaringType == typeof(Extensions) && tryies.Contains(m.Method.Name))
+            if (m.Method.DeclaringType == typeof(Extensions) && m.Method.Name == "Try")
             {
                 var tce = Cast(Visit(m.Arguments[0]));
                 var lambda = (LambdaExpression)m.Arguments[1];

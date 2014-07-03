@@ -20,6 +20,8 @@ using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Web;
 using Microsoft.SqlServer.Types;
+using Signum.Entities.Basics;
+using System.Drawing;
 #endregion
 
 namespace Signum.Web
@@ -55,10 +57,18 @@ namespace Signum.Web
             MappingRepository<float>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture) : float.Parse(ctx.Input));
             MappingRepository<double>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
             MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
-            MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
+            MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.HasInput ? ctx.Input : ctx.Inputs["Date"] + " " + ctx.Inputs["Time"]).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
-            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
+            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => 
+            {
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                if (dateFormatAttr != null)
+                    return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                else
+                    return TimeSpan.Parse(ctx.Input);
+            });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -72,10 +82,23 @@ namespace Signum.Web
             MappingRepository<float?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture) : float.Parse(ctx.Input));
             MappingRepository<double?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
             MappingRepository<decimal?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
-            MappingRepository<DateTime?>.Mapping = GetValueNullable(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
+            MappingRepository<DateTime?>.Mapping = GetValue(ctx =>
+            {
+                var input = ctx.HasInput ? ctx.Input : " ".CombineIfNotEmpty(ctx.Inputs["Date"], ctx.Inputs["Time"]);
+                return input.HasText() ? DateTime.Parse(input).FromUserInterface() : (DateTime?)null;
+            });
             MappingRepository<Guid?>.Mapping = GetValueNullable(ctx => Guid.Parse(ctx.Input));
-            MappingRepository<TimeSpan?>.Mapping = GetValueNullable(ctx => TimeSpan.Parse(ctx.Input));
+            MappingRepository<TimeSpan?>.Mapping = GetValue(ctx => 
+            {
+                if (ctx.Input.IsNullOrEmpty())
+                    return (TimeSpan?)null;
 
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                if (dateFormatAttr != null)
+                    return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
+                else
+                    return TimeSpan.Parse(ctx.Input);
+            });
 
             MappingRepository<string>.Mapping = ctx =>
             {
@@ -255,7 +278,7 @@ namespace Signum.Web
             return ctx => { throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName())); };
         }
 
-        static Mapping<T> GetValue<T>(Func<MappingContext, T> parse) where T : struct
+        static Mapping<T> GetValue<T>(Func<MappingContext, T> parse)
         {
             return ctx =>
             {
@@ -384,7 +407,7 @@ namespace Signum.Web
             if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
             {
                 if (!DisambiguateRuntimeInfo)
-                    return RuntimeInfo.FromFormValue(strRuntimeInfo).TryCC(ri => ri.EntityType);
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo).Try(ri => ri.EntityType);
                 else
                 {
                     RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
@@ -392,11 +415,11 @@ namespace Signum.Web
                         .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
                         .FirstEx();
 
-                    return runtimeInfo.TryCC(ri => ri.EntityType);
+                    return runtimeInfo.Try(ri => ri.EntityType);
                 }
             }
             else
-                return ctx.Value.TryCC(t => t.GetType());
+                return ctx.Value.Try(t => t.GetType());
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue =
@@ -630,7 +653,7 @@ namespace Signum.Web
             {
                 runtimeInfo = strRuntimeInfo.Split(',')
                     .Select(r => RuntimeInfo.FromFormValue(r))
-                    .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
+                    .OrderBy(a => !(a == null ? null : a.ToLite()).RefersTo((IdentifiableEntity)(object)ctx.Value))
                     .FirstEx();
             }
 
@@ -640,7 +663,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity())
             {
                 if (runtimeInfo.IsNew || ctx.Value == null)
-                    return Constructor.Construct<T>();
+                    return ctx.Controller.Construct<T>();
 
                 return ctx.Value;
             }
@@ -648,7 +671,7 @@ namespace Signum.Web
             {
                 IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)ctx.Value;
 
-                var result = GetIdentifiableEntity(runtimeInfo, identifiable);
+                var result = GetIdentifiableEntity(ctx.Controller, runtimeInfo, identifiable);
 
                 if (result is Entity && runtimeInfo.Ticks != null)
                     ((Entity)(ModifiableEntity)result).ticks = runtimeInfo.Ticks.Value;
@@ -657,14 +680,14 @@ namespace Signum.Web
             }
         }
 
-        private static T GetIdentifiableEntity(RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
+        private static T GetIdentifiableEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
         {
             if (runtimeInfo.IsNew)
             {
                 if (identifiable != null && identifiable.IsNew)
                     return (T)(ModifiableEntity)identifiable;
                 else
-                    return Constructor.Construct<T>();
+                    return controller.Construct<T>();
             }
 
             if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
@@ -834,7 +857,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.EntityType)).ToLiteFat());
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)ctx.Controller.Construct(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)
@@ -900,7 +923,7 @@ namespace Signum.Web
 
             var indexPrefixes = ctx.Inputs.IndexPrefixes();
 
-            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).Try(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.Prefix, index), null, route, ctx);
 
@@ -936,7 +959,7 @@ namespace Signum.Web
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new[] { ';' })[0]).ToInt();
+                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).Try(s => s.Split(new[] { ';' })[0]).ToInt();
 
                     if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                         itemCtx.Value = oldList[oldIndex.Value];

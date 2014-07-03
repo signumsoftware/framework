@@ -124,11 +124,14 @@ namespace Signum.Entities
                 });
         }
 
-        public static void AssertDefined(Type mainEntity, Type mixinType)
+        public static bool IsDeclared(Type mainEntity, Type mixinType)
         {
-            var hs = GetMixinDeclarations(mainEntity);
-            
-            if (!hs.Contains(mixinType))
+            return GetMixinDeclarations(mainEntity).Contains(mixinType);
+        }
+
+        public static void AssertDeclared(Type mainEntity, Type mixinType)
+        {
+            if (!IsDeclared(mainEntity, mixinType))
                 throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
@@ -144,10 +147,10 @@ namespace Signum.Entities
         }
 
         public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-            where T : IdentifiableEntity
+            where T : IIdentifiable
             where M : MixinEntity
         {
-            M mixin = entity.Mixin<M>();
+            M mixin = ((IdentifiableEntity)(IIdentifiable)entity).Mixin<M>();
 
             var pi = ReflectionTools.BasePropertyInfo(mixinProperty);
 
@@ -167,6 +170,24 @@ namespace Signum.Entities
                 return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
             }
         }
+
+        public static T CopyMixinsFrom<T>(this T newEntity, IIdentifiable original, params object[] args)
+            where T: IIdentifiable
+        {
+            var list = (from nm in ((IdentifiableEntity)(IIdentifiable)newEntity).Mixins
+                        join om in ((IdentifiableEntity)(IIdentifiable)original).Mixins
+                        on nm.GetType() equals om.GetType()
+                        select new { nm, om });
+
+            foreach (var pair in list)
+            {
+                pair.nm.CopyFrom(pair.om, args);
+            }
+
+            return newEntity;
+        }
+
+       
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]

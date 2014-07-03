@@ -110,7 +110,7 @@ namespace Signum.Engine.Linq
         {
             string constructor = "new {0}".Formato(Type.TypeName());
 
-            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+            string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ? 
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
@@ -144,7 +144,7 @@ namespace Signum.Engine.Linq
         {
             string constructor = "new {0}".Formato(Type.TypeName());
 
-            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+            string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
@@ -327,18 +327,18 @@ namespace Signum.Engine.Linq
     internal class MListExpression : DbExpression
     {
         public readonly Expression BackID; // not readonly
-        public readonly RelationalTable RelationalTable;
+        public readonly TableMList TableMList;
 
-        public MListExpression(Type type, Expression backID, RelationalTable tr)
+        public MListExpression(Type type, Expression backID, TableMList tr)
             :base(DbExpressionType.MList, type)
         {
             this.BackID = backID;
-            this.RelationalTable = tr;
+            this.TableMList = tr;
         }
 
         public override string ToString()
         {
-            return "new MList({0},{1})".Formato(RelationalTable.Name, BackID);
+            return "new MList({0},{1})".Formato(TableMList.Name, BackID);
         }
     }
 
@@ -364,9 +364,9 @@ namespace Signum.Engine.Linq
         public readonly EntityExpression Parent;
         public readonly Expression Element;
 
-        public readonly RelationalTable Table;
+        public readonly TableMList Table;
 
-        public MListElementExpression(Expression rowId, EntityExpression parent, Expression element, RelationalTable table)
+        public MListElementExpression(Expression rowId, EntityExpression parent, Expression element, TableMList table)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;

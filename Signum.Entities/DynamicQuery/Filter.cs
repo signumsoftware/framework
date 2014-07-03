@@ -34,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
      
         public void GenerateCondition(FilterBuildExpressionContext filterContext)
         {
-            List<CollectionElementToken> allAny = Token.FollowC(a => a.Parent)
+            List<CollectionElementToken> allAny = Token.Follow(a => a.Parent)
                 .OfType<CollectionElementToken>()
                 .Where(a => !a.CollectionElementType.IsElement())
                 .Reverse()

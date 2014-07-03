@@ -225,6 +225,20 @@ namespace Signum.Engine
 
         #region Exists
 
+        public static bool Exists<T>(this Lite<T> lite)
+            where T : IdentifiableEntity
+        {
+            try
+            {
+                return lite.InDB().Any();
+            }
+            catch (Exception e)
+            {
+                e.Data["lite"] = lite;
+                throw;
+            }
+        }
+
         static GenericInvoker<Func<int, bool>> giExist = new GenericInvoker<Func<int, bool>>(id => Exists<IdentifiableEntity>(id));
         public static bool Exists<T>(int id)
             where T : IdentifiableEntity
@@ -576,7 +590,7 @@ namespace Signum.Engine
 
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
-            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.RelationalTable);
+            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.TableMList);
         }
 
         class MListQueryExpander : IMethodExpander
@@ -862,7 +876,7 @@ namespace Signum.Engine
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c=>c.Parent));
-                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).RelationalTable;
+                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
                     return tr.Commit(rows);

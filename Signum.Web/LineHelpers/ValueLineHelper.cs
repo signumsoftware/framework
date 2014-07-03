@@ -8,70 +8,48 @@ using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using System.Globalization;
+using Signum.Entities.Basics;
 
 
 namespace Signum.Web
 {
     public static class ValueLineHelper
     {
+        public static string StaticValue = "sfStaticValue";
+
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
+            if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
+                return MvcHtmlString.Empty;
+
+            if (valueLine.PlaceholderLabels && !valueLine.ValueHtmlProps.ContainsKey("placeholder"))
+                valueLine.ValueHtmlProps["placeholder"] = valueLine.LabelText;
+
+            var value = InternalValue(helper, valueLine);
+
+            if (valueLine.InlineCheckbox)
+                return new HtmlTag("label").InnerHtml("{0} {1}".FormatHtml(value, valueLine.LabelText)).ToHtml();
+
+            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
+        }
+
+        private static MvcHtmlString InternalValue(HtmlHelper helper, ValueLine valueLine)
+        {
             HtmlStringBuilder sb = new HtmlStringBuilder();
+            ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
+            using (valueLine.UnitText == null ? null : sb.Surround(new HtmlTag("div").Class("input-group")))
             {
-                if (valueLine.OnlyValue)
-                {
-                    InternalValueLineValue(helper, valueLine, sb);
-                }
-                else
-                {
-                    using (sb.Surround(new HtmlTag("div").Class("sf-field")))
-                    using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
-                    {
-                        if (!valueLine.ValueFirst)
-                            InternalValueLineLabel(helper, valueLine, sb);
+                sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
 
-                        using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                            InternalValueLineValue(helper, valueLine, sb);
-
-                        if (valueLine.ValueFirst)
-                            InternalValueLineLabel(helper, valueLine, sb);
-                    }
-                }
+                if (valueLine.UnitText.HasText())
+                    sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "input-group-addon"));
             }
 
             return sb.ToHtml();
-        }
-
-        private static void InternalValueLineLabel(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
-        {
-            if (valueLine.LabelVisible)
-                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.Prefix, "sf-label-line", valueLine.LabelHtmlProps));
-        }
-
-        private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
-        {
-            ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
-
-            valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
-
-            if (valueLine.ShowValidationMessage)
-                valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-
-            sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
-
-            if (valueLine.UnitText.HasText())
-            {
-                sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "sf-unit-line"));
-            }
-
-            if (valueLine.ShowValidationMessage)
-            {
-                sb.AddLine(helper.ValidationMessage(valueLine.Prefix));
-            }
         }
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
@@ -85,11 +63,10 @@ namespace Signum.Web
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, valueLine.UntypedValue.ToString()));
 
-                string str =
-                    value == null ? null :
+                string str = value == null ? null :
                     LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members) ? value.NiceToString() : value.ToString();
 
-                return result.Concat(helper.Span("", str, "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(null, str, valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -98,17 +75,15 @@ namespace Signum.Web
             if (value != null)
                 items.Where(e => e.Value == value.ToString())
                     .SingleOrDefaultEx()
-                    .TryDoC(s => s.Selected = true);
+                    .TryDo(s => s.Selected = true);
 
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
 
-        public static MvcHtmlString DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString DateTimePicker(this HtmlHelper helper, ValueLine valueLine)
         {
             DateTime? value = (DateTime?)valueLine.UntypedValue;
-
-            if (valueLine.DatePickerOptions == null)
-                valueLine.DatePickerOptions = new DatePickerOptions();
 
             if (value.HasValue)
                 value = value.Value.ToUserInterface();
@@ -118,44 +93,33 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
-                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
 
-            valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
-
-            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");        
-            
-            string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
-
-            valueLine.ValueHtmlProps["size"] = jsDataFormat.Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
-
-            if (valueLine.DatePickerOptions.Format == null)
-                valueLine.DatePickerOptions.Format = jsDataFormat;
-
-            bool isDefaultDatepicker = valueLine.DatePickerOptions.IsDefault();
-            if (isDefaultDatepicker) //if default, datepicker will be created when processing html in javascript 
-            {
-                valueLine.ValueHtmlProps.AddCssClass("sf-datepicker");
-                valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
-            }
-
-            if (!valueLine.ValueHtmlProps.ContainsKey("placeholder") && jsDataFormat.HasText())
-                valueLine.ValueHtmlProps["placeholder"] = jsDataFormat.ToLower();
-
-            MvcHtmlString returnString = helper.TextBox(valueLine.Prefix, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
-            
-            if (!isDefaultDatepicker)
-                returnString = returnString.Concat(helper.Calendar(valueLine.Prefix, valueLine.DatePickerOptions));
-
-            return returnString;
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
+            return helper.DateTimePicker(valueLine.Prefix, true, value, valueLine.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
         }
 
-        public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString TimeSpanPicker(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.ReadOnly)
-                return helper.Span(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
+            TimeSpan? value = (TimeSpan?)valueLine.UntypedValue;
 
-            return HtmlHelperExtenders.InputType("hidden", valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            if (valueLine.ReadOnly)
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
+                return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
+            }
+
+            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+            if (dateFormatAttr != null)
+                return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
+            else
+            {
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+                return helper.TextBox(valueLine.Prefix, value == null ? "" : value.Value.ToString(valueLine.Format, CultureInfo.CurrentCulture), valueLine.ValueHtmlProps);
+            }
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
@@ -168,7 +132,11 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
-                return result.Concat(helper.Span("", value, "sf-value-line", valueLine.ValueHtmlProps));
+
+                if (valueLine.UnitText.HasText())
+                    return new HtmlTag("p").Id(valueLine.Compose(StaticValue)).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
+                else
+                    return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -181,6 +149,7 @@ namespace Signum.Web
             if (!valueLine.ValueHtmlProps.ContainsKey("type"))
                 valueLine.ValueHtmlProps["type"] = "text";
 
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.TextBox(valueLine.Prefix, value, valueLine.ValueHtmlProps);
         }
 
@@ -194,6 +163,25 @@ namespace Signum.Web
             return helper.TextboxInLine(valueLine);
         }
 
+        public static MvcHtmlString ColorTextbox(this HtmlHelper helper, ValueLine valueLine)
+        {
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            using (sb.Surround(new HtmlTag("div").Class("input-group")))
+            {
+                sb.AddLine(helper.TextboxInLine(valueLine));
+
+                sb.AddLine(new HtmlTag("span").Class("input-group-addon").InnerHtml(new HtmlTag("i")));
+            }
+
+            sb.AddLine(new HtmlTag("script").InnerHtml(MvcHtmlString.Create(
+@" $(function(){
+        $('#" + valueLine.Prefix + @"').parent().colorpicker();
+    });")));
+
+            return sb.ToHtml();
+        }
+
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
@@ -201,59 +189,27 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
-                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line", valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic("", (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
             valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + valueLine.ValueHtmlProps.TryGetC("onblur");
-
+            valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.TextArea(valueLine.Prefix, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString CheckBox(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.ReadOnly)
-                valueLine.ValueHtmlProps.Add("disabled", "disabled");
-
             bool? value = (bool?)valueLine.UntypedValue;
-            return HtmlHelperExtenders.CheckBox(helper, valueLine.Prefix, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
-        }
-
-        public static MvcHtmlString RadioButtons(this HtmlHelper helper, ValueLine valueLine)
-        {
-            bool? value = (bool?)valueLine.UntypedValue;
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            if (valueLine.ReadOnly)
-            {
-                if (valueLine.WriteHiddenOnReadonly)
-                    sb.AddLine(helper.Hidden(valueLine.Prefix, value ?? false));
-                
-                valueLine.ValueHtmlProps.Add("disabled", "disabled");
-            }
-
-            valueLine.ValueHtmlProps.Add("name", valueLine.Prefix);
-
-            valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
-
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, true, value == true, valueLine.ValueHtmlProps).ToHtmlString()
-                .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_True\"")));
-
-            sb.AddLine(helper.Span(valueLine.Compose("lblRadioTrue"), valueLine.RadioButtonLabelTrue, "sf-value-line-radiolbl"));
-
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, false, value == false, valueLine.ValueHtmlProps).ToHtmlString()
-              .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_False\"")));
-
-            sb.AddLine(helper.Span(valueLine.Compose("lblRadioFalse"), valueLine.RadioButtonLabelFalse, "sf-value-line-radiolbl"));
-
-            return sb.ToHtml();
+            if (!valueLine.InlineCheckbox)
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+            return helper.CheckBox(valueLine.Prefix, value ?? false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             return helper.InternalValueLine(valueLine);
         }
-
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
@@ -264,6 +220,11 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
+            var vo = tc.ViewOverrides;
+
+            if (vo != null && !vo.IsVisible(context.PropertyRoute))
+                return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
+
             ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             Common.FireCommonTasks(vl);
@@ -273,7 +234,6 @@ namespace Signum.Web
 
             var result = helper.InternalValueLine(vl);
 
-            var vo = vl.ViewOverrides;
             if (vo == null)
                 return result;
 
@@ -285,11 +245,11 @@ namespace Signum.Web
             return helper.HiddenLine(tc, property, null);
         }
 
-        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HiddenLine> settingsModifier)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+            HiddenLine hl = new HiddenLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             Common.FireCommonTasks(hl);
 
@@ -297,6 +257,14 @@ namespace Signum.Web
                 settingsModifier(hl);
 
             return Hidden(helper, hl);
+        }
+
+        public static MvcHtmlString Hidden(this HtmlHelper helper, HiddenLine hiddenLine)
+        {
+            if (hiddenLine.ReadOnly)
+                return helper.Span(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", "form-control");
+
+            return helper.Hidden(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", hiddenLine.ValueHtmlProps);
         }
     }
 
@@ -310,6 +278,10 @@ namespace Signum.Web
 
             if (type.IsEnum)
                 return ValueLineType.Combo;
+            else if (type == typeof(ColorDN))
+                return ValueLineType.Color;
+            else if (type == typeof(TimeSpan))
+                return ValueLineType.TimeSpan;
             else
             {
                 switch (Type.GetTypeCode(type))
@@ -346,22 +318,24 @@ namespace Signum.Web
             {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
-            {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},
             {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
-            {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePickerTextbox(valueLine)},
-            {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)}
+            {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
+            {ValueLineType.TimeSpan, (helper, valueLine) => helper.TimeSpanPicker(valueLine)},
+            {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},
+            {ValueLineType.Color, (helper, valueLine) => helper.ColorTextbox(valueLine)}
         };
     }
 
     public enum ValueLineType
     {
         Boolean,
-        RadioButtons,
         Combo,
         DateTime,
+        TimeSpan,
         TextBox,
         TextArea,
-        Number
+        Number,
+        Color
     };
 
 }

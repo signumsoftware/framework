@@ -8,37 +8,66 @@ using System.Web;
 
 namespace Signum.Web
 {
-    public class ToolBarMenu : ToolBarButton
+    public class ToolBarDropDown : ToolBarButton
     {
-        public List<ToolBarButton> Items { get; set; }
+        public List<IMenuItem> Items { get; set; }
 
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
+            using(sb.Surround(new HtmlTag("div").Class("btn-group")))
+            {
+                var a = new HtmlTag("a")
+                    .Id(Id)
+                    .Class("btn")
+                    .Class("btn-" + Style.ToString().ToLower())
+                    .Class(CssClass)
+                    .Class("dropdown-toggle")
+                    .Attr("data-toggle", "dropdown")
+                    .Attr("alt", Tooltip)
+                    .Attrs(HtmlProps);
 
-            using (sb.Surround(new HtmlTag("ul").Class("sf-menu-button")))
-                if (Items != null)
+                if (!Enabled)
+                    a.Attr("disabled", "disabled");  
+
+                using (sb.Surround(a))
                 {
-                    foreach (ToolBarButton tbb in Items)
-                        sb.Add(tbb.ToHtml(helper).Surround("li"));
+                    sb.AddLine(new MvcHtmlString(Text));
+                    sb.AddLine(new HtmlTag("span").Class("caret"));
                 }
 
-            HtmlProps["onclick"] = "SF.Dropdowns.toggle(event, this);";
-            HtmlProps["data-icon-secondary"] = "ui-icon-triangle-1-s";
 
-            var title = new HtmlTag("div").InnerHtml(Text.EncodeHtml()).Class(DivCssClass)
-                .Attr("onclick", "SF.Dropdowns.toggle(event, this);")
-                .Attr("data-icon-secondary", "ui-icon-triangle-1-s").ToHtml();
+                using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
+                {
+                    if (Items != null)
+                        foreach (var ci in Items)
+                            sb.Add(ci.ToHtml());
+                }
+            }
 
-            return helper.Div(Id, title.Concat(sb.ToHtml()), "sf-dropdown");
+            return sb.ToHtml();
         }
     }
 
-    public class ToolBarSeparator : ToolBarButton
+    public class MenuItemSeparator : IMenuItem
     {
-        public override MvcHtmlString ToHtml(HtmlHelper helper)
+        public MvcHtmlString ToHtml()
         {
-            return helper.Div("", null, DivCssClass != "not-set" ? DivCssClass : "sf-toolbar-menu-separator");
+            return new HtmlTag("li").Class("divider").ToHtml();
+        }
+    }
+
+    public class MenuItemHeader : IMenuItem
+    {
+        public string Text { get; set; }
+        public MenuItemHeader(string text)
+        {
+            this.Text = text;
+        }
+
+        public MvcHtmlString ToHtml()
+        {
+            return new HtmlTag("li").Class("dropdown-header").SetInnerText(this.Text).ToHtml();
         }
     }
 }

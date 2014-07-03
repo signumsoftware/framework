@@ -82,31 +82,35 @@ namespace Signum.Engine.DynamicQuery
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count)
             where T : IdentifiableEntity
         {
-            List<Lite<T>> results = new List<Lite<T>>();
-
-            int? id = subString.ToInt();
-            if (id.HasValue)
+            using(ExecutionMode.UserInterface())
             {
-                Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
 
-                if (entity != null)
-                    results.Add(entity);
+                List<Lite<T>> results = new List<Lite<T>>();
 
-                if (results.Count >= count)
-                    return results;
+                int? id = subString.ToInt();
+                if (id.HasValue)
+                {
+                    Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
+
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Select(a => a.ToLite())
+                    .Take(count - results.Count));
+
+                return results;
             }
-
-            if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                subString = subString.Trim('\'', '"');
-
-            var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
-                .OrderBy(a => a.ToString().Length)
-                .Select(a => a.ToLite())
-                .Take(count - results.Count));
-
-            return results;
         }
 
         static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> miLiteById =

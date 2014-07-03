@@ -1,284 +1,401 @@
-﻿.sf-label-line
+﻿
+input[type=checkbox]
+{
+    width: 16px;
+    height: 16px;
+}
+
+input[type=checkbox].form-control
+{
+    margin-top: 9px;
+}
+
+label > input[type=checkbox]
+{
+    margin: 0px;
+    vertical-align: middle;
+}
+
+.date-time .input-group.date,
+.date-time .input-group.time
 {
     float: left;
-    margin-right: 10px;
-    display: block;
-    width: 140px;
-    padding: 3px 0;
-    text-align: right;
-    font-weight: bold;
-}
-
-.sf-label-detail-line, .sf-label-repeater-line
-{
-    display: inline-block;
-    margin-right: 1px; /*IE8 fix for inline-block*/
-    vertical-align: top;
-}
-
-.sf-unit-line
-{
-    float: left;
-    margin-right: 10px;
-    display: block;
-    padding: 3px 0;
-}
-
-.sf-field
-{
-    min-width: 350px;
-}
-
-    .sf-field:after, .sf-field-list:after, .sf-value-line-radiolbl:after
-    {
-        content: "";
-        display: block;
-        height: 0;
-        clear: both;
-        visibility: hidden;
-    }
-
-.sf-value-line-radiolbl
-{
-    display: block;
-}
-
-.sf-field .sf-field-list
-{
-    margin-bottom: 0;
-}
-
-.sf-field-inline .sf-field
-{
-    clear: none;
-}
-
-
-.sf-entity-list
-{
-    min-width: 150px;
-    min-height: 72px;
     margin-right: 5px;
 }
 
-    .sf-entity-list option
-    {
-        padding: 3px;
-    }
-
-.sf-field-list-table td
+.input-group.date
 {
-    vertical-align: top;
+    max-width: 140px;
 }
 
-.sf-field-list-table ul .sf-line-button
+.input-group.time
 {
-    display: block;
-    line-height: 1em;
-    height: 18px;
+    max-width: 100px;
 }
 
-.sf-value-container
+.input-group.time[data-show-seconds=true]
 {
+    max-width: 120px;
+} 
+
+
+.sf-entity-line-entity
+{
+    background: transparent;
     overflow: hidden;
 }
 
-    .sf-value-container .sf-value-line, .sf-value-container .sf-entity-list
-    {
-        max-width: 90%;
-        margin-right: 4px;
-        display: block;
-    }
-
-.sf-value-line, .sf-field-list
+/* Buttons */
+.btn.btn-default.sf-line-button
 {
-    float: left;
+    background: transparent;
 }
 
-a.sf-value-line, span.sf-value-line
-{
-    padding: 5px 0;
-    overflow: hidden;
-    _overflow: visible;
-    zoom: 1;
-}
-
-/* inlines and value-first */
-
-.sf-field .sf-field
-{
-    margin-top: 0;
-}
-
-.sf-value-inline .sf-field
-{
-    float: left;
-    min-width: inherit;
-}
-
-.sf-value-inline .sf-label-line
-{
-    text-align: left;
-    font-size: 11px;
-    color: #444;
-    padding-left: 2px;
-    width: auto;
-}
-
-.sf-value-container .sf-value-container
-{
-    clear: both;
-}
-
-.sf-field
-{
-    margin: 2px 0;
-}
-
-.sf-entity-line-detail
-{
-    margin: 6px 0;
-}
-
-    .sf-entity-line-detail .sf-field-inline .sf-field
-    {
-        clear: inherit;
-    }
-
-.sf-field .sf-sf-value-first .sf-label-line
-{
-    width: inherit;
-    border: 0;
-    margin: inherit;
-}
 
 .sf-line-button
 {
-    border: 0 !important;
-    background: transparent !important;
-    cursor: pointer !important;
+    cursor:pointer;
+    color:lightgray;
+}
+.sf-line-button:hover
+{
+    color:gray;
 }
 
-    .sf-line-button.ui-button-icon-only
-    {
-        width: 1.2em;
-    }
-
-    .sf-line-button .ui-button-text
-    {
-        line-height: 1;
-    }
-
-.sf-line-detail-field legend .sf-line-button, .sf-repeater-field legend .sf-line-button
+/* EntityLine buttons  */
+.input-group-btn.btn-group-vertical
 {
-    float: none;
-    display: inline-block;
-    height: 1em;
+    vertical-align:top;
 }
 
-fieldset.sf-repeater-field
+.input-group-btn.btn-group-vertical > .btn 
 {
-    border-style: solid;
+    border-top-left-radius: 0px !important; 
+    border-bottom-left-radius: 0px !important;
 }
 
-/* errors */
-.sf-field-validation-error
+.input-group-btn.btn-group-vertical > .btn:first-child:not(:last-child)
 {
-    color: #ff0000;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
-.input-validation-error
+/*legends*/
+fieldset
 {
-    border: 1px solid #ff6666 !important;
-    background-color: #ffeeee !important;
-    padding-left: 2px;
+   border: 1px solid #ddd;
+   padding: 10px;
+   border-radius: 4px;
+   margin: 10px 0px;
 }
 
-    .input-validation-error[type=checkbox]
-    {
-        outline: 1px solid #ff6666;
-    }
-
-.validation-summary-errors
+fieldset legend
 {
-    margin: 5px;
-    color: #222;
-    border: 2px solid #ff6666;
-    padding: 4px;
-    background: url(../images/sign_error.gif) no-repeat 3px 3px #ffeeee;
-    border-radius: 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px 0 10px;
+    margin: 0px;
 }
 
-    .validation-summary-errors ul
-    {
-        margin-bottom: 0;
-    }
-
-    .validation-summary-errors li
-    {
-        list-style-type: none;
-        text-indent: 20px;
-    }
-
-.ui-autocomplete.ui-front
+.border
 {
-    z-index: 200;
+   border: 1px solid #ddd;
+   padding: 10px;
+   border-radius: 4px;
 }
 
-ul.sf-strip
+/*EntityRepeater*/
+
+fieldset.sf-repeater-element > legend
 {
-    overflow: hidden;
-    height: auto !important;
-    height: 1%;
-    cursor: text;
-    min-height: 1px;
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-    list-style-type: none;
+    width: auto;
 }
 
-li.sf-strip-element
+.repeater-inline .sf-repeater-element
 {
-    overflow: hidden;
-    height: auto !important;
-    height: 15px;
-    margin: 2px;
-    padding: 1px 3px;
-    background-color: #FAFAFA;
-    color: #000;
-    cursor: default;
-    border: 1px solid #BBB;
-    font-size: 11px;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+    padding: 4px 10px;
+    margin: 0px 0px 8px 0px;
+}
+
+.repeater-inline .sf-repeater-element legend
+{
     float: left;
-    white-space: nowrap;
+    margin-left: -6px;
+    margin-right: 10px;
+    border: 0px;
 }
 
-    li.sf-strip-element a.sf-remove
-    {
-        opacity: 0.5;
-    }
-
-li.sf-strip-input
-{
-    margin: 2px;
-}
-
-ul.sf-strip-vertical li.sf-strip-element
-{
-    display: block;
-    float: none;
-}
-
-li.sf-strip-element .sf-value-line
-{
-    margin-right: 4px;
-}
-
-ul.sf-strip-vertical li.sf-strip-element span.sf-button-container
+.repeater-inline.repeater-right .sf-repeater-element legend
 {
     float: right;
+    margin-left: 6px;
+    margin-right: -10px;
+    border: 0px;
+}
+
+/*EntityStrip*/
+
+ul.sf-strip-horizontal > li
+{
+    float: left;
+    margin-right: 10px;
+}
+
+ul.sf-strip-vertical>li
+{
+    margin: 1px 0px;
+}
+
+ul.sf-strip-vertical>li>.form-control
+{
+    background-color:transparent;
+    box-shadow:none;
+}
+
+.sf-strip
+{
+    list-style: none;
+    padding: 0px;
+}
+
+.sf-strip-horizontal > li > *
+{
+    vertical-align: middle;
+}
+
+/*Tabs*/
+ul.nav-tabs
+{
+    margin-bottom: 10px;
+}
+
+
+/*buton colors*/
+.sf-create:hover
+{
+    color:#22BA00;
+}
+
+.sf-remove:hover
+{
+    color:#CF0000;
+}
+
+.sf-find:hover
+{
+    color:#FFCC00;
+}
+
+.sf-view:hover
+{
+    color:#007CE8;
+}
+
+.move-down:hover, 
+.move-up:hover
+{
+    color:#9900E0;
+}
+
+/*has-error*/
+
+.has-error {
+    border-color: #a94442;
+}
+
+.form-group .form-group {
+    margin-bottom: 0px;
+}
+
+    .form-group .form-group label {
+        color: #D8D8D8;
+        font-size: 12px;
+        margin-bottom: 0px;
+    }
+
+/*form xs*/
+
+.form-xs .form-control
+{
+    padding: 0px 3px;
+    height: 20px;
+}
+
+.form-xs input[type=checkbox].form-control
+{
+    height: 16px;
+}
+
+.form-xs .input-group .btn,
+.form-xs .input-group .input-group-addon
+{
+    padding: 0px 3px;
+    height: 20px;
+}
+
+.form-xs .form-group 
+{
+    margin-bottom: 6px;
+}
+
+
+.form-xs fieldset > legend {
+    padding: 0px 4px 0 4px;
+    font-size: 16px;
+}
+
+
+.form-horizontal.form-xs .control-label, 
+.form-horizontal.form-xs .radio, 
+.form-horizontal.form-xs .checkbox, 
+.form-horizontal.form-xs .radio-inline, 
+.form-horizontal.form-xs .checkbox-inline,
+.form-horizontal.form-xs .form-control-static {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
+
+.form-horizontal .form-xs .control-label, 
+.form-horizontal .form-xs .radio, 
+.form-horizontal .form-xs .checkbox, 
+.form-horizontal .form-xs .radio-inline, 
+.form-horizontal .form-xs .checkbox-inline,
+.form-horizontal .form-xs .form-control-static {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
+
+.form-xs .form-horizontal .control-label, 
+.form-xs .form-horizontal .radio, 
+.form-xs .form-horizontal .checkbox, 
+.form-xs .form-horizontal .radio-inline, 
+.form-xs .form-horizontal .checkbox-inline,
+.form-xs .form-horizontal .form-control-static  {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0px;
+}
+
+/*form sm*/
+
+.form-sm .form-control
+{
+    padding: 3px 6px;
+    height: 30px;
+}
+
+.form-sm input[type=checkbox].form-control
+{
+    height: 16px;
+}
+
+.form-sm .input-group .btn,
+.form-sm .input-group .input-group-addon
+{
+    padding: 4px 6px;
+}
+
+.form-sm .form-group 
+{
+    margin-bottom: 5px;
+}
+
+
+.form-sm fieldset > legend {
+    padding: 2px 5px 0 5px;
+    font-size: 18px;
+}
+
+.form-horizontal.form-sm .control-label, 
+.form-horizontal.form-sm .radio, 
+.form-horizontal.form-sm .checkbox, 
+.form-horizontal.form-sm .radio-inline, 
+.form-horizontal.form-sm .checkbox-inline,
+.form-horizontal.form-sm .form-control-static {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
+
+.form-horizontal .form-sm .control-label, 
+.form-horizontal .form-sm .radio, 
+.form-horizontal .form-sm .checkbox, 
+.form-horizontal .form-sm .radio-inline, 
+.form-horizontal .form-sm .checkbox-inline,
+.form-horizontal .form-sm .form-control-static {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
+
+.form-sm .form-horizontal .control-label, 
+.form-sm .form-horizontal .radio, 
+.form-sm .form-horizontal .checkbox, 
+.form-sm .form-horizontal .radio-inline, 
+.form-sm .form-horizontal .checkbox-inline,
+.form-sm .form-horizontal .form-control-static {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 5px;
+}
+
+/*form-inline*/
+
+.form-horizontal .form-inline .form-group
+{
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+/*form-vertical*/
+.form-vertical .form-group > label
+{
+    float: none;
+    padding-top: 0;
+    text-align: start;
+    width: auto;
+}
+
+.form-vertical .form-group
+{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.form-vertical .form-control
+{
+    display: block;
+    width: 100%;
+    vertical-align: baseline;
+}
+
+/* table non-fluid*/
+
+.table-nonfluid {
+   width: auto;
+}
+
+/* disabled menu items*/
+
+ul.dropdown-menu > li > a[disabled],
+ul.dropdown-menu > li > a.disabled
+{
+    pointer-events: none;
+    cursor: not-allowed;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity: .65;
+}
+
+/*Override absurd width for popups on sm*/
+@media (min-width: 768px)
+{
+    .modal-dialog:not(.modal-dialog)
+    {
+        min-width: 730px;
+    }
 }

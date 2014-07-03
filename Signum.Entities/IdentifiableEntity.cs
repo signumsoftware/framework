@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Services;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
@@ -50,18 +51,17 @@ namespace Signum.Entities
             internal set { isNew = value; }
         }
 
-        protected bool SetIfNew<T>(ref T field, T value, Expression<Func<T>> property)
+        protected bool SetIfNew<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
             if (!IsNew)
             {
-                PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
-                throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".Formato(pi.Name));
+                throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".Formato(automaticPropertyName));
             }
 
-            return base.Set<T>(ref field, value, property);
+            return base.Set<T>(ref field, value, automaticPropertyName);
         }
 
         public override string ToString()
@@ -177,18 +177,7 @@ namespace Signum.Entities
             }
         }
 
-        public void CopyMixinsFrom(IdentifiableEntity original, params object[] args)
-        {
-            var list = (from nm in this.Mixins
-                        join om in original.Mixins
-                        on nm.GetType() equals om.GetType()
-                        select new { nm, om });
-
-            foreach (var pair in list)
-            {
-                pair.nm.CopyFrom(pair.om, args);
-            }
-        }
+       
     }
 
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity

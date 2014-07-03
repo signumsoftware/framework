@@ -18,10 +18,6 @@ namespace Signum.Web
         public string UnitText { get; set; }
                 
         public List<SelectListItem> EnumComboItems { get; set; }
-        public DatePickerOptions DatePickerOptions { get; set; }
-
-        public string RadioButtonLabelTrue = EntityControlMessage.Yes.NiceToString();
-        public string RadioButtonLabelFalse = EntityControlMessage.No.NiceToString();
 
         public bool WriteHiddenOnReadonly { get; set; }
 
@@ -53,6 +49,18 @@ namespace Signum.Web
                 }));
 
             return items;
+        }
+
+        public bool InlineCheckbox { get; set; }
+    }
+
+    public class HiddenLine : BaseLine
+    {
+        public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
+
+        public HiddenLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
+        {
         }
     }
 }

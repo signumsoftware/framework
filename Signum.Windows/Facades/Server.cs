@@ -26,6 +26,8 @@ namespace Signum.Windows
 
         public static event Action Connecting;
 
+        public static event Action<OperationContext> OnOperation; 
+
         static Server()
         {
             Connecting += () =>
@@ -35,6 +37,16 @@ namespace Signum.Windows
 
                 MixinDeclarations.Import(current.FindAllMixins()); 
             };
+        }
+
+        public static void SetSymbolIds<S>() where S :Symbol 
+        {
+            Symbol.SetSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSymbolIds(typeof(S))));
+        }
+
+        public static void SetSemiSymbolIds<S>() where S : SemiSymbol
+        {
+            SemiSymbol.SetSemiSymbolIdsAndNames<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIdsAndNames(typeof(S))));
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)
@@ -109,6 +121,7 @@ namespace Signum.Windows
             try
             {
                 using (HeavyProfiler.Log("WCFClient", () => "{0}".Formato(typeof(S).TypeName())))
+                using (CreateOperationContext((IContextChannel)current))
                 {
                     action(server);
                 }
@@ -134,6 +147,7 @@ namespace Signum.Windows
             try
             {
                 using (HeavyProfiler.Log("WCFClient", () => "Return(({0} server)=>{1})".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                using (CreateOperationContext((IContextChannel)current))
                 {
                     return function(server);
                 }
@@ -144,6 +158,18 @@ namespace Signum.Windows
                 current = null;
                 goto retry;
             }
+        }
+
+        public static IDisposable CreateOperationContext(IContextChannel contex)
+        {
+            if (Server.OnOperation == null)
+                return null;
+
+            var result = new OperationContextScope(contex);
+
+            Server.OnOperation(OperationContext.Current);
+
+            return result;
         }
 
         public static void ExecuteNoRetryOnSessionExpired<S>(Action<S> action)

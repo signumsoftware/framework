@@ -181,12 +181,8 @@ namespace Signum.Entities
     public class EMailValidatorAttribute : RegexValidatorAttribute
     {
         public static readonly Regex EmailRegex = new Regex(
-                          @"^(([^<>()[\]\\.,;:\s@\""]+"
-                        + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@"
-                        + @"((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
-                        + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+"
-                        + @"[a-zA-Z]{2,}))$", RegexOptions.IgnoreCase);
-
+                          @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
+                          + @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", RegexOptions.IgnoreCase);
         public EMailValidatorAttribute()
             : base(EmailRegex)
         {
@@ -639,13 +635,12 @@ namespace Signum.Entities
         {
             get
             {
-                var dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
                 switch (Precision)
                 {
-                    case DateTimePrecision.Hours: return "HH";
-                    case DateTimePrecision.Minutes: return dtfi.ShortTimePattern;
-                    case DateTimePrecision.Seconds: return "c";
-                    case DateTimePrecision.Milliseconds: return dtfi.LongTimePattern + ".fff";
+                    case DateTimePrecision.Hours: return "hh";
+                    case DateTimePrecision.Minutes: return @"hh\:mm";
+                    case DateTimePrecision.Seconds: return @"hh\:mm\:ss";
+                    case DateTimePrecision.Milliseconds: return "c";
                     default: return "";
                 }
             }

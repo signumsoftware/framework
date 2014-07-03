@@ -26,7 +26,7 @@ namespace Signum.Entities
         {
             get
             {
-                return this.FollowC(a => a.Parent).Select(a =>
+                return this.Follow(a => a.Parent).Select(a =>
                     a.PropertyRouteType == Entities.PropertyRouteType.Mixin ? a.type :
                     a.FieldInfo ?? (MemberInfo)a.PropertyInfo).Reverse().Skip(1).ToArray();
             }
@@ -34,7 +34,7 @@ namespace Signum.Entities
 
         public PropertyInfo[] Properties
         {
-            get { return this.FollowC(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
+            get { return this.Follow(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
         }
 
         public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
@@ -139,7 +139,7 @@ namespace Signum.Entities
             }
             else if (typeof(IdentifiableEntity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
             {
-                MixinDeclarations.AssertDefined(parent.type, (Type)fieldOrProperty);
+                MixinDeclarations.AssertDeclared(parent.type, (Type)fieldOrProperty);
 
                 type = (Type)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.Mixin;
@@ -149,14 +149,14 @@ namespace Signum.Entities
                 PropertyRouteType = PropertyRouteType.FieldOrProperty;
                 if (fieldOrProperty is PropertyInfo)
                 {
-                    if (!parent.Type.FollowC(a => a.BaseType).Contains(fieldOrProperty.DeclaringType))
+                    if (!parent.Type.Follow(a => a.BaseType).Contains(fieldOrProperty.DeclaringType))
                     {
                         var pi = (PropertyInfo)fieldOrProperty;
 
                         if (!parent.Type.GetInterfaces().Contains(fieldOrProperty.DeclaringType))
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
 
-                        var otherProperty = parent.Type.FollowC(a => a.BaseType)
+                        var otherProperty = parent.Type.Follow(a => a.BaseType)
                             .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance, null, null, new Type[0], null)).NotNull().FirstEx();
 
                         if (otherProperty == null)
@@ -471,6 +471,43 @@ namespace Signum.Entities
                 this.PropertyString()).Replace("/", ".Item.").TrimEnd('.');
 
             info.AddValue("property", property);
+        }
+
+        public Expression<Func<T, string>> GetLambdaExpression<T>() where T : IdentifiableEntity
+        {
+            if (typeof(T) != this.RootType)
+                throw new InvalidOperationException("Generic parameter T should be {0}".Formato(this.RootType));
+
+
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            Expression exp = null;
+            foreach (var p in this.Follow(a => a.Parent).Reverse())
+            {
+                switch (p.PropertyRouteType)
+                {
+                    case PropertyRouteType.Root:
+                        exp = pe;
+                        break;
+                    case PropertyRouteType.FieldOrProperty:
+                        if(p.PropertyInfo != null)
+                            exp = Expression.Property(exp, p.PropertyInfo);
+                        else
+                            exp = Expression.Field(exp, p.FieldInfo);
+                        break;
+                    case PropertyRouteType.Mixin:
+                            exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
+                        break;
+                    case PropertyRouteType.LiteEntity:
+                        exp = Expression.Property(exp, "Entity"); 
+                        break;
+                    case PropertyRouteType.MListItems:
+                    default:
+                        throw new InvalidOperationException("Unexpected {0}".Formato(p.PropertyRouteType)); 
+                }
+            }
+
+            var selector = Expression.Lambda<Func<T, string>>(exp, pe);
+            return selector;
         }
     }
 

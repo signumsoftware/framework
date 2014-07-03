@@ -25,13 +25,12 @@ namespace Signum.Web
         public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryTokenBuilderSettings settings)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            var id = context.Compose("ddlTokenContainer");
-            using (sb.Surround(new HtmlTag("span").Id(id)))
+            using (sb.Surround(new HtmlTag("span").Id(context.Prefix).Class("token-builder")))
             {
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
 
-            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "QueryTokenBuilder.init", id,
+            sb.Add(MvcHtmlString.Create("<script>" + JsModule.Finder["QueryTokenBuilder.init"](context.Prefix,
                 Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, settings.RequestExtraJSonData).ToString()
                 + "</script>")); 
         
@@ -40,7 +39,7 @@ namespace Signum.Web
 
         public static MvcHtmlString QueryTokenBuilderOptions(this HtmlHelper helper, QueryToken queryToken, Context context, QueryTokenBuilderSettings settings)
         {
-            var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
+            var tokenPath = queryToken.Follow(qt => qt.Parent).Reverse().NotNull().ToList();
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
@@ -89,6 +88,7 @@ namespace Signum.Web
             }
 
             HtmlTag dropdown = new HtmlTag("select")
+                .Class("form-control")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml()) 
                 .Attr("data-parenttoken", previous == null ? "" : previous.FullKey());

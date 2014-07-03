@@ -398,7 +398,7 @@ namespace Signum.Windows
         public virtual Lite<IdentifiableEntity> Find(FindOptions options)
         {
             AssertFindable(options.QueryName);
-
+            
             if (options.ReturnIfOne)
             {
                 Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
@@ -427,7 +427,7 @@ namespace Signum.Windows
         public virtual Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
-
+         
             SearchWindow sw = CreateSearchWindow(options);
             if (sw.ShowDialog() == true)
             {
@@ -445,7 +445,7 @@ namespace Signum.Windows
                 Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
-                    UniqueType = UniqueType.Only,
+                    UniqueType = UniqueType.Only
                 });
 
                 if (lite != null)
@@ -795,7 +795,7 @@ namespace Signum.Windows
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
             {
-                DataTemplate template = EntitySettings.TryGetC(entityType).TryCC(ess => ess.DataTemplate);
+                DataTemplate template = EntitySettings.TryGetC(entityType).Try(ess => ess.DataTemplate);
                 if (template != null)
                     return template;
 
@@ -882,6 +882,14 @@ namespace Signum.Windows
                 if (afterShown != null)
                     afterShown(win);
             }
+        }
+
+        public Control GetCurrentWindow()
+        {
+            if (multithreaded && Application.Current.Dispatcher != Dispatcher.CurrentDispatcher)
+                return Async.GetCurrentWindow();
+
+            return Application.Current.Windows.Cast<Window>().FirstOrDefault(a => a.IsActive);
         }
     }
 }

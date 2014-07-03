@@ -48,10 +48,10 @@ namespace Signum.Web
 
         public IEnumerable<MappingContext> Children()
         {
-            return FirstChild.FollowC(n => n.Next);
+            return FirstChild.Follow(n => n.Next);
         }
 
-        public abstract ControllerContext ControllerContext { get; }
+        public abstract ControllerBase Controller { get; }
 
         public abstract object UntypedValue { get; }
 
@@ -147,6 +147,33 @@ namespace Signum.Web
             }
             return true;
         }
+
+        public bool HasErrors()
+        {
+            return GlobalErrors.Any();
+        }
+
+        public JsonNetResult ToJsonModelState()
+        {
+            return ToJsonModelState(null, null);
+        }
+
+        public JsonNetResult ToJsonModelState(string newToString, string newToStringLink)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>
+            {
+                {"result", JsonResultType.ModelState.ToString()},
+                {"ModelState", this.GlobalErrors }
+            };
+
+            if (newToString != null)
+                result.Add(EntityBaseKeys.ToStr, newToString);
+            if (newToStringLink != null)
+                result.Add(EntityBaseKeys.Link, newToStringLink);
+
+            return new JsonNetResult { Data = result };
+        }
+
     }
 
     public abstract class MappingContext<T> : MappingContext
@@ -240,8 +267,8 @@ namespace Signum.Web
         public override MappingContext Parent { get { throw new InvalidOperationException(); } }
         public override MappingContext Root { get { return this; } }
 
-        ControllerContext controllerContext;
-        public override ControllerContext ControllerContext { get { return controllerContext; } }
+        ControllerBase controller;
+        public override ControllerBase Controller { get { return controller; } }
 
         SortedList<string, string> globalInputs;
         public override SortedList<string, string> GlobalInputs
@@ -261,7 +288,7 @@ namespace Signum.Web
         IDictionary<string, List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public RootContext(string prefix, SortedList<string, string> globalInputs, PropertyRoute route, ControllerContext controllerContext) :
+        public RootContext(string prefix, SortedList<string, string> globalInputs, PropertyRoute route, ControllerBase controller) :
             base(prefix, null, route)
         {
             this.globalInputs = globalInputs;
@@ -275,7 +302,7 @@ namespace Signum.Web
                 this.inputs = globalInputs;
                 this.errors = globalErrors;
             }
-            this.controllerContext = controllerContext;
+            this.controller = controller;
         }  
 
         internal override MappingContext Next
@@ -300,9 +327,9 @@ namespace Signum.Web
             set { next = value; }
         }
 
-        public override ControllerContext ControllerContext
+        public override ControllerBase Controller
         {
-            get { return root.ControllerContext; }
+            get { return root.Controller; }
         }
 
         public override SortedList<string, string> GlobalInputs
@@ -346,7 +373,7 @@ namespace Signum.Web
             set { next = value; }
         }
 
-        public override ControllerContext ControllerContext{   get { return root.ControllerContext; }}
+        public override ControllerBase Controller {   get { return root.Controller; }}
         public override SortedList<string, string> GlobalInputs{   get { return root.GlobalInputs; }}
         public override Dictionary<string, List<string>> GlobalErrors{ get { return root.GlobalErrors; }}
         public override IDictionary<string, string> Inputs { get { return parent.Inputs; } }

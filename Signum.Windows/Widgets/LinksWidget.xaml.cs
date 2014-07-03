@@ -26,6 +26,8 @@ namespace Signum.Windows
     /// </summary>
     public partial class LinksWidget : UserControl, IWidget
     {
+        public decimal Order { get; set; }
+
         public Control Control { get; set; }
         public event Action ForceShow;
 

@@ -1,0 +1,182 @@
+﻿.sf-main-control {
+    display:block;
+    clear:both;
+    padding-bottom:5px; /* hack to prevent vertical scrollbars on popups due to the use of sf-line:after */
+}
+
+/*--------------
+--dropdowns-----
+--------------*/
+.sf-dropdown
+{
+    position: relative;
+    display: inline-block;    
+}
+.sf-dropdown.sf-query-button .sf-menu-button, .sf-dropdown.sf-entity-button .sf-menu-button 
+{
+    position:absolute;
+}
+.sf-dropdown .sf-menu-button {
+    z-index:2;
+    display:none;
+    list-style:none;
+    margin-left:-5px;
+}
+.sf-dropdown.sf-open .sf-menu-button
+{
+	display:block;
+	border-shadow: 0 2px 8px #ddd;
+}
+.sf-dropdown.sf-open .sf-menu-button:hover
+{
+	background-color:#ffffee;
+}
+.sf-dropdown a
+{
+    text-align:left;
+    font-weight:bold;
+    text-decoration: none;
+    white-space: nowrap;
+    zoom: 1;
+    cursor: pointer;
+}
+.sf-dropdown .sf-menu-button > li
+{
+	margin-left:0px !important;
+	clear:both;
+}
+.sf-dropdown .sf-toolbar-menu-separator
+{
+	height:1px;
+	background-color:#ddd;
+}
+.sf-dropdown .sf-menu-button > li a:hover, .sf-dropdown .sf-menu-button > li div:hover
+{
+	background-color:#eee;
+}
+.sf-dropdown .sf-menu-button .sf-toolbar-menu-separator
+{
+	border-top:1px solid #bbb;
+}
+
+/*-----------------
+--entity title-----
+-----------------*/
+.sf-normal-control-header
+{
+    margin: auto;
+    min-height: 20px;
+    vertical-align: top;
+    margin-bottom: 0.5em;
+}
+.sf-type-nice-name 
+{
+    font-size: 12px;
+    color: black;
+    padding: 0 5px;
+    line-height: 20px;
+    vertical-align: middle;
+}
+.sf-entity-id 
+{
+    clear:right;
+    font-size:13px;
+    color:#3E818F;
+}
+.sf-separator {
+    color:#ccc;
+}
+.sf-entity-title {
+    display:block;
+    font-size:18px;
+    color: #424242;
+	margin-bottom:10px;
+	font-weight: bold;
+    line-height: 1.2em;
+}
+
+/*-----------------
+--button-bar-------
+-----------------*/
+.sf-button-bar, .sf-button-bar li, .sf-query-button-bar, .sf-query-button-bar li
+{
+    display:inline-block;
+}
+.sf-button-bar, .sf-query-button-bar 
+{
+	list-style:none;
+	margin: 2px 0;
+	line-height: 1em;	
+}
+.sf-button-bar
+{
+    margin-bottom:20px;
+}
+.sf-entity-button.sf-disabled:hover {
+    text-decoration:none;
+    cursor:default;
+}
+.sf-entity-button.sf-disabled {
+    color:#aaa;
+}
+.sf-query-button-bar > .sf-query-button
+{
+    vertical-align: top;   
+    margin: 0; /*-webkit-appearance:button fix*/
+}
+
+/*--------------
+--UI Blocker----
+--------------*/
+.sf-ui-blocker {
+    display:block;
+    position:fixed;
+    top:0;
+    z-index:20000;
+    background-color:#eee;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter:alpha(opacity=50);
+    -khtml-opacity:0.5;
+    opacity:0.5;
+}
+.clearall 
+{
+    clear:both;
+}
+.ui-tabs .ui-tabs-panel {
+    overflow: auto;
+    max-width:100%;
+}
+fieldset {
+    border: 1px solid #BBB;
+    padding: 5px 10px 10px 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-top-left-radius: 4px 4px;
+    border-top-right-radius: 4px 4px;
+    border-bottom-right-radius: 4px 4px;
+    border-bottom-left-radius: 4px 4px;
+}
+legend
+{
+    background-color: #fff; /*IE fix*/    
+}
+.sf-chooser-button
+{
+    display: block;
+    width: 100%;    
+}
+
+.sf-popup-fullscreen {
+    float: left;
+    display: block;
+    margin-left: 5px;
+    cursor: pointer;
+}   
+
+/*----------------
+--popup-----------
+----------------*/
+.ui-dialog-title {
+    line-height: 16px;
+}

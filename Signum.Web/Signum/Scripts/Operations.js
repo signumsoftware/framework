@@ -27,15 +27,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }, options);
 
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }).then(function (result) {
-            assertModelStateErrors(result, options);
+            exports.assertModelStateErrors(result, options.prefix);
             return Entities.EntityHtml.fromHtml(options.prefix, result);
         });
     }
     exports.executeAjax = executeAjax;
 
     function executeDefaultContextual(options) {
-        Finder.removeOverlay();
-
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
@@ -93,8 +91,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function constructFromDefaultContextual(options, newPrefix) {
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
             exports.markCells(options.prefix);
@@ -157,8 +153,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
-        Finder.removeOverlay();
-
         return exports.deleteAjaxContextual(options).then(function (result) {
             exports.markCells(options.prefix);
         });
@@ -183,8 +177,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
-
-        Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
             exports.markCells(options.prefix);
@@ -220,7 +212,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.openPopup = openPopup;
 
     function markCells(prefix) {
-        $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
+        $("tr.active").addClass("sf-entity-ctxmenu-success");
         exports.notifyExecuted();
     }
     exports.markCells = markCells;
@@ -231,7 +223,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.notifyExecuted = notifyExecuted;
 
     function getNewPrefix(options) {
-        return SF.compose(options.prefix, "New");
+        return options.prefix.child("New");
     }
     exports.getNewPrefix = getNewPrefix;
 
@@ -274,7 +266,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             runtimeInfo = items[0].runtimeInfo;
         }
 
-        result[SF.compose(options.prefix, Entities.Keys.runtimeInfo)] = runtimeInfo.toString();
+        result[options.prefix.child(Entities.Keys.runtimeInfo)] = runtimeInfo.toString();
 
         return result;
     }
@@ -300,18 +292,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.baseRequestData = baseRequestData;
 
-    function assertModelStateErrors(operationResult, options) {
+    function assertModelStateErrors(operationResult, prefix) {
         if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
             return false;
 
         var modelState = operationResult.ModelState;
 
-        Validator.showErrors({ prefix: options.prefix }, modelState);
+        Validator.showErrors({ prefix: prefix }, modelState);
 
         SF.Notify.error(lang.signum.error, 2000);
 
         throw modelState;
     }
+    exports.assertModelStateErrors = assertModelStateErrors;
 
     function entityIsValidOrLite(options) {
         if (options.isLite || options.avoidValidate)
@@ -330,15 +323,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.validateAndSubmit = validateAndSubmit;
 
     function submit(options) {
-        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl");
+        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divMainControl");
 
         var $form = mainControl.closest("form");
         $form.append(SF.hiddenInput('isLite', options.isLite) + SF.hiddenInput('operationFullKey', options.operationKey) + SF.hiddenInput("prefix", options.prefix));
 
         if (!SF.isEmpty(options.prefix)) {
             //Check runtimeInfo present => if it's a popup from a LineControl it will not be
-            var myRuntimeInfoKey = SF.compose(options.prefix, Entities.Keys.runtimeInfo);
-            if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
+            var myRuntimeInfoKey = options.prefix.child(Entities.Keys.runtimeInfo);
+            if (myRuntimeInfoKey.tryGet().length == 0) {
                 SF.hiddenInput(myRuntimeInfoKey, mainControl.data("runtimeinfo"));
             }
         }

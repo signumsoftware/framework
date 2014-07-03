@@ -12,50 +12,55 @@ namespace Signum.Services
     public interface IOperationServer
     {
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetCanExecuteAll(IdentifiableEntity entity);
+        Dictionary<OperationSymbol, string> GetCanExecuteAll(IdentifiableEntity entity);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite);
+        Dictionary<OperationSymbol, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite);
 
         [OperationContract, NetDataContract]
-        string GetCanExecute(IdentifiableEntity entity, Enum operationKey);
+        string GetCanExecute(IdentifiableEntity entity, OperationSymbol operationSymbol);
 
         [OperationContract, NetDataContract]
-        string GetCanExecuteLite(Lite<IdentifiableEntity> lite, Enum operationKey);
+        string GetCanExecuteLite(Lite<IdentifiableEntity> lite, OperationSymbol operationSymbol);
 
         [OperationContract, NetDataContract]
         List<OperationInfo> GetOperationInfos(Type entityType);
+         
+        [OperationContract, NetDataContract]
+        bool HasConstructOperations(Type entityType);
 
         [OperationContract, NetDataContract]
         HashSet<Type> GetSaveProtectedTypes();
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperation(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
-
-
-        [OperationContract, NetDataContract]
-        void Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args);
+        void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
-
-        [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
+        IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFrom(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<Enum> cleanKeys);
+        IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationSymbol, params object[] args);
+
+        [OperationContract, NetDataContract]
+        Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> cleanKeys);
+
+       
     }
 
 }

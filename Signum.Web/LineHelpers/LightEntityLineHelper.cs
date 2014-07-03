@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IIdentifiable> lite, bool isSearchEntity)
+        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IIdentifiable> lite, bool isSearch)
         {
             if (lite == null)
                 return MvcHtmlString.Empty;
@@ -23,7 +23,7 @@ namespace Signum.Web
             if (lite.ToString() == null)
                 Database.FillToString(lite);
 
-            MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, null, isSearchEntity) ?
+            MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, null, isSearch) ?
                 helper.Href("",
                     lite.ToString(),
                     Navigator.NavigateRoute(lite),

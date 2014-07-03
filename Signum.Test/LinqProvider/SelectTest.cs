@@ -553,6 +553,13 @@ namespace Signum.Test.LinqProvider
                         from s in Database.Query<AlbumDN>().Where(blas)
                         select new { a, s }).ToList();
         }
+
+        [TestMethod]
+        public void SelectExplicitInterfaceImplementedField()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        select ((ISecretContainer)a).Secret.InSql()).ToList();
+        }
     }
 
     public static class AuthorExtensions

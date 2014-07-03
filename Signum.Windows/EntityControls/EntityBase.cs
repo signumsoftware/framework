@@ -391,7 +391,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                object entity = Constructor.Construct(type, this);
+                object entity = this.Construct(type);
 
                 value = entity;
             }

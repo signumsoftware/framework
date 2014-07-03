@@ -189,9 +189,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Manager.Search(controller, request, allowSelection, navigate, filterMode, new Context(null, prefix));
+            return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
         }
 
         public static string SearchTitle(object queryName)
@@ -271,27 +271,27 @@ namespace Signum.Web
             return Manager.QuerySettings.GetOrThrow(queryName, "no QuerySettings for queryName {0} found");
         }
 
-        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null)
+        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerBase controller, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null)
         {
-            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, admin, prefix, route, inputs);
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controller, prefix, route, inputs);
         }
 
-        static GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
-            new GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, ad, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, ad, prefix, route, dic));
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
+        static GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, prefix, route, dic));
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerBase controller, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
-            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingMain : s.UntypedMappingLine);
+            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).UntypedMappingMain;
 
-            return ApplyChanges<T>(entity, controllerContext, mapping, prefix, route, inputs);
+            return ApplyChanges<T>(entity, controller, mapping, prefix, route, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, Mapping<T> mapping, string prefix = null,  PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerBase controller, Mapping<T> mapping, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
             if (prefix == null)
-                prefix = controllerContext.Controller.Prefix();
+                prefix = controller.Prefix();
 
             if (inputs == null)
-                inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
+                inputs = controller.ControllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
             if (route == null)
             {
@@ -301,7 +301,7 @@ namespace Signum.Web
                 route = PropertyRoute.Root(typeof(T));
             }
 
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, route, inputs);
+            return Manager.ApplyChanges<T>(controller, entity, prefix, mapping, route, inputs);
         }
 
         public static string Prefix(this ControllerBase controller)
@@ -380,9 +380,9 @@ namespace Signum.Web
             return Manager.OnIsFindable(queryName);
         }
 
-        public static bool IsCreable(Type type, bool isSearchEntity = false)
+        public static bool IsCreable(Type type, bool isSearch = false)
         {
-            return Manager.OnIsCreable(type, isSearchEntity);
+            return Manager.OnIsCreable(type, isSearch);
         }
 
         public static bool IsReadOnly(Type type)
@@ -405,14 +405,14 @@ namespace Signum.Web
             return Manager.OnIsViewable(entity.GetType(), entity, partialViewName);
         }
 
-        public static bool IsNavigable(Type type, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(type, null, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, partialViewName, isSearch);
         }
 
-        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearch);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)
@@ -608,7 +608,7 @@ namespace Signum.Web
             var entity = (ModifiableEntity)options.Entity;
 
             controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
-            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
@@ -648,7 +648,7 @@ namespace Signum.Web
             
             controller.ViewData.Model = typeContext;
             controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
-            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
             bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
@@ -684,7 +684,7 @@ namespace Signum.Web
             if (Navigator.IsReadOnly(cleanType))
                 cleanTC.ReadOnly = true;
 
-            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).ViewOverrides;
+            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).GetViewOverrides();
 
             return new PartialViewResult
             {
@@ -846,7 +846,7 @@ namespace Signum.Web
                 return QueryUtils.GetNiceName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, Context context)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
@@ -857,7 +857,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.AllowSelection] = allowSelection;
             controller.ViewData[ViewDataKeys.Navigate] = navigate;
-            controller.ViewData[ViewDataKeys.FilterMode] = filterMode;
+            controller.ViewData[ViewDataKeys.ShowFooter] = showFooter;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
@@ -927,14 +927,14 @@ namespace Signum.Web
                 (type.IsIdentifiableEntity() ? " or the Schema" : null));
         }
 
-        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
+        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerBase controller, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
         {
             using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
             using (new EntityCache(EntityCacheType.Normal))
             {
                 EntityCache.AddFullGraph((ModifiableEntity)entity);
 
-                RootContext<T> ctx = new RootContext<T>(prefix, inputs, route, controllerContext) { Value = entity };
+                RootContext<T> ctx = new RootContext<T>(prefix, inputs, route, controller) { Value = entity };
                 mapping(ctx);
                 return ctx;
             }
@@ -960,7 +960,7 @@ namespace Signum.Web
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(runtimeInfo.EntityType);
+                return controller.Construct(runtimeInfo.EntityType);
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)
@@ -977,13 +977,13 @@ namespace Signum.Web
 
         public event Func<Type, bool> IsCreable;
 
-        internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
+        internal protected virtual bool OnIsCreable(Type type, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            if (!es.OnIsCreable(isSearchEntity))
+            if (!es.OnIsCreable(isSearch))
                 return false;
 
 
@@ -1049,13 +1049,13 @@ namespace Signum.Web
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
             return es != null &&
                 IsViewableBase(type, entity) &&
-                es.OnIsNavigable(partialViewName, isSearchEntity);
+                es.OnIsNavigable(partialViewName, isSearch);
         }
 
         internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity, string partialViewName)
@@ -1202,17 +1202,19 @@ namespace Signum.Web
             };
         }
 
-        public static JsonNetResult ModelState(ModelStateDictionary dictionary)
+        public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary)
         {
-            return ModelState(dictionary, null, null); 
+            return ToJsonModelState(dictionary, null, null);
         }
 
-        public static JsonNetResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
+        public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary, string newToString, string newToStringLink)
         {
             Dictionary<string, object> result = new Dictionary<string, object>
             {
                 {"result", JsonResultType.ModelState.ToString()},
-                {"ModelState", dictionary.ToJsonData()}
+                {"ModelState", dictionary.ToDictionary(kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray())
+                }
             };
 
             if (newToString != null)
@@ -1222,6 +1224,7 @@ namespace Signum.Web
 
             return new JsonNetResult { Data = result };
         }
+
     }
 
     public class JsonNetResult : ActionResult

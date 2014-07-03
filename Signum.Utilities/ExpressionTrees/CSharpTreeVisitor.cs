@@ -277,7 +277,7 @@ namespace Signum.Utilities.ExpressionTrees
                 if (literal)
                     return value == null ? "null" : value.ToString();
                 else
-                    return CSharpRenderer.Value(value, value.TryCC(v=>v.GetType()), ImportedNamespaces);
+                    return CSharpRenderer.Value(value, value.Try(v=>v.GetType()), ImportedNamespaces);
             }
             else
                 return "{0}.{1}".Formato(Visit(m.Expression, m.NodeType), m.Member.Name);

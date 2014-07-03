@@ -15,7 +15,7 @@ namespace Signum.Entities.Basics
         public string FullClassName
         {
             get { return fullClassName; }
-            set { Set(ref fullClassName, value, () => FullClassName); }
+            set { Set(ref fullClassName, value); }
         }
 
         [NotNullable, UniqueIndex]
@@ -23,7 +23,7 @@ namespace Signum.Entities.Basics
         public string CleanName
         {
             get { return cleanName; }
-            set { Set(ref cleanName, value, () => CleanName); }
+            set { Set(ref cleanName, value); }
         }
 
         [NotNullable, UniqueIndex]
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
         public string TableName
         {
             get { return tableName; }
-            set { Set(ref tableName, value, () => TableName); }
+            set { Set(ref tableName, value); }
         }
 
         static Expression<Func<TypeDN, string>> ToStringExpression = e => e.CleanName;

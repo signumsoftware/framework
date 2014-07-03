@@ -4,9 +4,6 @@ export var Keys = {
     tabId: "sfTabId",
     antiForgeryToken: "__RequestVerificationToken",
 
-    entityTypeNames: "sfEntityTypeNames",
-    entityTypeNiceNames: "sfEntityTypeNiceNames",
-
     runtimeInfo: "sfRuntimeInfo",
     staticInfo: "sfStaticInfo",
     toStr: "sfToStr",
@@ -18,6 +15,14 @@ export var Keys = {
     viewMode: "sfViewMode",
 };
 
+
+export interface TypeInfo {
+    name: string;
+    niceName: string;
+    creable?: boolean;
+    findable?: boolean;
+    preConstruct?: (extraJsonArgs?: FormObject) => Promise<any>;
+}
 
 export class RuntimeInfo {
     type: string;
@@ -71,22 +76,12 @@ export class RuntimeInfo {
         return this.type + ";" + this.id;
     }
 
-
-    static getHiddenInput(prefix: string, context?: JQuery) : JQuery {
-        var result = $('#' + SF.compose(prefix, Keys.runtimeInfo), context);
-
-        if (result.length != 1)
-            throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, Keys.runtimeInfo)));
-
-        return result; 
-    }
-
     static getFromPrefix(prefix: string, context?: JQuery): RuntimeInfo {
-        return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+        return RuntimeInfo.parse(prefix.child(Keys.runtimeInfo).get().val());
     }
 
     static setFromPrefix(prefix: string, runtimeInfo: RuntimeInfo, context?: JQuery) {
-        RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null? "": runtimeInfo.toString());
+        prefix.child(Keys.runtimeInfo).get().val(runtimeInfo == null? "": runtimeInfo.toString());
     }
 }
 
@@ -104,11 +99,11 @@ export class EntityValue {
     toStr: string;
     link: string;
 
-    assertPrefixAndType(prefix: string, types: string[]) {
-        if (types.length == 0 && types[0] == "[All]")
+    assertPrefixAndType(prefix: string, types: TypeInfo[]) {
+        if (types == null) // All
             return;
 
-        if (types.indexOf(this.runtimeInfo.type) == -1)
+        if (!types.some(ti=> ti.name == this.runtimeInfo.type))
             throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
     }
 
@@ -132,7 +127,7 @@ export class EntityHtml extends EntityValue {
         this.prefix = prefix;
     }
 
-    assertPrefixAndType(prefix: string, types: string[]) {
+    assertPrefixAndType(prefix: string, types: TypeInfo[]) {
 
         super.assertPrefixAndType(prefix, types);
 
@@ -146,6 +141,14 @@ export class EntityHtml extends EntityValue {
 
     loadHtml(htmlText: string) {
         this.html = $('<div/>').html(htmlText).contents();
+    }
+
+    getChild(pathPart: string) : JQuery {
+        return this.prefix.child(pathPart).get(this.html);
+    }
+
+    tryGetChild(pathPart: string): JQuery {
+        return this.prefix.child(pathPart).tryGet(this.html);
     }
 
     static fromHtml(prefix: string, htmlText: string): EntityHtml {

@@ -15,20 +15,41 @@ namespace Signum.Web
 {
     public delegate MvcHtmlString WriteAHref(string href, string title, string text);
 
-    public class WebMenuItem 
+    public static class WebMenuHelper
     {
-        List<WebMenuItem> children = new List<WebMenuItem>();
-        public List<WebMenuItem> Children 
+        public static MvcHtmlString WebMenu(this HtmlHelper helper, params  WebMenuItem[] menuItems)
         {
-            get { return children; }
+            return helper.WebMenu((IEnumerable<WebMenuItem>)menuItems);
+        }
+        public static MvcHtmlString WebMenu(this HtmlHelper helper, IEnumerable<WebMenuItem> menuITems)
+        {
+            var currentUrl = helper.ViewContext.RequestContext.HttpContext.Request.RawUrl; 
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            foreach (WebMenuItem menu in menuITems)
+            {
+                if (menu.Visible)
+                    menu.Write(sb, currentUrl, 0);
+            }
+            return sb.ToHtml();
+        }
+    }
+
+
+    public class WebMenuItem
+    {
+        List<WebMenuItem> children;
+        public List<WebMenuItem> Children
+        {
+            get { return children ?? (children = new List<WebMenuItem>()); }
             set { children = value; }
         }
-
+      
         public WriteAHref ManualA { get; set; } //Specify all the tag string (href, title, text)=>"<a href='{0}' title={1}>{2}</a>".Formato(href,title,text); 
-        
-        public object Link {get; set; }
+
+        public object Link { get; set; }
 
         public string Id { get; set; }
+
         string text;
         public string Text
         {
@@ -46,12 +67,7 @@ namespace Signum.Web
             set { text = value; }
         }
 
-        MvcHtmlString html;
-        public MvcHtmlString Html
-        {
-            get { return html; }
-            set { html = value; }
-        }
+        public MvcHtmlString Html {get; set; }
 
         string title;
         public string Title
@@ -68,7 +84,7 @@ namespace Signum.Web
                 if (visible.HasValue)
                     return visible.Value;
 
-                if (Children.Count != 0)
+                if (children.HasItems())
                     return Children.Any(a => a.Visible);
 
                 FindOptions findOptions = Link as FindOptions;
@@ -81,75 +97,22 @@ namespace Signum.Web
             set { visible = value; }
         }
 
-        public string Class { get; set; }           //is applied to link
-        public string ListItemClass { get; set; }   //is applied to list item
-        
-        public MvcHtmlString ToHtml(string currentUrl, string rootClass) 
-        {
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-            this.Write(sb, currentUrl, rootClass, 0, "");
-            return sb.ToHtml();
-        }
+        public string Class { get; set; } //is applied to link
 
-        public MvcHtmlString ToHtml(string currentUrl, string rootClass, string selectedRoute)
+     
+        public void Write(HtmlStringBuilder sb, string currentUrl, int depth)
         {
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-            this.Write(sb, currentUrl, rootClass, 0, selectedRoute);
-            return sb.ToHtml();
-        }
+            if (!this.Visible)
+                throw new InvalidOperationException("Invisible menu");
 
-        void Write(HtmlStringBuilder sb, string currentUrl, string rootClass, int depth, string selectedRoute)
-        {
-            if(!Visible)
-                return;
+            bool isActive = this.Link != null && this.Link.ToString() == currentUrl ||
+                children.HasItems() && children.Any(a => a.Link != null && a.Link.ToString() == currentUrl);
 
-            using (depth == 0 ? null : sb.Surround(new HtmlTag("li").Class("l" + depth).Class(ListItemClass)))
+            bool isHeader = IsHeader(depth);
+
+            using (sb.Surround(new HtmlTag("li").Class(isActive ? "active" : null).Class(isHeader ? "dropdown-header" : this.children.HasItems() ? "dropdown" : null)))
             {
-                bool selectedSubmenu = false;
-                if (Id != null && selectedRoute != null && selectedRoute.Split(' ').Contains(Id))
-                {
-                    Class += " selected";
-                    selectedSubmenu = true;
-                }
-
-                if (Children.Any())
-                {
-                    if (depth != 0)
-                    {
-                        if (Link != null)
-                        {
-                            HtmlTag htA = new HtmlTag("a")
-                                             .Attrs(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
-                                             .Class(Class);
-
-                            if (!MvcHtmlString.IsNullOrEmpty(html))
-                                htA.InnerHtml(html);
-                            else
-                                htA.SetInnerText(Text);
-
-                            sb.AddLine(htA.ToHtml());
-                        }
-                        else
-                        {
-                            sb.AddLine(new HtmlTag("span")
-                                             .Attrs(new { onmouseover = "", title = Title, id = Id })
-                                             .Class(Class)
-                                             .SetInnerText(Text)
-                                             .ToHtml());
-                        }
-                    }
-
-                    using (sb.Surround(new HtmlTag("ul")
-                        .Class(depth == 0 ? rootClass : "submenu")
-                        .Attrs(selectedSubmenu ? new { style = "display:block" } : null)))
-                    {
-                        foreach (WebMenuItem menu in children)
-                        {
-                            menu.Write(sb, currentUrl, rootClass, depth + 1, selectedRoute);
-                        }
-                    }
-                }
-                else if (Link != null)
+                if (Link != null)
                 {
                     string link = Link.ToString();
 
@@ -161,24 +124,69 @@ namespace Signum.Web
                                 .Attrs(new { href = link, title = Title, id = Id })
                                 .Class(Class);
 
-                        if (!MvcHtmlString.IsNullOrEmpty(html))
-                            tbA.InnerHtml(html);
+                        if (Html != null)
+                            tbA.InnerHtml(Html);
                         else
                             tbA.SetInnerText(Text);
 
                         sb.AddLine(tbA.ToHtml());
                     }
                 }
-                else if (html != null)
+                else if (this.children.HasItems() && !isHeader)
                 {
-                    sb.AddLine(html);
+                    using (sb.Surround(new HtmlTag("a").Attr("href", "#")
+                        .Class("dropdown-toggle")
+                        .Attr("data-toggle", "dropdown")))
+                    {
+                        if (Html != null)
+                            sb.Add(Html);
+                        else 
+                            sb.Add(new HtmlTag("span").SetInnerText(Text));
+
+                        sb.Add(new HtmlTag("b").Class("caret"));
+                    }
                 }
-                else if (text.HasText())
+                else if (Html != null)
+                    sb.AddLine(Html);
+                else
+                    sb.AddLine(new HtmlTag("span").SetInnerText(Text));
+
+                if (this.children.HasItems() && !isHeader)
                 {
-                    sb.Add(new HtmlTag("span").SetInnerText(Text));
+                    using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
+                    {
+                        bool lastHeader = false;
+                        foreach (WebMenuItem menu in this.children)
+                        {
+                            if (menu.Visible)
+                            {
+                                if(lastHeader)
+                                    sb.AddLine(new HtmlTag("li").Class("divider")); 
+
+                                menu.Write(sb, currentUrl, depth + 1);
+
+                                lastHeader = menu.IsHeader(depth + 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isHeader)
+            {
+                foreach (WebMenuItem menu in this.children)
+                {
+                    if (menu.Visible)
+                        menu.Write(sb, currentUrl, depth + 1);
                 }
 
+               
             }
+        }
+
+        private bool IsHeader(int depth)
+        {
+            return this.children.HasItems() && depth >= 1;
         }
     }
 }

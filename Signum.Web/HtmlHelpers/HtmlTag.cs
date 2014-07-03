@@ -71,23 +71,24 @@ namespace Signum.Web
 
         public HtmlTag Attrs(object attributes)
         {
-            tagBuilder.MergeAttributes(new RouteValueDictionary(attributes));
-            return this;
+            return Attrs(new RouteValueDictionary(attributes));
         }
 
         public HtmlTag Attrs(object attributes, bool replaceExisting)
         {
-            tagBuilder.MergeAttributes(new RouteValueDictionary(attributes), replaceExisting);
-            return this;
+            return Attrs(new RouteValueDictionary(attributes), replaceExisting);
         }
 
-        public HtmlTag Attrs<TKey, TValue>(IDictionary<TKey, TValue> attributes)
+        public HtmlTag Attrs(IDictionary<string, object> attributes)
         {
+            if (attributes != null && attributes.ContainsKey("class"))
+                tagBuilder.AddCssClass((string)attributes["class"]);
+
             tagBuilder.MergeAttributes(attributes);
             return this;
         }
 
-        public HtmlTag Attrs<TKey, TValue>(IDictionary<TKey, TValue> attributes, bool replaceExisting)
+        public HtmlTag Attrs(IDictionary<string, object> attributes, bool replaceExisting)
         {
             tagBuilder.MergeAttributes(attributes, replaceExisting);
             return this;
@@ -190,11 +191,11 @@ namespace Signum.Web
         public HtmlStringBuilder() { }
         public HtmlStringBuilder(IEnumerable<MvcHtmlString> elements)
         {
-            if(elements != null)
+            if (elements != null)
+            {
                 foreach (var item in elements)
-                {
                     sb.AppendLine(item.ToHtmlString());
-                }
+            }
         }
 
         public void Add(MvcHtmlString html)
