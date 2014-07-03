@@ -510,8 +510,8 @@ export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
 
         var html = pair.entityHtml.html;
 
-        var date = html.find(options.prefix.child("Date"));
-        var time = html.find(options.prefix.child("Time"));
+        var date = html.find("#" + options.prefix.child("value").child("Date"));
+        var time = html.find("#" + options.prefix.child("value").child("Time"));
 
         if (date.length && time.length)
             return date.val() + " " + time.val();

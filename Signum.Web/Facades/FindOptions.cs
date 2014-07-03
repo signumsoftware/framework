@@ -85,8 +85,12 @@ namespace Signum.Web
         {
             this.QueryName = queryName;
             this.FilterOptions.Add(new FilterOption(parentColumn, parentValue) { Frozen = true });
-            this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
-            this.ColumnOptions.Add(new ColumnOption(parentColumn));
+
+            if (QueryUtils.IsColumnToken(parentColumn))
+            {
+                this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
+                this.ColumnOptions.Add(new ColumnOption(parentColumn));
+            }
             this.SearchOnLoad = true;
             this.ShowFilters = false;
         }
