@@ -129,20 +129,20 @@ namespace Signum.Web.Dashboard
 
         class DashboardQuickLink : QuickLink
         {
-            Lite<DashboardDN> controlPanel;
+            Lite<DashboardDN> dashboard;
             Lite<IdentifiableEntity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> controlPanel, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
             {
-                this.Text = controlPanel.ToString();
-                this.controlPanel = controlPanel;
+                this.Text = dashboard.ToString();
+                this.dashboard = dashboard;
                 this.entity = entity;
                 this.IsVisible = true;
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(controlPanel, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(dashboard, entity))).SetInnerText(Text);
             }
         }
     }

@@ -27,9 +27,9 @@ namespace Signum.Entities.Dashboard
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var controlPanel = autoComplete(ident, AutoCompleteLimit);
+            var dashboard = autoComplete(ident, AutoCompleteLimit);
 
-            foreach (var uq in controlPanel)
+            foreach (var uq in dashboard)
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 
