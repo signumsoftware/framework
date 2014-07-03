@@ -4,8 +4,19 @@ define(["require", "exports"], function(require, exports) {
         var showOnEntity = function () {
             var visible = !!el.getRuntimeInfo();
             el.element.closest(".form-group").next("p.messageEntity").toggle(visible);
+        };
 
-            var vl = el.prefix.parent("EntityType").child("Disposition").get();
+        showOnEntity();
+
+        el.entityChanged = showOnEntity;
+    }
+    exports.attachShowCurrentEntity = attachShowCurrentEntity;
+
+    function attachShowEmbeddedInEntity(el) {
+        var showOnEntity = function () {
+            var visible = !!el.getRuntimeInfo();
+
+            var vl = el.prefix.parent("EntityType").child("EmbeddedInEntity").get();
             if (!visible)
                 vl.val(null);
 
@@ -16,6 +27,6 @@ define(["require", "exports"], function(require, exports) {
 
         el.entityChanged = showOnEntity;
     }
-    exports.attachShowCurrentEntity = attachShowCurrentEntity;
+    exports.attachShowEmbeddedInEntity = attachShowEmbeddedInEntity;
 });
 //# sourceMappingURL=UserAssets.js.map

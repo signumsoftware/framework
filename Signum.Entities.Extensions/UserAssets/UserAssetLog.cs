@@ -34,11 +34,4 @@ namespace Signum.Entities.UserAssets
             private set { Set(ref creationDate, value); }
         }
     }
-
-    public enum UserAssetDisposition
-    {
-        QuickLink,
-        EntityTop,
-        EntityBottom
-    }
 }

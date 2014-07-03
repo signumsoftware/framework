@@ -167,16 +167,17 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN GetHomePageDashboard()
         {
-            var cps = Database.Query<DashboardDN>()
-                .Where(a => a.HomePagePriority.HasValue)
-                .OrderByDescending(a => a.HomePagePriority)
-                .Select(a => a.ToLite())
+            return Dashboards.Value.Values
+                .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();
+        }
 
-            if (cps == null)
-                return null;
-
-            return cps.Retrieve(); //I assume this simplifies the cross applys.
+        public static DashboardDN GetEmbeddedDashboard(Type entityType)
+        {
+            return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
+                .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
         }
 
         public static List<Lite<DashboardDN>> GetDashboards()
@@ -185,7 +186,7 @@ namespace Signum.Engine.Dashboard
                 .Select(d => d.Key).ToList();
         }
 
-        public static List<Lite<DashboardDN>> GetDashboardEntity(Type entityType)
+        public static List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType)
         {
             return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => Dashboards.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();

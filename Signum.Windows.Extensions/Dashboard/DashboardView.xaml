@@ -25,7 +25,10 @@
             <DataTemplate DataType="{x:Type secp:PanelPartDN}">
                 <GroupBox Style="{StaticResource EntityGroupBox}" Margin="8" Loaded="GroupBox_Loaded">
                     <GroupBox.Header>
-                        <TextBlock Text="{Binding}" x:Name="tb"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding}" x:Name="tb" VerticalAlignment="Center"  FontSize="12"/>
+                            <Button x:Name="navigate" Style="{StaticResource RoundButton}" Content="{StaticResource Navigate}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        </StackPanel>
                     </GroupBox.Header>
                     <ContentControl Content="{Binding Content}">
                         <ContentControl.ContentTemplateSelector>

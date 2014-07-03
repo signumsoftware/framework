@@ -58,8 +58,6 @@
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
         
-        @Html.ValueLine(uc, f => f.Disposition)
-        
         using(var sc= uc.SubContext())
         {
             sc.FormGroupSize = FormGroupSize.Small;

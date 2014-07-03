@@ -351,10 +351,16 @@ namespace Signum.Services
                 () => DashboardLogic.GetHomePageDashboard());
         }
 
-        public List<Lite<DashboardDN>> GetDashboardEntity(Type entityType)
+        public DashboardDN GetEmbeddedDashboard(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => DashboardLogic.GetDashboardEntity(entityType));
+                () => DashboardLogic.GetEmbeddedDashboard(entityType));
+        }
+
+        public List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => DashboardLogic.GetDashboardsEntity(entityType));
         }
 
         public List<Lite<DashboardDN>> AutocompleteDashboard(string subString, int limit)

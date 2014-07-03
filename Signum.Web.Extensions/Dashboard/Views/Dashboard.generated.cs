@@ -56,7 +56,7 @@ namespace Signum.Web.Extensions.Dashboard.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/Dashboard.cshtml")]
-    public partial class Dashboard : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class Dashboard : System.Web.Mvc.WebViewPage<DashboardDN>
     {
         public Dashboard()
         {
@@ -70,7 +70,7 @@ WriteLiteral("\r\n");
 WriteLiteral("    ");
 
             
-            #line 7 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 8 "..\..\Dashboard\Views\Dashboard.cshtml"
 Write(Html.ScriptCss("~/Dashboard/Content/Dashboard.css"));
 
             
@@ -83,13 +83,9 @@ WriteLiteral("\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 10 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 11 "..\..\Dashboard\Views\Dashboard.cshtml"
  using (Html.BeginForm("DoPostBack", "Signum", "POST"))
-{
-    DashboardDN cp = (DashboardDN)Model;
-
-    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
-    
+{    
 
             
             #line default
@@ -97,14 +93,14 @@ WriteLiteral("\r\n");
 WriteLiteral("    <h2>\r\n");
 
             
-            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 14 "..\..\Dashboard\Views\Dashboard.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
-         if (Navigator.IsNavigable(cp, null, isSearch: true))
+            #line 14 "..\..\Dashboard\Views\Dashboard.cshtml"
+         if (Navigator.IsNavigable(Model, null, isSearch: true))
         { 
 
             
@@ -112,21 +108,21 @@ WriteLiteral("    <h2>\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 489), Tuple.Create("\"", 548)
+WriteAttribute("href", Tuple.Create(" href=\"", 394), Tuple.Create("\"", 456)
             
-            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 496), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardDN), cp.Id)
+            #line 16 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create("", 401), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardDN), Model.Id)
             
             #line default
             #line hidden
-, 496), false)
+, 401), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
-                                                                      Write(cp.DisplayName);
+            #line 16 "..\..\Dashboard\Views\Dashboard.cshtml"
+                                                                         Write(Model.DisplayName);
 
             
             #line default
@@ -134,7 +130,7 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n");
 
             
-            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
         else
         {
@@ -143,15 +139,15 @@ WriteLiteral("</a>\r\n");
             #line default
             #line hidden
             
-            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
-       Write(cp.DisplayName);
+            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
+       Write(Model.DisplayName);
 
             
             #line default
             #line hidden
             
-            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
-                           
+            #line 20 "..\..\Dashboard\Views\Dashboard.cshtml"
+                              
         }
 
             
@@ -160,89 +156,12 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("    </h2>\r\n");
 
             
-            #line 26 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
     
     
-    using(cp.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
-    {
-            foreach (var gr in cp.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
-            {
-                var lastEnd = 0;
+        Html.RenderPartial(DashboardClient.ViewPrefix.Formato("DashboardView"), Model);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
-
-WriteLiteral(" class=\"row row-control-panel\"");
-
-WriteLiteral(">\r\n");
-
-            
-            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
-        
-            
-            #line default
-            #line hidden
-            
-            #line 34 "..\..\Dashboard\Views\Dashboard.cshtml"
-         foreach (var part in gr.OrderBy(a=>a.StartColumn))
-        {
-            var offset = part.StartColumn - lastEnd;
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <div");
-
-WriteAttribute("class", Tuple.Create(" class=\"", 1089), Tuple.Create("\"", 1186)
-, Tuple.Create(Tuple.Create("", 1097), Tuple.Create("part-control-panel", 1097), true)
-, Tuple.Create(Tuple.Create(" ", 1115), Tuple.Create("col-sm-", 1116), true)
-            
-            #line 37 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 1123), Tuple.Create<System.Object, System.Int32>(part.Columns
-            
-            #line default
-            #line hidden
-, 1123), false)
-            
-            #line 37 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create(" ", 1136), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
-            
-            #line default
-            #line hidden
-, 1137), false)
-);
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("                ");
-
-            
-            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
-           Write(Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n            </div>\r\n");
-
-            
-            #line 41 "..\..\Dashboard\Views\Dashboard.cshtml"
-            lastEnd = part.StartColumn + part.Columns;
-        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    </div>\r\n");
-
-            
-            #line 44 "..\..\Dashboard\Views\Dashboard.cshtml"
-            }
-        }
-
-        if (cp.AutoRefreshPeriod != null)
+        if (Model.AutoRefreshPeriod != null)
         {
 
             
@@ -256,8 +175,8 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 " window.location.href = window.location.href;\r\n            }, ");
 
             
-            #line 53 "..\..\Dashboard\Views\Dashboard.cshtml"
-           Write(cp.AutoRefreshPeriod.Value * 1000);
+            #line 33 "..\..\Dashboard\Views\Dashboard.cshtml"
+           Write(Model.AutoRefreshPeriod.Value * 1000);
 
             
             #line default
@@ -265,7 +184,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 WriteLiteral(");\r\n        });\r\n    </script>\r\n");
 
             
-            #line 56 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 36 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
 }
 

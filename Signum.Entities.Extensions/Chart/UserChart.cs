@@ -49,18 +49,7 @@ namespace Signum.Entities.Chart
         public Lite<TypeDN> EntityType
         {
             get { return entityType; }
-            set
-            {
-                if (Set(ref entityType, value) && value == null)
-                    Disposition = null;
-            }
-        }
-
-        UserAssetDisposition? disposition;
-        public UserAssetDisposition? Disposition
-        {
-            get { return disposition; }
-            set { Set(ref disposition, value); }
+            set { Set(ref entityType, value); }
         }
 
         Lite<IdentifiableEntity> owner;
@@ -217,20 +206,6 @@ namespace Signum.Entities.Chart
             Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
             Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
-        }
-
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if(pi.Is(()=>Disposition))
-            {
-                if (Disposition == null && EntityType != null)
-                    return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
-
-                if (Disposition != null && EntityType == null)
-                    return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
-            }
-
-            return base.PropertyValidation(pi);
         }
     }
 

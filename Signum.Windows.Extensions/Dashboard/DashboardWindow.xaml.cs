@@ -40,7 +40,8 @@ namespace Signum.Windows.Dashboard
 
         void DashboardWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            navigate.Visibility = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearchEntity: true)).ToVisibility(); 
+            bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearchEntity: true));
+            this.tbDashboard.Cursor = canNavigate ? Cursors.Hand : Cursors.Arrow;   
  	        this.tbDashboard.Text = e.NewValue.TryToString();
         }
 
@@ -51,9 +52,10 @@ namespace Signum.Windows.Dashboard
             Current = fresh;
         }
 
-        private void navigate_Click(object sender, RoutedEventArgs e)
+        private void tbDashboard_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            Navigator.Navigate(Current.ToLite());
+            if (Navigator.IsNavigable(Current, isSearchEntity: true))
+                Navigator.Navigate(Current.ToLite());
         }
     }
 }

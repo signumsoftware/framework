@@ -44,9 +44,6 @@
         @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
     </p>
     
-    
-    @Html.ValueLine(uc, f => f.Disposition)
-    
     @Html.ValueLine(e, f => f.WithoutFilters)
 
     using (var sc = e.SubContext())

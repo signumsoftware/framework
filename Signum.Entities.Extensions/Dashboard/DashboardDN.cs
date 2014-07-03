@@ -32,15 +32,15 @@ namespace Signum.Entities.Dashboard
             set
             {
                 if (Set(ref entityType, value) && value == null)
-                    Disposition = null;
+                    EmbeddedInEntity = null;
             }
         }
 
-        UserAssetDisposition disposition;
-        public UserAssetDisposition Disposition
+        DashboardEmbedededInEntity? embeddedInEntity;
+        public DashboardEmbedededInEntity? EmbeddedInEntity
         {
-            get { return disposition; }
-            set { Set(ref disposition, value); }
+            get { return embeddedInEntity; }
+            set { Set(ref embeddedInEntity, value); }
         }
 
         Lite<IdentifiableEntity> owner;
@@ -50,11 +50,11 @@ namespace Signum.Entities.Dashboard
             set { Set(ref owner, value); }
         }
 
-        int? homePagePriority;
-        public int? HomePagePriority
+        int? dashboardPriority;
+        public int? DashboardPriority
         {
-            get { return homePagePriority; }
-            set { Set(ref homePagePriority, value); }
+            get { return dashboardPriority; }
+            set { Set(ref dashboardPriority, value); }
         }
 
         int? autoRefreshPeriod;
@@ -181,7 +181,7 @@ namespace Signum.Entities.Dashboard
             return new DashboardDN
             {
                 DisplayName = "Clone {0}".Formato(this.DisplayName),
-                HomePagePriority = HomePagePriority,
+                DashboardPriority = DashboardPriority,
                 Parts = Parts.Select(p => p.Clone()).ToMList(),
                 Owner = Owner,
             };
@@ -194,7 +194,8 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("DisplayName", DisplayName),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                HomePagePriority == null ? null : new XAttribute("HomePagePriority", HomePagePriority.Value.ToString()),
+                DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
+                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", DashboardPriority.Value.ToString()),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
         }
 
@@ -204,18 +205,19 @@ namespace Signum.Entities.Dashboard
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
             Owner = element.Attribute("Owner").Try(a => Lite.Parse<IdentifiableEntity>(a.Value));
-            HomePagePriority = element.Attribute("HomePagePriority").Try(a => int.Parse(a.Value));
+            DashboardPriority = element.Attribute("DashboardPriority").Try(a => int.Parse(a.Value));
+            EmbeddedInEntity = element.Attribute("EmbeddedInEntity").Try(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Disposition))
+            if (pi.Is(() => EmbeddedInEntity))
             {
-                if (Disposition == null && EntityType != null)
+                if (EmbeddedInEntity == null && EntityType != null)
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
 
-                if (Disposition != null && EntityType == null)
+                if (EmbeddedInEntity != null && EntityType == null)
                     return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
             }
 
@@ -256,5 +258,12 @@ namespace Signum.Entities.Dashboard
 
         [Description("Part {0} overlaps with {1}")]
         Part0OverlapsWith1
+    }
+
+    public enum DashboardEmbedededInEntity
+    {
+        None,
+        Top,
+        Bottom
     }
 }

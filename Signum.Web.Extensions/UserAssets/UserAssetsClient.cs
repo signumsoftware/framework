@@ -17,12 +17,14 @@ namespace Signum.Web.UserAssets
     {
         public static string ViewPrefix = "~/UserAssets/Views/{0}.cshtml";
 
-        public static JsModule Module = new JsModule("UserAssets"); 
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/UserAssets/Scripts/UserAssets"); 
 
         internal static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                Navigator.RegisterArea(typeof(UserAssetsClient));
+
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ImportUserAssets", () => UserAssetPermission.UserAssetsToXML.IsAuthorized(), url =>
                     url.Action((UserAssetController a)=>a.Import())));
             }

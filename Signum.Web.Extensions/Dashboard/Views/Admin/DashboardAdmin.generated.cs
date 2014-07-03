@@ -119,7 +119,7 @@ WriteLiteral("                ");
 
             
             #line 21 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.ValueLine(sc, cp => cp.HomePagePriority));
+           Write(Html.ValueLine(sc, cp => cp.DashboardPriority));
 
             
             #line default
@@ -168,7 +168,10 @@ WriteLiteral("                ");
 
             
             #line 32 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); el.AttachFunction = UserAssetsClient.Module["attachShowCurrentEntity"](el); }));
+           Write(Html.EntityLine(sc, cp => cp.EntityType, el => { 
+               el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+               el.AttachFunction = UserAssetsClient.Module["attachShowEmbeddedInEntity"](el);
+           }));
 
             
             #line default
@@ -182,8 +185,8 @@ WriteLiteral(">\r\n");
 WriteLiteral("                 ");
 
             
-            #line 35 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-            Write(Html.ValueLine(sc, f => f.Disposition));
+            #line 38 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            Write(Html.ValueLine(sc, f => f.EmbeddedInEntity));
 
             
             #line default
@@ -191,7 +194,7 @@ WriteLiteral("                 ");
 WriteLiteral("\r\n             </div>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 39 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 42 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
     
     }
     
@@ -200,7 +203,7 @@ WriteLiteral("\r\n             </div>\r\n        </div>\r\n    </div>\r\n");
             #line default
             #line hidden
             
-            #line 42 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 45 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
 Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
             grid.PartialViewName = DashboardClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
@@ -213,7 +216,7 @@ Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
             #line default
             #line hidden
             
-            #line 48 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 51 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
           ;
 }
 

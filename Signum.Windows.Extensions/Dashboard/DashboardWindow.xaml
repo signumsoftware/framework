@@ -16,8 +16,8 @@
                 <Border BorderThickness="0,0,0,3" Padding="2" BorderBrush="{StaticResource EntityTitleLightShadowGradient}">                  
                     <StackPanel  TextBlock.Foreground="{DynamicResource BlueBorder}" HorizontalAlignment="Left" Orientation="Vertical" Margin="3">
                         <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="tbDashboard" Text="{Binding ToStringProperty, Mode=OneWay}" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="14" Background="{x:Null}"/>
-                            <Button x:Name="navigate" Click="navigate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Navigate}"/>
+                            <TextBox x:Name="tbDashboard" Text="{Binding ToStringProperty, Mode=OneWay}" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="14" Background="{x:Null}" Cursor="Hand" PreviewMouseUp="tbDashboard_PreviewMouseUp"/>
+                      
                             <Button x:Name="reload" Click="reload_Click" Style="{StaticResource RoundButton}">
                                 <Image Source="pack://application:,,,/Signum.Windows;component/Images/reload.png" Width="16" Height="16" />
                             </Button>

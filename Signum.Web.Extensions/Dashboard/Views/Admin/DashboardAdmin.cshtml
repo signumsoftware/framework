@@ -29,10 +29,13 @@
                 @Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false)
             </div>
             <div class="col-sm-4">
-                @Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); el.AttachFunction = UserAssetsClient.Module["attachShowCurrentEntity"](el); })
+                @Html.EntityLine(sc, cp => cp.EntityType, el => { 
+               el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+               el.AttachFunction = UserAssetsClient.Module["attachShowEmbeddedInEntity"](el);
+           })
             </div>
              <div class="col-sm-4">
-                 @Html.ValueLine(sc, f => f.Disposition)
+                 @Html.ValueLine(sc, f => f.EmbeddedInEntity)
              </div>
         </div>
     </div>

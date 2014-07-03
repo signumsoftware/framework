@@ -18,17 +18,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         });
     });
 
-    function attachShowCurrentEntity(el) {
-        var showOnEntity = function () {
-            el.element.closest(".form-group").next("p.messageEntity").toggle(!!el.getRuntimeInfo());
-        };
-
-        showOnEntity();
-
-        el.entityChanged = showOnEntity;
-    }
-    exports.attachShowCurrentEntity = attachShowCurrentEntity;
-
     function deleteUserQuery(options, urlRedirect) {
         options.avoidReturnRedirect = true;
 

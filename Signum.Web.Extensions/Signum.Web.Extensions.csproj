@@ -180,6 +180,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Dashboard\Views\DashboardView.generated.cs">
+      <DependentUpon>DashboardView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
     <Compile Include="Files\Views\FileRepository.generated.cs">
@@ -1279,6 +1284,10 @@
     <Content Include="Dashboard\Views\Admin\PanelPartViewAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PanelPartViewAdmin.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Dashboard\Views\DashboardView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DashboardView.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
