@@ -192,7 +192,7 @@ namespace Signum.Entities.DynamicQuery
         public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
         {
             if (parent.HasAllOrAny())
-                options = options & ~SubTokensOptions.CanAnyAll;
+                options = options & ~SubTokensOptions.CanElement;
 
             List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 
