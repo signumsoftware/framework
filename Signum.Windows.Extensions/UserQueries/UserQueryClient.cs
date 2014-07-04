@@ -153,7 +153,7 @@ namespace Signum.Windows.UserQueries
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
                 Path = qc.Token.Token.FullKey(),
-                DisplayName = qc.DisplayName
+                DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
@@ -181,7 +181,7 @@ namespace Signum.Windows.UserQueries
             {
 
                 Path = qc.Token.Token.FullKey(),
-                DisplayName = qc.DisplayName
+                DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption

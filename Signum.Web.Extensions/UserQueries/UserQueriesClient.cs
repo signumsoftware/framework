@@ -211,7 +211,7 @@ namespace Signum.Web.UserQueries
             {
                 Token = qc.Token.Token,
                 ColumnName = qc.Token.TokenString,                
-                DisplayName = qc.DisplayName,
+                DisplayName = qc.DisplayName.DefaultText(null),
             }));
 
             findOptions.OrderOptions.Clear();

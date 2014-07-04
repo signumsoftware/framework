@@ -305,7 +305,7 @@ namespace Signum.Entities.UserQueries
         {
             return new XElement("Column",
                 new XAttribute("Token", Token.Token.FullKey()),
-                DisplayName != null ? new XAttribute("DisplayName", DisplayName) : null);
+                DisplayName.HasText() ? new XAttribute("DisplayName", DisplayName) : null);
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
@@ -316,8 +316,7 @@ namespace Signum.Entities.UserQueries
 
         public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
-            DisplayName = DisplayName;
+            token.ParseData(context, description, options);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
