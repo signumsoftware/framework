@@ -20,6 +20,8 @@ using Signum.Web.Basic;
 using Signum.Web.Operations;
 using Signum.Web.Extensions.UserQueries;
 using Signum.Web.Excel;
+using Signum.Web.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Chart
 {
@@ -36,7 +38,7 @@ namespace Signum.Web.Chart
 
                 Func<SubTokensOptions, Mapping<QueryTokenDN>> qtMapping = ops=>ctx =>
                 {
-                    string tokenStr = UserQueries.UserQueriesHelper.GetTokenString(ctx);
+                    string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
                     string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);

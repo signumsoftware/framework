@@ -12,6 +12,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.UserQueries;
 using System.Collections.Concurrent;
 using System.Globalization;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Omnibox
 {

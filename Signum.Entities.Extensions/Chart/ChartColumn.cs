@@ -11,6 +11,7 @@ using System.ComponentModel;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart
 {

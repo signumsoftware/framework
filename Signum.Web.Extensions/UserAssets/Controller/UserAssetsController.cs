@@ -19,19 +19,20 @@ using System.IO;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
+using Signum.Engine.UserAssets;
+using Signum.Entities.UserAssets;
+using Signum.Web.Extensions.UserAssets;
 
 
-namespace Signum.Web.UserQueries
+namespace Signum.Web.UserAssets
 {
     public class UserAssetController : Controller
     {
         public ActionResult Import()
         {
-            return View(UserQueriesClient.ViewPrefix.Formato("ImportUserAsset")); 
+            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset")); 
         }
 
         [HttpPost]
@@ -45,7 +46,7 @@ namespace Signum.Web.UserQueries
 
             ViewData["Document"] = Convert.ToBase64String(bytes);
 
-            return View(UserQueriesClient.ViewPrefix.Formato("ImportUserAsset"), model);  
+            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset"), model);  
 
         }
 
@@ -66,7 +67,7 @@ namespace Signum.Web.UserQueries
 
             ViewData["Message"] = UserAssetMessage.SucessfullyImported.NiceToString();
 
-            return View(UserQueriesClient.ViewPrefix.Formato("ImportUserAsset"));
+            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset"));
         }
 
         public FileResult Export(Lite<IUserAssetEntity> entity)

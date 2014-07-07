@@ -14,6 +14,8 @@ using Signum.Web.Controllers;
 using Signum.Engine.Dashboard;
 using Signum.Engine.Authorization;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserAssets;
+using System.Web.Mvc.Html;
 
 namespace Signum.Web.Dashboard
 {
@@ -50,8 +52,6 @@ namespace Signum.Web.Dashboard
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserQueriesClient.Start();
-
                 Navigator.RegisterArea(typeof(DashboardClient));
 
                 UserAssetsClient.Start();
@@ -86,28 +86,63 @@ namespace Signum.Web.Dashboard
                     if (!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
 
-                    return DashboardLogic.GetDashboardEntity(entity.EntityType)
+                    return DashboardLogic.GetDashboardsEntity(entity.EntityType)
                         .Select(cp => new DashboardQuickLink(cp, entity)).ToArray(); 
                 });
+
+                WidgetsHelper.GetEmbeddedWidget += ctx =>
+                {
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is IdentifiableEntity))
+                        return null;
+
+                    var dashboard = DashboardLogic.GetEmbeddedDashboard(ctx.Entity.GetType());
+                    if (dashboard == null)
+                        return null;
+
+                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (IdentifiableEntity)ctx.Entity }; 
+                };
+            }
+        }
+
+        class DashboardEmbeddedWidget : IEmbeddedWidget
+        {
+            public DashboardDN Dashboard { get; set; }
+
+            public IdentifiableEntity Entity { get; set; }
+
+            public MvcHtmlString ToHtml(HtmlHelper helper)
+            {
+                return helper.Partial(DashboardClient.ViewPrefix.Formato("DashboardView"), Dashboard,
+                    new ViewDataDictionary { { "currentEntity", Entity } });
+            }
+
+            public EmbeddedWidgetPostion Position
+            {
+                get
+                {
+                    return Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top :
+                        Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom :
+                        new InvalidOperationException("Unexpected {0}".Formato(Dashboard.EmbeddedInEntity.Value)).Throw<EmbeddedWidgetPostion>(); 
+                }
             }
         }
 
         class DashboardQuickLink : QuickLink
         {
-            Lite<DashboardDN> controlPanel;
+            Lite<DashboardDN> dashboard;
             Lite<IdentifiableEntity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> controlPanel, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
             {
-                this.Text = controlPanel.ToString();
-                this.controlPanel = controlPanel;
+                this.Text = dashboard.ToString();
+                this.dashboard = dashboard;
                 this.entity = entity;
                 this.IsVisible = true;
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(controlPanel, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(dashboard, entity))).SetInnerText(Text);
             }
         }
     }

@@ -13,7 +13,7 @@ using System.Windows.Shapes;
 using Signum.Entities.UserQueries;
 using Signum.Services;
 
-namespace Signum.Windows.UserQueries
+namespace Signum.Windows.UserAssets
 {
     public partial class ImportUserAssetsConfirmation : Window
     {   

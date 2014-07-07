@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:swc="clr-namespace:Signum.Windows.Chart"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
-    xmlns:uq="clr-namespace:Signum.Windows.UserQueries"
+    xmlns:ua="clr-namespace:Signum.Windows.UserAssets"
     x:Name="me" m:Common.DelayedRoutes="True">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -30,7 +30,7 @@
                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                     <Image Source="/Signum.Windows.Extensions;Component/Images/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
                 </ToggleButton>
-                <uq:QueryTokenDNBuilder m:Common.Route="Token" Grid.Column="2" SubTokensEvent="token_SubTokensEvent" x:Name="token"/>
+                <ua:QueryTokenDNBuilder m:Common.Route="Token" Grid.Column="2" SubTokensEvent="token_SubTokensEvent" x:Name="token"/>
             </Grid>
         </Expander.Header>
         <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp" Background="{StaticResource LightBlue}">

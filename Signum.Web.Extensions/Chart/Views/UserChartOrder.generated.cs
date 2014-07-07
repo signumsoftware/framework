@@ -66,7 +66,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 7 "..\..\Chart\Views\UserChartOrder.cshtml"
-    using Signum.Web.UserQueries;
+    using Signum.Web.UserAssets;
     
     #line default
     #line hidden

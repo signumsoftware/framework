@@ -43,7 +43,7 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Web;
     
     #line 3 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-    using Signum.Web.UserQueries;
+    using Signum.Web.UserAssets;
     
     #line default
     #line hidden
@@ -57,8 +57,10 @@ namespace Signum.Web.Extensions.Mailing.Views
         }
         public override void Execute()
         {
+WriteLiteral("\r\n");
+
             
-            #line 4 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 5 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
  using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
 {
     using (var sc = tc.SubContext())
@@ -83,7 +85,7 @@ WriteLiteral(">\r\n            <label>\r\n");
 WriteLiteral("                ");
 
             
-            #line 12 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 13 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
            Write(Html.ValueLine(tc, c => c.Kind, vl => vl.FormGroupStyle = FormGroupStyle.None));
 
             
@@ -98,7 +100,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 16 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 17 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
        Write(Html.ValueLine(sc, c => c.EmailAddress));
 
             
@@ -113,7 +115,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 19 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 20 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
        Write(Html.ValueLine(sc, c => c.DisplayName));
 
             
@@ -122,7 +124,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 22 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 23 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
     }
 
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
@@ -132,7 +134,7 @@ WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
             #line default
             #line hidden
             
-            #line 26 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
 Write(Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, SearchControlHelper.GetQueryTokenBuilderSettings(
             (QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanElement))));
 
@@ -140,7 +142,7 @@ Write(Html.FormGroup(tc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, Sea
             #line default
             #line hidden
             
-            #line 27 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
+            #line 28 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
                                                                                                      
     }
 }

@@ -17,9 +17,24 @@ using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Basics
 {
+    public class TypeConditionPair
+    {
+        public TypeConditionPair(LambdaExpression condition, Delegate inMemoryCondition)
+        {
+            if (condition == null)
+                throw new ArgumentNullException("lambda");
+
+            this.Condition = condition;
+            this.InMemoryCondition = inMemoryCondition;
+        }
+
+        public LambdaExpression Condition;
+        public Delegate InMemoryCondition; 
+    }
+
     public static class TypeConditionLogic
     {
-        static Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>> infos = new Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>();
+        static Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>> infos = new Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>>();
 
         public static IEnumerable<Type> Types
         {
@@ -35,6 +50,18 @@ namespace Signum.Engine.Basics
         }
 
         public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+              where T : IdentifiableEntity
+        {
+            Register<T>(typeCondition, condition, null);
+        }
+
+        public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+              where T : IdentifiableEntity
+        {
+            Register<T>(typeCondition, condition, condition.Compile());
+        }
+
+        public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool> inMemoryCondition)
             where T : IdentifiableEntity
         {
             if (typeCondition == null)
@@ -43,7 +70,7 @@ namespace Signum.Engine.Basics
             if (condition == null)
                 throw new ArgumentNullException("condition");
 
-            infos.GetOrCreate(typeof(T))[typeCondition] = condition;
+            infos.GetOrCreate(typeof(T))[typeCondition] = new TypeConditionPair(condition, inMemoryCondition);
         }
 
         [MethodExpander(typeof(InConditionExpander))]
@@ -59,7 +86,7 @@ namespace Signum.Engine.Basics
                 Expression entity = arguments[0];
                 TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
 
-                var exp = GetExpression(entity.Type, typeCondition);
+                var exp = GetCondition(entity.Type, typeCondition);
 
                 return Expression.Invoke(exp, entity);
             }
@@ -70,7 +97,7 @@ namespace Signum.Engine.Basics
         public static IQueryable<T> WhereCondition<T>(this IQueryable<T> query, TypeConditionSymbol typeCondition)
             where T : IdentifiableEntity
         {
-            Expression<Func<T, bool>> exp = (Expression<Func<T, bool>>)GetExpression(typeof(T), typeCondition);
+            Expression<Func<T, bool>> exp = (Expression<Func<T, bool>>)GetCondition(typeof(T), typeCondition);
 
             return query.Where(exp);
         }
@@ -86,7 +113,7 @@ namespace Signum.Engine.Basics
                 Expression query = arguments[0];
                 TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1]);
 
-                LambdaExpression exp = GetExpression(type, typeCondition);
+                LambdaExpression exp = GetCondition(type, typeCondition);
 
                 return Expression.Call(null, miWhere.MakeGenericMethod(type), query, exp);
             }
@@ -101,14 +128,19 @@ namespace Signum.Engine.Basics
             return dic.Keys;
         }
 
-        public static LambdaExpression GetExpression(Type type, TypeConditionSymbol typeCondition)
+        public static LambdaExpression GetCondition(Type type, TypeConditionSymbol typeCondition)
         {
-            var expression = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
+            var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
 
-            if (expression == null)
-                throw new KeyNotFoundException("There's no TypeCondition registered for type {0} with key {1}".Formato(type, typeCondition));
+            return pair.Condition;
+        }
 
-            return expression;
+        public static Func<T, bool> GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
+            where T : IdentifiableEntity
+        {
+            var pair = infos.GetOrThrow(typeof(T), "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
+
+            return (Func<T, bool>)pair.InMemoryCondition;
         }
 
         public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)

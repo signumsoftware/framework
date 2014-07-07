@@ -1,0 +1,33 @@
+﻿@using System.Configuration
+@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+@using Signum.Entities.UserAssets
+@model DashboardDN
+@section head
+{
+    @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
+}
+
+@{
+    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+}
+
+@using (Model.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+{
+    foreach (var gr in Model.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
+    {
+        var lastEnd = 0;
+    <div class="row row-control-panel">
+        @foreach (var part in gr.OrderBy(a => a.StartColumn))
+        {
+            var offset = part.StartColumn - lastEnd;
+            <div class="part-control-panel col-sm-@part.Columns @(offset == 0 ? null : "col-sm-offset-" + offset)">
+                @Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part)
+
+            </div>
+            lastEnd = part.StartColumn + part.Columns;
+        }
+    </div>
+    }
+}
+

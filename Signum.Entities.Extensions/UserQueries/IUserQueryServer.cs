@@ -21,5 +21,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         List<Lite<UserQueryDN>> AutocompleteUserQueries(string subString, int limit);
+
+        [OperationContract, NetDataContract]
+        UserQueryDN RetrieveUserQuery(Lite<UserQueryDN> userQuery);
     }
 }

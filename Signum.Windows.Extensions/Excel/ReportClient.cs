@@ -9,7 +9,7 @@ using Signum.Entities.Excel;
 
 namespace Signum.Windows.Excel
 {
-    public class ReportClient
+    public class ExcelClient
     {
         public static void Start(bool toExcel, bool excelReport)
         {
@@ -18,9 +18,9 @@ namespace Signum.Windows.Excel
                 if (excelReport)
                 {
                     if (toExcel)
-                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ExcelMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
                     else
-                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, null);
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ExcelMenuItemConstructor.Construct(sc, null);
 
                     QueryClient.Start();
 

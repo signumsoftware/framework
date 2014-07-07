@@ -89,7 +89,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 11 "..\..\Chart\Views\ChartColumn.cshtml"
-    using Signum.Web.UserQueries;
+    using Signum.Web.UserAssets;
     
     #line default
     #line hidden

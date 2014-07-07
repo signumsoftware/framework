@@ -11,9 +11,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 
-namespace Signum.Windows.UserQueries
+namespace Signum.Windows.UserAssets
 {
     /// <summary>
     /// Interaction logic for QueryTokenDNBuilder.xaml

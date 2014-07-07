@@ -164,7 +164,8 @@
     <Compile Include="Excel\ExcelLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
-    <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />
+    <Compile Include="UserAssets\QueryTokenSynchronizer.cs" />
+    <Compile Include="UserAssets\UserAssetLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\SimpleTaskLogic.cs" />
@@ -172,7 +173,7 @@
     <Compile Include="SMS\SMSLogic.cs" />
     <Compile Include="SMS\SMSProcessAlgortihms.cs" />
     <Compile Include="SMS\SMSTemplateGraph.cs" />
-    <Compile Include="UserQueries\UserAssetsLogic.cs" />
+    <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

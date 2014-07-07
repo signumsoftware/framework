@@ -46,6 +46,13 @@ namespace Signum.Windows.Dashboard
                 tb.Cursor = Cursors.Hand;
                 tb.MouseDown += TextBlock_MouseUp;
             }
+
+            Button button = (Button)gb.FindName("navigate");
+            if (pv.FullScreen == null)
+                button.Visibility = System.Windows.Visibility.Collapsed;
+            else
+                button.Click += fullScreen_Click;
+
         }
 
         private void TextBlock_MouseUp(object sender, MouseButtonEventArgs e)
@@ -53,6 +60,13 @@ namespace Signum.Windows.Dashboard
             TextBlock tb = (TextBlock)sender;
             PanelPartDN pp = (PanelPartDN)tb.DataContext;
             DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).OnTitleClick(pp.Content);
+        }
+
+        private void fullScreen_Click(object sender, RoutedEventArgs e)
+        {
+            Button tb = (Button)sender;
+            PanelPartDN pp = (PanelPartDN)tb.DataContext;
+            DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).FullScreen(tb, pp.Content);
         }
     }
 }

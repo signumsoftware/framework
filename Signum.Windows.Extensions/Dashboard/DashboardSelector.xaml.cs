@@ -47,7 +47,7 @@ namespace Signum.Windows.Dashboard
 
         IEnumerable<Lite<IIdentifiable>> cpCombo_LoadData()
         {
-            return Server.RetrieveAllLite<DashboardDN>();
+            return Server.Return((IDashboardServer cps) => cps.GetDashboards());
         }
 
         void DashboardView_Loaded(object sender, RoutedEventArgs e)
@@ -64,7 +64,7 @@ namespace Signum.Windows.Dashboard
             {
                 var lite = Current.ToLite();
                 Current = null;
-                Current = lite.Retrieve();
+                Current = Server.Return((IDashboardServer cps) => cps.RetrieveDashboard(lite));
             }
 
             cpCombo.Entity = Current.ToLite();
@@ -75,7 +75,7 @@ namespace Signum.Windows.Dashboard
             if (userInteraction)
             {
                 Lite<DashboardDN> cp = newValue as Lite<DashboardDN>;
-                Current = cp == null ? null : cp.RetrieveAndForget();
+                Current = cp == null ? null : Server.Return((IDashboardServer cps) => cps.RetrieveDashboard(cp));
             }
 
         }

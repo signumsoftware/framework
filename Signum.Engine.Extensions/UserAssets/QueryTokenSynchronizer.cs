@@ -8,11 +8,11 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
-using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.Engine.UserQueries
+namespace Signum.Engine.UserAssets
 {
     public static class QueryTokenSynchronizer
     {

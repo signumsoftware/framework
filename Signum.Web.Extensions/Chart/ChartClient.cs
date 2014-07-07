@@ -25,6 +25,8 @@ using System.Text;
 using Signum.Entities.Files;
 using Signum.Web.UserQueries;
 using Newtonsoft.Json.Linq;
+using Signum.Web.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Chart
 {
@@ -72,7 +74,7 @@ namespace Signum.Web.Chart
         public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
             .SetProperty(ct => ct.Token, ctx =>
             {
-                var tokenName = UserQueriesHelper.GetTokenString(ctx);
+                var tokenName = UserAssetsHelper.GetTokenString(ctx);
 
                 if (string.IsNullOrEmpty(tokenName))
                     return null;

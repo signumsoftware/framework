@@ -13,6 +13,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Web.Operations;
 using Signum.Engine.Basics;
+using Signum.Engine.Dashboard;
 
 namespace Signum.Web.Dashboard
 {
@@ -22,13 +23,16 @@ namespace Signum.Web.Dashboard
         {
             DashboardPermission.ViewDashboard.Authorize();
 
-            var cp = panel.Retrieve();
+            var cp = DashboardLogic.RetrieveDashboard(panel);
+
+           
 
             if (cp.EntityType != null)
             {
-                var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
-                var entity = currentEntity.Retrieve();
-                CurrentEntityConverter.SetFilterValues(filters, entity);
+                if (currentEntity == null)
+                    throw new ArgumentNullException("currentEntity");
+
+                ViewData["currentEntity"] = currentEntity.Retrieve();
             }
 
             return View(DashboardClient.ViewPrefix.Formato("Dashboard"), cp);

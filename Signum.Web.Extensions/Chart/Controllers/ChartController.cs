@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
 using System.Collections.Specialized;
 using Signum.Engine;
 using Signum.Entities.Authorization;
@@ -20,6 +19,7 @@ using Signum.Engine.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
 using Signum.Engine.Excel;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Chart
 {
@@ -278,12 +278,10 @@ namespace Signum.Web.Chart
 
         public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<IdentifiableEntity> currentEntity)
         {
-            UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
+            UserChartDN uc = UserChartLogic.RetrieveUserChart(lite);
 
-            if (uc.EntityType != null)
-                CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity.Retrieve());
-
-            ChartRequest request = uc.ToRequest();
+            ChartRequest request = (uc.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity.Retrieve()))
+                .Using(_ => uc.ToRequest());
 
             return OpenChartRequest(request, uc.ToLite());
         }

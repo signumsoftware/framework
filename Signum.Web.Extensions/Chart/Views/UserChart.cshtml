@@ -8,6 +8,9 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Basics
 @using Signum.Entities.UserQueries
+@using Signum.Entities.UserAssets
+@using Signum.Web.UserAssets
+
 @Html.ScriptCss("~/Chart/Content/Chart.css")
 <div class="sf-chart-control" 
     data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
@@ -48,13 +51,13 @@
         @Html.EntityLine(uc, f => f.EntityType, el =>
         {
             el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
-            el.AttachFunction = ChartClient.Module["attachShowCurrentEntity"](el);
+            el.AttachFunction = UserAssetsClient.Module["attachShowCurrentEntity"](el);
         })
 
         <p class="messageEntity col-sm-offset-2">
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
-
+        
         using(var sc= uc.SubContext())
         {
             sc.FormGroupSize = FormGroupSize.Small;

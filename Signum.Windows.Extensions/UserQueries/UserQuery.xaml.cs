@@ -19,6 +19,7 @@ using Signum.Services;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Windows.Basics;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.UserQueries
 {

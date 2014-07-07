@@ -24,6 +24,7 @@ using Signum.Entities.UserQueries;
 using System.Collections.ObjectModel;
 using Signum.Services;
 using System.Threading;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Chart
 {

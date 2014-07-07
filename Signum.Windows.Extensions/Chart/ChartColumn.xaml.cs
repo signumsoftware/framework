@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Chart
 {

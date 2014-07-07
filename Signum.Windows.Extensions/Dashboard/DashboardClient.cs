@@ -17,7 +17,9 @@ using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
+using Signum.Windows.UserAssets;
 using Signum.Windows.UserQueries;
+using Signum.Windows.Chart;
 
 namespace Signum.Windows.Dashboard
 {
@@ -51,6 +53,10 @@ namespace Signum.Windows.Dashboard
                     OnTitleClick = part =>
                     {
                         Navigator.Navigate(((UserQueryPartDN)part).UserQuery);
+                    },
+                    FullScreen = (elem, part) =>
+                    {
+                        UserQueryClient.Explore(((UserQueryPartDN)part).UserQuery, UserAssetsClient.GetCurrentEntity(elem)); 
                     }
                 });
 
@@ -61,6 +67,10 @@ namespace Signum.Windows.Dashboard
                     OnTitleClick = part =>
                     {
                         Navigator.Navigate(((UserChartPartDN)part).UserChart);
+                    },
+                    FullScreen = (elem, part) =>
+                    {
+                        ChartClient.View(((UserChartPartDN)part).UserChart, UserAssetsClient.GetCurrentEntity(elem));
                     }
                 });
 
@@ -84,9 +94,30 @@ namespace Signum.Windows.Dashboard
                     if(!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
 
-                    return Server.Return((IDashboardServer us) => us.GetDashboardEntity(entity.EntityType))
+                    return Server.Return((IDashboardServer us) => us.GetDashboardsEntity(entity.EntityType))
                         .Select(cp => new DashboardQuickLink(cp, entity)).ToArray();
                 });
+
+                Navigator.Manager.OnGetEmbeddedWigets += (e, ctx) =>
+                {
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(e is IdentifiableEntity))
+                        return null;
+
+                    var dashboard = Server.Return((IDashboardServer s) => s.GetEmbeddedDashboard(e.GetType()));
+                    if (dashboard == null)
+                        return null;
+
+                    var control = new DashboardView { DataContext = dashboard }.Set(UserAssetsClient.CurrentEntityProperty, e);
+
+                    return new EmbeddedWidget
+                    {
+                         Control = control, 
+                         Position = dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top:
+                                    dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom:
+                                    new InvalidOperationException("Unexpected").Throw<EmbeddedWidgetPostion>()
+                    }; 
+
+                };
             }
         }
 
@@ -128,11 +159,7 @@ namespace Signum.Windows.Dashboard
 
                 if (cp.EntityType != null)
                 {
-                    var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
-
-                    CurrentEntityConverter.SetFilterValues(filters, currentEntity);
-
-                    win.CurrentEntity = currentEntity;
+                    UserAssetsClient.SetCurrentEntity(win, currentEntity);
                 }
 
                 win.DataContext = controlPanel.Retrieve();
@@ -145,6 +172,7 @@ namespace Signum.Windows.Dashboard
         public Expression<Func<FrameworkElement>> ViewControl;
         public Action<IPartDN> OnTitleClick;
         public Func<bool> IsTitleEnabled;
+        public Action<FrameworkElement, IPartDN> FullScreen; 
     }
 
     public class DashboardViewDataTemplateSelector : DataTemplateSelector

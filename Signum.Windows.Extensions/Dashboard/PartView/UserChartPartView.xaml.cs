@@ -17,6 +17,8 @@ using Signum.Entities.Dashboard;
 using Signum.Windows.Chart;
 using Signum.Entities.Chart;
 using Signum.Services;
+using Signum.Windows.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Dashboard
 {
@@ -33,9 +35,14 @@ namespace Signum.Windows.Dashboard
         {
             var dc = (UserChartPartDN)DataContext;
             chartRenderer.FilterOptions = new FreezableCollection<FilterOption>();
-            chartRenderer.DataContext = dc.UserChart.ToRequest();
+            var currentEntity = UserAssetsClient.GetCurrentEntity(this);
+
+            using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+                chartRenderer.DataContext = dc.UserChart.ToRequest();
+
             if (dc.ShowData)
                 chartRenderer.ShowData(); 
+
             chartRenderer.UpdateFiltersOrdersUserInterface();
             chartRenderer.GenerateOnLoad = true;
         }

@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Xml.Linq;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart
 {
@@ -177,13 +178,6 @@ namespace Signum.Entities.Chart
         }
 
         public bool Invalidator { get { return true; } }
-
-        public void SetFilterValues()
-        {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.SetValue();
-        }
 
         public XElement ToXml(IToXmlContext ctx)
         {

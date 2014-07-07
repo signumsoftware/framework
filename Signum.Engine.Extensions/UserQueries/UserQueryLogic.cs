@@ -14,11 +14,17 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
 using Signum.Utilities;
+using Signum.Engine.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.UserQueries
 {
     public static class UserQueryLogic
     {
+        public static ResetLazy<Dictionary<Lite<UserQueryDN>, UserQueryDN>> UserQueries;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryDN>>>> UserQueriesByType;
+        public static ResetLazy<Dictionary<object, List<Lite<UserQueryDN>>>> UserQueriesByQuery;
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -26,6 +32,8 @@ namespace Signum.Engine.UserQueries
                 QueryLogic.Start(sb);
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
+
+                UserAssetLogLogic.Register<UserQueryDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
@@ -58,11 +66,17 @@ namespace Signum.Engine.UserQueries
                     Lite = true,
                     Delete = (uq, _) => uq.Delete()
                 }.Register();
+
+                UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryDN>().ToDictionary(a => a.ToLite()), 
+                    new InvalidateWith(typeof(UserQueryDN)));
+
+                UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
+                    new InvalidateWith(typeof(UserQueryDN)));
+      
+                UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                    new InvalidateWith(typeof(UserQueryDN)));
             }
         }
-
-
-      
    
         public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
@@ -89,23 +103,38 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
-            return (from er in Database.Query<UserQueryDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName) && er.EntityType == null
-                    select er.ToLite()).ToList();
+            return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
+                .Where(e => UserQueries.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType)
         {
-            return (from er in Database.Query<UserQueryDN>()
-                    where er.EntityType == entityType.ToTypeDN().ToLite()
-                    select er.ToLite()).ToList();
+            return UserQueriesByType.Value.TryGetC(entityType).EmptyIfNull()
+                .Where(e => UserQueries.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+        }
+
+        public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
+        {
+            return UserQueries.Value.Where(a => a.Value.EntityType == null && a.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .Select(a => a.Key).Autocomplete(subString, limit).ToList();
+        }
+
+        public static UserQueryDN RetrieveUserQuery(this Lite<UserQueryDN> userQuery)
+        {
+            var result = UserQueries.Value.GetOrThrow(userQuery);
+
+            result.AssertAllowed(TypeAllowedBasic.Read, true);
+
+            result.LogUserAsset();
+
+            return result;
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<UserQueryDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
@@ -113,14 +142,10 @@ namespace Signum.Engine.UserQueries
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<UserQueryDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
-        public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
-        {
-            return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Select(o => o.ToLite()).Autocomplete(subString, limit);
-        }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {

@@ -19,6 +19,7 @@ using Signum.Windows.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Services;
 using Signum.Windows.UserQueries;
+using Signum.Windows.UserAssets;
 
 namespace Signum.Windows.Chart
 {
@@ -128,7 +129,7 @@ namespace Signum.Windows.Chart
                     Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 };
 
-                ChartClient.OpenChartRequest(cr, null);
+                ChartClient.OpenChartRequest(cr, null, null);
             };
 
             return miResult;
@@ -136,8 +137,6 @@ namespace Signum.Windows.Chart
 
         internal static void View(UserChartDN uc, IdentifiableEntity currentEntity)
         {
-            var query = QueryClient.GetQueryName(uc.Query.Key);
-
             if (uc.EntityType != null)
             {
                 if (currentEntity == null)
@@ -149,14 +148,14 @@ namespace Signum.Windows.Chart
 
                     currentEntity = entity.Retrieve();
                 }
-
-                CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity);
             }
+
+            var query = QueryClient.GetQueryName(uc.Query.Key);
             
-            OpenChartRequest(new ChartRequest(query), uc);
+            OpenChartRequest(new ChartRequest(query), uc, currentEntity);
         }
 
-        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc)
+        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc, IdentifiableEntity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => 
             {
@@ -169,6 +168,9 @@ namespace Signum.Windows.Chart
 
                 if (uc != null)
                     SetUserChart(crw, uc);
+
+                if (currentEntity != null)
+                    UserAssetsClient.SetCurrentEntity(crw, currentEntity);
 
                 return crw; 
             });
