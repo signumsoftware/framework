@@ -211,7 +211,7 @@ namespace Signum.Engine.Dashboard
 
         public static List<Lite<DashboardDN>> Autocomplete(string subString, int limit)
         {
-            return Database.Query<DashboardDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit);
+            return Database.Query<DashboardDN>().Where(cp => cp.EntityType == null).Select(o => o.ToLite()).Autocomplete(subString, limit);
         }
     }
 }
