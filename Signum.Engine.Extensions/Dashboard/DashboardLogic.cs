@@ -147,7 +147,6 @@ namespace Signum.Engine.Dashboard
 
                 new Delete(DashboardOperation.Delete)
                 {
-                    Lite = false,
                     Delete = (cp, _) =>
                     {
                         var parts = cp.Parts.Select(a => a.Content).ToList();
@@ -158,8 +157,6 @@ namespace Signum.Engine.Dashboard
 
                 new ConstructFrom<DashboardDN>(DashboardOperation.Clone)
                 {
-                    Lite = true,
-                    AllowsNew = false,
                     Construct = (cp, _) => cp.Clone()
                 }.Register();
             }
