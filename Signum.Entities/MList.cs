@@ -131,8 +131,6 @@ namespace Signum.Entities
             remove { collectionChanged -= value; }
         }
 
-        public static T[] Empty = new T[0];
-
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -223,10 +221,7 @@ namespace Signum.Entities
         public void AddRange(IEnumerable<T> collection)
         {
             foreach (var item in collection)
-                this.innerList.Add(new RowIdValue(item));
-
-            SetSelfModified();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, collection, Empty));
+                this.Add(item);
         }
 
         public ReadOnlyCollection<T> AsReadOnly()
@@ -303,7 +298,12 @@ namespace Signum.Entities
             if (modified || oldList.Any() || WrongPosition())
                 SetSelfModified();
 
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, innerList.Except(oldList).ToList(), oldList));
+            foreach (var item in innerList.Except(oldList).ToList())
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+
+            foreach (var item in oldList.Except(innerList).ToList())
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+
             return modified;
         }
 
@@ -325,7 +325,9 @@ namespace Signum.Entities
             var oldItems = innerList.ToList();
 
             innerList.Clear();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, Empty, oldItems)); 
+
+            foreach (var item in oldItems)
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item)); 
         }
 
         public void CopyTo(T[] array)
@@ -383,7 +385,8 @@ namespace Signum.Entities
             if (removed.Any())
             {
                 SetSelfModified();
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, Empty, removed));
+                foreach (var item in removed)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));             
             }
 
             return removed.Count; 
@@ -579,7 +582,14 @@ namespace Signum.Entities
         void IMListPrivate.InnerListModified(IList newItems, IList oldItems)
         {
             this.SetSelfModified();
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItems ?? Empty, oldItems ?? Empty));
+
+            if (newItems != null)
+                foreach (var item in newItems)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+
+            if (oldItems != null)
+                foreach (var item in oldItems)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
         }
 
         void IMListPrivate.SetRowId(int index, int rowId)
