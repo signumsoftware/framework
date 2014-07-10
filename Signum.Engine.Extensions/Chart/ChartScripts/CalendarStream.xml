@@ -37,7 +37,17 @@
   
   var cellSizeX = (width - 20)  / (horizontal? numDaysX: numDaysY);
   var cellSizeY = (height - 20) / (horizontal? numDaysY: numDaysX);
-  var cellSize = Math.min(cellSizeX, cellSizeY);
+  var cellSize = Math.min(cellSizeX, cellSizeY); 
+  
+  function cleanDate(d){
+    var str = d.toJSON();
+
+     var index = str.lastIndexOf('.'); 
+     if (index == -1)
+       throw Error(". not found");
+
+     return str.substring(0, index);
+  }
   
   var yRule = rule({
     _1: '*',
@@ -81,19 +91,20 @@
      .enter().append("rect")
      .attr("stroke","#ccc")
      .attr("fill",function(d) {   
-       var r = groups[d.toJSON().beforeLast(".")];
+       var r = groups[cleanDate(d)];
        return r == undefined ? "#fff":color(r.c1.key);})
      .attr("width", cellSize)
      .attr("height", cellSize)
      .attr("x", function(d) { return (horizontal? week(d): day(d)) * cellSize; })
      .attr("y", function(d) { return (horizontal? (6-day(d)): week(d)) * cellSize; })
      .attr('data-click', function(d) { 
-       var r = groups[d.toJSON().beforeLast(".")];
+       var r = groups[cleanDate(d)];
        return r == undefined? undefined: getClickKeys(r, data.columns); 
      })
      .append("title")
-    	.text(function(d) { 
-          var r = groups[d.toJSON().beforeLast(".")];
+    	.text(function(d) {  
+          debugger; 
+          var r = groups[cleanDate(d)];
           return format(d) + (r == undefined ? "": ("("+r.c1.key+")"));
         });
   
