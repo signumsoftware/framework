@@ -48,8 +48,8 @@
   
   var size = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 1);
   
-  var opacity = data.columns.c2 ?   parseFloat(data.columns.c2.parameter2) : 1;
-  var padding = data.columns.c2 ?   parseInt(data.columns.c2.parameter1) : 1;
+  var opacity = data.columns.c2.token ?   parseFloat(data.columns.c2.parameter2) : 1;
+  var padding = data.columns.c2.token ?   parseInt(data.columns.c2.parameter1) : 1;
   var p2 = padding / 2;
   
   var bubble = d3.layout.treemap()
