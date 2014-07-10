@@ -1282,7 +1282,7 @@ export class EntityStrip extends EntityList {
     }
 
     _create() {
-        var $txt = this.prefix.child(Entities.Keys.toStr).get().filter(".sf-entity-autocomplete");
+        var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
                 term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
