@@ -72,8 +72,11 @@ namespace Signum.Utilities
                 {
                     PrintOptions(i, step);
 
-                    SafeConsole.WriteColor(ConsoleColor.White, " +");
-                    Console.WriteLine(" - " + "more...");
+                    if (i + step < dictionary.Count)
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.White, " +");
+                        Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
+                    }
 
                     Console.WriteLine(endMessage);
                     string line = Console.ReadLine();
@@ -226,7 +229,9 @@ namespace Signum.Utilities
         [Description("No option with key {0} found")]
         NoOptionWithKey0Found,
         [Description("Select one of the following options:")]
-        SelectOneOfTheFollowingOptions
+        SelectOneOfTheFollowingOptions,
+        [Description("more...")]
+        More
     }
 
     public class WithDescription<T>
