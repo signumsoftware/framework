@@ -72,7 +72,7 @@ namespace Signum.Engine.UserQueries
 
                 UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryDN)));
-
+      
                 UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryDN)));
             }
@@ -135,7 +135,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Owner, typeof(UserDN));
 
             TypeConditionLogic.RegisterCompile<UserQueryDN>(typeCondition,
-                uq => uq.Owner.RefersTo(UserDN.Current)); 
+                uq => uq.Owner.RefersTo(UserDN.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

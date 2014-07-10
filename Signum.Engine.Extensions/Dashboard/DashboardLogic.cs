@@ -240,6 +240,6 @@ namespace Signum.Engine.Dashboard
                  uq => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
         }
 
-    
+
     }
 }

@@ -35,7 +35,7 @@ namespace Signum.Web.Isolation
             public string Prefix;
             public Lite<IsolationDN> Isolation;
 
-            public MvcHtmlString ToHtml(HtmlHelper helper)
+            MvcHtmlString IWidget.ToHtml(HtmlHelper helper)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(helper.HiddenLite(TypeContextUtilities.Compose(Prefix, "Isolation"), Isolation));
