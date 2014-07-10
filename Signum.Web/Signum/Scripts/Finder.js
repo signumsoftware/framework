@@ -377,6 +377,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $rowSelectors.prop("checked", select);
             $rowSelectors.closest("tr").toggleClass("active", select);
 
+            this.updateSelectedButton();
+
+            if (this.selectionChanged)
+                this.selectionChanged(this.selectedItems());
+        };
+
+        SearchControl.prototype.updateSelectedButton = function () {
             var selected = this.element.find(".sf-td-selection:checked").length;
 
             this.prefix.child("btnSelectedSpan").get().text(selected);
@@ -385,9 +392,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 btn.attr("disabled", "disabled");
             else
                 btn.removeAttr("disabled");
-
-            if (this.selectionChanged)
-                this.selectionChanged(this.selectedItems());
         };
 
         SearchControl.prototype.ctxMenuInDropdown = function () {
@@ -533,6 +537,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
                 _this.syncSize();
+                _this.updateSelectedButton();
             });
         };
 

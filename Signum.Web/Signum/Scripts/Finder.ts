@@ -417,6 +417,13 @@ export class SearchControl {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("active", select);
 
+        this.updateSelectedButton();
+
+        if (this.selectionChanged)
+            this.selectionChanged(this.selectedItems());
+    }
+
+    updateSelectedButton() {
         var selected = this.element.find(".sf-td-selection:checked").length;
 
         this.prefix.child("btnSelectedSpan").get().text(selected);
@@ -425,9 +432,6 @@ export class SearchControl {
             btn.attr("disabled", "disabled");
         else
             btn.removeAttr("disabled");
-
-        if (this.selectionChanged)
-            this.selectionChanged(this.selectedItems());
     }
 
     ctxMenuInDropdown() {
@@ -561,7 +565,8 @@ export class SearchControl {
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-                this.syncSize();
+            this.syncSize();
+            this.updateSelectedButton();
             });
     }
 
