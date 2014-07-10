@@ -37,11 +37,11 @@ namespace Signum.Windows.Chart
     {
         public static ChartTypeBackgroundConverter ChartTypeBackground = new ChartTypeBackgroundConverter();
 
-        public List<ChartScriptDN> chartScripts = Server.RetrieveAll<ChartScriptDN>().OrderBy(a => a.Columns.Count).ThenByDescending(a => a.Columns.Count(c => c.IsOptional)).ThenBy(a => a.Name).ToList();
+        public ObservableCollection<ChartScriptDN> chartScripts = ChartUtils.PackInGroups(Server.Return((IChartServer cs) => cs.GetChartScripts()), 4).SelectMany(a => a).ToObservableCollection();
 
         public ObservableCollection<ChartScriptDN> ChartScripts
         {
-            get { return new ObservableCollection<ChartScriptDN>(chartScripts); }
+            get { return chartScripts; }
         }
 
         public static IValueConverter ChartTypeToImage = ConverterFactory.New((Lite<FileDN> ct) =>

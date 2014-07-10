@@ -26,6 +26,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         UserChartDN RetrieveUserChart(Lite<UserChartDN> userChart);
+
+        [OperationContract, NetDataContract]
+        List<ChartScriptDN> GetChartScripts();
     }
 
     [ServiceContract]

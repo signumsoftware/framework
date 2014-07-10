@@ -260,6 +260,12 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                    () => UserChartLogic.RetrieveUserChart(userChart));
         }
+
+        public List<ChartScriptDN> GetChartScripts()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                    () => ChartScriptLogic.Scripts.Value.Values.ToList());
+        }
         #endregion
 
         #region IExcelReportServer Members
@@ -402,9 +408,6 @@ namespace Signum.Services
               () => UserAssetsImporter.Import(document, previews));
         }
         #endregion
-
-
-
-
+     
     }
 }

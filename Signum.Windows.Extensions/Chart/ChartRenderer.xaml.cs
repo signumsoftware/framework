@@ -145,7 +145,7 @@ namespace Signum.Windows.Chart
                 {
                     KeyColumns = Request.Columns.Iterate()
                     .Where(a => a.Value.ScriptColumn.IsGroupKey)
-                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token.Token })
+                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token.Try(t=>t.Token) })
                     .ToList(),
                     Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
                     {

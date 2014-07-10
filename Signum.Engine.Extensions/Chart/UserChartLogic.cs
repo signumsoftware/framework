@@ -66,7 +66,6 @@ namespace Signum.Engine.Chart
 
                 new Graph<UserChartDN>.Delete(UserChartOperation.Delete)
                 {
-                    Lite = true,
                     Delete = (uc, _) => { uc.Delete(); }
                 }.Register();
 
