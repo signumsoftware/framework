@@ -122,11 +122,13 @@ namespace Signum.Web.UserQueries
                 this.userQuery = userQuery;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Glyphicon = "glyphicon-list-alt";
+                this.GlyphiconColor = "dodgerblue";
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).InnerHtml(TextAndIcon());
             }
         }
 

@@ -23,7 +23,7 @@ namespace Signum.Web.Chart
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
             return html;
         }
@@ -35,7 +35,7 @@ namespace Signum.Web.Chart
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(UserChartDN).NiceName()), "darkviolet");
+            return ColoredGlyphicon("glyphicon-stats", "darkviolet");
         }
     }
 }

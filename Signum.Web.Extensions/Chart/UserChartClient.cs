@@ -109,11 +109,13 @@ namespace Signum.Web.Chart
                 this.userChart = userChart;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Glyphicon = "glyphicon-stats";
+                this.GlyphiconColor = "darkviolet";
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ChartController c) => c.ViewUserChart(userChart, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ChartController c) => c.ViewUserChart(userChart, entity))).InnerHtml(TextAndIcon());
             }
         }
 

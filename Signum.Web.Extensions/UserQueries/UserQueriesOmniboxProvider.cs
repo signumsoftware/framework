@@ -23,7 +23,7 @@ namespace Signum.Web.UserQueries
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
                 
             return html;
         }
@@ -35,7 +35,7 @@ namespace Signum.Web.UserQueries
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(UserQueryDN).NiceName()), "dodgerblue");
+            return ColoredGlyphicon("glyphicon-list-alt", "dodgerblue");
         }
     }
 }

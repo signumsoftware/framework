@@ -23,7 +23,7 @@ namespace Signum.Web.Dashboard
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
 
                 
@@ -37,7 +37,7 @@ namespace Signum.Web.Dashboard
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(DashboardDN).NiceName()), "darkslateblue");
+            return ColoredGlyphicon("glyphicon-th-large", "darkslateblue");
         }
     }
 }

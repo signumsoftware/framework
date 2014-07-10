@@ -138,11 +138,13 @@ namespace Signum.Web.Dashboard
                 this.dashboard = dashboard;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Glyphicon = "glyphicon-th-large";
+                this.GlyphiconColor = "darkslateblue";
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(dashboard, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(dashboard, entity))).InnerHtml(TextAndIcon());
             }
         }
     }

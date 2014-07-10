@@ -74,7 +74,7 @@ namespace Signum.Web.Omnibox
                             
             } 
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
             return html;
         }
@@ -106,7 +106,7 @@ namespace Signum.Web.Omnibox
         
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(QueryDN).NiceName()), "orange");
+            return ColoredGlyphicon("glyphicon-search", "orange");
         }
     }
 }
