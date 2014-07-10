@@ -16,7 +16,7 @@ namespace Signum.Engine.UserAssets
     public static class UserAssetLogLogic
     {
         static Expression<Func<IUserAssetEntity, IQueryable<UserAssetLogDN>>> UserAssetLogsExpression =
-            a => Database.Query<UserAssetLogDN>().Where(log => log.Asset == a);
+            a => Database.Query<UserAssetLogDN>().Where(log => log.Asset.RefersTo(a));
         public static IQueryable<UserAssetLogDN> UserAssetLogs(this IUserAssetEntity a)
         {
             return UserAssetLogsExpression.Evaluate(a);
@@ -43,13 +43,18 @@ namespace Signum.Engine.UserAssets
             }
         }
 
-        public static void Register<T>(SchemaBuilder sb, DynamicQueryManager dqm) where T : IUserAssetEntity
+        public static void Register<T>(SchemaBuilder sb, DynamicQueryManager dqm) where T : IdentifiableEntity, IUserAssetEntity
         {
             sb.WhenIncluded<UserAssetLogDN>(() =>
             {
                 sb.Settings.AssertImplementedBy((UserAssetLogDN log) => log.Asset, typeof(T));
 
                 dqm.RegisterExpression((T a) => a.UserAssetLogs());
+
+                sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+                {
+                    query.SelectMany(a => a.UserAssetLogs()).UnsafeDelete();
+                }; 
             }); 
         }
 
