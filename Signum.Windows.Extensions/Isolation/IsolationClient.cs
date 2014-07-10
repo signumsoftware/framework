@@ -121,7 +121,7 @@ namespace Signum.Windows.Isolation
                 }
                 ctx.Args.Add(isolation);
 
-                return IsolationDN.OverrideIfNecessary(isolation);
+                return IsolationDN.Override(isolation);
             }
 
             return null;
