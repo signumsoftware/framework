@@ -38,7 +38,7 @@ namespace Signum.Web.Isolation
                 //Unnecessary with the filter
                 Constructor.Manager.PreConstructors += ctx =>
                     !MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) ? null :
-                    IsolationDN.OverrideIfNecessary(GetIsolation(ctx.Controller.ControllerContext)); 
+                    IsolationDN.Override(GetIsolation(ctx.Controller.ControllerContext)); 
             }
         }
 
@@ -63,7 +63,7 @@ namespace Signum.Web.Isolation
 
             ViewDataDictionary viewData = filterContext.Controller.ViewData;
 
-            IDisposable isolation = IsolationDN.OverrideIfNecessary(iso);
+            IDisposable isolation = IsolationDN.Override(iso);
             if (isolation != null)
                 viewData.Add(Key, isolation);
 
@@ -93,7 +93,7 @@ namespace Signum.Web.Isolation
                 IdentifiableEntity entity = (model as TypeContext).Try(tc => tc.UntypedValue as IdentifiableEntity) ?? model as IdentifiableEntity;
 
                 if (entity != null)
-                    viewData[Key] = IsolationDN.OverrideIfNecessary(entity.TryIsolation());
+                    viewData[Key] = IsolationDN.Override(entity.TryIsolation());
             }
         }
 

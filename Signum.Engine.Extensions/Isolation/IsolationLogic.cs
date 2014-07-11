@@ -71,17 +71,17 @@ namespace Signum.Engine.Isolation
 
         static IDisposable ProcessLogic_ApplySession(ProcessDN process)
         {
-            return IsolationDN.OverrideIfNecessary(process.Data.TryIsolation());
+            return IsolationDN.Override(process.Data.TryIsolation());
         }
 
         static IDisposable SchedulerLogic_ApplySession(ITaskDN task)
         {
-            return IsolationDN.OverrideIfNecessary(task.TryIsolation());
+            return IsolationDN.Override(task.TryIsolation());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)
         {
-            return IsolationDN.OverrideIfNecessary(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
+            return IsolationDN.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
         }
 
         static void EntityEventsGlobal_PreSaving(IdentifiableEntity ident, ref bool graphModified)
@@ -170,7 +170,7 @@ namespace Signum.Engine.Isolation
             if (val == -1)
                 return null;
 
-            return IsolationDN.OverrideIfNecessary(Lite.Parse<IsolationDN>(headers.GetHeader<string>(val)));
+            return IsolationDN.Override(Lite.Parse<IsolationDN>(headers.GetHeader<string>(val)));
         }
 
         public static IEnumerable<T> WhereCurrentIsolationInMemory<T>(this IEnumerable<T> collection) where T : Entity
