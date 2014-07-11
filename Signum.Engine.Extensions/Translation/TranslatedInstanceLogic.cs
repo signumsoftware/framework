@@ -418,7 +418,7 @@ namespace Signum.Engine.Translation
             {
                 var routeConflicts = (from kvp in gr
                                       let t = target.TryGetC(kvp.Key)
-                                      where kvp.Value.HasText() && (t == null || t.OriginalText != kvp.Value)
+                                      where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
                                       select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
 
                 if (routeConflicts.IsEmpty())
