@@ -290,7 +290,7 @@ namespace Signum.Engine.Translation
         {
             var result = TranslatedInstanceLogic.GetTranslatedInstance(lite, route, rowId);
 
-            if (result != null && result.OriginalText == fallbackString)
+            if (result != null && result.OriginalText.Replace("\r", "").Replace("\n", "") == fallbackString.Replace("\r", "").Replace("\n", ""))
                 return result.TranslatedText;
 
             return fallbackString;
