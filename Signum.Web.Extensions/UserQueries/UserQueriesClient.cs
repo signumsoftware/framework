@@ -33,9 +33,9 @@ namespace Signum.Web.UserQueries
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery");
 
-        public static Func<SubTokensOptions, Mapping<QueryTokenDN>> QueryTokenMapping =  opts => ctx =>
+        public static Func<SubTokensOptions, Mapping<QueryTokenDN>> QueryTokenMapping = opts => ctx =>
         {
-			string tokenStr = UserAssetsHelper.GetTokenString(ctx);
+            string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
             string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
             object queryName = QueryLogic.ToQueryName(queryKey);
