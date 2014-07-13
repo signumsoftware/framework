@@ -422,6 +422,13 @@ namespace Signum.Utilities
         {
             return CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dateTime.Month);
         }
+
+        public static int WeekNumber(this DateTime dateTime)
+        {
+            var cc = CultureInfo.CurrentCulture;
+
+            return cc.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, cc.DateTimeFormat.FirstDayOfWeek); 
+        }
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
