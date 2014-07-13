@@ -6,11 +6,19 @@
 @{ 
     string prefix = "r{0}c{1}".Formato(Model.Row, Model.StartColumn);
     DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
+    var link = config.TitleLink == null ? null : config.TitleLink(Model.Content); 
 }
 <div class="panel panel-@Model.Style.ToString().ToLower()">
     <div class="panel-heading">
-        @Model.ToString()
-        @if (config.FullScreenLink)
+        @if (link == null)
+        {
+            @Model.ToString()
+        }
+        else
+        {
+            <a href="@link">@Model.ToString()</a>
+        }
+        @if (config.HasFullScreenLink)
         {
             <a id="@TypeContextUtilities.Compose(prefix, "sfFullScreen")" class="sf-ftbl-header-fullscreen" href="#">
                 <span class="glyphicon glyphicon-new-window"></span>
@@ -19,7 +27,7 @@
     </div>
 
     <div class="panel-body">
-        @{ Html.RenderPartial(config.FrontEnd, TypeContextUtilities.UntypedNew(Model.Content, prefix)); }
+        @{ Html.RenderPartial(config.FrontEndView, TypeContextUtilities.UntypedNew(Model.Content, prefix)); }
     </div>
 
 </div>
