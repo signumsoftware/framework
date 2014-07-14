@@ -232,7 +232,7 @@ WriteLiteral("                ");
 
             
             #line 29 "..\..\Dashboard\Views\Admin\PanelPartViewAdmin.cshtml"
-           Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = DashboardClient.PanelPartViews[part.Content.GetType()].Admin));
+           Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = DashboardClient.PanelPartViews[part.Content.GetType()].AdminView));
 
             
             #line default

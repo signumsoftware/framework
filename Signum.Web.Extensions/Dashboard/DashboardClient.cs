@@ -26,27 +26,36 @@ namespace Signum.Web.Dashboard
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Dashboard/Scripts/Dashboard");
         public static JsModule GridRepeater = new JsModule("Extensions/Signum.Web.Extensions/Dashboard/Scripts/GridRepeater");
 
-        public struct PartViews
+        public class PartViews
         {
             public PartViews(string frontEnd, string admin)
             {
-                FrontEnd = frontEnd;
-                Admin = admin;
-                FullScreenLink = false;
+                FrontEndView = frontEnd;
+                AdminView = admin;
+                HasFullScreenLink = false;
             }
 
-            public string FrontEnd;
-            public string Admin;
-            public bool FullScreenLink;
+            public string FrontEndView;
+            public string AdminView;
+            public Func<IPartDN, string> TitleLink;
+            public bool HasFullScreenLink;
         }
 
         public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
-            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) { FullScreenLink = true } },
-            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) { FullScreenLink = true } },
+            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserChartPartDN)p).UserChart) }},
+            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserQueryPartDN)p).UserQuery) }},
             { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };
+
+        static string NavigateRoute(IdentifiableEntity entity)
+        {
+            if (!Navigator.IsNavigable(entity, null))
+                return null;
+
+            return Navigator.NavigateRoute(entity);
+        }
 
         public static void Start()
         {
@@ -80,14 +89,14 @@ namespace Signum.Web.Dashboard
                     !DashboardPermission.ViewDashboard.IsAuthorized() ? null:
                      new QuickLinkAction(DashboardMessage.Preview, RouteHelper.New().Action<DashboardController>(cpc => cpc.View(cp, null)))
                 });
-           
+
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
                 {
                     if (!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
 
                     return DashboardLogic.GetDashboardsEntity(entity.EntityType)
-                        .Select(cp => new DashboardQuickLink(cp, entity)).ToArray(); 
+                        .Select(cp => new DashboardQuickLink(cp, entity)).ToArray();
                 });
 
                 WidgetsHelper.GetEmbeddedWidget += ctx =>
@@ -99,7 +108,7 @@ namespace Signum.Web.Dashboard
                     if (dashboard == null)
                         return null;
 
-                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (IdentifiableEntity)ctx.Entity }; 
+                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (IdentifiableEntity)ctx.Entity };
                 };
             }
         }
@@ -122,7 +131,7 @@ namespace Signum.Web.Dashboard
                 {
                     return Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top :
                         Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom :
-                        new InvalidOperationException("Unexpected {0}".Formato(Dashboard.EmbeddedInEntity.Value)).Throw<EmbeddedWidgetPostion>(); 
+                        new InvalidOperationException("Unexpected {0}".Formato(Dashboard.EmbeddedInEntity.Value)).Throw<EmbeddedWidgetPostion>();
                 }
             }
         }

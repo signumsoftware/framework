@@ -26,20 +26,21 @@ namespace Signum.Web.Chart
     public class ChartController : Controller
     {
         #region chart
-        public ActionResult Index(string webQueryName)
+        public ActionResult Index(FindOptions findOptions)
         {
             ChartPermission.ViewCharting.Authorize();
 
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            if (!Navigator.IsFindable(findOptions.QueryName))
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
-            if (!Navigator.IsFindable(queryName))
-                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(queryName));
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, false);
 
-            var request = new ChartRequest(queryName)
+            var request = new ChartRequest(findOptions.QueryName)
             {
                 ChartScript = ChartScriptLogic.Scripts.Value.Values.FirstEx(() => "No ChartScript loaded in the database"),
+                Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
 
             return OpenChartRequest(request, null);

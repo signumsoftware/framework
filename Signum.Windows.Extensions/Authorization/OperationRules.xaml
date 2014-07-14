@@ -4,9 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
-    xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities" 
-    xmlns:seb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
-    xmlns:seb2="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
+    xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     SizeToContent="WidthAndHeight"
     WindowStartupLocation="CenterOwner"
     m:Monitors.AdjustToMonitor="true"
@@ -33,7 +31,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="{m:LocType {x:Type seb:OperationDN}}" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="{m:LocType {x:Type dn:OperationSymbol}}" DisplayMemberBinding="{Binding Resource}" />
                     <GridViewColumn Header="{m:Loc {x:Static d:OperationAllowed.Allow}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

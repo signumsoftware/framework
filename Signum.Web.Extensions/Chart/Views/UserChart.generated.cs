@@ -408,7 +408,7 @@ WriteLiteral("            ");
 
             
             #line 75 "..\..\Chart\Views\UserChart.cshtml"
-       Write(Html.Partial(ChartClient.ChartBuilderView, uc.Value));
+       Write(Html.Partial(ChartClient.ChartBuilderView, uc));
 
             
             #line default
