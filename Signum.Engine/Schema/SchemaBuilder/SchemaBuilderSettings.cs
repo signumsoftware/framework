@@ -43,6 +43,8 @@ namespace Signum.Engine.Maps
         }
 
 
+        public Func<Type, string> CanOverrideAttributes = null;
+
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16; 
 
@@ -114,6 +116,11 @@ namespace Signum.Engine.Maps
 
         public void OverrideAttributes(PropertyRoute propertyRoute, params Attribute[] attributes)
         {
+            string error = CanOverrideAttributes == null ? null : CanOverrideAttributes(propertyRoute.RootType); 
+
+            if (error != null)
+                throw new InvalidOperationException(error);
+
             AssertCorrect(attributes, AttributeTargets.Field);
 
             OverridenAttributes.Add(propertyRoute, attributes);
