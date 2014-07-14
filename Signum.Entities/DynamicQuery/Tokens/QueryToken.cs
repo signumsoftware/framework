@@ -168,7 +168,7 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + QueryTokenMessage.Year.NiceToString()), 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + QueryTokenMessage.Month.NiceToString()), 
                 new MonthStartToken(parent), 
-
+                new WeekNumberToken(parent),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + QueryTokenMessage.Day.NiceToString()),
                 new DayOfYearToken(parent), 
                 new DayOfWeekToken(parent), 
@@ -391,6 +391,7 @@ namespace Signum.Entities.DynamicQuery
         Second,
         [Description("text")]
         Text,
-        Year
+        Year,
+        WeekNumber
     }
 }
