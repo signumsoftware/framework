@@ -619,6 +619,13 @@ namespace Signum.Entities
             this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }
 
+        void IMListPrivate.ForceRowId(int index, int rowId)
+        {
+            var prev = this.innerList[index];
+
+            this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
+        }
+
         void IMListPrivate.SetOldIndex(int index)
         {
             var prev = this.innerList[index];
@@ -645,6 +652,7 @@ namespace Signum.Entities
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
         void SetRowId(int index, int rowId);
+        void ForceRowId(int index, int rowId);
 
         void InnerListModified(IList newItems, IList oldItems); 
     }

@@ -248,7 +248,7 @@ namespace Signum.Engine
                 requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
             {
                 retrieved.Clear();
-                embeddedPostRetrieving.Clear();
+                if (embeddedPostRetrieving != null) embeddedPostRetrieving.Clear();
                 goto retry;
             }
 
