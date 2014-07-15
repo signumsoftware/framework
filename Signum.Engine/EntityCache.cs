@@ -129,6 +129,8 @@ namespace Signum.Engine
 
         internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value.HasRetriever; } }
 
+        public static bool IsSealed { get { return currentCache.Value.IsSealed; } }
+
         public void Dispose()
         {
             if (!facked)

@@ -21,11 +21,16 @@ namespace Signum.Entities
             get { return modified; }
             protected internal set
             {
-                if(modified == ModifiedState.Sealed)
+                if (modified == ModifiedState.Sealed)
                     throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
 
                 modified = value;
             }
+        }
+
+        public void SetCleanModified(bool isSealed)
+        {
+            Modified = isSealed ? ModifiedState.Sealed : ModifiedState.Clean;
         }
 
         /// <summary>
@@ -39,7 +44,7 @@ namespace Signum.Entities
 
         protected internal virtual void SetSelfModified()
         {
-            Modified = ModifiedState.SelfModified;
+            modified = ModifiedState.SelfModified;
         }
 
         protected internal virtual void PreSaving(ref bool graphModified)
