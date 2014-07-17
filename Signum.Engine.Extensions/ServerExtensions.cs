@@ -85,7 +85,7 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol, object[] operationArgs = null)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationSymbol));
@@ -408,6 +408,8 @@ namespace Signum.Services
               () => UserAssetsImporter.Import(document, previews));
         }
         #endregion
-     
+
+
+      
     }
 }
