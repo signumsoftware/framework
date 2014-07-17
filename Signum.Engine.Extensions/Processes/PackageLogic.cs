@@ -143,11 +143,12 @@ namespace Signum.Engine.Processes
             }); 
         }
 
-        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation, object[] operationArgs = null)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
-                Operation = operation
+                Operation = operation,
+                OperationArgs = operationArgs,
             }.CreateLines(entities));
         }
 
