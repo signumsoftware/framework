@@ -47,12 +47,12 @@ namespace Signum.Windows.UIAutomation
 
         public string EntityId
         {
-            get { return Element.ChildById("entityTitle").ChildById("tbEntityId").Value(); }
+            get { return Element.WaitChildById("entityTitle").WaitChildById("tbEntityId").Value(); }
         }
 
         public string EntityToStr
         {
-            get { return Element.ChildById("entityTitle").ChildById("tbEntityToStr").Value(); }
+            get { return Element.WaitChildById("entityTitle").WaitChildById("tbEntityToStr").Value(); }
         }
 
         public void Ok()
