@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Entities.UserAssets
 {
     [Serializable]
-    public sealed class QueryTokenDN : EmbeddedEntity
+    public sealed class QueryTokenDN : EmbeddedEntity, IEquatable<QueryTokenDN>
     {
         private QueryTokenDN()
         {
@@ -100,6 +100,21 @@ namespace Signum.Entities.UserAssets
                 return token.FullKey();
 
             return tokenString;
+        }
+
+        public bool Equals(QueryTokenDN other)
+        {
+            return this.Token.Equals(other.Token);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is QueryTokenDN && this.Equals((QueryTokenDN)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Token.GetHashCode();
         }
     }
 

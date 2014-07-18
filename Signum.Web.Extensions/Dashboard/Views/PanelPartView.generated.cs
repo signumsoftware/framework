@@ -62,22 +62,23 @@ namespace Signum.Web.Extensions.Dashboard.Views
    
     string prefix = "r{0}c{1}".Formato(Model.Row, Model.StartColumn);
     DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
+    var link = config.TitleLink == null ? null : config.TitleLink(Model.Content); 
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n<div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 294), Tuple.Create("\"", 347)
-, Tuple.Create(Tuple.Create("", 302), Tuple.Create("panel", 302), true)
-, Tuple.Create(Tuple.Create(" ", 307), Tuple.Create("panel-", 308), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 378), Tuple.Create("\"", 431)
+, Tuple.Create(Tuple.Create("", 386), Tuple.Create("panel", 386), true)
+, Tuple.Create(Tuple.Create(" ", 391), Tuple.Create("panel-", 392), true)
             
-            #line 10 "..\..\Dashboard\Views\PanelPartView.cshtml"
-, Tuple.Create(Tuple.Create("", 314), Tuple.Create<System.Object, System.Int32>(Model.Style.ToString().ToLower()
+            #line 11 "..\..\Dashboard\Views\PanelPartView.cshtml"
+, Tuple.Create(Tuple.Create("", 398), Tuple.Create<System.Object, System.Int32>(Model.Style.ToString().ToLower()
             
             #line default
             #line hidden
-, 314), false)
+, 398), false)
 );
 
 WriteLiteral(">\r\n    <div");
@@ -85,17 +86,6 @@ WriteLiteral(">\r\n    <div");
 WriteLiteral(" class=\"panel-heading\"");
 
 WriteLiteral(">\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 12 "..\..\Dashboard\Views\PanelPartView.cshtml"
-   Write(Model.ToString());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
 
             
             #line 13 "..\..\Dashboard\Views\PanelPartView.cshtml"
@@ -105,7 +95,24 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 13 "..\..\Dashboard\Views\PanelPartView.cshtml"
-         if (config.FullScreenLink)
+         if (link == null)
+        {
+            
+            
+            #line default
+            #line hidden
+            
+            #line 15 "..\..\Dashboard\Views\PanelPartView.cshtml"
+       Write(Model.ToString());
+
+            
+            #line default
+            #line hidden
+            
+            #line 15 "..\..\Dashboard\Views\PanelPartView.cshtml"
+                             
+        }
+        else
         {
 
             
@@ -113,14 +120,54 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 473), Tuple.Create("\"", 531)
+WriteAttribute("href", Tuple.Create(" href=\"", 588), Tuple.Create("\"", 600)
             
-            #line 15 "..\..\Dashboard\Views\PanelPartView.cshtml"
-, Tuple.Create(Tuple.Create("", 478), Tuple.Create<System.Object, System.Int32>(TypeContextUtilities.Compose(prefix, "sfFullScreen")
+            #line 19 "..\..\Dashboard\Views\PanelPartView.cshtml"
+, Tuple.Create(Tuple.Create("", 595), Tuple.Create<System.Object, System.Int32>(link
             
             #line default
             #line hidden
-, 478), false)
+, 595), false)
+);
+
+WriteLiteral(">");
+
+            
+            #line 19 "..\..\Dashboard\Views\PanelPartView.cshtml"
+                       Write(Model.ToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a>\r\n");
+
+            
+            #line 20 "..\..\Dashboard\Views\PanelPartView.cshtml"
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        ");
+
+            
+            #line 21 "..\..\Dashboard\Views\PanelPartView.cshtml"
+         if (config.HasFullScreenLink)
+        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <a");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 701), Tuple.Create("\"", 759)
+            
+            #line 23 "..\..\Dashboard\Views\PanelPartView.cshtml"
+, Tuple.Create(Tuple.Create("", 706), Tuple.Create<System.Object, System.Int32>(TypeContextUtilities.Compose(prefix, "sfFullScreen")
+            
+            #line default
+            #line hidden
+, 706), false)
 );
 
 WriteLiteral(" class=\"sf-ftbl-header-fullscreen\"");
@@ -134,7 +181,7 @@ WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
 WriteLiteral("></span>\r\n            </a>\r\n");
 
             
-            #line 18 "..\..\Dashboard\Views\PanelPartView.cshtml"
+            #line 26 "..\..\Dashboard\Views\PanelPartView.cshtml"
         }
 
             
@@ -147,14 +194,14 @@ WriteLiteral(" class=\"panel-body\"");
 WriteLiteral(">\r\n");
 
             
-            #line 22 "..\..\Dashboard\Views\PanelPartView.cshtml"
+            #line 30 "..\..\Dashboard\Views\PanelPartView.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 22 "..\..\Dashboard\Views\PanelPartView.cshtml"
-           Html.RenderPartial(config.FrontEnd, TypeContextUtilities.UntypedNew(Model.Content, prefix)); 
+            #line 30 "..\..\Dashboard\Views\PanelPartView.cshtml"
+           Html.RenderPartial(config.FrontEndView, TypeContextUtilities.UntypedNew(Model.Content, prefix)); 
             
             #line default
             #line hidden

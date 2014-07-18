@@ -31,7 +31,10 @@ namespace Signum.Windows.Chart
                 lines.Add(" ");
                 lines.AddMatch(result.QueryNameMatch);
             }
-
+            else
+            {
+                lines.Add(new Run(" " + OmniboxMessage.Omnibox_Query.NiceToString() + "...") { Foreground = Brushes.LightGray });
+            }
         }
 
         public override Run GetIcon()

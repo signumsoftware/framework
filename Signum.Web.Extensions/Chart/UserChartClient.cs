@@ -51,27 +51,25 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserChartDN> 
-                    { 
-                        PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart"),
-                        MappingMain = new EntityMapping<UserChartDN>(true)
-                        
-                            .SetProperty(cb=>cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnDN>(ChartClient.MappingChartColumn))
-                            .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
-                            {
-                                ElementMapping = new EntityMapping<QueryFilterDN>(false)
-                                    .CreateProperty(a=>a.Operation)
-                                    .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-                            })
-                            .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
-                            {
-                                ElementMapping = new EntityMapping<QueryOrderDN>(false)
-                                    .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-                            })
-                    }
+                    new EntitySettings<UserChartDN> { PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart") }
                 });
+
+                Navigator.EntitySettings<UserChartDN>().MappingMain = Navigator.EntitySettings<UserChartDN>().MappingLine = 
+                    new EntityMapping<UserChartDN>(true)
+                        .SetProperty(cb => cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnDN>(ChartClient.MappingChartColumn))
+                        .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
+                        {
+                            ElementMapping = new EntityMapping<QueryFilterDN>(false)
+                                .CreateProperty(a => a.Operation)
+                                .CreateProperty(a => a.ValueString)
+                                .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+                        })
+                        .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
+                        {
+                            ElementMapping = new EntityMapping<QueryOrderDN>(false)
+                                .CreateProperty(a => a.OrderType)
+                                .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+                        }); 
 
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });

@@ -130,7 +130,6 @@ namespace Signum.Web.Chart
                         itemCtx.Value = ElementMapping(itemCtx);
 
                         ctx.AddChild(itemCtx);
-                        list[i] = itemCtx.Value;
                     }
                     i++;
                 }
