@@ -198,7 +198,7 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
             entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
             entityHtml.html = pair.modalDiv;
 
-            return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
+            return { isOk: pair.button && pair.button.id == okButtonId, entityHtml: entityHtml };
         });
 
 }
