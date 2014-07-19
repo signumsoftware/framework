@@ -126,6 +126,7 @@ function changeButtonState($button: JQuery, disablingMessage?: string) {
 
 function updateHtmlEditorTextArea(idTargetTextArea: string) {
     CKEDITOR.instances[idTargetTextArea].updateElement();
+    SF.setHasChanges(idTargetTextArea.get());
 };
 
 export function initHtmlEditor(idTargetTextArea: string, culture: string) {

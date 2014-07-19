@@ -124,6 +124,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function updateHtmlEditorTextArea(idTargetTextArea) {
         CKEDITOR.instances[idTargetTextArea].updateElement();
+        SF.setHasChanges(idTargetTextArea.get());
     }
     ;
 
