@@ -33,6 +33,8 @@ using Signum.Engine.Dashboard;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Excel;
 using Signum.Engine.Excel;
+using Signum.Entities.UserAssets;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Services
 {
@@ -83,7 +85,7 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol, object[] operationArgs = null)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationSymbol));
@@ -250,7 +252,19 @@ namespace Signum.Services
         public List<Lite<UserChartDN>> AutocompleteUserChart(string subString, int limit)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ChartLogic.Autocomplete(subString, limit));
+                () => UserChartLogic.Autocomplete(subString, limit));
+        }
+
+        public UserChartDN RetrieveUserChart(Lite<UserChartDN> userChart)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                   () => UserChartLogic.RetrieveUserChart(userChart));
+        }
+
+        public List<ChartScriptDN> GetChartScripts()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                    () => ChartScriptLogic.Scripts.Value.Values.ToList());
         }
         #endregion
 
@@ -293,6 +307,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => UserQueryLogic.Autocomplete(subString, limit));
+        }
+
+        public UserQueryDN RetrieveUserQuery(Lite<UserQueryDN> userQuery)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => UserQueryLogic.RetrieveUserQuery(userQuery));
         }
         #endregion
 
@@ -337,10 +357,16 @@ namespace Signum.Services
                 () => DashboardLogic.GetHomePageDashboard());
         }
 
-        public List<Lite<DashboardDN>> GetDashboardEntity(Type entityType)
+        public DashboardDN GetEmbeddedDashboard(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => DashboardLogic.GetDashboardEntity(entityType));
+                () => DashboardLogic.GetEmbeddedDashboard(entityType));
+        }
+
+        public List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => DashboardLogic.GetDashboardsEntity(entityType));
         }
 
         public List<Lite<DashboardDN>> AutocompleteDashboard(string subString, int limit)
@@ -348,6 +374,19 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                   () => DashboardLogic.Autocomplete(subString, limit));
         }
+
+        public List<Lite<DashboardDN>> GetDashboards()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => DashboardLogic.GetDashboards());
+        }
+
+        public DashboardDN RetrieveDashboard(Lite<DashboardDN> dashboard)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                   () => DashboardLogic.RetrieveDashboard(dashboard));
+        }
+
         #endregion
 
         #region IUserAssetsServer
@@ -371,6 +410,6 @@ namespace Signum.Services
         #endregion
 
 
-
+      
     }
 }

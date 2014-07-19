@@ -48,6 +48,12 @@ namespace Signum.Web.Extensions.Dashboard.Views.Admin
     #line default
     #line hidden
     
+    #line 4 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+    using Signum.Web.UserAssets;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/Admin/DashboardAdmin.cshtml")]
     public partial class DashboardAdmin : System.Web.Mvc.WebViewPage<dynamic>
@@ -60,7 +66,7 @@ namespace Signum.Web.Extensions.Dashboard.Views.Admin
 WriteLiteral("\r\n");
 
             
-            #line 5 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 6 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
 Write(Html.ScriptCss("~/Dashboard/Content/Dashboard.css"));
 
             
@@ -69,7 +75,7 @@ Write(Html.ScriptCss("~/Dashboard/Content/Dashboard.css"));
 WriteLiteral("\r\n\r\n\r\n");
 
             
-            #line 8 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 9 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
  using (var tc = Html.TypeContext<DashboardDN>())
 {
     using (var sc = tc.SubContext())
@@ -97,7 +103,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 17 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 18 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
            Write(Html.ValueLine(sc, cp => cp.DisplayName));
 
             
@@ -112,8 +118,8 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 20 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.ValueLine(sc, cp => cp.HomePagePriority));
+            #line 21 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+           Write(Html.ValueLine(sc, cp => cp.DashboardPriority));
 
             
             #line default
@@ -127,7 +133,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 23 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 24 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
            Write(Html.ValueLine(sc, cp => cp.AutoRefreshPeriod));
 
             
@@ -139,14 +145,14 @@ WriteLiteral(" class=\"row\"");
 
 WriteLiteral(">\r\n            <div");
 
-WriteLiteral(" class=\"col-sm-6\"");
+WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("                ");
 
             
-            #line 28 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 29 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
            Write(Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false));
 
             
@@ -154,23 +160,41 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            </div>\r\n            <div");
 
-WriteLiteral(" class=\"col-sm-6\"");
+WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("                ");
 
             
-            #line 31 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.EntityLine(sc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); }));
+            #line 32 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+           Write(Html.EntityLine(sc, cp => cp.EntityType, el => { 
+               el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
+               el.AttachFunction = UserAssetsClient.Module["attachShowEmbeddedInEntity"](el);
+           }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("\r\n            </div>\r\n             <div");
+
+WriteLiteral(" class=\"col-sm-4\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                 ");
 
             
-            #line 35 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 38 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            Write(Html.ValueLine(sc, f => f.EmbeddedInEntity));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n             </div>\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 42 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
     
     }
     
@@ -179,8 +203,8 @@ WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
             #line default
             #line hidden
             
-            #line 38 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-Write(Html.GridRepater(tc, cp => cp.Parts, grid =>
+            #line 45 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
             grid.PartialViewName = DashboardClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
             grid.AttachFunction = DashboardClient.Module["attachGridControl"](grid,
@@ -192,7 +216,7 @@ Write(Html.GridRepater(tc, cp => cp.Parts, grid =>
             #line default
             #line hidden
             
-            #line 44 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 51 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
           ;
 }
 

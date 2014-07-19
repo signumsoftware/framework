@@ -3,6 +3,7 @@
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
 @using Signum.Web.Mailing
+@using Signum.Entities.DynamicQuery
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
@@ -46,7 +47,7 @@
                     <legend>Replacements</legend>
                     @using (var sc = new Context(nc, "qtb"))
                     {
-                        @Html.QueryTokenBuilder(null, sc, MailingClient.GetQueryTokenBuilderSettings(queryDescription))
+                        @Html.QueryTokenBuilder(null, sc, MailingClient.GetQueryTokenBuilderSettings(queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         <input type="button" disabled="disabled" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-basic" data-prefix="@sc.Prefix" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
                         <input type="button" disabled="disabled" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-if" data-prefix="@sc.Prefix" data-block="if" value="if" />
                         <input type="button" disabled="disabled" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-prefix="@sc.Prefix" data-block="foreach" value="foreach" />

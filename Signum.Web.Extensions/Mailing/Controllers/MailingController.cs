@@ -20,14 +20,14 @@ namespace Signum.Web.Mailing
     public class MailingController : Controller
     {
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int options)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+            var token = QueryUtils.Parse(tokenName, qd, (SubTokensOptions)options);
 
             var combo = FinderController.CreateHtmlHelper(this)
-                .QueryTokenBuilderOptions(token, new Context(null, prefix), MailingClient.GetQueryTokenBuilderSettings(qd));
+                .QueryTokenBuilderOptions(token, new Context(null, prefix), MailingClient.GetQueryTokenBuilderSettings(qd, (SubTokensOptions)options));
 
             return Content(combo.ToHtmlString());
         }

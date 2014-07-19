@@ -49,7 +49,7 @@ namespace Signum.Web.Omnibox
                 }
             }
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
             return html;
         }
@@ -64,7 +64,7 @@ namespace Signum.Web.Omnibox
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(AuthMessage.View.NiceToString()), "dodgerblue");
+            return ColoredGlyphicon("glyphicon-circle-arrow-right", "#BCDEFF");
         }
     }
 }

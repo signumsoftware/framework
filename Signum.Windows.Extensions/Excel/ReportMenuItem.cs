@@ -14,7 +14,7 @@ using Signum.Entities.Excel;
 
 namespace Signum.Windows.Excel
 {
-    public static class ReportMenuItemConstructor
+    public static class ExcelMenuItemConstructor
     {
         public static MenuItem Construct(SearchControl sc, MenuItem plainExcelMenuItem)
         {

@@ -94,214 +94,187 @@ namespace Signum.Web.Extensions.Chart.Views
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 15 "..\..\Chart\Views\ChartResultsTable.cshtml"
- if (queryResult == null)
-{ 
-    
-            
-            #line default
-            #line hidden
-            
-            #line 17 "..\..\Chart\Views\ChartResultsTable.cshtml"
-Write(SearchMessage.NoResultsFound.NiceToString());
-
-            
-            #line default
-            #line hidden
-            
-            #line 17 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                                
-}
-else
-{
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <div");
+WriteLiteral("\r\n<div");
 
 WriteLiteral(" class=\"table-responsive\"");
 
-WriteLiteral(">\r\n        <table");
+WriteLiteral(">\r\n    <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 625), Tuple.Create("\"", 658)
+WriteAttribute("id", Tuple.Create(" id=\"", 524), Tuple.Create("\"", 557)
             
-            #line 22 "..\..\Chart\Views\ChartResultsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 630), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
+            #line 16 "..\..\Chart\Views\ChartResultsTable.cshtml"
+, Tuple.Create(Tuple.Create("", 529), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
             
             #line default
             #line hidden
-, 630), false)
+, 529), false)
 );
 
 WriteLiteral(" class=\"sf-search-results table table-hover  table-condensed\"");
 
-WriteLiteral(">\r\n            <thead>\r\n                <tr>\r\n");
+WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n");
 
             
-            #line 25 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                    
+            #line 19 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                
             
             #line default
             #line hidden
             
-            #line 25 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                     if (!Model.Value.GroupResults && navigate)
-                    {
+            #line 19 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                 if (!Model.Value.GroupResults && navigate)
+                {
 
             
             #line default
             #line hidden
-WriteLiteral("                        <th");
+WriteLiteral("                    <th");
 
 WriteLiteral(" class=\"sf-th-entity\"");
 
 WriteLiteral("></th>\r\n");
 
             
-            #line 28 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                    }
+            #line 22 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                }
 
             
             #line default
             #line hidden
-WriteLiteral("                    ");
+WriteLiteral("                ");
 
             
-            #line 29 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                     if (queryResult.Columns.Any())
+            #line 23 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                 if (queryResult.Columns.Any())
+                {
+                    foreach (ResultColumn col in queryResult.Columns)
                     {
-                        foreach (ResultColumn col in queryResult.Columns)
-                        {
-                            var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                        var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
 
             
             #line default
             #line hidden
-WriteLiteral("                        <th");
+WriteLiteral("                    <th");
 
 WriteLiteral(" data-column-name=\"");
 
             
-            #line 34 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                         Write(col.Column.Name);
+            #line 28 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                                     Write(col.Column.Name);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(">\r\n                            <span");
+WriteLiteral(">\r\n                        <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1331), Tuple.Create("\"", 1486)
-, Tuple.Create(Tuple.Create("", 1339), Tuple.Create("sf-header-sort", 1339), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1178), Tuple.Create("\"", 1333)
+, Tuple.Create(Tuple.Create("", 1186), Tuple.Create("sf-header-sort", 1186), true)
             
-            #line 35 "..\..\Chart\Views\ChartResultsTable.cshtml"
-, Tuple.Create(Tuple.Create(" ", 1353), Tuple.Create<System.Object, System.Int32>(order == null ? "" : ((order.OrderType == OrderType.Ascending ? "asc" : "desc") + (" l" + Model.Value.Orders.IndexOf(order) % 4))
+            #line 29 "..\..\Chart\Views\ChartResultsTable.cshtml"
+, Tuple.Create(Tuple.Create(" ", 1200), Tuple.Create<System.Object, System.Int32>(order == null ? "" : ((order.OrderType == OrderType.Ascending ? "asc" : "desc") + (" l" + Model.Value.Orders.IndexOf(order) % 4))
             
             #line default
             #line hidden
-, 1354), false)
+, 1201), false)
 );
 
-WriteLiteral("></span>\r\n                            <span>");
+WriteLiteral("></span>\r\n                        <span>");
 
             
-            #line 36 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                             Write(col.Column.DisplayName);
+            #line 30 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                         Write(col.Column.DisplayName);
 
             
             #line default
             #line hidden
-WriteLiteral("</span>\r\n                        </th>\r\n");
+WriteLiteral("</span>\r\n                    </th>\r\n");
 
             
-            #line 38 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        }
+            #line 32 "..\..\Chart\Views\ChartResultsTable.cshtml"
                     }
+                }
 
             
             #line default
             #line hidden
-WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody>\r\n");
+WriteLiteral("            </tr>\r\n        </thead>\r\n        <tbody>\r\n");
 
             
-            #line 43 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                
+            #line 37 "..\..\Chart\Views\ChartResultsTable.cshtml"
+            
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                 if (!queryResult.Rows.Any())
-                {
+            #line 37 "..\..\Chart\Views\ChartResultsTable.cshtml"
+             if (!queryResult.Rows.Any())
+            {
 
             
             #line default
             #line hidden
-WriteLiteral("                    <tr>\r\n                        <td");
+WriteLiteral("                <tr>\r\n                    <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 1829), Tuple.Create("\"", 1890)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 1632), Tuple.Create("\"", 1693)
             
-            #line 46 "..\..\Chart\Views\ChartResultsTable.cshtml"
-, Tuple.Create(Tuple.Create("", 1839), Tuple.Create<System.Object, System.Int32>(queryResult.Columns.Count() + (navigate ? 1 : 0)
+            #line 40 "..\..\Chart\Views\ChartResultsTable.cshtml"
+, Tuple.Create(Tuple.Create("", 1642), Tuple.Create<System.Object, System.Int32>(queryResult.Columns.Count() + (navigate ? 1 : 0)
             
             #line default
             #line hidden
-, 1839), false)
+, 1642), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 46 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                                                                     Write(SearchMessage.NoResultsFound.NiceToString());
+            #line 40 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                                                                                 Write(SearchMessage.NoResultsFound.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </td>\r\n                    </tr>\r\n");
+WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
             
-            #line 49 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                }
-                else
+            #line 43 "..\..\Chart\Views\ChartResultsTable.cshtml"
+            }
+            else
+            {
+                foreach (var row in queryResult.Rows)
                 {
-                    foreach (var row in queryResult.Rows)
+                    if (Model.Value.GroupResults)
                     {
-                        if (Model.Value.GroupResults)
-                        {
                             
 
             
             #line default
             #line hidden
-WriteLiteral("                    <tr>\r\n");
+WriteLiteral("                <tr>\r\n");
 
             
-            #line 58 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        
+            #line 52 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                    
             
             #line default
             #line hidden
             
-            #line 58 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                         foreach (var col in queryResult.Columns)
-                        {
-                            CellFormatter ft = formatters[col.Index];
-                            var value = row[col];
+            #line 52 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                     foreach (var col in queryResult.Columns)
+                    {
+                        CellFormatter ft = formatters[col.Index];
+                        var value = row[col];
 
             
             #line default
             #line hidden
-WriteLiteral("                            <td ");
+WriteLiteral("                        <td ");
 
             
-            #line 62 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                           Write(ft.WriteDataAttribute(value));
+            #line 56 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                       Write(ft.WriteDataAttribute(value));
 
             
             #line default
@@ -309,8 +282,8 @@ WriteLiteral("                            <td ");
 WriteLiteral(">");
 
             
-            #line 62 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                                         Write(ft.Formatter(Html, value));
+            #line 56 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                                                     Write(ft.Formatter(Html, value));
 
             
             #line default
@@ -318,33 +291,33 @@ WriteLiteral(">");
 WriteLiteral("</td>\r\n");
 
             
-            #line 63 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        }
+            #line 57 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                    }
 
             
             #line default
             #line hidden
-WriteLiteral("                    </tr>\r\n");
+WriteLiteral("                </tr>\r\n");
 
             
-            #line 65 "..\..\Chart\Views\ChartResultsTable.cshtml"
+            #line 59 "..\..\Chart\Views\ChartResultsTable.cshtml"
                     
-                        }
-                        else
-                        {
-                            
-                            Lite<IdentifiableEntity> entityField = row.Entity;
+                    }
+                    else
+                    {
+
+                        Lite<IdentifiableEntity> entityField = row.Entity;
 
             
             #line default
             #line hidden
-WriteLiteral("                    <tr");
+WriteLiteral("                <tr");
 
 WriteLiteral(" data-entity=\"");
 
             
-            #line 71 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                Write(entityField.Key());
+            #line 65 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                            Write(entityField.Key());
 
             
             #line default
@@ -354,24 +327,63 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n");
 
             
-            #line 72 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        
+            #line 66 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                    
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                         if (entityField != null && navigate)
-                        {
+            #line 66 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                     if (entityField != null && navigate)
+                    {
 
             
             #line default
             #line hidden
-WriteLiteral("                            <td>");
+WriteLiteral("                        <td>");
+
+            
+            #line 68 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                       Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n");
+
+            
+            #line 69 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    ");
+
+            
+            #line 70 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                     foreach (var col in queryResult.Columns)
+                    {
+                        var value = row[col];
+                        var ft = formatters[col.Index];
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        <td ");
 
             
             #line 74 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                           Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
+                       Write(ft.WriteDataAttribute(value));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(">");
+
+            
+            #line 74 "..\..\Chart\Views\ChartResultsTable.cshtml"
+                                                     Write(ft.Formatter(Html, value));
 
             
             #line default
@@ -380,71 +392,25 @@ WriteLiteral("</td>\r\n");
 
             
             #line 75 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        }
+                    }
 
             
             #line default
             #line hidden
-WriteLiteral("                        ");
+WriteLiteral("                </tr>\r\n");
 
             
-            #line 76 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                         foreach (var col in queryResult.Columns)
-                        {
-                            var value = row[col];
-                            var ft = formatters[col.Index];
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                            <td ");
-
-            
-            #line 80 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                           Write(ft.WriteDataAttribute(value));
-
-            
-            #line default
-            #line hidden
-WriteLiteral(">");
-
-            
-            #line 80 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                                         Write(ft.Formatter(Html, value));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</td>\r\n");
-
-            
-            #line 81 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                    </tr>\r\n");
-
-            
-            #line 83 "..\..\Chart\Views\ChartResultsTable.cshtml"
+            #line 77 "..\..\Chart\Views\ChartResultsTable.cshtml"
                     
-                        }
                     }
                 }
+            }
 
             
             #line default
             #line hidden
-WriteLiteral("            </tbody>\r\n        </table>\r\n    </div>\r\n");
+WriteLiteral("        </tbody>\r\n    </table>\r\n</div>\r\n\r\n");
 
-            
-            #line 90 "..\..\Chart\Views\ChartResultsTable.cshtml"
-}
-
-            
-            #line default
-            #line hidden
         }
     }
 }

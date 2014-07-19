@@ -16,6 +16,8 @@ using System.Windows.Controls;
 using Signum.Entities.Chart;
 using Signum.Windows.Basics;
 using Signum.Entities.Reflection;
+using Signum.Windows.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.UserQueries
 {
@@ -37,11 +39,14 @@ namespace Signum.Windows.UserQueries
         {
             UserQueryPermission.ViewUserQuery.Authorize();
 
+            var currentEntity = UserAssetsClient.GetCurrentEntity(s);
+
             var csc = s as CountSearchControl;
             if (csc != null)
             {
-                csc.QueryName = QueryClient.queryNames[uc.Query.Key];
-                UserQueryClient.ToCountSearchControl(uc, csc);
+                csc.QueryName = QueryClient.GetQueryName(uc.Query.Key);
+                using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+                    UserQueryClient.ToCountSearchControl(uc, csc);
                 csc.Search();
                 return;
             }
@@ -49,7 +54,8 @@ namespace Signum.Windows.UserQueries
             var sc = s as SearchControl;
             if (sc != null && sc.ShowHeader == false)
             {
-                sc.QueryName = QueryClient.queryNames[uc.Query.Key];
+                sc.QueryName = QueryClient.GetQueryName(uc.Query.Key);
+                using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
                 UserQueryClient.ToSearchControl(uc, sc);
                 sc.Search();
                 return;
@@ -141,13 +147,13 @@ namespace Signum.Windows.UserQueries
              {
                  Path = qf.Token.Token.FullKey(),
                  Operation = qf.Operation,
-                 Value = qf.Value
+                 Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn)
              })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
                 Path = qc.Token.Token.FullKey(),
-                DisplayName = qc.DisplayName
+                DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
@@ -168,14 +174,14 @@ namespace Signum.Windows.UserQueries
                 {
                     Path = qf.Token.Token.FullKey(),
                     Operation = qf.Operation,
-                    Value = qf.Value
+                    Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn)
                 })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
 
                 Path = qc.Token.Token.FullKey(),
-                DisplayName = qc.DisplayName
+                DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
@@ -197,26 +203,15 @@ namespace Signum.Windows.UserQueries
 
         internal static void Explore(UserQueryDN userQuery, IdentifiableEntity currentEntity)
         {
-            if (userQuery.EntityType != null)
-            {
-                if (currentEntity == null)
-                {
-                    var entity = Navigator.Find(new FindOptions(Server.GetType(userQuery.EntityType.ToString())));
-
-                    if (entity == null)
-                        return;
-
-                    currentEntity = entity.Retrieve();
-                }
-
-                CurrentEntityConverter.SetFilterValues(userQuery.Filters, currentEntity);
-            }
-
             var query = QueryClient.GetQueryName(userQuery.Query.Key);
 
             Navigator.Explore(new ExploreOptions(query)
             {
-                InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, userQuery)
+                InitializeSearchControl = sc =>
+                {
+                    using (userQuery.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+                        UserQueryClient.SetUserQuery(sc, userQuery);
+                }
             });
         }
     }

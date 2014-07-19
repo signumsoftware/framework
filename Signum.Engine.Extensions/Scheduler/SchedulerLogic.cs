@@ -72,6 +72,7 @@ namespace Signum.Engine.Scheduler
                 if (!imp2.Equals(imp2))
                     throw new InvalidOperationException("Implementations of ScheduledTaskDN.Task should be the same as in ScheduledTaskLogDN.Task");
 
+                PermissionAuthLogic.RegisterPermissions(SchedulerPermission.ViewSchedulerPanel);
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
@@ -326,7 +327,7 @@ namespace Signum.Engine.Scheduler
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
-            using (ApplySession(task))
+            using (OnApplySession(task))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {

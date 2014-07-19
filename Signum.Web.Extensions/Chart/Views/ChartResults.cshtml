@@ -9,19 +9,13 @@
 @model TypeContext<ChartRequest>
 @{ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    bool navigate = (bool)ViewData[ViewDataKeys.Navigate];
-    var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
+    var mode = (ChartRequestMode)ViewData["mode"];
 }
-@if (queryResult == null)
-{ 
-    @SearchMessage.NoResultsFound.NiceToString()
-}
-else
+@if(mode == ChartRequestMode.complete)
 {
     using(var tabs = Html.Tabs(Model))
     {
         tabs.Tab("sfChartContainer", ChartMessage.Chart.NiceToString(), @<div class="sf-chart-container" 
-                data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.Prefix)))"
                 data-json="@Html.Json(ChartUtils.DataJson(Model.Value, queryResult)).ToString()">
             </div>);
 
@@ -29,4 +23,13 @@ else
             @{Html.RenderPartial(ChartClient.ChartResultsTableView, Model, ViewData);}
         </text>);
     }
+}
+else if (mode == ChartRequestMode.chart)
+{
+    <div class="sf-chart-container"data-json="@Html.Json(ChartUtils.DataJson(Model.Value, queryResult)).ToString()">
+    </div>
+}
+else if (mode == ChartRequestMode.data)
+{
+    Html.RenderPartial(ChartClient.ChartResultsTableView, Model, ViewData);
 }

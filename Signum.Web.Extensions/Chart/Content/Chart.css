@@ -63,8 +63,19 @@ div.chart-column-parameters > fieldset > legend
     vertical-align: middle;
 }
 
+.sf-chart-token-narrow
+{
+   min-width: 125px;
+}
+
 .sf-chart-token-wide {
     width: 100%;
+}
+
+.sf-chart-token th,
+.sf-chart-token td
+{
+    padding: 4px !important;
 }
 
 .sf-chart-img

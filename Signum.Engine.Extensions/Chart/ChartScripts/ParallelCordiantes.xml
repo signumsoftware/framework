@@ -5,10 +5,10 @@
       <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
       <Parameter2 Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
     </Column>
-    <Column DisplayName="Dimension1" ColumnType="Positionable" IsOptional="true">
+    <Column DisplayName="Dimension1" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
     </Column>
-    <Column DisplayName="Dimension2" ColumnType="Positionable" IsOptional="true">
+    <Column DisplayName="Dimension2" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
     </Column>
     <Column DisplayName="Dimension3" ColumnType="Positionable" IsOptional="true">

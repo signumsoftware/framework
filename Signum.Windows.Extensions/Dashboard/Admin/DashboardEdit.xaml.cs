@@ -43,17 +43,14 @@ namespace Signum.Windows.Dashboard.Admin
             if (type == null)
                 return null;
 
-            throw new NotImplementedException();
-
-            //var lastColumn = 0.To(Panel.NumberOfRows).WithMin(c => Panel.Parts.Count(p => p.Columns == c));
-
-            //return new PanelPartDN
-            //{
-            //    Columns = lastColumn,
-            //    Offset = (Panel.Parts.Where(a => a.Columns == lastColumn).Max(a => (int?)a.Offset + 1) ?? 0),
-            //    Content = (IPartDN)Constructor.Construct(type, this),
-            //    Title = null,
-            //};
+            return new PanelPartDN
+            {
+                Row = Panel.Parts.IsEmpty() ? 0 : Panel.Parts.Max(a => Math.Max(a.Row, 0)) + 1,
+                Columns = 12,
+                StartColumn = 0,
+                Content = (IPartDN)Constructor.Construct(this, type),
+                Title = null,
+            };
         }
 
         IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)

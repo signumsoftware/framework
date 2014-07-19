@@ -143,17 +143,18 @@ namespace Signum.Engine.Processes
             }); 
         }
 
-        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation, object[] operationArgs = null)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
-                Operation = operation
+                Operation = operation,
+                OperationArgs = operationArgs,
             }.CreateLines(entities));
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            TypeConditionLogic.Register<ProcessDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<ProcessDN>(typeCondition,
                 pe => pe.Mixin<UserProcessSessionMixin>().User.RefersTo(UserDN.Current));
 
             TypeConditionLogic.Register<PackageOperationDN>(typeCondition,

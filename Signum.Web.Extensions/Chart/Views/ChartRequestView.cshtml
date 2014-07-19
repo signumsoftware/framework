@@ -21,40 +21,48 @@
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = entityColumn.Type.CleanType();
 }
-<div id="@Model.Compose("sfChartControl")" 
-    class="sf-search-control sf-chart-control" 
-    data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
-    data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
-    data-prefix="@Model.Prefix"
-    data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(Model.Prefix)))"
-    >
-    @Html.HiddenRuntimeInfo(Model)
-    @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
-        (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
-    <div>
-        @{
-            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
-            ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey: false);
-            Html.RenderPartial(Navigator.Manager.FilterBuilderView);
-        }
 
+@using (Html.BeginForm())
+{
+    <h2>
+        <span class="sf-entity-title">@(ViewBag.Title)</span>
+        <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen" href="#">
+            <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+    </h2>
+    @Html.ValidationSummaryAjax()
+    @Html.AntiForgeryToken()
+
+    <div id="@Model.Compose("sfChartControl")" class="sf-chart-control SF-control-container">
+        @Html.HiddenRuntimeInfo(Model)
+        @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
+        (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+        <div>
+            @{
+    ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+    ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription,
+        SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (Model.Value.GroupResults ? SubTokensOptions.CanAggregate : 0));
+    Html.RenderPartial(Navigator.Manager.FilterBuilderView);
+            }
+
+        </div>
+        <div id="@Model.Compose("sfChartBuilderContainer")" class="SF-control-container">
+            @Html.Partial(ChartClient.ChartBuilderView, Model)
+        </div>
+        <script type="text/javascript">
+            require(["@ChartClient.Module"], function (Chart) {
+                var options = @(MvcHtmlString.Create(Model.Value.ToChartRequest(Url, "", ChartRequestMode.complete).ToString()));
+                new Chart.ChartRequest(options);
+            }); 
+        </script>
+        <div class="sf-query-button-bar">
+            <button type="submit" class="sf-query-button sf-chart-draw btn btn-primary" id="@Model.Compose("qbDraw")">@ChartMessage.Chart_Draw.NiceToString()</button>
+            <button class="sf-query-button sf-chart-script-edit btn btn-default"  id="@Model.Compose("qbEdit")">@ChartMessage.EditScript.NiceToString()</button>
+            @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.Prefix, (Lite<UserChartDN>)ViewData["UserChart"]).ToStringButton(Html)
+        </div>
+        <br />
+        <div id="@Model.Compose("divResults")" class="sf-search-results-container">
+            @JavascriptMessage.searchForResults.NiceToString()
+        </div>
     </div>
-    <div id="@Model.Compose("sfChartBuilderContainer")">
-        @Html.Partial(ChartClient.ChartBuilderView, Model.Value)
-    </div>
-    <script type="text/javascript">
-        require(["@ChartClient.Module"], function (Chart) {
-            var findOptions = @(MvcHtmlString.Create(Model.Value.ToJS().ToString()));
-            new Chart.ChartBuilder($('#@Model.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@Model.Prefix' }, findOptions));
-        }); 
-    </script>
-    <div class="sf-query-button-bar">
-        <button type="submit" class="sf-query-button sf-chart-draw btn btn-primary" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.Prefix)))">@ChartMessage.Chart_Draw.NiceToString()</button>
-        <button class="sf-query-button sf-chart-script-edit btn btn-default"  id="@Model.Compose("qbEdit")">@ChartMessage.EditScript.NiceToString()</button>
-        @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.Prefix, (Lite<UserChartDN>)ViewData["UserChart"]).ToStringButton(Html)
-    </div>
-    <br />
-    <div id="@Model.Compose("divResults")" class="sf-search-results-container">
-        @{ Html.RenderPartial(ChartClient.ChartResultsView); }
-    </div>
-</div>
+}

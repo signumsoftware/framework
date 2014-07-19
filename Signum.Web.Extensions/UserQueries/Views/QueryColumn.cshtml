@@ -1,6 +1,6 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.UserQueries
-@using Signum.Web.UserQueries
+@using Signum.Web.UserAssets
 @using Signum.Entities.DynamicQuery
 @using (var e = Html.TypeContext<QueryColumnDN>())
 {
@@ -8,5 +8,5 @@
     @Html.ValueLine(e, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20)
 
     @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token),
-        SearchControlHelper.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription]))
+        SearchControlHelper.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanElement))
 }

@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Entities, Finder, Operations) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Operations) {
     once("SF-UserQuery", function () {
         $(document).on("click", ".sf-userquery", function (e) {
             var _this = this;
@@ -18,17 +18,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         });
     });
 
-    function attachShowCurrentEntity(el) {
-        var showOnEntity = function () {
-            el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
-        };
-
-        showOnEntity();
-
-        el.entityChanged = showOnEntity;
-    }
-    exports.attachShowCurrentEntity = attachShowCurrentEntity;
-
     function deleteUserQuery(options, urlRedirect) {
         options.avoidReturnRedirect = true;
 
@@ -41,13 +30,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         });
     }
     exports.deleteUserQuery = deleteUserQuery;
-
-    function saveUserQuery(os, url) {
-        os.controllerUrl = url;
-
-        Operations.executeDefault(os);
-    }
-    exports.saveUserQuery = saveUserQuery;
 
     function createUserQuery(prefix, url) {
         return Finder.getFor(prefix).then(function (sc) {

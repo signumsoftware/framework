@@ -14,6 +14,8 @@ using Signum.Web.Controllers;
 using Signum.Engine.Dashboard;
 using Signum.Engine.Authorization;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserAssets;
+using System.Web.Mvc.Html;
 
 namespace Signum.Web.Dashboard
 {
@@ -24,34 +26,41 @@ namespace Signum.Web.Dashboard
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Dashboard/Scripts/Dashboard");
         public static JsModule GridRepeater = new JsModule("Extensions/Signum.Web.Extensions/Dashboard/Scripts/GridRepeater");
 
-        public struct PartViews
+        public class PartViews
         {
             public PartViews(string frontEnd, string admin)
             {
-                FrontEnd = frontEnd;
-                Admin = admin;
-                FullScreenLink = false;
+                FrontEndView = frontEnd;
+                AdminView = admin;
+                HasFullScreenLink = false;
             }
 
-            public string FrontEnd;
-            public string Admin;
-            public bool FullScreenLink;
+            public string FrontEndView;
+            public string AdminView;
+            public Func<IPartDN, string> TitleLink;
+            public bool HasFullScreenLink;
         }
 
         public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
-            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) { FullScreenLink = true } },
-            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) { FullScreenLink = true } },
+            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserChartPartDN)p).UserChart) }},
+            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserQueryPartDN)p).UserQuery) }},
             { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };
+
+        static string NavigateRoute(IdentifiableEntity entity)
+        {
+            if (!Navigator.IsNavigable(entity, null))
+                return null;
+
+            return Navigator.NavigateRoute(entity);
+        }
 
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserQueriesClient.Start();
-
                 Navigator.RegisterArea(typeof(DashboardClient));
 
                 UserAssetsClient.Start();
@@ -80,34 +89,71 @@ namespace Signum.Web.Dashboard
                     !DashboardPermission.ViewDashboard.IsAuthorized() ? null:
                      new QuickLinkAction(DashboardMessage.Preview, RouteHelper.New().Action<DashboardController>(cpc => cpc.View(cp, null)))
                 });
-           
+
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
                 {
                     if (!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
 
-                    return DashboardLogic.GetDashboardEntity(entity.EntityType)
-                        .Select(cp => new DashboardQuickLink(cp, entity)).ToArray(); 
+                    return DashboardLogic.GetDashboardsEntity(entity.EntityType)
+                        .Select(cp => new DashboardQuickLink(cp, entity)).ToArray();
                 });
+
+                WidgetsHelper.GetEmbeddedWidget += ctx =>
+                {
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is IdentifiableEntity))
+                        return null;
+
+                    var dashboard = DashboardLogic.GetEmbeddedDashboard(ctx.Entity.GetType());
+                    if (dashboard == null)
+                        return null;
+
+                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (IdentifiableEntity)ctx.Entity };
+                };
+            }
+        }
+
+        class DashboardEmbeddedWidget : IEmbeddedWidget
+        {
+            public DashboardDN Dashboard { get; set; }
+
+            public IdentifiableEntity Entity { get; set; }
+
+            public MvcHtmlString ToHtml(HtmlHelper helper)
+            {
+                return helper.Partial(DashboardClient.ViewPrefix.Formato("DashboardView"), Dashboard,
+                    new ViewDataDictionary { { "currentEntity", Entity } });
+            }
+
+            public EmbeddedWidgetPostion Position
+            {
+                get
+                {
+                    return Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top :
+                        Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom :
+                        new InvalidOperationException("Unexpected {0}".Formato(Dashboard.EmbeddedInEntity.Value)).Throw<EmbeddedWidgetPostion>();
+                }
             }
         }
 
         class DashboardQuickLink : QuickLink
         {
-            Lite<DashboardDN> controlPanel;
+            Lite<DashboardDN> dashboard;
             Lite<IdentifiableEntity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> controlPanel, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
             {
-                this.Text = controlPanel.ToString();
-                this.controlPanel = controlPanel;
+                this.Text = dashboard.ToString();
+                this.dashboard = dashboard;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Glyphicon = "glyphicon-th-large";
+                this.GlyphiconColor = "darkslateblue";
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(controlPanel, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((DashboardController c) => c.View(dashboard, entity))).InnerHtml(TextAndIcon());
             }
         }
     }

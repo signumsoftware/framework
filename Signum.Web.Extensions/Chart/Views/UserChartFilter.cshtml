@@ -4,13 +4,13 @@
 @using Signum.Web.Chart
 @using Signum.Entities.Chart
 @using Signum.Entities.DynamicQuery
-@using Signum.Web.UserQueries
+@using Signum.Web.UserAssets
 @using (var e = Html.TypeContext<QueryFilterDN>())
 {
     var parent = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
     e.FormGroupStyle = FormGroupStyle.None;
     @Html.QueryTokenDNBuilder(e.SubContext(qf => qf.Token), ChartClient.GetQueryTokenBuilderSettings(
-            (QueryDescription)ViewData[ViewDataKeys.QueryDescription], parent.GroupResults, isKey: false))
+            (QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (parent.GroupResults ? SubTokensOptions.CanAggregate :  0)))
     @Html.ValueLine(e, f => f.Operation)
     @Html.ValueLine(e, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20)
 } 

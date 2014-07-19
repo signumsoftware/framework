@@ -11,9 +11,9 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Signum.Entities;
 using Signum.Entities.Mailing;
-using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 using System.Linq.Expressions;
-using Signum.Engine.UserQueries;
+using Signum.Engine.UserAssets;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
@@ -192,7 +192,7 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            ParsedToken TryParseToken(string tokenString, string variable)
+            ParsedToken TryParseToken(string tokenString, string variable, SubTokensOptions options)
             {
                 ParsedToken result = new ParsedToken { String = tokenString, Variable = variable };
 
@@ -215,7 +215,7 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
-                    result.QueryToken = QueryUtils.Parse(tokenString, qd, false);
+                    result.QueryToken = QueryUtils.Parse(tokenString, qd, options);
                 }
                 catch (Exception ex)
                 {
@@ -282,7 +282,7 @@ namespace Signum.Engine.Mailing
                                 AddError(true, "{0} has invalid format".Formato(token));
                             else
                             {
-                                var t = TryParseToken(tok.Groups["token"].Value, dec);
+                                var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
 
                                 stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
                                     isRaw: keyword.Contains("raw"),
@@ -293,7 +293,7 @@ namespace Signum.Engine.Mailing
                             break;
                         case "declare":
                             {
-                                var t = TryParseToken(token, dec);
+                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
 
                                 stack.Peek().Nodes.Add(new DeclareNode(t, this));
 
@@ -314,12 +314,12 @@ namespace Signum.Engine.Mailing
                                 var filter = TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec);
+                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                     any = new AnyNode(t, this);
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value, dec);
+                                    t = TryParseToken(filter.Groups["token"].Value,  dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
                                     any = new AnyNode(t, comparer, value, this);
@@ -344,7 +344,7 @@ namespace Signum.Engine.Mailing
                             }
                         case "foreach":
                             {
-                                var t = TryParseToken(token, dec);
+                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
                                 var fn = new ForeachNode(t);
                                 stack.Peek().Nodes.Add(fn);
                                 PushBlock(fn.Block);
@@ -364,12 +364,12 @@ namespace Signum.Engine.Mailing
                                 var filter = TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec);
+                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                     ifn = new IfNode(t, this);
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value, dec);
+                                    t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
                                     ifn = new IfNode(t, comparer, value, this);
@@ -458,7 +458,7 @@ namespace Signum.Engine.Mailing
                     Console.WriteLine(" " + remainingText);
 
                     QueryToken token;
-                    FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, false, remainingText, allowRemoveToken: false);
+                    FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false);
                     switch (result)
                     {
                         case FixTokenResult.Nothing:
@@ -524,7 +524,7 @@ namespace Signum.Engine.Mailing
                 if (et.From != null && et.From.Token != null)
                 {
                     QueryTokenDN token = et.From.Token;
-                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, " From", allowRemoveToken: false))
+                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
@@ -540,7 +540,7 @@ namespace Signum.Engine.Mailing
                     foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                     {
                         QueryTokenDN token = item.Token;
-                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, " Recipient"))
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient"))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);

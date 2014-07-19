@@ -24,8 +24,10 @@ namespace Signum.Web.Chart
 
             if (result.QueryNameMatch != null)
                 html = html.Concat(" {0}".FormatHtml(result.QueryNameMatch.ToHtml()));
+            else
+                html = html.Concat(this.ColoredSpan(OmniboxMessage.Omnibox_Query.NiceToString() + "...", "lightgray"));
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
             
             return html;
         }
@@ -40,7 +42,7 @@ namespace Signum.Web.Chart
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(ChartMessage.Chart.NiceToString()), "violet");
+            return ColoredGlyphicon("glyphicon-stats", "violet");
         }
     }
 }

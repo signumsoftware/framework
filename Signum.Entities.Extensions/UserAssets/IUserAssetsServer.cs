@@ -5,7 +5,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Xml.Linq;
 using Signum.Entities;
-using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 using Signum.Services;
 
 namespace Signum.Services

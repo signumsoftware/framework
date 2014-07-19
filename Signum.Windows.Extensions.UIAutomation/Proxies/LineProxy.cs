@@ -341,7 +341,7 @@ namespace Signum.Windows.UIAutomation
         AutomationElement autoCompleteControl;
         public AutomationElement AutoCompleteControl
         {
-            get { return autoCompleteControl ?? (autoCompleteControl = Element.Child(a => a.Current.ClassName == "AutoCompleteTextBox")); }
+            get { return autoCompleteControl ?? (autoCompleteControl = Element.Child(a => a.Current.ClassName == "AutocompleteTextBox")); }
         }
 
         public EntityLineProxy(AutomationElement element, PropertyRoute route)

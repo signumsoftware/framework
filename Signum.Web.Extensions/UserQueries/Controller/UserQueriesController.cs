@@ -24,6 +24,7 @@ using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Web.Operations;
+using Signum.Entities.UserAssets;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -31,24 +32,20 @@ namespace Signum.Web.UserQueries
     public class UserQueriesController : Controller
     {
         public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<IdentifiableEntity> currentEntity)
-        {   
-            UserQueryPermission.ViewUserQuery.Authorize(); 
+        {
+            UserQueryPermission.ViewUserQuery.Authorize();
 
-            UserQueryDN uq = Database.Retrieve<UserQueryDN>(lite);
+            UserQueryDN uq =  UserQueryLogic.RetrieveUserQuery(lite);
 
-            if (uq.EntityType != null)
-                CurrentEntityConverter.SetFilterValues(uq.Filters, currentEntity.Retrieve());
-
-            if (findOptions == null)
+            using (uq.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity.Retrieve()))
             {
-                findOptions = uq.ToFindOptions();
-                return Navigator.Find(this, findOptions);
+                if (findOptions == null)
+                    findOptions = uq.ToFindOptions();
+                else
+                    findOptions.ApplyUserQuery(uq);
             }
-            else
-            {
-                findOptions.ApplyUserQuery(uq);
-                return Navigator.Find(this, findOptions);
-            }
+
+            return Navigator.Find(this, findOptions);
         }
 
         public ActionResult Create(QueryRequest request)
@@ -70,27 +67,6 @@ namespace Signum.Web.UserQueries
                 QueryLogic.GetQuery(request.QueryName),
                 FindOptions.DefaultPagination,
                 withoutFilters: false /*Implement Simple Filter Builder*/);
-        }
-
-        [HttpPost]
-        public ActionResult Save()
-        {
-            UserQueryDN userQuery = null;
-            
-            try
-            {
-                userQuery = this.ExtractEntity<UserQueryDN>();
-            }
-            catch(Exception){}
-
-            var context = userQuery.ApplyChanges(this).ValidateGlobal();
-
-            if (context.HasErrors())
-                return context.ToJsonModelState();
-
-            userQuery = context.Value.Execute(UserQueryOperation.Save);
-
-            return this.DefaultExecuteResult(userQuery);
         }
     }
 }

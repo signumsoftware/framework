@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web.Omnibox
 {
@@ -73,7 +74,7 @@ namespace Signum.Web.Omnibox
                             
             } 
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
             return html;
         }
@@ -105,7 +106,7 @@ namespace Signum.Web.Omnibox
         
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(QueryDN).NiceName()), "orange");
+            return ColoredGlyphicon("glyphicon-search", "orange");
         }
     }
 }

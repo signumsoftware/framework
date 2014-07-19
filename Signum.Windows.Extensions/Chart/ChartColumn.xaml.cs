@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Entities.UserQueries;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Chart
 {
@@ -118,7 +119,7 @@ namespace Signum.Windows.Chart
 
             var desc = this.VisualParents().OfType<ChartBuilder>().First().Description;
 
-            return QueryUtils.SubTokens(token, desc, canAggregate: ct.IsGroupKey == false);
+            return QueryUtils.SubTokens(token, desc, SubTokensOptions.CanElement |  (ct.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
         }
 
         private void UpdateGroup()

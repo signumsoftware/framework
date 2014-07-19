@@ -17,7 +17,16 @@ namespace Signum.Services
         DashboardDN GetHomePageDashboard();
 
         [OperationContract, NetDataContract]
-        List<Lite<DashboardDN>> GetDashboardEntity(Type entityType);
+        DashboardDN GetEmbeddedDashboard(Type entityType);
+
+        [OperationContract, NetDataContract]
+        List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType);
+
+        [OperationContract, NetDataContract]
+        List<Lite<DashboardDN>> GetDashboards();
+
+        [OperationContract, NetDataContract]
+        DashboardDN RetrieveDashboard(Lite<DashboardDN> dashboard);
 
         [OperationContract, NetDataContract]
         List<Lite<DashboardDN>> AutocompleteDashboard(string subString, int limit);

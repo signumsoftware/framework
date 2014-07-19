@@ -41,7 +41,7 @@ namespace Signum.Web.Omnibox
 
         public override MvcHtmlString RenderHtml(SpecialOmniboxResult result)
         {
-            var html = "!{0}".FormatHtml(result.Match.ToHtml()).Concat(Icon());
+            var html = Icon().Concat("!{0}".FormatHtml(result.Match.ToHtml()));
 
             return html;
         }
@@ -53,7 +53,7 @@ namespace Signum.Web.Omnibox
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" (Special)", "limegreen");
+            return ColoredGlyphicon("glyphicon-cog", "limegreen");
         }
     }
 

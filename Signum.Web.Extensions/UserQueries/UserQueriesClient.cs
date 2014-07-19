@@ -20,6 +20,9 @@ using Signum.Entities.Authorization;
 using Signum.Web.Operations;
 using Signum.Web.Basic;
 using Signum.Web.Extensions.UserQueries;
+using Signum.Entities.UserAssets;
+using Signum.Web.UserAssets;
+using Signum.Web.Extensions.UserAssets;
 
 namespace Signum.Web.UserQueries
 {
@@ -30,14 +33,14 @@ namespace Signum.Web.UserQueries
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery");
 
-        public static Mapping<QueryTokenDN> QueryTokenMapping = ctx =>
+        public static Func<SubTokensOptions, Mapping<QueryTokenDN>> QueryTokenMapping = opts => ctx =>
         {
-			string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+            string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
             string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
             object queryName = QueryLogic.ToQueryName(queryKey);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: false));
+            return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, opts));
         };
 
         public static void Start()
@@ -62,7 +65,7 @@ namespace Signum.Web.UserQueries
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
-                            .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
                     },
@@ -71,7 +74,7 @@ namespace Signum.Web.UserQueries
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
-                            .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.DisplayName)
                     },
 
@@ -79,7 +82,7 @@ namespace Signum.Web.UserQueries
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
-                            .SetProperty(a=>a.Token, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.OrderType)
                             
                     },
@@ -89,13 +92,11 @@ namespace Signum.Web.UserQueries
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(UserQueryOperation.Save)
-                    {
-                        OnClick = ctx => Module["saveUserQuery"](ctx.Options(), ctx.Url.Action((UserQueriesController uq)=>uq.Save()))
-                    },
                     new EntityOperationSettings(UserQueryOperation.Delete)
                     {
-                        OnClick = ctx => Module["deleteUserQuery"](ctx.Options(), Navigator.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName()))
+                        OnClick = ctx => Module["deleteUserQuery"](ctx.Options(), Navigator.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName())),
+                        Contextual = { IsVisible = a => true },
+                        ContextualFromMany = { IsVisible = a => true },
                     }
                 });
 
@@ -121,11 +122,13 @@ namespace Signum.Web.UserQueries
                 this.userQuery = userQuery;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Glyphicon = "glyphicon-list-alt";
+                this.GlyphiconColor = "dodgerblue";
             }
 
             public override MvcHtmlString Execute()
             {
-                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).SetInnerText(Text);
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).InnerHtml(TextAndIcon());
             }
         }
 
@@ -201,7 +204,7 @@ namespace Signum.Web.UserQueries
                     Token = qf.Token.Token,
                     ColumnName = qf.Token.TokenString,
                     Operation = qf.Operation,
-                    Value = qf.Value
+                    Value = FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn),
                 }));
             }
 
@@ -212,7 +215,7 @@ namespace Signum.Web.UserQueries
             {
                 Token = qc.Token.Token,
                 ColumnName = qc.Token.TokenString,                
-                DisplayName = qc.DisplayName,
+                DisplayName = qc.DisplayName.DefaultText(null),
             }));
 
             findOptions.OrderOptions.Clear();

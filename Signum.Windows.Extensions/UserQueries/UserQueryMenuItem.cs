@@ -138,7 +138,7 @@ namespace Signum.Windows.UserQueries
                     MenuItem b = (MenuItem)e.OriginalSource;
                     Lite<UserQueryDN> userQuery = (Lite<UserQueryDN>)b.Tag;
 
-                    var uq = userQuery.Retrieve();
+                    var uq = Server.Return((IUserQueryServer s) => s.RetrieveUserQuery(userQuery));
 
                     UserQueryClient.ToSearchControl(uq, sc);
 

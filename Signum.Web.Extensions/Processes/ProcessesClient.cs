@@ -96,6 +96,7 @@ namespace Signum.Web.Processes
                                 Entities = ctx.Lites,
                                 OperationSettings = os.Try(s => s.ContextualFromMany),
                                 CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t))),
+                                Url = ctx.Url
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                             os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.OnClick == null || os.ContextualFromMany.OnClick != null)) :

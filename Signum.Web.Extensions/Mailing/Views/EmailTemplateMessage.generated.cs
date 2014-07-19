@@ -138,7 +138,7 @@ WriteLiteral("            ");
 
             
             #line 19 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-       Write(Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
+       Write(Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)));
 
             
             #line default
@@ -163,14 +163,14 @@ WriteLiteral("\"");
 WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
 "n-basic\"");
 
-WriteAttribute("value", Tuple.Create("  value=\"", 1015), Tuple.Create("\"", 1073)
+WriteAttribute("value", Tuple.Create("  value=\"", 1073), Tuple.Create("\"", 1131)
             
             #line 20 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                , Tuple.Create(Tuple.Create("", 1024), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                                , Tuple.Create(Tuple.Create("", 1082), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1024), false)
+, 1082), false)
 );
 
 WriteLiteral(" />\r\n            <input");

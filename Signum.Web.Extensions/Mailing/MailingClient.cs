@@ -24,6 +24,8 @@ using Signum.Entities.UserQueries;
 using Signum.Web.Operations;
 using Signum.Web.UserQueries;
 using System.Text.RegularExpressions;
+using Signum.Entities.UserAssets;
+using Signum.Web.UserAssets;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -42,7 +44,7 @@ namespace Signum.Web.Mailing
             var queryName = QueryLogic.ToQueryName(((Lite<QueryDN>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, canAggregate: false));
+            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
         public static void Start(bool newsletter, bool pop3Config)
@@ -91,7 +93,7 @@ namespace Signum.Web.Mailing
                         MappingDefault = new EntityMapping<EmailTemplateContactDN>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
-                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+                                string tokenStr = UserAssetsHelper.GetTokenString(ctx);
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             }),
                     },
@@ -102,7 +104,7 @@ namespace Signum.Web.Mailing
                         MappingDefault = new EntityMapping<EmailTemplateRecipientDN>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
-                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+                                string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             })
@@ -177,14 +179,12 @@ namespace Signum.Web.Mailing
             }
         }
 
-        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)
         {
-            return new QueryTokenBuilderSettings
+            return new QueryTokenBuilderSettings(qd, options)
             {
-                CanAggregate = false,
                 ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Mailing"),
                 Decorators = MailingDecorators,
-                QueryDescription = qd,
                 RequestExtraJSonData = null,
             };
         }

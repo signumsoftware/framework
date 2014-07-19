@@ -13,6 +13,7 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Entities.Reflection;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -189,7 +190,7 @@ namespace Signum.Engine.Mailing
                 entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
 
                 if (entityToken == null)
-                    entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), canAggregate: false);
+                    entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
                 if (entityToken.Type.IsAssignableFrom(Route.RootType))
                     return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());

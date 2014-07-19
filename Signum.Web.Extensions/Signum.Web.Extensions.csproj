@@ -180,6 +180,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Dashboard\Views\DashboardView.generated.cs">
+      <DependentUpon>DashboardView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
     <Compile Include="Files\Views\FileRepository.generated.cs">
@@ -875,17 +880,23 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="UserQueries\Controller\UserAssetsController.cs" />
-    <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
-    <Compile Include="UserQueries\UserAssetsClient.cs" />
-    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
-    <Compile Include="UserQueries\UserQueriesClient.cs" />
-    <Compile Include="UserQueries\UserQueriesHelper.cs" />
-    <Compile Include="UserQueries\Views\ImportUserAsset.generated.cs">
+    <Compile Include="UserAssets\Controller\UserAssetsController.cs" />
+    <Compile Include="UserAssets\UserAssetsHelper.cs" />
+    <Compile Include="UserAssets\Views\ImportUserAsset.generated.cs">
       <DependentUpon>ImportUserAsset.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="UserAssets\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
+    <Compile Include="UserAssets\UserAssetsClient.cs" />
+    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
+    <Compile Include="UserQueries\UserQueriesClient.cs" />
+    <Compile Include="UserQueries\UserQueriesHelper.cs" />
     <Compile Include="UserQueries\Views\QueryColumn.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1274,6 +1285,10 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PanelPartViewAdmin.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Dashboard\Views\DashboardView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DashboardView.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1349,6 +1364,7 @@
     <Content Include="Translation\Content\Translation.css" />
     <TypeScriptCompile Include="Translation\Scripts\Translation.ts" />
     <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
+    <TypeScriptCompile Include="UserAssets\Scripts\UserAssets.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Dashboard\Views\Web.config" />
@@ -1543,10 +1559,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Sync.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="UserQueries\Views\ImportUserAsset.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Translation\Views\IndexInstance.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>IndexInstance.generated.cs</LastGenOutput>
@@ -1576,6 +1588,15 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="SMS\Views\Web.config" />
+    <Content Include="UserAssets\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="UserAssets\Views\Web.config" />
+    <Content Include="UserAssets\Views\ImportUserAsset.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
+    </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>

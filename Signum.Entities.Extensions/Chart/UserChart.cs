@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Xml.Linq;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart
 {
@@ -96,7 +97,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
         MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
         public MList<ChartColumnDN> Columns
         {
@@ -112,7 +113,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
@@ -120,7 +121,7 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value); }
         }
 
-        [NotNullable]
+        [NotNullable, PreserveOrder]
         MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
@@ -146,15 +147,15 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(this, description, canAggregate: this.GroupResults);
+                    f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (this.GroupResults ? SubTokensOptions.CanAggregate : 0));
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(this, description, canAggregate: c.IsGroupKey == false);
+                    c.ParseData(this, description, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(this, description, canAggregate: this.GroupResults);
+                    o.ParseData(this, description, SubTokensOptions.CanElement | (this.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
         static Func<QueryDN, object> ToQueryName;
@@ -166,26 +167,8 @@ namespace Signum.Entities.Chart
             ToQueryDN = toQueryDN;
         }
 
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            if (Orders != null)
-                Orders.ForEach((o, i) => o.Index = i);
-
-            if (Columns != null)
-                Columns.ForEach((c, i) => c.Index = i);
-
-            if (Filters != null)
-                Filters.ForEach((f, i) => f.Index = i);
-        }
-
         protected override void PostRetrieving()
         {
-            Orders.Sort(a => a.Index);
-            Columns.Sort(a => a.Index);
-            Filters.Sort(a => a.Index);
-
             chartScript.SyncronizeColumns(this, changeParameters: false);
         }
 
@@ -195,13 +178,6 @@ namespace Signum.Entities.Chart
         }
 
         public bool Invalidator { get { return true; } }
-
-        public void SetFilterValues()
-        {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.SetValue();
-        }
 
         public XElement ToXml(IToXmlContext ctx)
         {

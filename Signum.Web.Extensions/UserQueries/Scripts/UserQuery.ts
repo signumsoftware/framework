@@ -25,16 +25,6 @@ once("SF-UserQuery", () => {
     });
 });
 
-export function attachShowCurrentEntity(el: Lines.EntityLine) {
-    var showOnEntity = function () {
-        el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
-    };
-
-    showOnEntity();
-
-    el.entityChanged = showOnEntity;
-}
-
 export function deleteUserQuery(options: Operations.EntityOperationOptions, urlRedirect: string) {
 
     options.avoidReturnRedirect = true;
@@ -46,13 +36,6 @@ export function deleteUserQuery(options: Operations.EntityOperationOptions, urlR
         if (!options.prefix)
             window.location.href = urlRedirect;
     });
-} 
-
-export function saveUserQuery(os: Operations.EntityOperationOptions, url: string) {
-
-    os.controllerUrl = url;
-
-    Operations.executeDefault(os); 
 } 
 
 export function createUserQuery(prefix: string, url: string) {

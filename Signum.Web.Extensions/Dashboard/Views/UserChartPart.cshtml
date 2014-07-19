@@ -17,11 +17,7 @@
 
     using (var crc = new TypeContext<ChartRequest>(request, tc.Prefix))
     {
-        var containerId = crc.Compose("sfChartBuilderContainer");
-
-        ResultTable resultTable = ChartLogic.ExecuteChart(request);
-
-    <div id="@crc.Compose("sfChartControl")" class="sf-search-control sf-chart-control" data-prefix="@crc.Prefix">
+    <div id="@crc.Compose("sfChartControl")" class="sf-chart-control SF-control-container">
         <div style="display: none">
             @Html.HiddenRuntimeInfo(crc)
             @Html.Hidden(crc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
@@ -31,52 +27,19 @@
         ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
             }
             @Html.Partial(Navigator.Manager.FilterBuilderView, crc)
-            <div id="@containerId">
+            <div id="@crc.Compose("sfChartBuilderContainer")" class="SF-control-container">
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>
             <script type="text/javascript">
                 require(["@ChartClient.Module"], function (Chart) {
-                     var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()));
-
-                     var chartBuilder = new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.Prefix' }, findOptions));
-
-                     @if (!tc.Value.ShowData)
-                     {
-                         <text>
-                     chartBuilder.reDraw();
-                        </text>
-                     }
+                    var options = @(MvcHtmlString.Create(uc.ToRequest().ToChartRequest(Url, tc.Prefix, tc.Value.ShowData ?  ChartRequestMode.data: ChartRequestMode.chart).ToString()));
+                    new Chart.ChartRequest(options);
                  });
             </script>
-        </div>
-        <div id="@crc.Compose("sfChartContainer")">
-            <div class="sf-chart-container" style="display:@(tc.Value.ShowData ? "none" : "block")" 
-                    data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.Prefix)))" 
-                    data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(crc.Prefix)))"
-                    data-json="@Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString()">
-            </div>
+        </div>    
+        <div id="@Model.Compose("divResults")" class="sf-search-results-container">
+            @JavascriptMessage.searchForResults.NiceToString()
         </div>
     </div>
-                     if (tc.Value.ShowData)
-                     {
-                         ViewData[ViewDataKeys.Results] = resultTable;
-                         ViewData[ViewDataKeys.Navigate] = false;
-
-                         QuerySettings settings = Navigator.QuerySettings(request.QueryName);
-                         ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => settings.GetFormatter(c.c.Column));
-
-    @Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, tc.Prefix))
-                     }
-                     else
-                     {
-                         MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
-                     }
-    <script type="text/javascript">
-        (function () {
-            "@crc.Prefix".child("sfFullScreen").get().on("mousedown", function (e) {
-                    $("#@containerId").SFControl().fullScreen();
-             });
-         })();
-    </script>
     }
 }

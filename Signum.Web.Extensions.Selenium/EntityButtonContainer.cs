@@ -66,7 +66,7 @@ namespace Signum.Web.Selenium
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
         {
-            container.Selenium.Click(container.ButtonLocator(idButton) + ":not([disabled])");
+            container.Selenium.MouseUp(container.ButtonLocator(idButton) + ":not([disabled])");
         }
 
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)

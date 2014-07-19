@@ -16,18 +16,22 @@ using Signum.Engine.Operations;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using Signum.Entities.Basics;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Dashboard
 {
     public static class DashboardLogic
     {
+        public static ResetLazy<Dictionary<Lite<DashboardDN>, DashboardDN>> Dashboards;
+        public static ResetLazy<Dictionary<Type, List<Lite<DashboardDN>>>> DashboardsByType;
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserQueryLogic.Start(sb, dqm);
-
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
+
+                UserAssetLogLogic.Register<DashboardDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardDN));
 
@@ -115,6 +119,13 @@ namespace Signum.Engine.Dashboard
                 }
 
                 DashboardGraph.Register();
+
+
+                Dashboards = sb.GlobalLazy(() => Database.Query<DashboardDN>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(DashboardDN)));
+
+                DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                    new InvalidateWith(typeof(DashboardDN)));
             }
         }
 
@@ -136,7 +147,6 @@ namespace Signum.Engine.Dashboard
 
                 new Delete(DashboardOperation.Delete)
                 {
-                    Lite = false,
                     Delete = (cp, _) =>
                     {
                         var parts = cp.Parts.Select(a => a.Content).ToList();
@@ -147,8 +157,6 @@ namespace Signum.Engine.Dashboard
 
                 new ConstructFrom<DashboardDN>(DashboardOperation.Clone)
                 {
-                    Lite = true,
-                    AllowsNew = false,
                     Construct = (cp, _) => cp.Clone()
                 }.Register();
             }
@@ -156,23 +164,53 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN GetHomePageDashboard()
         {
-            var cps = Database.Query<DashboardDN>()
-                .Where(a => a.HomePagePriority.HasValue)
-                .OrderByDescending(a => a.HomePagePriority)
-                .Select(a => a.ToLite())
+            return Dashboards.Value.Values
+                .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();
+        }
 
-            if (cps == null)
-                return null;
+        public static DashboardDN GetEmbeddedDashboard(Type entityType)
+        {
+            return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
+                .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
+        }
 
-            return cps.Retrieve(); //I assume this simplifies the cross applys.
+        public static List<Lite<DashboardDN>> GetDashboards()
+        {
+            return Dashboards.Value.Where(d => d.Value.EntityType == null && d.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .Select(d => d.Key).ToList();
+        }
+
+        public static List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType)
+        {
+            return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull()
+                .Where(e => Dashboards.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+        }
+
+        public static List<Lite<DashboardDN>> Autocomplete(string subString, int limit)
+        {
+            return Dashboards.Value.Where(a => a.Value.EntityType == null && a.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .Select(a => a.Key).Autocomplete(subString, limit).ToList();
+        }
+
+        public static DashboardDN RetrieveDashboard(this Lite<DashboardDN> dashboard)
+        {
+            var result = Dashboards.Value.GetOrThrow(dashboard);
+
+            result.AssertAllowed(TypeAllowedBasic.Read, true);
+
+            result.LogUserAsset();
+
+            return result;
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardDN uq) => uq.Owner, typeof(UserDN));
 
-            TypeConditionLogic.Register<DashboardDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
@@ -189,7 +227,7 @@ namespace Signum.Engine.Dashboard
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardDN uq) => uq.Owner, typeof(RoleDN));
 
-            TypeConditionLogic.Register<DashboardDN>(typeCondition,
+            TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
@@ -202,16 +240,6 @@ namespace Signum.Engine.Dashboard
                  uq => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
         }
 
-        public static List<Lite<DashboardDN>> GetDashboardEntity(Type entityType)
-        {
-            return (from er in Database.Query<DashboardDN>()
-                    where er.EntityType == entityType.ToTypeDN().ToLite()
-                    select er.ToLite()).ToList();
-        }
 
-        public static List<Lite<DashboardDN>> Autocomplete(string subString, int limit)
-        {
-            return Database.Query<DashboardDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit);
-        }
     }
 }

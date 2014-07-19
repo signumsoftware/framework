@@ -16,14 +16,14 @@ namespace Signum.Web.Chart
     {
         public override OmniboxResultGenerator<UserChartOmniboxResult> CreateGenerator()
         {
-            return new UserChartOmniboxResultGenerator(ChartLogic.Autocomplete);
+            return new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(UserChartOmniboxResult result)
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(Icon());
+            html = Icon().Concat(html);
 
             return html;
         }
@@ -35,7 +35,7 @@ namespace Signum.Web.Chart
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(typeof(UserChartDN).NiceName()), "darkviolet");
+            return ColoredGlyphicon("glyphicon-stats", "darkviolet");
         }
     }
 }

@@ -12,79 +12,73 @@
     bool navigate = (bool)ViewData[ViewDataKeys.Navigate];
     var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 }
-@if (queryResult == null)
-{ 
-    @SearchMessage.NoResultsFound.NiceToString()
-}
-else
-{
-    <div class="table-responsive">
-        <table id="@Model.Compose("tblResults")" class="sf-search-results table table-hover  table-condensed">
-            <thead>
-                <tr>
-                    @if (!Model.Value.GroupResults && navigate)
+<div class="table-responsive">
+    <table id="@Model.Compose("tblResults")" class="sf-search-results table table-hover  table-condensed">
+        <thead>
+            <tr>
+                @if (!Model.Value.GroupResults && navigate)
+                {
+                    <th class="sf-th-entity"></th>
+                }
+                @if (queryResult.Columns.Any())
+                {
+                    foreach (ResultColumn col in queryResult.Columns)
                     {
-                        <th class="sf-th-entity"></th>
+                        var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                    <th data-column-name="@col.Column.Name">
+                        <span class="sf-header-sort @(order == null ? "" : ((order.OrderType == OrderType.Ascending ? "asc" : "desc") + (" l" + Model.Value.Orders.IndexOf(order) % 4)))"></span>
+                        <span>@col.Column.DisplayName</span>
+                    </th>
                     }
-                    @if (queryResult.Columns.Any())
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (!queryResult.Rows.Any())
+            {
+                <tr>
+                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@SearchMessage.NoResultsFound.NiceToString()
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var row in queryResult.Rows)
+                {
+                    if (Model.Value.GroupResults)
                     {
-                        foreach (ResultColumn col in queryResult.Columns)
-                        {
-                            var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
-                        <th data-column-name="@col.Column.Name">
-                            <span class="sf-header-sort @(order == null ? "" : ((order.OrderType == OrderType.Ascending ? "asc" : "desc") + (" l" + Model.Value.Orders.IndexOf(order) % 4)))"></span>
-                            <span>@col.Column.DisplayName</span>
-                        </th>
-                        }
+                            
+                <tr>
+                    @foreach (var col in queryResult.Columns)
+                    {
+                        CellFormatter ft = formatters[col.Index];
+                        var value = row[col];
+                        <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
                     }
                 </tr>
-            </thead>
-            <tbody>
-                @if (!queryResult.Rows.Any())
-                {
-                    <tr>
-                        <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@SearchMessage.NoResultsFound.NiceToString()
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    foreach (var row in queryResult.Rows)
+                    
+                    }
+                    else
                     {
-                        if (Model.Value.GroupResults)
-                        {
-                            
-                    <tr>
-                        @foreach (var col in queryResult.Columns)
-                        {
-                            CellFormatter ft = formatters[col.Index];
-                            var value = row[col];
-                            <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
-                        }
-                    </tr>
+
+                        Lite<IdentifiableEntity> entityField = row.Entity;
+                <tr data-entity="@entityField.Key()">
+                    @if (entityField != null && navigate)
+                    {
+                        <td>@QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)</td>
+                    }
+                    @foreach (var col in queryResult.Columns)
+                    {
+                        var value = row[col];
+                        var ft = formatters[col.Index];
+                        <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
+                    }
+                </tr>
                     
-                        }
-                        else
-                        {
-                            
-                            Lite<IdentifiableEntity> entityField = row.Entity;
-                    <tr data-entity="@entityField.Key()">
-                        @if (entityField != null && navigate)
-                        {
-                            <td>@QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)</td>
-                        }
-                        @foreach (var col in queryResult.Columns)
-                        {
-                            var value = row[col];
-                            var ft = formatters[col.Index];
-                            <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
-                        }
-                    </tr>
-                    
-                        }
                     }
                 }
-            </tbody>
-        </table>
-    </div>
-}
+            }
+        </tbody>
+    </table>
+</div>
+

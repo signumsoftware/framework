@@ -17,6 +17,8 @@ using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows.Data;
 using Signum.Entities.UserQueries;
+using Signum.Windows.UserAssets;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Chart
 {
@@ -42,7 +44,18 @@ namespace Signum.Windows.Chart
 
         void UserChartMenuItem_Loaded(object sender, RoutedEventArgs e)
         {
-            Initialize(); 
+            var currentEntity = UserAssetsClient.GetCurrentEntity(this);
+
+            if (currentEntity != null)
+                this.Visibility = System.Windows.Visibility.Hidden;
+            else
+                Initialize();
+
+            var autoSet = ChartClient.GetUserChart(ChartWindow);
+
+            if (autoSet != null)
+                using (currentEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
+                    SetCurrent(autoSet);
         }
 
         ChartRequest ChartRequest
@@ -133,10 +146,7 @@ namespace Signum.Windows.Chart
                 .Bind(MenuItem.VisibilityProperty, this, "CurrentUserChart", notNullAndEditable));
             }
 
-            var autoSet = ChartClient.GetUserChart(ChartWindow);
 
-            if (autoSet != null)
-                SetCurrent(autoSet);
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Collapsed);
@@ -151,7 +161,7 @@ namespace Signum.Windows.Chart
                 MenuItem b = (MenuItem)e.OriginalSource;
                 Lite<UserChartDN> userChart = (Lite<UserChartDN>)b.Tag;
 
-                var uc = userChart.Retrieve();
+                var uc = Server.Return((IChartServer s) => s.RetrieveUserChart(userChart));
 
                 SetCurrent(uc);
             }

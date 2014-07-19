@@ -47,7 +47,7 @@ namespace Signum.Web.Omnibox
                 if (helpResult.OmniboxResultType != null)
                 {
                     var icon = Providers[helpResult.OmniboxResultType].Icon();
-                    innerHtml = innerHtml.Concat(icon);
+                    innerHtml = icon.Concat(innerHtml);
                 }
 
                 return new HtmlTag("span").InnerHtml(innerHtml)
@@ -84,12 +84,21 @@ namespace Signum.Web.Omnibox
 
             public abstract MvcHtmlString RenderHtmlUntyped(OmniboxResult result);
             public abstract string GetUrlUntyped(OmniboxResult result);
-            
+
             public MvcHtmlString ColoredSpan(string text, string colorName)
-            { 
+            {
                 return new HtmlTag("span")
                     .InnerHtml(new MvcHtmlString(text))
-                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".Formato(colorName)).ToHtml(); 
+                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".Formato(colorName)).ToHtml();
+            }
+
+            public MvcHtmlString ColoredGlyphicon(string icon, string colorName)
+            {
+                return new HtmlTag("span")
+                    .Class("glyphicon")
+                    .Class(icon)
+                    .Attr("style", "color:{0}".Formato(colorName))
+                    .ToHtml();
             }
         }
 

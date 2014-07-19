@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.DynamicQuery
-@using Signum.Web.UserQueries
+@using Signum.Web.UserAssets
 @using Signum.Web.Mailing
 @using (var tc = Html.TypeContext<EmailTemplateContactDN>())
 {
@@ -24,6 +24,6 @@
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
     {
     @Html.FormGroup(qtTc, null, "Email Owner", Html.QueryTokenDNBuilder(qtTc, MailingClient.GetQueryTokenBuilderSettings(
-        (QueryDescription)ViewData[ViewDataKeys.QueryDescription])))
+        (QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanElement)))
     }
 }

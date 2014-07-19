@@ -13,6 +13,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Signum.Entities.Translation;
 using System.Reflection;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Mailing
 {
@@ -164,11 +165,13 @@ namespace Signum.Entities.Mailing
         {
             if (sender == messages)
             {
-                foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = null;
+                if (args.OldItems != null)
+                    foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
+                        item.Template = null;
 
-                foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = this;
+                if (args.NewItems != null)
+                    foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
+                        item.Template = this;
             }
         }
 
@@ -209,10 +212,10 @@ namespace Signum.Entities.Mailing
         {
             if (Recipients != null)
                 foreach (var r in Recipients.Where(r => r.Token != null))
-                    r.Token.ParseData(this, queryDescription, false);
+                    r.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
 
             if (From != null && From.Token != null)
-                From.Token.ParseData(this, queryDescription, false);
+                From.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
         }
     }
 
