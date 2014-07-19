@@ -7,15 +7,15 @@ namespace Signum.Utilities
 {
     public class ProgressProxy
     {
-        const int numUpdates = 10000; 
+        const int numUpdates = 10000;
 
         private int min;
         private int max;
         private int position;
-        private int step;
+        private int stepMask;
         public event EventHandler<ProgressArgs> Changed;
-        private string currentTask;      
-        
+        private string currentTask;
+
         public ProgressProxy()
         { }
 
@@ -37,7 +37,7 @@ namespace Signum.Utilities
                 if (min <= value && value <= max)
                 {
                     position = value;
-                    if ((step & position) == 0)
+                    if ((stepMask & position) == 0)
                         OnChanged(ProgressAction.Position);
                 }
             }
@@ -71,26 +71,29 @@ namespace Signum.Utilities
             Start(0, max, currentTask);
         }
 
-        public void Start(int min, int max, string currentTask)
+        public void Start(int min, int max, string currentTask, int? position = null)
         {
             if (min < 0 || max < 0)
                 throw new ArgumentException("Min and Max should be greater than 0");
 
-            if(max < min)
+            if (max < min)
                 throw new ArgumentException("Max should be greater or equal than min");
 
-            this.currentTask = currentTask; 
-            this.min = this.position = min;
+            if (position.HasValue && !(min <= position && position <= max))
+                throw new ArgumentException("position should be between min and max");
+
+            this.currentTask = currentTask;
+            this.min = min;
+            this.position = position ?? min;
             this.max = max;
 
-            if (max - min > numUpdates*2)
-                step = RoundToPowerOfTwoMinusOne((max - min) / numUpdates)-1;
+            if (max - min > numUpdates * 2)
+                stepMask = RoundToPowerOfTwoMinusOne((max - min) / numUpdates) - 1;
             else
-                step = 1;
+                stepMask = 1;
 
-            OnChanged(ProgressAction.Interval| ProgressAction.Task);
+            OnChanged(ProgressAction.Interval | ProgressAction.Task);
         }
-
 
         public void NextTask(int position, string currentTask)
         {
@@ -126,7 +129,7 @@ namespace Signum.Utilities
             n |= n >> 2;
             n |= n >> 4;
             n |= n >> 8;
-            n |= n >> 16; 
+            n |= n >> 16;
             return n;
         }
     }
