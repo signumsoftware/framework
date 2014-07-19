@@ -68,7 +68,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -521,6 +521,11 @@ namespace Signum.Web
         {
             get { return null; }
         }
+
+        public override string ToString()
+        {
+            return this.PropertyValidator.PropertyInfo.PropertyName();
+        }
     }
 
     class MixinPropertyMapping<T, M, P> : IPropertyMapping<T, P>
@@ -557,6 +562,11 @@ namespace Signum.Web
         public Type MixinType
         {
             get { return typeof(M); }
+        }
+
+        public override string ToString()
+        {
+            return "[" + typeof(M).TypeName() + "] " + this.PropertyValidator.PropertyInfo.PropertyName();
         }
     }
 
@@ -983,7 +993,7 @@ namespace Signum.Web
                         {
                             var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
 
-                            if (oldValue.Equals(val))
+                            if (oldValue.Value.Equals(val))
                                 newList.Add(new MList<S>.RowIdValue(val, rowId.Value, oldValue.OldIndex));
                             else
                                 newList.Add(new MList<S>.RowIdValue(val));
@@ -1005,9 +1015,12 @@ namespace Signum.Web
                     if (ctx.Value == null)
                         mlistPriv = ctx.Value = new MList<S>();
 
+                    var added = newList.Select(a=>a.Value).Except(mlistPriv.InnerList.Select(a=>a.Value)).ToList();
+                    var removed = mlistPriv.InnerList.Select(a=>a.Value).Except(newList.Select(a=>a.Value)).ToList();
+
                     mlistPriv.InnerList.Clear();
                     mlistPriv.InnerList.AddRange(newList);
-                    mlistPriv.InnerListModified();
+                    mlistPriv.InnerListModified(added, removed);
                 }
 
                 return ctx.Value;

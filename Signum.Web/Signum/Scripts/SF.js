@@ -307,6 +307,33 @@ once("arrayExtensions", function () {
         });
         return cloned;
     };
+
+    Array.prototype.toObject = function (keySelector) {
+        var obj = {};
+
+        this.forEach(function (item) {
+            var key = keySelector(item);
+
+            if (obj[key])
+                throw new Error("Repeated key {0}".format(key));
+
+            obj[key] = item;
+        });
+
+        return obj;
+    };
+
+    Array.prototype.toObjectDistinct = function (keySelector) {
+        var obj = {};
+
+        this.forEach(function (item) {
+            var key = keySelector(item);
+
+            obj[key] = item;
+        });
+
+        return obj;
+    };
 });
 
 once("stringExtensions", function () {

@@ -219,10 +219,11 @@ namespace Signum.Windows
 
         public static void SetFilterTokens(IEnumerable<FilterOption> filters, QueryDescription qd, bool canAggregate = false)
         {
+            var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement |(canAggregate? SubTokensOptions.CanAggregate : 0); 
             foreach (var f in filters)
             {
                 if (f.Token == null && f.Path.HasText())
-                    f.Token = QueryUtils.Parse(f.Path, qd, canAggregate);
+                    f.Token = QueryUtils.Parse(f.Path, qd, options);
 
                 f.RefreshRealValue();
             }
@@ -230,17 +231,19 @@ namespace Signum.Windows
 
         public static void SetOrderTokens(IEnumerable<OrderOption> orders, QueryDescription qd, bool canAggregate = false)
         {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
             foreach (var o in orders)
             {
-                o.Token = QueryUtils.Parse(o.Path, qd, canAggregate);
+                o.Token = QueryUtils.Parse(o.Path, qd, options);
             }
         }
 
         public static void SetColumnTokens(IEnumerable<ColumnOption> columns, QueryDescription qd, bool canAggregate = false)
         {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
             foreach (var c in columns)
             {
-                c.Token = QueryUtils.Parse(c.Path, qd, canAggregate);
+                c.Token = QueryUtils.Parse(c.Path, qd, options);
             }
         }
 

@@ -20,6 +20,8 @@ namespace Signum.Windows
 
     public static class Server
     {
+        public static bool OfflineMode { get; set; }
+
         static Func<IBaseServer> getServer;
         
         static IBaseServer current;
@@ -41,11 +43,17 @@ namespace Signum.Windows
 
         public static void SetSymbolIds<S>() where S :Symbol 
         {
+            if (OfflineMode)
+                return;
+
             Symbol.SetSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSymbolIds(typeof(S))));
         }
 
         public static void SetSemiSymbolIds<S>() where S : SemiSymbol
         {
+            if (OfflineMode)
+                return;
+
             SemiSymbol.SetSemiSymbolIdsAndNames<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIdsAndNames(typeof(S))));
         }
 
@@ -61,7 +69,6 @@ namespace Signum.Windows
 
             if (!Connect())
                 throw new NotConnectedToServerException(ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue.NiceToString());
-
         }
 
         public static bool Connect()
@@ -356,6 +363,7 @@ namespace Signum.Windows
 
            return lite;
         }
+
     }
 
     [Serializable]

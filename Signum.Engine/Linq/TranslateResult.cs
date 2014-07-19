@@ -105,7 +105,8 @@ namespace Signum.Engine.Linq
                     {
                         var results = lookUp[kvp.Key];
 
-                        kvp.Value.AddRange(results);
+                        ((IMListPrivate<V>)kvp.Value).InnerList.AddRange(results);
+                        ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Value).ToList(), null);
                         kvp.Value.PostRetrieving();
                         kvp.Value.Modified = ms;
                     }

@@ -200,7 +200,7 @@ export function requestDataForOpenFinder(findOptions: FindOptions, isExplore: bo
     return requestData;
 }
 
-function serializeOrders(orders: OrderOption[]) {
+export function serializeOrders(orders: OrderOption[]) {
     return orders.map(f=> (f.orderType == OrderType.Ascending ? "" : "-") + f.columnName).join(";");//A Json array like ["Id","-Name"] => Id asc, then Name desc
 }
 
@@ -292,7 +292,7 @@ export class SearchControl {
 
         if (this.options.allowOrder) {
             $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", e => {
-                this.newSortOrder($(e.currentTarget), e.shiftKey);
+                SearchControl.newSortOrder(this.options.orders, $(e.currentTarget), e.shiftKey);
                 this.search();
                 return false;
             });
@@ -417,6 +417,13 @@ export class SearchControl {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("active", select);
 
+        this.updateSelectedButton();
+
+        if (this.selectionChanged)
+            this.selectionChanged(this.selectedItems());
+    }
+
+    updateSelectedButton() {
         var selected = this.element.find(".sf-td-selection:checked").length;
 
         this.prefix.child("btnSelectedSpan").get().text(selected);
@@ -425,9 +432,6 @@ export class SearchControl {
             btn.attr("disabled", "disabled");
         else
             btn.removeAttr("disabled");
-
-        if (this.selectionChanged)
-            this.selectionChanged(this.selectedItems());
     }
 
     ctxMenuInDropdown() {
@@ -561,7 +565,8 @@ export class SearchControl {
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-                this.syncSize();
+            this.syncSize();
+            this.updateSelectedButton();
             });
     }
 
@@ -653,22 +658,26 @@ export class SearchControl {
         return SearchControl.liteKeys(this.selectedItems());
     }
 
-    newSortOrder($th: JQuery, multiCol: boolean) {
+    static newSortOrder(orders : OrderOption[], $th: JQuery, multiCol: boolean) {
 
         SF.ContextMenu.hideContextMenu();
 
         var columnName = $th.data("column-name");
 
-        var cols = this.options.orders.filter(o=> o.columnName == columnName);
+        var cols = orders.filter(o=> o.columnName == columnName);
         var col = cols.length == 0 ? null : cols[0];
 
         var oposite = col == null ? OrderType.Ascending :
             col.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
         var $sort = $th.find("span.sf-header-sort")
         if (!multiCol) {
-            this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+            $th.closest("thead").find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
             $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc");
-            this.options.orders = [{ columnName: columnName, orderType: oposite }];
+
+            while (orders.length > 0) //clear
+                orders.pop();
+
+            orders.push({ columnName: columnName, orderType: oposite });
         }
         else {
             if (col !== null) {
@@ -676,8 +685,8 @@ export class SearchControl {
                 $sort.removeClass("asc desc").addClass(oposite == OrderType.Ascending ? "asc" : "desc");
             }
             else {
-                this.options.orders.push({ columnName: columnName, orderType: oposite });
-                $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
+                orders.push({ columnName: columnName, orderType: oposite });
+                $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc").addClass("l" + (orders.length - 1 % 4));
             }
         }
     }
@@ -889,7 +898,7 @@ export class SearchControl {
     searchOnLoad() {
         var $button = this.options.prefix.child("qbSearch").get();
 
-        SF.onVisible($button, () => {
+        SF.onVisible($button).then(() => {
             if (!this.searchOnLoadFinished) {
                 $button.click();
                 this.searchOnLoadFinished = true;
@@ -906,7 +915,7 @@ export class FilterBuilder {
         public element: JQuery,
         public prefix: string,
         public webQueryName: string,
-        public url: string) {
+        public addFilterUrl: string) {
 
         this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
@@ -986,7 +995,7 @@ export class FilterBuilder {
 
         var self = this;
         SF.ajaxPost({
-            url: this.url,
+            url: this.addFilterUrl,
             data: data,
             async: false,
         }).then((filterHtml) => {
@@ -1052,13 +1061,13 @@ export class FilterBuilder {
 
 export module QueryTokenBuilder {
 
-    export function init(containerId: string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function init(containerId: string, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
         $("#" + containerId).on("change", "select", function () {
-            tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+            tokenChanged($(this), webQueryName, controllerUrl, options, requestExtraJsonData);
         });
     }
 
-    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
 
         var prefix = $selectedCombo.attr("id").before("ddlTokens_");
         if (prefix.endsWith("_"))
@@ -1080,7 +1089,8 @@ export module QueryTokenBuilder {
             webQueryName: webQueryName,
             tokenName: tokenName,
             index: index,
-            prefix: prefix
+            prefix: prefix,
+            options: options
         }, requestExtraJsonData);
 
         SF.ajaxPost({

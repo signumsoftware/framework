@@ -359,7 +359,7 @@ ul.nav-tabs
 .form-vertical .form-control
 {
     display: block;
-    width: initial;
+    /*width: initial;*/
     vertical-align: baseline;
 }
 

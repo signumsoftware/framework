@@ -270,6 +270,8 @@ interface Array<T> {
     groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
+    toObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T[] };
 }
 
 once("arrayExtensions", () => {
@@ -322,6 +324,33 @@ once("arrayExtensions", () => {
             return 0;
         });
         return cloned;
+    };
+
+    Array.prototype.toObject = function (keySelector: (element: any) => any): any {
+        var obj = {}; 
+
+        (<Array<any>>this).forEach(item=> {
+            var key = keySelector(item);
+
+            if (obj[key])
+                throw new Error("Repeated key {0}".format(key)); 
+
+            obj[key] = item;
+        }); 
+
+        return obj;
+    };
+
+    Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any): any {
+        var obj = {};
+
+        (<Array<any>>this).forEach(item=> {
+            var key = keySelector(item);
+
+            obj[key] = item;
+        });
+
+        return obj;
     };
 });
 

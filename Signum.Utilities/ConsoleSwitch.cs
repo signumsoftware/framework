@@ -65,18 +65,34 @@ namespace Signum.Utilities
         retry:
             try
             {
+                var step = Console.WindowHeight - 10;
+
                 Console.WriteLine(welcomeMessage);
-                PrintOptions();
+                for (int i = 0; i < dictionary.Count; i += step)
+                {
+                    PrintOptions(i, step);
 
-                Console.WriteLine(endMessage);
-                string line = Console.ReadLine();
-                
-                if (string.IsNullOrEmpty(line))
-                    return null;
+                    if (i + step < dictionary.Count)
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.White, " +");
+                        Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
+                    }
 
-                Console.WriteLine();
+                    Console.WriteLine(endMessage);
+                    string line = Console.ReadLine();
 
-                return GetValue(line);
+                    if (string.IsNullOrEmpty(line))
+                        return null;
+
+                    if (line.Trim() == "+")
+                        continue;
+
+                    Console.WriteLine();
+
+                    return GetValue(line);
+                }
+
+                return null;             
             }
             catch (Exception e)
             {
@@ -85,10 +101,11 @@ namespace Signum.Utilities
             }
         }
 
-        private void PrintOptions()
+        private void PrintOptions(int skip, int take)
         {
             var keys = dictionary.Keys.ToList();
-            for (int i = 0; i < keys.Count; i++)
+            var max = Math.Min(keys.Count, skip + take);
+            for (int i = skip; i < max; i++)
             {
                 var key = keys[i];
 
@@ -132,7 +149,7 @@ namespace Signum.Utilities
             try
             {
                 Console.WriteLine(welcomeMessage);
-                PrintOptions();
+                PrintOptions(0, this.dictionary.Count);
 
                 Console.WriteLine(endMessage);
                 string line = Console.ReadLine();
@@ -143,7 +160,7 @@ namespace Signum.Utilities
                     return null;
                 }
 
-                Console.WriteLine(); 
+                Console.WriteLine();
 
                 return line.Split(',').SelectMany(GetValuesRange).ToArray();
             }
@@ -191,7 +208,7 @@ namespace Signum.Utilities
         {
             return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString());
         }
-   
+
         public IEnumerator<KeyValuePair<string, WithDescription<V>>> GetEnumerator()
         {
             return dictionary.GetEnumerator();
@@ -199,7 +216,7 @@ namespace Signum.Utilities
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-          return GetEnumerator(); 
+            return GetEnumerator();
         }
     }
 
@@ -212,17 +229,19 @@ namespace Signum.Utilities
         [Description("No option with key {0} found")]
         NoOptionWithKey0Found,
         [Description("Select one of the following options:")]
-        SelectOneOfTheFollowingOptions
+        SelectOneOfTheFollowingOptions,
+        [Description("more...")]
+        More
     }
 
     public class WithDescription<T>
     {
-        public T Value{get; private set;}
+        public T Value { get; private set; }
 
         public string Description { get; private set; }
 
         public WithDescription(T value)
-            :this(value, DefaultDescription(value))
+            : this(value, DefaultDescription(value))
         {
 
         }
@@ -242,6 +261,24 @@ namespace Signum.Utilities
             if (value == null)
                 return "[No Name]";
             return value.ToString();
+        }
+    }
+
+    public static class ConsoleSwitchExtensions
+    {
+        public static T ChooseConsole<T>(this List<T> collection, Func<T, string> getString = null) where T : class
+        {
+            var cs = new ConsoleSwitch<int, T>();
+            for (int i = 0; i < collection.Count; i++)
+            {
+                var item = collection[i]; 
+                if (getString != null)
+                    cs.Add(i, item, getString(item));
+                else
+                    cs.Add(i, item);
+            }
+
+            return cs.Choose();
         }
     }
 }

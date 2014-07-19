@@ -169,15 +169,19 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("div").Class("input-group")))
             {
-                sb.AddLine(helper.TextboxInLine(valueLine));
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+
+                ColorDN color = (ColorDN)valueLine.UntypedValue;
+
+                sb.AddLine(helper.TextBox(valueLine.Prefix, color == null ? "" : color.RGBHex(), valueLine.ValueHtmlProps));
 
                 sb.AddLine(new HtmlTag("span").Class("input-group-addon").InnerHtml(new HtmlTag("i")));
             }
 
             sb.AddLine(new HtmlTag("script").InnerHtml(MvcHtmlString.Create(
 @" $(function(){
-        $('#" + valueLine.Prefix + @"').parent().colorpicker();
-    });")));
+        $('#" + valueLine.Prefix + @"').parent().colorpicker()" + (valueLine.ReadOnly ? ".colorpicker('disable')" : null) + @";
+   });")));
 
             return sb.ToHtml();
         }

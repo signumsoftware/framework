@@ -9,8 +9,17 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                @if(viewMode == ViewMode.Navigate){
+                @if(viewMode == ViewMode.Navigate)
+                {
                 <button type="button" class="close sf-close-button">×</button>
+                }
+                else
+                {
+                    var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
+                    <div style="float:right">
+                        <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")">@JavascriptMessage.ok.NiceToString()</button>
+                        <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>
+                    </div>
                 }
                 <h4>
                     <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
@@ -58,14 +67,6 @@
                     }
                 </div>
             </div>
-            @if (viewMode == ViewMode.View)
-            {
-                var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
-                <div class="modal-footer">
-                    <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")">@JavascriptMessage.ok.NiceToString()</button>
-                    <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>
-                </div>
-            }
         </div>
     </div>
 </div>

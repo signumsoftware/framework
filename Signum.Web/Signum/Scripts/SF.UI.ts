@@ -49,17 +49,23 @@ module SF {
         }
 
         jQuery.fn.SFControlFullfill = function (val : any) {
-            fulllFill<any>(this, val);
+            fullFill<any>(this, val);
         };
 
 
-        function fulllFill<T>(jq: JQuery, control: T){
+        function fullFill<T>(jq: JQuery, control: T){
          
             if (jq.length == 0)
                 throw new Error("impossible to fulfill SFControl from no elements");
 
             if (jq.length > 1)
                 throw new Error("impossible to fulfill SFControl from more than one element");
+
+            if (!jq.hasClass("SF-control-container"))
+                throw Error("this element has not SF-control");
+
+            if (!jq.data("SF-control"))
+                throw Error("SF-control not set yet");
 
             var queue: { (value: T): void }[] = jq.data("SF-queue");
 
@@ -259,40 +265,51 @@ module SF {
         }
     }
 
-    export function onVisible(element: JQuery, callbackVisible: (element: JQuery) => void) {
+    export function onVisible(element: JQuery) : Promise<JQuery> {
 
         if (element.length == 0)
             throw Error("element is empty");
 
         if (element.closest("[id$=_sfEntity]").length) {
-            return; // will be called again? 
+            return Promise.reject("In sfEntity"); // will be called again? 
         }
 
-        var pane = element.closest(".tab-pane"); 
-        if (pane.length) {
-            var id = (<HTMLElement>pane[0]).id; 
+        var modal = element.closest(".modal"); 
 
-            if (pane.hasClass("active") || !id) {
-                callbackVisible(element);
-                return;
-            }
+        var onModalVisible = modal.length == 0 ? Promise.resolve(element) :
+            onEventOnce(modal, "shown.bs.modal"); 
+
+        return onModalVisible.then(() => {
+            var pane = element.closest(".tab-pane");
+            if (!pane.length)
+                return element;
+
+            var id = (<HTMLElement>pane[0]).id;
+
+            if (pane.hasClass("active") || !id)
+                return element;
 
             var tab = pane.parent().parent().find("a[data-toggle=tab][href=#" + id + "]");
 
-            if (!tab.length) {
-                callbackVisible(element);
-                return;
-            }
+            if (!tab.length)
+                return element;
 
-            tab.on("shown.bs.tab", function (e) {
-                if (callbackVisible)
-                    callbackVisible(element);
-                callbackVisible = null;
-            }); 
-        }
-        else {
-            callbackVisible(element);
-        }
+            return <any>onEventOnce(tab, "shown.bs.tab");
+        });
+    }
+
+    export function onEventOnce(element: JQuery, eventName: string): Promise<JQuery> {
+        return new Promise((resolve) => {
+            var onEvent: () => void;
+
+            onEvent = () => {
+                element.off(eventName, onEvent);
+                resolve(element);
+            };
+
+            element.on(eventName, onEvent);
+        });
+
     }
 
     export function onHidden(element: JQuery, callbackHidden: (element: JQuery) => void) {

@@ -4,6 +4,7 @@
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
     string partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
+    var wc = new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix };
 }
 <h3>
     @Html.AntiForgeryToken()
@@ -18,7 +19,7 @@
     <br />
     <small class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</small>
 </h3>
-@Html.RenderWidgetsForEntity(new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix })
+@Html.RenderWidgets(wc)
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     {
@@ -36,6 +37,9 @@
 {
     @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
 }
-<div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix" data-test-ticks="@DateTime.Now.Ticks">
-    @{ Html.RenderPartial(partialViewName, Model);}
-</div>
+@using (Html.RenderEmbeddedWidget(wc))
+{
+    <div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix" data-test-ticks="@DateTime.Now.Ticks">
+        @{ Html.RenderPartial(partialViewName, Model);}
+    </div>
+}

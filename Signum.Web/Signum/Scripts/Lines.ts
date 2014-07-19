@@ -360,6 +360,13 @@ export class EntityBase {
     onAutocompleteSelected(entityValue: Entities.EntityValue) {
         throw new Error("onAutocompleteSelected is abstract");
     }
+
+    getNiceName(typeName: string) : string {
+
+        var t = this.options.types.filter(a=> a.name == typeName);
+
+        return t.length ? t[0].niceName : typeName;
+    }
 }
 
 export interface EntityAutocompleter {
@@ -862,8 +869,10 @@ export class EntityList extends EntityListBase {
 
         list.change(() => this.selection_Changed());
 
-        if (list.height() < this.shownButton.height())
-            list.css("min-height", this.shownButton.height());
+        SF.onVisible(list).then(() => {
+            if (list.height() < this.shownButton.height())
+                list.css("min-height", this.shownButton.height());
+        });
 
         this.selection_Changed();
     }
@@ -945,11 +954,14 @@ export class EntityList extends EntityListBase {
         var select = this.prefix.child(EntityList.key_list).get();
         select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
 
+        var ri = entityValue.runtimeInfo;
+
         $("<option/>")
             .attr("id", itemPrefix.child(Entities.Keys.toStr))
             .attr("value", "")
             .attr('selected', true)
             .text(entityValue.toStr)
+            .attr('title', this.options.isEmbedded ? null : (this.getNiceName(ri.type) + (ri.id ? " " + ri.id : null)))
             .appendTo(select);
     }
 
@@ -1270,7 +1282,7 @@ export class EntityStrip extends EntityList {
     }
 
     _create() {
-        var $txt = this.prefix.child(Entities.Keys.toStr).get().filter(".sf-entity-autocomplete");
+        var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
                 term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));

@@ -79,7 +79,7 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
-        public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count)
+        public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : IdentifiableEntity
         {
             using(ExecutionMode.UserInterface())
@@ -90,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
                 int? id = subString.ToInt();
                 if (id.HasValue)
                 {
-                    Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
+                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
                     if (entity != null)
                         results.Add(entity);
@@ -106,7 +106,38 @@ namespace Signum.Engine.DynamicQuery
 
                 results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
-                    .Select(a => a.ToLite())
+                    .Take(count - results.Count));
+
+                return results;
+            }
+        }
+
+        public static List<Lite<T>> Autocomplete<T>(this IEnumerable<Lite<T>> query, string subString, int count)
+            where T : IdentifiableEntity
+        {
+            using (ExecutionMode.UserInterface())
+            {
+                List<Lite<T>> results = new List<Lite<T>>();
+
+                int? id = subString.ToInt();
+                if (id.HasValue)
+                {
+                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
+
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                results.AddRange(query.Where(a =>  a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
                     .Take(count - results.Count));
 
                 return results;

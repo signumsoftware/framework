@@ -320,6 +320,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.onAutocompleteSelected = function (entityValue) {
             throw new Error("onAutocompleteSelected is abstract");
         };
+
+        EntityBase.prototype.getNiceName = function (typeName) {
+            var t = this.options.types.filter(function (a) {
+                return a.name == typeName;
+            });
+
+            return t.length ? t[0].niceName : typeName;
+        };
         EntityBase.key_entity = "sfEntity";
         return EntityBase;
     })();
@@ -827,8 +835,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return _this.selection_Changed();
             });
 
-            if (list.height() < this.shownButton.height())
-                list.css("min-height", this.shownButton.height());
+            SF.onVisible(list).then(function () {
+                if (list.height() < _this.shownButton.height())
+                    list.css("min-height", _this.shownButton.height());
+            });
 
             this.selection_Changed();
         };
@@ -907,7 +917,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var select = this.prefix.child(EntityList.key_list).get();
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
 
-            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).appendTo(select);
+            var ri = entityValue.runtimeInfo;
+
+            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).attr('title', this.options.isEmbedded ? null : (this.getNiceName(ri.type) + (ri.id ? " " + ri.id : null))).appendTo(select);
         };
 
         EntityList.prototype.remove_click = function () {
@@ -1223,7 +1235,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityStrip.prototype._create = function () {
             var _this = this;
-            var $txt = this.prefix.child(Entities.Keys.toStr).get().filter(".sf-entity-autocomplete");
+            var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
             if ($txt.length) {
                 this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
                     return ({ types: _this.options.types.map(function (t) {

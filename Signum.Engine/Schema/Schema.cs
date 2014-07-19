@@ -129,6 +129,19 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity);
         }
 
+
+        internal void OnSaved(IdentifiableEntity entity)
+        {
+            AssertAllowed(entity.GetType());
+
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnSaved(entity);
+
+            entityEventsGlobal.OnSaving(entity);
+        }
+
         internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
@@ -580,6 +593,8 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity);
+        void OnSaved(IdentifiableEntity entity);
+        
         void OnRetrieved(IdentifiableEntity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
@@ -628,6 +643,7 @@ namespace Signum.Engine.Maps
     {
         public event PreSavingEventHandler<T> PreSaving;
         public event SavingEventHandler<T> Saving;
+        public event SavedEventHandler<T> Saved;
 
         public event RetrievedEventHandler<T> Retrieved;
 
@@ -698,6 +714,13 @@ namespace Signum.Engine.Maps
         {
             if (Saving != null)
                 Saving((T)entity);
+
+        }
+
+        void IEntityEvents.OnSaved(IdentifiableEntity entity)
+        {
+            if (Saved != null)
+                Saved((T)entity,null);
 
         }
 
