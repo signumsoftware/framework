@@ -189,11 +189,18 @@ namespace Signum.Entities
             get { return innerList.Count; }
         }
 
+        void AssertNotSealed()
+        {
+            if (Modified == ModifiedState.Sealed)
+                throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
+        }
+
         public T this[int index]
         {
             get { return innerList[index].Value; }
             set
             {
+                AssertNotSealed();
                 T old = innerList[index].Value;
                 innerList[index] = new RowIdValue(value);
                 SetSelfModified();
@@ -203,6 +210,7 @@ namespace Signum.Entities
 
         public void Add(T item)
         {
+            AssertNotSealed();
             innerList.Add(new RowIdValue(item)); 
             SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
@@ -238,6 +246,7 @@ namespace Signum.Entities
         public void Sort<S>(Func<T, S> element)
             where S : IComparable<S>
         {
+            AssertNotSealed();
             innerList.Sort((a, b) => element(a.Value).CompareTo(element(b.Value)));
             if (WrongPosition())
                 this.SetSelfModified();
@@ -247,6 +256,7 @@ namespace Signum.Entities
         public void SortDescending<S>(Func<T, S> element)
             where S : IComparable<S>
         {
+            AssertNotSealed();
             innerList.Sort((a, b) => element(b.Value).CompareTo(element(a.Value)));
             if (WrongPosition()) 
                 this.SetSelfModified();
@@ -255,6 +265,7 @@ namespace Signum.Entities
 
         public void Sort(Comparison<T> comparison)
         {
+            AssertNotSealed();
             innerList.Sort((a, b) => comparison(a.Value, b.Value));
             if (WrongPosition()) 
                 this.SetSelfModified();
@@ -263,6 +274,7 @@ namespace Signum.Entities
 
         public void Sort(IComparer<T> comparer)
         {
+            AssertNotSealed();
             innerList.Sort((a, b) => comparer.Compare(a.Value, b.Value));
             if (WrongPosition()) 
                 this.SetSelfModified(); 
@@ -319,6 +331,8 @@ namespace Signum.Entities
 
         public void Clear()
         {
+            AssertNotSealed();
+
             if (innerList.Count > 0)
                 SetSelfModified();
 
@@ -348,6 +362,7 @@ namespace Signum.Entities
 
         public void Insert(int index, T item)
         {
+            AssertNotSealed();
             innerList.Insert(index, new RowIdValue(item));
             SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
@@ -355,6 +370,7 @@ namespace Signum.Entities
 
         public bool Remove(T item)
         {
+            AssertNotSealed();
             int index = innerList.IndexOf(new RowIdValue(item));
             if (index == -1)
                 return false;
@@ -394,6 +410,7 @@ namespace Signum.Entities
 
         public void RemoveAt(int index)
         {
+            AssertNotSealed();
             T item = innerList[index].Value;
             innerList.RemoveAt(index);
             SetSelfModified();
@@ -602,6 +619,13 @@ namespace Signum.Entities
             this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }
 
+        void IMListPrivate.ForceRowId(int index, int rowId)
+        {
+            var prev = this.innerList[index];
+
+            this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
+        }
+
         void IMListPrivate.SetOldIndex(int index)
         {
             var prev = this.innerList[index];
@@ -628,6 +652,7 @@ namespace Signum.Entities
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
         void SetRowId(int index, int rowId);
+        void ForceRowId(int index, int rowId);
 
         void InnerListModified(IList newItems, IList oldItems); 
     }

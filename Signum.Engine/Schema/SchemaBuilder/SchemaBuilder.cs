@@ -33,6 +33,7 @@ namespace Signum.Engine.Maps
         {
             schema = new Schema(new SchemaSettings(dbms));
             Include<TypeDN>();
+            Settings.CanOverrideAttributes = MixinDeclarations.CanAddMixins = t => schema.Tables.ContainsKey(t) ? "{0} is already included in the Schema".Formato(t.TypeName()) : null;
         }
 
         protected SchemaBuilder(Schema schema)
