@@ -211,7 +211,7 @@ namespace Signum.Engine.Maps
 
         SqlPreCommand SyncDefaultConstraints(Replacements replacements)
         {
-            var oldConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
+            var dbDefaultConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
                 {
                     using (Administrator.OverrideDatabaseInViews(db))
                     {
@@ -219,20 +219,21 @@ namespace Signum.Engine.Maps
                                 join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
                                 join c in Database.View<SysColumns>() on t.object_id equals c.object_id
                                 join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
+                                where !ctr.is_system_named
                                 select new
                                 {
                                     table = new ObjectName(new SchemaName(db, s.name), t.name),
                                     column = c.name,
                                     constraint = ctr.name,
-                                    definition = ctr.definition
+                                    definition = ctr.definition,
                                 }).ToList();
                     }
                 }).AgGroupToDictionary(a => a.table,
-                                        gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
+                gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
 
             return Synchronizer.SynchronizeScript(
                 DefaultContraints,
-                oldConstraints,
+                dbDefaultConstraints,
                 (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(tn, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
                 (tn, oldDic) => oldDic.Select(kvp => SqlBuilder.AlterTableDropConstraint(tn, kvp.Value.constraintName)).Combine(Spacing.Simple),
                 (tn, newDic, oldDic) =>
