@@ -43,7 +43,7 @@
                 <td>
                    @foreach (var r in item.References.Iterate())
                    {
-                       @Html.ActionLink(r.Value.FullKey + " " + r.Value.Elapsed.NiceToString().Trim(), (ProfilerController pc) => pc.HeavyRoute(r.Value.FullKey))
+                       @Html.ActionLink(r.Value.FullKey + " " + r.Value.ElapsedToString, (ProfilerController pc) => pc.HeavyRoute(r.Value.FullKey))
                        if (!r.IsLast)
                        {
                            <text>|</text> 

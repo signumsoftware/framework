@@ -70,7 +70,7 @@ namespace Signum.Web.Profiler
                 e.BeforeStart,
                 e.Start,
                 e.End,
-                Elapsed = e.Elapsed.NiceToString(),
+                Elapsed = e.ElapsedToString(),
                 e.Role,
                 Color = GetColor(e.Role),
                 e.Depth,
