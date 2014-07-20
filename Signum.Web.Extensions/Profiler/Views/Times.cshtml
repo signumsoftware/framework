@@ -130,7 +130,7 @@
                                     </td>
                                     <td class="leftBorder">
                                         <span class="med" style="width:@((int)(pair.Value.Average * ratio))px"></span>@pair.Value.LastTime
-                                        ms (hace @(new TimeSpan(DateTime.UtcNow.Subtract(pair.Value.LastDate).Ticks).ToShortString()))
+                                        ms (@pair.Value.LastDate.ToAgoString())
                                     </td>
                                 </tr>
                             }
@@ -140,32 +140,28 @@
                                     <td width="40">Max
                                     </td>
                                     <td class="leftBorder">
-                                        <span class="max" style="width:@((int)(pair.Value.MaxTime * ratio))px"></span>@pair.Value.MaxTime
-                                        ms (hace @(new TimeSpan(DateTime.UtcNow.Subtract(pair.Value.MaxDate).Ticks).ToShortString()))
+                                        <span class="max" style="width:@((int)(pair.Value.MaxTime * ratio))px"></span>@pair.Value.MaxTime ms (@pair.Value.MaxDate.ToAgoString())
                                     </td>
                                 </tr>
                                 <tr>
                                     <td width="40">Average
                                     </td>
                                     <td class="leftBorder">
-                                        <span class="med" style="width:@((int)(pair.Value.Average * ratio))px"></span>@pair.Value.Average
-                                        ms
+                                        <span class="med" style="width:@((int)(pair.Value.Average * ratio))px"></span>@pair.Value.Average ms
                                     </td>
                                 </tr>
                                 <tr>
                                     <td width="40">Min
                                     </td>
                                     <td class="leftBorder">
-                                        <span class="min" style="width:@((int)(pair.Value.MinTime * ratio))px"></span>@pair.Value.MinTime
-                                        ms (hace @(new TimeSpan(DateTime.UtcNow.Subtract(pair.Value.MinDate).Ticks).ToShortString()))
+                                        <span class="min" style="width:@((int)(pair.Value.MinTime * ratio))px"></span>@pair.Value.MinTime ms (@pair.Value.MinDate.ToAgoString())
                                     </td>
                                 </tr>
                                 <tr>
                                     <td width="40">Last
                                     </td>
                                     <td class="leftBorder">
-                                        <span class="last" style="width:@((int)(pair.Value.LastTime * ratio))px"></span>@pair.Value.LastTime
-                                        ms (hace @(new TimeSpan(DateTime.UtcNow.Subtract(pair.Value.LastDate).Ticks).ToShortString()))
+                                        <span class="last" style="width:@((int)(pair.Value.LastTime * ratio))px"></span>@pair.Value.LastTime ms (@pair.Value.LastDate.ToAgoString())
                                     </td>
                                 </tr> 
                             }
