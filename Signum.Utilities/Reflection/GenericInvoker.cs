@@ -7,15 +7,15 @@ using System.Reflection;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.ObjectModel;
+using System.Reflection.Emit;
 
 namespace Signum.Utilities.Reflection
 {
     public class GenericInvoker<T>
     {
-        readonly ConcurrentDictionary<object, T> executor = new ConcurrentDictionary<object, T>();
+        readonly ConcurrentDictionary<Type[], T> executor = new ConcurrentDictionary<Type[], T>(TypeArrayEqualityComparer.Instance);
         readonly Expression<T> expression;
         readonly int numParams;
-        readonly Func<Type[], object> getKey;
 
         public GenericInvoker(Expression<T> expression)
         {
@@ -23,22 +23,42 @@ namespace Signum.Utilities.Reflection
             this.numParams = GenericParametersVisitor.GenericParameters(expression);
 
             ParameterExpression tp = Expression.Parameter(typeof(Type[]));
-
-            this.getKey = Expression.Lambda<Func<Type[], object>>(TupleReflection.TupleChainConstructor(0.To(numParams)
-                                                         .Select(i => Expression.ArrayAccess(tp, Expression.Constant(i)))), tp).Compile();
         }
 
         public T GetInvoker(params Type[] types)
         {
-            return executor.GetOrAdd(getKey(types), (object o) =>
-            {
-                if (types.Length != numParams)
-                    throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".Formato(types.Length, numParams));
+            if (types.Length != numParams)
+                throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".Formato(types.Length, numParams));
 
-                return GeneratorVisitor.GetGenerator<T>(expression, types).Compile();
-            });
+                return executor.GetOrAdd(types, (ts) =>
+                     GeneratorVisitor.GetGenerator<T>(expression, ts).Compile());
         }
     }
+
+
+    class TypeArrayEqualityComparer : IEqualityComparer<Type[]>
+    {
+        public static readonly TypeArrayEqualityComparer Instance = new TypeArrayEqualityComparer(); 
+        public bool Equals(Type[] x, Type[] y)
+        {
+            for (int i = 0; i < x.Length; i++)
+            {
+                if (!x[i].Equals(y[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public int GetHashCode(Type[] types)
+        {
+            int result = 0;
+            for (int i = 0; i < types.Length; i++)
+                result ^= types[i].GetHashCode() >> i;
+            return result;
+        }
+    }
+
 
     internal class GenericParametersVisitor : SimpleExpressionVisitor
     {
@@ -105,11 +125,23 @@ namespace Signum.Utilities.Reflection
             var returnType = lambda.Type.GetMethod("Invoke").ReturnType;
 
             Expression body = Convert(this.Visit(lambda.Body), returnType);
+
+            //if (returnType != typeof(void))
+            //    body = Expression.Call(giInside.MakeGenericMethod(returnType),
+            //        Expression.Lambda(body));
+
             if (body != lambda.Body)
             {
                 return Expression.Lambda(lambda.Type, body, lambda.Parameters);
             }
             return lambda;
+        }
+
+        static MethodInfo giInside = ReflectionTools.GetMethodInfo(() => Inside<string>(null)).GetGenericMethodDefinition();
+
+        static T Inside<T>(Func<T> lambda)
+        {
+            return HeavyProfiler.LogNoStackTrace("inside").Using(_ => lambda()); 
         }
 
         private Expression Convert(Expression result, Type type)
