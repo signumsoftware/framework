@@ -269,7 +269,7 @@ namespace Signum.Services
         public void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                () => OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
+                () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
         }
 
         public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
