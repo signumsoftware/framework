@@ -169,7 +169,7 @@ namespace Signum.Web.Profiler
             ProfilerPermission.ViewTimeTracker.Authorize();
 
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
-            return RedirectToAction("Times");
+            return RedirectToAction("TimeTable");
         }
 
 
