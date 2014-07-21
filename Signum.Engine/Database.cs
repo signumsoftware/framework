@@ -478,15 +478,12 @@ namespace Signum.Engine
         }
 
         public static void Delete<T>(this T ident)
-            where T : IdentifiableEntity
+            where T : class, IIdentifiable
         {
             if (ident == null)
                 throw new ArgumentNullException("ident");
 
-            if (ident.GetType() == typeof(T))
-                Delete<T>(ident.Id);
-            else
-                giDeleteId.GetInvoker(ident.GetType())(ident.Id);
+            giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
         static GenericInvoker<Action<int>> giDeleteId = new GenericInvoker<Action<int>>(id => Delete<IdentifiableEntity>(id));
