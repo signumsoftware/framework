@@ -3,12 +3,24 @@
 
 @using (var e = Html.TypeContext<ScheduleRuleWeekDaysDN>())
 {
+    e.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.Monday)
+            @Html.ValueLine(e, f => f.Tuesday)
+            @Html.ValueLine(e, f => f.Wednesday)
+            @Html.ValueLine(e, f => f.Thursday)
+            @Html.ValueLine(e, f => f.Friday)
+        </div>
+        <div class="col-sm-6">
+            @Html.ValueLine(e, f => f.Sunday)
+            @Html.ValueLine(e, f => f.Saturday)
+            @Html.ValueLine(e, f => f.Holiday)
+        </div>
+    </div>
+    
+    e.LabelColumns = new BsColumn(2);
+    @Html.EntityLine(e, f => f.Calendar)
     @Html.ValueLine(e, f => f.StartingOn)
-    @Html.ValueLine(e, f => f.Sunday)
-    @Html.ValueLine(e, f => f.Monday)
-    @Html.ValueLine(e, f => f.Tuesday)
-    @Html.ValueLine(e, f => f.Wednesday)
-    @Html.ValueLine(e, f => f.Thursday)
-    @Html.ValueLine(e, f => f.Friday)
-    @Html.ValueLine(e, f => f.Saturday)
+   
 }

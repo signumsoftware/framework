@@ -20,6 +20,7 @@ using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Engine.Cache;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Scheduler
 {
@@ -39,6 +40,14 @@ namespace Signum.Engine.Scheduler
         public static ScheduledTaskLogDN LastExecution(this ITaskDN e)
         {
             return LastExecutionExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ScheduledTaskDN, IQueryable<ScheduledTaskLogDN>>> ExecutionsSTExpression =
+            ct => Database.Query<ScheduledTaskLogDN>().Where(a => a.ScheduledTask == ct);
+        [ExpressionField("ExecutionsSTExpression")]
+        public static IQueryable<ScheduledTaskLogDN> Executions(this ScheduledTaskDN e)
+        {
+            return ExecutionsSTExpression.Evaluate(e);
         }
 
         public static Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>>();
@@ -79,7 +88,6 @@ namespace Signum.Engine.Scheduler
                 SimpleTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Include<ScheduledTaskLogDN>();
-                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
 
                 dqm.RegisterQuery(typeof(HolidayCalendarDN), () =>
                      from st in Database.Query<HolidayCalendarDN>()
@@ -124,6 +132,7 @@ namespace Signum.Engine.Scheduler
 
                 dqm.RegisterExpression((ITaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
                 dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
+                dqm.RegisterExpression((ScheduledTaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
 
                 new Graph<HolidayCalendarDN>.Execute(HolidayCalendarOperation.Save)
                 {
@@ -146,7 +155,7 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<ScheduledTaskDN>.Delete(ScheduledTaskOperation.Delete)
                 {
-                    Delete = (st, _) => { st.OperationLogs().UnsafeDelete(); st.Delete(); },
+                    Delete = (st, _) => { st.Executions().UnsafeDelete(); var rule = st.Rule; st.Delete(); rule.Delete(); },
                 }.Register();
 
 
@@ -171,13 +180,9 @@ namespace Signum.Engine.Scheduler
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
         {
-            ReloadPlan();
+            Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
         }
 
-        static void Schema_InitializingApplicaton()
-        {
-            ReloadPlan();
-        }
 
         static bool running = false;
         public static bool Running
