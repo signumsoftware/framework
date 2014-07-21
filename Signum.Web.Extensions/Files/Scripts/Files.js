@@ -30,6 +30,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 FileLine.initDragDrop(this.prefix.child("DivNew").get(), function (e) {
                     return _this.fileDropped(e);
                 });
+
+            this.prefix.child("sfFile").get().on("change", function (ev) {
+                return _this.onChanged(ev);
+            });
         };
 
         FileLine.initDragDrop = function ($div, onDropped) {
@@ -142,7 +146,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     this.prefix.child(Entities.Keys.link).tryGet().attr("download", entityValue.toStr);
             } else {
                 this.prefix.child(Entities.Keys.toStr).tryGet().html("");
-                this.prefix.child(Entities.Keys.toStr).tryGet().html("").removeAttr("download").removeAttr("href");
+                this.prefix.child(Entities.Keys.link).tryGet().html("").removeAttr("download").removeAttr("href");
             }
         };
 
@@ -154,7 +158,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix.child("frame").tryGet().remove();
         };
 
-        FileLine.prototype.onChanged = function () {
+        FileLine.prototype.onChanged = function (e) {
             if (this.options.asyncUpload) {
                 this.upload();
             } else {
@@ -172,7 +176,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FileLine.prototype.getLink = function (itemPrefix) {
-            return this.prefix.child(Entities.Keys.link).get().attr("href");
+            return this.prefix.child(Entities.Keys.link).get().attr("href") || null;
         };
 
         FileLine.prototype.getToString = function (itemPrefix) {
