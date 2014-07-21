@@ -13,6 +13,7 @@ using Signum.Entities;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Basic;
 using Signum.Web.Extensions.Translation.Views;
 using Signum.Web.Omnibox;
 using Signum.Web.PortableAreas;
@@ -33,14 +34,11 @@ namespace Signum.Web.Translation
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoClient.Start();
 
                 Translator = translator;
 
                 Navigator.RegisterArea(typeof(TranslationClient));
-                Navigator.AddSettings(new List<EntitySettings>
-                {   
-                    new EntitySettings<CultureInfoDN>{ PartialViewName = t=>ViewPrefix.Formato("CultureInfoView")},
-                });
 
                 if (translatorUser)
                 {

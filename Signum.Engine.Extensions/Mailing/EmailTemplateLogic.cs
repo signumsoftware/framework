@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Translation;
 using Signum.Engine.Translation;
 using System.Text.RegularExpressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -43,6 +44,8 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoLogic.AssertStarted(sb);
+
                 sb.Include<EmailTemplateDN>();       
 
                 EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateDN>()

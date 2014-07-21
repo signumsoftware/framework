@@ -6,6 +6,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -44,6 +46,9 @@ namespace Signum.Engine.Translation
                         e.User,
                         Cultures = e.Cultures.Count,
                     });
+
+
+                PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
 
                 dqm.RegisterExpression((IUserDN e) => e.TranslatorUser(), () => typeof(TranslatorUserDN).NiceName());
 

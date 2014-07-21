@@ -1,5 +1,4 @@
-﻿using Signum.Entities.Translation;
-using Signum.Utilities;
+﻿using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -9,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {

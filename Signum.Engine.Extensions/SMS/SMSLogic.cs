@@ -73,6 +73,8 @@ namespace Signum.Engine.SMS
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoLogic.AssertStarted(sb);
+
                 SMSLogic.getConfiguration = getConfiguration;
 
                 sb.Include<SMSMessageDN>();

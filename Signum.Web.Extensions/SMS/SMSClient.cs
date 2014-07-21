@@ -19,6 +19,7 @@ using Signum.Web.Extensions.SMS.Models;
 using System.Linq.Expressions;
 using Newtonsoft.Json.Linq;
 using Signum.Engine.DynamicQuery;
+using Signum.Web.Basic;
 #endregion
 
 
@@ -33,7 +34,8 @@ namespace Signum.Web.SMS
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-               
+                CultureInfoClient.Start();
+
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {

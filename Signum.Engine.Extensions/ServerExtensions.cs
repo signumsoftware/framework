@@ -335,7 +335,7 @@ namespace Signum.Services
                 () => SMSLogic.RegisteredDataObjectProviders());
         }
 
-        public Entities.Translation.CultureInfoDN GetDefaultCulture()
+        public CultureInfoDN GetDefaultCulture()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.Configuration.DefaultCulture);
