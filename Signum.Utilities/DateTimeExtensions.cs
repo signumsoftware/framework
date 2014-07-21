@@ -330,9 +330,9 @@ namespace Signum.Utilities
             TimeSpan ts = now.Subtract(dateTime);
             string resource = null;
             if (ts.TotalMilliseconds < 0)
-                resource = DateTimeMessage.In.NiceToString();
+                resource = DateTimeMessage.In0.NiceToString();
             else
-                resource = DateTimeMessage.Ago.NiceToString();
+                resource = DateTimeMessage._0Ago.NiceToString();
 
             int months = Math.Abs(ts.Days) / 30;
             if (months > 0)
@@ -541,14 +541,14 @@ namespace Signum.Utilities
         _0Year,
         [Description("{0} Years")]
         _0Years,
-        [Description("{0} ago ")]
-        Ago,
+        [Description("{0} ago")]
+        _0Ago,
         [Description("Last {0}")]
         DateLast,
         [Description("This {0}")]
         DateThis,
         [Description("In {0}")]
-        In,
+        In0,
         Today,
         Tomorrow,
         Yesterday

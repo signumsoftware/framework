@@ -397,6 +397,7 @@ namespace Signum.Engine.Maps
 
             Synchronizing += SchemaSynchronizer.SnapshotIsolation;
             Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSystemDefaultConstraints;
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;

@@ -327,11 +327,11 @@ namespace Signum.Utilities
                         {
                             Query = gr.Key,
                             Count = gr.Count(),
-                            Sum = new TimeSpan(gr.Sum(a => a.Elapsed.Ticks)),
-                            Avg = new TimeSpan((long)gr.Average((a => a.Elapsed.Ticks))),
-                            Min = new TimeSpan(gr.Min((a => a.Elapsed.Ticks))),
-                            Max = new TimeSpan(gr.Max((a => a.Elapsed.Ticks))),
-                            References = gr.Select(a => new SqlProfileReference { FullKey = a.FullIndex(), Elapsed = a.Elapsed }).ToList(),
+                            Sum = TimeSpan.FromMilliseconds(gr.Sum(a => a.ElapsedMilliseconds)),
+                            Avg = TimeSpan.FromMilliseconds((long)gr.Average((a => a.ElapsedMilliseconds))),
+                            Min = TimeSpan.FromMilliseconds(gr.Min((a => a.ElapsedMilliseconds))),
+                            Max = TimeSpan.FromMilliseconds(gr.Max((a => a.ElapsedMilliseconds))),
+                            References = gr.Select(a => new SqlProfileReference { FullKey = a.FullIndex(), ElapsedToString = a.ElapsedToString() }).ToList(),
                         }).OrderByDescending(a => a.Sum);
             return statistics;
         }
@@ -400,6 +400,16 @@ namespace Signum.Utilities
             {
                 return TimeSpan.FromMilliseconds(ElapsedMilliseconds);
             }
+        }
+
+        public string ElapsedToString()
+        {
+            var ms = ElapsedMilliseconds;
+
+            if (ms < 10)
+                return ms.ToString("0.0000") + "ms";
+
+            return TimeSpan.FromMilliseconds(ms).NiceToString();
         }
 
         public double ElapsedMilliseconds
@@ -553,6 +563,6 @@ namespace Signum.Utilities
     public class SqlProfileReference
     {
         public string FullKey;
-        public TimeSpan Elapsed;
+        public string ElapsedToString;
     }
 }
