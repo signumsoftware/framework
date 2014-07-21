@@ -24,6 +24,7 @@ using Signum.Engine.Translation;
 
 namespace Signum.Engine.SMS
 {
+
     public static class SMSLogic
     {
         public static SMSTemplateMessageDN GetCultureMessage(this SMSTemplateDN template, CultureInfo ci)
@@ -54,9 +55,7 @@ namespace Signum.Engine.SMS
             return SMSMessagesUpdateExpression.Evaluate(e);
         }
 
-        static Func<SMSMessageDN, string> SMSSendAndGetTicketAction;
-        static Func<CreateMessageParams, List<string>, List<string>> SMSMultipleSendAction;
-        static Func<SMSMessageDN, SMSMessageState> SMSUpdateStatusAction;
+
 
         static Func<SMSConfigurationDN> getConfiguration;
         public static SMSConfigurationDN Configuration
@@ -64,18 +63,21 @@ namespace Signum.Engine.SMS
             get { return getConfiguration(); }
         }
 
+        public static ISMSProvider Provider { get; set; }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, false, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerGraph, Func<SMSConfigurationDN> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationDN> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
 
                 SMSLogic.getConfiguration = getConfiguration;
+                SMSLogic.Provider = provider;
 
                 sb.Include<SMSMessageDN>();
                 sb.Include<SMSTemplateDN>();
@@ -103,16 +105,12 @@ namespace Signum.Engine.SMS
                         IsActive = t.IsActiveNow(),
                         Source = t.From,
                         t.AssociatedType,
-                        t.State,
                         t.StartDate,
                         t.EndDate,
                     });
 
-                if (registerGraph)
-                {
-                    SMSMessageGraph.Register();
-                    SMSTemplateGraph.Register();
-                }
+                SMSMessageGraph.Register();
+                SMSTemplateGraph.Register();
 
                 Validator.PropertyValidator<SMSTemplateDN>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
                 {
@@ -166,27 +164,7 @@ namespace Signum.Engine.SMS
             }.Register();
         }
 
-        [Serializable]
-        public class CreateMessageParams
-        {
-            public string Message;
-            public string From;
-            public bool Certified;
 
-            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
-            {
-                return new SMSMessageDN
-                {
-                    Message = this.Message,
-                    From = this.From,
-                    State = SMSMessageState.Created,
-                    DestinationNumber = destinationNumber,
-                    SendPackage = packLite,
-                    Referred = referred,
-                    Certified = certified
-                };
-            }
-        }
 
         public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
         {
@@ -414,12 +392,6 @@ namespace Signum.Engine.SMS
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (!SMSMessageGraph.Registered)
-                    throw new InvalidOperationException("SMSMessageGraph must be registered prior to start the processes");
-
-                if (!SMSTemplateGraph.Registered)
-                    throw new InvalidOperationException("SMSTemplateGraph must be registered prior to start the processes");
-
                 sb.Include<SMSSendPackageDN>();
                 sb.Include<SMSUpdatePackageDN>();
                 SMSLogic.AssertStarted(sb);
@@ -483,25 +455,12 @@ namespace Signum.Engine.SMS
 
         #endregion
 
-        public static void RegisterSMSSendAction(Func<SMSMessageDN, string> action)
-        {
-            SMSSendAndGetTicketAction = action;
-        }
-
-        public static void RegisterSMSMultipleSendAction(Func<CreateMessageParams, List<string>, List<string>> action)
-        {
-            SMSMultipleSendAction = action;
-        }
-
-        public static void RegisterSMSUpdateStatusAction(Func<SMSMessageDN, SMSMessageState> action)
-        {
-            SMSUpdateStatusAction = action;
-        }
+      
 
         public static void SendSMS(SMSMessageDN message)
         {
-            if (SMSSendAndGetTicketAction == null)
-                throw new InvalidOperationException("SMSSendAction was not established");
+            if (Provider == null)
+                throw new InvalidOperationException("Provider was not established");
 
             if (!message.DestinationNumber.Contains(','))
             {
@@ -514,7 +473,7 @@ namespace Signum.Engine.SMS
                 SendOneMessage(message);
                 foreach (var number in numbers.Skip(1))
                 {
-                    SendOneMessage(new SMSMessageDN 
+                    SendOneMessage(new SMSMessageDN
                     {
                         DestinationNumber = number,
                         Certified = message.Certified,
@@ -534,7 +493,7 @@ namespace Signum.Engine.SMS
 
         private static void SendOneMessage(SMSMessageDN message)
         {
-            message.MessageID = SMSSendAndGetTicketAction(message);
+            message.MessageID = Provider.SMSSendAndGetTicket(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
             message.Save();
@@ -551,7 +510,7 @@ namespace Signum.Engine.SMS
         public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template, List<string> phones)
         {
             var messages = new List<SMSMessageDN>();
-            var IDs = SMSMultipleSendAction(template, phones);
+            var IDs = Provider.SMSMultipleSendAction(template, phones);
             var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
@@ -566,27 +525,10 @@ namespace Signum.Engine.SMS
 
             return messages;
         }
-
-        public static void UpdateMessageStatus(SMSMessageDN message)
-        {
-            if (SMSUpdateStatusAction == null)
-                throw new InvalidOperationException("SMSUpdateStatusAction was not established");
-
-            UpdateMessageStatus(message, SMSUpdateStatusAction);
-        }
-
-        //Allows concurrent custom updateStatusProviders for one application
-        public static void UpdateMessageStatus(SMSMessageDN message, Func<SMSMessageDN, SMSMessageState> updateAction)
-        {
-            message.State = updateAction(message);
-        }
     }
 
     public class SMSMessageGraph : Graph<SMSMessageDN, SMSMessageState>
     {
-        static bool registered;
-        public static bool Registered { get { return registered; } }
-
         public static void Register()
         {
             GetState = m => m.State;
@@ -645,18 +587,44 @@ namespace Signum.Engine.SMS
                 Execute = (sms, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
-                    if (func != null)
-                        SMSLogic.UpdateMessageStatus(sms, func);
-                    else
-                        SMSLogic.UpdateMessageStatus(sms);
+                    if (func == null)
+                        func = SMSLogic.Provider.SMSUpdateStatusAction;
+
+                    sms.State = func(sms);
 
                     if (sms.UpdatePackage != null)
                         sms.UpdatePackageProcessed = true;
                 }
             }.Register();
-
-            registered = true;
         }
     }
 
+    public interface ISMSProvider
+    {
+        string SMSSendAndGetTicket(SMSMessageDN message);
+        List<string> SMSMultipleSendAction(CreateMessageParams template, List<string> phones);
+        SMSMessageState SMSUpdateStatusAction(SMSMessageDN message);
+    }
+
+    [Serializable]
+    public class CreateMessageParams
+    {
+        public string Message;
+        public string From;
+        public bool Certified;
+
+        public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
+        {
+            return new SMSMessageDN
+            {
+                Message = this.Message,
+                From = this.From,
+                State = SMSMessageState.Created,
+                DestinationNumber = destinationNumber,
+                SendPackage = packLite,
+                Referred = referred,
+                Certified = certified
+            };
+        }
+    }
 }
