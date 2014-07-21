@@ -131,6 +131,19 @@ namespace Signum.Engine.Processes
             return package;
         }
 
+        public static PackageDN CreateLinesQuery<T>(this PackageDN package, IQueryable<T> entities) where T : IdentifiableEntity
+        {
+            package.Save();
+
+            entities.UnsafeInsert(e => new PackageLineDN
+            {
+                Package = package.ToLite(),
+                Target = e,
+            }); 
+
+            return package;
+        }
+
         static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>> giInsertPackageLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>>(
             (package, lites) => InsertPackageLines<Entity>(package, lites));
         static int InsertPackageLines<T>(PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
