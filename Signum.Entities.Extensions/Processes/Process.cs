@@ -88,6 +88,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? plannedDate;
+        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? PlannedDate
         {
             get { return plannedDate; }
@@ -95,6 +96,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? cancelationDate;
+        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? CancelationDate
         {
             get { return cancelationDate; }
@@ -102,6 +104,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? queuedDate;
+        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? QueuedDate
         {
             get { return queuedDate; }
@@ -109,6 +112,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? executionStart;
+        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
@@ -116,6 +120,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? executionEnd;
+        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
