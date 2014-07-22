@@ -276,7 +276,7 @@ module SF {
 
         var modal = element.closest(".modal"); 
 
-        var onModalVisible = modal.length == 0 ? Promise.resolve(element) :
+        var onModalVisible = modal.length == 0 || modal.is(":visible") ? Promise.resolve(element) :
             onEventOnce(modal, "shown.bs.modal"); 
 
         return onModalVisible.then(() => {

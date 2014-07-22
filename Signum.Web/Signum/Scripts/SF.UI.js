@@ -281,7 +281,7 @@ var SF;
 
         var modal = element.closest(".modal");
 
-        var onModalVisible = modal.length == 0 ? Promise.resolve(element) : onEventOnce(modal, "shown.bs.modal");
+        var onModalVisible = modal.length == 0 || modal.is(":visible") ? Promise.resolve(element) : onEventOnce(modal, "shown.bs.modal");
 
         return onModalVisible.then(function () {
             var pane = element.closest(".tab-pane");
