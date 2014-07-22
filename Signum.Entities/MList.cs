@@ -239,16 +239,23 @@ namespace Signum.Entities
 
         public void Sort()
         {
+            var orderMatters = OrderMatters();
+            if (orderMatters)
+                AssertNotSealed();
             innerList.Sort();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            if (orderMatters)
+                this.SetSelfModified();
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void Sort<S>(Func<T, S> element)
             where S : IComparable<S>
         {
-            AssertNotSealed();
+            var orderMatters = OrderMatters();
+            if (orderMatters)
+                AssertNotSealed();
             innerList.Sort((a, b) => element(a.Value).CompareTo(element(b.Value)));
-            if (WrongPosition())
+            if (orderMatters)
                 this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
@@ -256,29 +263,45 @@ namespace Signum.Entities
         public void SortDescending<S>(Func<T, S> element)
             where S : IComparable<S>
         {
-            AssertNotSealed();
+            var orderMatters = OrderMatters();
+            if (orderMatters)
+                AssertNotSealed();
             innerList.Sort((a, b) => element(b.Value).CompareTo(element(a.Value)));
-            if (WrongPosition()) 
+            if (orderMatters) 
                 this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(Comparison<T> comparison)
         {
-            AssertNotSealed();
+            var orderMatters = OrderMatters();
+            if (orderMatters)
+                AssertNotSealed();
             innerList.Sort((a, b) => comparison(a.Value, b.Value));
-            if (WrongPosition()) 
+            if (orderMatters) 
                 this.SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(IComparer<T> comparer)
         {
-            AssertNotSealed();
+            var orderMatters = OrderMatters();
+            if (orderMatters)
+                AssertNotSealed();
             innerList.Sort((a, b) => comparer.Compare(a.Value, b.Value));
-            if (WrongPosition()) 
+            if (orderMatters) 
                 this.SetSelfModified(); 
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+        }
+
+        private bool OrderMatters()
+        {
+            for (int i = 0; i < innerList.Count; i++)
+            {
+                if (innerList[i].OldIndex.HasValue)
+                    return true;
+            }
+            return false;
         }
 
         public bool ResetRange(IEnumerable<T> newItems)
