@@ -44,7 +44,7 @@ namespace Signum.Entities
 
         protected internal virtual void SetSelfModified()
         {
-            modified = ModifiedState.SelfModified;
+            Modified = ModifiedState.SelfModified;
         }
 
         protected internal virtual void PreSaving(ref bool graphModified)
