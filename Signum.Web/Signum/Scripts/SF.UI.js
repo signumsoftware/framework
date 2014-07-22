@@ -317,9 +317,11 @@ var SF;
     }
     SF.onEventOnce = onEventOnce;
 
-    function onHidden(element, callbackHidden) {
-        element.closest(".modal").on("hide.bs.modal", function () {
-            callbackHidden(element);
+    function onHidden(element) {
+        return new Promise(function (resolve) {
+            element.closest(".modal").on("hide.bs.modal", function () {
+                resolve(element);
+            });
         });
     }
     SF.onHidden = onHidden;

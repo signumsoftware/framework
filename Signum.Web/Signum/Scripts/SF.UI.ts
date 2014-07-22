@@ -312,12 +312,14 @@ module SF {
 
     }
 
-    export function onHidden(element: JQuery, callbackHidden: (element: JQuery) => void) {
+    export function onHidden(element: JQuery): Promise<JQuery> {
+        return new Promise((resolve) => {
+            element.closest(".modal")
+                .on("hide.bs.modal", () => {
+                    resolve(element);
+                });
 
-        element.closest(".modal")
-            .on("hide.bs.modal", () => {
-                callbackHidden(element);
-            });
+        });
     }
 }
 

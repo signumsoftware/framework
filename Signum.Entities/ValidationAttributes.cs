@@ -592,7 +592,7 @@ namespace Signum.Entities
                     case DateTimePrecision.Hours: return dtfi.ShortDatePattern + " " + "HH";
                     case DateTimePrecision.Minutes: return "g";
                     case DateTimePrecision.Seconds: return "G";
-                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern.Replace("ss", "ss.fff");
                     default: return "";
                 }
             }
