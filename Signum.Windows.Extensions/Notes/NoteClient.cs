@@ -13,13 +13,16 @@ namespace Signum.Windows.Notes
 {
     public static class NoteClient
     {
-        public static void Start()
+        public static void Start(params Type[] types)
         {
             if(Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (types == null)
+                    throw new ArgumentNullException("types");
+
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
                 {
-                    if (obj is IdentifiableEntity && !(obj is NoteDN || ((IdentifiableEntity)obj).IsNew) && Navigator.IsFindable(typeof(NoteDN)))
+                    if (obj is IdentifiableEntity && types.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew && Navigator.IsFindable(typeof(NoteDN)))
                         return new NotesWidget();
 
                     return null;

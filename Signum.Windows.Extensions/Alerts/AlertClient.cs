@@ -15,6 +15,8 @@ namespace Signum.Windows.Alerts
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (types == null)
+                    throw new ArgumentNullException("types");
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

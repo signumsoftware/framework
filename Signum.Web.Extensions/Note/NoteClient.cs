@@ -21,6 +21,9 @@ namespace Signum.Web.Notes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (types == null)
+                    throw new ArgumentNullException("types");
+
                 Navigator.RegisterArea(typeof(NoteClient));
 
                 Navigator.AddSettings(new List<EntitySettings>
