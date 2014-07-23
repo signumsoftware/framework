@@ -199,6 +199,7 @@
     <Member Name="_0ShouldBeAnAggregate" Description="{0} debe ser un agregado" />
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeSet" Description="{0} debe establecerse" />
+    <Member Name="ChartToken" Description="Grafico" />
     <Member Name="Chart" Description="Gráfico" />
     <Member Name="Chart_ChartSettings" Description="Configuración del gráfico" />
     <Member Name="Chart_Dimension" Description="Dimensión" />
@@ -1042,7 +1043,7 @@
     <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="Rule" Description="Regla" />
     <Member Name="Suspended" Description="Suspendido" />
-    <Member Name="Task" Description="Tarea programada" />
+    <Member Name="Task" Description="Tarea" />
   </Type>
   <Type Name="ScheduledTaskLogDN" Description="Registro de tareas programadas">
     <Member Name="ApplicationName" Description="Nombre de la aplicación" />
