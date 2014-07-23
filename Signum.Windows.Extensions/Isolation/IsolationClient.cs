@@ -17,7 +17,7 @@ namespace Signum.Windows.Isolation
 {
     public class IsolationClient
     {
-        public static Func<Window, Lite<IsolationDN>> SelectIsolationInteractively;
+        public static Func<Window, Func<Lite<IsolationDN>, string>, Lite<IsolationDN>> SelectIsolationInteractively;
 
         public static Func<Lite<IsolationDN>, ImageSource> GetIsolationIcon; 
 
@@ -51,13 +51,16 @@ namespace Signum.Windows.Isolation
 
                 GetIsolationIcon = getIsolationIcon;
 
-                SelectIsolationInteractively = owner =>
+                SelectIsolationInteractively = (owner, isValid) =>
                 {
                     if (isolations == null)
                         isolations = Server.RetrieveAllLite<IsolationDN>();
 
+
+                    var isos = isValid == null ? isolations : isolations.Where(i => isValid(i) == null).ToList();
+
                     Lite<IsolationDN> result;
-                    if (SelectorWindow.ShowDialog(isolations, out result,
+                    if (SelectorWindow.ShowDialog(isos, out result,
                         elementIcon: getIsolationIcon,
                         elementText: iso => getIsolationIcon(iso) == null ? iso.ToString() : null,
                         title: IsolationMessage.SelectAnIsolation.NiceToString(),
@@ -107,12 +110,18 @@ namespace Signum.Windows.Isolation
             tb.Before(new Image { Stretch = Stretch.None, SnapsToDevicePixels = true, Source = GetIsolationIcon(iso) }); 
         }
 
+        public static Dictionary<Type, Func<Lite<IsolationDN>, string>> IsValid = new Dictionary<Type, Func<Lite<IsolationDN>, string>>();
+
+        public static void RegisterIsValid<T>(Func<Lite<IsolationDN>, string> isValid) where T : IdentifiableEntity
+        {
+            IsValid[typeof(T)] = isValid;
+        }
 
         static IDisposable Constructor_PreConstructors(ConstructorContext ctx)
         {
             if (MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)))
             {
-                Lite<IsolationDN> isolation = GetIsolation(ctx.Element);
+                Lite<IsolationDN> isolation = GetIsolation(ctx.Element, IsValid.TryGetC(ctx.Type));
 
                 if (isolation == null)
                 {
@@ -127,21 +136,33 @@ namespace Signum.Windows.Isolation
             return null;
         }
 
-        public static Lite<IsolationDN> GetIsolation(FrameworkElement element)
+        public static Lite<IsolationDN> GetIsolation(FrameworkElement element, Func<Lite<IsolationDN>, string> isValid = null)
         {
             var result = IsolationDN.Current;
             if (result != null)
+            {
+                var error = isValid == null ? null : isValid(result);
+                if (error != null)
+                    throw new ApplicationException(error); 
+                
                 return result;
+            }
 
             var entity = element == null ? null: element.DataContext as IdentifiableEntity;
             if (entity != null)
             {
                 result = entity.TryIsolation();
                 if (result != null)
+                {
+                    var error = isValid == null ? null : isValid(result);
+                    if (error != null)
+                        throw new ApplicationException(error); 
+
                     return result;
+                }
             }
 
-            return SelectIsolationInteractively(element == null ? null : Window.GetWindow(element));
+            return SelectIsolationInteractively(element == null ? null : Window.GetWindow(element), isValid);
         }
     }
 }
