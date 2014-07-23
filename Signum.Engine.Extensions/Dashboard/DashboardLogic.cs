@@ -213,14 +213,7 @@ namespace Signum.Engine.Dashboard
             TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
 
-            TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
-                 cscp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
-
-            TypeConditionLogic.Register<LinkListPartDN>(typeCondition,
-                 llp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(llp)));
-
-            TypeConditionLogic.Register<UserChartPartDN>(typeCondition,
-                 llp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(llp)));
+            RegisterParts(typeCondition);
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -230,16 +223,22 @@ namespace Signum.Engine.Dashboard
             TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-            TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
-                 uq => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
-
-            TypeConditionLogic.Register<LinkListPartDN>(typeCondition,
-                 uq => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
-
-            TypeConditionLogic.Register<UserChartPartDN>(typeCondition,
-                 uq => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uq)));
+            RegisterParts(typeCondition);
         }
 
+        private static void RegisterParts(TypeConditionSymbol typeCondition)
+        {
+            TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
+                 cscp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
 
+            TypeConditionLogic.Register<LinkListPartDN>(typeCondition,
+                 llp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(llp)));
+
+            TypeConditionLogic.Register<UserChartPartDN>(typeCondition,
+                 ucp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(ucp)));
+
+            TypeConditionLogic.Register<UserQueryPartDN>(typeCondition,
+                uqp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(uqp)));
+        }
     }
 }
