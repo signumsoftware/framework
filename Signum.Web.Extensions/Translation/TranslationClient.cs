@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,6 +9,7 @@ using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.Translation;
@@ -94,6 +96,25 @@ namespace Signum.Web.Translation
             }
         }
 
+        public static CultureInfo GetCultureRequest(HttpRequest request)
+        {
+            if (request.UserLanguages == null)
+                return null;
+
+            foreach (string lang in request.UserLanguages)
+            {
+                string cleanLang = lang.Contains('-') ? lang.Split('-')[0] : lang;
+
+                var culture = CultureInfoLogic.ApplicationCultures
+                    .Where(ci => ci.Name.StartsWith(cleanLang))
+                    .FirstOrDefault();
+
+                if (culture != null)
+                    return culture;
+            }
+
+            return null;
+        }
 
         public static SelectListItem ToTranslatedSelectListItem<T>(this Lite<T> lite, Lite<T> selected, Expression<Func<T, string>> toStringField) where T : IdentifiableEntity
         {
