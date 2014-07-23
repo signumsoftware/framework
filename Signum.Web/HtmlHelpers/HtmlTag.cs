@@ -13,6 +13,11 @@ namespace Signum.Web
 {
     public class HtmlTag : IHtmlString
     {
+        public static MvcHtmlString Encode(string text)
+        {
+            return new MvcHtmlString(HttpUtility.HtmlEncode(text));
+        }
+
         TagBuilder tagBuilder;
         public TagBuilder TagBuilder
         {
