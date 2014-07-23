@@ -12,10 +12,12 @@
   <Type Name="ConsoleMessage">
     <Member Name="EnterYourSelection" Description="Introduzca su selección: " />
     <Member Name="EnterYoutSelectionsSeparatedByComma" Description="Introduzca sus selecciones separadas por comas: " />
+    <Member Name="More" Description="más..." />
     <Member Name="NoOptionWithKey0Found" Description="Ninguna opción con clave  {0} encontrada" />
     <Member Name="SelectOneOfTheFollowingOptions" Description="Elige una de las siguientes opciones:" />
   </Type>
   <Type Name="DateTimeMessage">
+    <Member Name="_0Ago" Description="hace {0}" />
     <Member Name="_0Day" Description="{0} Día" />
     <Member Name="_0Days" Description="{0} Días" />
     <Member Name="_0Hour" Description="{0} Hora" />
@@ -28,10 +30,9 @@
     <Member Name="_0Seconds" Description="{0} Segundos" />
     <Member Name="_0Year" Description="{0} Año" />
     <Member Name="_0Years" Description="{0} Años" />
-    <Member Name="Ago" Description="hace {0} " />
     <Member Name="DateLast" Description="{0} pasado" />
     <Member Name="DateThis" Description="Este {0}" />
-    <Member Name="In" Description="En {0}" />
+    <Member Name="In0" Description="en {0}" />
     <Member Name="Today" Description="Hoy" />
     <Member Name="Tomorrow" Description="Mañana" />
     <Member Name="Yesterday" Description="Ayer" />

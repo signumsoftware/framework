@@ -81,7 +81,8 @@
     <Member Name="Yes" Description="sí" />
   </Type>
   <Type Name="EntityMessage">
-    <Member Name="AttemptToModifyLockedEntity0" Description="Se intentó modificar la entidad bloqueada {0}" />
+    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Trate de añadir/quitar {0} en entidad bloqueada {1}" />
+    <Member Name="AttemptToSet0InLockedEntity1" Description="Intento de establecer {0} en entidad bloqueada {1}" />
   </Type>
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionDN" Description="Excepción">
@@ -220,7 +221,6 @@
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
-    <Member Name="Delete" Description="¿Borrar?" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
@@ -269,6 +269,7 @@
     <Member Name="Of" Description=" de " />
     <Member Name="Second" Description="Segundo" />
     <Member Name="Text" Description="texto" />
+    <Member Name="WeekNumber" Description="Número semana" />
     <Member Name="Year" Description="Año" />
   </Type>
   <Type Name="QuickLinkMessage">
@@ -328,7 +329,6 @@
     <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="Symbol" Description="Símbolo">
-    <Member Name="FieldInfo" Description="Información de campo" />
     <Member Name="Key" Description="Clave" />
   </Type>
   <Type Name="SynchronizerMessage">
