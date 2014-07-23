@@ -230,11 +230,20 @@ WriteLiteral("            <td ");
             
             #line default
             #line hidden
-WriteLiteral(">");
+WriteLiteral(" style=\"");
 
             
             #line 54 "..\..\Signum\Views\SearchResults.cshtml"
-                                         Write(ft.Formatter(Html, value));
+                                                 Write(ft.TextAlign == null ? null : "text-align:" + ft.TextAlign);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\">");
+
+            
+            #line 54 "..\..\Signum\Views\SearchResults.cshtml"
+                                                                                                               Write(ft.Formatter(Html, value));
 
             
             #line default
@@ -269,14 +278,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <tr>\r\n        <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2369), Tuple.Create("\"", 2392)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2439), Tuple.Create("\"", 2462)
             
             #line 62 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 2379), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 2449), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 2379), false)
+, 2449), false)
 );
 
 WriteLiteral(">");
