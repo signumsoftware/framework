@@ -48,9 +48,12 @@ namespace Signum.Web.Chart
 
         public ViewResult FullScreen(string prefix)
         {
-            var request = this.ExtractChartRequestCtx(null).Value;
+            var ctx = this.ExtractChartRequestCtx(null);
 
-            return OpenChartRequest(request, null);
+            if (ctx.HasErrors())
+                throw new InvalidOperationException(ctx.Errors.SelectMany(a => a.Value).ToString("\r\n"));
+
+            return OpenChartRequest(ctx.Value, null);
         }
 
 
