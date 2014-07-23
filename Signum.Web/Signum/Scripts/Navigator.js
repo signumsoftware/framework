@@ -345,8 +345,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (options.saveProtected != null)
             obj["saveProtected"] = options.saveProtected;
 
-        if (options.showOperations != true)
-            obj["showOperations"] = false;
+        if (options.showOperations != null)
+            obj["showOperations"] = options.showOperations;
 
         if (!SF.isEmpty(options.partialViewName))
             obj["partialViewName"] = options.partialViewName;
