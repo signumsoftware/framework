@@ -12,7 +12,7 @@ using Signum.Engine.UserQueries;
 
 namespace Signum.Web.UserQueries
 {
-    public class UserQueriesOmniboxProvider : OmniboxClient.OmniboxProvider<UserQueryOmniboxResult>
+    public class UserQueryOmniboxProvider : OmniboxClient.OmniboxProvider<UserQueryOmniboxResult>
     {
         public override OmniboxResultGenerator<UserQueryOmniboxResult> CreateGenerator()
         {
