@@ -156,11 +156,15 @@ WriteLiteral(">\r\n");
             
             #line default
             #line hidden
-WriteLiteral("            <td>");
+WriteLiteral("            <td");
+
+WriteLiteral(" style=\"text-align:center\"");
+
+WriteLiteral(">");
 
             
             #line 37 "..\..\Signum\Views\SearchResults.cshtml"
-           Write(Html.CheckBox(
+                                     Write(Html.CheckBox(
                     Model.Compose("rowSelection", row.Index.ToString()),
                         new
                         {
@@ -278,14 +282,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <tr>\r\n        <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2439), Tuple.Create("\"", 2462)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2465), Tuple.Create("\"", 2488)
             
             #line 62 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 2449), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 2475), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 2449), false)
+, 2475), false)
 );
 
 WriteLiteral(">");
