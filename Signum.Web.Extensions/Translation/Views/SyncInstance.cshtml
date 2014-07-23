@@ -80,9 +80,17 @@ else
                     @if (mc.Key.Equals(defaultCulture))
                     {
                         string originalName = defaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
-                        <textarea name="@originalName" style="display:none" >@route.Value.Single(kvp => kvp.Key.Equals(defaultCulture)).Value.Original</textarea>
+                        <textarea name="@originalName" style="display:none" >@mc.Value.Original</textarea>
                     }
-                    <span>@mc.Value.Original</span>
+
+                    @if (mc.Value.OldOriginal != null)
+                    {
+                        <span>@TranslationClient.Diff(mc.Value)</span>
+                    }
+                    else
+                    {
+                        <span>@mc.Value.Original</span>
+                    }
                 </td>
             </tr>
                 }
@@ -90,15 +98,17 @@ else
                 <td class="leftCell">@culture.Name</td>
                 <td class="monospaceCell">
                     @{  
-                var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
-
+                var translations = route.Value.Values.Select(a => a.OldTranslation).NotNull().Concat(route.Value.Values.Select(a => a.AutomaticTranslation));
 
                 string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
                 if (translations.Count() == 1)
                 {       
-                    <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
-                    <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
-                    <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                        <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
+                        <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
+                    if (TranslationClient.Translator is ITranslatorWithFeedback)
+                    {
+                        <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                    }
                 }
                 else
                 {

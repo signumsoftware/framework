@@ -416,25 +416,34 @@ namespace Signum.Engine.Translation
 
             var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a => a.Key.Instance).Select(gr =>
             {
-                var routeConflicts = (from kvp in gr
-                                      let t = target.TryGetC(kvp.Key)
-                                      where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
-                                      select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
+                Dictionary<LocalizedInstanceKey, string> routeConflicts =
+                    (from kvp in gr
+                     let t = target.TryGetC(kvp.Key)
+                     where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
+                     select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
 
                 if (routeConflicts.IsEmpty())
                     return null;
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.TranslatedText)
-                              where str.HasItems()
+                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              where str.HasText()
+                              let old = c.Equals(masterCulture) ? target.TryGetC(rc.Key) : null
                               select new
                               {
                                   rc.Key.Route,
                                   rc.Key.RowId,
                                   Culture = c,
-                                  Conflict = new PropertyRouteConflict { Original = str, AutomaticTranslation = null }
-                              }).AgGroupToDictionary(a =>Tuple.Create(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
+                                  Conflict = new PropertyRouteConflict
+                                  {
+                                      OldOriginal = old.Try(o => o.OriginalText),
+                                      OldTranslation = old.Try(o => o.TranslatedText),
+
+                                      Original = str,
+                                      AutomaticTranslation = null
+                                  }
+                              }).AgGroupToDictionary(a => Tuple.Create(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
 
                 return new InstanceChanges
                 {
@@ -442,7 +451,7 @@ namespace Signum.Engine.Translation
                     RouteConflicts = result
                 };
 
-            }).NotNull().ToList();
+            }).NotNull().OrderByDescending(ic => ic.RouteConflicts.Values.Any(dic => dic.Values.Any(rc => rc.OldOriginal != null))).ToList();
             return instances;
         }
 
@@ -539,6 +548,9 @@ namespace Signum.Engine.Translation
 
     public class PropertyRouteConflict
     {
+        public string OldOriginal;
+        public string OldTranslation;
+
         public string Original;
         public string AutomaticTranslation;
 
