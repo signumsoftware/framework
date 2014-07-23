@@ -659,7 +659,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
         static Color GetColor(Type type, Func<Type, bool> cacheHint)
         {
-            if (type.IsEnumEntity())
+            if (type.IsEnumEntityOrSymbol())
                 return Color.Red;
 
             switch (CacheLogic.GetCacheType(type))

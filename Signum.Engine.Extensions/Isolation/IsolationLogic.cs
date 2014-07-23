@@ -102,7 +102,7 @@ namespace Signum.Engine.Isolation
         {
             var result = EnumerableExtensions.JoinStrict(
                 strategies.Keys,
-                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntity() && !typeof(Symbol).IsAssignableFrom(a) && !typeof(SemiSymbol).IsAssignableFrom(a)),
+                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntityOrSymbol() && !typeof(SemiSymbol).IsAssignableFrom(a)),
                 a => a,
                 a => a,
                 (a, b) => 0);
