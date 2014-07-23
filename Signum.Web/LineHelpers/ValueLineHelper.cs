@@ -16,8 +16,6 @@ namespace Signum.Web
 {
     public static class ValueLineHelper
     {
-        public static string StaticValue = "sfStaticValue";
-
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
@@ -134,9 +132,9 @@ namespace Signum.Web
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
 
                 if (valueLine.UnitText.HasText())
-                    return new HtmlTag("p").Id(valueLine.Compose(StaticValue)).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
+                    return new HtmlTag("p").Id(valueLine.Prefix).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
                 else
-                    return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
+                    return result.Concat(helper.FormControlStatic(valueLine.Prefix, value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
