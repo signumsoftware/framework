@@ -69,6 +69,10 @@ namespace Signum.Windows
             if (message == null)
                 message = SearchMessage.SelectAnElement.NiceToString();
 
+            selectedElement = elements.Only();
+            if (selectedElement != null)
+                return true;
+
             if (elementIcon == null)
                 elementIcon = o => null;
 
