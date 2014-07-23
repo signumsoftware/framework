@@ -229,6 +229,11 @@ namespace Signum.Utilities
             return maxlen;
         }
 
+        string DebugTable()
+        {
+            return num.SelectArray(a => a.ToString()).FormatTable();
+        }
+
         public int LongestCommonSubsequence(string str1, string str2)
         {
             if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
@@ -436,7 +441,7 @@ namespace Signum.Utilities
         }
     }
 
-    public struct Slice<T>
+    public struct Slice<T> :IEnumerable<T>
     {
         public Slice(T[] array) : this(array, 0, array.Length) { }
 
@@ -472,24 +477,34 @@ namespace Signum.Utilities
             }
         }
 
-        public Slice<T> SubSlice(int relativeOffset, int length)
+        public Slice<T> SubSlice(int relativeIndex, int length)
         {
-            return new Slice<T>(this.Array, this.Offset + relativeOffset, length);
+            return new Slice<T>(this.Array, this.Offset + relativeIndex, length);
         }
 
-        public Slice<T> SubSliceStart(int pos)
+        public Slice<T> SubSliceStart(int relativeIndex)
         {
-            return new Slice<T>(this.Array, 0, pos);
+            return new Slice<T>(this.Array, this.Offset, relativeIndex);
         }
 
-        public Slice<T> SubSliceEnd(int pos)
+        public Slice<T> SubSliceEnd(int relativeIndex)
         {
-            return new Slice<T>(this.Array, pos, this.Length - pos);
+            return new Slice<T>(this.Array, this.Offset + relativeIndex, this.Length - relativeIndex);
         }
 
         public override string ToString()
         {
             return this.Array.Skip(Offset).Take(Length).ToString("");
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return this.Array.Skip(Offset).Take(Length).GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
