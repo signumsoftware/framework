@@ -77,6 +77,19 @@ namespace Signum.Test
         }
 
         [TestMethod]
+        public void DiffWords()
+        {
+            var result = d.DiffWords(
+                "Soft drinks, coffees, teas, beers, and ginger ales", 
+                "Soft drinks, coffees, teas and beers");
+
+            var str = result.ToString("");
+
+            Assert.AreEqual("Soft drinks, coffees, teas-,- -beers-, and -ginger- -ales+beers", str);
+
+        }
+
+        [TestMethod]
         public void Choices()
         {
             var result = d.LevenshteinChoices("en un lugar de la mancha".ToCharArray(), "in un legarito de la mincha".ToCharArray());
