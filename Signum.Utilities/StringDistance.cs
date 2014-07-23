@@ -6,42 +6,16 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
-  
-
     public class StringDistance
     {
-        //Nullable? doesn't work with reference types
-        public struct Maybe<T>
-        {
-            public readonly bool HasValue;
-            public readonly T Value;
-
-            public Maybe(T value)
-            {
-                this.HasValue = true;
-                this.Value = value;
-            }
-
-            public override string ToString()
-            {
-                if (!HasValue)
-                    return "-";
-
-                if (Value == null)
-                    return "";
-
-                return Value.ToString();
-            }
-        }
-
         int[,] num;
 
-        public int LevenshteinDistance(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Maybe<char>, Maybe<char>, int> weight = null)
+        public int LevenshteinDistance(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
         {
             return LevenshteinDistance<char>(str1.ToCharArray(), str2.ToCharArray(), comparer, weight);
         }
 
-        public int LevenshteinDistance<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Maybe<T>, Maybe<T>, int> weight = null)
+        public int LevenshteinDistance<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
         {
             int M1 = str1.Length + 1;
             int M2 = str2.Length + 1;
@@ -49,17 +23,17 @@ namespace Signum.Utilities
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
 
-            if(weight == null)
-                weight = (s1, s2)=>1;
+            if (weight == null)
+                weight = c => 1;
 
             ResizeArray(M1, M2);
 
             num[0, 0] = 0;
 
             for (int i = 1; i < M1; i++)
-                num[i, 0] = num[i - 1, 0] + weight(new Maybe<T>(str1[i - 1]), new Maybe<T>());
+                num[i, 0] = num[i - 1, 0] + weight(Choice<T>.Add(str1[i - 1]));
             for (int j = 1; j < M2; j++)
-                num[0, j] = num[0, j - 1] + weight(new Maybe<T>(), new Maybe<T>(str2[j - 1]));
+                num[0, j] = num[0, j - 1] + weight(Choice<T>.Remove(str2[j - 1]));
 
             for (int i = 1; i < M1; i++)
             {
@@ -69,82 +43,127 @@ namespace Signum.Utilities
                         num[i, j] = num[i - 1, j - 1];
                     else
                         num[i, j] = Math.Min(Math.Min(
-                            num[i - 1, j] + weight(new Maybe<T>(str1[i - 1]), new Maybe<T>()),
-                            num[i, j - 1] + weight(new Maybe<T>(), new Maybe<T>(str2[j - 1]))),
-                            num[i - 1, j - 1] + weight(new Maybe<T>(str1[i - 1]), new Maybe<T>(str2[j - 1])));
+                            num[i - 1, j] + weight(Choice<T>.Add(str1[i - 1])),
+                            num[i, j - 1] + weight(Choice<T>.Remove(str2[j - 1]))),
+                            num[i - 1, j - 1] + weight(Choice<T>.Substitute(str1[i - 1], str2[j - 1])));
                 }
             }
 
             return num[M1 - 1, M2 - 1];
         }
 
-        public List<LevenshteinChoice<char>> LevenshteinChoices(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Maybe<char>, Maybe<char>, int> weight = null)
+    
+
+        public enum ChoiceType
+        {
+            Equal,
+            Substitute,
+            Remove,
+            Add,
+        }
+
+
+
+        public struct Choice<T>
+        {
+            public readonly ChoiceType Type;
+            public readonly T Added;
+            public readonly T Removed;
+
+            public bool HasAdded { get { return Type != ChoiceType.Remove; } }
+            public bool HasRemoved { get { return Type != ChoiceType.Add; } }
+
+            internal Choice( ChoiceType type, T added, T removed)
+            {
+                this.Type = type;
+                this.Added = added;
+                this.Removed = removed;
+            }
+
+            public static Choice<T> Add(T value)
+            {
+                return new Choice<T>(ChoiceType.Add, value, default(T));
+            }
+
+            public static Choice<T> Remove(T value)
+            {
+                return new Choice<T>(ChoiceType.Remove, default(T), value);
+            }
+
+            public static Choice<T> Equal(T value)
+            {
+                return new Choice<T>(ChoiceType.Equal, value, value);
+            }
+
+            public static Choice<T> Substitute(T add, T remove)
+            {
+                return new Choice<T>(ChoiceType.Substitute, add, remove);
+            }
+
+
+            public override string ToString()
+            {
+                switch (Type)
+                {
+                    case ChoiceType.Equal: return "{0}".Formato(Added);
+                    case ChoiceType.Substitute: return "[-{0}+{1}]".Formato(Removed, Added);
+                    case ChoiceType.Remove: return "-{0}".Formato(Removed);
+                    case ChoiceType.Add: return "+{0}".Formato(Added);
+                    default: return null;
+                }
+            }
+        }
+
+        public List<Choice<char>> LevenshteinChoices(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
         {
             return LevenshteinChoices<char>(str1.ToCharArray(), str2.ToCharArray(), comparer, weight);
         }
 
-        public struct LevenshteinChoice<T>
-        {
-            public LevenshteinChoice(Maybe<T> maybe1, Maybe<T> maybe2)
-            {
-                this.Maybe1 = maybe1;
-                this.Maybe2 = maybe2;
-            }
-
-            public Maybe<T> Maybe1;
-            public Maybe<T> Maybe2;
-
-            public override string ToString()
-            {
-                return "[{0},{1}]".Formato(Maybe1, Maybe2);
-            }
-        }
-
-        public List<LevenshteinChoice<T>> LevenshteinChoices<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Maybe<T>, Maybe<T>, int> weight = null)
+        public List<Choice<T>> LevenshteinChoices<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
         {
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
 
-            if(weight == null)
-                weight = (s1, s2)=>1;
+            if (weight == null)
+                weight = (c) => 1;
 
             this.LevenshteinDistance<T>(str1, str2, comparer, weight);
 
             int i = str1.Length;
             int j = str2.Length;
 
-            List<LevenshteinChoice<T>> result = new List<LevenshteinChoice<T>>();
+            List<Choice<T>> result = new List<Choice<T>>();
 
             while (i > 0 && j > 0)
             {
                 if (comparer.Equals(str1[i - 1], str2[j - 1]))
                 {
-                    result.Add(new LevenshteinChoice<T>(new Maybe<T>(str1[i - 1]), new Maybe<T>(str2[j - 1])));
+                    result.Add(Choice<T>.Equal(str1[i - 1]));
                     i = i - 1;
                     j = j - 1;
                 }
                 else
                 {
-                    var add1 = num[i - 1, j] + weight(new Maybe<T>(str1[i - 1]), new Maybe<T>());
-                    var remove2 = num[i, j - 1] + weight(new Maybe<T>(), new Maybe<T>(str2[j - 1]));
-                    var replace = num[i - 1, j - 1] + weight(new Maybe<T>(str1[i - 1]), new Maybe<T>(str2[j - 1]));
+                    var add1 = num[i - 1, j] + weight(Choice<T>.Add(str1[i - 1]));
+                    var remove2 = num[i, j - 1] + weight(Choice<T>.Remove(str2[j - 1]));
+                    var replace = num[i - 1, j - 1] + weight(Choice<T>.Substitute(str1[i - 1], str2[j - 1]));
 
                     var min = Math.Min(add1, Math.Min(remove2, replace));
 
                     if (replace == min)
                     {
-                        result.Add(new LevenshteinChoice<T>(new Maybe<T>(str1[i - 1]), new Maybe<T>(str2[j - 1])));
+                        result.Add(Choice<T>.Substitute(str1[i - 1], str2[j - 1]));
                         i = i - 1;
                         j = j - 1;
                     }
                     else if (add1 == min)
                     {
-                        result.Add(new LevenshteinChoice<T>(new Maybe<T>(str1[i - 1]), new Maybe<T>()));
+                        result.Add(Choice<T>.Add(str1[i - 1]));
                         i = i - 1;
                     }
                     else if (remove2 == min)
                     {
-                        result.Add(new LevenshteinChoice<T>(new Maybe<T>(), new Maybe<T>(str2[j - 1])));
+                        result.Add(Choice<T>.Remove(str2[j - 1]));
                         j = j - 1;
                     }
                 }
@@ -343,28 +362,28 @@ namespace Signum.Utilities
                 var removed = g.Where(a=>a.Action == DiffAction.Removed).Select(a=>a.Value).ToArray();
                 var added = g.Where(a=>a.Action == DiffAction.Added).Select(a=>a.Value).ToArray();
 
-                var choices = this.LevenshteinChoices<string>(removed, added, weight: (a, b) =>
+                var choices = this.LevenshteinChoices<string>(removed, added, weight: c =>
                 {
-                    if (!a.HasValue)
-                        return b.Value.Length;
+                    if (c.Type == ChoiceType.Add)
+                        return c.Added.Length;
 
-                    if (!b.HasValue)
-                        return a.Value.Length;
+                    if (c.Type == ChoiceType.Remove)
+                        return c.Removed.Length;
 
-                    var distance = sd.LevenshteinDistance(a.Value, b.Value);
+                    var distance = sd.LevenshteinDistance(c.Added, c.Removed);
 
                     return distance * 2;
                 });
 
                 return choices.Select(c =>
                 {
-                    if (!c.Maybe1.HasValue)
-                        return new DiffPair<List<DiffPair<string>>>(DiffAction.Added, new List<DiffPair<string>> { new DiffPair<string>(DiffAction.Added, c.Maybe2.Value) });
+                    if (c.Type == ChoiceType.Add)
+                        return new DiffPair<List<DiffPair<string>>>(DiffAction.Added, new List<DiffPair<string>> { new DiffPair<string>(DiffAction.Added, c.Added) });
 
-                    if (!c.Maybe2.HasValue)
-                        return new DiffPair<List<DiffPair<string>>>(DiffAction.Removed, new List<DiffPair<string>> { new DiffPair<string>(DiffAction.Removed, c.Maybe1.Value) });
+                    if (c.Type == ChoiceType.Remove)
+                        return new DiffPair<List<DiffPair<string>>>(DiffAction.Removed, new List<DiffPair<string>> { new DiffPair<string>(DiffAction.Removed, c.Removed) });
 
-                    var diffWords = sd.DiffWords(c.Maybe1.Value, c.Maybe2.Value);
+                    var diffWords = sd.DiffWords(c.Added, c.Removed);
 
                     return new DiffPair<List<DiffPair<string>>>(DiffAction.Equal, diffWords); 
                 });

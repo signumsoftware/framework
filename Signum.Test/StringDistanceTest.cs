@@ -40,7 +40,7 @@ namespace Signum.Test
         [TestMethod]
         public void LevenshteinDistanceWeight()
         {
-            Func<StringDistance.Maybe<char>, StringDistance.Maybe<char>, int> w = (c1, c2) => c1.HasValue && char.IsNumber(c1.Value) || c2.HasValue && char.IsNumber(c2.Value) ? 10 : 1;
+            Func<StringDistance.Choice<char>, int> w = c => c.HasAdded && char.IsNumber(c.Added) || c.HasRemoved && char.IsNumber(c.Removed) ? 10 : 1;
 
             Assert.AreEqual(10, d.LevenshteinDistance("hola", "ho5la", weight: w));
             Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "hola", weight: w));
@@ -94,7 +94,7 @@ namespace Signum.Test
         {
             var result = d.LevenshteinChoices("en un lugar de la mancha".ToCharArray(), "in un legarito de la mincha".ToCharArray());
 
-            var str = result.ToString(a => a.Maybe1.HasValue && a.Maybe2.HasValue && a.Maybe1.Value == a.Maybe2.Value ? a.Maybe1.ToString() : a.ToString(), "");
+            var str = result.ToString("");
 
             Assert.AreEqual("[e,i]n un l[u,e]gar[-,i][-,t][-,o] de la m[a,i]ncha", str);
         }
