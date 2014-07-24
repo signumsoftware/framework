@@ -71,7 +71,6 @@ namespace Signum.Engine.Translation
                     {
                         AddRoute(pr);
                     }
-
                 };
             }
         }
@@ -357,9 +356,9 @@ namespace Signum.Engine.Translation
             return (Func<T, R>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
         }
 
-        public static byte[] GetExcelFile(Type t, CultureInfo c)
+        public static FilePair ExportExcelFile(Type type, CultureInfo culture)
         {
-            var result = TranslatedInstanceLogic.TranslationsForType(t, c).Single().Value;
+            var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value;
 
             var list = result
                 .OrderBy(a=>a.Key.Instance.Id)
@@ -372,11 +371,19 @@ namespace Signum.Engine.Translation
                 Translated = r.Value.TranslatedText
             }).ToList();
 
-            return PlainExcelGenerator.WritePlainExcel<ExcelRow>(list);
+            return new FilePair
+            {
+                Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
+                FileName = "{0}.{1}.View.xlsx".Formato(type, culture.Name)
+            };
         }
 
-        public static byte[] GetSyncExcelFile(List<InstanceChanges> changes, CultureInfo master, CultureInfo target)
+        public static FilePair ExportExcelFileSync(Type type, CultureInfo culture)
         {
+            CultureInfo master = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
+
+            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { master });
+
             var list = (from ic in changes
                         from pr in ic.RouteConflicts
                         orderby ic.Instance, pr.Key.Item1.PropertyString(), pr.Key.Item2
@@ -389,11 +396,24 @@ namespace Signum.Engine.Translation
                             Translated = null
                         }).ToList();
 
-            return PlainExcelGenerator.WritePlainExcel<ExcelRow>(list);
+            return new FilePair
+            {
+                Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
+                FileName = "{0}.{1}.Sync.xlsx".Formato(type, culture.Name)
+            };
         }
 
-        public static void SaveExcelFile(Stream stream, Type type, CultureInfo culture)
+        public static TypeCulturePair ImportExcelFile(string filePath)
         {
+            using (var stream = File.OpenRead(filePath))
+                return ImportExcelFile(stream, Path.GetFileName(filePath));
+        }
+
+        public static TypeCulturePair ImportExcelFile(Stream stream, string fileName)
+        {
+            Type type = TypeLogic.GetType(fileName.Before('.'));
+            CultureInfo culture = CultureInfo.GetCultureInfo(fileName.After('.').Before('.'));
+
             var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
             {
                  Culture = culture,
@@ -403,6 +423,8 @@ namespace Signum.Engine.Translation
             });
 
             SaveRecords(records, type, culture);
+
+            return new TypeCulturePair { Type = type, Culture = culture};
         }
 
 
@@ -503,6 +525,18 @@ namespace Signum.Engine.Translation
         }
 
       
+    }
+
+    public class TypeCulturePair
+    {
+        public Type Type;
+        public CultureInfo Culture;
+    }
+
+    public class FilePair
+    {
+        public string FileName;
+        public byte[] Content;
     }
 
     public struct TranslatableElement<T>
