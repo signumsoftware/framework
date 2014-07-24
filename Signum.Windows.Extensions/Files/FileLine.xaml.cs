@@ -323,6 +323,9 @@ namespace Signum.Windows.Files
 
         private void fileLine_DragEnter(object sender, DragEventArgs e)
         {
+            if (!DropFile)
+                return;
+
             if (!e.Data.GetDataPresent(DataFormats.FileDrop) && !e.CanHandleOutlookAttachment())
             {
                 e.Effects = DragDropEffects.None;
@@ -332,6 +335,9 @@ namespace Signum.Windows.Files
 
         private void fileLine_Drop(object sender, DragEventArgs e)
         {
+            if (!DropFile)
+                return;
+
             string[] files = null;
 
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
