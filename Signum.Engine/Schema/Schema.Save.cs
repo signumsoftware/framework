@@ -1099,7 +1099,7 @@ namespace Signum.Engine.Maps
             result.hasOrder = this.Order != null; 
             result.isEmbeddedEntity = typeof(EmbeddedEntity).IsAssignableFrom(this.Field.FieldType);
 
-            if (result.isEmbeddedEntity)
+            if (result.isEmbeddedEntity || result.hasOrder)
             {
                 var trios = new List<Table.Trio>();
                 var assigments = new List<Expression>();
