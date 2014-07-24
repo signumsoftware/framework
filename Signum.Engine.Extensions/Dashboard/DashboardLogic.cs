@@ -51,6 +51,7 @@ namespace Signum.Engine.Dashboard
                     select new
                     {
                         Entity = cp,
+                        cp.Id,
                         cp.DisplayName,
                         cp.EntityType,
                         Related = cp.Owner,
