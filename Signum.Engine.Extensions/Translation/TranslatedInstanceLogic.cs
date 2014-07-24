@@ -56,7 +56,7 @@ namespace Signum.Engine.Translation
                     gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance, a.RowId))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                sb.Schema.Initializing += () =>
                 {
                     var s = Schema.Current;
 
