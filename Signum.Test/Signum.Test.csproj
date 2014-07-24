@@ -102,7 +102,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SaveTest.cs" />
-    <Compile Include="Environment\Starter.cs" />
+    <Compile Include="Environment\MusicStarter.cs" />
     <Compile Include="StringDistanceTest.cs" />
   </ItemGroup>
   <ItemGroup>
