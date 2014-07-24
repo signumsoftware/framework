@@ -985,14 +985,4 @@ namespace Signum.Engine.Maps
             this.Name = this.Name.OnSchema(schemaName);
         }
     }
-
-
-    public enum InitLevel
-    {
-        Level0SyncEntities,
-        Level1SimpleEntities,
-        Level2NormalEntities,
-        Level3MainEntities,
-        Level4BackgroundProcesses,
-    }
 }
