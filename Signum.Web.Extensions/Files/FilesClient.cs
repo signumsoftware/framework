@@ -181,7 +181,9 @@ namespace Signum.Web.Files
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
                        col => new CellFormatter((help, obj) => ((WebImage)obj).FullWebPath == null ? null :
-                           new HtmlTag("img").Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath)).Attr("alt", typeof(WebImage).NiceName())
+                           new HtmlTag("img")
+                           .Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath))
+                           .Attr("alt", typeof(WebImage).NiceName())
                            .Attr("style", "width:80px").ToHtmlSelf()) { TextAlign = "center" }
                  ));
 
