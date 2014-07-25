@@ -72,7 +72,7 @@ namespace Signum.Engine.Authorization
                               let parentAllowed = GetAllowed(role, parent.Type)
                               where parentAllowed.MaxCombined() > TypeAllowed.None
                               from kvp in graph.RelatedTo(parent)
-                              where !kvp.Value.IsLite && !kvp.Value.IsNullable && !kvp.Value.IsCollection && !kvp.Key.Type.IsEnumEntityOrSymbol()
+                              where !kvp.Value.IsLite && !kvp.Value.IsNullable && !kvp.Value.IsCollection && !kvp.Key.Type.IsEnumEntity()
                               let relAllowed = GetAllowed(role, kvp.Key.Type)
                               where relAllowed.MaxCombined() == TypeAllowed.None
                               select new
@@ -168,7 +168,7 @@ namespace Signum.Engine.Authorization
         {
             var result = new TypeRulePack { Role = roleLite };
 
-            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumEntityOrSymbol()).Select(a => a.Value));
+            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
