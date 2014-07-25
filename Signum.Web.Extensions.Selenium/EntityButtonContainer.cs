@@ -17,11 +17,15 @@ namespace Signum.Web.Selenium
 
     public interface IEntityButtonContainer<T> : IEntityButtonContainer
     {
-
     }
 
     public static class EntityButtonContainerExtensions
     {
+        public static Lite<T> GetLite<T>(this IEntityButtonContainer<T> container) where T : IdentifiableEntity
+        {
+            return (Lite<T>)container.RuntimeInfo().ToLite();
+        }
+
         public static string ButtonLocator(this IEntityButtonContainer container, string buttonId)
         {
             return container.ContainerLocator() + " #" + "_".CombineIfNotEmpty(container.Prefix, buttonId);
