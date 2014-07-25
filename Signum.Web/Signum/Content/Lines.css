@@ -229,7 +229,7 @@ ul.nav-tabs
     padding: 0px 3px;
 }
 
-.form-xs :not(textarea).form-control
+.form-xs .form-control:not(textarea)
 {
     height: 20px;
 }
@@ -237,6 +237,7 @@ ul.nav-tabs
 .form-xs input[type=checkbox].form-control
 {
     height: 16px;
+    padding: 0px;
 }
 
 .form-xs .input-group .btn,
@@ -285,7 +286,7 @@ ul.nav-tabs
     padding: 3px 6px;
 }
 
-.form-sm :not(textarea).form-control
+.form-sm .form-control:not(textarea)
 {
     height: 30px;
 }
@@ -293,6 +294,7 @@ ul.nav-tabs
 .form-sm input[type=checkbox].form-control
 {
     height: 16px;
+    padding: 0px;
 }
 
 .form-sm .input-group .btn,
