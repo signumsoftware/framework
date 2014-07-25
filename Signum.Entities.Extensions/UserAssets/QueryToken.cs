@@ -104,9 +104,14 @@ namespace Signum.Entities.UserAssets
 
         public bool Equals(QueryTokenDN other)
         {
-            return this.Token.Equals(other.Token);
+            return this.GetTokenString() == other.GetTokenString();
         }
 
+        public string GetTokenString()
+        {
+            return this.token != null ? this.token.FullKey() : this.tokenString;
+        }
+        
         public override bool Equals(object obj)
         {
             return obj is QueryTokenDN && this.Equals((QueryTokenDN)obj);
