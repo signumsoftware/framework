@@ -44,6 +44,17 @@ namespace Signum.Web.Controllers
         }
 
         [ActionSplitter("webQueryName")]
+        public ContentResult Count(FindOptions findOptions)
+        {
+            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
+            {
+                FilterOptions = findOptions.FilterOptions
+            });
+
+            return this.Content(count.ToString());
+        }
+
+        [ActionSplitter("webQueryName")]
         public ActionResult Find(FindOptions findOptions)
         {
             return Navigator.Find(this, findOptions);

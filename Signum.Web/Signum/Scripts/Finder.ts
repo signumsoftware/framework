@@ -219,7 +219,17 @@ export function deleteFilter(trId) {
     $tr.remove();
 }
 
-
+export function count(options: FindOptions, element: JQuery) {
+    SF.onVisible(element).then(() => {
+        SF.ajaxPost({
+            url: SF.Urls.count,
+            data: requestDataForOpenFinder(options, false)
+        }).then(data=> {
+                element.html(data);
+            element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+        });
+    }); 
+}
 
 export class SearchControl {
 

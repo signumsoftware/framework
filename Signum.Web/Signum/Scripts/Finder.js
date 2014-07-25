@@ -198,6 +198,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.deleteFilter = deleteFilter;
 
+    function count(options, element) {
+        SF.onVisible(element).then(function () {
+            SF.ajaxPost({
+                url: SF.Urls.count,
+                data: exports.requestDataForOpenFinder(options, false)
+            }).then(function (data) {
+                element.html(data);
+                element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+            });
+        });
+    }
+    exports.count = count;
+
     var SearchControl = (function () {
         function SearchControl(element, _options, types) {
             this.keys = {
