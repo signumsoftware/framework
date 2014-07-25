@@ -429,15 +429,6 @@ namespace Signum.Windows.UIAutomation
         {
             ComboBox.WaitComboBoxHasItems(() => "EntityCombo {0} has items".Formato(this), timeOut);
         }
-
-        public void SelectFirstElement()
-        {
-            ComboBox.Pattern<ExpandCollapsePattern>().Expand();
-
-            var item = ComboBox.Child(a => a.Current.ControlType == ControlType.ListItem);
-
-            item.Pattern<SelectionItemPattern>().Select();
-        }
     }
 
     public class EntityDetailProxy : EntityBaseProxy
