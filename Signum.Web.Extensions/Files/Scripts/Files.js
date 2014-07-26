@@ -134,6 +134,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         FileLine.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
             this.prefix.child(Entities.Keys.loading).get().hide();
+            this.prefix.child("sfFile").get().val("");
             if (entityValue) {
                 this.prefix.child(Entities.Keys.toStr).tryGet().html(entityValue.toStr);
                 this.prefix.child(Entities.Keys.link).tryGet().html(entityValue.toStr).attr("href", entityValue.link);

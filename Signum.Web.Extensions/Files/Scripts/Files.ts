@@ -151,6 +151,7 @@ export class FileLine extends Lines.EntityBase {
 
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
         this.prefix.child(Entities.Keys.loading).get().hide();
+        this.prefix.child("sfFile").get().val("");
         if (entityValue) {
             this.prefix.child(Entities.Keys.toStr).tryGet().html(entityValue.toStr);
             this.prefix.child(Entities.Keys.link).tryGet().html(entityValue.toStr).attr("href", entityValue.link);
