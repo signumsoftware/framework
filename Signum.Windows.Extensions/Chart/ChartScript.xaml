@@ -17,8 +17,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <m:ValueLine m:Common.Route="Name" Grid.Row="0" />
         <f:FileLine m:Common.Route="Icon" Grid.Row="1" />

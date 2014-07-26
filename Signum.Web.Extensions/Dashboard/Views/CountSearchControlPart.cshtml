@@ -17,7 +17,12 @@
 
             fo.ApplyUserQuery(uq.UserQuery);
             <p>
-                @Html.CountSearchControlSpan(fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.QueryLabelText = uq.Label.DefaultText(uq.UserQuery.ToString()); })
+                @Html.CountSearchControlSpan(fo, new Context(tc, "cnt"), csc =>
+           {
+               csc.Navigate = true;
+               csc.Href = uq.Href;
+               csc.QueryLabelText = uq.Label.DefaultText(uq.UserQuery.ToString());
+           })
             </p>
         }
     </div>

@@ -231,15 +231,11 @@ namespace Signum.Entities.Scheduler
         public HolidayCalendarDN Calendar
         {
             get { return calendar; }
-            set
-            {
-                if (Set(ref calendar, value))
-                    Holiday = calendar == null ? (bool?)null : false;
-            }
+            set { Set(ref calendar, value); }
         }
 
-        bool? holiday;
-        public bool? Holiday
+        bool holiday;
+        public bool Holiday
         {
             get { return holiday; }
             set { SetToStr(ref holiday, value); }
@@ -258,7 +254,7 @@ namespace Signum.Entities.Scheduler
         bool IsAllowed(DateTime dateTime)
         {
             if (calendar != null && calendar.IsHoliday(dateTime))
-                return holiday.Value;
+                return holiday;
 
             switch (dateTime.DayOfWeek)
             {
@@ -283,25 +279,10 @@ namespace Signum.Entities.Scheduler
                 (friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_F.NiceToString() : "") +
                 (saturday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Sa.NiceToString() : "") +
                 (sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
-                (holiday.HasValue ? (holiday.Value ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
+                (calendar != null ? (holiday ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
         }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Is(()=>Holiday))
-            {
-                if (calendar != null && holiday == null)
-                    return SchedulerMessage.Holidayhavetobetrueorfalsewhenacalendarisset.NiceToString();
-
-                if (calendar == null && holiday != null)
-                    return SchedulerMessage.Holidayhavetobenullwhennocalendarisset.NiceToString();
-            }
-
-            return base.PropertyValidation(pi);
-        }
-
     }
 
     public enum SchedulerMessage
@@ -312,10 +293,6 @@ namespace Signum.Entities.Scheduler
         Each0Hours,
         [Description("Each {0} minutes")]
         Each0Minutes,
-        [Description("Holiday have to be null when no calendar is set")]
-        Holidayhavetobenullwhennocalendarisset,
-        [Description("Holiday have to be true or false when a calendar is set")]
-        Holidayhavetobetrueorfalsewhenacalendarisset,
         [Description("Dialy")]
         ScheduleRuleDailyDN,
         [Description("Every day at ")]

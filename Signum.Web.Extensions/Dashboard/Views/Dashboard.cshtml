@@ -6,10 +6,32 @@
 @section head
 {
     @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
+
+}
+@{
+    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+}
+
+@if (currentEntity != null)
+{
+    <div style="float: right; text-align:right">
+        <h3>
+            @if (Navigator.IsNavigable(currentEntity, null))
+            {
+                <a class="sf-entity-title" href="@Navigator.NavigateRoute(currentEntity)">@currentEntity.ToString()</a>
+            }
+            else
+            {
+                <span class="sf-entity-title">@currentEntity.ToString()</span>
+            }
+            <br />
+            <small class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(currentEntity)</small>
+        </h3>
+    </div>
 }
 
 @using (Html.BeginForm("DoPostBack", "Signum", "POST"))
-{    
+{
     <h2>
         @if (Navigator.IsNavigable(Model, null, isSearch: true))
         { 
@@ -21,7 +43,8 @@
         }
     </h2>
     
-    
+      
+
         Html.RenderPartial(DashboardClient.ViewPrefix.Formato("DashboardView"), Model);
 
         if (Model.AutoRefreshPeriod != null)

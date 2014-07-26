@@ -57,11 +57,9 @@ namespace Signum.Web.Translation.Controllers
              Type t = TypeLogic.GetType(type);
              var c = CultureInfo.GetCultureInfo(culture);
 
-            var bytes = TranslatedInstanceLogic.GetExcelFile(t, c);
+            var file = TranslatedInstanceLogic.ExportExcelFile(t, c);
 
-            var fileName = "{0}.{1}.View.xlsx".Formato(type, c.Name);
-
-            return File(bytes, MimeType.FromFileName(fileName), fileName);  
+            return File(file.Content, MimeType.FromFileName(file.FileName), file.FileName);  
         }
 
         [HttpPost]
@@ -129,15 +127,9 @@ namespace Signum.Web.Translation.Controllers
 
             CultureInfo c = CultureInfo.GetCultureInfo(culture);
 
-            CultureInfo master = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
+            var file = TranslatedInstanceLogic.ExportExcelFileSync(t, c);
 
-            var changes = TranslatedInstanceLogic.GetInstanceChanges(t, c, new List<CultureInfo> { master });
-
-            byte[] bytes = TranslatedInstanceLogic.GetSyncExcelFile(changes, master, c);
-
-            string fileName = "{0}.{1}.Sync.xlsx".Formato(type, c.Name);
-
-            return File(bytes, MimeType.FromFileName(fileName), fileName);  
+            return File(file.Content, MimeType.FromFileName(file.FileName), file.FileName);  
         }
 
         [HttpPost]
@@ -162,9 +154,9 @@ namespace Signum.Web.Translation.Controllers
             var type = TypeLogic.GetType(hpf.FileName.Before('.'));
             var culture = CultureInfo.GetCultureInfo(hpf.FileName.After('.').Before('.'));
 
-            TranslatedInstanceLogic.SaveExcelFile(hpf.InputStream, type, culture);
+            var pair = TranslatedInstanceLogic.ImportExcelFile(hpf.InputStream, hpf.FileName);
 
-            return RedirectToAction("View", new { type = TypeLogic.GetCleanName(type), culture = culture.Name, searchPressed = false });
+            return RedirectToAction("View", new { type = TypeLogic.GetCleanName(pair.Type), culture = pair.Culture, searchPressed = false });
         }
 
     }

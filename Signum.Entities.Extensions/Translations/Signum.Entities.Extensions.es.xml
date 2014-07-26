@@ -120,7 +120,6 @@
     <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado con éxito" />
     <Member Name="PasswordMustHaveAValue" Description="Se debe especificar la contraseña" />
-    <Member Name="PasswordNearExpired" Description="Tu contraseña está a punto de caducar" />
     <Member Name="PasswordsAreDifferent" Description="Las contraseñas son diferentes" />
     <Member Name="PasswordsDoNotMatch" Description="Las contraseñas no coinciden" />
     <Member Name="Please0IntoYourAccount" Description="Por favor, vaya al {0} para acceder a la aplicación" />
@@ -147,6 +146,7 @@
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
     <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Le enviaremos un correo electrónico con un enlace para restablecer su contraseña." />
     <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
+    <Member Name="YourPasswordIsNearExpiration" Description="Su contraseña es cerca de caducar" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Role" />
@@ -171,7 +171,6 @@
   </Type>
   <Type Name="ChartColumnDN" Description="Columna de gráfico">
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
-    <Member Name="Index" Description="Índice" />
     <Member Name="Parameter1" Description="Parámetro1" />
     <Member Name="Parameter2" Description="Parámetro2" />
     <Member Name="Parameter3" Description="Parámetro3" />
@@ -200,6 +199,7 @@
     <Member Name="_0ShouldBeAnAggregate" Description="{0} debe ser un agregado" />
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeSet" Description="{0} debe establecerse" />
+    <Member Name="ChartToken" Description="Grafico" />
     <Member Name="Chart" Description="Gráfico" />
     <Member Name="Chart_ChartSettings" Description="Configuración del gráfico" />
     <Member Name="Chart_Dimension" Description="Dimensión" />
@@ -209,10 +209,12 @@
     <Member Name="Chart_ToggleInfo" Description="Mostrar/Ocultar información" />
     <Member Name="ChartFor" Description="Gráfico para" />
     <Member Name="ChartOf0" Description="Gráfico de {0}" />
+    <Member Name="ChooseABasePalette" Description="Elegir una paleta base" />
     <Member Name="ColorsFor0" Description="Colores para {0}" />
     <Member Name="CreateNew" Description="Crear" />
     <Member Name="CreatePalette" Description="Crear paleta" />
     <Member Name="Data" Description="Datos" />
+    <Member Name="DeletePalette" Description="Eliminar paleta" />
     <Member Name="EditScript" Description="Editar Script" />
     <Member Name="EditUserChart" Description="Editar gráfico de usuario" />
     <Member Name="MyCharts" Description="Mis Gráficos" />
@@ -245,7 +247,6 @@
   <Type Name="ChartScriptColumnDN" Description="Columna de Script de Gráfico">
     <Member Name="ColumnType" Description="Tipo de columna" />
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
-    <Member Name="Index" Description="Índice" />
     <Member Name="IsGroupKey" Description="Es clave de grupo" />
     <Member Name="IsOptional" Description="Es opcional" />
     <Member Name="Parameter1" Description="Parámetro1" />
@@ -274,34 +275,6 @@
     <Member Name="CertFileType" Description="Tipo de archivo de certificado" />
     <Member Name="FullFilePath" Description="Ruta completa del archivo" />
   </Type>
-  <Type Name="DashboardDN" Description="Panel de control">
-    <Member Name="AutoRefreshPeriod" Description="Período de actualización automática" />
-    <Member Name="DisplayName" Description="Nombre" />
-    <Member Name="EntityType" Description="Tipo de entidad" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="HomePagePriority" Description="Prioridad de la página de inicio" />
-    <Member Name="Owner" Description="Propietario" />
-    <Member Name="Parts" Description="Partes" />
-  </Type>
-  <Type Name="DashboardMessage">
-    <Member Name="_0Is1InstedOf2In3" Description="{0} es {1} (en lugar de {2}) en {3}" />
-    <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Se debe especificar el título para {0}" />
-    <Member Name="CountSearchControlPartDN" Description="Lista de contadores" />
-    <Member Name="CountUserQueryElement" Description="Contador" />
-    <Member Name="CreateNewPart" Description="Crear nueva parte" />
-    <Member Name="Part0IsTooLarge" Description="Parte {0} es demasiado grande" />
-    <Member Name="Part0OverlapsWith1" Description="Parte {0} se superpone con {1}" />
-    <Member Name="Preview" Description="Vista previa" />
-  </Type>
-  <Type Name="DashboardOperation">
-    <Member Name="Clone" Description="Clonar" />
-    <Member Name="Create" Description="Crear" />
-    <Member Name="Delete" Description="Eliminar" />
-    <Member Name="Save" Description="Guardar" />
-  </Type>
-  <Type Name="DashboardPermission">
-    <Member Name="ViewDashboard" Description="Vista panel de control" />
-  </Type>
   <Type Name="CountSearchControlPartDN" Description="Parte de contadores de consultas de usuario">
     <Member Name="RequiresTitle" Description="Requiere título" />
     <Member Name="UserQueries" Description="Consultas de usuario" />
@@ -318,6 +291,40 @@
   </Type>
   <Type Name="CultureInfoOperation">
     <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="DashboardDN" Description="Panel de control">
+    <Member Name="AutoRefreshPeriod" Description="Período de actualización automática" />
+    <Member Name="DashboardPriority" Description="Prioridad panel de información" />
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="EmbeddedInEntity" Description="Incrustado en entidad" />
+    <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Owner" Description="Propietario" />
+    <Member Name="Parts" Description="Partes" />
+  </Type>
+  <Type Name="DashboardEmbedededInEntity" Description="Panel incrustado en entidad">
+    <Member Name="Bottom" Description="Abajo" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Top" Description="Arriba" />
+  </Type>
+  <Type Name="DashboardMessage">
+    <Member Name="_0Is1InstedOf2In3" Description="{0} es {1} (en lugar de {2}) en {3}" />
+    <Member Name="CountSearchControlPartDN" Description="Lista de contadores" />
+    <Member Name="CountUserQueryElement" Description="Contador" />
+    <Member Name="CreateNewPart" Description="Crear nueva parte" />
+    <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Se debe especificar el título para {0}" />
+    <Member Name="Part0IsTooLarge" Description="Parte {0} es demasiado grande" />
+    <Member Name="Part0OverlapsWith1" Description="Parte {0} se superpone con {1}" />
+    <Member Name="Preview" Description="Vista previa" />
+  </Type>
+  <Type Name="DashboardOperation">
+    <Member Name="Clone" Description="Clonar" />
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="DashboardPermission">
+    <Member Name="ViewDashboard" Description="Vista panel de control" />
   </Type>
   <Type Name="DateSpanDN" Description="Intervalo de fecha">
     <Member Name="Days" Description="Días" />
@@ -701,6 +708,7 @@
     <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="HolidayCalendarOperation">
+    <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="HolidayDN" Description="Festivo">
@@ -828,9 +836,6 @@
     <Member Name="Search" Description="Búsqueda de..." />
     <Member Name="Unknown" Description="Desconocido" />
     <Member Name="Yes" Description="sí" />
-  </Type>
-  <Type Name="OmniboxPermission">
-    <Member Name="OmniboxInAssemblyLanguage" Description="Omnibox en lenguaje ensamblador" />
   </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Permitir" />
@@ -981,7 +986,6 @@
   <Type Name="PropertyRulePack" Description="Paquete de reglas de propiedades" />
   <Type Name="QueryColumnDN" Description="Columna de consulta">
     <Member Name="DisplayName" Description="Nombre" />
-    <Member Name="Index" Description="Índice" />
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryDN" Description="Query">
@@ -989,14 +993,11 @@
     <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="QueryFilterDN" Description="Filtro de consulta">
-    <Member Name="Index" Description="Índice" />
     <Member Name="Operation" Description="Operación" />
     <Member Name="Token" Description="Token" />
-    <Member Name="Value" Description="Valor" />
     <Member Name="ValueString" Description="Valor cadena" />
   </Type>
   <Type Name="QueryOrderDN" Description="Orden de consulta">
-    <Member Name="Index" Description="Índice" />
     <Member Name="OrderType" Description="Tipo de orden" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -1042,7 +1043,7 @@
     <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="Rule" Description="Regla" />
     <Member Name="Suspended" Description="Suspendido" />
-    <Member Name="Task" Description="Tarea programada" />
+    <Member Name="Task" Description="Tarea" />
   </Type>
   <Type Name="ScheduledTaskLogDN" Description="Registro de tareas programadas">
     <Member Name="ApplicationName" Description="Nombre de la aplicación" />
@@ -1057,14 +1058,13 @@
     <Member Name="User" Description="Usuario" />
   </Type>
   <Type Name="ScheduledTaskOperation">
+    <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="SchedulerMessage">
     <Member Name="_0IsNotMultiple1" Description="{0} no es múltiplo de {1}" />
     <Member Name="Each0Hours" Description="Cada {0} horas " />
     <Member Name="Each0Minutes" Description="Cada {0} minutos " />
-    <Member Name="Holidayhavetobenullwhennocalendarisset" Description="Festivos debe ser nulo si no hay calendario" />
-    <Member Name="Holidayhavetobetrueorfalsewhenacalendarisset" Description="Festivos debe ser verdadero o falso cuando hay un calendario" />
     <Member Name="ScheduleRuleDailyDN" Description="Diariamente" />
     <Member Name="ScheduleRuleDailyDN_Everydayat" Description="Todos los días a " />
     <Member Name="ScheduleRuleDayDN_StartingOn" Description="A partir del" />
@@ -1142,6 +1142,7 @@
     <Member Name="Message" Description="Mensaje" />
     <Member Name="RemainingCharacters" Description="Caracteres restantes" />
     <Member Name="RemoveNonValidCharacters" Description="Quitar caracteres no válidos" />
+    <Member Name="Replacements" Description="Reemplazos" />
     <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Estado no puede ser actualizado para mensajes no enviados" />
     <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="La plantilla debe estar activa para crear un SMS" />
     <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="El texto del mensaje SMS supera el límite de longitud" />
@@ -1200,7 +1201,6 @@
     <Member Name="Name" Description="Nombre" />
     <Member Name="RemoveNoSMSCharacters" Description="Quitar No SMSCharacters" />
     <Member Name="StartDate" Description="Fecha de inicio" />
-    <Member Name="State" Description="Estado" />
   </Type>
   <Type Name="SMSTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Fecha de finalización debe ser superior a la fecha de inicio" />
@@ -1216,13 +1216,7 @@
   </Type>
   <Type Name="SMSTemplateOperation">
     <Member Name="Create" Description="Crear" />
-    <Member Name="Disable" Description="Deshabilitar" />
-    <Member Name="Enable" Description="Habilitar" />
     <Member Name="Save" Description="Guardar" />
-  </Type>
-  <Type Name="SMSTemplateState" Description="Estado de plantilla SMS">
-    <Member Name="Created" Description="Creado" />
-    <Member Name="Modified" Description="Modificado" />
   </Type>
   <Type Name="SMSUpdatePackageDN" Description="Paquete de actualización de SMS" />
   <Type Name="SmtpConfigurationDN" Description="Configuración Smtp">
@@ -1343,6 +1337,11 @@
     <Member Name="Stop" Description="Parada" />
   </Type>
   <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
+  <Type Name="UserAssetLogDN" Description="Registro recurso de usuario">
+    <Member Name="Asset" Description="Recurso" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="User" Description="Usuario" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="Exportar a xml" />
     <Member Name="ImportPreview" Description="Previsualizar importación" />

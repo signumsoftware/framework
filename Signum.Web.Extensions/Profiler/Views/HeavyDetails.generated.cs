@@ -147,7 +147,7 @@ WriteLiteral("            ");
 
             
             #line 30 "..\..\Profiler\Views\HeavyDetails.cshtml"
-       Write(Model.Elapsed.NiceToString());
+       Write(Model.ElapsedToString());
 
             
             #line default
@@ -228,15 +228,15 @@ WriteLiteral("                <tr>\r\n                    <td>\r\n");
             #line hidden
 WriteLiteral("                            <span");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 1916), Tuple.Create("\"", 1936)
-, Tuple.Create(Tuple.Create("", 1924), Tuple.Create("color:", 1924), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 1911), Tuple.Create("\"", 1931)
+, Tuple.Create(Tuple.Create("", 1919), Tuple.Create("color:", 1919), true)
             
             #line 69 "..\..\Profiler\Views\HeavyDetails.cshtml"
-, Tuple.Create(Tuple.Create("", 1930), Tuple.Create<System.Object, System.Int32>(color
+, Tuple.Create(Tuple.Create("", 1925), Tuple.Create<System.Object, System.Int32>(color
             
             #line default
             #line hidden
-, 1930), false)
+, 1925), false)
 );
 
 WriteLiteral(">");

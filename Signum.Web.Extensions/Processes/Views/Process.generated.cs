@@ -427,9 +427,9 @@ WriteLiteral("\r\n        })\r\n    </script>\r\n");
             #line hidden
             
             #line 79 "..\..\Processes\Views\Process.cshtml"
-Write(Html.CountSearchControl(e, new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
+Write(Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), new Context(e, "errors"), csc =>
         {
-            csc.PopupViewPrefix = e.Compose("errors");
+            csc.View = true;
         }));
 
             

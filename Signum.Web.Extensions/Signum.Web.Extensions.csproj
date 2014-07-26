@@ -144,6 +144,7 @@
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\UserTicketClient.cs" />
+    <Compile Include="Basic\CultureInfoClient.cs" />
     <Compile Include="Dashboard\GridRepeaterHelper.cs" />
     <Compile Include="Dashboard\Views\Admin\DashboardAdmin.generated.cs">
       <AutoGen>True</AutoGen>
@@ -845,7 +846,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Translation\Views\CultureInfoView.generated.cs">
+    <Compile Include="Basic\Views\CultureInfoView.generated.cs">
       <DependentUpon>CultureInfoView.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1539,7 +1540,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\CultureInfoView.cshtml">
+    <Content Include="Basic\Views\CultureInfoView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
     </Content>

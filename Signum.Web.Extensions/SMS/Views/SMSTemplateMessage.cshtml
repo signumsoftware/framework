@@ -5,6 +5,7 @@
 
 @using (var tc = Html.TypeContext<SMSTemplateMessageDN>())
 {
+    tc.LabelColumns = new BsColumn(4);
     <div class="sf-sms-template-message">
         <input type="hidden" class="sf-tab-title" value="@(tc.Value.CultureInfo.TryToString())" />
         @Html.EntityCombo(tc, e => e.CultureInfo, vl =>

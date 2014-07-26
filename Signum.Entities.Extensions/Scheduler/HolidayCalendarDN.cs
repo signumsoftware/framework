@@ -30,11 +30,6 @@ namespace Signum.Entities.Scheduler
             set { Set(ref holidays, value); }
         }
 
-        public void CleanOldHolidays()
-        {
-            holidays.RemoveAll(h => h.Date < TimeZoneManager.Now);
-        }
-
         public bool IsHoliday(DateTime date)
         {
             return holidays.Any(h => h.Date == date);
@@ -72,7 +67,7 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public class HolidayDN : EmbeddedEntity
     {
-        DateTime date;
+        DateTime date = DateTime.Today;
         [DaysPrecissionValidator]
         public DateTime Date
         {
@@ -80,9 +75,9 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref date, value); }
         }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [SqlDbType(Size = 100)]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name
         {
             get { return name; }

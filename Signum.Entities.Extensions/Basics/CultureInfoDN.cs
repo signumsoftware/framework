@@ -8,7 +8,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Translation
+namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class CultureInfoDN : Entity
@@ -87,11 +87,5 @@ namespace Signum.Entities.Translation
     public static class CultureInfoOperation
     {
         public static readonly ExecuteSymbol<CultureInfoDN> Save = OperationSymbol.Execute<CultureInfoDN>();
-    }
-
-    public static class TranslationPermission
-    {
-        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
-        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
     }
 }

@@ -76,8 +76,8 @@
           }
 
           e.LabelColumns = new BsColumn(3);
-    @Html.CountSearchControl(e, new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
+    @Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), new Context(e, "errors"), csc =>
         {
-            csc.PopupViewPrefix = e.Compose("errors");
+            csc.View = true;
         })
 }

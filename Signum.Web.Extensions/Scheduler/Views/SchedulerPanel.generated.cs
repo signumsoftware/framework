@@ -78,55 +78,66 @@ WriteLiteral("<div>\r\n    <h2>");
             
             #line default
             #line hidden
-WriteLiteral("</h2>\r\n    <div>\r\n        <a");
+WriteLiteral("</h2>\r\n");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 268), Tuple.Create("\"", 325)
+WriteLiteral("    ");
+
             
-            #line 10 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 275), Tuple.Create<System.Object, System.Int32>(Url.Action((SchedulerController sc) => sc.Stop())
+            #line 9 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+Write(Html.AntiForgeryToken());
+
             
             #line default
             #line hidden
-, 275), false)
+WriteLiteral("\r\n    <div>\r\n        <a");
+
+WriteAttribute("href", Tuple.Create(" href=\"", 298), Tuple.Create("\"", 355)
+            
+            #line 11 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+, Tuple.Create(Tuple.Create("", 305), Tuple.Create<System.Object, System.Int32>(Url.Action((SchedulerController sc) => sc.Stop())
+            
+            #line default
+            #line hidden
+, 305), false)
 );
 
-WriteLiteral(" class=\"sf-button\"");
+WriteLiteral(" class=\"sf-button btn btn-default active\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 344), Tuple.Create("\"", 400)
+WriteAttribute("style", Tuple.Create(" style=\"", 397), Tuple.Create("\"", 453)
             
-            #line 10 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-                , Tuple.Create(Tuple.Create("", 352), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
+            #line 11 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+                                       , Tuple.Create(Tuple.Create("", 405), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 352), false)
-, Tuple.Create(Tuple.Create("", 390), Tuple.Create(";color:red", 390), true)
+, 405), false)
+, Tuple.Create(Tuple.Create("", 443), Tuple.Create(";color:red", 443), true)
 );
 
 WriteLiteral(" id=\"sfSchedulerDisable\"");
 
 WriteLiteral(">Stop </a>\r\n        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 447), Tuple.Create("\"", 505)
+WriteAttribute("href", Tuple.Create(" href=\"", 500), Tuple.Create("\"", 558)
             
-            #line 11 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 454), Tuple.Create<System.Object, System.Int32>(Url.Action((SchedulerController sc) => sc.Start())
+            #line 12 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+, Tuple.Create(Tuple.Create("", 507), Tuple.Create<System.Object, System.Int32>(Url.Action((SchedulerController sc) => sc.Start())
             
             #line default
             #line hidden
-, 454), false)
+, 507), false)
 );
 
-WriteLiteral(" class=\"sf-button\"");
+WriteLiteral(" class=\"sf-button btn btn-default\"");
 
-WriteAttribute("style", Tuple.Create("  style=\"", 524), Tuple.Create("\"", 572)
+WriteAttribute("style", Tuple.Create("  style=\"", 593), Tuple.Create("\"", 641)
             
-            #line 11 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-                  , Tuple.Create(Tuple.Create("", 533), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
+            #line 12 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+                                  , Tuple.Create(Tuple.Create("", 602), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 533), false)
+, 602), false)
 );
 
 WriteLiteral(" id=\"sfSchedulerEnable\"");
@@ -136,7 +147,7 @@ WriteLiteral(">Start </a>\r\n    </div>\r\n    <script>\r\n        $(function ()
 WriteLiteral("            ");
 
             
-            #line 15 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 16 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
         Write(SchedulerClient.Module["initDashboard"]());
 
             
@@ -149,7 +160,7 @@ WriteLiteral(" id=\"schedulerMainDiv\"");
 WriteLiteral(">\r\n        <br />\r\n        <h2>SchedulerLogic state in ");
 
             
-            #line 20 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 21 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                                Write(Environment.MachineName);
 
             
@@ -158,13 +169,13 @@ WriteLiteral(">\r\n        <br />\r\n        <h2>SchedulerLogic state in ");
 WriteLiteral("</h2>\r\n\r\n        State: <strong>\r\n");
 
             
-            #line 23 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 24 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 23 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 24 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
              if (Model.Running)
             {
 
@@ -178,7 +189,7 @@ WriteLiteral(" style=\"color: Green\"");
 WriteLiteral(">RUNNING</span>\r\n");
 
             
-            #line 26 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 27 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
             }
             else
             {
@@ -193,7 +204,7 @@ WriteLiteral(" style=\"color: Red\"");
 WriteLiteral(">STOPPED</span>\r\n");
 
             
-            #line 30 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 31 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
             }
             
             #line default
@@ -201,7 +212,7 @@ WriteLiteral(">STOPPED</span>\r\n");
 WriteLiteral("</strong>\r\n        <br />\r\n        SchedulerMargin: ");
 
             
-            #line 32 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 33 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                     Write(Model.SchedulerMargin);
 
             
@@ -210,7 +221,7 @@ WriteLiteral("</strong>\r\n        <br />\r\n        SchedulerMargin: ");
 WriteLiteral("\r\n        <br />\r\n        NextExecution: ");
 
             
-            #line 34 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 35 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                   Write(Model.NextExecution);
 
             
@@ -219,7 +230,7 @@ WriteLiteral("\r\n        <br />\r\n        NextExecution: ");
 WriteLiteral("  (");
 
             
-            #line 34 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 35 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                                           Write(Model.NextExecution == null ? "-None-" : Model.NextExecution.Value.ToAgoString());
 
             
@@ -244,13 +255,13 @@ WriteLiteral(@">
 ");
 
             
-            #line 49 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 50 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 49 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 50 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                  foreach (var item in Model.Queue)
                 {
 
@@ -260,7 +271,7 @@ WriteLiteral(@">
 WriteLiteral("                    <tr>\r\n                        <td>");
 
             
-            #line 52 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 53 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                        Write(Html.LightEntityLine(item.ScheduledTask, true));
 
             
@@ -269,7 +280,7 @@ WriteLiteral("                    <tr>\r\n                        <td>");
 WriteLiteral("\r\n                        </td>\r\n                        <td>");
 
             
-            #line 54 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 55 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                        Write(item.Rule);
 
             
@@ -278,7 +289,7 @@ WriteLiteral("\r\n                        </td>\r\n                        <td>"
 WriteLiteral("\r\n                        </td>\r\n                        <td>");
 
             
-            #line 56 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 57 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                        Write(item.NextExecution);
 
             
@@ -287,7 +298,7 @@ WriteLiteral("\r\n                        </td>\r\n                        <td>"
 WriteLiteral(" (");
 
             
-            #line 56 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 57 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                                             Write(item.NextExecution.ToAgoString());
 
             
@@ -296,7 +307,7 @@ WriteLiteral(" (");
 WriteLiteral(")\r\n                        </td>\r\n                    </tr>\r\n");
 
             
-            #line 59 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 60 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
                 }
 
             
@@ -305,7 +316,7 @@ WriteLiteral(")\r\n                        </td>\r\n                    </tr>\r\
 WriteLiteral("            </tbody>\r\n        </table>\r\n\r\n        <br />\r\n        <h2>");
 
             
-            #line 64 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 65 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
        Write(typeof(ScheduledTaskDN).NicePluralName());
 
             
@@ -316,7 +327,7 @@ WriteLiteral("</h2>\r\n\r\n");
 WriteLiteral("        ");
 
             
-            #line 66 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 67 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
    Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
 {
     ShowFilters = false,
@@ -330,7 +341,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n        <br />\r\n        <br />\r\n        <h2>");
 
             
-            #line 74 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 75 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
        Write(typeof(ScheduledTaskLogDN).NicePluralName());
 
             
@@ -341,7 +352,7 @@ WriteLiteral("</h2>\r\n\r\n");
 WriteLiteral("        ");
 
             
-            #line 76 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+            #line 77 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
    Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
 {
     OrderOptions = { new OrderOption("StartTime", Signum.Entities.DynamicQuery.OrderType.Descending) },

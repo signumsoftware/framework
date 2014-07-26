@@ -117,6 +117,11 @@ namespace Signum.Web.Translation
     //        return result;
     //    }
 
+    //    public bool AutoSelect()
+    //    {
+    //        return true;
+    //    }
+     
     //    public class googleResponse
     //    {
     //        public List<googleSentence> sentences;
@@ -174,6 +179,12 @@ namespace Signum.Web.Translation
     //            }).ToList();
     //        }
     //    }
+
+    //    public bool AutoSelect()
+    //    {
+    //        return true;
+    //    }
+
     //}
 
     public static class AdmAuthentication

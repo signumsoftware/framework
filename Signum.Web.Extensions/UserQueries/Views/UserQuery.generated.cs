@@ -52,6 +52,12 @@ namespace Signum.Web.Extensions.UserQueries.Views
     #line default
     #line hidden
     
+    #line 9 "..\..\UserQueries\Views\UserQuery.cshtml"
+    using Signum.Entities.DynamicQuery;
+    
+    #line default
+    #line hidden
+    
     #line 7 "..\..\UserQueries\Views\UserQuery.cshtml"
     using Signum.Entities.UserAssets;
     
@@ -90,7 +96,7 @@ namespace Signum.Web.Extensions.UserQueries.Views
 WriteLiteral("\r\n\r\n");
 
             
-            #line 11 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 12 "..\..\UserQueries\Views\UserQuery.cshtml"
  using (var e = Html.TypeContext<UserQueryDN>())
 {
     e.LabelColumns = new BsColumn(2);
@@ -103,14 +109,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 18 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 19 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.EntityLine(e, f => f.Owner, el => el.Create = false));
 
             
             #line default
             #line hidden
             
-            #line 18 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 19 "..\..\UserQueries\Views\UserQuery.cshtml"
                                                               
     
     using (var query = e.SubContext(f => f.Query))
@@ -120,14 +126,14 @@ Write(Html.EntityLine(e, f => f.Owner, el => el.Create = false));
             #line default
             #line hidden
             
-            #line 22 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 23 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.HiddenRuntimeInfo(query));
 
             
             #line default
             #line hidden
             
-            #line 22 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 23 "..\..\UserQueries\Views\UserQuery.cshtml"
                                   
        
     
@@ -135,46 +141,48 @@ Write(Html.HiddenRuntimeInfo(query));
             #line default
             #line hidden
             
-            #line 24 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 25 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
 
             
             #line default
             #line hidden
             
-            #line 24 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 25 "..\..\UserQueries\Views\UserQuery.cshtml"
                                                        
     
             
             #line default
             #line hidden
             
-            #line 25 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 26 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.Hidden(query.Compose("Name"), query.Value.Name));
 
             
             #line default
             #line hidden
             
-            #line 25 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 26 "..\..\UserQueries\Views\UserQuery.cshtml"
                                                          
+
+    var niceName = QueryUtils.GetNiceName(query.Value.ToQueryName());
 
     
             
             #line default
             #line hidden
             
-            #line 27 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 30 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
-                     new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
-                     Html.Span(null, query.Value.Name, "form-control-static")));
+                     new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
+                     Html.Span(null, niceName, "form-control-static")));
 
             
             #line default
             #line hidden
             
-            #line 29 "..\..\UserQueries\Views\UserQuery.cshtml"
-                                                                              
+            #line 32 "..\..\UserQueries\Views\UserQuery.cshtml"
+                                                                      
 
     }
     
@@ -183,14 +191,14 @@ Write(Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(q
             #line default
             #line hidden
             
-            #line 33 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 36 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.DisplayName));
 
             
             #line default
             #line hidden
             
-            #line 33 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 36 "..\..\UserQueries\Views\UserQuery.cshtml"
                                           
         
     var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
@@ -200,7 +208,7 @@ Write(Html.ValueLine(e, f => f.DisplayName));
             #line default
             #line hidden
             
-            #line 37 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 40 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.EntityLine(e, f => f.EntityType, el =>
     {
         el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
@@ -211,7 +219,7 @@ Write(Html.EntityLine(e, f => f.EntityType, el =>
             #line default
             #line hidden
             
-            #line 41 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
       
     
 
@@ -227,7 +235,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 47 "..\..\UserQueries\Views\UserQuery.cshtml"
    Write(UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey));
 
             
@@ -236,21 +244,21 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </p>\r\n");
 
             
-            #line 46 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 49 "..\..\UserQueries\Views\UserQuery.cshtml"
     
     
             
             #line default
             #line hidden
             
-            #line 47 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 50 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.WithoutFilters));
 
             
             #line default
             #line hidden
             
-            #line 47 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 50 "..\..\UserQueries\Views\UserQuery.cshtml"
                                              
 
     using (var sc = e.SubContext())
@@ -270,7 +278,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 54 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 57 "..\..\UserQueries\Views\UserQuery.cshtml"
    Write(Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; }));
 
             
@@ -279,21 +287,21 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 56 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 59 "..\..\UserQueries\Views\UserQuery.cshtml"
 
     
             
             #line default
             #line hidden
             
-            #line 57 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 60 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.ColumnsMode));
 
             
             #line default
             #line hidden
             
-            #line 57 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 60 "..\..\UserQueries\Views\UserQuery.cshtml"
                                           
 
             
@@ -308,7 +316,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 59 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 62 "..\..\UserQueries\Views\UserQuery.cshtml"
    Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; }));
 
             
@@ -317,7 +325,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 61 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 64 "..\..\UserQueries\Views\UserQuery.cshtml"
     
 
             
@@ -332,7 +340,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 63 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 66 "..\..\UserQueries\Views\UserQuery.cshtml"
    Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; }));
 
             
@@ -341,7 +349,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 65 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 68 "..\..\UserQueries\Views\UserQuery.cshtml"
     }
 
     
@@ -349,28 +357,28 @@ WriteLiteral("\r\n    </div>\r\n");
             #line default
             #line hidden
             
-            #line 67 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 70 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.PaginationMode));
 
             
             #line default
             #line hidden
             
-            #line 67 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 70 "..\..\UserQueries\Views\UserQuery.cshtml"
                                              
     
             
             #line default
             #line hidden
             
-            #line 68 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.ElementsPerPage));
 
             
             #line default
             #line hidden
             
-            #line 68 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
                                               
 }
 

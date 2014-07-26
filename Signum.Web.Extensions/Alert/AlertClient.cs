@@ -23,6 +23,9 @@ namespace Signum.Web.Alerts
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (types == null)
+                    throw new ArgumentNullException("types");
+
                 Navigator.RegisterArea(typeof(AlertClient));
 
                 Navigator.AddSettings(new List<EntitySettings>

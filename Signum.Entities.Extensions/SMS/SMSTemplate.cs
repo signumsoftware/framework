@@ -77,13 +77,6 @@ namespace Signum.Entities.SMS
             set { Set(ref removeNoSMSCharacters, value); }
         }
 
-        SMSTemplateState state = SMSTemplateState.Created;
-        public SMSTemplateState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
-
         bool active;
         public bool Active
         {
@@ -164,18 +157,10 @@ namespace Signum.Entities.SMS
         public static bool AllowEditMessages = true;
     }
 
-    public enum SMSTemplateState
-    {
-        Created,
-        Modified
-    }
-
     public static class SMSTemplateOperation
     {
         public static readonly ConstructSymbol<SMSTemplateDN>.Simple Create = OperationSymbol.Construct<SMSTemplateDN>.Simple();
         public static readonly ExecuteSymbol<SMSTemplateDN> Save = OperationSymbol.Execute<SMSTemplateDN>();
-        public static readonly ExecuteSymbol<SMSTemplateDN> Disable = OperationSymbol.Execute<SMSTemplateDN>();
-        public static readonly ExecuteSymbol<SMSTemplateDN> Enable = OperationSymbol.Execute<SMSTemplateDN>();
     }
 
     public enum MessageLengthExceeded

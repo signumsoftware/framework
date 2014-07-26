@@ -77,6 +77,11 @@ namespace Signum.Entities.Translation
         Read,
     }
 
+    public static class TranslationPermission
+    {
+        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
+        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
+    }
 
     public static class TranslatorUserOperation
     {

@@ -112,7 +112,12 @@ WriteLiteral("                ");
 
             
             #line 20 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
-           Write(Html.CountSearchControlSpan(fo, csc => { csc.Navigate = true; csc.Href = uq.Href; csc.QueryLabelText = uq.Label.DefaultText(uq.UserQuery.ToString()); }));
+           Write(Html.CountSearchControlSpan(fo, new Context(tc, "cnt"), csc =>
+           {
+               csc.Navigate = true;
+               csc.Href = uq.Href;
+               csc.QueryLabelText = uq.Label.DefaultText(uq.UserQuery.ToString());
+           }));
 
             
             #line default
@@ -120,7 +125,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            </p>\r\n");
 
             
-            #line 22 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
+            #line 27 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
         }
 
             
@@ -129,7 +134,7 @@ WriteLiteral("\r\n            </p>\r\n");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 24 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
+            #line 29 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
 }
             
             #line default

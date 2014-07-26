@@ -58,7 +58,7 @@ namespace Signum.Engine.Isolation
                 }.Register();
 
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertIsolationStrategies;
+                sb.Schema.Initializing += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
                 Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationDN>(),
@@ -102,7 +102,7 @@ namespace Signum.Engine.Isolation
         {
             var result = EnumerableExtensions.JoinStrict(
                 strategies.Keys,
-                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntity() && !typeof(Symbol).IsAssignableFrom(a) && !typeof(SemiSymbol).IsAssignableFrom(a)),
+                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntityOrSymbol() && !typeof(SemiSymbol).IsAssignableFrom(a)),
                 a => a,
                 a => a,
                 (a, b) => 0);

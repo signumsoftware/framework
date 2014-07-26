@@ -26,7 +26,7 @@ namespace Signum.Windows.UIAutomation
                 throw new ArgumentNullException("menuNames");
 
             var menuItem = menu.Child(mi => mi.Current.Name == menuNames[0]);
-            var window = menu.Normalize(mi => mi.Current.ControlType == ControlType.Window);
+            var window = menu.Parent(mi => mi.Current.ControlType == ControlType.Window);
 
             for (int i = 1; i < menuNames.Length; i++)
             {

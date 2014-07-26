@@ -170,12 +170,13 @@ namespace Signum.Engine.Processes
                     MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {
-						var user = process.Mixin<UserProcessSessionMixin>().User; 
+                        var user = process.Mixin<UserProcessSessionMixin>().User;
 
-                        if (user == null)
-                             UserHolder.Current = user.Retrieve();
-  					  
-  					    return null; 
+                        if (user != null)
+                            using (ExecutionMode.Global())
+                                UserHolder.Current = user.Retrieve();
+
+                        return null;
                     };
                 }
             }

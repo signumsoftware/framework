@@ -42,7 +42,7 @@ export class FileLine extends Lines.EntityBase {
             FileLine.initDragDrop(this.prefix.child("DivNew").get(),
                 e=> this.fileDropped(e));
 
-
+        this.prefix.child("sfFile").get().on("change", ev=> this.onChanged(ev)); 
     }
 
     static initDragDrop($div: JQuery, onDropped: (e: DragEvent) => void) {
@@ -161,7 +161,7 @@ export class FileLine extends Lines.EntityBase {
 
         } else {
             this.prefix.child(Entities.Keys.toStr).tryGet().html("");
-            this.prefix.child(Entities.Keys.toStr).tryGet().html("").removeAttr("download").removeAttr("href");
+            this.prefix.child(Entities.Keys.link).tryGet().html("").removeAttr("download").removeAttr("href");
         }
     }
 
@@ -174,7 +174,7 @@ export class FileLine extends Lines.EntityBase {
         this.prefix.child("frame").tryGet().remove();
     }
 
-    onChanged() {
+    onChanged(e: Event) {
         if (this.options.asyncUpload) {
             this.upload();
         }
@@ -194,7 +194,7 @@ export class FileLine extends Lines.EntityBase {
     }
 
     getLink(itemPrefix?: string): string {
-        return this.prefix.child(Entities.Keys.link).get().attr("href");
+        return this.prefix.child(Entities.Keys.link).get().attr("href") || null;
     }
 
     getToString(itemPrefix?: string): string {

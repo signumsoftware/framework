@@ -356,6 +356,8 @@ namespace Signum.Entities.Chart
         [Description("{0} can only be created from the search window")]
         _0CanOnlyBeCreatedFromTheSearchWindow,
         Chart,
+        [Description("Chart")]
+        ChartToken,
         [Description("Chart settings")]
         Chart_ChartSettings,
         [Description("Dimension")]
