@@ -15,8 +15,8 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
                 return 0;
 
-            if(weighter == null)
-                weighter = (c1, c2)=>1;
+            if (weighter == null)
+                weighter = (c1, c2) => 1;
 
             int M1 = str1.Length + 1;
             int M2 = str2.Length + 1;

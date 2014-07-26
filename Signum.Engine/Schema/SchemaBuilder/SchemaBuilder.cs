@@ -284,12 +284,12 @@ namespace Signum.Engine.Maps
                 if (!Settings.FieldAttributes(route).Any(a => a is IgnoreAttribute))
                 {
                     if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
-                        throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                        throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, table, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fi.Name))
-                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fi.Name, type.TypeName()));
+                        throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".Formato(fi.Name, type.TypeName()));
 
                     result.Add(fi.Name, new EntityField(type, fi) { Field = field });
                 }
