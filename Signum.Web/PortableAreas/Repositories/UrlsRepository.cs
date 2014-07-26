@@ -34,6 +34,7 @@ namespace Signum.Web.PortableAreas
             
             { "quickFilter", url => url.Action("QuickFilter", "Finder") },
             { "selectedItemsContextMenu", url => url.Action("SelectedItemsContextMenu", "Finder") },
+            { "count", url => url.Action("Count", "Finder") },
 
             { "autocomplete", url => url.Action("Autocomplete", "Finder") }
         };

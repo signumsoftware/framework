@@ -427,7 +427,7 @@ namespace Signum.Engine.Maps
                         if (num != 1)
                             throw new ConcurrencyException(ident.GetType(), ident.Id);
 
-                        if (table.saveCollections.Value != null)
+                       if (table.saveCollections.Value != null)
                             table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
                     };
                 }
@@ -1099,7 +1099,7 @@ namespace Signum.Engine.Maps
             result.hasOrder = this.Order != null; 
             result.isEmbeddedEntity = typeof(EmbeddedEntity).IsAssignableFrom(this.Field.FieldType);
 
-            if (result.isEmbeddedEntity)
+            if (result.isEmbeddedEntity || result.hasOrder)
             {
                 var trios = new List<Table.Trio>();
                 var assigments = new List<Expression>();

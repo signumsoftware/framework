@@ -219,7 +219,17 @@ export function deleteFilter(trId) {
     $tr.remove();
 }
 
-
+export function count(options: FindOptions, element: JQuery) {
+    SF.onVisible(element).then(() => {
+        SF.ajaxPost({
+            url: SF.Urls.count,
+            data: requestDataForOpenFinder(options, false)
+        }).then(data=> {
+                element.html(data);
+            element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+        });
+    }); 
+}
 
 export class SearchControl {
 
@@ -292,6 +302,7 @@ export class SearchControl {
 
         if (this.options.allowOrder) {
             $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", e => {
+                e.preventDefault();
                 SearchControl.newSortOrder(this.options.orders, $(e.currentTarget), e.shiftKey);
                 this.search();
                 return false;
@@ -338,9 +349,10 @@ export class SearchControl {
         }
 
         if (this.options.showFooter) {
-            this.element.on("click", ".sf-search-footer ul.pagination a", e=>
-                this.search(parseInt($(e.currentTarget).attr("data-page")))
-                );
+            this.element.on("click", ".sf-search-footer ul.pagination a", e=> {
+                e.preventDefault();
+                this.search(parseInt($(e.currentTarget).attr("data-page")));
+            });
 
             this.element.on("change", ".sf-search-footer .sf-pagination-size", e => {
                 if ($(e.currentTarget).find("option:selected").val() == "All") {

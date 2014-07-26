@@ -13,7 +13,7 @@ namespace Signum.Web.Controllers
 {
     public class FinderController : Controller
     {
-        [HttpPost]
+        [HttpPost, ActionSplitter("types")]
         public JsonNetResult Autocomplete(string types, string q, int l)
         {
             Type[] typeArray = EntityBase.ParseTypes(types);
@@ -43,18 +43,30 @@ namespace Signum.Web.Controllers
             return this.JsonNet(result);
         }
 
+        [ActionSplitter("webQueryName")]
+        public ContentResult Count(FindOptions findOptions)
+        {
+            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
+            {
+                FilterOptions = findOptions.FilterOptions
+            });
+
+            return this.Content(count.ToString());
+        }
+
+        [ActionSplitter("webQueryName")]
         public ActionResult Find(FindOptions findOptions)
         {
             return Navigator.Find(this, findOptions);
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult PartialFind(FindOptions findOptions, string prefix, bool isExplore)
         {
             return Navigator.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
             return Navigator.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
@@ -69,7 +81,7 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public ContentResult SelectedItemsContextMenu(string webQueryName, string implementationsKey, string prefix)
         {
             var lites = this.ParseLiteKeys<IdentifiableEntity>();

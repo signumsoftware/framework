@@ -198,6 +198,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.deleteFilter = deleteFilter;
 
+    function count(options, element) {
+        SF.onVisible(element).then(function () {
+            SF.ajaxPost({
+                url: SF.Urls.count,
+                data: exports.requestDataForOpenFinder(options, false)
+            }).then(function (data) {
+                element.html(data);
+                element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+            });
+        });
+    }
+    exports.count = count;
+
     var SearchControl = (function () {
         function SearchControl(element, _options, types) {
             this.keys = {
@@ -255,6 +268,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.allowOrder) {
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
+                    e.preventDefault();
                     SearchControl.newSortOrder(_this.options.orders, $(e.currentTarget), e.shiftKey);
                     _this.search();
                     return false;
@@ -298,7 +312,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.showFooter) {
                 this.element.on("click", ".sf-search-footer ul.pagination a", function (e) {
-                    return _this.search(parseInt($(e.currentTarget).attr("data-page")));
+                    e.preventDefault();
+                    _this.search(parseInt($(e.currentTarget).attr("data-page")));
                 });
 
                 this.element.on("change", ".sf-search-footer .sf-pagination-size", function (e) {

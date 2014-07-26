@@ -19,7 +19,7 @@ using Signum.Test.Properties;
 
 namespace Signum.Test.Environment
 {
-    public static class Starter
+    public static class MusicStarter
     {
         static bool startedAndLoaded = false;
         public static void StartAndLoad()
@@ -50,7 +50,7 @@ namespace Signum.Test.Environment
                 Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
 
 
-            sb.Schema.Version = typeof(Starter).Assembly.GetName().Version;
+            sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
             sb.Schema.Settings.OverrideAttributes((OperationLogDN ol) => ol.User, new ImplementedByAttribute());
             sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute());

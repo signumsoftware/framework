@@ -192,13 +192,12 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 var colName = m.Groups["token"].Value;
-                var displayCapture = m.Groups["name"].Captures;
                 var token = QueryUtils.Parse(colName, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
                 return new ColumnOption
                 {
                     Token = token,
                     ColumnName = colName,
-                    DisplayName = displayCapture.Count > 0 ? DecodeValue(m.Groups["name"].Value) : colName
+                    DisplayName =m.Groups["name"].Success ? DecodeValue(m.Groups["name"].Value) : null
                 };
             }).ToList();
         }

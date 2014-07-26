@@ -373,8 +373,8 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
     if ((<ViewPopupOptions>options).saveProtected != null)
         obj["saveProtected"] = (<ViewPopupOptions>options).saveProtected;
 
-    if (options.showOperations != true)
-        obj["showOperations"] = false;
+    if (options.showOperations != null)
+        obj["showOperations"] = options.showOperations;
 
     if (!SF.isEmpty(options.partialViewName)) //Send specific partialview if given
         obj["partialViewName"] = options.partialViewName;

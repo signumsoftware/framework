@@ -49,7 +49,7 @@ namespace Signum.Engine.Basics
             {
                 Schema current = Schema.Current;
 
-                current.Initializing[InitLevel.Level0SyncEntities] += () =>
+                current.Initializing += () =>
                 {
                     var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
 

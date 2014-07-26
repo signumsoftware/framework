@@ -232,7 +232,7 @@ namespace Signum.Engine
 
         static float Distance(StringDistance sd, string o, string n)
         {
-            return sd.LevenshteinDistance(o, n, weighter: (oc, nc) => oc.HasValue && nc.HasValue ? 2 : 1);
+            return sd.LevenshteinDistance(o, n, weight: c => c.Type == StringDistance.ChoiceType.Substitute ? 2 : 1);
         }
 
         public string SelectInteractive(string oldValue, ICollection<string> newValues, string replacementsKey, StringDistance sd)

@@ -77,6 +77,11 @@ namespace Signum.Entities
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumEntity<>);
         }
 
+        public static bool IsEnumEntityOrSymbol(this Type type)
+        {
+            return type.IsEnumEntity() || typeof(Symbol).IsAssignableFrom(type);
+        }
+
         public static IEnumerable<Enum> GetValues(Type enumType)
         {
             return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key); 

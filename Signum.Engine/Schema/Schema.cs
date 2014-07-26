@@ -299,83 +299,20 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public class InitEventDictionary
-        {
-            Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
-            InitLevel? initLevel;
-
-            public Action this[InitLevel level]
-            {
-                get { return dict.TryGetC(level); }
-                set
-                {
-                    int current = dict.TryGetC(level).Try(d => d.GetInvocationList().Length) ?? 0;
-                    int @new = value.Try(d => d.GetInvocationList().Length) ?? 0;
-
-                    if (Math.Abs(current - @new) > 1)
-                        throw new InvalidOperationException("add or remove just one event handler each time");
-
-                    dict[level] = value;
-                }
-            }
-
-            public void InitializeUntil(InitLevel topLevel)
-            {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
-                {
-                    InitializeJust(current);
-                    initLevel = current;
-                }
-            }
-
-            void InitializeJust(InitLevel currentLevel)
-            {
-                using (HeavyProfiler.Log("InitializeJuts", () => currentLevel.ToString()))
-                {
-                    Action h = dict.TryGetC(currentLevel);
-                    if (h == null)
-                        return;
-
-                    var handlers = h.GetInvocationList().Cast<Action>();
-
-                    foreach (Action handler in handlers)
-                    {
-                        using (HeavyProfiler.Log("InitAction", () => "{0}.{1}".Formato(handler.Method.DeclaringType.TypeName(), handler.Method.MethodName())))
-                        {
-                            handler();
-                        }
-                    }
-                }
-            }
-
-            public override string ToString()
-            {
-                return dict.OrderBy(a => a.Key)
-                    .ToString(a => "{0} -> \r\n{1}".Formato(
-                        a.Key,
-                        a.Value.GetInvocationList().Select(h => h.Method).ToString(mi => "\t{0}.{1}".Formato(
-                            mi.DeclaringType.TypeName(),
-                            mi.MethodName()),
-                        "\r\n")
-                    ), "\r\n\r\n");
-            }
-        }
-
-        public InitEventDictionary Initializing = new InitEventDictionary();
+        public Action Initializing;
 
         public void Initialize()
         {
-            using (ExecutionMode.Global())
-                Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
-        }
+            if (Initializing == null)
+                return;
 
-        public void InitializeUntil(InitLevel level)
-        {
             using (ExecutionMode.Global())
-                Initializing.InitializeUntil(level);
-        }
+                foreach (Action item in Initializing.GetInvocationList())
+                    item();
 
+            Initializing = null;
+        }
 
         #endregion
 

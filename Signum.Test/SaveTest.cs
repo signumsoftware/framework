@@ -18,7 +18,7 @@ namespace Signum.Test
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad();
+            MusicStarter.StartAndLoad();
         }
 
         [TestInitialize]
