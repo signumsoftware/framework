@@ -58,11 +58,13 @@ namespace Signum.Web
             if (entitySettings.ViewRoute != null)
                 return entitySettings.ViewRoute(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
 
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
+            var result = new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
                 id = id.TryToString()
             });
+
+            return result;
         }
 
         public static string NavigateRoute(IIdentifiable ie)
