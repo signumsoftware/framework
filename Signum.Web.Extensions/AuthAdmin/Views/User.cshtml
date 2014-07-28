@@ -12,8 +12,7 @@
             Html.Password(e.Compose(UserMapping.NewPasswordBisKey), "").Concat(
             Html.ValidationMessage(e.Compose(UserMapping.NewPasswordBisKey)) ?? MvcHtmlString.Empty))
     }
-
-   
+    
     @Html.EntityLine(e, f => f.Role)
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
