@@ -49,11 +49,21 @@ namespace Signum.Entities.Isolation
                 throw new InvalidOperationException("Trying to change isolation from {0} to {1}".Formato(curr, isolation));
             }
 
-            var old = CurrentThreadVariable.Value; 
+            return UnsafeOverride(isolation);
+        }
+
+        public static IDisposable Disable()
+        {
+            return UnsafeOverride(null);
+        }
+
+        static IDisposable UnsafeOverride(Lite<IsolationDN> isolation)
+        {
+            var old = CurrentThreadVariable.Value;
 
             CurrentThreadVariable.Value = isolation;
 
-            return new Disposable(() => CurrentThreadVariable.Value = old); 
+            return new Disposable(() => CurrentThreadVariable.Value = old);
         }
 
         public static Lite<IsolationDN> Current
