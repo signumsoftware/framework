@@ -172,7 +172,8 @@ namespace Signum.Engine.Processes
                     {
 						var user = process.Mixin<UserProcessSessionMixin>().User; 
 
-                        if (user == null)
+                        if (user != null)
+                            using (AuthLogic.Disable())
                              UserHolder.Current = user.Retrieve();
   					  
   					    return null; 
