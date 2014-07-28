@@ -79,6 +79,9 @@ namespace Signum.Windows
             {
                 W win = windowConstructor();
 
+                if (win == null)
+                    return;
+
                 if (closed != null)
                     win.Closed += (sender, args) => closed(sender, args);
 
@@ -114,7 +117,8 @@ namespace Signum.Windows
 
                         W win = windowConstructor();
 
-                      
+                        if (win == null)
+                            return;
 
                         threadWindows.TryAdd(Thread.CurrentThread, win);
 
