@@ -71,13 +71,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordNeverExpires, value); }
         }
        
-        IIdentifiable related;
-        public IIdentifiable Related
-        {
-            get { return related; }
-            set { Set(ref related, value); }
-        }
-
         RoleDN role;
         [NotNullValidator]
         public RoleDN Role

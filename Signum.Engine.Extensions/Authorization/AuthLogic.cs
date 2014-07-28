@@ -145,7 +145,6 @@ namespace Signum.Engine.Authorization
                         e.Email,
                         e.Role,
                         e.State,
-                        e.Related,
                     });
 
                 UserGraph.Register();
