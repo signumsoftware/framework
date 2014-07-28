@@ -91,7 +91,8 @@ namespace Signum.Windows.Isolation
                 if(entity != null)
                     current = current ?? entity.TryIsolation();
 
-                IsolationDN.CurrentThreadVariable.Value = current;
+                if (current != null)
+                    IsolationDN.CurrentThreadVariable.Value = current;
             }; 
         }
 
