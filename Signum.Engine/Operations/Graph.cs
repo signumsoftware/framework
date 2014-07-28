@@ -443,7 +443,7 @@ namespace Signum.Engine.Operations
                                         Operation = log.Operation,
                                         Start = log.Start,
                                         User = log.User,
-                                        Target = entity.ToLite(),
+                                        Target = entity.IsNew ? null : entity.ToLite(),
                                         Exception = exLog.ToLite(),
                                         End = TimeZoneManager.Now
                                     };

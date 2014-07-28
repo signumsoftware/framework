@@ -689,7 +689,7 @@ namespace Signum.Engine.Maps
     {
         public bool IsRoot { get; set; }
         public bool WasNew { get; set; }
-        public bool WasModified { get; set; }
+        public bool WasSelfModified { get; set; }
     }
 
 

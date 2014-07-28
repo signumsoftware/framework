@@ -67,7 +67,7 @@ namespace Signum.Web
 
     public static class LinksClient
     {
-        static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> entityLinks =
+        public static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> EntityLinks =
             new Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>(
                 merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
                 minimumType: typeof(IdentifiableEntity));
@@ -76,11 +76,11 @@ namespace Signum.Web
         public static void RegisterEntityLinks<T>(Func<Lite<T>, QuickLinkContext, QuickLink[]> getQuickLinks)
             where T : IdentifiableEntity
         {
-            var current = entityLinks.GetDefinition(typeof(T));
+            var current = EntityLinks.GetDefinition(typeof(T));
 
             current += (t, p0) => getQuickLinks((Lite<T>)t, p0);
 
-            entityLinks.SetDefinition(typeof(T), current);
+            EntityLinks.SetDefinition(typeof(T), current);
         }
 
 
@@ -90,7 +90,7 @@ namespace Signum.Web
 
             QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix }; 
 
-            var func  =  entityLinks.TryGetValue(ident.EntityType);
+            var func  =  EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
                 foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
