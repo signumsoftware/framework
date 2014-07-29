@@ -399,7 +399,7 @@ namespace Signum.Web
                 return null;
 
             bool hasQuote = p.Contains("\"");
-            if (hasQuote || p.Contains(";") || p.Contains(";"))
+            if (hasQuote || p.Contains(",") || p.Contains(";"))
             {
                 if (hasQuote)
                     p = p.Replace("\"", "\"\"");
