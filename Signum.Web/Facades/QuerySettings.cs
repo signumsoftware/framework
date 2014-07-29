@@ -59,7 +59,7 @@ namespace Signum.Web
                 new FormatterRule(c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
                     return h.LightEntityLine((Lite<IIdentifiable>)o, false);
-                })),
+                }){ WriteData = true }),
 
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
@@ -86,7 +86,7 @@ namespace Signum.Web
                         return s.EncodeHtml();
                     }
                     return MvcHtmlString.Empty;
-                }){ TextAlign = "right"}),
+                }){ WriteData = true, TextAlign = "right"}),
 
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => new CellFormatter((h,o) => 
                 {
@@ -95,7 +95,7 @@ namespace Signum.Web
                         .Attr("disabled", "disabled")
                         .Let(a => (bool)o ? a.Attr("checked", "checked") : a)
                         .ToHtml() : MvcHtmlString.Empty;
-                }){ TextAlign = "center"}),
+                }){ WriteData = true, TextAlign = "center"}),
             };
 
             EntityFormatRules = new List<EntityFormatterRule>
@@ -181,7 +181,7 @@ namespace Signum.Web
 
             string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
 
-            return MvcHtmlString.Create("data-value=" + key);
+            return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }
     }
 }
