@@ -50,6 +50,13 @@ namespace Signum.Utilities
             get { return currentTask; }
         }
 
+        public void Start(int max)
+        {
+            this.min = 0;
+            this.max = max;
+            this.position = 0;
+            OnChanged(ProgressAction.Interval);
+        }
 
         public void Start(string currentTask)
         {
@@ -119,6 +126,8 @@ namespace Signum.Utilities
             n |= n >> 16;
             return n;
         }
+
+      
     }
 
     public enum ProgressAction
