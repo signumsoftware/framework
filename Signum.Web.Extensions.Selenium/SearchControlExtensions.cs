@@ -13,13 +13,13 @@ namespace Signum.Web.Selenium
     {
         public static SearchPopupProxy AdministerExcelReports(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("qbReportAdminister"));
+            sc.Selenium.MouseUp(sc.MenuOptionLocator("qbReportAdminister"));
             return new SearchPopupProxy(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static PopupControl<ExcelReportDN> CreateExcelReport(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("qbReportCreate"));
+            sc.Selenium.MouseUp(sc.MenuOptionLocator("qbReportCreate"));
             return new PopupControl<ExcelReportDN>(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
@@ -30,7 +30,7 @@ namespace Signum.Web.Selenium
 
         public static NormalPage<UserQueryDN> NewUserQuery(this SearchControlProxy sc)
         {
-            sc.Selenium.Click(sc.MenuOptionLocator("qbUserQueryNew"));
+            sc.Selenium.MouseUp(sc.MenuOptionLocator("qbUserQueryNew"));
             sc.Selenium.WaitForPageToLoad();
 
             return new NormalPage<UserQueryDN>(sc.Selenium); 

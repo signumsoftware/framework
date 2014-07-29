@@ -153,7 +153,7 @@ namespace Signum.Web.Chart
             if (Navigator.IsCreable(typeof(UserChartDN), isSearch: true))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
-                items.Add(new MenuItem(prefix, "qbUserhartNew")
+                items.Add(new MenuItem(prefix, "qbUserChartNew")
                 {
                     Title = uqNewText,
                     Text = uqNewText,
