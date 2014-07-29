@@ -9,15 +9,18 @@ namespace Signum.Utilities
     {
         const int numUpdates = 10000;
 
+        private string currentTask;
+
         private int min;
         private int max;
         private int position;
-        private int stepMask;
+
         public event EventHandler<ProgressArgs> Changed;
-        private string currentTask;
 
         public ProgressProxy()
-        { }
+        {
+        }
+
 
         public int Min
         {
@@ -37,7 +40,6 @@ namespace Signum.Utilities
                 if (min <= value && value <= max)
                 {
                     position = value;
-                    if ((stepMask & position) == 0)
                         OnChanged(ProgressAction.Position);
                 }
             }
@@ -46,18 +48,8 @@ namespace Signum.Utilities
         public string CurrentTask
         {
             get { return currentTask; }
-            set
-            {
-                currentTask = value;
-                OnChanged(ProgressAction.Task);
-            }
         }
 
-
-        public void Start(int max)
-        {
-            Start(0, max, "");
-        }
 
         public void Start(string currentTask)
         {
@@ -87,11 +79,6 @@ namespace Signum.Utilities
             this.position = position ?? min;
             this.max = max;
 
-            if (max - min > numUpdates * 2)
-                stepMask = RoundToPowerOfTwoMinusOne((max - min) / numUpdates) - 1;
-            else
-                stepMask = 1;
-
             OnChanged(ProgressAction.Interval | ProgressAction.Task);
         }
 
@@ -99,14 +86,14 @@ namespace Signum.Utilities
         {
             this.position = position;
             this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position | ProgressAction.Task);
+            OnChanged(ProgressAction.Position);
         }
 
         public void NextTask(string currentTask)
         {
             this.position++;
             this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position | ProgressAction.Task);
+            OnChanged(ProgressAction.Task | ProgressAction.Position);
         }
 
         public void Reset()

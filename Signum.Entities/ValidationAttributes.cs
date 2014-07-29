@@ -917,7 +917,16 @@ namespace Signum.Entities
         [Description("The number of elements of {{0}} has to be {0} {1}")]
         TheNumberOfElementsOf0HasToBe01,
         [Description("Type {0} not allowed")]
-        Type0NotAllowed
+        Type0NotAllowed,
+
+        [Description("{0} is mandatory when {1} is not set")]
+        _0IsMandatoryWhen1IsNotSet,
+        [Description("{0} is mandatory when {1} is set")]
+        _0IsMandatoryWhen1IsSet,
+        [Description("{0} should be null when {1} is not set")]
+        _0ShouldBeNullWhen1IsNotSet,
+        [Description("{0} should be null when {1} is set")]
+        _0ShouldBeNullWhen1IsSet
     }
 
 
