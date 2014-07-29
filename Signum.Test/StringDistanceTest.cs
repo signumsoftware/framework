@@ -96,7 +96,7 @@ namespace Signum.Test
 
             var str = result.ToString("");
 
-            Assert.AreEqual("[e,i]n un l[u,e]gar[-,i][-,t][-,o] de la m[a,i]ncha", str);
+            Assert.AreEqual("[-e+i]n un l[-u+e]gar+i+t+o de la m[-a+i]ncha", str);
         }
 
         [TestMethod]
@@ -125,7 +125,7 @@ Adios Juani";
 [-]-Que tal
 [-]-Bien
 [=]
-[=]Adios -Juan+Juani", result);
+[=]Adios -Juan+Juani", str);
 
         }
     }
