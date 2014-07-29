@@ -1017,7 +1017,7 @@
     <Resource Include="Images\sms.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\controlPanel.png" />
+    <Resource Include="Images\dashboard.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\chartScript.png" />
