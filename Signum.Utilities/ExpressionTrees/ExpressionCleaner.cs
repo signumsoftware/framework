@@ -226,12 +226,25 @@ namespace Signum.Utilities.ExpressionTrees
             Type type = mi.DeclaringType;
 
             FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi != null)
-                return fi.GetValue(null) as LambdaExpression;
-            else if (efa != null)
-                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName())); 
+            if (fi == null)
+            {
+                if (efa != null)
+                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName()));
 
-            return null;
+                return null;
+            }
+
+            var obj = fi.GetValue(null);
+
+            if (obj == null)
+                throw new InvalidOperationException("Expression field '{0}' is null".Formato(name));
+
+            var result = obj as LambdaExpression;
+
+            if (result == null)
+                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".Formato(name, type.TypeName()));
+
+            return result;
         }
 
         static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;

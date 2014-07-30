@@ -566,6 +566,14 @@ namespace Signum.Web
             return loadedModules.Add(methodName);
         }
 
+        public void AssertDefined(MethodBase methodBase)
+        {
+            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+
+            if (!loadedModules.Contains(name))
+                throw new InvalidOperationException("Call {0} first".Formato(name));
+        }
+
         protected internal string GetOrCreateTabID(ControllerBase c)
         {
             if (c.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))

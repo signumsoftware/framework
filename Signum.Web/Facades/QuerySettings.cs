@@ -54,7 +54,7 @@ namespace Signum.Web
                 new FormatterRule(c => c.Type.UnNullify().IsEnum, c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((Enum)o).NiceToString().EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = true }),
+                })),
 
                 new FormatterRule(c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
@@ -165,7 +165,7 @@ namespace Signum.Web
 
     public class CellFormatter
     {
-        public bool WriteData;
+        public bool WriteData = true;
         public string TextAlign;
         public Func<HtmlHelper, object, MvcHtmlString> Formatter;
 
@@ -181,7 +181,7 @@ namespace Signum.Web
 
             string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
 
-            return MvcHtmlString.Create("data-value=" + key);
+            return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }
     }
 }

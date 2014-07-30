@@ -10,15 +10,15 @@ namespace Signum.Utilities
     {
         int[,] num;
 
-        public int LevenshteinDistance(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
+        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
         {
-            return LevenshteinDistance<char>(str1.ToCharArray(), str2.ToCharArray(), comparer, weight);
+            return LevenshteinDistance<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight);
         }
 
-        public int LevenshteinDistance<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
+        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
         {
-            int M1 = str1.Length + 1;
-            int M2 = str2.Length + 1;
+            int M1 = strOld.Length + 1;
+            int M2 = strNew.Length + 1;
 
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
@@ -31,21 +31,21 @@ namespace Signum.Utilities
             num[0, 0] = 0;
 
             for (int i = 1; i < M1; i++)
-                num[i, 0] = num[i - 1, 0] + weight(Choice<T>.Add(str1[i - 1]));
+                num[i, 0] = num[i - 1, 0] + weight(Choice<T>.Remove(strOld[i - 1]));
             for (int j = 1; j < M2; j++)
-                num[0, j] = num[0, j - 1] + weight(Choice<T>.Remove(str2[j - 1]));
+                num[0, j] = num[0, j - 1] + weight(Choice<T>.Add(strNew[j - 1]));
 
             for (int i = 1; i < M1; i++)
             {
                 for (int j = 1; j < M2; j++)
                 {
-                    if (comparer.Equals(str1[i - 1], str2[j - 1]))
+                    if (comparer.Equals(strOld[i - 1], strNew[j - 1]))
                         num[i, j] = num[i - 1, j - 1];
                     else
                         num[i, j] = Math.Min(Math.Min(
-                            num[i - 1, j] + weight(Choice<T>.Add(str1[i - 1])),
-                            num[i, j - 1] + weight(Choice<T>.Remove(str2[j - 1]))),
-                            num[i - 1, j - 1] + weight(Choice<T>.Substitute(str1[i - 1], str2[j - 1])));
+                            num[i - 1, j] + weight(Choice<T>.Remove(strOld[i - 1])),
+                            num[i, j - 1] + weight(Choice<T>.Add(strNew[j - 1]))),
+                            num[i - 1, j - 1] + weight(Choice<T>.Substitute(strOld[i - 1], strNew[j - 1])));
                 }
             }
 
@@ -62,32 +62,30 @@ namespace Signum.Utilities
             Add,
         }
 
-
-
         public struct Choice<T>
         {
             public readonly ChoiceType Type;
-            public readonly T Added;
             public readonly T Removed;
+            public readonly T Added;
 
-            public bool HasAdded { get { return Type != ChoiceType.Remove; } }
             public bool HasRemoved { get { return Type != ChoiceType.Add; } }
+            public bool HasAdded { get { return Type != ChoiceType.Remove; } }
 
-            internal Choice( ChoiceType type, T added, T removed)
+            internal Choice( ChoiceType type, T removed, T added)
             {
                 this.Type = type;
-                this.Added = added;
                 this.Removed = removed;
+                this.Added = added;
             }
 
             public static Choice<T> Add(T value)
             {
-                return new Choice<T>(ChoiceType.Add, value, default(T));
+                return new Choice<T>(ChoiceType.Add, default(T), value);
             }
 
             public static Choice<T> Remove(T value)
             {
-                return new Choice<T>(ChoiceType.Remove, default(T), value);
+                return new Choice<T>(ChoiceType.Remove, value, default(T));
             }
 
             public static Choice<T> Equal(T value)
@@ -95,9 +93,9 @@ namespace Signum.Utilities
                 return new Choice<T>(ChoiceType.Equal, value, value);
             }
 
-            public static Choice<T> Substitute(T add, T remove)
+            public static Choice<T> Substitute(T remove, T add)
             {
-                return new Choice<T>(ChoiceType.Substitute, add, remove);
+                return new Choice<T>(ChoiceType.Substitute, remove, add);
             }
 
 
@@ -114,12 +112,12 @@ namespace Signum.Utilities
             }
         }
 
-        public List<Choice<char>> LevenshteinChoices(string str1, string str2, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
+        public List<Choice<char>> LevenshteinChoices(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
         {
-            return LevenshteinChoices<char>(str1.ToCharArray(), str2.ToCharArray(), comparer, weight);
+            return LevenshteinChoices<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight);
         }
 
-        public List<Choice<T>> LevenshteinChoices<T>(T[] str1, T[] str2, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
+        public List<Choice<T>> LevenshteinChoices<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
         {
             if (comparer == null)
                 comparer = EqualityComparer<T>.Default;
@@ -127,43 +125,47 @@ namespace Signum.Utilities
             if (weight == null)
                 weight = (c) => 1;
 
-            this.LevenshteinDistance<T>(str1, str2, comparer, weight);
+            this.LevenshteinDistance<T>(strOld, strNew, comparer, weight);
 
-            int i = str1.Length;
-            int j = str2.Length;
+            int i = strOld.Length;
+            int j = strNew.Length;
 
             List<Choice<T>> result = new List<Choice<T>>();
 
             while (i > 0 && j > 0)
             {
-                if (comparer.Equals(str1[i - 1], str2[j - 1]))
+                if (comparer.Equals(strOld[i - 1], strNew[j - 1]))
                 {
-                    result.Add(Choice<T>.Equal(str1[i - 1]));
+                    result.Add(Choice<T>.Equal(strOld[i - 1]));
                     i = i - 1;
                     j = j - 1;
                 }
                 else
                 {
-                    var add1 = num[i - 1, j] + weight(Choice<T>.Add(str1[i - 1]));
-                    var remove2 = num[i, j - 1] + weight(Choice<T>.Remove(str2[j - 1]));
-                    var replace = num[i - 1, j - 1] + weight(Choice<T>.Substitute(str1[i - 1], str2[j - 1]));
+                    var cRemove = Choice<T>.Remove(strOld[i - 1]);
+                    var cAdd = Choice<T>.Add(strNew[j - 1]);
+                    var cSubstitute = Choice<T>.Substitute(strOld[i - 1], strNew[j - 1]);
 
-                    var min = Math.Min(add1, Math.Min(remove2, replace));
+                    var remove = num[i - 1, j] + weight(cRemove);
+                    var add = num[i, j - 1] + weight(cAdd);
+                    var substitute = num[i - 1, j - 1] + weight(cSubstitute);
 
-                    if (replace == min)
+                    var min = Math.Min(remove, Math.Min(add, substitute));
+
+                    if (substitute == min)
                     {
-                        result.Add(Choice<T>.Substitute(str1[i - 1], str2[j - 1]));
+                        result.Add(cSubstitute);
                         i = i - 1;
                         j = j - 1;
                     }
-                    else if (add1 == min)
+                    else if (remove == min)
                     {
-                        result.Add(Choice<T>.Add(str1[i - 1]));
+                        result.Add(cRemove);
                         i = i - 1;
                     }
-                    else if (remove2 == min)
+                    else if (add == min)
                     {
-                        result.Add(Choice<T>.Remove(str2[j - 1]));
+                        result.Add(cAdd);
                         j = j - 1;
                     }
                 }
@@ -293,7 +295,7 @@ namespace Signum.Utilities
             {
                 for (int j = 1; j < M2; j++)
                 {
-                    if (!comparer.Equals(str1[i], str2[j]))
+                    if (comparer.Equals(str1[i - 1], str2[j - 1]))
                         num[i, j] = num[i - 1, j - 1] + 1;
                     else
                     {
@@ -383,7 +385,7 @@ namespace Signum.Utilities
                     if (c.Type == ChoiceType.Remove)
                         return new DiffPair<List<DiffPair<string>>>(DiffAction.Removed, new List<DiffPair<string>> { new DiffPair<string>(DiffAction.Removed, c.Removed) });
 
-                    var diffWords = sd.DiffWords(c.Added, c.Removed);
+                    var diffWords = sd.DiffWords(c.Removed, c.Added);
 
                     return new DiffPair<List<DiffPair<string>>>(DiffAction.Equal, diffWords); 
                 });
