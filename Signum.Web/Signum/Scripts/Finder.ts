@@ -483,10 +483,18 @@ export class SearchControl {
         var $td = $(e.target).closest("td");
         var $menu = SF.ContextMenu.createContextMenu(e);
 
+      
         if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
             $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(() => this.quickFilterCell($td))));
-            $menu.append($("<li class='divider'></li>"));
         }
+
+        var a = $td.find("a");
+        if (a.length && a.attr("href")) {
+            $menu.append($("<li>").append($("<a>").text(lang.signum.openTab + " " + a.text()).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+        }
+       
+        if ($menu.children().length)
+            $menu.append($("<li class='divider'></li>"));
 
         var message = this.loadingMessage();
 
@@ -497,6 +505,8 @@ export class SearchControl {
             data: this.requestDataForContextMenu()
         }).then((items) => message.replaceWith(items || this.noActionsFoundMessage()));
     }
+
+    
 
     requestDataForContextMenu() {
         return {
@@ -512,15 +522,22 @@ export class SearchControl {
 
         var $menu = SF.ContextMenu.createContextMenu(e);
 
-        $menu.html(this.loadingMessage());
+        var a = $td.find("a");
+        if (a.length && a.attr("href")) {
+            $menu.append($("<li>").append($("<a>").text(lang.signum.openTab).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+        }
+
+        if ($menu.children().length)
+            $menu.append($("<li class='divider'></li>"));
+
+        var message = this.loadingMessage();
+
+        $menu.append(message);
 
         SF.ajaxPost({
             url: SF.Urls.selectedItemsContextMenu,
             data: this.requestDataForContextMenu()
-        })
-            .then((items) => {
-                $menu.html(items || this.noActionsFoundMessage());
-            });
+        }).then((items) => message.replaceWith(items || this.noActionsFoundMessage()));
 
         return false;
     }

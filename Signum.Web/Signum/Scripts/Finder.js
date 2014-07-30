@@ -454,8 +454,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(function () {
                     return _this.quickFilterCell($td);
                 })));
-                $menu.append($("<li class='divider'></li>"));
             }
+
+            var a = $td.find("a");
+            if (a.length && a.attr("href")) {
+                $menu.append($("<li>").append($("<a>").text(lang.signum.openTab + " " + a.text()).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+            }
+
+            if ($menu.children().length)
+                $menu.append($("<li class='divider'></li>"));
 
             var message = this.loadingMessage();
 
@@ -488,13 +495,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var $menu = SF.ContextMenu.createContextMenu(e);
 
-            $menu.html(this.loadingMessage());
+            var a = $td.find("a");
+            if (a.length && a.attr("href")) {
+                $menu.append($("<li>").append($("<a>").text(lang.signum.openTab).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+            }
+
+            if ($menu.children().length)
+                $menu.append($("<li class='divider'></li>"));
+
+            var message = this.loadingMessage();
+
+            $menu.append(message);
 
             SF.ajaxPost({
                 url: SF.Urls.selectedItemsContextMenu,
                 data: this.requestDataForContextMenu()
             }).then(function (items) {
-                $menu.html(items || _this.noActionsFoundMessage());
+                return message.replaceWith(items || _this.noActionsFoundMessage());
             });
 
             return false;

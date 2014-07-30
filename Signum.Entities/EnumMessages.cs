@@ -224,6 +224,8 @@ Lose changes?")]
         chooseAValue,
         [Description("Add filter")]
         addFilter,
+        [Description("Open tab")]
+        openTab,
         [Description("Rename column")]
         renameColumn,
         [Description("Enter the new column name")]
