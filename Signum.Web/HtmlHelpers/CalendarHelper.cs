@@ -111,7 +111,7 @@ namespace Signum.Web
                 case "u": return info.UniversalSortableDateTimePattern;
                 case "U": return info.FullDateTimePattern;
                 case "y":
-                case "Y": return info.YearMonthPattern;
+                case "Y": return info.ShortDatePattern;//info.YearMonthPattern;
                 default: return format;
             }
         }
