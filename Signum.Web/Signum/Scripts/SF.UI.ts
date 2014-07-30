@@ -351,4 +351,20 @@ once("ajaxError", () =>
         });
     }));
 
+once("dateTimePickerSync", () => {
+    $(function () {
+        $(document).on("changeDate clearDate", 'div.date-time div.date', function (e : any) {
+            var time = $(this).closest("div.date-time").find("div.time")
+            time.timepicker("setTime", e.date);
+        });
+
+        $(document).on("show.timepicker", 'div.date-time div.time', function (e: any) {
+            var time = $(this).closest("div.date-time").find("div.date")
+            var date = time.datepicker("getDate");
+            if (isNaN(date.getTime()))
+                e.time.cancel = true;
+        });
+    });
+});
+
 
