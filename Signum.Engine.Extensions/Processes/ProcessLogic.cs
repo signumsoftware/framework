@@ -286,13 +286,20 @@ namespace Signum.Engine.Processes
         public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IdentifiableEntity copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessDN>())
-                return new ProcessDN(process)
+            {
+                var result = new ProcessDN(process)
                 {
                     State = ProcessState.Created,
                     Data = processData,
                     MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None,
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None,
-                }.CopyMixinsFrom(copyMixinsFrom).Save();
+                };
+                
+                if(copyMixinsFrom != null)
+                    process.CopyMixinsFrom(copyMixinsFrom);
+
+                return result.Save();
+            }
         }
 
         public static void ExecuteTest(this ProcessDN p)
