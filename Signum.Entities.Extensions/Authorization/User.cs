@@ -131,7 +131,13 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserDN, EmailOwnerData>> EmailOwnerDataExpression;
+        public static Expression<Func<UserDN, EmailOwnerData>> EmailOwnerDataExpression = entity => new EmailOwnerData
+        {
+            Owner = entity.ToLite(),
+            CultureInfo = entity.CultureInfo,
+            DisplayName = entity.UserName,
+            Email = entity.Email,
+        };
         public EmailOwnerData EmailOwnerData
         {
             get{ return EmailOwnerDataExpression.Evaluate(this); }
