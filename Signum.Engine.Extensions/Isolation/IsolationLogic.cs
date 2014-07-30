@@ -141,7 +141,7 @@ namespace Signum.Engine.Isolation
         {
             Schema.Current.EntityEvents<T>().FilterQuery += query =>
             {
-                if (IsolationDN.Current == null || ExecutionMode.InGlobal)
+                if (ExecutionMode.InGlobal || IsolationDN.Current == null)
                     return query;
 
                 Expression<Func<T, bool>> filter = a => a.Mixin<IsolationMixin>().Isolation == IsolationDN.Current;
