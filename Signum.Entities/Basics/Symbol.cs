@@ -85,6 +85,11 @@ namespace Signum.Entities
             return ToStringExpression.Evaluate(this);
         }
 
+        public bool BaseEquals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
         public override bool Equals(object obj)
         {
             return obj is Symbol &&
