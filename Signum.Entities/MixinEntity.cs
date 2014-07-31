@@ -192,8 +192,6 @@ namespace Signum.Entities
 
             return newEntity;
         }
-
-       
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
