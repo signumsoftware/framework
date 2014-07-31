@@ -78,13 +78,6 @@ namespace Signum.Engine.Authorization
                 CultureInfoLogic.AssertStarted(sb); 
 
                 sb.Include<UserDN>();
-                UserDN.EmailOwnerDataExpression = entity => new EmailOwnerData
-                {
-                    Owner = entity.ToLite(),
-                    CultureInfo = entity.CultureInfo.ToCultureInfo(),
-                    DisplayName = entity.UserName,
-                    Email = entity.Email,
-                };
                 
                 sb.Include<RoleDN>();
                 sb.Include<LastAuthRulesImportDN>(); 
@@ -145,7 +138,6 @@ namespace Signum.Engine.Authorization
                         e.Email,
                         e.Role,
                         e.State,
-                        e.Related,
                     });
 
                 UserGraph.Register();

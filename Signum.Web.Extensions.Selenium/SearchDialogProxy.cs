@@ -19,7 +19,8 @@ namespace Signum.Web.Selenium
         public FiltersProxy Filters { get { return SearchControl.Filters; } }
         public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
 
-        public SearchPopupProxy(ISelenium selenium, string prefix) : base(selenium, prefix)
+        public SearchPopupProxy(ISelenium selenium, string prefix)
+            : base(selenium, prefix)
         {
             this.SearchControl = new SearchControlProxy(selenium, prefix);
         }
@@ -38,7 +39,7 @@ namespace Signum.Web.Selenium
         }
 
         public void SelectByPosition(int rowIndex)
-        {   
+        {
             this.SearchControl.Search();
 
             this.SearchControl.Results.SelectRow(rowIndex);
@@ -81,7 +82,7 @@ namespace Signum.Web.Selenium
 
             this.Dispose();
         }
-     
+
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
             return SearchControl.Create<T>();
@@ -98,7 +99,7 @@ namespace Signum.Web.Selenium
         }
     }
 
-    public class SearchPageProxy :IDisposable
+    public class SearchPageProxy : IDisposable
     {
         public ISelenium Selenium { get; private set; }
         public SearchControlProxy SearchControl { get; private set; }
@@ -139,7 +140,7 @@ namespace Signum.Web.Selenium
         }
 
         public void Dispose()
-        {   
+        {
         }
 
         public void Search()
@@ -220,7 +221,7 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementPresent(FiltersPanelLocator + (show ? ":visible" : ":hidden"));
         }
 
-      
+
 
         public string AddColumnButtonLocator
         {
@@ -432,7 +433,7 @@ namespace Signum.Web.Selenium
             {
                 var prev = parts.Take(i).ToString(".");
 
-                var tokenLocator = TokenLocator(i, prev, isEnd : false);
+                var tokenLocator = TokenLocator(i, prev, isEnd: false);
 
                 Selenium.WaitElementPresent(tokenLocator);
 
@@ -452,14 +453,14 @@ namespace Signum.Web.Selenium
                     return true;
 
                 return false;
-            }); 
+            });
         }
 
-    
+
     }
 
     public class ResultTableProxy
-    {  
+    {
         public ISelenium Selenium { get; private set; }
 
         public string PrefixUnderscore;
@@ -488,7 +489,7 @@ namespace Signum.Web.Selenium
 
         public string RowLocator(int rowIndex)
         {
-            return RowsLocator + ":nth-child({0})".Formato(rowIndex + 1); 
+            return RowsLocator + ":nth-child({0})".Formato(rowIndex + 1);
         }
 
         public string RowLocator(Lite<IIdentifiable> lite)
@@ -546,7 +547,7 @@ namespace Signum.Web.Selenium
 
             return array.Split(',');
         }
-     
+
         public string HeaderCellLocator(string token)
         {
             return HeaderLocator + "[data-column-name='{0}']".Formato(token);
@@ -580,7 +581,7 @@ namespace Signum.Web.Selenium
             return this;
         }
 
-        private void OrderBy(string token, OrderType  orderType, bool thenBy = false)
+        private void OrderBy(string token, OrderType orderType, bool thenBy = false)
         {
             do
             {
@@ -661,7 +662,7 @@ namespace Signum.Web.Selenium
 
             int num = int.Parse(result);
 
-            return num; 
+            return num;
         }
 
         public Lite<IdentifiableEntity> EntityInIndex(int index)
@@ -676,7 +677,7 @@ namespace Signum.Web.Selenium
             return IsHeaderMarkedSorted(token, OrderType.Ascending) ||
                 IsHeaderMarkedSorted(token, OrderType.Descending);
         }
-        
+
 
         public bool IsHeaderMarkedSorted(string token, OrderType orderType)
         {
@@ -700,7 +701,7 @@ namespace Signum.Web.Selenium
             Selenium.Click("jq=#sfContextMenu .sf-edit-header");
 
             using (var popup = new Popup(Selenium, this.PrefixUnderscore + "newName"))
-            {   
+            {
                 Selenium.WaitElementPresent(popup.PopupVisibleLocator);
                 Selenium.Type(popup.PopupVisibleLocator + " input:text", newName);
                 popup.OkWaitClosed();
@@ -738,7 +739,7 @@ namespace Signum.Web.Selenium
     public class EntityContextMenuProxy
     {
         ResultTableProxy resultTable;
-        bool IsContext; 
+        bool IsContext;
         public EntityContextMenuProxy(ResultTableProxy resultTable, bool isContext)
         {
             this.resultTable = resultTable;
@@ -747,7 +748,7 @@ namespace Signum.Web.Selenium
 
         public string EntityContextMenuLocator
         {
-            get 
+            get
             {
                 if (IsContext)
                     return "jq=#sfContextMenu:visible";
@@ -770,26 +771,30 @@ namespace Signum.Web.Selenium
             return result;
         }
 
-        public void ExecuteClick(IOperationSymbolContainer symbolContainer)
+        public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false)
         {
-            ExecuteClick(symbolContainer.Operation);
+            ExecuteClick(symbolContainer.Operation, consumeConfirmation);
         }
 
-        public void ExecuteClick(OperationSymbol operationSymbol)
+        public void ExecuteClick(OperationSymbol operationSymbol, bool consumeConfirmation = false)
         {
             MenuClick(operationSymbol.KeyWeb());
-            resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator); 
+            if (consumeConfirmation)
+                this.resultTable.Selenium.ConsumeConfirmation();
+
+            resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
         }
 
-        public void DeleteClick(IOperationSymbolContainer symbolContainer)
+        public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true)
         {
             DeleteClick(symbolContainer.Operation);
         }
 
-        public void DeleteClick(OperationSymbol operationSymbol)
+        public void DeleteClick(OperationSymbol operationSymbol, bool consumeConfirmation = true)
         {
             MenuClick(operationSymbol.KeyWeb());
-            resultTable.Selenium.ConsumeConfirmation();
+            if (consumeConfirmation)
+                this.resultTable.Selenium.ConsumeConfirmation();
         }
 
         public PopupControl<ProcessDN> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
@@ -810,7 +815,9 @@ namespace Signum.Web.Selenium
 
         public void MenuClick(string itemId)
         {
-            resultTable.Selenium.Click(MenuItemLocator(itemId));
+            var loc = MenuItemLocator(itemId);
+            resultTable.Selenium.MouseUp(loc);
+            resultTable.Selenium.Click(loc);
         }
 
         public string MenuItemLocator(string itemId)
@@ -832,7 +839,7 @@ namespace Signum.Web.Selenium
             where T : IdentifiableEntity
         {
             MenuClick(itemId);
-            resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
+            //resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
             var result = new PopupControl<T>(this.resultTable.Selenium, prefix);
             result.Selenium.WaitElementPresent(result.PopupVisibleLocator);
             return result;
@@ -929,7 +936,7 @@ namespace Signum.Web.Selenium
 
         public ValueLineProxy ValueLine()
         {
-            return new ValueLineProxy(Filters.Selenium, "{0}value_{1}".Formato(Filters.PrefixUnderscore, FilterIndex), null); 
+            return new ValueLineProxy(Filters.Selenium, "{0}value_{1}".Formato(Filters.PrefixUnderscore, FilterIndex), null);
         }
 
         public EntityLineProxy EntityLine()

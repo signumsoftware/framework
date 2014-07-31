@@ -16,7 +16,6 @@
 
         <m:ValueLine m:Common.Route="PasswordSetDate" />
         <m:EntityLine m:Common.Route="Role" />
-        <m:EntityLine m:Common.Route="Related"  />
         <m:ValueLine m:Common.Route="Email"  />
     </StackPanel>
 </UserControl>

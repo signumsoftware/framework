@@ -52,7 +52,7 @@ namespace Signum.Web.Selenium
 
             string createSelector = "{0} a.sf-note-create".Formato(container.WidgetContainerLocator());
             container.Selenium.WaitElementPresent("{0}:visible".Formato(createSelector));
-            container.Selenium.Click(createSelector);
+            container.Selenium.MouseUp(createSelector);
 
             PopupControl<NoteDN> result = new PopupControl<NoteDN>(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -65,7 +65,7 @@ namespace Signum.Web.Selenium
 
             string viewSelector = "{0} a.sf-note-view".Formato(container.WidgetContainerLocator());
             container.Selenium.WaitElementPresent("{0}:visible".Formato(viewSelector));
-            container.Selenium.Click(viewSelector);
+            container.Selenium.MouseUp(viewSelector);
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -86,7 +86,7 @@ namespace Signum.Web.Selenium
 
             string createSelector = "{0} a.sf-alert-create".Formato(container.WidgetContainerLocator());
             container.Selenium.WaitElementPresent("{0}:visible".Formato(createSelector));
-            container.Selenium.Click(createSelector);
+            container.Selenium.MouseUp(createSelector);
 
             PopupControl<AlertDN> result = new PopupControl<AlertDN>(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -103,7 +103,7 @@ namespace Signum.Web.Selenium
                 GetCssClass(state));
 
             container.Selenium.WaitElementPresent(viewSelector + ":visible");
-            container.Selenium.Click(viewSelector);
+            container.Selenium.MouseUp(viewSelector);
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "alerts");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);

@@ -38,7 +38,7 @@ namespace Signum.Windows.Dashboard
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DashboardDN>() { View = e => new DashboardEdit(), Icon = ExtensionsImageLoader.GetImageSortName("controlPanel.png") },
+                    new EntitySettings<DashboardDN>() { View = e => new DashboardEdit(), Icon = ExtensionsImageLoader.GetImageSortName("dashboard.png") },
 
                     new EntitySettings<CountSearchControlPartDN>() { View = e => new CountSearchControlPartEdit() },
                     new EntitySettings<LinkListPartDN>() { View = e => new LinkListPartEdit() },
@@ -123,46 +123,46 @@ namespace Signum.Windows.Dashboard
 
         class DashboardQuickLink : QuickLink
         {
-            Lite<DashboardDN> controlPanel;
+            Lite<DashboardDN> dashboard;
             Lite<IdentifiableEntity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> controlPanel, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
             {
-                this.ToolTip = controlPanel.ToString(); 
-                this.Label = controlPanel.ToString();
-                this.controlPanel = controlPanel;
+                this.ToolTip = dashboard.ToString(); 
+                this.Label = dashboard.ToString();
+                this.dashboard = dashboard;
                 this.entity = entity;
                 this.IsVisible = true;
-                this.Icon = ExtensionsImageLoader.GetImageSortName("controlPanel.png");
+                this.Icon = ExtensionsImageLoader.GetImageSortName("dashboard.png");
             }
 
             public override void Execute()
             {
-                DashboardClient.Navigate(controlPanel, entity.Retrieve());
+                DashboardClient.Navigate(dashboard, entity.Retrieve());
             }
 
             public override string Name
             {
-                get { return controlPanel.Key(); }
+                get { return dashboard.Key(); }
             }
         }
 
-        public static void Navigate(Lite<DashboardDN> controlPanel, IdentifiableEntity currentEntity)
+        public static void Navigate(Lite<DashboardDN> dashboard, IdentifiableEntity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => new DashboardWindow
             {
-                tbDashboard = { Text = NormalWindowMessage.Loading0.NiceToString().Formato(controlPanel.EntityType.NiceName()) }
+                tbDashboard = { Text = NormalWindowMessage.Loading0.NiceToString().Formato(dashboard.EntityType.NiceName()) }
             },
             afterShown: win =>
             {
-                var cp = controlPanel.Retrieve();
+                var cp = dashboard.Retrieve();
 
                 if (cp.EntityType != null)
                 {
                     UserAssetsClient.SetCurrentEntity(win, currentEntity);
                 }
 
-                win.DataContext = controlPanel.Retrieve();
+                win.DataContext = dashboard.Retrieve();
             });
         }
     }

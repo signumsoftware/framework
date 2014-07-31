@@ -43,7 +43,7 @@ namespace Signum.Windows.Isolation
 
                     if (iso != null)
                     {
-                        var msg = new MessageHeader<string>(iso.KeyLong())
+                        var msg = new MessageHeader<string>(iso.Item1.Try(i=>i.KeyLong()))
                             .GetUntypedHeader("CurrentIsolation", "http://www.signumsoftware.com/Isolation");
                         context.OutgoingMessageHeaders.Add(msg);
                     }
@@ -88,10 +88,11 @@ namespace Signum.Windows.Isolation
 
                 var entity = win.DataContext as IdentifiableEntity;
 
-                if(entity != null)
+                if (entity != null)
                     current = current ?? entity.TryIsolation();
 
-                IsolationDN.CurrentThreadVariable.Value = current;
+                if (current != null)
+                    IsolationDN.CurrentThreadVariable.Value = Tuple.Create(current);
             }; 
         }
 

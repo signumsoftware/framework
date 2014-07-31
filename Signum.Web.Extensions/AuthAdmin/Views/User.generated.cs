@@ -110,64 +110,49 @@ Write(Html.FormGroup(e, e.Compose(UserMapping.NewPasswordBisKey), AuthMessage.Ch
             #line 13 "..\..\AuthAdmin\Views\User.cshtml"
                                                                                                      
     }
-
-   
+    
     
             
             #line default
             #line hidden
             
-            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityLine(e, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
                                     
-    
-            
-            #line default
-            #line hidden
-            
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
-Write(Html.EntityLine(e, f => f.Related));
-
-            
-            #line default
-            #line hidden
-            
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
-                                       
 
     
             
             #line default
             #line hidden
             
-            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30));
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
                                                                           
     
             
             #line default
             #line hidden
             
-            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityCombo(e, f => f.CultureInfo));
 
             
             #line default
             #line hidden
             
-            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
                                             
 
     
@@ -175,28 +160,28 @@ Write(Html.EntityCombo(e, f => f.CultureInfo));
             #line default
             #line hidden
             
-            #line 23 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordNeverExpires, a => a.LabelColumns = new BsColumn(3)));
 
             
             #line default
             #line hidden
             
-            #line 23 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 21 "..\..\AuthAdmin\Views\User.cshtml"
                                                                                           
     
             
             #line default
             #line hidden
             
-            #line 24 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 22 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordSetDate, a => a.LabelColumns = new BsColumn(3)));
 
             
             #line default
             #line hidden
             
-            #line 24 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 22 "..\..\AuthAdmin\Views\User.cshtml"
                                                                                      
 
 }
