@@ -319,6 +319,7 @@ namespace Signum.Engine.Maps
         static Schema()
         {
             PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+            ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
         }
 
         internal Schema(SchemaSettings settings)
