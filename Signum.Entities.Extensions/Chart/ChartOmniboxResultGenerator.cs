@@ -18,6 +18,9 @@ namespace Signum.Entities.Chart
         Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
         public override IEnumerable<ChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
+            if (!OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
+                yield break;
+
             Match m = regex.Match(tokenPattern);
 
             if (!m.Success)
