@@ -364,7 +364,7 @@ namespace Signum.Entities
             innerList.Clear();
 
             foreach (var item in oldItems)
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item)); 
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item.Value)); 
         }
 
         public void CopyTo(T[] array)
