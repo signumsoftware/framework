@@ -287,6 +287,27 @@ namespace Signum.Windows
             return new NormalWindowAutomationPeer(this);
         }
 
+        public static readonly RoutedEvent PreEntityLoadedEvent = EventManager.RegisterRoutedEvent(
+            "PreEntityLoaded", RoutingStrategy.Direct, typeof(EventHandler<PreEntityLoadedEventArgs>), typeof(NormalWindow));
+        public event EventHandler<PreEntityLoadedEventArgs> PreEntityLoaded
+        {
+            add { AddHandler(PreEntityLoadedEvent, value); }
+            remove { RemoveHandler(PreEntityLoadedEvent, value); }
+        }
+
+        internal void OnPreEntityLoaded(ModifiableEntity entity)
+        {
+            this.RaiseEvent(new PreEntityLoadedEventArgs(PreEntityLoadedEvent) { Entity = entity });
+        }
+    }
+
+    public class PreEntityLoadedEventArgs : RoutedEventArgs
+    {
+        public ModifiableEntity Entity;
+        public PreEntityLoadedEventArgs(RoutedEvent re)
+            : base(re)
+        {
+        }
     }
 
     public enum AllowErrors

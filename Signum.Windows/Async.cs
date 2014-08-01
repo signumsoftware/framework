@@ -134,11 +134,11 @@ namespace Signum.Windows
 
                         win.Show();
 
-                        if (afterShown != null)
-                            afterShown(win);
-
                         if (onWindowsReady != null)
                             onWindowsReady(win);
+
+                        if (afterShown != null)
+                            afterShown(win);
 
                         Dispatcher.Run();
                     }
