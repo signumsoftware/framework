@@ -597,7 +597,10 @@ namespace Signum.Windows
             win.MainControl = ctrl;
             win.ShowOperations = options.ShowOperations;
             win.ViewMode = options.ViewButtons;
-            win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
+
+            entity = options.Clone ? (ModifiableEntity)((ICloneable)entity).Clone() : entity;
+            win.OnPreEntityLoaded(entity);
+            win.DataContext = entity;
 
             if (options.ReadOnly ?? OnIsReadOnly(entityType, entity))
                 Common.SetIsReadOnly(win, true);
