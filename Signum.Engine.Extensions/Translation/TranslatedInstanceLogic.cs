@@ -232,6 +232,8 @@ namespace Signum.Engine.Translation
             int deletedPr = Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.RootType == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
 
             int deletedInstance = giRemoveTranslationsForMissingEntities.GetInvoker(t)();
+
+            int deleteInconsistent = Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.RootType == t.ToTypeDN() && (a.RowId != null) != a.PropertyRoute.Path.Contains("/")).UnsafeDelete();
         }
 
         static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new GenericInvoker<Func<int>>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
@@ -524,6 +526,8 @@ namespace Signum.Engine.Translation
 
                 tr.Commit();
             }
+
+            CleanTranslations(t);
         }
 
       

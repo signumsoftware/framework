@@ -22,7 +22,7 @@ export function fixTextAreas() {
 
 function fixTextArea(area: HTMLTextAreaElement) {
     area.style.height = "1px";
-    area.style.height = (25 + area.scrollHeight) + "px";
+    area.style.height = area.scrollHeight + "px";
 }
 
 export function editAndRemember(remember: boolean) {

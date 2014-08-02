@@ -22,8 +22,11 @@
     var all = string.IsNullOrEmpty(filter);
 
     Func<LocalizedInstanceKey, bool> filtered = li => all ||
-        master.GetOrThrow(li).Contains(filter) ||
-        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter));
+        li.RowId.ToString() == filter ||
+        li.Instance.Id.ToString() == filter || 
+        li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
+        master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
+        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
@@ -66,16 +69,17 @@ else
             </thead>
 
             foreach (LocalizedInstanceKey key in instance.OrderBy(a => a.Route.ToString()))
-            {     
+            {   
+                  var propertyString = key.Route.PropertyString().Replace("/", "[" + key.RowId + "].");
             <tr>
                 <th class="leftCell">@TranslationMessage.Property.NiceToString()
                 </th>
-                <th>@key.Route.PropertyString()</th>
+                <th>@propertyString</th>
             </tr>
             
                 foreach (var ci in cultures)
                 {
-                    var formName = ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString();
+                    var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
 
                     if (ci.Name == TranslatedInstanceLogic.DefaultCulture)
                     {

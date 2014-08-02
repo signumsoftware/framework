@@ -70,6 +70,7 @@ table.st
     table.st .monospaceCell
     {
         font-family: monospace;
+        font-size:14px;
     }
 
         table.st .monospaceCell pre
@@ -78,4 +79,5 @@ table.st
             color: rgb(102, 102, 153);
             background-color:transparent;
             border:none;
+            font-size:14px;
         }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace Signum.Entities.Translation
 {
@@ -65,6 +66,20 @@ namespace Signum.Entities.Translation
         public override string ToString()
         {
             return "{0} {1} {2}".Formato(culture, instance, propertyRoute);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => RowId) && PropertyRoute != null)
+            {
+                if (RowId == null && PropertyRoute.Path.Contains("/"))
+                    return "{0} should be set for route {1}".Formato(pi.NiceName(), PropertyRoute);
+
+                if (RowId != null && !PropertyRoute.Path.Contains("/"))
+                    return "{0} should be null for route {1}".Formato(pi.NiceName(), PropertyRoute);
+            }
+
+            return null;
         }
     }
 

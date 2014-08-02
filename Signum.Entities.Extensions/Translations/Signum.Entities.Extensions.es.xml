@@ -1256,7 +1256,7 @@
     <Member Name="Instance" Description="Instancia" />
     <Member Name="OriginalText" Description="Texto original" />
     <Member Name="PropertyRoute" Description="Ruta de propiedad" />
-    <Member Name="RowId" Description="Identificador de fila" />
+    <Member Name="RowId" Description="RowId" />
     <Member Name="TranslatedText" Description="Texto traducido" />
   </Type>
   <Type Name="TranslationJavascriptMessage">
