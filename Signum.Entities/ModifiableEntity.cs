@@ -25,6 +25,17 @@ namespace Signum.Entities
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
+        static Func<bool> isRetrievingFunc = null;
+        static public bool IsRetrieving
+        {
+            get { return isRetrievingFunc != null && isRetrievingFunc(); }
+        }
+
+        internal static void SetIsRetrievingFunc(Func<bool> isRetrievingFunc)
+        {
+            ModifiableEntity.isRetrievingFunc = isRetrievingFunc;
+        }
+
         protected internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)

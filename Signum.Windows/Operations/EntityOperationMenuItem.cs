@@ -63,8 +63,17 @@ namespace Signum.Windows.Operations
                             case OperationType.ConstructorFrom:
                                 {
                                     var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol));
-                                    if (Navigator.IsNavigable(result, true))
-                                        Navigator.Navigate(result);
+
+                                    if (result == null)
+                                    {
+                                        MessageBox.Show(Window.GetWindow(miResult), 
+                                            OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(coc.OperationInfo.OperationSymbol.NiceToString()));
+                                    }
+                                    else
+                                    {
+                                        if (Navigator.IsNavigable(result, true))
+                                            Navigator.Navigate(result);
+                                    };
                                     break;
                                 }
                             case OperationType.Constructor:
