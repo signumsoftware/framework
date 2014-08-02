@@ -471,6 +471,13 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 return cachedTable.GetToString(id);
             }
 
+            public override string TryGetToString(int id)
+            {
+                AssertEnabled();
+
+                return cachedTable.TryGetToString(id);
+            }
+
             public override void Complete(T entity, IRetriever retriver)
             {
                 AssertEnabled();

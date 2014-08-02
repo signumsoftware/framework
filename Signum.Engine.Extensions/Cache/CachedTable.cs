@@ -580,6 +580,20 @@ namespace Signum.Engine.Cache
         public string GetToString(int id)
         {
             Interlocked.Increment(ref hits);
+            var origin = rows.Value.TryGetC(id);
+            if (origin == null)
+                throw new EntityNotFoundException(typeof(T), id);
+
+            return toStrGetter(origin);
+        }
+
+        public string TryGetToString(int id)
+        {
+            Interlocked.Increment(ref hits);
+            var origin = rows.Value.TryGetC(id);
+            if (origin == null)
+                return null;
+
             return toStrGetter(rows.Value[id]);
         }
 
@@ -590,6 +604,7 @@ namespace Signum.Engine.Cache
             var origin = rows.Value.TryGetC(entity.Id);
             if (origin == null)
                 throw new EntityNotFoundException(typeof(T), entity.Id);
+
             completer(origin, retriever, entity);
         }
 
