@@ -553,6 +553,7 @@ namespace Signum.Engine.Maps
         void Complete(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
+        string TryGetToString(int id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -574,6 +575,7 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(int id);
+        public abstract string TryGetToString(int id);
     }
 
     public class EntityEvents<T> : IEntityEvents

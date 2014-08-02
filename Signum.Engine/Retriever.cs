@@ -263,7 +263,7 @@ namespace Signum.Engine
             if (cc != null && cc.Enabled)
             {
                 cc.Load();
-                return ids.ToDictionary(a => a, a => cc.GetToString(a));
+                return ids.ToDictionary(a => a, a => cc.TryGetToString(a));
             }
             else
                 return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
