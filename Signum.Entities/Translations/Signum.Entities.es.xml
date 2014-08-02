@@ -155,6 +155,7 @@
     <Member Name="noActionsFound" Description="No hay acciónes" />
     <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
     <Member Name="ok" Description="Aceptar" />
+    <Member Name="openTab" Description="Nueva pestaña " />
     <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
     <Member Name="remove" Description="Quitar" />
@@ -353,12 +354,16 @@
     <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tiene que estar entre {0} y {1}" />
     <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
+    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} es obligatorio si {1} no está establecido" />
+    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} es obligatorio si se establece {1}" />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
     <Member Name="_0IsNotA1" Description="{0} no es [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
+    <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
+    <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
     <Member Name="Be" Description="ser " />
     <Member Name="BeA0" Description="ser [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
