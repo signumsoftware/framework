@@ -121,11 +121,11 @@ namespace Signum.Web.Translation
             return new SelectListItem { Text = lite.TranslatedField(toStringField, lite.ToString()), Value = lite.Id.ToString(), Selected = lite.Equals(selected) };
         }
 
-        public static MvcHtmlString Diff(PropertyRouteConflict conflict)
+        public static MvcHtmlString Diff(string oldStr, string newStr)
         {
             StringDistance sd = new StringDistance();
 
-            var dif = sd.DiffText(conflict.OldOriginal, conflict.Original);
+            var dif = sd.DiffText(oldStr, newStr);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (var line in dif)

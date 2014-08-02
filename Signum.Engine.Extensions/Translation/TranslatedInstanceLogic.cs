@@ -26,7 +26,8 @@ namespace Signum.Engine.Translation
     {
         public static string DefaultCulture { get; private set; }
 
-        public static Dictionary<Type, List<PropertyRoute>> TraducibleRoutes = new Dictionary<Type, List<PropertyRoute>>();
+        public static Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>> TraducibleRoutes 
+            = new Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>>();
         static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>>> LocalizationCache;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string defaultCulture)
@@ -34,7 +35,7 @@ namespace Signum.Engine.Translation
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TranslatedInstanceDN>();
-                sb.AddUniqueIndex<TranslatedInstanceDN>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance });
+                sb.AddUniqueIndex<TranslatedInstanceDN>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId });
 
                 DefaultCulture = defaultCulture;
 
@@ -65,11 +66,11 @@ namespace Signum.Engine.Translation
                              where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string)
                              && s.Settings.FieldAttributes(pr).OfType<TranslateFieldAttribute>().Any() && 
                              !s.Settings.FieldAttributes(pr).OfType<IgnoreAttribute>().Any()
-                             select pr).ToList();
+                             select KVP.Create(pr, s.Settings.FieldAttributes(pr).OfType<TranslateFieldAttribute>().Single().TraducibleRouteType)).ToList();
 
-                    foreach (var pr in prs)
+                    foreach (var kvp in prs)
                     {
-                        AddRoute(pr);
+                        AddRoute(kvp.Key, kvp.Value);
                     }
                 };
             }
@@ -80,7 +81,7 @@ namespace Signum.Engine.Translation
             AddRoute(PropertyRoute.Construct<T, S>(propertyRoute));
         }
 
-        public static void AddRoute(PropertyRoute route)
+        public static void AddRoute(PropertyRoute route, TraducibleRouteType type = TraducibleRouteType.Text)
         {
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("Routes of type {0} can not be traducibles".Formato(route.PropertyRouteType));
@@ -88,14 +89,14 @@ namespace Signum.Engine.Translation
             if (route.Type != typeof(string))
                 throw new InvalidOperationException("Only string routes can be traducibles");
 
-            TraducibleRoutes.GetOrCreate(route.RootType).Add(route); 
+            TraducibleRoutes.GetOrCreate(route.RootType).Add(route, type); 
         }
 
-        public static bool ContainsRoute(PropertyRoute route)
+        public static TraducibleRouteType? RouteType(PropertyRoute route)
         {
-            var list = TraducibleRoutes.TryGetC(route.RootType);
+            var dic = TraducibleRoutes.TryGetC(route.RootType);
 
-            return list != null && list.Contains(route); 
+            return dic.TryGetS(route); 
         }
 
         public static List<TranslatedTypeSummary> TranslationInstancesStatus()
@@ -118,7 +119,7 @@ namespace Signum.Engine.Translation
         {
             Dictionary<LocalizedInstanceKey, string> result = null;
 
-            foreach (var pr in TraducibleRoutes.GetOrThrow(type))
+            foreach (var pr in TraducibleRoutes.GetOrThrow(type).Keys)
             {
                 var mlist = pr.GetMListItemsRoute();
 
@@ -167,7 +168,7 @@ namespace Signum.Engine.Translation
         {
             using (HeavyProfiler.LogNoStackTrace("GetState", () => type.Name + " " + ci.Name))
             {
-                if (!TraducibleRoutes.GetOrThrow(type).Any(pr => AnyNoTranslated(pr, ci)))
+                if (!TraducibleRoutes.GetOrThrow(type).Keys.Any(pr => AnyNoTranslated(pr, ci)))
                     return TranslatedSummaryState.Completed;
 
                 if (Database.Query<TranslatedInstanceDN>().Count(ti => ti.PropertyRoute.RootType == type.ToTypeDN() && ti.Culture == ci.ToCultureInfoDN()) == 0)
@@ -226,7 +227,7 @@ namespace Signum.Engine.Translation
 
         public static void CleanTranslations(Type t)
         {
-            var routes = TraducibleRoutes.GetOrThrow(t).Select(pr => pr.ToPropertyRouteDN()).Where(a => !a.IsNew).ToList();
+            var routes = TraducibleRoutes.GetOrThrow(t).Keys.Select(pr => pr.ToPropertyRouteDN()).Where(a => !a.IsNew).ToList();
 
             int deletedPr = Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.RootType == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
 
@@ -501,6 +502,7 @@ namespace Signum.Engine.Translation
                         Culture = n.Culture.ToCultureInfoDN(),
                         PropertyRoute = routes.GetOrThrow(n.Key.Route),
                         Instance = n.Key.Instance,
+                        RowId  = n.Key.RowId,
                         OriginalText = n.OriginalText,
                         TranslatedText = n.TranslatedText,
                     }.Save(),

@@ -71,6 +71,14 @@ namespace Signum.Entities.Translation
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class TranslateFieldAttribute : Attribute
     {
+        public TraducibleRouteType TraducibleRouteType = TraducibleRouteType.Text;
+        
       
+    }
+
+    public enum TraducibleRouteType
+    {
+        Text,
+        Html
     }
 }

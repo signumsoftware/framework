@@ -80,9 +80,16 @@ else
                     if (ci.Name == TranslatedInstanceLogic.DefaultCulture)
                     {
             <tr>
-                <td class="leftCell">@TranslatedInstanceLogic.DefaultCulture</td>
+                <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture</em></td>
                 <td class="monospaceCell">
-                    <em>@master[key]</em>
+                    @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                    {
+                        <pre>@master[key]</pre>
+                    }
+                    else
+                    {
+                        @master[key]
+                    }
                     @Html.TextArea(formName, master[key], new { style = "display:none" })
                 </td>
             </tr>
@@ -91,14 +98,30 @@ else
                     {
                         TranslatedInstanceDN trans = Model.TryGetC(ci).TryGetC(key);
 
+                        if (trans != null && editCulture(ci))
+                            {
+            <tr>
+                <td class="leftCell">@ci.Name Diff</td>
+                <td class="monospaceCell">
+                    @Signum.Web.Translation.TranslationClient.Diff(trans.OriginalText, trans.TranslatedText)
+                </td>
+            </tr>
+                                
+                            }
+                        
+                        
                         if (trans != null || editCulture(ci))
-                        {
+                        {   
             <tr>
                 <td class="leftCell">@ci.Name</td>
                 <td class="monospaceCell">
                     @if (editCulture(ci))
                     {
                         @Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" })
+                    }
+                    else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                    {
+                        <pre>@trans.TranslatedText</pre>
                     }
                     else
                     {
@@ -116,3 +139,10 @@ else
     <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
     }
 }
+
+
+<script>
+    $(function () {
+        @(Signum.Web.Translation.TranslationClient.Module["fixTextAreas"]())
+    });
+</script>

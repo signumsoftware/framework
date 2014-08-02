@@ -179,7 +179,7 @@ namespace Signum.Engine.Mailing
                 if (pr == null)
                     return false;
 
-                if (!TranslatedInstanceLogic.ContainsRoute(pr))
+                if (TranslatedInstanceLogic.RouteType(pr) == null)
                     return false;
 
                 return true;

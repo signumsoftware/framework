@@ -14,6 +14,17 @@ export function pluralAndGender() {
     });
 }
 
+
+
+export function fixTextAreas() {
+    $("textarea").each((i, e) => fixTextArea(<HTMLTextAreaElement>e));
+}
+
+function fixTextArea(area: HTMLTextAreaElement) {
+    area.style.height = "1px";
+    area.style.height = (25 + area.scrollHeight) + "px";
+}
+
 export function editAndRemember(remember: boolean) {
 
     $("a.edit").bind("click", function () {
@@ -24,6 +35,8 @@ export function editAndRemember(remember: boolean) {
             .attr("style", "width:90%");
         select.after(input);
 
+        fixTextArea(<HTMLTextAreaElement>input[0]);
+        
         $(this).remove();
 
         if (!remember) {

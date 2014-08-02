@@ -14,11 +14,25 @@ define(["require", "exports"], function(require, exports) {
     }
     exports.pluralAndGender = pluralAndGender;
 
+    function fixTextAreas() {
+        $("textarea").each(function (i, e) {
+            return fixTextArea(e);
+        });
+    }
+    exports.fixTextAreas = fixTextAreas;
+
+    function fixTextArea(area) {
+        area.style.height = "1px";
+        area.style.height = (25 + area.scrollHeight) + "px";
+    }
+
     function editAndRemember(remember) {
         $("a.edit").bind("click", function () {
             var select = $(this).parent().find("select");
             var input = $("<textarea/>").attr("type", "text").attr("name", select.attr("name")).val(select.val()).attr("style", "width:90%");
             select.after(input);
+
+            fixTextArea(input[0]);
 
             $(this).remove();
 

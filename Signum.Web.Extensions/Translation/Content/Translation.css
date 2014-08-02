@@ -71,3 +71,11 @@ table.st
     {
         font-family: monospace;
     }
+
+        table.st .monospaceCell pre
+        {
+            padding:0px;
+            color: rgb(102, 102, 153);
+            background-color:transparent;
+            border:none;
+        }

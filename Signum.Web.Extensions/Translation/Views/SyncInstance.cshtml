@@ -19,24 +19,7 @@
         ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Instances.Count, totalInstances);
     }
 
-    Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
-    {
-        var items = values.Select(s => new SelectListItem { Value = s, Text = s }).ToList();
 
-        if (values.Count() > 1 && values.Distinct().Count() == 1)
-        {
-            items.First().Selected = true;
-            items.Insert(0, new SelectListItem { Value = "", Text = "-" });
-        }
-        else
-        {
-            items.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
-        }
-
-        return items;
-    };
-
-    Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
 }
 
 @Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")
@@ -85,11 +68,15 @@ else
 
                     @if (mc.Value.OldOriginal != null)
                     {
-                        <span>@TranslationClient.Diff(mc.Value)</span>
+                        <span>@TranslationClient.Diff(mc.Value.OldOriginal, mc.Value.Original)</span>
+                    }
+                    else if(TranslatedInstanceLogic.RouteType(route.Key.Item1).Value == TraducibleRouteType.Html)
+                    {
+                        <pre>@mc.Value.Original</pre>
                     }
                     else
                     {
-                        <span>@mc.Value.Original</span>
+                        <span>@mc.Value.Original</span>   
                     }
                 </td>
             </tr>
@@ -98,13 +85,16 @@ else
                 <td class="leftCell">@culture.Name</td>
                 <td class="monospaceCell">
                     @{  
-                var translations = route.Value.Values.Select(a => a.OldTranslation).NotNull().Concat(route.Value.Values.Select(a => a.AutomaticTranslation));
+                var translations = route.Value.Where(kvp => kvp.Value.OldTranslation != null)
+                    .Select(kvp => new SelectListItem { Text = "old translation - " + kvp.Value.OldTranslation, Value = kvp.Value.OldTranslation })
+                    .Concat(route.Value.Select(kvp => new SelectListItem { Text = "from " + kvp.Key + " - " + kvp.Value.AutomaticTranslation, Value = kvp.Value.AutomaticTranslation }))
+                    .ToList();
 
                 string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
                 if (translations.Count() == 1)
                 {       
-                        <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First()</textarea>
-                        <textarea name="@elementName" style="width:90%" data-original="@translations.First()">@translations.First()</textarea>
+                        <textarea name="@(elementName)_original" style="display:none" disabled="disabled">@translations.First().Value</textarea>
+                        <textarea name="@elementName" style="width:90%" data-original="@translations.First().Value">@translations.First().Value</textarea>
                     if (TranslationClient.Translator is ITranslatorWithFeedback)
                     {
                         <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
@@ -112,8 +102,17 @@ else
                 }
                 else
                 {
-                    var items = selectListItems(translations);
-                        @Html.DropDownList(elementName, items);
+                    if (translations.Count() > 1 && translations.Select(a => a.Value).Distinct().Count() == 1)
+                    {
+                        translations.First().Selected = true;
+                        translations.Insert(0, new SelectListItem { Value = "", Text = "-" });
+                    }
+                    else
+                    {
+                        translations.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                    }
+                    
+                        @Html.DropDownList(elementName, translations);
                         <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                 }
                     }
@@ -129,5 +128,6 @@ else
 <script>
     $(function () {
         @(TranslationClient.Module["editAndRemember"](TranslationClient.Translator is ITranslatorWithFeedback))
+        @(TranslationClient.Module["fixTextAreas"]())
     });
 </script>
