@@ -946,6 +946,30 @@ namespace Signum.Utilities
                 yield return newList;
         }
 
+        public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
+        {
+            List<T> newList = new List<T>();
+            int accumSize = 0;
+            foreach (var item in collection)
+            {
+                var size = elementSize(item);
+                if ((accumSize + size) > groupSize && newList.Count > 0)
+                {
+                    yield return newList;
+                    newList = new List<T> { item };
+                    accumSize = size;
+                }
+                else
+                {
+                    accumSize += size;
+                    newList.Add(item);
+                }
+            }
+
+            if (newList.Count != 0)
+                yield return newList;
+        }
+
         public static IEnumerable<Interval<int>> IntervalsOf(this IEnumerable<int> collection, int groupSize)
         {
             return collection.OrderBy().GroupsOf(groupSize).Select(gr => new Interval<int>(gr.Min(), gr.Max() + 1));
