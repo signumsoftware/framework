@@ -10,7 +10,7 @@ namespace Signum.Web.Translation
 {
     public static class TranslationSynchronizer
     {
-        public static int MaxTypeChanges = 50; 
+        public static int MaxTotalSyncCharacters = 4000;
 
         public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, out int totalTypes)
         {
@@ -18,8 +18,9 @@ namespace Signum.Web.Translation
 
             totalTypes = types.Count;
 
-            if (totalTypes > MaxTypeChanges)
-                types = types.Take(MaxTypeChanges).ToList();
+
+            if (types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
+                types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
             return Translate(translator, target, types);
         }
@@ -148,6 +149,14 @@ namespace Signum.Web.Translation
         public override string ToString()
         {
             return "Changes for {0}".Formato(Type);
+        }
+
+        public int TotalOriginalLength()
+        {
+            var ci = Type.Assembly.Culture;
+
+            return (TypeConflict == null ? 0 : TypeConflict[ci].Original.Description.Length) +
+                MemberConflicts.Values.Sum(m => m[ci].Original.Length);
         }
     }
 

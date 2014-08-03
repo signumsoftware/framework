@@ -24,7 +24,7 @@ namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceLogic
     {
-        public static string DefaultCulture { get; private set; }
+        public static CultureInfo DefaultCulture { get; private set; }
 
         public static Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>> TraducibleRoutes 
             = new Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>>();
@@ -37,7 +37,7 @@ namespace Signum.Engine.Translation
                 sb.Include<TranslatedInstanceDN>();
                 sb.AddUniqueIndex<TranslatedInstanceDN>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId });
 
-                DefaultCulture = defaultCulture;
+                DefaultCulture = CultureInfo.GetCultureInfo(defaultCulture);
 
                 dqm.RegisterQuery(typeof(TranslatedInstanceDN), () =>
                     from e in Database.Query<TranslatedInstanceDN>()
@@ -109,7 +109,7 @@ namespace Signum.Engine.Translation
                     {
                         Type = type,
                         CultureInfo = ci,
-                        State = ci.IsNeutralCulture && ci.Name != DefaultCulture ? GetState(type, ci) : null,
+                        State = ci.IsNeutralCulture && ci.Name != DefaultCulture.Name ? GetState(type, ci) : null,
                     }).ToList();
 
         }
@@ -383,19 +383,17 @@ namespace Signum.Engine.Translation
 
         public static FilePair ExportExcelFileSync(Type type, CultureInfo culture)
         {
-            CultureInfo master = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
-
-            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { master });
+            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { TranslatedInstanceLogic.DefaultCulture });
 
             var list = (from ic in changes
                         from pr in ic.RouteConflicts
-                        orderby ic.Instance, pr.Key.Item1.PropertyString(), pr.Key.Item2
+                        orderby ic.Instance, pr.Key.ToString()
                         select new ExcelRow
                         {
                             Instance = ic.Instance.Key(),
-                            Path = pr.Key.Item1.PropertyString(),
-                            RowId = pr.Key.Item2,
-                            Original = pr.Value.GetOrThrow(master).Original,
+                            Path = pr.Key.Route.PropertyString(),
+                            RowId = pr.Key.RowId,
+                            Original = pr.Value.GetOrThrow(TranslatedInstanceLogic.DefaultCulture).Original,
                             Translated = null
                         }).ToList();
 
@@ -433,8 +431,6 @@ namespace Signum.Engine.Translation
 
         public static List<InstanceChanges> GetInstanceChanges(Type type, CultureInfo targetCulture, List<CultureInfo> cultures)
         {
-            CultureInfo masterCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
-
             Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(type, culture: null);
 
             Dictionary<LocalizedInstanceKey, TranslatedInstanceDN> target = support.TryGetC(targetCulture);
@@ -452,9 +448,9 @@ namespace Signum.Engine.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
                               where str.HasText()
-                              let old = c.Equals(masterCulture) ? target.TryGetC(rc.Key) : null
+                              let old = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? target.TryGetC(rc.Key) : null
                               select new
                               {
                                   rc.Key.Route,
@@ -468,7 +464,7 @@ namespace Signum.Engine.Translation
                                       Original = str,
                                       AutomaticTranslation = null
                                   }
-                              }).AgGroupToDictionary(a => Tuple.Create(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
+                              }).AgGroupToDictionary(a => new IndexedPropertyRoute(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
 
                 return new InstanceChanges
                 {
@@ -578,11 +574,48 @@ namespace Signum.Engine.Translation
     {
         public Lite<IdentifiableEntity> Instance { get; set; }
 
-        public Dictionary<Tuple<PropertyRoute, int?>, Dictionary<CultureInfo, PropertyRouteConflict>> RouteConflicts { get; set; }
+        public Dictionary<IndexedPropertyRoute, Dictionary<CultureInfo, PropertyRouteConflict>> RouteConflicts { get; set; }
 
         public override string ToString()
         {
             return "Changes for {0}".Formato(Instance);
+        }
+
+        public int TotalOriginalLength()
+        {
+            return RouteConflicts.Values.Sum(dic => dic[TranslatedInstanceLogic.DefaultCulture].Original.Length);
+        }
+    }
+
+    public struct IndexedPropertyRoute : IEquatable<IndexedPropertyRoute>
+    {
+        public readonly PropertyRoute Route;
+        public readonly int? RowId;
+
+        public IndexedPropertyRoute(PropertyRoute route, int? rowId)
+        {
+            this.Route = route;
+            this.RowId = rowId;
+        }
+
+        public override string ToString()
+        {
+            return Route.PropertyString().Replace("/", "[" + RowId + "].");
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IndexedPropertyRoute && base.Equals((IndexedPropertyRoute)obj);
+        }
+
+        public bool Equals(IndexedPropertyRoute other)
+        {
+            return Route.Equals(other.Route) && RowId.Equals(other.RowId);
+        }
+
+        public override int GetHashCode()
+        {
+            return Route.GetHashCode() ^ RowId.GetHashCode();
         }
     }
 
@@ -648,6 +681,10 @@ namespace Signum.Engine.Translation
             return result;
         }
     }
+
+    
+
+   
 
     public class TranslatedTypeSummary
     {

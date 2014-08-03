@@ -357,7 +357,7 @@ WriteLiteral("</th>\r\n            </tr>\r\n");
                 {
                     var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
 
-                    if (ci.Name == TranslatedInstanceLogic.DefaultCulture)
+                    if (ci.Name == TranslatedInstanceLogic.DefaultCulture.Name)
                     {
 
             
@@ -602,14 +602,14 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 5662), Tuple.Create("\"", 5709)
+WriteAttribute("value", Tuple.Create(" value=\"", 5667), Tuple.Create("\"", 5714)
             
             #line 143 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 5670), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 5675), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 5670), false)
+, 5675), false)
 );
 
 WriteLiteral(" />\r\n");

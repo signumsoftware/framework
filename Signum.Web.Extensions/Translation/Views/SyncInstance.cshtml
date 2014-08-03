@@ -8,7 +8,6 @@
 @using Signum.Entities.Translation
 @{
     CultureInfo culture = ViewBag.Culture;
-    CultureInfo defaultCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
 
     ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.Type.NiceName(), culture.DisplayName);
 
@@ -47,9 +46,9 @@ else
                 </tr>
             </thead>
            
-            foreach (var route in instance.RouteConflicts)
+            foreach (var route in instance.RouteConflicts.OrderBy(a=>a.Key.ToString()))
             {
-                var propertyString = route.Key.Item1.PropertyString().Replace("/", "[" + route.Key.Item2 + "].");
+                var propertyString = route.Key.ToString();
             <tr>
                 <th class="leftCell">@TranslationMessage.Property.NiceToString()
                 </th>
@@ -60,9 +59,9 @@ else
             <tr>
                 <td class="leftCell">@mc.Key.Name</td>
                 <td class="monospaceCell">
-                    @if (mc.Key.Equals(defaultCulture))
+                    @if (mc.Key.Equals(TranslatedInstanceLogic.DefaultCulture))
                     {
-                        string originalName = defaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
+                        string originalName = TranslatedInstanceLogic.DefaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
                         <textarea name="@originalName" style="display:none" >@mc.Value.Original</textarea>
                     }
 
@@ -70,7 +69,7 @@ else
                     {
                         <span>@TranslationClient.Diff(mc.Value.OldOriginal, mc.Value.Original)</span>
                     }
-                    else if(TranslatedInstanceLogic.RouteType(route.Key.Item1).Value == TraducibleRouteType.Html)
+                    else if(TranslatedInstanceLogic.RouteType(route.Key.Route).Value == TraducibleRouteType.Html)
                     {
                         <pre>@mc.Value.Original</pre>
                     }

@@ -14,7 +14,7 @@ namespace Signum.Web.Translation
 {
     public static class TranslatedInstanceSynchronizer
     {
-        public static int MaxInstancesChanges = 50;
+        public static int MaxTotalSyncCharacters = 4000;
 
         public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
         {
@@ -25,8 +25,8 @@ namespace Signum.Web.Translation
             var instances = TranslatedInstanceLogic.GetInstanceChanges(type, targetCulture, cultures);
 
             totalInstances = instances.Count;
-            if (totalInstances > MaxInstancesChanges)
-                instances = instances.Take(MaxInstancesChanges).ToList();
+            if (instances.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
+                instances = instances.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
             return TranslateInstances(translator, type, targetCulture, instances);
         }

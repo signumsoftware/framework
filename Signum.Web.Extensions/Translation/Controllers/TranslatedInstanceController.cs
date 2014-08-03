@@ -98,7 +98,7 @@ namespace Signum.Web.Translation.Controllers
                             TranslatedText = Request.Form[k].DefaultText(null),
                         }).ToList();
 
-            var master = list.Extract(a => a.Culture.Name == TranslatedInstanceLogic.DefaultCulture).ToDictionary(a=>a.Key);
+            var master = list.Extract(a => a.Culture.Name == TranslatedInstanceLogic.DefaultCulture.Name).ToDictionary(a=>a.Key);
 
             list.ForEach(r => r.OriginalText = master.GetOrThrow(r.Key).TranslatedText);
 

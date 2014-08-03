@@ -66,7 +66,7 @@ namespace Signum.Engine.Translation
             }
         }
 
-        public static List<CultureInfo> CurrentCultureInfos(string defaultCulture)
+        public static List<CultureInfo> CurrentCultureInfos(CultureInfo defaultCulture)
         {
             var cultures = CultureInfoLogic.ApplicationCultures;
 
@@ -75,10 +75,10 @@ namespace Signum.Engine.Translation
                 TranslatorUserDN tr = UserDN.Current.TranslatorUser();
 
                 if (tr != null)
-                    cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.ToCultureInfo() == ci));
+                    cultures = cultures.Where(ci => ci.Name == defaultCulture.Name || tr.Cultures.Any(tc => tc.Culture.ToCultureInfo() == ci));
             }
 
-            return cultures.OrderByDescending(a => a.Name == defaultCulture).ThenBy(a => a.Name).ToList();
+            return cultures.OrderByDescending(a => a.Name == defaultCulture.Name).ThenBy(a => a.Name).ToList();
         }
 
 

@@ -25,7 +25,7 @@ namespace Signum.Web.Translation.Controllers
 
         public ActionResult Index()
         {
-            var cultures = TranslationLogic.CurrentCultureInfos("en");
+            var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
 
             var assemblies = AssembliesToLocalize().ToDictionary(a=>a.FullName);
 
@@ -52,7 +52,7 @@ namespace Signum.Web.Translation.Controllers
             CultureInfo targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = !searchPressed ? null :
-                (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
+                (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture)
                 let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                 where la != null || ci == defaultCulture || ci == targetCulture
                 select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
@@ -87,7 +87,7 @@ namespace Signum.Web.Translation.Controllers
             }
             else
             {
-                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos("en").ToDictionary(ci => ci.Name, 
+                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en")).ToDictionary(ci => ci.Name, 
                     ci => LocalizedAssembly.ImportXml(currentAssembly, ci, forceCreate: true));
 
                 Dictionary<string, List<TranslationRecord>> groups = list.GroupToDictionary(a => a.Lang);
@@ -176,7 +176,7 @@ namespace Signum.Web.Translation.Controllers
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
-            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
+            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
                                                                     select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
