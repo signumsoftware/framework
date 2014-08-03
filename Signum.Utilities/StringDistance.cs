@@ -171,6 +171,18 @@ namespace Signum.Utilities
                 }
             }
 
+            while (i > 0)
+            {
+                result.Add(Choice<T>.Remove(strOld[i - 1]));
+                i = i - 1;
+            }
+
+            while (j > 0)
+            {
+                result.Add(Choice<T>.Add(strNew[j - 1]));
+                j = j - 1;
+            }
+
             result.Reverse();
 
             return result;
