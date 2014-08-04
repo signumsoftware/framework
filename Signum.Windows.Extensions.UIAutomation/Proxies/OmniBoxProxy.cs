@@ -16,7 +16,7 @@ namespace Signum.Windows.UIAutomation
 {
     public class OmniBoxProxy
     {
-        public int OmniboxTimeout = 4000;
+        public int OmniboxTimeout = 10000;
 
         public AutomationElement Element { get; private set; }
 
