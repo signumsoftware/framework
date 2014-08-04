@@ -165,14 +165,14 @@ namespace Signum.Windows.Operations
                         if (eoc.ConfirmMessage())
                         {
                             Lite<IdentifiableEntity> lite = ident.ToLite();
-                            result = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.OperationSymbol, null));
+                            result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx => Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.OperationSymbol, null)));
                         }
                     }
                     else
                     {
                         if (eoc.ConfirmMessage())
                         {
-                            result = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                            result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx => Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null)));
                         }
                     }
 
