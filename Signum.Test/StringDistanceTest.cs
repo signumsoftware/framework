@@ -103,14 +103,14 @@ namespace Signum.Test
         public void DiffText()
         {
             var text1 = 
-@"Hola Pedro
+@"  Hola Pedro
 Que tal
 Bien
 
 Adios Juan";
 
             var text2 =
-@"Hola Pedri
+@"  Hola Pedri
 
 Que til
 Adios Juani";
@@ -121,10 +121,11 @@ Adios Juani";
                 l.Action == StringDistance.DiffAction.Removed ? "[-]" : "[=]") + l.Value.ToString(""), "\r\n");
 
             Assert.AreEqual(
-@"[=]Hola -Pedro+Pedri
+@"[=]  Hola -Pedro+Pedri
 [-]-Que tal
 [-]-Bien
 [=]
+[+]+Que til
 [=]Adios -Juan+Juani", str);
 
         }
