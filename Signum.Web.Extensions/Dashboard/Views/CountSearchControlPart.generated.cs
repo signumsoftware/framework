@@ -93,8 +93,9 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 10 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
-         foreach (CountUserQueryElementDN uq in tc.Value.UserQueries)
+         for (int i = 0; i < tc.Value.UserQueries.Count; i++)
         {
+            CountUserQueryElementDN uq = tc.Value.UserQueries[i];
             object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
             FindOptions fo = new FindOptions(queryName)
             {
@@ -111,8 +112,8 @@ WriteLiteral("            <p>\r\n");
 WriteLiteral("                ");
 
             
-            #line 20 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
-           Write(Html.CountSearchControlSpan(fo, new Context(tc, "cnt"), csc =>
+            #line 21 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
+           Write(Html.CountSearchControlSpan(fo, new Context(tc, "{0}_cnt".Formato(i)), csc =>
            {
                csc.Navigate = true;
                csc.Href = uq.Href;
@@ -125,7 +126,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            </p>\r\n");
 
             
-            #line 27 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
+            #line 28 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
         }
 
             
@@ -134,7 +135,7 @@ WriteLiteral("\r\n            </p>\r\n");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 29 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
+            #line 30 "..\..\Dashboard\Views\CountSearchControlPart.cshtml"
 }
             
             #line default
