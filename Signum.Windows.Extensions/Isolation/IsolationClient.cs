@@ -79,41 +79,44 @@ namespace Signum.Windows.Isolation
 
         static Action<Window> Async_OnShowInAnotherThread()
         {
-            Lite<IsolationDN> current = IsolationDN.Current;
+            if (IsolationDN.Default != null)
+                return win => { };
+
+            Lite<IsolationDN> prev = IsolationDN.Current;
 
             return win =>
             {
                 if (Application.Current.Dispatcher == Dispatcher.CurrentDispatcher)
                     throw new InvalidOperationException("Isolation can not be set in the main Thread");
 
-                if (current != null)
+                if (win.DataContext != null)
                 {
-                    IsolationDN.CurrentThreadVariable.Value = Tuple.Create(current);
-                }
-                else if (win.DataContext != null)
-                {
-                    SetIsolation(win.DataContext as IdentifiableEntity);
+                    SetIsolation(win.DataContext as IdentifiableEntity, prev);
                 }
                 else if (win is NormalWindow)
                 {
                     ((NormalWindow)win).PreEntityLoaded += (w, args) =>
                     {
-                        SetIsolation(args.Entity as IdentifiableEntity);
+                        SetIsolation(args.Entity as IdentifiableEntity, prev);
                         return;
                     };
+                }
+                else if (prev != null)
+                {
+                    IsolationDN.CurrentThreadVariable.Value = Tuple.Create(prev);
                 }
             }; 
         }
 
-        private static void SetIsolation(IdentifiableEntity entity)
+        private static void SetIsolation(IdentifiableEntity entity, Lite<IsolationDN> prev)
         {
             if (entity == null)
-                return;
-
-            var cur = entity.TryIsolation();
-
-            if (cur != null)
+                IsolationDN.CurrentThreadVariable.Value = Tuple.Create(prev);
+            else
+            {
+                var cur = entity.TryIsolation();
                 IsolationDN.CurrentThreadVariable.Value = Tuple.Create(cur);
+            }
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
