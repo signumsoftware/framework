@@ -156,31 +156,28 @@ namespace Signum.Windows.Operations
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
                 {
-                    IIdentifiable result = null;
-                    if (eoc.OperationInfo.Lite.Value)
-                    {
-                        if (!eoc.EntityControl.LooseChangesIfAny())
-                            return;
+                    if (eoc.OperationInfo.Lite.Value && !eoc.EntityControl.LooseChangesIfAny())
+                        return;
 
-                        if (eoc.ConfirmMessage())
-                        {
-                            Lite<IdentifiableEntity> lite = ident.ToLite();
-                            result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx => Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.OperationSymbol, null)));
-                        }
-                    }
-                    else
+                    if (!eoc.ConfirmMessage())
+                        return;
+                        
+                    bool serverCalled = false;
+                    IIdentifiable result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx =>
                     {
-                        if (eoc.ConfirmMessage())
-                        {
-                            result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx => Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null)));
-                        }
-                    }
+                        serverCalled = true;
+
+                        if (eoc.OperationInfo.Lite.Value)
+                            return Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null));
+                        else
+
+                            return Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                    });
 
                     if (result != null)
                         Navigator.Navigate(result);
-                    else
-                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
-
+                    else if(serverCalled)
+                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(eoc.OperationInfo.OperationSymbol.NiceToString()));
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.Delete)
                 {
