@@ -3,8 +3,6 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
-export var doubleScroll = true;
-
 export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
@@ -383,46 +381,10 @@ export class SearchControl {
             return false;
         });
 
-        if (doubleScroll) {
-            var div = this.prefix.child("divResults").get();
-
-            div.removeClass("table-responsive");
-            div.css("overflow-x", "auto");
-
-            var divUp = this.options.prefix.child("divResults_Up").tryGet();
-
-            if (!divUp.length) {
-                divUp = $("<div>")
-                    .attr("id", this.options.prefix.child("divResults_Up"))
-                    .css("overflow-x", "auto")
-                    .css("overflow-y", "hidden")
-                    .css("height", "15")
-                    .insertBefore(div);
-
-                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
-            }
-
-            div.scroll(() => { this.syncSize(); divUp.scrollLeft(div.scrollLeft()); });
-            divUp.scroll(() => { this.syncSize(); div.scrollLeft(divUp.scrollLeft()); });
-
-            this.syncSize();
-
-            window.onresize = () => this.syncSize();
-        }
 
         if (this.options.searchOnLoad) {
             this.searchOnLoad();
         }
-    }
-
-    syncSize() {
-        if (!doubleScroll)
-            return;
-
-        this.prefix.child("tblResults_Up").get().width(this.prefix.child("tblResults").get().width());
-
-        this.prefix.child("divResults_Up").get().css("height",
-            this.prefix.child("tblResults_Up").get().width() > this.prefix.child("divResults_Up").get().width() ? "15" : "1");
     }
 
     changeRowSelection($rowSelectors, select: boolean) {
@@ -594,7 +556,6 @@ export class SearchControl {
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-            this.syncSize();
             this.updateSelectedButton();
             });
     }
@@ -743,7 +704,7 @@ export class SearchControl {
             url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
             async: false,
-        }).then(html => { $tblHeaders.append(html); this.syncSize(); });
+        }).then(html => { $tblHeaders.append(html); });
     }
 
     editColumn($th: JQuery) {
@@ -758,7 +719,6 @@ export class SearchControl {
         }).then(result => {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
-                this.syncSize();
             });
     }
 
@@ -842,7 +802,6 @@ export class SearchControl {
     removeColumn($th) {
         $th.remove();
         this.clearResults();
-        this.syncSize();
     }
 
     clearResults() {
