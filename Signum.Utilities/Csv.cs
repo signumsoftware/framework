@@ -114,24 +114,24 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = false, 
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
             Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, trim, parserFactory).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, parserFactory).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true,
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
             Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, trim, parserFactory).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, parserFactory).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true, 
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
             Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
             where T : new()
         {
@@ -140,7 +140,7 @@ namespace Signum.Utilities
 
             var columns = ColumnInfoCache<T>.Columns;
             var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers =  columns.Select(c => GetParser(culture, trim, c, parserFactory)).ToList();
+            var parsers =  columns.Select(c => GetParser(culture, c, parserFactory)).ToList();
 
             Regex regex = GetRegex(culture);
 
@@ -165,7 +165,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, bool trim = true, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
+        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
             where T : new()
         {
             culture = culture ?? CultureInfo.CurrentCulture;
@@ -178,10 +178,10 @@ namespace Signum.Utilities
 
             return ReadObject<T>(m,
                 columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(culture, trim, c, parserFactory)).ToList());
+                columns.Select(c => GetParser(culture, c, parserFactory)).ToList());
         }
 
-        private static Func<string, object> GetParser<T>(CultureInfo culture, bool trim, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory)
+        private static Func<string, object> GetParser<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory)
         {
             if (parserFactory != null)
             {
@@ -255,8 +255,10 @@ namespace Signum.Utilities
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
-                if (!s.HasText()) return null;
-                else return ConvertTo(s, baseType, culture, format);
+                if (!s.HasText()) 
+                    return null;
+
+                type = baseType;
             }
 
             if (type.IsEnum)

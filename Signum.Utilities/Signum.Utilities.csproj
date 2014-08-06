@@ -185,6 +185,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Docs\1-Introduction.md" />
     <Content Include="Translations\Signum.Utilities.de.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -203,6 +204,11 @@
     <Content Include="Translations\Signum.Utilities.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Docs\2-ExtensionMethods.md" />
+    <None Include="Docs\2.1-Extensions.md" />
+    <None Include="Docs\2.4-Csv.md" />
+    <None Include="Docs\2.2-EnumerableExtensions.md" />
+    <None Include="Docs\2.3-GroupingExtensions.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

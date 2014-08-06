@@ -661,17 +661,6 @@ namespace Signum.Utilities
                 collection.WriteFormattedStringTable(sw, title, longHeader);
             return sb.ToString();
         }
-
-        public static string ToWikiTable<T>(this IEnumerable<T> collection)
-        {
-            string[,] table = collection.ToStringTable();
-
-            string str = "{| class=\"data\"\r\n" + 0.To(table.GetLength(1))
-                .Select(i => (i == 0 ? "! " : "| ") + table.Row(i).ToString(o => o == null ? "" : o.ToString(), i == 0 ? " !! " : " || "))
-                .ToString("\r\n|-\r\n") + "\r\n|}";
-
-            return str;
-        }
         #endregion
 
         #region Min Max
@@ -742,7 +731,7 @@ namespace Signum.Utilities
             return new MinMax<T>(withMin, withMax);
         }
 
-        public static Interval<T> MinMaxPair<T>(this IEnumerable<T> collection)
+        public static Interval<T> ToInterval<T>(this IEnumerable<T> collection)
             where T : struct, IComparable<T>, IEquatable<T>
         {
             bool has = false;
@@ -766,7 +755,7 @@ namespace Signum.Utilities
             return new Interval<T>(min, max);
         }
 
-        public static Interval<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+        public static Interval<V> ToInterval<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
             where V : struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
@@ -864,60 +853,7 @@ namespace Signum.Utilities
             return result.Select(a => a.Reverse());
         }
 
-        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
-        {
-            return GroupWhen(collection, isGroupKey, false);
-        }
-
-        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
-        {
-            List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
-            Grouping<T, T> group = null;
-            foreach (var item in collection)
-            {
-                if (isGroupKey(item))
-                {
-                    group = new Grouping<T, T>(item);
-                    if (includeKeyInGroup)
-                        group.Add(item);
-                    result.Add(group);
-                }
-                else
-                {
-                    if (group != null)
-                        group.Add(item);
-                }
-            }
-
-            return result;
-        }
-
-        public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
-        {
-            Grouping<K, T> current = null;
-
-            foreach (var item in collection)
-            {
-                if (current == null)
-                {
-                    current = new Grouping<K, T>(getGroupKey(item));
-                    current.Add(item);
-                }
-                else if (current.Key.Equals(getGroupKey(item)))
-                {
-                    current.Add(item);
-                }
-                else
-                {
-                    yield return current;
-                    current = new Grouping<K, T>(getGroupKey(item));
-                    current.Add(item);
-                }
-            }
-
-            if (current != null)
-                yield return current;
-        }
+     
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
         {
@@ -927,52 +863,6 @@ namespace Signum.Utilities
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func, IEqualityComparer<S> comparer)
         {
             return collection.Distinct(new LambdaComparer<T, S>(func, comparer, null));
-        }
-
-        public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, int groupSize)
-        {
-            List<T> newList = new List<T>(groupSize);
-            foreach (var item in collection)
-            {
-                newList.Add(item);
-                if (newList.Count == groupSize)
-                {
-                    yield return newList;
-                    newList = new List<T>(groupSize);
-                }
-            }
-
-            if (newList.Count != 0)
-                yield return newList;
-        }
-
-        public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
-        {
-            List<T> newList = new List<T>();
-            int accumSize = 0;
-            foreach (var item in collection)
-            {
-                var size = elementSize(item);
-                if ((accumSize + size) > groupSize && newList.Count > 0)
-                {
-                    yield return newList;
-                    newList = new List<T> { item };
-                    accumSize = size;
-                }
-                else
-                {
-                    accumSize += size;
-                    newList.Add(item);
-                }
-            }
-
-            if (newList.Count != 0)
-                yield return newList;
-        }
-
-        public static IEnumerable<Interval<int>> IntervalsOf(this IEnumerable<int> collection, int groupSize)
-        {
-            return collection.OrderBy().GroupsOf(groupSize).Select(gr => new Interval<int>(gr.Min(), gr.Max() + 1));
         }
 
         public static IEnumerable<T> Slice<T>(this IEnumerable<T> collection, int firstIncluded, int toNotIncluded)
@@ -1062,6 +952,7 @@ namespace Signum.Utilities
 
         public static IEnumerable<R> ZipStrict<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> mixer)
         {
+            colA.Zip(colB, (a, b) => a);
             using (var enumA = colA.GetEnumerator())
             using (var enumB = colB.GetEnumerator())
             {

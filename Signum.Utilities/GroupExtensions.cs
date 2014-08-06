@@ -107,5 +107,107 @@ namespace Signum.Utilities
                 .OrderByDescending(g => g.Count())
                 .ToDictionary(g => g.Key, agregateSelector);
         }
+
+
+        public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, int groupSize)
+        {
+            List<T> newList = new List<T>(groupSize);
+            foreach (var item in collection)
+            {
+                newList.Add(item);
+                if (newList.Count == groupSize)
+                {
+                    yield return newList;
+                    newList = new List<T>(groupSize);
+                }
+            }
+
+            if (newList.Count != 0)
+                yield return newList;
+        }
+
+        public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
+        {
+            List<T> newList = new List<T>();
+            int accumSize = 0;
+            foreach (var item in collection)
+            {
+                var size = elementSize(item);
+                if ((accumSize + size) > groupSize && newList.Count > 0)
+                {
+                    yield return newList;
+                    newList = new List<T> { item };
+                    accumSize = size;
+                }
+                else
+                {
+                    accumSize += size;
+                    newList.Add(item);
+                }
+            }
+
+            if (newList.Count != 0)
+                yield return newList;
+        }
+
+        public static IEnumerable<Interval<int>> IntervalsOf(this IEnumerable<int> collection, int groupSize)
+        {
+            return collection.OrderBy().GroupsOf(groupSize).Select(gr => new Interval<int>(gr.Min(), gr.Max() + 1));
+        }
+
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
+        {
+            return GroupWhen(collection, isGroupKey, false);
+        }
+
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
+        {
+            List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
+            Grouping<T, T> group = null;
+            foreach (var item in collection)
+            {
+                if (isGroupKey(item))
+                {
+                    group = new Grouping<T, T>(item);
+                    if (includeKeyInGroup)
+                        group.Add(item);
+                    result.Add(group);
+                }
+                else
+                {
+                    if (group != null)
+                        group.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
+        {
+            Grouping<K, T> current = null;
+
+            foreach (var item in collection)
+            {
+                if (current == null)
+                {
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+                else if (current.Key.Equals(getGroupKey(item)))
+                {
+                    current.Add(item);
+                }
+                else
+                {
+                    yield return current;
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+            }
+
+            if (current != null)
+                yield return current;
+        }
     }
 }

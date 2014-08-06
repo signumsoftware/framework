@@ -193,12 +193,12 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static int DivCeiling(int a, int b)
+        public static int DivCeiling(this int a, int b)
         {
             return (a + b - 1) / b;
         }
 
-        public static long DivCeiling(int a, long b)
+        public static long DivCeiling(this int a, long b)
         {
             return (a + b - 1) / b;
         }
