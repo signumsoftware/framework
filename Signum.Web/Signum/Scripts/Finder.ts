@@ -367,7 +367,7 @@ export class SearchControl {
                 this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
             });
 
-            this.prefix.child("sfFullScreen").get().on("mousedown", e => {
+            this.prefix.child("sfFullScreen").get().on("mouseup", e => {
                 e.preventDefault();
                 this.fullScreen(e);
             });
