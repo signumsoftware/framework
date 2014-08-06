@@ -115,12 +115,9 @@ namespace Signum.Engine.Alerts
                 CreatedBy = user ?? UserHolder.Current.ToLite(),
                 Text = text,
                 Title = title,
-                Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
+                Target = (Lite<IdentifiableEntity>)entity,
                 AlertType = alertType
             };
-
-            if (result.Mixins.Any())
-                result.CopyMixinsFrom(entity.Retrieve());
 
             return result.Execute(AlertOperation.SaveNew);
         }
