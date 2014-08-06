@@ -61,7 +61,7 @@ namespace Signum.Windows
             Func<T, string> elementText = null,
             string title = null,
             string message = null,
-            bool autoSelectOnlyElement = false,
+            bool autoSelectOnlyElement = true,
             Window owner = null)
         {
             if (title == null)
