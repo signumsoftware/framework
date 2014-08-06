@@ -381,6 +381,11 @@ export class SearchControl {
             return false;
         });
 
+        //if (SF.isTouchDevice()) { //UserQuery dropdown problems
+        //    this.element.find(".sf-query-button-bar")
+        //        .css("overflow-x", "auto")
+        //        .css("white-space", "nowrap");
+        //}
 
         if (this.options.searchOnLoad) {
             this.searchOnLoad();
@@ -904,6 +909,12 @@ export class FilterBuilder {
         public prefix: string,
         public webQueryName: string,
         public addFilterUrl: string) {
+
+        if (SF.isTouchDevice()) {
+            element.find(".sf-filters-body")
+                .css("overflow-x", "auto")
+                .css("white-space", "nowrap");
+        }
 
         this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 

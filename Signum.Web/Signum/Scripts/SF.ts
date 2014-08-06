@@ -236,6 +236,15 @@ module SF {
 
         return false;
     }
+
+    export function isTouchDevice() {
+        try {
+            document.createEvent("TouchEvent");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
 }
 
 interface JQuery {
