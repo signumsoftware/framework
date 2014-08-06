@@ -62,7 +62,7 @@ namespace Signum.Windows.UIAutomation
                     if (item == null)
                         throw new ElementNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(name, autoCompleteText));
 
-                    var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
+                    var listItem = item.Parent(a => a.Current.ControlType == ControlType.ListItem);
 
                     listItem.Pattern<SelectionItemPattern>().Select();
                 },

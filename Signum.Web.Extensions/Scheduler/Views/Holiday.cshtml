@@ -3,6 +3,13 @@
 
 @using (var e = Html.TypeContext<HolidayDN>()) 
 {
-    @Html.ValueLine(e, f => f.Date)
-    @Html.ValueLine(e, f => f.Name)        
+     e.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-4">
+            @Html.ValueLine(e, f => f.Date)
+        </div>
+        <div class="col-sm-4">
+            @Html.ValueLine(e, f => f.Name)
+        </div>
+    </div>      
 }

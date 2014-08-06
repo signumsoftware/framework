@@ -56,7 +56,7 @@ namespace Signum.Engine.Translation
                     gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance, a.RowId))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                sb.Schema.Initializing += () =>
                 {
                     var s = Schema.Current;
 
@@ -71,7 +71,6 @@ namespace Signum.Engine.Translation
                     {
                         AddRoute(pr);
                     }
-
                 };
             }
         }
@@ -357,9 +356,9 @@ namespace Signum.Engine.Translation
             return (Func<T, R>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
         }
 
-        public static byte[] GetExcelFile(Type t, CultureInfo c)
+        public static FilePair ExportExcelFile(Type type, CultureInfo culture)
         {
-            var result = TranslatedInstanceLogic.TranslationsForType(t, c).Single().Value;
+            var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value;
 
             var list = result
                 .OrderBy(a=>a.Key.Instance.Id)
@@ -372,11 +371,19 @@ namespace Signum.Engine.Translation
                 Translated = r.Value.TranslatedText
             }).ToList();
 
-            return PlainExcelGenerator.WritePlainExcel<ExcelRow>(list);
+            return new FilePair
+            {
+                Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
+                FileName = "{0}.{1}.View.xlsx".Formato(type, culture.Name)
+            };
         }
 
-        public static byte[] GetSyncExcelFile(List<InstanceChanges> changes, CultureInfo master, CultureInfo target)
+        public static FilePair ExportExcelFileSync(Type type, CultureInfo culture)
         {
+            CultureInfo master = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
+
+            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { master });
+
             var list = (from ic in changes
                         from pr in ic.RouteConflicts
                         orderby ic.Instance, pr.Key.Item1.PropertyString(), pr.Key.Item2
@@ -389,11 +396,24 @@ namespace Signum.Engine.Translation
                             Translated = null
                         }).ToList();
 
-            return PlainExcelGenerator.WritePlainExcel<ExcelRow>(list);
+            return new FilePair
+            {
+                Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
+                FileName = "{0}.{1}.Sync.xlsx".Formato(type, culture.Name)
+            };
         }
 
-        public static void SaveExcelFile(Stream stream, Type type, CultureInfo culture)
+        public static TypeCulturePair ImportExcelFile(string filePath)
         {
+            using (var stream = File.OpenRead(filePath))
+                return ImportExcelFile(stream, Path.GetFileName(filePath));
+        }
+
+        public static TypeCulturePair ImportExcelFile(Stream stream, string fileName)
+        {
+            Type type = TypeLogic.GetType(fileName.Before('.'));
+            CultureInfo culture = CultureInfo.GetCultureInfo(fileName.After('.').Before('.'));
+
             var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
             {
                  Culture = culture,
@@ -403,6 +423,8 @@ namespace Signum.Engine.Translation
             });
 
             SaveRecords(records, type, culture);
+
+            return new TypeCulturePair { Type = type, Culture = culture};
         }
 
 
@@ -416,25 +438,34 @@ namespace Signum.Engine.Translation
 
             var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a => a.Key.Instance).Select(gr =>
             {
-                var routeConflicts = (from kvp in gr
-                                      let t = target.TryGetC(kvp.Key)
-                                      where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
-                                      select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
+                Dictionary<LocalizedInstanceKey, string> routeConflicts =
+                    (from kvp in gr
+                     let t = target.TryGetC(kvp.Key)
+                     where kvp.Value.HasText() && (t == null || t.OriginalText.Replace("\r", "").Replace("\n", "") != kvp.Value.Replace("\r", "").Replace("\n", ""))
+                     select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
 
                 if (routeConflicts.IsEmpty())
                     return null;
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.TranslatedText)
-                              where str.HasItems()
+                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              where str.HasText()
+                              let old = c.Equals(masterCulture) ? target.TryGetC(rc.Key) : null
                               select new
                               {
                                   rc.Key.Route,
                                   rc.Key.RowId,
                                   Culture = c,
-                                  Conflict = new PropertyRouteConflict { Original = str, AutomaticTranslation = null }
-                              }).AgGroupToDictionary(a =>Tuple.Create(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
+                                  Conflict = new PropertyRouteConflict
+                                  {
+                                      OldOriginal = old.Try(o => o.OriginalText),
+                                      OldTranslation = old.Try(o => o.TranslatedText),
+
+                                      Original = str,
+                                      AutomaticTranslation = null
+                                  }
+                              }).AgGroupToDictionary(a => Tuple.Create(a.Route, a.RowId), g => g.ToDictionary(a => a.Culture, a => a.Conflict));
 
                 return new InstanceChanges
                 {
@@ -442,7 +473,7 @@ namespace Signum.Engine.Translation
                     RouteConflicts = result
                 };
 
-            }).NotNull().ToList();
+            }).NotNull().OrderByDescending(ic => ic.RouteConflicts.Values.Any(dic => dic.Values.Any(rc => rc.OldOriginal != null))).ToList();
             return instances;
         }
 
@@ -496,6 +527,18 @@ namespace Signum.Engine.Translation
       
     }
 
+    public class TypeCulturePair
+    {
+        public Type Type;
+        public CultureInfo Culture;
+    }
+
+    public class FilePair
+    {
+        public string FileName;
+        public byte[] Content;
+    }
+
     public struct TranslatableElement<T>
     {
         public readonly Lite<IdentifiableEntity> Lite;
@@ -539,6 +582,9 @@ namespace Signum.Engine.Translation
 
     public class PropertyRouteConflict
     {
+        public string OldOriginal;
+        public string OldTranslation;
+
         public string Original;
         public string AutomaticTranslation;
 

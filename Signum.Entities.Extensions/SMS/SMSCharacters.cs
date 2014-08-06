@@ -121,6 +121,7 @@ namespace Signum.Entities.SMS
         [Description("The template must be Active to construct SMS messages")]
         TheTemplateMustBeActiveToConstructSMSMessages,
         TheTextForTheSMSMessageExceedsTheLengthLimit,
-        Language
+        Language,
+        Replacements
     }
 }

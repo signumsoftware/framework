@@ -29,7 +29,7 @@ namespace Signum.Windows.Processes
         {
             InitializeComponent();
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.Interval = TimeSpan.FromSeconds(.5);
             timer.IsEnabled = false;
             timer.Tick += new EventHandler(timer_Tick);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(Process_DataContextChanged);

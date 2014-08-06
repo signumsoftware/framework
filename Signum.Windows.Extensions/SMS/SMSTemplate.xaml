@@ -8,22 +8,31 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
-        <m:ValueLine m:Common.Route="Active" m:Common.IsReadOnly="True"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <m:ValueLine m:Common.Route="Active"/>
+                <m:ValueLine m:Common.Route="StartDate" />
+                <m:ValueLine m:Common.Route="EndDate" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <m:ValueLine m:Common.Route="Certified" />
+                <m:ValueLine m:Common.Route="EditableMessage" />
+                <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" m:Common.MinLabelWidth="150"/>
+            </StackPanel>
+        </Grid>
+        <m:ValueLine m:Common.Route="From" />
+        <m:ValueLine m:Common.Route="MessageLengthExceeded" m:Common.MinLabelWidth="150" />
         <Grid Margin="0,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <GroupBox Header="{m:Loc {x:Static d:SmsMessage.Message}}" Margin="0,10" Grid.Column="0">
-                <StackPanel>
-                    <!--<m:EntityRepeater m:Common.Route="Messages" Find="False">
-                        <m:EntityRepeater.EntityTemplate>
-                            <DataTemplate>
-                                <w:SMSTemplateMessage />
-                            </DataTemplate>
-                        </m:EntityRepeater.EntityTemplate>
-                    </m:EntityRepeater>-->
-                    
+            <GroupBox Header="{m:Loc {x:Static d:SmsMessage.Message}}" Grid.Column="0">
+                <StackPanel>                    
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -51,29 +60,18 @@
                             </TabControl.ContentTemplate>
                         </TabControl>
                     </Grid>
-
-                    <!--<m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message" Grid.Column="0" MaxWidth="300" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 10" >
-                        <TextBlock Text="{m:Loc {x:Static d:SmsMessage.RemainingCharacters}}" />
-                        <TextBlock x:Name="charactersLeft" FontWeight="Bold" Margin="4,0,0,0">160</TextBlock>
-                    </StackPanel>
-                    <Button x:Name="removeNonSMSChars" Click="removeNonSMSChars_Click" 
-                            Content="{m:Loc {x:Static d:SmsMessage.RemoveNonValidCharacters}}" Width="200" HorizontalAlignment="Left"/>-->
                 </StackPanel>
             </GroupBox>
-
-            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+            <GroupBox Header="{m:Loc {x:Static d:SmsMessage.Replacements}}" Grid.Column="1" Margin="10,0,0,0">
+                <StackPanel >
                 <m:EntityCombo m:Common.Route="AssociatedType" EntityChanged="EntityCombo_EntityChanged" Create="False" LoadData="EntityCombo_LoadData"/>
                 <ListBox x:Name="sfLiterals" Height="100" MouseDoubleClick="sfLiterals_MouseDoubleClick" />
                 <Button x:Name="insertLiteral" Click="insertLiteral_Click" Content="{m:Loc {x:Static d:SmsMessage.Insert}}" Margin="0,10,0,0"/>
             </StackPanel>
+            </GroupBox>
         </Grid>
-        <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" m:Common.MinLabelWidth="150"/>
-        <m:ValueLine m:Common.Route="MessageLengthExceeded" m:Common.MinLabelWidth="150" />
-        <m:ValueLine m:Common.Route="EditableMessage" />
-        <m:ValueLine m:Common.Route="Certified" />
-        <m:ValueLine m:Common.Route="From" />
-        <m:ValueLine m:Common.Route="StartDate" />
-        <m:ValueLine m:Common.Route="EndDate" />
+
+    
+  
     </StackPanel>
 </UserControl>

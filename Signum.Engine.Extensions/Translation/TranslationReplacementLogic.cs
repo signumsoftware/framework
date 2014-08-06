@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -70,7 +71,7 @@ namespace Signum.Engine.Translation
 
             if (string.IsNullOrWhiteSpace(translationRight))
                 throw new ArgumentNullException(translationRight);
-
+            
             if (!Database.Query<TranslationReplacementDN>().Any(a => a.CultureInfo == ci.ToCultureInfoDN() && a.WrongTranslation == translationWrong))
                 using (OperationLogic.AllowSave<TranslationReplacementDN>())
                     new TranslationReplacementDN

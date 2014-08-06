@@ -370,15 +370,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             $chartContainer.find('[data-click]').click(function (e) {
                 var url = _this.options.openUrl;
 
-                var win = window.open("about:blank");
+                var options = _this.chartControl.find(":input").not(_this.chartControl.find(".sf-filters-list :input")).serializeObject();
+                options["webQueryName"] = _this.options.webQueryName;
+                options["orders"] = _this.serializeOrders();
+                options["filters"] = _this.filterBuilder.serializeFilters();
 
-                var options = _this.chartControl.find(":input").not(_this.chartControl.find(".sf-filters-list :input")).serialize();
-                options += "&webQueryName=" + _this.options.webQueryName;
-                options += "&orders=" + _this.serializeOrders();
-                options += "&filters=" + _this.filterBuilder.serializeFilters();
-                options += $(e.currentTarget).data("click");
-
-                win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                var params = $.param(options) + $(e.currentTarget).data("click");
+                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + params);
             });
         };
         return ChartRequest;

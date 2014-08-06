@@ -126,7 +126,7 @@ namespace Signum.Web.Files
 
                     HtmlStringBuilder sb = new HtmlStringBuilder();
                     sb.AddLine(helper.HiddenRuntimeInfo(fileLine));
-                    sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='form-control'/>".Formato(fileLine.SFControlThen("onChanged()"), fileLine.Compose(FileLineKeys.File))));
+                    sb.AddLine(MvcHtmlString.Create("<input type='file' id='{0}' name='{0}' class='form-control'/>".Formato(fileLine.Compose(FileLineKeys.File))));
                     sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
 
 

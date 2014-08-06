@@ -60,17 +60,17 @@
                         @if (pair.Key.Split(' ').Length > 1)
                         {<span class="entityName">@pair.Key.Split(' ')[1]</span>}
                     </td>
-                    <td class="centered" style="background:@getColor(pair.Value.Count / max.Count)">@pair.Value.Count
+                    <td style="text-align:center; background:@getColor(pair.Value.Count / max.Count); ">@pair.Value.Count
                     </td>
-                    <td class="right" style="background:@getColor(pair.Value.LastTime/max.LastTime)">@pair.Value.LastTime
+                    <td style="text-align:right; background:@getColor(pair.Value.LastTime/max.LastTime)">@pair.Value.LastTime
                     </td>
-                    <td class="right" style="background:@getColor(pair.Value.MinTime / max.MinTime)">@pair.Value.MinTime
+                    <td style="text-align:right; background:@getColor(pair.Value.MinTime / max.MinTime)">@pair.Value.MinTime
                     </td>
-                    <td class="right" style="background:@getColor((float)pair.Value.Average / max.Average)">@pair.Value.Average
+                    <td style="text-align:right; background:@getColor((float)pair.Value.Average / max.Average)">@pair.Value.Average
                     </td>
-                    <td class="right" style="background:@getColor(pair.Value.MaxTime / max.MaxTime)">@pair.Value.MaxTime
+                    <td style="background:@getColor(pair.Value.MaxTime / max.MaxTime)">@pair.Value.MaxTime
                     </td>
-                    <td class="right" style="background:@getColor(pair.Value.TotalTime / max.TotalTime)">@pair.Value.TotalTime
+                    <td style="text-align:right; background:@getColor(pair.Value.TotalTime / max.TotalTime)">@pair.Value.TotalTime
                     </td>
                 </tr>
             }

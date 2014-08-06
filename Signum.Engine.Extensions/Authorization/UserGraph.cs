@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -47,6 +48,7 @@ namespace Signum.Engine.Authorization
                 ToState = UserState.Disabled,
                 Execute = (u, _) =>
                 {
+                    Thread.Sleep(500);
                     u.AnulationDate = TimeZoneManager.Now;
                     u.State = UserState.Disabled;
                 },
@@ -60,6 +62,7 @@ namespace Signum.Engine.Authorization
                 ToState = UserState.Saved,
                 Execute = (u, _) =>
                 {
+                    Thread.Sleep(500);
                     u.AnulationDate = null;
                     u.State = UserState.Saved;
                 },

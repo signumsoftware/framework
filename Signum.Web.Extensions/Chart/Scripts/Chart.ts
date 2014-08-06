@@ -406,21 +406,18 @@ export class ChartRequest {
     }
 
     bindMouseClick($chartContainer: JQuery) {
-
+        
         $chartContainer.find('[data-click]').click(e=> {
 
             var url = this.options.openUrl;
 
-            var win = window.open("about:blank");
+            var options = this.chartControl.find(":input").not(this.chartControl.find(".sf-filters-list :input")).serializeObject();
+            options["webQueryName"] = this.options.webQueryName;
+            options["orders"] = this.serializeOrders();
+            options["filters"] = this.filterBuilder.serializeFilters();
 
-            var options = this.chartControl.find(":input").not(this.chartControl.find(".sf-filters-list :input")).serialize();
-            options += "&webQueryName=" + this.options.webQueryName;
-            options += "&orders=" + this.serializeOrders();
-            options += "&filters=" + this.filterBuilder.serializeFilters();
-            options += $(e.currentTarget).data("click");
-
-            win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
-
+            var params = $.param(options) + $(e.currentTarget).data("click");
+            window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + params);
         });
     }
 }

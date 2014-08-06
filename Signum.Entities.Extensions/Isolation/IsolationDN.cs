@@ -33,7 +33,7 @@ namespace Signum.Entities.Isolation
             set { DefaultVariable.Value = value; }
         }
 
-        public static readonly ThreadVariable<Lite<IsolationDN>> CurrentThreadVariable = Statics.ThreadVariable<Lite<IsolationDN>>("CurrentIsolation");
+        public static readonly ThreadVariable<Tuple<Lite<IsolationDN>>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationDN>>>("CurrentIsolation");
 
         public static IDisposable Override(Lite<IsolationDN> isolation)
         {
@@ -49,16 +49,35 @@ namespace Signum.Entities.Isolation
                 throw new InvalidOperationException("Trying to change isolation from {0} to {1}".Formato(curr, isolation));
             }
 
-            var old = CurrentThreadVariable.Value; 
+            return UnsafeOverride(isolation);
+        }
 
-            CurrentThreadVariable.Value = isolation;
+        public static IDisposable Disable()
+        {
+            return UnsafeOverride(null);
+        }
 
-            return new Disposable(() => CurrentThreadVariable.Value = old); 
+        static IDisposable UnsafeOverride(Lite<IsolationDN> isolation)
+        {
+            var old = CurrentThreadVariable.Value;
+
+            CurrentThreadVariable.Value = Tuple.Create(isolation);
+
+            return new Disposable(() => CurrentThreadVariable.Value = old);
         }
 
         public static Lite<IsolationDN> Current
         {
-            get { return CurrentThreadVariable.Value ?? Default; }
+            get
+            {
+
+                var tuple = CurrentThreadVariable.Value;
+
+                if (tuple != null)
+                    return tuple.Item1;
+
+                return Default;
+            }
         }
     }
 
@@ -82,7 +101,7 @@ namespace Signum.Entities.Isolation
         }
 
         [NotNullable, AttachToAllUniqueIndexes]
-        Lite<IsolationDN> isolation = IsolationDN.Current;
+        Lite<IsolationDN> isolation = IsRetrieving ? null : IsolationDN.Current;
         [NotNullValidator]
         public Lite<IsolationDN> Isolation
         {

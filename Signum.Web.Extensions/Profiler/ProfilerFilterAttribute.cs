@@ -4,16 +4,32 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Profiler;
 
 namespace Signum.Web.Profiler
 {
+    
+
     public class ProfilerFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var action = filterContext.RouteData.Values["controller"] + "." + filterContext.RouteData.Values["action"];
+
+            var rad = filterContext.ActionDescriptor as ReflectedActionDescriptor;
+            if (rad != null)
+            {
+                var attr = rad.SingleAttribute<ActionSplitterAttribute>(); 
+                if(attr != null)
+                {
+                    var str = filterContext.HttpContext.Request[attr.RequestKey] ?? filterContext.RouteData.Values[attr.RequestKey];
+
+                    if (str != null)
+                        action += " " + str;
+                }
+            }
 
             ViewDataDictionary viewData = filterContext.Controller.ViewData;
 

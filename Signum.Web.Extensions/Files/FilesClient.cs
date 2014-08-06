@@ -180,16 +180,17 @@ namespace Signum.Web.Files
                
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
-                       col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
-                           new MvcHtmlString("<img src='" +
-                               RouteHelper.New().Content(((WebImage)obj).FullWebPath) +
-                               "' alt='" + typeof(WebImage).NiceName() + "' class='sf-search-control-image' />")
+                       col => new CellFormatter((help, obj) => ((WebImage)obj).FullWebPath == null ? null :
+                           new HtmlTag("img")
+                           .Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath))
+                           .Attr("alt", typeof(WebImage).NiceName())
+                           .Attr("style", "width:80px").ToHtmlSelf()) { TextAlign = "center" }
                  ));
 
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebDownload),
-                       col => (help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
-                          new MvcHtmlString("<a href='{0}'>{1}</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))
+                       col => new CellFormatter((help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
+                          new MvcHtmlString("<a href='{0}'>{1}</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }
                 ));
 
             }

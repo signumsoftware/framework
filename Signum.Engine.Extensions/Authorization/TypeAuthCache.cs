@@ -336,7 +336,7 @@ namespace Signum.Entities.Authorization
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource").Value).ToHashSet(),
-                TypeLogic.NameToType.Where(a=>!a.Value.IsEnumEntity()).Select(a=>a.Key).ToHashSet(), typeof(TypeDN).Name);
+                TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeof(TypeDN).Name);
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),

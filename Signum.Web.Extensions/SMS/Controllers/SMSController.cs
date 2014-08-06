@@ -95,7 +95,7 @@ namespace Signum.Web.SMS
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
-            var cp = new Signum.Engine.SMS.SMSLogic.CreateMessageParams
+            var cp = new CreateMessageParams
             {
                 Message = model.Message,
                 From = model.From,

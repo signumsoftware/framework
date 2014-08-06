@@ -13,11 +13,14 @@ namespace Signum.Entities.Chart
 {
     public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxResult>
     {
-        public Func<string> NiceName = () => ChartMessage.Chart.NiceToString();
+        public Func<string> NiceName = () => ChartMessage.ChartToken.NiceToString();
 
         Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
         public override IEnumerable<ChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
+            if (!OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
+                yield break;
+
             Match m = regex.Match(tokenPattern);
 
             if (!m.Success)
@@ -57,7 +60,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    Text = "Chart {0}".Formato(OmniboxMessage.Omnibox_Query.NiceToString()), 
+                    Text =  ChartMessage.ChartToken.NiceToString() + " " + OmniboxMessage.Omnibox_Query.NiceToString(), 
                     OmniboxResultType = resultType 
                 }
             };

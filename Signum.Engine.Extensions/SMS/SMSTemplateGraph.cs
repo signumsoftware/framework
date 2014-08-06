@@ -7,21 +7,14 @@ using Signum.Entities.SMS;
 
 namespace Signum.Engine.SMS
 {
-    public class SMSTemplateGraph : Graph<SMSTemplateDN, SMSTemplateState>
+    public class SMSTemplateGraph : Graph<SMSTemplateDN>
     {
-        static bool registered;
-        public static bool Registered { get { return registered; } }
-
-
         public static void Register()
         {
-            GetState = t => t.State;
             new Construct(SMSTemplateOperation.Create)
             {
-                ToState = SMSTemplateState.Created,
                 Construct = _ => new SMSTemplateDN
                 {
-                    State = SMSTemplateState.Created,
                     Messages = new Entities.MList<SMSTemplateMessageDN> 
                     {
                         new SMSTemplateMessageDN
@@ -36,28 +29,8 @@ namespace Signum.Engine.SMS
             {
                 Lite = false,
                 AllowsNew = true,
-                FromStates = { SMSTemplateState.Created, SMSTemplateState.Modified },
-                ToState = SMSTemplateState.Modified,
-                Execute = (t, _) => { t.State = SMSTemplateState.Modified; }
+                Execute = (t, _) => {}
             }.Register();
-
-            new Execute(SMSTemplateOperation.Enable)
-            {
-                FromStates = { SMSTemplateState.Modified },
-                ToState = SMSTemplateState.Modified,
-                CanExecute = c => c.Active ? "The template is already active" : null,                
-                Execute = (t, _) => { t.Active = true; }
-            }.Register();
-
-            new Execute(SMSTemplateOperation.Disable)
-            {
-                CanExecute = c => !c.Active ? "The template is already inactive" : null,
-                FromStates = { SMSTemplateState.Modified },
-                ToState = SMSTemplateState.Modified,
-                Execute = (t, _) => { t.Active = false; }
-            }.Register();
-
-            registered = true;
         }
     }
 }

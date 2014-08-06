@@ -46,8 +46,8 @@
                 <ColumnDefinition Width="226*"/>
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="3" Height="22" >
-                <Image Height="16" Width="16" Name="iMinimizar" Source="/Signum.Windows.Extensions;Component/Images/bminimizar.png" Margin="3,0" MouseLeftButtonDown="Minimizar" MouseEnter="EntraMinimizar" MouseLeave="SaleMinimizar" />
-                <Image Height="16" Width="16" Name="iCerrar" Source="/Signum.Windows.Extensions;Component/Images/bcerrar.png" Margin="3,0" MouseLeftButtonDown="btSalir_Click" MouseEnter="EntraCerrar" MouseLeave="SaleCerrar"/>
+                <Image Height="16" Width="16" Name="iMinimizar" Source="/Signum.Windows.Extensions;Component/Images/bminimize.png" Margin="3,0" MouseLeftButtonDown="Minimizar" MouseEnter="EntraMinimizar" MouseLeave="SaleMinimizar" />
+                <Image Height="16" Width="16" Name="iCerrar" Source="/Signum.Windows.Extensions;Component/Images/bclose.png" Margin="3,0" MouseLeftButtonDown="btSalir_Click" MouseEnter="EntraCerrar" MouseLeave="SaleCerrar"/>
             </StackPanel>
             <Image Grid.RowSpan="4" Grid.Row="2" Source="..\Images\keys.png" Stretch="None" Margin="0,22,0,0" Height="102" VerticalAlignment="Top">
                 <Image.Effect>

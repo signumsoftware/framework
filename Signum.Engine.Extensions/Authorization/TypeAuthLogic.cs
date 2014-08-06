@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
                 sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                sb.Schema.Initializing += () =>
                 {
                     foreach (var type in TypeConditionLogic.Types)
                     {

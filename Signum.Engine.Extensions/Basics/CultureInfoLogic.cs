@@ -9,13 +9,12 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
-using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 
-namespace Signum.Engine.Translation
+namespace Signum.Engine.Basics
 {
     public static class CultureInfoLogic
     {
@@ -70,8 +69,6 @@ namespace Signum.Engine.Translation
                 }.Register();
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-
-                PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
             }
         }
 

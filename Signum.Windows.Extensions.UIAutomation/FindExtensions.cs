@@ -13,60 +13,7 @@ namespace Signum.Windows.UIAutomation
 {
     public static class FindExtensions
     {
-        public static AutomationElement TryDescendantById(this AutomationElement parent, string automationId)
-        {
-            return parent.TryElementById(TreeScope.Descendants, automationId);
-        }
-
-        public static AutomationElement TryChildById(this AutomationElement parent, string automationId)
-        {
-            return parent.TryElementById(TreeScope.Children, automationId);
-        }
-
-        public static AutomationElement TryElementById(this AutomationElement parent, TreeScope scope, string automationId)
-        {
-            return parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
-        }
-
-        public static AutomationElement TryNormalizeById(this AutomationElement parent, string automationId)
-        {
-            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
-
-            return tw.Normalize(parent);
-        }
-
-        public static AutomationElement DescendantById(this AutomationElement parent, string automationId)
-        {
-            return parent.ElementById(TreeScope.Descendants, automationId);
-        }
-
-        public static AutomationElement ChildById(this AutomationElement parent, string automationId)
-        {
-            return parent.ElementById(TreeScope.Children, automationId);
-        }
-
-        public static AutomationElement ElementById(this AutomationElement parent, TreeScope scope, string automationId)
-        {
-            var result = parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
-
-            if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
-
-            return result;
-        }
-
-        public static AutomationElement NormalizeById(this AutomationElement parent, string automationId)
-        {
-            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
-
-            var result = tw.Normalize(parent);
-
-            if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
-
-            return result;
-        }
-
+        #region TryElementByCondition
         public static AutomationElement TryDescendantByCondition(this AutomationElement parent, Condition condition)
         {
             return parent.TryElementByCondition(TreeScope.Descendants, condition);
@@ -77,12 +24,70 @@ namespace Signum.Windows.UIAutomation
             return parent.TryElementByCondition(TreeScope.Children, condition);
         }
 
-        public static AutomationElement TryElementByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
+        public static AutomationElement TryParentByCondition(this AutomationElement child, Condition condition)
         {
-            return parent.FindFirst(scope, condition);
+            return child.TryElementByCondition(TreeScope.Parent, condition);
         }
 
+        public static AutomationElement TryElementByCondition(this AutomationElement element, TreeScope scope, Condition condition)
+        {
+            var result = scope == TreeScope.Parent || scope == TreeScope.Ancestors ?
+                        new TreeWalker(condition).GetParent(element) :
+                        element.FindFirst(scope, condition);
 
+            return result;
+        } 
+        #endregion
+
+        #region TryElementById
+        public static AutomationElement TryDescendantById(this AutomationElement parent, string automationId)
+        {
+            return parent.TryElementById(TreeScope.Descendants, automationId);
+        }
+
+        public static AutomationElement TryChildById(this AutomationElement parent, string automationId)
+        {
+            return parent.TryElementById(TreeScope.Children, automationId);
+        }
+
+        public static AutomationElement TryParentById(this AutomationElement parent, string automationId)
+        {
+            return parent.TryElementById(TreeScope.Children, automationId);
+        }
+
+        public static AutomationElement TryElementById(this AutomationElement element, TreeScope scope, string automationId)
+        {
+            return element.TryElementByCondition(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+        }
+        
+        #endregion
+
+        #region TryElement
+        public static AutomationElement TryDescendant(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return parent.TryElement(TreeScope.Descendants, condition);
+        }
+
+        public static AutomationElement TryChild(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return parent.TryElement(TreeScope.Children, condition);
+        }
+
+        public static AutomationElement TryParent(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return parent.TryElement(TreeScope.Parent, condition);
+        }
+
+        public static AutomationElement TryElement(this AutomationElement element, TreeScope scope, Expression<Func<AutomationElement, bool>> condition)
+        {
+            var c = ConditionBuilder.ToCondition(condition);
+
+            return element.TryElementByCondition(scope, c);
+        }
+        
+        #endregion
+
+        #region ElementByCondition
         public static AutomationElement DescendantByCondition(this AutomationElement parent, Condition condition)
         {
             return parent.ElementByCondition(TreeScope.Descendants, condition);
@@ -93,28 +98,82 @@ namespace Signum.Windows.UIAutomation
             return parent.ElementByCondition(TreeScope.Children, condition);
         }
 
-        public static AutomationElement ElementByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
+        public static AutomationElement ParentByCondition(this AutomationElement parent, Condition condition)
         {
-            var result = parent.FindFirst(scope, condition);
+            return parent.ElementByCondition(TreeScope.Children, condition);
+        }
+
+        public static AutomationElement ElementByCondition(this AutomationElement element, TreeScope scope, Condition condition)
+        {
+            var result = element.TryElementByCondition(scope, condition);
 
             if (result == null)
                 throw new ElementNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
 
             return result;
-        }
+        } 
+        #endregion
 
-        public static AutomationElement NormalizeByCondition(this AutomationElement parent, Condition condition)
+        #region ElementById
+        public static AutomationElement DescendantById(this AutomationElement parent, string automationId)
         {
-            TreeWalker tw = new TreeWalker(condition);
-
-            var result = tw.Normalize(parent);
-
-            if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
-
-            return result;
+            return parent.ElementById(TreeScope.Descendants, automationId);
         }
 
+        public static AutomationElement ChildById(this AutomationElement parent, string automationId)
+        {
+            return parent.ElementById(TreeScope.Children, automationId);
+        }
+
+        public static AutomationElement ParentById(this AutomationElement child, string automationId)
+        {
+            return child.ElementById(TreeScope.Parent, automationId);
+        }
+
+        public static AutomationElement ElementById(this AutomationElement element, TreeScope scope, string automationId)
+        {
+            var c = new PropertyCondition(AutomationElement.AutomationIdProperty, automationId);
+
+            return element.ElementByCondition(scope, c);
+        } 
+        #endregion
+
+        #region Element
+        public static AutomationElement Descendant(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return parent.Element(TreeScope.Descendants, condition);
+        }
+
+        public static AutomationElement Child(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return parent.Element(TreeScope.Children, condition);
+        }
+
+        public static AutomationElement Parent(this AutomationElement child, Expression<Func<AutomationElement, bool>> condition)
+        {
+            return child.Element(TreeScope.Parent, condition);
+        }
+
+        public static AutomationElement Element(this AutomationElement element, TreeScope scope, Expression<Func<AutomationElement, bool>> condition)
+        {
+            var c = ConditionBuilder.ToCondition(condition);
+
+            return element.ElementByCondition(scope, c);
+        }
+
+        #endregion
+
+        public static AutomationElement Child(this AutomationElement parent)
+        {
+            return parent.ElementByCondition(TreeScope.Children, Condition.TrueCondition);
+        }
+
+        public static AutomationElement Parent(this AutomationElement child)
+        {
+            return child.ElementByCondition(TreeScope.Parent, Condition.TrueCondition);
+        }
+
+        #region ElementsByCondition
         public static List<AutomationElement> DescendantsByCondition(this AutomationElement parent, Condition condition)
         {
             return parent.ElementsByCondition(TreeScope.Descendants, condition);
@@ -128,63 +187,10 @@ namespace Signum.Windows.UIAutomation
         public static List<AutomationElement> ElementsByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
         {
             return parent.FindAll(scope, condition).Cast<AutomationElement>().ToList();
-        }
+        } 
+        #endregion
 
-   
-
-        public static AutomationElement TryDescendant(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
-        {
-            return parent.TryElement(TreeScope.Descendants, condition);
-        }
-
-        public static AutomationElement TryChild(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
-        {
-            return parent.TryElement(TreeScope.Children, condition);
-        }
-
-        public static AutomationElement TryElement(this AutomationElement parent, TreeScope scope, Expression<Func<AutomationElement, bool>> condition)
-        {
-            return parent.FindFirst(scope, ConditionBuilder.ToCondition(condition));
-        }
-
-
-        public static AutomationElement Descendant(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
-        {
-            return parent.Element(TreeScope.Descendants, condition);
-        }
-
-        public static AutomationElement Child(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
-        {
-            return parent.Element(TreeScope.Children, condition);
-        }
-
-        public static AutomationElement Element(this AutomationElement parent, TreeScope scope, Expression<Func<AutomationElement, bool>> condition)
-        {
-            var c = ConditionBuilder.ToCondition(condition); 
-
-            var result = parent.FindFirst(scope, c);
-
-            if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found with condition {0}".Formato(ExpressionEvaluator.PartialEval(condition).NiceToString()));
-
-            return result;
-        }
-
-        public static AutomationElement Normalize(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
-        {
-            var c = ConditionBuilder.ToCondition(condition);
-
-            TreeWalker tw = new TreeWalker(c);
-
-            var result = tw.Normalize(parent);
-
-            if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
-
-            return result;
-        }
-
-
+        #region Elements
         public static List<AutomationElement> Descendants(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
         {
             return parent.Elements(TreeScope.Descendants, condition);
@@ -202,6 +208,8 @@ namespace Signum.Windows.UIAutomation
 
             return parent.FindAll(scope, c).Cast<AutomationElement>().ToList();
         }
+        
+        #endregion
 
         public static List<AutomationElement> DescendantsAll(this AutomationElement parent)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,11 +9,13 @@ using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Basic;
 using Signum.Web.Extensions.Translation.Views;
 using Signum.Web.Omnibox;
 using Signum.Web.PortableAreas;
@@ -33,14 +36,11 @@ namespace Signum.Web.Translation
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoClient.Start();
 
                 Translator = translator;
 
                 Navigator.RegisterArea(typeof(TranslationClient));
-                Navigator.AddSettings(new List<EntitySettings>
-                {   
-                    new EntitySettings<CultureInfoDN>{ PartialViewName = t=>ViewPrefix.Formato("CultureInfoView")},
-                });
 
                 if (translatorUser)
                 {
@@ -96,10 +96,91 @@ namespace Signum.Web.Translation
             }
         }
 
+        public static CultureInfo GetCultureRequest(HttpRequest request)
+        {
+            if (request.UserLanguages == null)
+                return null;
+
+            foreach (string lang in request.UserLanguages)
+            {
+                string cleanLang = lang.Contains('-') ? lang.Split('-')[0] : lang;
+
+                var culture = CultureInfoLogic.ApplicationCultures
+                    .Where(ci => ci.Name.StartsWith(cleanLang))
+                    .FirstOrDefault();
+
+                if (culture != null)
+                    return culture;
+            }
+
+            return null;
+        }
 
         public static SelectListItem ToTranslatedSelectListItem<T>(this Lite<T> lite, Lite<T> selected, Expression<Func<T, string>> toStringField) where T : IdentifiableEntity
         {
             return new SelectListItem { Text = lite.TranslatedField(toStringField, lite.ToString()), Value = lite.Id.ToString(), Selected = lite.Equals(selected) };
+        }
+
+        public static MvcHtmlString Diff(PropertyRouteConflict conflict)
+        {
+            StringDistance sd = new StringDistance();
+
+            var dif = sd.DiffText(conflict.OldOriginal, conflict.Original);
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            foreach (var line in dif)
+            {
+                if (line.Action == StringDistance.DiffAction.Removed)
+                {
+                    using (sb.Surround(new HtmlTag("span").Attr("style", "background-color:#FFD1D1")))
+                        DiffLine(sb, line.Value);
+                }
+                if (line.Action == StringDistance.DiffAction.Added)
+                {
+                    using (sb.Surround(new HtmlTag("span").Attr("style", "background-color:#CEF3CE")))
+                        DiffLine(sb, line.Value);
+                }
+                else if (line.Action == StringDistance.DiffAction.Equal)
+                {
+                    if (line.Value.Count == 1)
+                    {
+                        using (sb.Surround(new HtmlTag("span")))
+                            DiffLine(sb, line.Value);
+                    }
+                    else
+                    {
+                        using (sb.Surround(new HtmlTag("span").Attr("style", "background-color:#FFD1D1")))
+                            DiffLine(sb, line.Value.Where(a => a.Action == StringDistance.DiffAction.Removed || a.Action == StringDistance.DiffAction.Equal));
+
+                        using (sb.Surround(new HtmlTag("span").Attr("style", "background-color:#CEF3CE")))
+                            DiffLine(sb, line.Value.Where(a => a.Action == StringDistance.DiffAction.Added || a.Action == StringDistance.DiffAction.Equal));
+                    }
+                }
+            }
+
+            return sb.ToHtml();
+        }
+
+        private static void DiffLine(HtmlStringBuilder sb, IEnumerable<StringDistance.DiffPair<string>> list)
+        {
+            foreach (var gr in list.GroupWhenChange(a=>a.Action))
+            {
+                string text = gr.Select(a => a.Value).ToString("");
+
+                if (gr.Key == StringDistance.DiffAction.Equal)
+                    sb.Add(HtmlTag.Encode(text));
+                else
+                {
+                    var color =
+                        gr.Key == StringDistance.DiffAction.Added ? "#72F272" :
+                        gr.Key == StringDistance.DiffAction.Removed ? "#FF8B8B" :
+                        new InvalidOperationException().Throw<string>();
+
+                    sb.Add(new HtmlTag("span").Attr("style", "background:" + color).SetInnerText(text));
+                }
+            }
+
+            sb.Add(new HtmlTag("br").ToHtmlSelf());
         }
     }
 }

@@ -56,6 +56,9 @@ namespace Signum.Web.Selenium
                     Selenium.IsElementPresent("jq=input[name={0}_Time]".Formato(Prefix)))
                     return Selenium.GetValue(Prefix + "_Date") + " " + Selenium.GetValue(Prefix + "_Time");
 
+                if (Selenium.IsElementPresent("jq=#{0}".Formato(Prefix)))
+                    return Selenium.GetText(Prefix);
+
                 throw new InvalidOperationException("Element {0} not found".Formato(Prefix));
             }
 

@@ -479,7 +479,7 @@ namespace Signum.Entities.Mailing
         public Lite<IEmailOwnerDN> Owner { get; set; }
         public string Email { get; set; }
         public string DisplayName { get; set; }
-        public CultureInfo CultureInfo { get; set; }
+        public CultureInfoDN CultureInfo { get; set; }
 
         public bool Equals(EmailOwnerData other)
         {

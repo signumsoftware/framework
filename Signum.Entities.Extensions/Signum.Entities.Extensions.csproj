@@ -106,7 +106,7 @@
     <Compile Include="Scheduler\ScheduledTaskLogDN.cs" />
     <Compile Include="Scheduler\ApplicationEventLog.cs" />
     <Compile Include="SMS\SMSConfigurationDN.cs" />
-    <Compile Include="Translation\CultureInfoDN.cs" />
+    <Compile Include="Basics\CultureInfoDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\TypeConditionName.cs" />
     <Compile Include="Basics\PropertyRouteDN.cs" />

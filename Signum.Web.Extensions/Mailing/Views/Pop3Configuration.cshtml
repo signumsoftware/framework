@@ -14,9 +14,9 @@
 
     if (!sc.Value.IsNew)
     {
-    @Html.CountSearchControl(sc, new FindOptions(typeof(Pop3ReceptionDN))
+    @Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
-    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); });
+    }, new Context(sc, "receptions"), csc => { csc.View = true; });
     }
 }

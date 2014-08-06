@@ -26,6 +26,7 @@ using Signum.Web.UserQueries;
 using System.Text.RegularExpressions;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
+using Signum.Web.Basic;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -51,6 +52,8 @@ namespace Signum.Web.Mailing
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoClient.Start();
+
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {

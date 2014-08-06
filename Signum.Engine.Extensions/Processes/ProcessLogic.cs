@@ -170,12 +170,13 @@ namespace Signum.Engine.Processes
                     MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {
-						var user = process.Mixin<UserProcessSessionMixin>().User; 
+                        var user = process.Mixin<UserProcessSessionMixin>().User;
 
-                        if (user == null)
-                             UserHolder.Current = user.Retrieve();
-  					  
-  					    return null; 
+                        if (user != null)
+                            using (ExecutionMode.Global())
+                                UserHolder.Current = user.Retrieve();
+
+                        return null;
                     };
                 }
             }
@@ -277,21 +278,28 @@ namespace Signum.Engine.Processes
                 {
                     CanConstruct = p => p.State.InState(ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
                     ToState = ProcessState.Created,
-                    Construct = (p, _) => p.Algorithm.Create(p.Data).CopyMixinsFrom(p)
+                    Construct = (p, _) => p.Algorithm.Create(p.Data, p)
                 }.Register();
             }
         }
 
-        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData)
+        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IdentifiableEntity copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessDN>())
-                return new ProcessDN(process)
+            {
+                var result = new ProcessDN(process)
                 {
                     State = ProcessState.Created,
                     Data = processData,
                     MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None,
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None,
-                }.Save();
+                };
+                
+                if(copyMixinsFrom != null)
+                    process.CopyMixinsFrom(copyMixinsFrom);
+
+                return result.Save();
+            }
         }
 
         public static void ExecuteTest(this ProcessDN p)
