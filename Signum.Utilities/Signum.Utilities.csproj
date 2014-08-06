@@ -209,6 +209,7 @@
     <None Include="Docs\2.4-Csv.md" />
     <None Include="Docs\2.2-EnumerableExtensions.md" />
     <None Include="Docs\2.3-GroupingExtensions.md" />
+    <None Include="Docs\2.5-DictionaryExtensions.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
