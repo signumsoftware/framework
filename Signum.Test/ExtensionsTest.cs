@@ -45,10 +45,13 @@ namespace Signum.Test
             Expression<Func<int, int>> f2 = a => a;
             Expression<Func<int, int>> f3 = b => b;
 
-            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2));
-            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2)); 
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2, checkParameterNames: true));
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2, checkParameterNames: false));
+            Assert.IsFalse(ExpressionComparer.AreEqual(f1, f3, checkParameterNames: true));
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f3, checkParameterNames: false));
 
+            f1.Evaluate(1);
+            Assert2.Throws<InvalidOperationException>("cache", () => f2.Evaluate(2));
         }
-
     }
 }
