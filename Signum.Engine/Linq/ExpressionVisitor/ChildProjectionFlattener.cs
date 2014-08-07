@@ -20,7 +20,7 @@ namespace Signum.Engine.Linq
 
         public Type inMList = null;
 
-        protected override Expression VisitMListProjection(MListProjectionExpression mlp)
+        protected internal override Expression VisitMListProjection(MListProjectionExpression mlp)
         {
             var oldInEntity = inMList;
             inMList = mlp.Type;
@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
             return (ProjectionExpression)subqueryCleaned; 
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             if (currentSource == null)
             {
@@ -258,12 +258,12 @@ namespace Signum.Engine.Linq
                 return new ColumnReplacer { Replacements = replacements }.Visit(expression); 
             }
 
-            protected override Expression VisitColumn(ColumnExpression column)
+            protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 return Replacements.TryGetC(column) ?? base.VisitColumn(column);
             }
 
-            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
             {
                 return child;
             }
@@ -289,7 +289,7 @@ namespace Signum.Engine.Linq
                 return ap.columns;
             }
 
-            protected override Expression VisitColumn(ColumnExpression column)
+            protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 if (externalAlias == column.Alias)
                     columns.Add(column);

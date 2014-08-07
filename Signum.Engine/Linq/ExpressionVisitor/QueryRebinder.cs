@@ -30,7 +30,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             this.Visit(proj.Projector);
 
@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             var columns = CurrentScope.Keys.Where(ce => ce.Alias == table.Alias).ToList();
 
@@ -53,7 +53,7 @@ namespace Signum.Engine.Linq
             return table;
         }
 
-        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
             var columns = CurrentScope.Keys.Where(ce => ce.Alias == sqlFunction.Alias).ToList();
 
@@ -65,7 +65,7 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             if (join.Condition != null)
                 this.Visit(join.Condition);
@@ -82,7 +82,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
             List<ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => k.Alias == set.Alias).ToList();
 
@@ -106,7 +106,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitDelete(DeleteExpression delete)
+        protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             Visit(delete.Where);
 
@@ -119,7 +119,7 @@ namespace Signum.Engine.Linq
             return delete;
         }
 
-        protected override Expression VisitUpdate(UpdateExpression update)
+        protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             Visit(update.Where);
             update.Assigments.NewIfChange(VisitColumnAssigment);
@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
             return update;
         }
 
-        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
 
@@ -145,7 +145,7 @@ namespace Signum.Engine.Linq
             return insertSelect;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             Dictionary<ColumnExpression, Expression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (Expression)null);
             Dictionary<ColumnExpression, Expression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
             return new Disposable(() => scopes = scopes.Pop());
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             Expression result;
             if (CurrentScope.TryGetValue(column, out result))
@@ -251,7 +251,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             var column = scalar.Select.Columns.SingleEx();
 

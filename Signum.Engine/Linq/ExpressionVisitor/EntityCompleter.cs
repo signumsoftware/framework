@@ -29,7 +29,7 @@ namespace Signum.Engine.Linq
             return expandedResul;
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var id = binder.GetId(lite.Reference);
             var typeId = binder.GetEntityType(lite.Reference);
@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
             return false;
         }
 
-        protected override Expression VisitEntity(EntityExpression ee)
+        protected internal override Expression VisitEntity(EntityExpression ee)
         {
             if (previousTypes.Contains(ee.Type) || IsCached(ee.Type) || ee.AvoidExpandOnRetrieving)
             {
@@ -119,7 +119,7 @@ namespace Signum.Engine.Linq
             return cc != null && cc.Enabled; /*just to force cache before executing the query*/
         }
 
-        protected override Expression VisitMList(MListExpression ml)
+        protected internal override Expression VisitMList(MListExpression ml)
         {
             var proj = binder.MListProjection(ml, withRowId: true);
 
@@ -128,7 +128,7 @@ namespace Signum.Engine.Linq
             return new MListProjectionExpression(ml.Type, newProj);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             Expression projector;
             using (binder.SetCurrentSource(proj.Select))

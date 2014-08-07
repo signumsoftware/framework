@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return expression;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             select = (SelectExpression)base.VisitSelect(select);
 
@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             proj = (ProjectionExpression)base.VisitProjection(proj);
             if (proj.Select.From is SelectExpression)
@@ -113,7 +113,7 @@ namespace Signum.Engine.Linq
                     && (select.GroupBy == null || select.GroupBy.Count == 0);
             }
 
-            protected override Expression VisitSelect(SelectExpression select)
+            protected internal override Expression VisitSelect(SelectExpression select)
             {
                 if (IsRedudantSubquery(select))
                 {
@@ -126,7 +126,7 @@ namespace Signum.Engine.Linq
                 return select;
             }
 
-            protected override Expression VisitSubquery(SubqueryExpression subquery)
+            protected internal override Expression VisitSubquery(SubqueryExpression subquery)
             {
                 // don't gather inside scalar & exists
                 return subquery;
@@ -146,7 +146,7 @@ namespace Signum.Engine.Linq
 
             bool isTopLevel = true;
 
-            protected override Expression VisitSelect(SelectExpression select)
+            protected internal override Expression VisitSelect(SelectExpression select)
             {
                 bool wasTopLevel = isTopLevel;
                 isTopLevel = false;
@@ -285,13 +285,13 @@ namespace Signum.Engine.Linq
                 return checker.hasAggregate;
             }
 
-            protected override Expression VisitAggregate(AggregateExpression aggregate)
+            protected internal override Expression VisitAggregate(AggregateExpression aggregate)
             {
                 this.hasAggregate = true;
                 return aggregate;
             }
 
-            protected override Expression VisitSelect(SelectExpression select)
+            protected internal override Expression VisitSelect(SelectExpression select)
             {
                 // only consider aggregates in these locations
                 this.Visit(select.Where);
@@ -301,7 +301,7 @@ namespace Signum.Engine.Linq
                 return select;
             }
 
-            protected override Expression VisitSubquery(SubqueryExpression subquery)
+            protected internal override Expression VisitSubquery(SubqueryExpression subquery)
             {
                 // don't count aggregates in subqueries
                 return subquery;

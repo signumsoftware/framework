@@ -17,7 +17,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     ///  returns the set of all aliases produced by a query source
     /// </summary>
-    internal class OverloadingSimplifier : SimpleExpressionVisitor
+    internal class OverloadingSimplifier : ExpressionVisitor
     {
         static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
         static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
@@ -411,7 +411,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             if (m.Expression != null && m.Expression.Type.IsGenericType && m.Expression.Type.GetGenericTypeDefinition() == typeof(MList<>) && m.Member is PropertyInfo && m.Member.Name == "Count")
             {
@@ -424,7 +424,7 @@ namespace Signum.Engine.Linq
                 return Expression.Call(mCount, source);
             }
 
-            return base.VisitMemberAccess(m);
+            return base.VisitMember(m);
         }
 
         protected override Expression VisitBinary(BinaryExpression b)

@@ -16,7 +16,7 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if (exp == null)
                 return null;
@@ -27,7 +27,7 @@ namespace Signum.Engine.Linq
                 return base.Visit(exp);
         }
 
-        protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
             return base.VisitTypeFieldInit(typeFie);
         }
@@ -40,7 +40,7 @@ namespace Signum.Engine.Linq
             return new TypeImplementedByAllExpression(QueryBinder.ExtractTypeId(exp));
         }
 
-        protected override Expression VisitEntity(EntityExpression fieldInit)
+        protected internal override Expression VisitEntity(EntityExpression fieldInit)
         {
             Expression newID = Visit(fieldInit.ExternalId);
 

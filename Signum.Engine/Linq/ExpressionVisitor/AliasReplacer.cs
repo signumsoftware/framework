@@ -25,21 +25,21 @@ namespace Signum.Engine.Linq
             return ap.Visit(source);
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             if(aliasMap.ContainsKey(column.Alias))
                 return new ColumnExpression(column.Type, aliasMap[column.Alias], column.Name);
             return column;
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             if (aliasMap.ContainsKey(table.Alias))
                 return new TableExpression(aliasMap[table.Alias], table.Table);
             return table;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);

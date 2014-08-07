@@ -223,7 +223,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
             sb.Append("ROW_NUMBER() OVER(ORDER BY ");
             for (int i = 0, n = rowNumber.OrderBy.Count; i < n; i++)
@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
             return rowNumber;
         }
 
-        protected override Expression VisitCase(CaseExpression cex)
+        protected internal override Expression VisitCase(CaseExpression cex)
         {
             AppendNewLine(Indentation.Inner);
             sb.Append("CASE");
@@ -265,7 +265,7 @@ namespace Signum.Engine.Linq
             return cex; 
         }
 
-        protected override Expression VisitLike(LikeExpression like)
+        protected internal override Expression VisitLike(LikeExpression like)
         {
             Visit(like.Expression);
             sb.Append(" LIKE ");
@@ -273,7 +273,7 @@ namespace Signum.Engine.Linq
             return like;
         }
 
-        protected override Expression VisitExists(ExistsExpression exists)
+        protected internal override Expression VisitExists(ExistsExpression exists)
         {
             sb.Append("EXISTS(");
             this.Visit(exists.Select);
@@ -281,7 +281,7 @@ namespace Signum.Engine.Linq
             return exists;
         }
 
-        protected override Expression VisitScalar(ScalarExpression exists)
+        protected internal override Expression VisitScalar(ScalarExpression exists)
         {
             sb.Append("(");
             this.Visit(exists.Select);
@@ -289,7 +289,7 @@ namespace Signum.Engine.Linq
             return exists;
         }
 
-        protected override Expression VisitIsNull(IsNullExpression isNull)
+        protected internal override Expression VisitIsNull(IsNullExpression isNull)
         {
             sb.Append("(");
             this.Visit(isNull.Expression);
@@ -297,7 +297,7 @@ namespace Signum.Engine.Linq
             return isNull;
         }
 
-        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        protected internal override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
         {
             sb.Append("(");
             this.Visit(isNotNull.Expression);
@@ -305,7 +305,7 @@ namespace Signum.Engine.Linq
             return isNotNull;
         }
 
-        protected override Expression VisitIn(InExpression inExpression)
+        protected internal override Expression VisitIn(InExpression inExpression)
         {
             Visit(inExpression.Expression);
             sb.Append(" IN (");
@@ -329,13 +329,13 @@ namespace Signum.Engine.Linq
             return inExpression;
         }
 
-        protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
+        protected internal override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             sb.Append(sqlEnum.Value);
             return sqlEnum;
         }
 
-        protected override Expression VisitSqlCast(SqlCastExpression castExpr)
+        protected internal override Expression VisitSqlCast(SqlCastExpression castExpr)
         {
             sb.Append("CAST(");
             Visit(castExpr.Expression);
@@ -361,7 +361,7 @@ namespace Signum.Engine.Linq
             return c;
         }
 
-        protected override Expression VisitSqlConstant(SqlConstantExpression c)
+        protected internal override Expression VisitSqlConstant(SqlConstantExpression c)
         {
             if (c.Value == null)
                 sb.Append("NULL");
@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             sb.Append(column.Alias.Name.SqlEscape());
             sb.Append(".");
@@ -393,7 +393,7 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             bool isFirst = sb.Length == 0;
             if (!isFirst)
@@ -494,7 +494,7 @@ namespace Signum.Engine.Linq
             {AggregateFunction.Sum, "SUM"}
         };
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             sb.Append(dic[aggregate.AggregateFunction]);
             sb.Append("(");
@@ -507,7 +507,7 @@ namespace Signum.Engine.Linq
             return aggregate; 
         }
 
-        protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             if (sqlFunction.Object != null)
             {
@@ -528,7 +528,7 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
             sb.Append(sqlFunction.SqlFunction);
             sb.Append("(");
@@ -555,7 +555,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             if (objectNameOptions.IncludeDboSchema)
                 sb.Append(table.Name.ToStringDbo());
@@ -565,7 +565,7 @@ namespace Signum.Engine.Linq
             return table;
         }
 
-        protected override SourceExpression VisitSource(SourceExpression source)
+        protected internal override SourceExpression VisitSource(SourceExpression source)
         {
             if (source is SourceWithAliasExpression)
             {
@@ -587,7 +587,7 @@ namespace Signum.Engine.Linq
             return source;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             this.VisitSource(join.Left);
             this.AppendNewLine(Indentation.Same);
@@ -637,7 +637,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
             VisitSetPart(set.Left);
 
@@ -672,7 +672,7 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("{0} not expected in SetOperatorExpression".Formato(source.NiceToString()));
         }
 
-        protected override Expression VisitDelete(DeleteExpression delete)
+        protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             sb.Append("DELETE ");
             sb.Append(delete.Table.Name.ToString());
@@ -688,7 +688,7 @@ namespace Signum.Engine.Linq
             return delete;
         }
 
-        protected override Expression VisitUpdate(UpdateExpression update)
+        protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             sb.Append("UPDATE ");
             sb.Append(update.Table.Name.ToString());
@@ -720,7 +720,7 @@ namespace Signum.Engine.Linq
 
         }
 
-        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             sb.Append("INSERT INTO ");
             sb.Append(insertSelect.Table.Name.ToString());
@@ -756,13 +756,13 @@ namespace Signum.Engine.Linq
 
         }
 
-        protected override Expression VisitSelectRowCount(SelectRowCountExpression src)
+        protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
         {
             sb.Append("SELECT @@rowcount");
             return src; 
         }
 
-        protected override Expression VisitCommandAggregate(CommandAggregateExpression cea)
+        protected internal override Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             for (int i = 0, n = cea.Commands.Count; i < n; i++)
             {
@@ -777,19 +777,19 @@ namespace Signum.Engine.Linq
             return cea;
         }
 
-        protected override Expression VisitSubquery(SubqueryExpression subquery)
+        protected internal override Expression VisitSubquery(SubqueryExpression subquery)
         {
             return base.VisitSubquery(subquery);
         }
 
 
 
-        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
+        protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
             throw InvalidSqlExpression(aggregate);
         }
 
-        protected override Expression VisitChildProjection(ChildProjectionExpression child)
+        protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
         {
             throw InvalidSqlExpression(child);
         }
@@ -799,27 +799,27 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(c);
         }
 
-        protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
+        protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
             throw InvalidSqlExpression(eee);
         }
 
-        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
+        protected internal override Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             throw InvalidSqlExpression(reference);
         }
 
-        protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
+        protected internal override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             throw InvalidSqlExpression(reference);
         }
 
-        protected override Expression VisitEntity(EntityExpression ee)
+        protected internal override Expression VisitEntity(EntityExpression ee)
         {
             throw InvalidSqlExpression(ee);
         }
 
-        protected override Expression VisitLambda(LambdaExpression lambda)
+        protected override Expression VisitLambda<T>(Expression<T> lambda)
         {
             throw InvalidSqlExpression(lambda);
         }
@@ -829,12 +829,12 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(init);
         }
 
-        protected override Expression VisitLiteValue(LiteValueExpression lite)
+        protected internal override Expression VisitLiteValue(LiteValueExpression lite)
         {
             throw InvalidSqlExpression(lite);
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             return base.VisitLiteReference(lite);
         }
@@ -844,7 +844,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(iv);
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             throw InvalidSqlExpression(m);
         }
@@ -859,17 +859,17 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(m);
         }
 
-        protected override Expression VisitMList(MListExpression ml)
+        protected internal override Expression VisitMList(MListExpression ml)
         {
             throw InvalidSqlExpression(ml);
         }
 
-        protected override Expression VisitMListElement(MListElementExpression mle)
+        protected internal override Expression VisitMListElement(MListElementExpression mle)
         {
             throw InvalidSqlExpression(mle);
         }
 
-        protected override NewExpression VisitNew(NewExpression nex)
+        protected override Expression VisitNew(NewExpression nex)
         {
             throw InvalidSqlExpression(nex);
         }
@@ -886,27 +886,27 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(p);
         }
 
-        protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
             throw InvalidSqlExpression(typeFie);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             throw InvalidSqlExpression(proj);
         }
 
-        protected override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+        protected internal override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
         {
             throw InvalidSqlExpression(typeIb);
         }
 
-        protected override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+        protected internal override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
         {
             throw InvalidSqlExpression(typeIba);
         }
 
-        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
             throw InvalidSqlExpression(b);
         }

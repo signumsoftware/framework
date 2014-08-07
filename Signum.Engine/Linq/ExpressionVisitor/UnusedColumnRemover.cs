@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return new UnusedColumnRemover().Visit(expression);
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal virtual Expression VisitColumn(ColumnExpression column)
         {
             allColumnsUsed.GetOrCreate(column.Alias).Add(column.Name);
             return column;
@@ -33,7 +33,7 @@ namespace Signum.Engine.Linq
             return ((DbExpressionType)exp.NodeType) == DbExpressionType.SqlConstant;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal virtual Expression VisitSelect(SelectExpression select)
         {
             // visit column projection first
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
@@ -61,7 +61,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitSubquery(SubqueryExpression subquery)
+        protected internal virtual Expression VisitSubquery(SubqueryExpression subquery)
         {
             if ((subquery.NodeType == (ExpressionType)DbExpressionType.Scalar ||
                 subquery.NodeType == (ExpressionType)DbExpressionType.In) &&
@@ -74,7 +74,7 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
-        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal virtual Expression VisitSetOperator(SetOperatorExpression set)
         {
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
             return base.VisitSetOperator(set);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression projection)
+        protected internal virtual Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order
             Expression projector = this.Visit(projection.Projector);
@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
             return projection;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal virtual Expression VisitJoin(JoinExpression join)
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
@@ -131,7 +131,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitDelete(DeleteExpression delete)
+        protected internal virtual Expression VisitDelete(DeleteExpression delete)
         {
             var where = Visit(delete.Where);
             var source = Visit(delete.Source);
@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
             return delete;
         }
 
-        protected override Expression VisitUpdate(UpdateExpression update)
+        protected internal virtual Expression VisitUpdate(UpdateExpression update)
         {
             var where = Visit(update.Where);
             var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
@@ -150,7 +150,7 @@ namespace Signum.Engine.Linq
             return update;
         }
 
-        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        protected internal virtual Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
             var source = Visit(insertSelect.Source);
@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
             return insertSelect;
         }
 
-        protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
             var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
             if (orderBys != rowNumber.OrderBy)
@@ -167,7 +167,7 @@ namespace Signum.Engine.Linq
             return rowNumber;
         }
 
-        protected override Expression VisitChildProjection(ChildProjectionExpression child)
+        protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
         {
             Expression key = this.Visit(child.OuterKey);
             ProjectionExpression proj = (ProjectionExpression)UnusedColumnRemover.Remove(child.Projection);

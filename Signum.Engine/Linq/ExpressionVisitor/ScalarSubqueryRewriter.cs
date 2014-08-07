@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return new ScalarSubqueryRewriter().Visit(expression);
         }
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             var saveInAggregate = this.inAggregate;
 
@@ -35,7 +35,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             var saveFrom = this.currentFrom;
             var saveInAggregate = this.inAggregate;
@@ -63,7 +63,7 @@ namespace Signum.Engine.Linq
 
         }
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             if (connector.SupportsScalarSubquery &&
                (!inAggregate || connector.SupportsScalarSubqueryInAggregates))

@@ -128,9 +128,6 @@
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
     <Compile Include="ExpressionTrees\ExpressionToString.cs" />
-    <Compile Include="ExpressionTrees\SimpleExpressionVisitor.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ExpressionTrees\Query.cs" />
     <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
