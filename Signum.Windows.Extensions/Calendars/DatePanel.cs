@@ -200,7 +200,7 @@ namespace Signum.Windows.Calendars
 
         public Interval<DateTime> ElementsMinMax()
         {
-            var dates = InternalChildren.Cast<UIElement>().SelectMany(ui => new[] { GetDate(ui), GetDateMin(ui), GetDateMax(ui) }).NotNull().MinMaxPair();
+            var dates = InternalChildren.Cast<UIElement>().SelectMany(ui => new[] { GetDate(ui), GetDateMin(ui), GetDateMax(ui) }).NotNull().ToInterval();
             return dates;
         }
 
