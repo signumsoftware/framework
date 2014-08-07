@@ -1,0 +1,5 @@
+# Introduction
+
+In `Signum.Utilities.ExpressionTrees` there are some general purpose and utility classes for working with `ExpressionTrees` and making a `LinqProvider`. 
+
+These classes are used by Signum.Engine LINQ provider as well as other parts of the framework. They are public but are meant to be used in very advanced scenarios (like building a new Linq Provider). 

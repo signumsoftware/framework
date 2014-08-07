@@ -1,4 +1,4 @@
-﻿# Signum.Utilities.DictionaryExtensions class
+# Signum.Utilities.DictionaryExtensions class
 
 Some useful extension methods to deal with Dictionaries.
 
@@ -132,12 +132,13 @@ take a look at Immutable Data Structures, or [`ConcurrentDictionary<K,V>`](http:
 
 ### GetOrThrow
 
-Throws your own custom error message in a KeyNotFoundException when the
-key is not found in the dictionary:
+Equivalent to using a dictionary indexer, but throws your own custom error message in a KeyNotFoundException when the
+key is not found in the dictionary, or a better exception message thet informs about the dictionary type and missing key. 
 
 ```C#
-//Message could contain a '{0}' to insert the key value
+public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
 public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
+public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
 ```
 
 Example:
@@ -145,9 +146,11 @@ Example:
 ```C#
 Dictionary<string, List<Planet>> dictionary = planets.GroupToDictionary(a => a.Color);
 List<Planet> redPlanets = dictionary.GetOrThrow("Red", "No planet with {0} color found"); 
-
 //throws new KeyNotFoundException("No planet with Red color found")
-```C#
+
+List<Planet> redPlanets = dictionary.GetOrThrow("Red"); 
+//throws new KeyNotFoundException("Key 'Red' (string) not found on Dictionary<string, List<Planet>>")
+```
 
 ### AddOrThrow
 
@@ -198,6 +201,40 @@ dictionary.SelectDictionary(k => k[0], v => v.Count).ToConsole();
 *Note*: It's your responsibility to create a mapKey that preserves
 uniqueness in the data set. i.e. If there were any Green planets this
 operation will fail because G will conflict with Gray.
+
+### ToDictionary with errorContext 
+
+This sets of overloads mimics the ones provided by `System.Linq.Enumerable` class have an aditional parameter 'errorContext' and throws better exception messages:
+
+```C#
+public static Dictionary<K, T> ToDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string errorContext)
+public static Dictionary<K, V> ToDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string errorContext)
+public static Dictionary<K, T> ToDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string errorContext)
+public static Dictionary<K, V> ToDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string errorContext)      
+```
+
+Example: 
+```C#
+new []{"Hi", "Bye", "Now"}.ToDictionary(s=>s.Length, "string lengths"); 
+//throws ArgumentException(@"There are some repeated string lengths:
+//3 (Bye, Now)");
+```
+
+Additionaly, an overload of ToDitionary with no lambda expression is provided to convert   `IEnumerable<KeyValuePair<K,V>>` directly. 
+
+```C#
+public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
+public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
+```
+
+This method is specially useful to create efficient database queries that generate dictionaries, because Select is translated but ToDictionary is not. 
+
+```C#
+
+Database.Que<PersonDN>().ToDictionary(p => p.Id, p => p.Name); //Retrieves whole persons! SLOW!! 
+Database.Que<PersonDN>().Select(p=>new { p.Id, p.Name }).ToDictionary(p => p.Id, p => p.Name);  //Efficient but to long
+Database.Que<PersonDN>().Select(p=>KVP.Create(p.Id, p.Name)).ToDictionary(); //Efficient and a little bit sorter
+```
 
 ### JumpDictionary
 
@@ -270,8 +307,50 @@ dicColors.JoinDictionary(dictionary, (n, c, list) => new
 //[Orange, { Color = #FFFFA500, Planets = Mars, Jupiter }]
 ```
 
+### JoinDictionaryStrict
 
-### OutterJoinDictionary
+Joins to dictionaries by key, but throws a nice exception if the keys do not match **exactly**:
+
+```C#
+public static Dictionary<K, R> JoinDictionaryStrict<K, C, S, R>(
+    Dictionary<K, C> currentDictionary,
+    Dictionary<K, S> shouldDictionary,
+    Func<C, S, R> resultSelector, string errorContext)
+
+public static void JoinDictionaryForeachStrict<K, C, S>(
+    Dictionary<K, C> currentDictionary,
+    Dictionary<K, S> shouldDictionary,
+    Action<K, C, S> mixAction, string errorContext)
+```
+
+Example:
+
+```C#
+Dictionary<string, List<Planet>> dictionary = planets.GroupToDictionary(a => a.Color);
+
+Dictionary<string, Color> dicColors = new Dictionary<string, Color>()
+{
+   {"Gray", Colors.Gray}, 
+   {"Yellow", Colors.Yellow},
+   {"Blue", Colors.Blue},
+   {"Orange", Colors.Orange}
+};
+
+dictionary.JoinDictionaryStrict(dicColors, (n, list, c) => new
+{
+   Color = c,
+   Planets = list
+}, "combining Planets"); 
+
+//throws InvalidOperationException(@"Error combining Planets
+// Extra: Magenta
+// Missing: Yellow"
+```
+
+Useful to assert, at application start time, if the entities in the database match the ones in code.  
+
+
+### OuterJoinDictionary
 
 There's also support for OuterJoin with dictionaries. Because of the
 recurrent problem with value types, there are many (nasty) overloads to
@@ -328,9 +407,18 @@ an ArgumentException.
 There are many overloads.
 
 ```C#
+public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
 public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
-public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
-public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
+public static void AddRange<K, V, T>(this IDictionary<K, V> dictionary, IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
+```
+
+Aditionally, overloads exist that take an `errorContext`.
+
+```C#
+
+public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
+public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values, string errorContext)
+public static void AddRange<K, V, T>(this IDictionary<K, V> dictionary, IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, string errorContext)
 ```
 
 ### SetRange
@@ -341,8 +429,8 @@ value is overridden.
 There are many overloads.
 
 ```C#
+public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
 public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
-public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
 public static void SetRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
 ```
 
@@ -354,8 +442,8 @@ value is **not** overridden and the default value is preserved.
 There are many overloads.
 
 ```C#
+public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
 public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
-public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
 public static void DefaultRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
 ```
 
@@ -394,18 +482,21 @@ public static Dictionary<K, V> Extract<K, V>(this IDictionary<K, V> dictionary, 
 public static Dictionary<K, V> Extract<K, V>(this IDictionary<K, V> dictionary, Func<K, V, bool> condition)
 ```
 
-There's also another overload that extracts one single element,
-returning the value:
+There's also another overloads that extracts one single element, returning the value:
 
 ```C#
 public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key)
+public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
+public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
 ```
 
 ### Inverse
 
-Creates a new Dictionary using values as keys and keys as values. It's
-your responsibility to avoid repetitions in the values.
+Creates a new Dictionary using values as keys and keys as values. There are overloads to get good exception messaages if values are repeated.
 
 ```C#
 public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic)
+public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer)
+public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, string errorContext)
+public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer, string errorContext)
 ```

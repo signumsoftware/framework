@@ -1,4 +1,4 @@
-﻿# Signum.Utilities.EnumerableExtensions class
+# EnumerableExtensions
 
 Contains many simple and useful methods over that should have been
 included in Linq.

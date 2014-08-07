@@ -307,16 +307,16 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareElementInit(ElementInit a, ElementInit b)
         {
-            return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
+            return ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
                 && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
-        public static IEqualityComparer<E> GetComparer<E>() where E:Expression
+        public static IEqualityComparer<E> GetComparer<E>() where E : Expression
         {
-            return new ExpressionsComparer<E>(); 
+            return new ExpressionsEqualityComparer<E>();
         }
 
-        class ExpressionsComparer<E> : IEqualityComparer<E> where E : Expression
+        class ExpressionsEqualityComparer<E> : IEqualityComparer<E> where E : Expression
         {
             public bool Equals(E x, E y)
             {
@@ -325,7 +325,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             public int GetHashCode(E obj)
             {
-                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode(); 
+                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode();
             }
         }
     }

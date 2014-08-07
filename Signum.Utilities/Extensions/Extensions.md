@@ -1,4 +1,4 @@
-﻿#Signum.Utilities.Extensions class
+# Extensions class
 
 As a general rule we tried to avoid adding ExtensionMethods to basic
 types, like object (or a free generic type) to avoid cluttering

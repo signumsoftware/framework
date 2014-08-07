@@ -11,12 +11,6 @@ namespace Signum.Utilities
 {
     public static class EnumExtensions
     {
-        public static bool HasFlag(this Enum value, Enum flag)
-        {
-            int val = Convert.ToInt32(flag);
-            return (Convert.ToInt32(value) & val) == val;
-        }
-
         public static T ToEnum<T>(this string str) where T : struct
         {
             return (T)Enum.Parse(typeof(T), str);
@@ -78,19 +72,6 @@ namespace Signum.Utilities
                 return false;
             }
             result = (Enum)Enum.Parse(enumType, value);
-            return true;
-        }
-
-        public static bool TryParse<T>(string value, bool ignoreCase, out T result)
-            where T:struct
-        {
-            int rubish;
-            if (!Enum.IsDefined(typeof(T), value) && !int.TryParse(value, out rubish))
-            {
-                result = default(T);
-                return false;
-            }
-            result = (T)(object)Enum.Parse(typeof(T), value);
             return true;
         }
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Utilities
 {
-    public static class TypedArgsExtensions
+    public static class ArgsExtensions
     {
         public static T GetArg<T>(this IEnumerable<object> args)
         {

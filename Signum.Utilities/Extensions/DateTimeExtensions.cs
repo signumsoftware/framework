@@ -239,54 +239,6 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
-        public static TimeSpan TrimTo(this TimeSpan timeSpan, DateTimePrecision precision)
-        {
-            switch (precision)
-            {
-                case DateTimePrecision.Days: return timeSpan.TrimToDays();
-                case DateTimePrecision.Hours: return TrimToHours(timeSpan);
-                case DateTimePrecision.Minutes: return TrimToMinutes(timeSpan);
-                case DateTimePrecision.Seconds: return TrimToSeconds(timeSpan);
-                case DateTimePrecision.Milliseconds: return timeSpan;
-            }
-            throw new ArgumentException("precission");
-        }
-
-        public static TimeSpan TrimToSeconds(this TimeSpan dateTime)
-        {
-            return new TimeSpan(dateTime.Days, dateTime.Hours, dateTime.Minutes, dateTime.Seconds);
-        }
-
-        public static TimeSpan TrimToMinutes(this TimeSpan dateTime)
-        {
-            return new TimeSpan(dateTime.Days, dateTime.Hours, dateTime.Minutes, 0);
-        }
-
-        public static TimeSpan TrimToHours(this TimeSpan dateTime)
-        {
-            return new TimeSpan(dateTime.Days, dateTime.Hours, 0, 0);
-        }
-
-        public static TimeSpan TrimToDays(this TimeSpan dateTime)
-        {
-            return new TimeSpan(dateTime.Days, 0, 0, 0);
-        }
-
-        public static DateTimePrecision? GetPrecision(this TimeSpan timeSpan)
-        {
-            if (timeSpan.Milliseconds != 0)
-                return DateTimePrecision.Milliseconds;
-            if (timeSpan.Seconds != 0)
-                return DateTimePrecision.Seconds;
-            if (timeSpan.Minutes != 0)
-                return DateTimePrecision.Minutes;
-            if (timeSpan.Hours != 0)
-                return DateTimePrecision.Hours;
-            if (timeSpan.Days != 0)
-                return DateTimePrecision.Days;
-            
-            return null;
-        }
 
         public static string SmartDatePattern(this DateTime date)
         {
@@ -325,8 +277,11 @@ namespace Signum.Utilities
 
         public static string ToAgoString(this DateTime dateTime)
         {
-            DateTime now = dateTime.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now;
+            return ToAgoString(dateTime, dateTime.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now);
+        }
 
+        public static string ToAgoString(this DateTime dateTime, DateTime now)
+        {
             TimeSpan ts = now.Subtract(dateTime);
             string resource = null;
             if (ts.TotalMilliseconds < 0)
@@ -347,63 +302,8 @@ namespace Signum.Utilities
             return resource.Formato((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).Formato(Math.Abs(ts.Seconds))).ToLower();
         }
         
-        public static DateTime MonthStart(this DateTime dateTime)
-        {
-            return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind); 
-        }
 
-        public static string NiceToString(this TimeSpan timeSpan)
-        {
-            return timeSpan.NiceToString(DateTimePrecision.Milliseconds); 
-        }
-
-        public static string NiceToString(this TimeSpan timeSpan, DateTimePrecision precission)
-        {
-            StringBuilder sb = new StringBuilder();
-            bool any = false;
-            if (timeSpan.Days != 0/* && precission >= DateTimePrecision.Days*/)
-            {
-                sb.AppendFormat("{0}d", timeSpan.Days);
-                any = true;
-            }
-
-            if ((any || timeSpan.Hours != 0) && precission >= DateTimePrecision.Hours)
-            {
-                if (any)
-                    sb.Append(" ");
-
-                sb.AppendFormat("{0,2}h", timeSpan.Hours);
-                any = true;
-            }
-
-            if ((any || timeSpan.Minutes != 0) && precission >= DateTimePrecision.Minutes)
-            {
-                if (any)
-                    sb.Append(" ");
-
-                sb.AppendFormat("{0,2}m", timeSpan.Minutes);
-                any = true;
-            }
-
-            if ((any || timeSpan.Seconds != 0) && precission >= DateTimePrecision.Seconds)
-            {
-                if (any)
-                    sb.Append(" ");
-
-                sb.AppendFormat("{0,2}s", timeSpan.Seconds);
-                any = true;
-            }
-
-            if ((any || timeSpan.Milliseconds != 0) && precission >= DateTimePrecision.Milliseconds)
-            {
-                if (any)
-                    sb.Append(" ");
-
-                sb.AppendFormat("{0,3}ms", timeSpan.Milliseconds);
-            }
-
-            return sb.ToString();
-        }
+     
 
         public static long JavascriptMilliseconds(this DateTime dateTime)
         {
@@ -411,6 +311,11 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("dateTime should be UTC"); 
 
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
+        }
+
+        public static DateTime MonthStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
         }
 
         public static string ToMonthName(this DateTime dateTime)

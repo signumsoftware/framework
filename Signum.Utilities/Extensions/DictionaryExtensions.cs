@@ -155,30 +155,30 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string errorContext)
+        public static Dictionary<K, T> ToDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string errorContext)
         {
-            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>();
+            Dictionary<K, T> result = new Dictionary<K, T>();
             result.AddRange(source, keySelector, v => v, errorContext);
             return result;
         }
 
-        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string errorContext)
+        public static Dictionary<K, V> ToDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string errorContext)
         {
-            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>();
+            Dictionary<K, V> result = new Dictionary<K, V>();
             result.AddRange(source, keySelector, elementSelector, errorContext);
             return result;
         }
 
-        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer, string errorContext)
+        public static Dictionary<K, T> ToDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string errorContext)
         {
-            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>(comparer);
+            Dictionary<K, T> result = new Dictionary<K, T>(comparer);
             result.AddRange(source, keySelector, v => v, errorContext);
             return result;
         }
 
-        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer, string errorContext)
+        public static Dictionary<K, V> ToDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string errorContext)
         {
-            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>(comparer);
+            Dictionary<K, V> result = new Dictionary<K, V>(comparer);
             result.AddRange(source, keySelector, elementSelector, errorContext);
             return result;
         }
@@ -200,7 +200,7 @@ namespace Signum.Utilities
         public static Dictionary<K, R> JoinDictionaryStrict<K, C, S, R>(
            Dictionary<K, C> currentDictionary,
            Dictionary<K, S> shouldDictionary,
-           Func<C, S, R> resultSelector, string action)
+           Func<C, S, R> resultSelector, string errorContext)
         {
 
             var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
@@ -208,12 +208,12 @@ namespace Signum.Utilities
 
             if (currentOnly.Count != 0)
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".Formato(errorContext, shouldOnly.ToString(", ")));
 
             return currentDictionary.ToDictionary(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
         }
@@ -231,7 +231,7 @@ namespace Signum.Utilities
         public static void JoinDictionaryForeachStrict<K, C, S>(
             Dictionary<K, C> currentDictionary,
             Dictionary<K, S> shouldDictionary,
-            Action<K, C, S> mixAction, string action)
+            Action<K, C, S> mixAction, string errorContext)
         {
 
             var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
@@ -239,12 +239,12 @@ namespace Signum.Utilities
 
             if (currentOnly.Count != 0)
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(errorContext, shouldOnly.ToString(", ")));
 
             foreach (var kvp in currentDictionary)
             {
@@ -329,6 +329,17 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
+        {
+            foreach (var item in keys.ZipStrict(values))
+                dictionary.Add(item.Item1, item.Item2);
+        }
+
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values, string errorContext)
+        {
+            dictionary.AddRange(keys.ZipStrict(values), t=>t.Item1, t=>t.Item2);
+        }
+
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
         {
             foreach (var kvp in collection)
@@ -340,13 +351,13 @@ namespace Signum.Utilities
             dictionary.AddRange(collection, kvp => kvp.Key, kvp => kvp.Value, errorContext);
         }
 
-        public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector)
+        public static void AddRange<K, V, T>(this IDictionary<K, V> dictionary, IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
         {
             foreach (var item in collection)
                 dictionary.Add(keySelector(item), valueSelector(item));
         }
 
-        public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector, string errorContext)
+        public static void AddRange<K, V, T>(this IDictionary<K, V> dictionary, IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, string errorContext)
         {
             Dictionary<K, List<V>> repetitions = new Dictionary<K, List<V>>();
             foreach (var item in collection)
@@ -377,16 +388,17 @@ namespace Signum.Utilities
                 dictionary[item.Item1] = item.Item2;
         }
 
-        public static void SetRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
-        {
-            foreach (var item in other)
-                dictionary[item.Key] = item.Value;
-        }
-
         public static void SetRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
         {
             foreach (var item in collection)
                 dictionary[getKey(item)] = getValue(item);
+        }
+
+        public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
+        {
+            foreach (var item in collection)
+                if (!dictionary.ContainsKey(item.Key))
+                    dictionary[item.Key] = item.Value;
         }
 
         public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
@@ -394,13 +406,6 @@ namespace Signum.Utilities
             foreach (var item in keys.ZipStrict(values))
                 if (!dictionary.ContainsKey(item.Item1))
                     dictionary[item.Item1] = item.Item2;
-        }
-
-        public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
-        {
-            foreach (var item in other)
-                if (!dictionary.ContainsKey(item.Key))
-                    dictionary[item.Key] = item.Value;
         }
 
         public static void DefaultRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)

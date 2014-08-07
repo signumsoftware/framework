@@ -68,12 +68,12 @@ namespace Signum.Utilities
 
         static InvalidOperationException NotFound(string str, char separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str));
         }
 
         static InvalidOperationException NotFound(string str, string separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str));
         }
 
         public static string Before(this string str, char separator)
@@ -373,28 +373,7 @@ namespace Signum.Utilities
 
             return str.Substring(numChars);
         }
-
-        public static List<string> SplitInGroupsOf(this string str, int maxChars)
-        {
-            if (string.IsNullOrEmpty(str))
-                return new List<string>();
-
-            if (maxChars <= 0)
-                throw new ArgumentOutOfRangeException("maxChars should be greater than 0");
-
-            List<string> result = new List<string>();
-
-            for (int i = 0; i < str.Length; i+= maxChars)
-            {
-                if (i + maxChars < str.Length)
-                    result.Add(str.Substring(i, maxChars));
-                else
-                    result.Add(str.Substring(i));
-            }
-
-            return result;
-        }
-
+    
         public static string RemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
@@ -411,6 +390,28 @@ namespace Signum.Utilities
             return str.Substring(0, str.Length - numChars);
         }
 
+        public static List<string> SplitInGroupsOf(this string str, int maxChars)
+        {
+            if (string.IsNullOrEmpty(str))
+                return new List<string>();
+
+            if (maxChars <= 0)
+                throw new ArgumentOutOfRangeException("maxChars should be greater than 0");
+
+            List<string> result = new List<string>();
+
+            for (int i = 0; i < str.Length; i += maxChars)
+            {
+                if (i + maxChars < str.Length)
+                    result.Add(str.Substring(i, maxChars));
+                else
+                    result.Add(str.Substring(i));
+            }
+
+            return result;
+        }
+
+
         public static string PadChopRight(this string str, int length)
         {
             str = str ?? "";
@@ -423,22 +424,25 @@ namespace Signum.Utilities
             return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length);
         }
 
-        public static string VerticalEtc(this string str, int maxLines)
+        public static string FirstNonEmptyLine(this string str)
         {
-            return str.VerticalEtc(maxLines, "(...)");
-        }
+            int index = 0;
 
-        public static string VerticalEtc(this string str, int maxLines, string etcString)
-        {
-            if (str.HasText() && (str.Contains("\r\n")))
+            while (index < str.Length)
             {
-                string[] arr = str.Split(new string[] { "\r\n" }, maxLines, StringSplitOptions.None);
-                string res = arr.ToString("\r\n");
-                if (res.Length < str.Length)
-                    res += etcString;
-                str = res;
+                var newIndex = str.IndexOfAny(new[] { '\r', '\n' }, index).NotFound(str.Length);
+
+                if (newIndex > index + 1)
+                {
+                    var res = str.Substring(index, newIndex - index).Trim();
+                    if (res.Length > 0)
+                        return res;
+                }
+
+                index = newIndex;
             }
-            return str;
+
+            return ""; 
         }
 
         public static string Etc(this string str, int max, string etcString)
@@ -448,28 +452,22 @@ namespace Signum.Utilities
             return str;
         }
 
-        public static string Etc(this string str, int max)
+        public static string Etc(this string str, int max) //Expressions and optionals don't work
         {
             return str.Etc(max, "(...)");
         }
 
-        public static string EtcLines(this string str, int max, string etcString)
+        public static string VerticalEtc(this string str, int maxLines, string etcString = "(...)")
         {
-            if (!str.HasText())
-                return str;
-
-            int pos = str.IndexOfAny(new[] { '\n', '\r' });
-            if (pos != -1 && pos + etcString.Length < max)
-                max = pos + etcString.Length;
-
-            if (str.HasText() && (str.Length > max))
-                return str.Start(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+            if (str.HasText() && (str.Contains("\r\n")))
+            {
+                string[] arr = str.Split(new string[] { "\r\n" }, maxLines - 1, StringSplitOptions.None);
+                string res = arr.ToString("\r\n");
+                if (res.Length < str.Length)
+                    res += etcString;
+                return res;
+            }
             return str;
-        }
-
-        public static string EtcLines(this string str, int max)
-        {
-            return str.EtcLines(max, "(...)");
         }
 
         public static bool ContinuesWith(this string str, string subString, int pos)

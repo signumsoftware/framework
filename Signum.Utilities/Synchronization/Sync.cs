@@ -88,29 +88,6 @@ namespace Signum.Utilities
             } while (Interlocked.CompareExchange<T>(ref variable, newValue, oldValue) != oldValue);
         }
 
-        public static V SafeGetOrCreate<K, V>(ref ImmutableAVLTree<K, V> tree, K key, Func<V> createValue)
-            where K : IComparable<K>
-        {
-            V result;
-            if (tree.TryGetValue(key, out result))
-                return result;
-
-            V value = createValue();
-
-            SafeUpdate(ref tree, t =>
-            {
-                if (t.TryGetValue(key, out result))
-                    return null;
-                else
-                {
-                    result = value;
-                    return t.Add(key, value);
-                }
-            });
-
-            return result;
-        }
-
         public static LocString ToLoc(Func<string> resourceProperty)
         {
             return lang =>
