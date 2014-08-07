@@ -182,7 +182,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                 this.request();
             }
 
-            this.options.prefix.child("sfFullScreen").get().on("mousedown", function (e) {
+            this.options.prefix.child("sfFullScreen").get().on("mouseup", function (e) {
                 e.preventDefault();
                 _this.fullScreen(e);
             });
