@@ -208,8 +208,17 @@ namespace Signum.Web.Selenium
                         return true;
 
                     if (Selenium.IsElementPresent(CloseButtonLocator))
-                        Selenium.Click(CloseButtonLocator);
-
+                    {
+                        try
+                        {
+                            Selenium.Click(CloseButtonLocator);
+                        }
+                        catch (SeleniumException e)
+                        {
+                            if (!e.Message.Contains("not found"))
+                                throw;
+                        }
+                    }
 
                     if (Selenium.IsConfirmationPresent())
                         confirmation = Selenium.GetConfirmation();
