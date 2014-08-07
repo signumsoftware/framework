@@ -262,8 +262,8 @@ namespace Signum.Windows.UIAutomation
 
     public class OperationTimeouts
     {
-        public static int ExecuteTimeout = 3 * 1000;
-        public static int ConstructFromTimeout = 2 * 1000;
+        public static int ExecuteTimeout = 10 * 1000;
+        public static int ConstructFromTimeout = 10 * 1000;
     }
 
 
