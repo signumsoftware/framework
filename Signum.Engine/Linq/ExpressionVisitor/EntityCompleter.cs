@@ -101,8 +101,8 @@ namespace Signum.Engine.Linq
 
             previousTypes = previousTypes.Push(ee.Type);
 
-            var bindings =  Visit(ee.Bindings, VisitFieldBinding);
-            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+            var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 

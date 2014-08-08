@@ -7,8 +7,7 @@ using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Diagnostics;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures; 
+using Signum.Utilities.ExpressionTrees; 
 
 
 namespace Signum.Engine.Linq
@@ -28,7 +27,7 @@ namespace Signum.Engine.Linq
 
         protected IEnumerable<CommandExpression> VisitCommands(ReadOnlyCollection<CommandExpression> commands)
         {
-            return Visit(commands, c => (CommandExpression)Visit(c));
+            return commands.NewIfChange(c => (CommandExpression)Visit(c));
         }
 
         protected internal virtual Expression VisitDelete(DeleteExpression delete)
@@ -44,7 +43,7 @@ namespace Signum.Engine.Linq
         {
             var source = VisitSource(update.Source); 
             var where = Visit(update.Where);
-            var assigments = Visit(update.Assigments, VisitColumnAssigment);
+            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
             return update;
@@ -53,7 +52,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             var source = VisitSource(insertSelect.Source);
-            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
+            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
             if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
                 return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
             return insertSelect;
@@ -101,39 +100,9 @@ namespace Signum.Engine.Linq
             return typeFie;
         }
 
-        [DebuggerStepThrough]
-        protected static ReadOnlyDictionary<K, V> Visit<K, V>(ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
-            where V : class
-        {
-            if (dictionary == null)
-                return null;
-
-            Dictionary<K, V> alternate = null;
-            foreach (var k in dictionary.Keys)
-            {
-                V item = dictionary[k];
-                V newItem = newValue(item);
-                if (alternate == null && item != newItem)
-                {
-                    alternate = new Dictionary<K, V>();
-                    foreach (var k2 in dictionary.Keys.TakeWhile(k2 => !k2.Equals(k)))
-                        alternate.Add(k2, dictionary[k2]);
-                }
-                if (alternate != null && newItem != null)
-                {
-                    alternate.Add(k, newItem);
-                }
-            }
-            if (alternate != null)
-            {
-                return alternate.ToReadOnly();
-            }
-            return dictionary;
-        }
-
         protected internal virtual Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
         {
-            var implementations = Visit(typeIb.TypeImplementations, eid => Visit(eid));
+            var implementations = typeIb.TypeImplementations.NewIfChange(eid => Visit(eid));
 
             if (implementations != typeIb.TypeImplementations)
                 return new TypeImplementedByExpression(implementations);
@@ -212,7 +181,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitImplementedBy(ImplementedByExpression ib)
         {
-            var implementations = Visit(ib.Implementations, v => (EntityExpression)Visit(v));
+            var implementations = ib.Implementations.NewIfChange(v => (EntityExpression)Visit(v));
 
             if (implementations != ib.Implementations)
                 return new ImplementedByExpression(ib.Type, ib.Strategy, implementations);
@@ -221,8 +190,8 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitEntity(EntityExpression ee)
         {
-            var bindings = Visit(ee.Bindings, VisitFieldBinding);
-            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+            var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 
@@ -234,7 +203,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
-            var bindings = Visit(eee.Bindings, VisitFieldBinding);
+            var bindings = eee.Bindings.NewIfChange(VisitFieldBinding);
             var hasValue = Visit(eee.HasValue);
 
             if (eee.Bindings != bindings || eee.HasValue != hasValue)
@@ -246,7 +215,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
         {
-            var bindings = Visit(me.Bindings, VisitFieldBinding);
+            var bindings = me.Bindings.NewIfChange(VisitFieldBinding);
 
             if (me.Bindings != bindings)
             {
@@ -336,7 +305,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
-            var orderBys = Visit(rowNumber.OrderBy, VisitOrderBy);
+            var orderBys = rowNumber.OrderBy.NewIfChange(VisitOrderBy);
             if (orderBys != rowNumber.OrderBy)
                 return new RowNumberExpression(orderBys);
             return rowNumber;
@@ -364,9 +333,9 @@ namespace Signum.Engine.Linq
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
-            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
@@ -428,7 +397,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             Expression obj = Visit(sqlFunction.Object);
-            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); 
             return sqlFunction;
@@ -436,7 +405,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments)
                 return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
@@ -449,7 +418,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitCase(CaseExpression cex)
         {
-            var newWhens = Visit(cex.Whens, w => VisitWhen(w));
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
             var newDefault = Visit(cex.DefaultValue);
 
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)

@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
         {
             //We can not assume allways true because neasted projections
             Expression obj = Visit(sqlFunction.Object);
-            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
@@ -152,7 +152,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => Visit(a));
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments)
                 sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args); ;
 
@@ -179,7 +179,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitCase(CaseExpression cex)
         {
-            var newWhens = Visit(cex.Whens, w => VisitWhen(w));
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
             var newDefault = Visit(cex.DefaultValue);
 
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)

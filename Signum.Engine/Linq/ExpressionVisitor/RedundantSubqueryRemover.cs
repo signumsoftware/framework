@@ -296,8 +296,8 @@ namespace Signum.Engine.Linq
                 // only consider aggregates in these locations
                 this.Visit(select.Where);
 
-                Visit(select.OrderBy, VisitOrderBy);
-                Visit(select.Columns, VisitColumnDeclaration);
+                select.OrderBy.NewIfChange(VisitOrderBy);
+                select.Columns.NewIfChange(VisitColumnDeclaration);
                 return select;
             }
 

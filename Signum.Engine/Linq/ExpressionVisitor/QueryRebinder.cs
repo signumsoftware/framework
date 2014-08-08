@@ -59,7 +59,7 @@ namespace Signum.Engine.Linq
 
             CurrentScope.SetRange(columns, columns.Cast<Expression>());
 
-            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments)
                 return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
@@ -122,11 +122,11 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             Visit(update.Where);
-            Visit(update.Assigments, VisitColumnAssigment);
+            update.Assigments.NewIfChange(VisitColumnAssigment);
 
             var source = Visit(update.Source);
             var where = Visit(update.Where);
-            var assigments = Visit(update.Assigments, VisitColumnAssigment);
+            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
 
@@ -135,10 +135,10 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            Visit(insertSelect.Assigments, VisitColumnAssigment);
+            insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
 
             var source = Visit(insertSelect.Source);
-            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
+            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
             if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
                 return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
 
@@ -157,17 +157,17 @@ namespace Signum.Engine.Linq
 
             this.Visit(select.Top);
             this.Visit(select.Where);
-            Visit(select.Columns, VisitColumnDeclaration);
-            Visit(select.OrderBy, VisitOrderBy);
-            Visit(select.GroupBy, Visit);
+            select.Columns.NewIfChange(VisitColumnDeclaration);
+            select.OrderBy.NewIfChange(VisitOrderBy);
+            select.GroupBy.NewIfChange(Visit);
 
             SourceExpression from = this.VisitSource(select.From);
 
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
-            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration); ;
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration); ;
 
             columns = AnswerAndExpand(columns, select.Alias, askedColumns);
 
