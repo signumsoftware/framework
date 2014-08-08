@@ -52,8 +52,6 @@ namespace Signum.Windows.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
-        private Entities.OperationSymbol item;
-
         public Func<EntityOperationContext, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
