@@ -31,7 +31,7 @@ namespace Signum.Web.Translation.Controllers
         }
 
         [HttpGet]
-        public new ActionResult View(string type, string culture, bool searchPressed, string filter)
+        public ActionResult View(string type, string culture, bool searchPressed, string filter)
         {
             Type t = TypeLogic.GetType(type);
             ViewBag.Type = t;

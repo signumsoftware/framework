@@ -303,17 +303,14 @@ namespace Signum.Engine.Translation
         {
             var hastMList = route.GetMListItemsRoute() != null;
 
-            if (hastMList != rowId.HasValue)
-            {
-                if (rowId.HasValue)
-                    throw new InvalidOperationException("Route {0} has not MList so rowId should be null".Formato(route));
-                else
-                    throw new InvalidOperationException("Route {0} has MList so rowId should have a value".Formato(route));
+            if (hastMList && !rowId.HasValue)
+                throw new InvalidOperationException("Route {0} has MList so rowId should have a value".Formato(route));
 
-                if (route.Type != lite.EntityType)
+            if (!hastMList && rowId.HasValue)
+                throw new InvalidOperationException("Route {0} has not MList so rowId should be null".Formato(route));
+                
+            if (route.Type != lite.EntityType)
                     throw new InvalidOperationException("Route {0} belongs to type {1}, not {2}".Formato(route, route.RootType.TypeName(), lite.EntityType.TypeName()));
-            }
-
             var key = new LocalizedInstanceKey(route, lite, rowId);
 
             var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture).TryGetC(key);
