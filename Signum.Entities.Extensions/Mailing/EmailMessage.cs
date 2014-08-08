@@ -89,7 +89,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = true, Min = 3)]
+        [StringLengthValidator(AllowNulls = true)]
         public string Subject
         {
             get { return subject; }
@@ -98,7 +98,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = true, Min = 3)]
+        [StringLengthValidator(AllowNulls = true)]
         public string Body
         {
             get { return body; }
@@ -116,7 +116,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable, SqlDbType(Size = 150)]
         string bodyHash;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 150)]
         public string BodyHash
         {
             get { return bodyHash; }
