@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
@@ -288,7 +288,7 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 return Generating

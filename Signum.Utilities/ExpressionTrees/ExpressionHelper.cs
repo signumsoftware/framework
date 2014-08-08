@@ -74,32 +74,7 @@ namespace Signum.Utilities.ExpressionTrees
             return dictionary;
         }
 
-        [DebuggerStepThrough]
-        public static List<T> NewIfChange<T>(this List<T> collection, Func<T, T> newValue)
-          where T : class
-        {
-            if (collection == null)
-                return null;
-
-            List<T> alternate = null;
-            for (int i = 0, n = collection.Count; i < n; i++)
-            {
-                T item = collection[i];
-                T newItem = newValue(item);
-                if (alternate == null && item != newItem)
-                {
-                    alternate = collection.Take(i).ToList();
-                }
-                if (alternate != null && newItem != null)
-                {
-                    alternate.Add(newItem);
-                }
-            }
-            return alternate ?? collection;
-        }
-
-        static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null)).GetGenericMethodDefinition();
-
+    
         [DebuggerStepThrough]
         public static Expression TryConvert(this Expression expression, Type type)
         {

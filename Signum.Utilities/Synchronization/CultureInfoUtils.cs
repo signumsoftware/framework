@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Utilities
 {
-    public static class Sync
+    public static class CultureInfoUtils
     {
         public static IDisposable ChangeBothCultures(string cultureName)
         {
@@ -73,30 +73,5 @@ namespace Signum.Utilities
             t.CurrentUICulture = ci;
             return new Disposable(() => t.CurrentUICulture = old);
         }
-
-        public static void SafeUpdate<T>(ref T variable, Func<T, T> repUpdateFunction) where T : class
-        {
-            T oldValue, newValue;
-            do
-            {
-                oldValue = variable;
-                newValue = repUpdateFunction(oldValue);
-
-                if (newValue == null)
-                    break;
-
-            } while (Interlocked.CompareExchange<T>(ref variable, newValue, oldValue) != oldValue);
-        }
-
-        public static LocString ToLoc(Func<string> resourceProperty)
-        {
-            return lang =>
-            {
-                using (Sync.ChangeBothCultures(lang))
-                    return resourceProperty();
-            };
-        }
     }
-
-    public delegate string LocString(CultureInfo lang);
 }

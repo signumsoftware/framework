@@ -149,7 +149,7 @@
     <Compile Include="Disposable.cs" />
     <Compile Include="Extensions\ProgressEnumerator.cs" />
     <Compile Include="ProgressProxy.cs" />
-    <Compile Include="Synchronization\Sync.cs" />
+    <Compile Include="Synchronization\CultureInfoUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Synchronization\ThreadSafeEnumerator.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />

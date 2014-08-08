@@ -70,7 +70,7 @@ namespace Signum.Web.PortableAreas
 
         Dictionary<string, string> ReadAllKeys(CultureInfo ci)
         {
-            using (Sync.ChangeCultureUI(ci))
+            using (CultureInfoUtils.ChangeCultureUI(ci))
                 return Enum.GetValues(MessageType).Cast<Enum>().ToDictionary(a => a.ToString(), a => a.NiceToString());
         }
 

@@ -71,7 +71,7 @@ namespace Signum.Engine.Extensions.Basics
         {
             IEnumerable<T> should = getSemiSymbols().ToList();
 
-            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
+            using (CultureInfoUtils.ChangeCulture(Schema.Current.ForceCultureInfo))
                 foreach (var item in should)
                     item.Name = item.NiceToString();
 
