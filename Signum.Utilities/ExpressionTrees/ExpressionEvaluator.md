@@ -5,10 +5,10 @@ Expression Visitor that takes the nominated subtrees of the `ExpressionNominator
 `ExpressionEvaluator.Eval` also is able to evaluate a complete expression tree and return the value (or throw an exception if it's not possible to do so).  
 
 ```C#
-public class ¬ExpressionEvaluator : ¬ExpressionVisitor
+public class ExpressionEvaluator : ExpressionVisitor
 {
-   public static Expression PartialEval(¬Expression exp);
-   public static object Eval(¬Expression expression);
+   public static Expression PartialEval(Expression exp);
+   public static object Eval(Expression expression);
 }
 ```
 

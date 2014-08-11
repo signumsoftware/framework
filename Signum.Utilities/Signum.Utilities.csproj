@@ -87,13 +87,13 @@
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
     <Compile Include="DataStructures\ScopedDictionary.cs" />
-    <Compile Include="DescriptionAttributes.cs" />
+    <Compile Include="DescriptionManager.cs" />
     <Compile Include="ExpressionTrees\ExpressionComparer.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="Extensions\FileExtensions.cs" />
     <Compile Include="NaturalLanguage\NaturalLanguageTools.cs" />
-    <Compile Include="Pagination.cs" />
+    <Compile Include="Extensions\PageExtensions.cs" />
     <Compile Include="Polymorphic.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
@@ -133,7 +133,6 @@
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Reflection\MemberEntryFactory.cs" />
     <Compile Include="Serialization.cs" />
-    <Compile Include="Switch.cs" />
     <Compile Include="ExpressionTrees\CSharpRenderer.cs" />
     <Compile Include="ExpressionTrees\CSharpTreeVisitor.cs" />
     <Compile Include="Extensions\Extensions.cs" />
@@ -156,7 +155,7 @@
     <Compile Include="StringDistance.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\Version.cs" />
-    <Compile Include="Extensions\TreeExtensions.cs" />
+    <Compile Include="Extensions\TreeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -176,6 +175,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="AboutTools.md" />
+    <None Include="ConsoleSwitch.md" />
     <None Include="DataStructures\DirectedEdgedGraph.md" />
     <None Include="DataStructures\DirectedGraph.md" />
     <None Include="DataStructures\Grouping.md" />
@@ -189,12 +190,29 @@
     <None Include="DataStructures\PriorityQueue.md" />
     <None Include="DataStructures\RecentsDictionary.md" />
     <None Include="DataStructures\ReferenceEqualityComparer.md" />
+    <None Include="DebugTextWriter.md" />
+    <None Include="DescriptionManager.md" />
+    <None Include="Disposable.md" />
+    <None Include="ExpressionTrees\0.Intro.md" />
+    <None Include="ExpressionTrees\CSharpRenderer.md" />
+    <None Include="ExpressionTrees\ExpressionCleaner.md" />
+    <None Include="ExpressionTrees\ExpressionComparer.md" />
+    <None Include="ExpressionTrees\ExpressionEvaluator.md" />
+    <None Include="ExpressionTrees\ExpressionHelper.md" />
+    <None Include="ExpressionTrees\ExpressionNominator.md" />
+    <None Include="ExpressionTrees\ExpressionToString.md" />
+    <None Include="ExpressionTrees\LinqExtensibility.md" />
+    <None Include="ExpressionTrees\Query.md" />
+    <None Include="ExpressionTrees\QueryProvider.md" />
     <None Include="Extensions\ArgsExtensions.md" />
     <None Include="Extensions\ColorExtensions.md" />
+    <None Include="Extensions\PageExtensions.md" />
+    <None Include="Extensions\ProgressEnumerator.md" />
+    <None Include="Extensions\ReflectionExtensions.md" />
     <None Include="Extensions\StringExtensions.md" />
     <None Include="Extensions\TimeSpanExtensions.md" />
     <None Include="Extensions\ExpressionExtensions.md" />
-    <None Include="Introduction.md" />
+    <None Include="0.Introduction.md" />
     <Content Include="Translations\Signum.Utilities.de.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -215,7 +233,7 @@
     </Content>
     <None Include="Extensions\0.ExtensionMethods.md" />
     <None Include="Extensions\Extensions.md" />
-    <None Include="2.4-Csv.md" />
+    <None Include="Csv.md" />
     <None Include="Extensions\EnumerableExtensions.md" />
     <None Include="Extensions\GroupingExtensions.md" />
     <None Include="Extensions\DictionaryExtensions.md" />
@@ -224,8 +242,17 @@
     <None Include="Extensions\DateTimeExtensions.md" />
     <None Include="Extensions\EnumExtensions.md" />
     <None Include="Extensions\ListExtensions.md" />
-    <None Include="Extensions\ReflectionExensions.md" />
+    <None Include="Extensions\TreeHelper.md" />
+    <None Include="MimeTypes.md" />
+    <None Include="MyRandom.md" />
     <None Include="NaturalLanguage\NaturalLangageTools.md" />
+    <None Include="ProgressProxy.md" />
+    <None Include="Reflection\ReflectionTools.md" />
+    <None Include="SafeConsole.md" />
+    <None Include="Serialization.md" />
+    <None Include="StringDistance.md" />
+    <None Include="Synchronization\CultureInfoUtils.md" />
+    <None Include="Synchronization\ThreadSafeEnumerator.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Docs\" />

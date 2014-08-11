@@ -29,6 +29,7 @@ namespace Signum.Utilities
         }
     }
 
+    [Flags]
     public enum DescriptionOptions
     {
         None = 0,

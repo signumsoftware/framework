@@ -89,13 +89,6 @@ namespace Signum.Utilities
             OnChanged(ProgressAction.Interval | ProgressAction.Task);
         }
 
-        public void NextTask(int position, string currentTask)
-        {
-            this.position = position;
-            this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position);
-        }
-
         public void NextTask(string currentTask)
         {
             this.position++;

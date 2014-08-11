@@ -47,10 +47,9 @@ namespace Signum.Windows
 
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :
-                                                 new Switch<int, string>(str.Length)
-                                                 .Case(0, NormalWindowMessage.NoDirectErrors.NiceToString())
-                                                 .Case(1, v => NormalWindowMessage._1Error.NiceToString().Formato(str[0]))
-                                                 .Default(v => NormalWindowMessage._0Errors1.NiceToString().Formato(v, str[0])));
+                str.Length == 0 ? NormalWindowMessage.NoDirectErrors.NiceToString() :
+                str.Length == 1 ? NormalWindowMessage._1Error.NiceToString() :
+                NormalWindowMessage._0Errors1.NiceToString().Formato(str.Length, str[0]));
 
         public static readonly IValueConverter ErrorListToBool =
             ConverterFactory.New((string[] str) => str != null && str.Length > 0);

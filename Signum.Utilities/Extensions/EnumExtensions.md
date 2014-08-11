@@ -34,7 +34,7 @@ public static T[] GetValues<T>()
 
 Example: 
 ```c#
-¬EnumExtensions.GetValues<DayOfWeek>();
+EnumExtensions.GetValues<DayOfWeek>();
 //Returns: new DayOfWeek[]{DayOfWeek.Sunday, DayOfWeek.Monday, ... }
 ```
 
@@ -49,8 +49,8 @@ public static bool IsDefined<T>(T value) where T : struct
 Example:
 
 ```c#
-¬EnumExtensions.IsDefined(¬DayOfWeek.Monday); //returns true
-¬EnumExtensions.IsDefined((¬DayOfWeek)10); // returns false
+EnumExtensions.IsDefined(DayOfWeek.Monday); //returns true
+EnumExtensions.IsDefined((DayOfWeek)10); // returns false
 ```
 
 ### MinFlag and MaxFlag
@@ -66,6 +66,6 @@ Example:
 
 ```c#
 //Binary representation of 14 = 1110 = 8 + 4 + 2
-¬EnumExtensions.MinFlag(14); //Returns 2
-¬EnumExtensions.MaxFlag(14); //Returns 8  
+EnumExtensions.MinFlag(14); //Returns 2
+EnumExtensions.MaxFlag(14); //Returns 8  
 ```

@@ -8,7 +8,7 @@ i.e: `IdentifiableEntity` for example overrides it to use Type and Id for conven
 `ReferenceEqualityComparer` allows you to change back this behavior in whatever data structure or algorithm that takes an `IEqualityComparer`.    
 
 ```C#
-public class ¬ReferenceEqualityComparer<T> : ¬IEqualityComparer<T>, ¬IEqualityComparer where T : class
+public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer where T : class
 {
    public static ReferenceEqualityComparer<T> Default {get; }
 }
@@ -17,5 +17,5 @@ public class ¬ReferenceEqualityComparer<T> : ¬IEqualityComparer<T>, ¬IEqualit
 Example: 
 
 ```C#
-var memoryGraph = new ¬DirectedGraph<¬Modifiable>(¬ReferenceEqualityComparer<¬Modifiable>.Default);
+var memoryGraph = new DirectedGraph<Modifiable>(ReferenceEqualityComparer<Modifiable>.Default);
 ```

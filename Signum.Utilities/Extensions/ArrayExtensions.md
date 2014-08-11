@@ -8,8 +8,8 @@ Extensions that take or generate arrays
 Initializes every cell of the array with a provided function.
 
 ```C#
-public static T[,] Initialize<T>(this T[,] array, ¬Func<int,int,T> valueXY)
-public static T[, ,] Initialize<T>(this T[, ,] array, ¬Func<int, int, int, T> valueXYZ)
+public static T[,] Initialize<T>(this T[,] array, Func<int,int,T> valueXY)
+public static T[, ,] Initialize<T>(this T[, ,] array, Func<int, int, int, T> valueXYZ)
 ```
 
 Example:
@@ -25,9 +25,9 @@ Another overload of ToArray method that takes a function, shuffling the
 values as they are introduced:
 
 ```C#
-public static S[] ToArray<T,S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos)
-public static S[,] ToArray<T, S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos, ¬Func<T, int> yPos)
-public static S[, ,] ToArray<T, S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos, ¬Func<T, int> yPos, ¬Func<T, int> zPos)
+public static S[] ToArray<T,S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos)
+public static S[,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos)
+public static S[, ,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, Func<T, int> zPos)
 ```
 
 Example:
@@ -43,9 +43,9 @@ resulting array as a parameter. It's more efficient because avoids
 enumerating the collection twice.
 
 ```C#
-public static S[] ToArray<T, S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos, int xLength)
-public static S[,] ToArray<T, S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos, ¬Func<T, int> yPos, int xLength, int yLength)
-public static S[, ,] ToArray<T, S>(this ¬IEnumerable<T> collection, ¬Func<T, S> value, ¬Func<T, int> xPos, ¬Func<T, int> yPos, ¬Func<T, int> zPos, int xLength, int yLength, int zLength)
+public static S[] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, int xLength)
+public static S[,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, int xLength, int yLength)
+public static S[, ,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, Func<T, int> zPos, int xLength, int yLength, int zLength)
 ```
 
 ### Row and Column
@@ -57,8 +57,8 @@ A row is the sequence of elements [\_,row] A column is the sequence of
 elements [column,\_]
 
 ```C#
-public static ¬IEnumerable<T> Row<T>(this T[,] data, int row)
-public static ¬IEnumerable<T> Column<T>(this T[,] data, int column)
+public static IEnumerable<T> Row<T>(this T[,] data, int row)
+public static IEnumerable<T> Column<T>(this T[,] data, int column)
 ```
 
 Result:
@@ -80,10 +80,10 @@ given position:
 
 ```C#
 public static T[,] AddRow<T>(this T[,] values, int pos, T[] newValues)
-public static T[,] AddRow<T>(this T[,] values, int pos, ¬Func<int, T> newValue)
+public static T[,] AddRow<T>(this T[,] values, int pos, Func<int, T> newValue)
 
 public static T[,] AddColumn<T>(this T[,] values, int pos, T[] newValues)
-public static T[,] AddColumn<T>(this T[,] values, int pos, ¬Func<int, T> newValue)
+public static T[,] AddColumn<T>(this T[,] values, int pos, Func<int, T> newValue)
 ```
 
 Example:

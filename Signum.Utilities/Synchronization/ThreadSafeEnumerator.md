@@ -7,9 +7,9 @@ In order to enumerate a collection you need to keep some data (the current item,
 But sometimes you want to make different threads work over the same `IEnumerator` at the same time, so that each element is yielded to just one of the consumer threads and 'no element is left behind'.
 
 ```C#
-public class ¬TreadSafeEnumerator<T>: ¬IEnumerable<T>, ¬IEnumerator<T>
+public class TreadSafeEnumerator<T>: IEnumerable<T>, IEnumerator<T>
 {
-    public TreadSafeEnumerator(¬IEnumerable<T> source)
+    public TreadSafeEnumerator(IEnumerable<T> source)
     
     (...) //interface implementation and threading code
 }
@@ -24,22 +24,22 @@ It just distributes the elements of the source enumerator to all the interested 
 Also, it's not meant to be instantiated manually, instead use the more convinient `AsThreadSafe` method in `EnumerableExtensions`.
 
 ```C#
-public static ¬IEnumerable<T> AsThreadSafe<T>(this ¬IEnumerable<T> source)
+public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)
 ```
 
 Example:
 
 ```C#
-¬IEnumerable<int> numbers = 0.To(100);
+IEnumerable<int> numbers = 0.To(100);
 
-¬IEnumerable<int> threadSafeNumbers = numbers.AsThreadSafe();
+IEnumerable<int> threadSafeNumbers = numbers.AsThreadSafe();
 
-¬Thread[] threads = 0.To(10).Select(i => new Thread(() =>
+Thread[] threads = 0.To(10).Select(i => new Thread(() =>
 {
     foreach (var num in threadSafeNumbers)
     {
-        ¬Console.WriteLine("{0} Getting {1}".Formato(¬Thread.CurrentThread.Name, num));
-        ¬Thread.Sleep(100); //To force some thread changes
+        Console.WriteLine("{0} Getting {1}".Formato(Thread.CurrentThread.Name, num));
+        Thread.Sleep(100); //To force some thread changes
     }
 }) { Name = "Thread #" + i }).ToArray();
 

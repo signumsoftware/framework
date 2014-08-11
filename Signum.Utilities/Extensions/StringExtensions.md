@@ -413,7 +413,7 @@ If more than one replacement could be applied, the one added before to
 the dictionary wins.
 
 ```C#
-public static string Replace(this string str, ¬Dictionary<string, string> replacements)
+public static string Replace(this string str, Dictionary<string, string> replacements)
 ```
 
 Example: 

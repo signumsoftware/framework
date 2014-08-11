@@ -5,20 +5,20 @@
 Also, `IntervalDictionary` is designed to be a read-only source of information, not to be modified frequently. Currently there's no support to remove intervals for example. 
 
 ```C#
-public class ¬IntervalDictionary<K,V>: ¬IEnumerable<¬KeyValuePair<¬Interval<K>, V>> 
-    where K: struct, ¬IComparable<K>, ¬IEquatable<K>
+public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>> 
+    where K: struct, IComparable<K>, IEquatable<K>
 {
-    ¬SortedList<¬Interval<K>, V> dic = new ¬SortedList<¬Interval<K>, V>();
+    SortedList<Interval<K>, V> dic = new SortedList<Interval<K>, V>();
 
     //Constructors
     public IntervalDictionary()
-    public IntervalDictionary(¬IEnumerable<¬Tuple<¬Interval<K>,V>> pares)
+    public IntervalDictionary(IEnumerable<Tuple<Interval<K>,V>> pares)
   
-    public ¬IList<¬Interval<K>> Intervals {get;}
+    public IList<Interval<K>> Intervals {get;}
     public int Count {get;}
 
     //Adds a new interval, throwing ArgumentException if overlaps with a previous one
-    public new void Add(¬Interval<K> time, V value)
+    public new void Add(Interval<K> time, V value)
     public void Add(K min, K max, V value)
 
     //Retrieves the value for a key (not set available). 
@@ -29,18 +29,18 @@ public class ¬IntervalDictionary<K,V>: ¬IEnumerable<¬KeyValuePair<¬Interval<
     public bool TryGetValue(K key, out V value)
 
     //Functional style TryGetValue using IntervalValue structure 
-    public ¬IntervalValue<V> TryGetValue(K key)
+    public IntervalValue<V> TryGetValue(K key)
 
     public K? TotalMin {get;} //Min value in the minimum interval 
     public K? TotalMax {get;} //Max value in the maximum interval
 
-    public ¬IEnumerator<¬KeyValuePair<¬Interval<K>, V>> GetEnumerator()
-    ¬IEnumerator ¬IEnumerable.GetEnumerator()
+    public IEnumerator<KeyValuePair<Interval<K>, V>> GetEnumerator()
+    IEnumerator IEnumerable.GetEnumerator()
 
     public override string ToString()
 }
 
-public struct ¬IntervalValue<T>
+public struct IntervalValue<T>
 {
     public readonly bool HasInterval;
     public readonly T Value;
@@ -52,7 +52,7 @@ public struct ¬IntervalValue<T>
 Example: 
 
 ```C#
-var interval = new ¬IntervalDictionary<decimal, string>
+var interval = new IntervalDictionary<decimal, string>
 {
     {0,1, "baby" },
     {1,3, "toddler" },

@@ -5,23 +5,23 @@ A [priority queue](http://en.wikipedia.org/wiki/Priority_queue) is a data struct
 It's usually implemented using a [heap](http://en.wikipedia.org/wiki/Heap_(data_structure)). Our version, based on the work of [BenDi](http://www.codeproject.com/KB/recipes/priorityqueue.aspx), uses a [binary heap](http://en.wikipedia.org/wiki/Binary_heap) in a flat List, and instead of setting priority explicitly for each element we use `IComparable<T>` interface of `Comparison<T>` delegate. Let's see  what it looks like!
 
 ```C#
-public class ¬PriorityQueue<T>
+public class PriorityQueue<T>
 {
-    ¬List<T> list = new ¬List<T>(); //where the elements are actually stored
-    ¬Comparison<T> comparer; //The comparison delegate used internally
+    List<T> list = new List<T>(); //where the elements are actually stored
+    Comparison<T> comparer; //The comparison delegate used internally
     
     //Default constructor, returns default comparator for a T that implements IComparable
-    public PriorityQueue():this(¬Comparer<T>.Default.Compare) 
+    public PriorityQueue():this(Comparer<T>.Default.Compare) 
     //Constructor with explicit IComparer (Think about using LambdaComparer)
     public PriorityQueue(IComparer<T> comparer) 
     //Constructor with explicit Comparisor
-    public PriorityQueue(¬Comparison<T> comparer)
+    public PriorityQueue(Comparison<T> comparer)
 
     public int Count{get;} // number of elements in the queue
     public bool Empty{get;} //returns true if no element is in the queue
 
     public int Push(T element) //Enqueue an element
-    public void PushAll(¬IEnumerable<T> elements) //Enqueue all the elements 
+    public void PushAll(IEnumerable<T> elements) //Enqueue all the elements 
     public T Pop() //Dequeue and returns the smallest element 
     public T Peek() //Returns the smallest element without dequeuing 
       
@@ -37,7 +37,7 @@ public class ¬PriorityQueue<T>
 Example: 
 
 ```C#
-¬PriorityQueue<int> numbers = new ¬PriorityQueue<int>(); 
+PriorityQueue<int> numbers = new PriorityQueue<int>(); 
 numbers.Push(1);
 numbers.Push(10);
 numbers.Push(8);
@@ -46,7 +46,7 @@ numbers.Push(4);
 numbers.Push(54);
 
 while (!numbers.Empty)
-    ¬Console.Write(numbers.Pop() + ", ");
+    Console.Write(numbers.Pop() + ", ");
 
 //Writes: 1, 4, 8, 10, 12, 54,
 ```
@@ -54,7 +54,7 @@ while (!numbers.Empty)
 Example using an explicit `IComparer` (`LambdaComparer`):
 
 ```C#
-¬PriorityQueue<string> numbers = new ¬PriorityQueue<string>(new ¬LambdaComparer<string, int>(s => s.Length));
+PriorityQueue<string> numbers = new PriorityQueue<string>(new LambdaComparer<string, int>(s => s.Length));
 numbers.Push("Teutons");
 numbers.Push("Mongols");
 numbers.Push("Persians");
@@ -70,7 +70,7 @@ numbers.Push("Franks");
 numbers.Push("Byzantines");
 
 while (!numbers.Empty)
-    ¬Console.WriteLine(numbers.Pop());
+    Console.WriteLine(numbers.Pop());
 
 //Goths
 //Turks

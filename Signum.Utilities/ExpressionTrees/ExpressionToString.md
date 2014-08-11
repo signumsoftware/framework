@@ -7,9 +7,9 @@ While this is a good idea for performance reasons it makes it really hard to com
 In order to make this work is necessary to replicate all the `ToString` logic in a visitor. 
 
 ```C#
-internal class ¬ExpressionToString: ¬ExpressionVisitor
+internal class ExpressionToString: ExpressionVisitor
 {
-   public static string NiceToString(¬Expression exp)
+   public static string NiceToString(Expression exp)
 }
 ```
 

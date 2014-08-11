@@ -15,7 +15,7 @@ Many of the ideas and code of this extensibility model are integrated in Signum 
 Imagine you have an entity like this
 
 ```C#
-public class ¬PersonDN
+public class PersonDN
 {
     string county;
     public string Country
@@ -32,7 +32,7 @@ public class ¬PersonDN
 
 
 (...)
-¬Database.Query<¬PersonDN>().Where(p=>p.IsAmerican)...; 
+Database.Query<PersonDN>().Where(p=>p.IsAmerican)...; 
 ```
 
 In this case, our Linq provider could use Country property (because is able to find country field), but the implementation of IsAmerican is **completely opaque for the provider** and if you use it in a DB query will complaint about it. 
@@ -40,7 +40,7 @@ In this case, our Linq provider could use Country property (because is able to f
 In order to enable this property on queries you need to indicate the equivalent expression tree. You can easily do that like this: 
 
 ```C#
-public class ¬PersonDN
+public class PersonDN
 {
     string country;
     public string Country
@@ -49,7 +49,7 @@ public class ¬PersonDN
        set { ... }
     }
 
-    static ¬Expression<¬Func<¬PersonDN,bool>> IsAmericanExpression = p=>p.Country == "USA"; 
+    static Expression<Func<PersonDN,bool>> IsAmericanExpression = p=>p.Country == "USA"; 
     public bool IsAmerican
     { 
        get { return IsAmericanExpression.Evaluate(this); }        
@@ -60,7 +60,7 @@ public class ¬PersonDN
 Just by providing a static field with the same name of the member with `Expression` at the end, the expansion system will replace the query at runtime by something like this: 
 
 ```C#
-¬Database.Query<¬PersonDN>().Where(p=>p.Country == "USA")...; 
+Database.Query<PersonDN>().Where(p=>p.Country == "USA")...; 
 ```
 
 Some important things to mention: 
@@ -71,9 +71,9 @@ Some important things to mention:
 This also works for static / instance methods. Let's see an example, making IsAmerican an extension method defined in the Business Logic.
 
 ```C#
-public static class ¬PersonLogic
+public static class PersonLogic
 {
-   public static bool IsAmerican(this ¬PersonDN person)
+   public static bool IsAmerican(this PersonDN person)
    {
        return person.Country == "USA";
    }
@@ -83,10 +83,10 @@ public static class ¬PersonLogic
 Could be replaced by
 
 ```C#
-public static class ¬PersonLogic
+public static class PersonLogic
 {
-   static ¬Expression<¬Func<¬PersonDN,bool>> IsAmericanExpression = p => p.Country == "USA"; 
-   public static bool IsAmerican(this ¬PersonDN person)
+   static Expression<Func<PersonDN,bool>> IsAmericanExpression = p => p.Country == "USA"; 
+   public static bool IsAmerican(this PersonDN person)
    {
        return IsAmericanExpression.Invoke(person);
    }
@@ -104,12 +104,12 @@ Sometimes you just want to factor out some code locally in your queries (to use 
 
 Example: 
 ```C#
-public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
 {
    (...)
    dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-     from p in ¬Database.Query<¬PersonDN>()
-     where p.State == ¬MaritalStatus.Single || p.State == ¬MaritalStatus.Divorced
+     from p in Database.Query<PersonDN>()
+     where p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced
      select new 
      {
          Entity = p.ToLite(),
@@ -119,8 +119,8 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
      });
 
     dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-     from p in ¬Database.Query<¬PersonDN>()
-     where (p.State == ¬MaritalStatus.Single || p.State == ¬MaritalStatus.Divorced) && p.Alive
+     from p in Database.Query<PersonDN>()
+     where (p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced) && p.Alive
      select new 
      {
          Entity = p.ToLite(),
@@ -134,14 +134,14 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
 As you see, the 'not married' predicate is redundant on the two queries, in order to avoid this redundancy you could just do: 
 
 ```C#
-public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
 {
    (...)
 
-   ¬Expression<¬Func<¬PersonDN,bool>> notMarried = p => p.State == ¬MaritalStatus.Single || p.State == ¬MaritalStatus.Divorced;
+   Expression<Func<PersonDN,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
 
     dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-       from p in ¬Database.Query<¬PersonDN>()
+       from p in Database.Query<PersonDN>()
        where notMarried.Evaluate(p) 
        select new 
        {
@@ -152,7 +152,7 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
        });
 
     dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-        from p in ¬Database.Query<¬PersonDN>()
+        from p in Database.Query<PersonDN>()
         where notMarried.Evaluate(p)  && p.Alive
         select new 
         {
@@ -169,7 +169,7 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
 In order to factor out the select expression we will need to do something like that: 
 
 ```C#
-¬Expression<¬Func<¬PersonDN, ¿?>> selector = p=> new 
+Expression<Func<PersonDN, ¿?>> selector = p=> new 
      {
          Entity = p.ToLite(),
          p.Id,
@@ -183,7 +183,7 @@ We need to tell the compiler about the `Expression` so it can create an expressi
 Unfortunately, there's no way we can write an anonymous type... neither it's possible to partially infer a type in C# like this: 
   
 ```C#
-¬Expression<¬Func<¬PersonDN, var>> selector = (...)
+Expression<Func<PersonDN, var>> selector = (...)
 ```
 
 **Note:** Maybe if they whould have [choose 'auto' instead of 'var' as the keyword](http://stackoverflow.com/questions/1263527/better-word-for-inferring-variables-other-than-var-c/1263553#1263553) we could see this in some future versions, but with 'var'... I don't see this happening.
@@ -201,10 +201,10 @@ public static class Linq
     public static Expression<Func<T0, T1, T2, R>> Expr<T0, T1, T2, R>(Expression<Func<T0, T1, T2, R>> f)
     public static Expression<Func<T0, T1, T2, T3, R>> Expr<T0, T1, T2, T3, R>(Expression<Func<T0, T1, T2, T3, R>> f)
 
-    public static ¬Func<T, R> Func<T, R>(¬Func<T, R> f)
-    public static ¬Func<T0, T1, R> Func<T0, T1, R>(¬Func<T0, T1, R> f)
-    public static ¬Func<T0, T1, T2, R> Func<T0, T1, T2, R>(¬Func<T0, T1, T2, R> f)
-    public static ¬Func<T0, T1, T2, T3, R> Func<T0, T1, T2, T3, R>(¬Func<T0, T1, T2, T3, R> f)
+    public static Func<T, R> Func<T, R>(Func<T, R> f)
+    public static Func<T0, T1, R> Func<T0, T1, R>(Func<T0, T1, R> f)
+    public static Func<T0, T1, T2, R> Func<T0, T1, T2, R>(Func<T0, T1, T2, R> f)
+    public static Func<T0, T1, T2, T3, R> Func<T0, T1, T2, T3, R>(Func<T0, T1, T2, T3, R> f)
 }
 ```
 
@@ -213,12 +213,12 @@ By calling `Linq.Expr` we tell the compiler that we want to generate an Expressi
 So finally our code will be like this: 
 
 ```C#
-public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
 {
    (...)
 
-   ¬Expression<¬Func<¬PersonDN,bool>> notMarried = p => p.State == ¬MaritalStatus.Single || p.State == ¬MaritalStatus.Divorced;
-   var selector = ¬Linq.Expr((¬PersonDN p)=>new 
+   Expression<Func<PersonDN,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
+   var selector = Linq.Expr((PersonDN p)=>new 
      {
          Entity = p.ToLite(),
          p.Id,
@@ -226,13 +226,13 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
          p.Sex
      });
  
-   dqm[¬PeopleQueries.NotMarried] = 
-     from p in ¬Database.Query<¬PersonDN>()
+   dqm[PeopleQueries.NotMarried] = 
+     from p in Database.Query<PersonDN>()
      where notMarried.Evaluate(p)
      select selector.Evaluate(p)
 
-    dqm[¬PeopleQueries.NotMarriedAlive] = 
-     from p in ¬Database.Query<¬PersonDN>()
+    dqm[PeopleQueries.NotMarriedAlive] = 
+     from p in Database.Query<PersonDN>()
      where notMarried.Evaluate(p) && p.Alive
      select selector.Evaluate(p)
 }
@@ -242,12 +242,12 @@ public static void Start(¬SchemaBuilder sb, ¬DynamicQueryManager dqm)
 
 ```C#
 dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-    Database.Query<¬PersonDN>() 
+    Database.Query<PersonDN>() 
     .Where(notMarried)
     .Select(selector);
 
 dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-    Database.Query<¬PersonDN>()
+    Database.Query<PersonDN>()
     .Where(p=>notMarried.Evaluate(p) && p.Alive) //Here Evaluate is really necessary
     .Select(selector);
 ```
@@ -267,9 +267,9 @@ In order to do so we just need to compare (==) the two parameters, but since the
 What we do is decorate the method with a MethodExpanderAttribute pointing to the class that will handle the expansion. 
 
 ```C#
-[¬MethodExpander(typeof(¬IsExpander))]
+[MethodExpander(typeof(IsExpander))]
 public static bool Is<T>(this T entity1, T entity2)
-    where T : class, ¬IIdentifiable
+    where T : class, IIdentifiable
 {
    (...)
 }
@@ -278,11 +278,11 @@ public static bool Is<T>(this T entity1, T entity2)
 Finally we create the class IsExpander, implementing IMethodExpander.Expand method.   
 
 ```C#
-class ¬IsExpander : ¬IMethodExpander
+class IsExpander : IMethodExpander
 {
-    public ¬Expression Expand(¬Expression instance, ¬Expression[] arguments, ¬Type[] typeArguments)
+    public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
     {
-        return ¬Expression.Equal(arguments[0], arguments[1]);
+        return Expression.Equal(arguments[0], arguments[1]);
     }
 }
 ```
@@ -292,19 +292,19 @@ You are free to do whatever you want in the Expand method. Here we are creating 
 `IsInInterval` expression can't use static expression because it has different overloads (whether minDate and maxDate are null or not). 
 
 ```C#
-[¬MethodExpander(typeof(¬IsInIntervalExpander1))]
-public static bool IsInInterval(this DateTime date, ¬DateTime minDate, ¬DateTime maxDate)
+[MethodExpander(typeof(IsInIntervalExpander1))]
+public static bool IsInInterval(this DateTime date, DateTime minDate, DateTime maxDate)
 {
     return minDate <= date && date < maxDate;
 }
 
-class ¬IsInIntervalExpander1 : ¬IMethodExpander
+class IsInIntervalExpander1 : IMethodExpander
 {
-    static readonly ¬Expression<¬Func<¬DateTime, ¬DateTime, ¬DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
+    static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
 
-    public ¬Expression Expand(¬Expression instance, ¬Expression[] arguments, ¬Type[] typeArguments)
+    public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
     {
-        return ¬Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
+        return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
     }
 }
 ```

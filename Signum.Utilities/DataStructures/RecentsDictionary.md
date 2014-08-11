@@ -12,7 +12,7 @@ Internally it has a `LinkedList` that contains all the values:
 * When a new element is added, and the maximum capacity is reached, the element in the tail of the list is purged. 
 
 ```C#
-public class ¬RecentDictionary<K, V> 
+public class RecentDictionary<K, V> 
 {
     public RecentDictionary() //Default constructor, capacity = 50
     public RecentDictionary(int capacity) //Explicit capacity constructor
@@ -25,12 +25,12 @@ public class ¬RecentDictionary<K, V>
     public V this[K key]{get;set;} //Gets and sets the Value for the key. If the element is not there throws KeyNotFoundException
     public bool TryGetValue(K key, out V value) //.Net 2.0 style TryGetValue, if the element is not there returns false, otherwise value is filled. 
    
-    public V GetOrCreate(K key, ¬Func<V> createValue) //If the value is in the dictionary, it's retrieved. Otherwise is created using createValue and stored. 
+    public V GetOrCreate(K key, Func<V> createValue) //If the value is in the dictionary, it's retrieved. Otherwise is created using createValue and stored. 
 
     public int Capacity{get;set;} //Maximum number of elements  
     public int Count{get;} //Current number of elements
 
-    public event ¬Action<K,V> Purged //Thrown every time an element is removed because there's not enough space
+    public event Action<K,V> Purged //Thrown every time an element is removed because there's not enough space
 
     public override string ToString()
 }
@@ -40,24 +40,24 @@ public class ¬RecentDictionary<K, V>
 Let's imagine we have a few images that are being continuously retrieved in a non-homogeneous fashion.
 
 ```C#
-¬DirectoryInfo di = new ¬DirectoryInfo(@"C:\Users\Public\Pictures\Sample Pictures");
-¬FileInfo[] files = di.GetFiles();
-¬Random r = new ¬Random();
+DirectoryInfo di = new DirectoryInfo(@"C:\Users\Public\Pictures\Sample Pictures");
+FileInfo[] files = di.GetFiles();
+Random r = new Random();
 
-¬Console.WriteLine(files.Length); 
+Console.WriteLine(files.Length); 
 //Writes 10
 
-¬Stopwatch sw = new ¬Stopwatch();
+Stopwatch sw = new Stopwatch();
 sw.Start();
 for (int i = 0; i < 10000; i++)
 {
     //This formula makes files at the end more probable than those at the beginning of the array
-    int index = (int)¬Math.Sqrt(r.Next(files.Length * files.Length));
+    int index = (int)Math.Sqrt(r.Next(files.Length * files.Length));
     string fileName = files[index].FullName;
-    byte[] fileData = ¬File.ReadAllBytes(files[index].FullName); //Expensive operations
+    byte[] fileData = File.ReadAllBytes(files[index].FullName); //Expensive operations
 }
 sw.Stop();
-¬Console.WriteLine(sw.Elapsed)
+Console.WriteLine(sw.Elapsed)
 //Writes: 00:00:04.3913192
 ```
 
@@ -66,7 +66,7 @@ In order to improve performance, we just create a RecentDictionary and use GetOr
 This way, the most recent 4 items are kept
 
 ```C#
-¬RecentDictionary<string, byte[]> images = new ¬RecentDictionary<string, byte[]>(4);
+RecentDictionary<string, byte[]> images = new RecentDictionary<string, byte[]>(4);
 sw.Reset();
 sw.Start();
 for (int i = 0; i < 10000; i++)
@@ -76,7 +76,7 @@ for (int i = 0; i < 10000; i++)
     byte[] fileData = images.GetOrCreate(fileName, () => File.ReadAllBytes(fileName)); //Expensive and cached operations
 }
 sw.Stop();
-¬Console.WriteLine("CacheSize {0} Time {1}".Formato(4, sw.Elapsed));
+Console.WriteLine("CacheSize {0} Time {1}".Formato(4, sw.Elapsed));
 //CacheSize 4 Time 00:00:02.2218371
 ```
 
