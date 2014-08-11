@@ -102,7 +102,7 @@ namespace Signum.Engine.Basics
 
             foreach (var c in CultureInfoDNToCultureInfo.Value)
             {
-                using (Sync.ChangeBothCultures(c.Value))
+                using (CultureInfoUtils.ChangeBothCultures(c.Value))
                 {
                     yield return func(c.Key);
                 }
