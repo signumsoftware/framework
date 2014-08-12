@@ -303,16 +303,14 @@ namespace Signum.Engine.Translation
         {
             var hastMList = route.GetMListItemsRoute() != null;
 
-            if (hastMList != rowId.HasValue)
-            {
-                if (rowId.HasValue)
-                    throw new InvalidOperationException("Route {0} has not MList so rowId should be null".Formato(route));
-                else
-                    throw new InvalidOperationException("Route {0} has MList so rowId should have a value".Formato(route));
+            if (hastMList && !rowId.HasValue)
+                throw new InvalidOperationException("Route {0} has MList so rowId should have a value".Formato(route));
 
-                if (route.Type != lite.EntityType)
-                    throw new InvalidOperationException("Route {0} belongs to type {1}, not {2}".Formato(route, route.RootType.TypeName(), lite.EntityType.TypeName()));
-            }
+            if (!hastMList && rowId.HasValue)
+                throw new InvalidOperationException("Route {0} has not MList so rowId should be null".Formato(route));
+
+            if (route.RootType != lite.EntityType)
+                throw new InvalidOperationException("Route {0} belongs to type {1}, not {2}".Formato(route, route.RootType.TypeName(), lite.EntityType.TypeName()));
 
             var key = new LocalizedInstanceKey(route, lite, rowId);
 
@@ -352,7 +350,7 @@ namespace Signum.Engine.Translation
         }
 
 
-        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>(false));
 
         public static Func<T, R> GetPropertyRouteAccesor<T, R>(Expression<Func<T, R>> propertyRoute)
         {

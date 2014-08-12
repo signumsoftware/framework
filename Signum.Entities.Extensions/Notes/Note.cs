@@ -60,7 +60,7 @@ namespace Signum.Entities.Notes
 
         public override string ToString()
         {
-            return " - ".Combine(title, text.EtcLines(100)).Etc(100);
+            return " - ".Combine(title, text.FirstNonEmptyLine()).Etc(100);
         }
 
         NoteTypeDN noteType;

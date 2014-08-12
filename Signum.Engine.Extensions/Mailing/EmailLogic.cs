@@ -171,7 +171,7 @@ namespace Signum.Engine.Mailing
             var list = new MList<EmailTemplateMessageDN>();
             foreach (var ci in CultureInfoLogic.ApplicationCultures)
             {
-                using (Sync.ChangeBothCultures(ci))
+                using (CultureInfoUtils.ChangeBothCultures(ci))
                 {
                     list.Add(func());
                 }

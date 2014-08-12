@@ -100,7 +100,7 @@ namespace Signum.Entities.Alerts
 
         public override string ToString()
         {
-            return text.EtcLines(100);
+            return text.FirstNonEmptyLine().Etc(100);
         }
 
         static Expression<Func<AlertDN, bool>> AttendedExpression =

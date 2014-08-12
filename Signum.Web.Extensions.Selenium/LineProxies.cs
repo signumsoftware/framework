@@ -673,17 +673,17 @@ namespace Signum.Web.Selenium
         {
         }
 
-        public virtual void MoveUp(int index)
+        public override void MoveUp(int index)
         {
             Selenium.Click("jq=#{0}_{1}_btnUp".Formato(Prefix, index));
         }
 
-        public virtual void MoveDown(int index)
+        public override void MoveDown(int index)
         {
             Selenium.Click("jq=#{0}_{1}_btnDown".Formato(Prefix, index));
         }
 
-        public virtual int ItemsCount()
+        public override int ItemsCount()
         {
             string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').length".Formato(ItemsContainerLocator));
 

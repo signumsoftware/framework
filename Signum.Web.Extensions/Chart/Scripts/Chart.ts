@@ -226,7 +226,7 @@ export class ChartRequest {
             this.request();
         }
 
-        this.options.prefix.child("sfFullScreen").get().on("mousedown", e => {
+        this.options.prefix.child("sfFullScreen").get().on("mouseup", e => {
             e.preventDefault();
             this.fullScreen(e);
         });
