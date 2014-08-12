@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Isolation;
+using System.Diagnostics;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -105,46 +106,50 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        
-
-
-
         public override void Dispose()
         {
-            if (base.Close())
+            try
             {
-                MessageBoxProxy confirmation = null;
-
-                Element.Wait(() =>
+                if (base.Close())
                 {
-                    try
+                    MessageBoxProxy confirmation = null;
+
+                    Element.Wait(() =>
                     {
-                        if (IsClosed)
+                        try
+                        {
+                            if (IsClosed)
+                                return true;
+
+                            confirmation = Element.TryMessageBoxChild();
+
+                            if (confirmation != null)
+                                return true;
+
+                            base.Close();
+
+                            return false;
+                        }
+                        catch (ElementNotAvailableException)
+                        {
                             return true;
+                        }
+                    }, () => "Waiting for normal window to close or show confirmation dialog");
 
-                        confirmation = Element.TryMessageBoxChild();
 
-                        if (confirmation != null)
-                            return true;
-
-                        base.Close();
-
-                        return false;
-                    }
-                    catch (ElementNotAvailableException)
+                    if (confirmation != null && !confirmation.IsError)
                     {
-                        return true;
+                        confirmation.OkButton.ButtonInvoke();
                     }
-                }, () => "Waiting for normal window to close or show confirmation dialog");
-
-
-                if (confirmation != null && !confirmation.IsError)
-                {
-                    confirmation.OkButton.ButtonInvoke();
                 }
-            }
 
-            OnDisposed();
+                OnDisposed();
+            }
+            catch
+            {
+                if (CurrentException == null)
+                    throw;
+            }
         }
 
         public void CloseLooseChanges()

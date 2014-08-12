@@ -20,12 +20,28 @@ namespace Signum.Windows.UIAutomation
             wp = element.Pattern<WindowPattern>();
         }
 
+        //http://roslyn.codeplex.com/discussions/551007
+        public void OnException(Exception exception)
+        {
+            this.CurrentException = exception;
+        }
+
+        public Exception CurrentException { get; set; }
+
         public event Action Disposed;
 
         public virtual void Dispose()
         {
-            Close();
-            OnDisposed();
+            try
+            {
+                Close();
+                OnDisposed();
+            }
+            catch
+            {
+                if (CurrentException == null)
+                    throw;
+            }
         }
 
         protected void OnDisposed()
