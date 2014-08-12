@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return new UnusedColumnRemover().Visit(expression);
         }
 
-        protected internal virtual Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             allColumnsUsed.GetOrCreate(column.Alias).Add(column.Name);
             return column;
@@ -33,12 +33,12 @@ namespace Signum.Engine.Linq
             return ((DbExpressionType)exp.NodeType) == DbExpressionType.SqlConstant;
         }
 
-        protected internal virtual Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             // visit column projection first
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
 
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(
+            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns,
                 c =>
                 {
                     if (select.IsDistinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
@@ -49,9 +49,9 @@ namespace Signum.Engine.Linq
                     return ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex);
                 });
 
-            ReadOnlyCollection<OrderExpression> orderbys = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<OrderExpression> orderbys = Visit(select.OrderBy, VisitOrderBy);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
+            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, e => IsConstant(e) ? null : Visit(e));
 
             SourceExpression from = this.VisitSource(select.From);
 
@@ -61,7 +61,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected internal virtual Expression VisitSubquery(SubqueryExpression subquery)
+        protected internal override Expression VisitSubquery(SubqueryExpression subquery)
         {
             if ((subquery.NodeType == (ExpressionType)DbExpressionType.Scalar ||
                 subquery.NodeType == (ExpressionType)DbExpressionType.In) &&
@@ -74,7 +74,7 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
-        protected internal virtual Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
             return base.VisitSetOperator(set);
         }
 
-        protected internal virtual Expression VisitProjection(ProjectionExpression projection)
+        protected internal override Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order
             Expression projector = this.Visit(projection.Projector);
@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
             return projection;
         }
 
-        protected internal virtual Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
@@ -131,7 +131,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected internal virtual Expression VisitDelete(DeleteExpression delete)
+        protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             var where = Visit(delete.Where);
             var source = Visit(delete.Source);
@@ -140,19 +140,19 @@ namespace Signum.Engine.Linq
             return delete;
         }
 
-        protected internal virtual Expression VisitUpdate(UpdateExpression update)
+        protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             var where = Visit(update.Where);
-            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
+            var assigments = Visit(update.Assigments, VisitColumnAssigment);
             var source = Visit(update.Source);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
             return update;
         }
 
-        protected internal virtual Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             var source = Visit(insertSelect.Source);
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
                 return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
@@ -161,7 +161,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
-            var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
+            var orderBys = Visit(rowNumber.OrderBy, o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
             if (orderBys != rowNumber.OrderBy)
                 return new RowNumberExpression(orderBys);
             return rowNumber;
