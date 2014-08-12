@@ -1002,16 +1002,36 @@ namespace Signum.Utilities
 
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
         {
-            return collection == null ? null :
+            return collection == null ? EmptyReadOnlyCollection<T>.Instance :
                 collection as ReadOnlyCollection<T> ??
                 (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
+        static class EmptyReadOnlyCollection<T>
+        {
+            internal static ReadOnlyCollection<T> Instance;
+
+            static EmptyReadOnlyCollection()
+            {
+                EmptyReadOnlyCollection<T>.Instance = new ReadOnlyCollection<T>(new T[0]);
+            }
+        }
+
         public static ReadOnlyDictionary<K, V> ToReadOnly<K, V>(this IDictionary<K, V> dictionary)
         {
-            return dictionary == null ? null :
+            return dictionary == null ? EmptyReadOnlyDictionary<K, V>.Instance :
                 dictionary as ReadOnlyDictionary<K, V> ??
                 new ReadOnlyDictionary<K, V>(dictionary);
+        }
+
+        static class EmptyReadOnlyDictionary<K, V>
+        {
+            internal static ReadOnlyDictionary<K, V> Instance;
+
+            static EmptyReadOnlyDictionary()
+            {
+                EmptyReadOnlyDictionary<K, V>.Instance = new ReadOnlyDictionary<K, V>();
+            }
         }
 
         public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)

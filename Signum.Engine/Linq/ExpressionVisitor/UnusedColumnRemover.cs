@@ -38,20 +38,19 @@ namespace Signum.Engine.Linq
             // visit column projection first
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
 
-            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns,
-                c =>
-                {
-                    if (select.IsDistinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
-                        return null;
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.Select(c =>
+            {
+                if (select.IsDistinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
+                    return null;
 
-                    var ex = Visit(c.Expression);
+                var ex = Visit(c.Expression);
 
-                    return ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex);
-                });
+                return ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex);
+            }).NotNull().ToReadOnly();
 
             ReadOnlyCollection<OrderExpression> orderbys = Visit(select.OrderBy, VisitOrderBy);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, e => IsConstant(e) ? null : Visit(e));
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.Select(e => IsConstant(e) ? null : Visit(e)).NotNull().ToReadOnly();
 
             SourceExpression from = this.VisitSource(select.From);
 
@@ -61,17 +60,27 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected internal override Expression VisitSubquery(SubqueryExpression subquery)
+        protected internal override Expression VisitIn(InExpression @in)
         {
-            if ((subquery.NodeType == (ExpressionType)DbExpressionType.Scalar ||
-                subquery.NodeType == (ExpressionType)DbExpressionType.In) &&
-                subquery.Select != null)
+            if (@in.Select != null)
             {
-                if (subquery.Select.Columns.Count != 1)
-                    throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subquery.Select.Columns.Count, subquery.NiceToString()));
-                allColumnsUsed.GetOrCreate(subquery.Select.Alias).Add(subquery.Select.Columns[0].Name);
+                AddSingleColumn(@in);
             }
-            return base.VisitSubquery(subquery);
+            return base.VisitIn(@in);
+        }
+
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
+        {
+            AddSingleColumn(scalar);
+
+            return base.VisitScalar(scalar);
+        }
+
+        private void AddSingleColumn(SubqueryExpression subQuery)
+        {
+            if (subQuery.Select.Columns.Count != 1)
+                throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subQuery.Select.Columns.Count, subQuery.NiceToString()));
+            allColumnsUsed.GetOrCreate(subQuery.Select.Alias).Add(subQuery.Select.Columns[0].Name);
         }
 
         protected internal override Expression VisitSetOperator(SetOperatorExpression set)

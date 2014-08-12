@@ -274,20 +274,6 @@ namespace Signum.Engine.Linq
             return like;
         }
 
-        protected internal virtual Expression VisitSubquery(SubqueryExpression subquery)
-        {
-            switch ((DbExpressionType)subquery.NodeType)
-            {
-                case DbExpressionType.Scalar:
-                    return this.VisitScalar((ScalarExpression)subquery);
-                case DbExpressionType.Exists:
-                    return this.VisitExists((ExistsExpression)subquery);
-                case DbExpressionType.In:
-                    return this.VisitIn((InExpression)subquery);
-            }
-            return subquery;
-        }
-
         protected internal virtual Expression VisitScalar(ScalarExpression scalar)
         {
             var select = (SelectExpression)this.Visit(scalar.Select);

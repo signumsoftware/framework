@@ -109,8 +109,8 @@ namespace Signum.Engine.Linq
                     && select.Top == null
                     //&& select.Skip == null
                     && select.Where == null
-                    && (select.OrderBy == null || select.OrderBy.Count == 0)
-                    && (select.GroupBy == null || select.GroupBy.Count == 0);
+                    && (select.OrderBy.Count == 0)
+                    && (select.GroupBy.Count == 0);
             }
 
             protected internal override Expression VisitSelect(SelectExpression select)
@@ -126,10 +126,20 @@ namespace Signum.Engine.Linq
                 return select;
             }
 
-            protected internal override Expression VisitSubquery(SubqueryExpression subquery)
+            // don't gather inside scalar & exists
+            protected internal override Expression VisitIn(InExpression @in)
             {
-                // don't gather inside scalar & exists
-                return subquery;
+                return @in;
+            }
+            // don't gather inside scalar & exists
+            protected internal override Expression VisitScalar(ScalarExpression scalar)
+            {
+                return scalar;
+            }
+            // don't gather inside scalar & exists
+            protected internal override Expression VisitExists(ExistsExpression exists)
+            {
+                return exists;
             }
         }
 
@@ -175,8 +185,8 @@ namespace Signum.Engine.Linq
                             where = fromSelect.Where;
                         }
                     }
-                    var orderBy = select.OrderBy != null && select.OrderBy.Count > 0 ? select.OrderBy : fromSelect.OrderBy;
-                    var groupBy = select.GroupBy != null && select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
+                    var orderBy = select.OrderBy.Count > 0 ? select.OrderBy : fromSelect.OrderBy;
+                    var groupBy = select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
                     //Expression skip = select.Skip != null ? select.Skip : fromSelect.Skip;
                     Expression top = select.Top != null ? select.Top : fromSelect.Top;
                     bool isDistinct = select.IsDistinct | fromSelect.IsDistinct;
@@ -214,11 +224,11 @@ namespace Signum.Engine.Linq
                     return false;
                 if (!IsColumnProjection(fromSelect))
                     return false;
-                bool selHasOrderBy = select.OrderBy != null && select.OrderBy.Count > 0;
-                bool selHasGroupBy = select.GroupBy != null && select.GroupBy.Count > 0;
+                bool selHasOrderBy = select.OrderBy.Count > 0;
+                bool selHasGroupBy = select.GroupBy.Count > 0;
                
-                bool frmHasOrderBy = fromSelect.OrderBy != null && fromSelect.OrderBy.Count > 0;
-                bool frmHasGroupBy = fromSelect.GroupBy != null && fromSelect.GroupBy.Count > 0;
+                bool frmHasOrderBy = fromSelect.OrderBy.Count > 0;
+                bool frmHasGroupBy = fromSelect.GroupBy.Count > 0;
                 // both cannot have orderby
                 if (selHasOrderBy && frmHasOrderBy)
                     return false;
@@ -299,12 +309,24 @@ namespace Signum.Engine.Linq
                 Visit(select.OrderBy, VisitOrderBy);
                 Visit(select.Columns, VisitColumnDeclaration);
                 return select;
+            } 
+
+            // don't count aggregates in subqueries
+            protected internal override Expression VisitIn(InExpression @in)
+            {
+                return base.VisitIn(@in);
             }
 
-            protected internal override Expression VisitSubquery(SubqueryExpression subquery)
+            // don't count aggregates in subqueries
+            protected internal override Expression VisitExists(ExistsExpression exists)
             {
-                // don't count aggregates in subqueries
-                return subquery;
+                return base.VisitExists(exists);
+            }
+
+            // don't count aggregates in subqueries
+            protected internal override Expression VisitScalar(ScalarExpression scalar)
+            {
+                return base.VisitScalar(scalar);
             }
         }
     }
