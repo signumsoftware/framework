@@ -6,7 +6,7 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
 
-namespace Signum.Entities.UserAssets
+namespace Signum.Entities.ViewLog
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ViewLogDN : Entity

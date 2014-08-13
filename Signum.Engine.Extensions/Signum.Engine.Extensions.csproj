@@ -165,7 +165,7 @@
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
     <Compile Include="UserAssets\QueryTokenSynchronizer.cs" />
-    <Compile Include="UserAssets\ViewLogLogic.cs" />
+    <Compile Include="ViewLog\ViewLogLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\SimpleTaskLogic.cs" />

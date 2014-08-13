@@ -8,11 +8,11 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.Entities.ViewLog;
 
-namespace Signum.Engine.UserAssets
+namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
@@ -53,7 +53,7 @@ namespace Signum.Engine.UserAssets
 
                 foreach (var t in types)
                 {
-                    dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", ()=>typeof(ViewLogDN).NicePluralName()));
+                    dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogDN).NicePluralName()));
                 }
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
@@ -65,14 +65,14 @@ namespace Signum.Engine.UserAssets
             Database.Query<ViewLogDN>().Where(view => view.StartDate < limit);
         }
 
-        public static IDisposable LogView(IIdentifiable entity, string viewAction)
+        public static IDisposable LogView(Lite<IIdentifiable> entity, string viewAction)
         {
-            if (Started && Types.Contains(entity.GetType()))
+            if (Started && Types.Contains(entity.EntityType))
                 return null;
 
             var viewLog = new ViewLogDN
             {
-                Target = ((IdentifiableEntity)entity).ToLite(),
+                Target = (Lite<IdentifiableEntity>)entity,
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
             };

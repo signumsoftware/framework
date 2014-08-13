@@ -17,6 +17,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
+using Signum.Engine.ViewLog;
 
 namespace Signum.Engine.Dashboard
 {
@@ -30,8 +31,6 @@ namespace Signum.Engine.Dashboard
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
-
-                ViewLogLogic.Register<DashboardDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardDN));
 
@@ -198,13 +197,14 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN RetrieveDashboard(this Lite<DashboardDN> dashboard)
         {
-            var result = Dashboards.Value.GetOrThrow(dashboard);
+            using (ViewLogLogic.LogView(dashboard, "Dashboard"))
+            {
+                var result = Dashboards.Value.GetOrThrow(dashboard);
 
-            result.AssertAllowed(TypeAllowedBasic.Read, true);
+                result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogView();
-
-            return result;
+                return result;
+            }
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

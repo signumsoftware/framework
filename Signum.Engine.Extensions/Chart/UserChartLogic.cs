@@ -18,6 +18,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
+using Signum.Engine.ViewLog;
 
 namespace Signum.Engine.Chart
 {
@@ -33,8 +34,6 @@ namespace Signum.Engine.Chart
             {
                 if (sb.Schema.Tables.ContainsKey(typeof(UserChartDN)))
                     throw new InvalidOperationException("UserChart has already been registered");
-
-                ViewLogLogic.Register<UserChartDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
 
@@ -128,13 +127,14 @@ namespace Signum.Engine.Chart
 
         public static UserChartDN RetrieveUserChart(this Lite<UserChartDN> userChart)
         {
-            var result = UserCharts.Value.GetOrThrow(userChart);
+            using (ViewLogLogic.LogView(userChart, "UserChart"))
+            {
+                var result = UserCharts.Value.GetOrThrow(userChart);
 
-            result.AssertAllowed(TypeAllowedBasic.Read, true);
+                result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogView();
-
-            return result;
+                return result;
+            }
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

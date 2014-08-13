@@ -151,7 +151,7 @@
     <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserAssets\IUserAssetsServer.cs" />
     <Compile Include="UserAssets\QueryToken.cs" />
-    <Compile Include="UserAssets\ViewLogLogic.cs" />
+    <Compile Include="ViewLog\ViewLogDN.cs" />
     <Compile Include="UserAssets\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />

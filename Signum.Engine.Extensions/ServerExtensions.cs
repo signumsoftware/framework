@@ -35,6 +35,7 @@ using Signum.Entities.Excel;
 using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
 using Signum.Engine.UserAssets;
+using Signum.Engine.ViewLog;
 
 namespace Signum.Services
 {
@@ -43,6 +44,12 @@ namespace Signum.Services
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
+        public override IdentifiableEntity Retrieve(Type type, int id)
+        {
+            using (ViewLogLogic.LogView(Lite.Create(type, id), "WCFRetrieve"))
+                return base.Retrieve(type, id);
+        }
+
 
         #region ILoginServer Members
         public virtual void Login(string username, string passwordHash)

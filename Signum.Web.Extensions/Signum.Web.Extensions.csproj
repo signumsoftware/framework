@@ -882,6 +882,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="UserAssets\Controller\UserAssetsController.cs" />
+    <Compile Include="ViewLog\ViewLogClient.cs" />
     <Compile Include="UserAssets\UserAssetsHelper.cs" />
     <Compile Include="UserAssets\Views\ImportUserAsset.generated.cs">
       <DependentUpon>ImportUserAsset.cshtml</DependentUpon>

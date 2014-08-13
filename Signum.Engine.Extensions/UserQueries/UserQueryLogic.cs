@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
+using Signum.Engine.ViewLog;
 
 namespace Signum.Engine.UserQueries
 {
@@ -32,8 +33,6 @@ namespace Signum.Engine.UserQueries
                 QueryLogic.Start(sb);
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
-
-                ViewLogLogic.Register<UserQueryDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
@@ -121,13 +120,14 @@ namespace Signum.Engine.UserQueries
 
         public static UserQueryDN RetrieveUserQuery(this Lite<UserQueryDN> userQuery)
         {
-            var result = UserQueries.Value.GetOrThrow(userQuery);
+            using (ViewLogLogic.LogView(userQuery, "UserQuery"))
+            {
+                var result = UserQueries.Value.GetOrThrow(userQuery);
 
-            result.AssertAllowed(TypeAllowedBasic.Read, true);
+                result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogView();
-
-            return result;
+                return result;
+            }
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
