@@ -136,6 +136,7 @@ namespace Signum.Web
                 {
                     using (sb.Surround(new HtmlTag("a").Attr("href", "#")
                         .Class("dropdown-toggle")
+                        .Class(Class)
                         .Attr("data-toggle", "dropdown")))
                     {
                         if (Html != null)
