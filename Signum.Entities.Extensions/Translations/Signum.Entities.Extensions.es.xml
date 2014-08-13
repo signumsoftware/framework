@@ -1337,7 +1337,7 @@
     <Member Name="Stop" Description="Parada" />
   </Type>
   <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
-  <Type Name="UserAssetLogDN" Description="Registro recurso de usuario">
+  <Type Name="UserViewLogDN" Description="Registro recurso de vista de usuario">
     <Member Name="Asset" Description="Recurso" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="User" Description="Usuario" />

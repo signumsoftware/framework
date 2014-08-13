@@ -33,7 +33,7 @@ namespace Signum.Engine.UserQueries
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
-                UserAssetLogLogic.Register<UserQueryDN>(sb, dqm);
+                ViewLogLogic.Register<UserQueryDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
@@ -125,7 +125,7 @@ namespace Signum.Engine.UserQueries
 
             result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogUserAsset();
+            result.LogView();
 
             return result;
         }

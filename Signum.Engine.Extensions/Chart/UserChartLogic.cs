@@ -34,7 +34,7 @@ namespace Signum.Engine.Chart
                 if (sb.Schema.Tables.ContainsKey(typeof(UserChartDN)))
                     throw new InvalidOperationException("UserChart has already been registered");
 
-                UserAssetLogLogic.Register<UserChartDN>(sb, dqm);
+                ViewLogLogic.Register<UserChartDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
 
@@ -132,7 +132,7 @@ namespace Signum.Engine.Chart
 
             result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogUserAsset();
+            result.LogView();
 
             return result;
         }

@@ -31,7 +31,7 @@ namespace Signum.Engine.Dashboard
             {
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
-                UserAssetLogLogic.Register<DashboardDN>(sb, dqm);
+                ViewLogLogic.Register<DashboardDN>(sb, dqm);
 
                 UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardDN));
 
@@ -202,7 +202,7 @@ namespace Signum.Engine.Dashboard
 
             result.AssertAllowed(TypeAllowedBasic.Read, true);
 
-            result.LogUserAsset();
+            result.LogView();
 
             return result;
         }
