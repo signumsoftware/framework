@@ -149,10 +149,10 @@ namespace Signum.Web.Selenium
             if (selenium.IsElementPresent("jq=.sf-login:visible"))
                 return null;
 
-            if (!selenium.IsElementPresent("jq=a[href$='Auth/Logout']"))
+            if (!selenium.IsElementPresent("jq=a.sf-user"))
                 throw new InvalidOperationException("No login or logout button found");
 
-            var result = selenium.GetEval("window.$('.sf-logout').attr('data-user')");
+            var result = selenium.GetEval("window.$('.sf-user span').text()");
 
             return result;
         }
