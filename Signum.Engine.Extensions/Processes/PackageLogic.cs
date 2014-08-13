@@ -104,7 +104,18 @@ namespace Signum.Engine.Processes
 
                     ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 }
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DateTime limit)
+        {
+            var usedDatas = Database.Query<ProcessDN>().Select(a => a.Data);
+
+            Database.Query<PackageLineDN>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDelete();
+            Database.Query<PackageOperationDN>().Where(po => !usedDatas.Contains(po)).UnsafeDelete();
+            Database.Query<PackageDN>().Where(po => !usedDatas.Contains(po)).UnsafeDelete();
         }
 
         public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)

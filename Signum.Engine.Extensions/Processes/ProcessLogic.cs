@@ -179,7 +179,25 @@ namespace Signum.Engine.Processes
                         return null;
                     };
                 }
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DateTime limit)
+        {
+            Remove(ProcessState.Canceled, limit);
+            Remove(ProcessState.Finished, limit);
+            Remove(ProcessState.Error, limit);
+        }
+
+        private static void Remove(ProcessState processState, DateTime limit)
+        {
+            var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < limit);
+
+            query.SelectMany(a=>a.ExceptionLines()).UnsafeDelete();
+
+            query.UnsafeDelete();
         }
 
         public static IDisposable OnApplySession(ProcessDN process)

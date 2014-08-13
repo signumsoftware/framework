@@ -175,7 +175,14 @@ namespace Signum.Engine.Scheduler
                     new InvalidateWith(typeof(ScheduledTaskDN)));
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DateTime limite)
+        {
+            Database.Query<ScheduledTaskLogDN>().Where(a => a.StartTime < limite).UnsafeDelete();
         }
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
