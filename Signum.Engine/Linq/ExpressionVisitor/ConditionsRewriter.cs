@@ -266,7 +266,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             Expression obj = MakeSqlValue(Visit(sqlFunction.Object));
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a=>MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
             return sqlFunction;
@@ -274,7 +274,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments)
                 return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
@@ -282,7 +282,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitCase(CaseExpression cex)
         {
-            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newWhens = Visit(cex.Whens, w => VisitWhen(w));
             var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
 
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
@@ -312,9 +312,9 @@ namespace Signum.Engine.Linq
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);
             Expression where = MakeSqlCondition(this.Visit(select.Where));
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
-            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => MakeSqlValue(Visit(e)));
+            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, e => MakeSqlValue(Visit(e)));
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
@@ -360,7 +360,7 @@ namespace Signum.Engine.Linq
         {
             var source = Visit(update.Source);
             var where = Visit(update.Where);
-            var assigments = update.Assigments.NewIfChange(c =>
+            var assigments = Visit(update.Assigments, c =>
             {
                 var exp = MakeSqlValue(Visit(c.Expression));
                 if (exp != c.Expression)

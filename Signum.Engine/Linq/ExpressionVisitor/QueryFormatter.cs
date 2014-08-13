@@ -437,7 +437,7 @@ namespace Signum.Engine.Linq
                 sb.Append("WHERE ");
                 this.Visit(select.Where);
             }
-            if (select.GroupBy != null && select.GroupBy.Count > 0)
+            if (select.GroupBy.Count > 0)
             {
                 this.AppendNewLine(Indentation.Same);
                 sb.Append("GROUP BY ");
@@ -451,7 +451,7 @@ namespace Signum.Engine.Linq
                     this.Visit(exp);
                 }
             }
-            if (select.OrderBy != null && select.OrderBy.Count > 0)
+            if (select.OrderBy.Count > 0)
             {
                 this.AppendNewLine(Indentation.Same);
                 sb.Append("ORDER BY ");
@@ -776,12 +776,6 @@ namespace Signum.Engine.Linq
             }
             return cea;
         }
-
-        protected internal override Expression VisitSubquery(SubqueryExpression subquery)
-        {
-            return base.VisitSubquery(subquery);
-        }
-
 
 
         protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)

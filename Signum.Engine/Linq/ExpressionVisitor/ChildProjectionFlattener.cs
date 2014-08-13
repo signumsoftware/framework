@@ -145,7 +145,7 @@ namespace Signum.Engine.Linq
 
         private SelectExpression WithoutOrder(SelectExpression sel)
         {
-            if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
+            if (sel.Top != null || (sel.OrderBy.Count == 0))
                 return sel;
 
             return new SelectExpression(sel.Alias, sel.IsDistinct, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy, sel.SelectOptions);
@@ -153,7 +153,7 @@ namespace Signum.Engine.Linq
 
         private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
         {
-            if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
+            if (sel.Top != null || (sel.OrderBy.Count == 0))
             {
                 innerOrders = null;
                 return sel;
@@ -226,7 +226,7 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
             {
-                if(select.GroupBy != null && select.GroupBy.Count == 0)
+                if(select.GroupBy.Count == 0)
                     return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be inproved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
 
 

@@ -129,7 +129,7 @@ namespace Signum.Engine.Linq
                     o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending,
                     o.Expression)).ToReadOnly();  
 
-            if (select.OrderBy != null && select.OrderBy.Count > 0)
+            if (select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
             ReadOnlyCollection<OrderExpression> orderings = null;

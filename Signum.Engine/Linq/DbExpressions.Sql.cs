@@ -400,12 +400,12 @@ namespace Signum.Engine.Linq
                 if (Where != null)
                     roles |= SelectRoles.Where;
 
-                if (GroupBy != null && GroupBy.Count > 0)
+                if (GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
                 else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
                     roles |= SelectRoles.Aggregate;
 
-                if (OrderBy != null && OrderBy.Count > 0)
+                if (OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
 
                 if (!Columns.All(cd => cd.Expression is ColumnExpression))
@@ -426,11 +426,11 @@ namespace Signum.Engine.Linq
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".Formato(
                 IsDistinct ? "DISTINCT " : "",
                 Top.Try(t => "TOP {0} ".Formato(t.NiceToString())),
-                Columns.Try(c => c.ToString(", ")),
+                Columns.ToString(", "),
                 From.Try(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
                 Where.Try(a => "WHERE " + a.NiceToString() + "\r\n"),
-                OrderBy.Try(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
-                GroupBy.Try(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
+                OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
+                GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.NiceToString(), " ,") + "\r\n") : null,
                 SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
                 Alias);
         }
@@ -869,11 +869,6 @@ namespace Signum.Engine.Linq
         {
             System.Diagnostics.Debug.Assert(nodeType == DbExpressionType.Scalar || nodeType == DbExpressionType.Exists || nodeType == DbExpressionType.In);
             this.Select = select;
-        }
-
-        protected override Expression Accept(ExpressionVisitor visitor)
-        {
-            return ((DbExpressionVisitor)visitor).VisitSubquery(this);
         }
     }
 
