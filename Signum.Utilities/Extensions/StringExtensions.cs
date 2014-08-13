@@ -426,6 +426,9 @@ namespace Signum.Utilities
 
         public static string FirstNonEmptyLine(this string str)
         {
+            if (str == null)
+                return null;
+
             int index = 0;
 
             while (index < str.Length)
