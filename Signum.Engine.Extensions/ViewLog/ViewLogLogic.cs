@@ -67,7 +67,7 @@ namespace Signum.Engine.ViewLog
 
         public static IDisposable LogView(Lite<IIdentifiable> entity, string viewAction)
         {
-            if (Started && Types.Contains(entity.EntityType))
+            if (!Started || !Types.Contains(entity.EntityType))
                 return null;
 
             var viewLog = new ViewLogDN
