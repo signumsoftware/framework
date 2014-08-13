@@ -22,7 +22,6 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-
         static Expression<Func<IdentifiableEntity, IQueryable<OperationLogDN>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogDN>().Where(a => a.Target.RefersTo(e));
         [ExpressionField("OperationLogsEntityExpression")]
@@ -152,7 +151,14 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.Initializing += OperationLogic_Initializing;
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DateTime limitDate)
+        {
+            Database.Query<OperationLogDN>().Where(o => o.Start < limitDate).UnsafeDelete();
         }
 
         static void OperationLogic_Initializing()

@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Threading;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -129,6 +130,45 @@ namespace Signum.Engine.Basics
             string oldEnviroment = overridenEnvironment.Value;
             overridenEnvironment.Value = newEnviroment;
             return new Disposable(() => overridenEnvironment.Value = oldEnviroment);
+        }
+
+
+        public static event Action<DateTime> DeleteLogs;
+
+        public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
+
+        public static void DeleteLogsAndExceptions(DateTime limitDate)
+        {
+            using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
+            {
+                if(DeleteLogs != null)
+                {
+                    foreach (var action in DeleteLogs.GetInvocationList().Cast<Action<DateTime>>())
+	                {
+                        action(limitDate);
+	                }
+                }
+
+                int exceptions = Database.Query<ExceptionDN>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
+
+                var ex = Schema.Current.Table<ExceptionDN>();
+                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionDN e)=>e.Referenced));
+
+                var commands = (from t in Schema.Current.GetDatabaseTables()
+                               from c in t.Columns.Values
+                               where c.ReferenceTable == ex
+                                select new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
+                                   .Formato(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
+
+                foreach (var c in commands)
+                {
+                    c.ExecuteNonQuery();
+                }
+
+                int deletedExceptions = Database.Query<ExceptionDN>()
+                    .Where(a => !a.Referenced && a.CreationDate < limitDate)
+                    .UnsafeDelete(); 
+            }
         }
     }
 }
