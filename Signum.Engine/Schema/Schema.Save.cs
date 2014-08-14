@@ -360,7 +360,7 @@ namespace Signum.Engine.Maps
             if (toStrColumn != null)
             {
                 string newStr;
-                using (Sync.ChangeCultureUI(Schema.Current.ForceCultureInfo))
+                using (CultureInfoUtils.ChangeCultureUI(Schema.Current.ForceCultureInfo))
                     newStr = entity.ToString();
 
                 if (newStr.HasText() && toStrColumn.Size.HasValue && newStr.Length > toStrColumn.Size)

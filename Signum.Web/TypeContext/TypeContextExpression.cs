@@ -71,7 +71,7 @@ namespace Signum.Web
         }
     }
 
-    internal class MemberAccessGatherer : SimpleExpressionVisitor
+    internal class MemberAccessGatherer : ExpressionVisitor
     {
         static object NonValue = new object(); 
 
@@ -106,7 +106,7 @@ namespace Signum.Web
             return result;
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression me)
+        protected override Expression VisitMember(MemberExpression me)
         {
             var tce = Cast(Visit(me.Expression));
 

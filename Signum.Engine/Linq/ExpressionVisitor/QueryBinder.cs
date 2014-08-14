@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
-    internal class QueryBinder : SimpleExpressionVisitor
+    internal class QueryBinder : ExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
         Dictionary<Alias, GroupByInfo> groupByMap = new Dictionary<Alias, GroupByInfo>();
@@ -305,7 +305,7 @@ namespace Signum.Engine.Linq
 
         //Avoid self referencing SQL problems
         bool inTableValuedFunction = false;
-        public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>());
+        public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>(false));
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
@@ -959,9 +959,9 @@ namespace Signum.Engine.Linq
             return assignment;
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
-            Expression ex = base.VisitMemberAccess(m);
+            Expression ex = base.VisitMember(m);
             Expression binded = BindMemberAccess((MemberExpression)ex);
             return binded;
         }
@@ -1476,7 +1476,7 @@ namespace Signum.Engine.Linq
             return base.VisitInvocation(iv);
         }
 
-        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
             Expression operand = Visit(b.Expression);
             Type type = b.TypeOperand;
@@ -1515,7 +1515,7 @@ namespace Signum.Engine.Linq
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
                 return SmartEqualizer.EqualNullable(riba.TypeId.TypeColumn, TypeConstant(type));
             }
-            return base.VisitTypeIs(b); 
+            return base.VisitTypeBinary(b); 
         }
        
         protected override Expression VisitUnary(UnaryExpression u)
@@ -1536,7 +1536,7 @@ namespace Signum.Engine.Linq
             return base.VisitUnary(u); 
         }
 
-        protected override Expression VisitLambda(LambdaExpression lambda)
+        protected override Expression VisitLambda<T>(Expression<T> lambda)
         {
             return lambda; //not touch until invoke
         }
@@ -1944,7 +1944,7 @@ namespace Signum.Engine.Linq
         }
         #region BinderTools
 
-        Dictionary<ImplementedByExpression, UnionAllRequest> implementedByReplacements = new Dictionary<ImplementedByExpression, UnionAllRequest>(DbExpressionComparer.GetComparer<ImplementedByExpression>());
+        Dictionary<ImplementedByExpression, UnionAllRequest> implementedByReplacements = new Dictionary<ImplementedByExpression, UnionAllRequest>(DbExpressionComparer.GetComparer<ImplementedByExpression>(false));
         public UnionAllRequest Completed(ImplementedByExpression ib)
         {
             return implementedByReplacements.GetOrCreate(ib, () =>
@@ -2060,7 +2060,7 @@ namespace Signum.Engine.Linq
 
         internal Dictionary<SourceExpression, List<ExpansionRequest>> requests = new Dictionary<SourceExpression, List<ExpansionRequest>>();
 
-        Dictionary<EntityExpression, EntityExpression> entityReplacements = new Dictionary<EntityExpression, EntityExpression>(DbExpressionComparer.GetComparer<EntityExpression>());
+        Dictionary<EntityExpression, EntityExpression> entityReplacements = new Dictionary<EntityExpression, EntityExpression>(DbExpressionComparer.GetComparer<EntityExpression>(false));
         public EntityExpression Completed(EntityExpression entity)
         {
             if (entity.TableAlias != null)
@@ -2442,7 +2442,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override SourceExpression VisitSource(SourceExpression source)
+        protected internal override SourceExpression VisitSource(SourceExpression source)
         {
             if (source == null)
                 return null;
@@ -2510,7 +2510,7 @@ namespace Signum.Engine.Linq
             return source;
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             SourceExpression source = (SourceExpression)this.VisitSource(proj.Select);
             Expression projector = this.Visit(proj.Projector);
@@ -2675,7 +2675,7 @@ namespace Signum.Engine.Linq
             return lite;
         }
 
-        protected override Expression VisitEntity(EntityExpression ee)
+        protected internal override Expression VisitEntity(EntityExpression ee)
         {
             if (colExpression is ImplementedByAllExpression)
                 return new ImplementedByAllExpression(colExpression.Type,
@@ -2694,7 +2694,7 @@ namespace Signum.Engine.Linq
             return ee;
         }
 
-        protected override Expression VisitImplementedBy(ImplementedByExpression ib)
+        protected internal override Expression VisitImplementedBy(ImplementedByExpression ib)
         {
             if (colExpression is ImplementedByAllExpression)
             {

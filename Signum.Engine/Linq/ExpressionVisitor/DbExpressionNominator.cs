@@ -66,7 +66,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
             if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
@@ -95,7 +95,7 @@ namespace Signum.Engine.Linq
 
         //Dictionary<ColumnExpression, ScalarExpression> replacements; 
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             if (IsFullNominateOrAggresive || !innerProjection)
                 return Add(column);
@@ -103,11 +103,11 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-        protected override NewExpression VisitNew(NewExpression nex)
+        protected override Expression VisitNew(NewExpression nex)
         {
             if (isFullNominate)
             {
-                ReadOnlyCollection<Expression> args = this.VisitExpressionList(nex.Arguments);
+                ReadOnlyCollection<Expression> args = this.Visit(nex.Arguments);
                 if (args != nex.Arguments)
                 {
                     if (nex.Members != null)
@@ -136,11 +136,11 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             //We can not assume allways true because neasted projections
             Expression obj = Visit(sqlFunction.Object);
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
@@ -150,9 +150,9 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => Visit(a));
             if (args != sqlFunction.Arguments)
                 sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args); ;
 
@@ -162,7 +162,7 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-        protected override Expression VisitSqlCast(SqlCastExpression castExpr)
+        protected internal override Expression VisitSqlCast(SqlCastExpression castExpr)
         {
             var expression = Visit(castExpr.Expression);
             if (expression != castExpr.Expression)
@@ -170,16 +170,16 @@ namespace Signum.Engine.Linq
             return Add(castExpr);
         }
 
-        protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
+        protected internal override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)
                 return Add(sqlConstant);
             return sqlConstant;
         }
 
-        protected override Expression VisitCase(CaseExpression cex)
+        protected internal override Expression VisitCase(CaseExpression cex)
         {
-            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newWhens = Visit(cex.Whens, w => VisitWhen(w));
             var newDefault = Visit(cex.DefaultValue);
 
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
@@ -736,7 +736,7 @@ namespace Signum.Engine.Linq
             return Expression.Convert(expression, type);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             bool oldInnerProjection = this.innerProjection;
             innerProjection = true;
@@ -745,7 +745,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             if (!innerProjection)
                 return Add(table);
@@ -753,7 +753,7 @@ namespace Signum.Engine.Linq
             return table;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             if (!innerProjection)
                 return Add(select);
@@ -761,7 +761,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitIn(InExpression inExp)
+        protected internal override Expression VisitIn(InExpression inExp)
         {
             if (!innerProjection)
                 return Add(inExp);
@@ -769,7 +769,7 @@ namespace Signum.Engine.Linq
             return inExp;
         }
 
-        protected override Expression VisitExists(ExistsExpression exists)
+        protected internal override Expression VisitExists(ExistsExpression exists)
         {
             if(!innerProjection)
                 return Add(exists);
@@ -777,7 +777,7 @@ namespace Signum.Engine.Linq
             return exists;
         }
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             if (!innerProjection)
                 return Add(scalar);
@@ -785,7 +785,7 @@ namespace Signum.Engine.Linq
             return scalar;
         }
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             if (!innerProjection)
                 return Add(aggregate);
@@ -793,7 +793,7 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
-        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
+        protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
             if (!innerProjection)
                 return Add(aggregate);
@@ -801,7 +801,7 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
-        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        protected internal override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
         {
             if (!innerProjection)
                 return Add(isNotNull);
@@ -809,7 +809,7 @@ namespace Signum.Engine.Linq
             return isNotNull;
         }
 
-        protected override Expression VisitIsNull(IsNullExpression isNull)
+        protected internal override Expression VisitIsNull(IsNullExpression isNull)
         {
             if (!innerProjection)
                 return Add(isNull);
@@ -817,7 +817,7 @@ namespace Signum.Engine.Linq
             return isNull;
         }
 
-        protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
+        protected internal override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             if (!innerProjection)
                 return Add(sqlEnum);
@@ -825,7 +825,7 @@ namespace Signum.Engine.Linq
             return sqlEnum;
         }
 
-        protected override Expression VisitLike(LikeExpression like)
+        protected internal override Expression VisitLike(LikeExpression like)
         {
             Expression exp = Visit(like.Expression);
             Expression pattern = Visit(like.Pattern);
@@ -857,7 +857,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
             {
@@ -878,7 +878,7 @@ namespace Signum.Engine.Linq
             if (hardResult != null)
                 return hardResult; 
 
-            return base.VisitMemberAccess(m);
+            return base.VisitMember(m);
         }
 
         public Expression HardCodedMembers(MemberExpression m)

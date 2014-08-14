@@ -60,7 +60,7 @@ namespace Signum.Utilities.Reflection
     }
 
 
-    internal class GenericParametersVisitor : SimpleExpressionVisitor
+    internal class GenericParametersVisitor : ExpressionVisitor
     {
         int? parameters;
 
@@ -86,7 +86,7 @@ namespace Signum.Utilities.Reflection
             return m;
         }
 
-        protected override NewExpression VisitNew(NewExpression nex)
+        protected override Expression VisitNew(NewExpression nex)
         {
             if (!nex.Type.IsGenericType)
                 throw new InvalidOperationException("The constructor of {0} should be generic".Formato(nex.Type.TypeName()));
@@ -97,7 +97,7 @@ namespace Signum.Utilities.Reflection
         }
     }
 
-    class GeneratorVisitor : SimpleExpressionVisitor
+    class GeneratorVisitor : ExpressionVisitor
     {
         Type[] types;
 
@@ -113,14 +113,14 @@ namespace Signum.Utilities.Reflection
             return result; 
         }
 
-        protected override NewExpression VisitNew(NewExpression nex)
+        protected override Expression VisitNew(NewExpression nex)
         {
             ConstructorInfo ci = nex.Constructor.GetGenericConstructorDefinition().MakeGenericConstructor(types);
             var result = Expression.New(ci, nex.Arguments.Zip(ci.GetParameters(), (e, p) => Convert(e, p.ParameterType)));
             return result;
         }
 
-        protected override Expression VisitLambda(LambdaExpression lambda)
+        protected override Expression VisitLambda<T>(Expression<T> lambda)
         {
             var returnType = lambda.Type.GetMethod("Invoke").ReturnType;
 
