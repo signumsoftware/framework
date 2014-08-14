@@ -90,7 +90,9 @@ namespace Signum.Entities.Isolation
     {
         [Description("Entity {0} has isolation {1} but current isolation is {2}")]
         Entity0HasIsolation1ButCurrentIsolationIs2,
-        SelectAnIsolation
+        SelectAnIsolation,
+        [Description("Entity '{0}' has isolation {1} but entity '{2}' has isolation {3}")]
+        Entity0HasIsolation1ButEntity2HasIsolation3
     }
 
     [Serializable]
