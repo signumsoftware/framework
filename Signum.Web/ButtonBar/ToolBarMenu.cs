@@ -20,7 +20,7 @@ namespace Signum.Web
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Class("btn-group")))
+            using (sb.SurroundLine(new HtmlTag("div").Class("btn-group")))
             {
                 var a = new HtmlTag("a")
                     .Id(Id)
@@ -35,14 +35,14 @@ namespace Signum.Web
                 if (!Enabled)
                     a.Attr("disabled", "disabled");
 
-                using (sb.Surround(a))
+                using (sb.SurroundLine(a))
                 {
                     sb.AddLine(new MvcHtmlString(Text));
                     sb.AddLine(new HtmlTag("span").Class("caret"));
                 }
 
 
-                using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
+                using (sb.SurroundLine(new HtmlTag("ul").Class("dropdown-menu")))
                 {
                     if (Items != null)
                         foreach (var ci in Items)
