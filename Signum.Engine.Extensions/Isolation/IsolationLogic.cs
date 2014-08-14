@@ -79,7 +79,7 @@ namespace Signum.Engine.Isolation
             return IsolationDN.Override(task.TryIsolation());
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, IdentifiableEntity entity, object[] args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
         {
             return IsolationDN.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
         }

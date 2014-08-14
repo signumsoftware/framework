@@ -145,6 +145,7 @@
     </Compile>
     <Compile Include="Auth\UserTicketClient.cs" />
     <Compile Include="Basic\CultureInfoClient.cs" />
+    <Compile Include="DiffLog\DiffLogClient.cs" />
     <Compile Include="Dashboard\GridRepeaterHelper.cs" />
     <Compile Include="Dashboard\Views\Admin\DashboardAdmin.generated.cs">
       <AutoGen>True</AutoGen>
@@ -185,6 +186,16 @@
       <DependentUpon>DashboardView.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="DiffLog\Views\OperationLog.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OperationLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="DiffLog\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
@@ -1291,6 +1302,15 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DashboardView.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="DiffLog\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="DiffLog\Views\OperationLog.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>OperationLog.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="DiffLog\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>

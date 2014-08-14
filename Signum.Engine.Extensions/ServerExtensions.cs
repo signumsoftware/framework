@@ -36,13 +36,14 @@ using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Engine.DiffLog;
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IDashboardServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
-        IProfilerServer
+        IProfilerServer, IDiffLogServer
     {
         public override IdentifiableEntity Retrieve(Type type, int id)
         {
@@ -417,6 +418,10 @@ namespace Signum.Services
         #endregion
 
 
-      
+        public MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+              () => DiffLogLogic.OperationLogNextPrev(log));
+        }
     }
 }

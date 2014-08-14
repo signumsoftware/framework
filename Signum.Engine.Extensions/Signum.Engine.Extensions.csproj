@@ -119,6 +119,7 @@
     <Compile Include="Chart\ChartScriptLogic.cs" />
     <Compile Include="Chart\UserChartLogic.cs" />
     <Compile Include="Dashboard\DashboardLogic.cs" />
+    <Compile Include="DiffLog\DiffLogLogic.cs" />
     <Compile Include="Disconnected\DisconnectedTools.cs" />
     <Compile Include="Disconnected\LocalBackupManager.cs" />
     <Compile Include="Disconnected\ImportManager.cs" />

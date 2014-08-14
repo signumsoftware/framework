@@ -180,7 +180,7 @@ namespace Signum.Web.Translation
                 }
             }
 
-            sb.Add(new HtmlTag("br").ToHtmlSelf());
+            sb.AddLine();
         }
     }
 }

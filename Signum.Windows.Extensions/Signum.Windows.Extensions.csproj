@@ -233,6 +233,10 @@
     <Compile Include="Dashboard\Admin\DashboardEdit.xaml.cs">
       <DependentUpon>DashboardEdit.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DiffLog\DiffLogClient.cs" />
+    <Compile Include="DiffLog\DiffLogTabs.xaml.cs">
+      <DependentUpon>DiffLogTabs.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Disconnected\UploadProgress.xaml.cs">
       <DependentUpon>UploadProgress.xaml</DependentUpon>
     </Compile>
@@ -617,6 +621,10 @@
     <Page Include="Dashboard\DashboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DiffLog\DiffLogTabs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Disconnected\UploadProgress.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -1032,6 +1040,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Chart\Html\jquery-1.11.0.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\back.png" />
+    <Resource Include="Images\fast-back.png" />
+    <Resource Include="Images\fast-fore.png" />
+    <Resource Include="Images\fore.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

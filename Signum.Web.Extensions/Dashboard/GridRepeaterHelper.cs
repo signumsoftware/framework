@@ -29,48 +29,48 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-grid-repeater-field SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("fieldset", repeater.Prefix).Class("SF-grid-repeater-field SF-control-container")))
             {
                 sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
                 {
                 }
 
-                using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
+                using (sb.SurroundLine(new HtmlTag("legend")))
+                using (sb.SurroundLine(new HtmlTag("div", repeater.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
+                    using (sb.SurroundLine(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {
                         sb.AddLine(EntityButtonHelper.Create(helper, repeater, btn: false));
                         sb.AddLine(EntityButtonHelper.Find(helper, repeater, btn: false));
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div").Class("row rule")))
+                using (sb.SurroundLine(new HtmlTag("div").Class("row rule")))
                 {
                     for (int i = 0; i < 12; i++)
                     {
-                        using (sb.Surround(new HtmlTag("div").Class("col-sm-1")))
-                        using (sb.Surround(new HtmlTag("div").Class("ruleItem")))
+                        using (sb.SurroundLine(new HtmlTag("div").Class("col-sm-1")))
+                        using (sb.SurroundLine(new HtmlTag("div").Class("ruleItem")))
                         {
                         }
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                using (sb.SurroundLine(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (repeater.UntypedValue != null)
                     {
                         foreach (var gr in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)repeater.Parent).GroupBy(a => a.Value.Row).OrderBy(a => a.Key))
                         {
-                            using (sb.Surround(new HtmlTag("div").Class("row separator-row")))
+                            using (sb.SurroundLine(new HtmlTag("div").Class("row separator-row")))
                             {
                             }
 
-                            using (sb.Surround(new HtmlTag("div").Class("row items-row")))
+                            using (sb.SurroundLine(new HtmlTag("div").Class("row items-row")))
                             {
                                 var lastEnd = 0;
                                 foreach (var itemTC in gr.OrderBy(a => a.Value.StartColumn))
@@ -85,7 +85,7 @@ namespace Signum.Web
                         helper.ViewData.Remove("lastEnd");
                     }
 
-                    using (sb.Surround(new HtmlTag("div").Class("row separator-row")))
+                    using (sb.SurroundLine(new HtmlTag("div").Class("row separator-row")))
                     {
                     }
                 }

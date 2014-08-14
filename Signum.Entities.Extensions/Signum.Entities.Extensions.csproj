@@ -98,6 +98,8 @@
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
+    <Compile Include="DiffLog\DiffLogMixin.cs" />
+    <Compile Include="DiffLog\Services.cs" />
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Isolation\IsolationDN.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
