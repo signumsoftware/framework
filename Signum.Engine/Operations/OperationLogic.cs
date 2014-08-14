@@ -134,9 +134,9 @@ namespace Signum.Engine.Operations
                     {
                         Entity = lo,
                         lo.Id,
-                        Target = lo.Target,
+                        lo.Target,
                         lo.Operation,
-                        User = lo.User,
+                        lo.User,
                         lo.Start,
                         lo.End,
                         lo.Exception
@@ -231,12 +231,9 @@ namespace Signum.Engine.Operations
         #region Events
 
         public static event SurroundOperationHandler SurroundOperation;
-        public static event OperationHandler BeginOperation;
-        public static event OperationHandler EndOperation;
-        public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation;
 
-        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity, object[] args)
+        internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogDN log, IIdentifiable entity, object[] args)
         {
             if (SurroundOperation == null)
                 return null;
@@ -244,32 +241,17 @@ namespace Signum.Engine.Operations
             IDisposable result = null;
             foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
             {
-                result = Disposable.Combine(result, surround(operation, (IdentifiableEntity)entity, args));
+                result = Disposable.Combine(result, surround(operation, log, (IdentifiableEntity)entity, args));
             }
 
             return result;
         }
 
-        internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
-        {
-            if (BeginOperation != null)
-                BeginOperation(operation, (IdentifiableEntity)entity);
-        }
-
-        internal static void OnEndOperation(IOperation operation, IIdentifiable entity)
-        {
-            if (EndOperation != null)
-                EndOperation(operation, (IdentifiableEntity)entity);
-        }
-
-        internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, object[] args, Exception ex)
+        internal static void SetExceptionData(Exception ex, IIdentifiable entity, object[] args)
         {
             ex.Data["entity"] = entity;
             if (args != null)
                 ex.Data["args"] = args;
-
-            if (ErrorOperation != null)
-                ErrorOperation(operation, (IdentifiableEntity)entity, ex);
         }
 
         public static bool OperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
@@ -742,7 +724,7 @@ namespace Signum.Engine.Operations
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, IdentifiableEntity entity, object[] args);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args);
     public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);
     public delegate void ErrorOperationHandler(IOperation operation, IdentifiableEntity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);
