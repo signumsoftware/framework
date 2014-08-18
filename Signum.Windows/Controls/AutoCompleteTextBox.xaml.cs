@@ -105,7 +105,7 @@ namespace Signum.Windows
             var task = Task.Factory.StartNew<IEnumerable>(() =>
             {
                 Thread.CurrentThread.AssignCultures(parent);
-                Statics.SetThreadContext(context);
+                Statics.ImportThreadContext(context);
                 return AutoCompleting(text, source.Token);
             }, source.Token);
 

@@ -28,7 +28,7 @@ namespace Signum.Windows
             {
                 try
                 {
-                    using (Statics.SetThreadContext(context))
+                    using (Statics.ImportThreadContext(context))
                         backgroundThread();
 
                     if (endAction != null)
