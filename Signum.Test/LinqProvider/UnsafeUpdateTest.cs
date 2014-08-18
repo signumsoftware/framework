@@ -545,5 +545,17 @@ namespace Signum.Test.LinqProviderUpdateDelete
                      .Execute();
             }
         }
+
+        [TestMethod]
+        public void UnsafeUpdatePartExpand()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Database.Query<LabelDN>()
+                    .UnsafeUpdatePart(a => a.Owner.Entity)
+                    .Set(lb => lb.Name, a => a.Owner.Entity + "toStr")
+                    .Execute();
+            }
+        }
     }
 }
