@@ -1699,9 +1699,8 @@ namespace Signum.Engine.Linq
             else
             {
                 var cleanedSelector = (LambdaExpression)DbQueryProvider.Clean(partSelector, false, null);
-                map.Add(cleanedSelector.Parameters[0], pr.Projector);
-                entity = Visit(cleanedSelector.Body);
-                map.Remove(cleanedSelector.Parameters[0]);
+
+                entity = MapVisitExpand(cleanedSelector, pr);
             }
 
             ITable table = entity is EntityExpression ?
@@ -2534,9 +2533,14 @@ namespace Signum.Engine.Linq
             Alias newAlias = aliasGenerator.NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, newAlias); //Do not replace tokens
 
-            return new ProjectionExpression(
-                    new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null, 0),
-                    pc.Projector, proj.UniqueFunction, proj.Type);
+            var newSelect = new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null, 0);
+
+            return new ProjectionExpression(newSelect, pc.Projector, proj.UniqueFunction, proj.Type);
+        }
+
+        protected internal override Expression VisitUpdate(UpdateExpression update)
+        {
+            return base.VisitUpdate(update);
         }
     }
 
