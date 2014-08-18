@@ -111,5 +111,24 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 //tr.Commit();
             }
         }
+
+
+        [TestMethod]
+        public void InsertSimpleSingle()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int value = Database.Query<AlbumDN>().UnsafeInsert(a => new AlbumDN
+                {
+                    Author = a.Author,
+                    BonusTrack = a.BonusTrack,
+                    Label = Database.Query<LabelDN>().Single(l => l.Is(a.Label)),
+                    Name = a.Name + "copy",
+                    State = a.State,
+                    Year = a.Year,
+                }.SetReadonly(_ => _.Ticks, a.Ticks));
+                //tr.Commit();
+            }
+        }
     }
 }
