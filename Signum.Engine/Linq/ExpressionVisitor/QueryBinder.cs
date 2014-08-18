@@ -2671,7 +2671,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             if (!(colExpression is LiteReferenceExpression))
                 throw new InvalidOperationException("colExpression should be a LiteReferenceExpression in this stage");
