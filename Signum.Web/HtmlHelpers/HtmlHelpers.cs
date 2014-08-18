@@ -35,11 +35,11 @@ namespace Signum.Web
         public static MvcHtmlString ValudationSummaryStatic(this HtmlHelper html)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", "sfGlobalValidationSummary")))
+            using (sb.SurroundLine(new HtmlTag("div", "sfGlobalValidationSummary")))
             {
                 if (html.ViewData.ModelState.Any(x => x.Value.Errors.Any()))
                 {
-                    using (sb.Surround(new HtmlTag("ul").Class("validaton-summary alert alert-danger")))
+                    using (sb.SurroundLine(new HtmlTag("ul").Class("validaton-summary alert alert-danger")))
                     {
                         foreach (var str in html.ViewData.ModelState.SelectMany(a => a.Value.Errors))
                         {
@@ -95,7 +95,7 @@ namespace Signum.Web
                 "form-xs";
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(attrs)))
+            using (sb.SurroundLine(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(attrs)))
             {
                 var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 
@@ -107,7 +107,7 @@ namespace Signum.Web
                 if (context.FormGroupStyle != FormGroupStyle.BasicDown)
                     sb.AddLine(lbl);
 
-                using (context.FormGroupStyle == FormGroupStyle.LabelColumns ? sb.Surround(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
+                using (context.FormGroupStyle == FormGroupStyle.LabelColumns ? sb.SurroundLine(new HtmlTag("div").Class(context.ValueColumns.ToString())) : null)
                 {
                     sb.AddLine(value);
                 }

@@ -34,9 +34,9 @@ namespace Signum.Web
         public MvcHtmlString ToHtml(HtmlHelper helper)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround("li"))
+            using (sb.SurroundLine("li"))
             {
-                using (sb.Surround(new HtmlTag("a", Id)
+                using (sb.SurroundLine(new HtmlTag("a", Id)
                     .Class("badge").Class(Class).Class(Active? "sf-widget-active" : null)
                     .Attr("title", Title)
                     .Attr("role", "button")
@@ -54,7 +54,7 @@ namespace Signum.Web
                         sb.AddLine(Html);
                 }
 
-                using (sb.Surround(new HtmlTag("ul")
+                using (sb.SurroundLine(new HtmlTag("ul")
                     .Class("dropdown-menu dropdown-menu-right")
                     .Attr("role", "menu")
                     .Attr("aria-labelledby", Id)))
@@ -110,7 +110,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("ul").Class("sf-widgets")))
+            using (sb.SurroundLine(new HtmlTag("ul").Class("sf-widgets")))
             {
                 foreach (IWidget widget in widgets)
                 {

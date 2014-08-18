@@ -26,11 +26,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityLine.Prefix).Class("SF-entity-line SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityLine.Prefix).Class("SF-entity-line SF-control-container")))
             {
                  sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
 
-                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("hidden")).Class("hide")))
+                 using (sb.SurroundLine(new HtmlTag("div", entityLine.Compose("hidden")).Class("hide")))
                  {
                      if (entityLine.UntypedValue != null)
                      {
@@ -46,14 +46,14 @@ namespace Signum.Web
                      }
                  }
 
-                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
+                 using (sb.SurroundLine(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
                  {
                      if (entityLine.UntypedValue == null)
                          sb.AddLine(AutocompleteTextBox(helper, entityLine));
                      else
                          sb.AddLine(LinkOrSpan(helper, entityLine));
 
-                     using (sb.Surround(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
+                     using (sb.SurroundLine(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
                      {
                          if (entityLine.UntypedValue == null)
                          {

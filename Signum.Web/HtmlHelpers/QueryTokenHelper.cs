@@ -33,7 +33,7 @@ namespace Signum.Web
         public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryTokenBuilderSettings settings)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("span").Id(context.Prefix).Class("token-builder")))
+            using (sb.SurroundLine(new HtmlTag("span").Id(context.Prefix).Class("token-builder")))
             {
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }

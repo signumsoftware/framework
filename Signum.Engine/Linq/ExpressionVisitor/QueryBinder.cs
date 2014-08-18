@@ -2615,7 +2615,7 @@ namespace Signum.Engine.Linq
                     {
                         using (this.OverrideColExpression(col.Reference))
                         {
-                            var entity =  CombineCoalesce(l.Reference, r.Reference);
+                            var entity = CombineCoalesce(l.Reference, r.Reference);
                             return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null);
                         }
                     }); 
@@ -2669,6 +2669,20 @@ namespace Signum.Engine.Linq
             Debug.Assert(result.Type == colExpression.Type);
 
             return result;
+        }
+
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            if (!(colExpression is LiteReferenceExpression))
+                throw new InvalidOperationException("colExpression should be a LiteReferenceExpression in this stage");
+
+            var reference = ((LiteReferenceExpression)colExpression).Reference;
+
+            var newRef = this.OverrideColExpression(reference).Using(_ => Visit(lite.Reference));
+            if (newRef != lite.Reference)
+                return new LiteReferenceExpression(Lite.Generate(newRef.Type), newRef, null);
+
+            return lite;
         }
 
         protected internal override Expression VisitEntity(EntityExpression ee)
