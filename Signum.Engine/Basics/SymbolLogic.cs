@@ -34,7 +34,7 @@ namespace Signum.Engine
             {
                 sb.Include<T>();
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () => lazy.Load();
+                sb.Schema.Initializing += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
 

@@ -392,6 +392,7 @@ namespace Signum.Windows
             RouteTask += TaskSetFormatText;
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
+            RouteTask += TaskSetMove;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
             RouteTask += TaskSetNullValueEntityCombo;
@@ -612,6 +613,18 @@ namespace Signum.Windows
                 if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
                 {
                     eb.Implementations = entityContext.GetImplementations();
+                }
+            }
+        }
+
+        public static void TaskSetMove(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            EntityListBase eb = fe as EntityListBase;
+            if (eb != null && eb.NotSet(EntityListBase.MoveProperty))
+            {
+                if (!eb.Move  && context.FieldInfo.HasAttribute<PreserveOrderAttribute>())
+                {
+                    eb.Move = true;
                 }
             }
         }

@@ -175,10 +175,17 @@ namespace Signum.Engine.Maps
 
                 if (attachedFields.Any())
                 {
-                    foreach (var ui in result.OfType<UniqueIndex>())
+                    result = result.Select(ix =>
                     {
-                        ui.Columns = ui.Columns.Concat(attachedFields).ToArray();
-                    }
+                        var ui = ix as UniqueIndex;
+                        if (ui == null)
+                            return ix;
+
+                        return new UniqueIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                        {
+                            Where = ui.Where
+                        };
+                    }).ToList();
                 }
             }
 
@@ -888,7 +895,7 @@ namespace Signum.Engine.Maps
     {
         public class PrimaryKeyColumn : IColumn
         {
-            string IColumn.Name { get { return SqlBuilder.PrimaryKeyName; } }
+            public string Name { get { return SqlBuilder.PrimaryKeyName; } }
             bool IColumn.Nullable { get { return false; } }
             SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
             string IColumn.UdtTypeName { get { return null; } }
@@ -905,6 +912,7 @@ namespace Signum.Engine.Maps
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
+        public FieldValue Order { get; set; }
         public Field Field { get; set; }
 
         public Type CollectionType { get; private set; }
@@ -924,7 +932,14 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
+            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference }; 
+
+            if(Order != null)
+                cols.Add(Order); 
+
+            cols.AddRange(Field.Columns());
+
+            Columns = cols.ToDictionary(a => a.Name);
         }
 
         public List<Index> GeneratAllIndexes()
@@ -969,15 +984,5 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnSchema(schemaName);
         }
-    }
-
-
-    public enum InitLevel
-    {
-        Level0SyncEntities,
-        Level1SimpleEntities,
-        Level2NormalEntities,
-        Level3MainEntities,
-        Level4BackgroundProcesses,
     }
 }

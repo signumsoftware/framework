@@ -10,6 +10,7 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities
 {
@@ -19,9 +20,12 @@ namespace Signum.Entities
 
         public static string Dump(this object o, bool showIgnoredFields = false, bool showByteArrays = false)
         {
-            var od = new DumpVisitor(showIgnoredFields, showByteArrays);
-            od.DumpObject(o);
-            return od.Sb.TryToString();
+            using (HeavyProfiler.LogNoStackTrace("Dump"))
+            {
+                var od = new DumpVisitor(showIgnoredFields, showByteArrays);
+                od.DumpObject(o);
+                return od.Sb.TryToString();
+            }
         }
 
         static string Indent(this string t, int level)
@@ -31,16 +35,16 @@ namespace Signum.Entities
 
         class DumpVisitor
         {
-            HashSet<Object> objects = new HashSet<Object>();
+            HashSet<object> objects = new HashSet<Object>(ReferenceEqualityComparer<object>.Default);
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
             bool showIgnoredFields = false;
-            bool showBiteArrays = false;
+            bool showByteArrays = false;
 
             public DumpVisitor(bool showIgnoredFields, bool showByteArrays)
             {
                 this.showIgnoredFields = showIgnoredFields;
-                this.showBiteArrays = showByteArrays;
+                this.showByteArrays = showByteArrays;
             }
 
             public void DumpObject(object o)
@@ -67,7 +71,7 @@ namespace Signum.Entities
                     return;
                 }
 
-                if (IsBasicType(t))
+                if (IsBasicType(t) || t.IsValueType)
                 {
                     Sb.Append(DumpValue(o));
                     return;
@@ -79,14 +83,25 @@ namespace Signum.Entities
 
                 if (IgnoreTypes.Contains(t))
                 {
+                    Sb.Append("{ " + o.ToString() + " }");
                     return;
                 }
 
                 if (objects.Contains(o))
                 {
-                    if (o is IdentifiableEntity || o is Lite<IdentifiableEntity>)
+                    if (o is IdentifiableEntity)
                     {
-                        var id = o is IdentifiableEntity ? (o as IdentifiableEntity).IdOrNull : (o as Lite<IdentifiableEntity>).IdOrNull;
+                        var ident = o as IdentifiableEntity;
+                        var ent = o as Entity;
+
+                        Sb.Append("({0}{1})".Formato(
+                            ident.IsNew ? "IsNew": ident.IdOrNull.ToString(),
+                            ent == null ? null : ", ticks: " + ent.ticks
+                            ));
+                    }
+                    if (o is Lite<IdentifiableEntity>)
+                    {
+                        var id =  ((Lite<IdentifiableEntity>)o).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
                     }
                     Sb.Append(" /* [CICLE] {0} */".Formato(o.ToString()));
@@ -97,8 +112,12 @@ namespace Signum.Entities
 
                 if (o is IdentifiableEntity)
                 {
-                    var id = (o as IdentifiableEntity).IdOrNull;
-                    Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
+                    var ident = o as IdentifiableEntity;
+                    var ent = o as Entity;
+                    Sb.Append("({0}{1})".Formato(
+                        ident.IsNew ? "IsNew" : ident.IdOrNull.ToString(),
+                        ent == null ? null : ", ticks: " + ent.ticks
+                        ));
                     Sb.Append(" /* {0} */".Formato(o.ToString()));
                 }
 
@@ -116,7 +135,7 @@ namespace Signum.Entities
                     return;
                 }
 
-                if (o is byte[] && !showBiteArrays)
+                if (o is byte[] && !showByteArrays)
                 {
                     Sb.Append("{...}");
                     return;
@@ -149,23 +168,37 @@ namespace Signum.Entities
                         }
                     }
                     else
+                    {
                         foreach (var item in (o as IEnumerable))
                         {
                             Sb.Append("".Indent(level));
                             DumpObject(item);
                             Sb.AppendLine(",");
                         }
+                    }
                 }
                 else if (t.IsAnonymous())
-                    foreach (var prop in t.GetProperties(BindingFlags.Instance |
-                                                         BindingFlags.Public))
+                    foreach (var prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
                     }
                 else
                     foreach (var field in Reflector.InstanceFieldsInOrder(t).OrderBy(IsMixinField))
                     {
-                        if (!showIgnoredFields && field.IsDefined(typeof(IgnoreAttribute), false) && !IsMixinField(field))
+                        if (IsIdOrTicks(field))
+                            continue;
+
+                        if (IsMixinField(field))
+                        {
+                            var val = field.GetValue(o);
+
+                            if (val == null)
+                                continue;
+
+                            DumpPropertyOrField(field.FieldType, field.Name, val);
+                        }
+
+                        if (!showIgnoredFields && field.IsDefined(typeof(IgnoreAttribute), false))
                             continue;
 
                         DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
@@ -180,6 +213,12 @@ namespace Signum.Entities
             {
                 return field.Name == "mixin" && field.DeclaringType == typeof(IdentifiableEntity) ||
                     field.Name == "next" && field.DeclaringType == typeof(MixinEntity);
+            }
+
+            private bool IsIdOrTicks(FieldInfo field)
+            {
+                return field.Name == "id" && field.DeclaringType == typeof(IdentifiableEntity) ||
+                    field.Name == "ticks" && field.DeclaringType == typeof(Entity);
             }
 
             private bool Any(IEnumerable ie)

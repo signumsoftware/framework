@@ -39,15 +39,21 @@ var SF;
         }
 
         jQuery.fn.SFControlFullfill = function (val) {
-            fulllFill(this, val);
+            fullFill(this, val);
         };
 
-        function fulllFill(jq, control) {
+        function fullFill(jq, control) {
             if (jq.length == 0)
                 throw new Error("impossible to fulfill SFControl from no elements");
 
             if (jq.length > 1)
                 throw new Error("impossible to fulfill SFControl from more than one element");
+
+            if (!jq.hasClass("SF-control-container"))
+                throw Error("this element has not SF-control");
+
+            if (!jq.data("SF-control"))
+                throw Error("SF-control not set yet");
 
             var queue = jq.data("SF-queue");
 
@@ -167,7 +173,7 @@ var SF;
 })(SF || (SF = {}));
 
 $(function () {
-    $(document).on("change", "select, input", function () {
+    $(document).on("change", "select, input, textarea", function () {
         SF.setHasChanges($(this));
     });
 });
@@ -265,36 +271,60 @@ var SF;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
 
-    function onVisible(element, callback) {
+    function onVisible(element) {
         if (element.length == 0)
             throw Error("element is empty");
 
-        var pane = element.closest(".tab-pane");
-        if (pane.length) {
+        if (element.closest("[id$=_sfEntity]").length) {
+            return Promise.reject("In sfEntity");
+        }
+
+        var modal = element.closest(".modal");
+
+        var onModalVisible = modal.length == 0 || modal.is(":visible") ? Promise.resolve(element) : onEventOnce(modal, "shown.bs.modal");
+
+        return onModalVisible.then(function () {
+            var pane = element.closest(".tab-pane");
+            if (!pane.length)
+                return element;
+
             var id = pane[0].id;
 
-            if (pane.hasClass("active") || !id) {
-                callback(element);
-                return;
-            }
+            if (pane.hasClass("active") || !id)
+                return element;
 
             var tab = pane.parent().parent().find("a[data-toggle=tab][href=#" + id + "]");
 
-            if (!tab.length) {
-                callback(element);
-                return;
-            }
+            if (!tab.length)
+                return element;
 
-            tab.on("shown.bs.tab", function (e) {
-                if (callback)
-                    callback(element);
-                callback = null;
-            });
-        } else {
-            callback(element);
-        }
+            return onEventOnce(tab, "shown.bs.tab");
+        });
     }
     SF.onVisible = onVisible;
+
+    function onEventOnce(element, eventName) {
+        return new Promise(function (resolve) {
+            var onEvent;
+
+            onEvent = function () {
+                element.off(eventName, onEvent);
+                resolve(element);
+            };
+
+            element.on(eventName, onEvent);
+        });
+    }
+    SF.onEventOnce = onEventOnce;
+
+    function onHidden(element) {
+        return new Promise(function (resolve) {
+            element.closest(".modal").on("hide.bs.modal", function () {
+                resolve(element);
+            });
+        });
+    }
+    SF.onHidden = onHidden;
 })(SF || (SF = {}));
 
 once("removeKeyPress", function () {
@@ -324,6 +354,22 @@ once("ajaxError", function () {
             if (SF.Blocker.isEnabled()) {
                 SF.Blocker.disable();
             }
+        });
+    });
+});
+
+once("dateTimePickerSync", function () {
+    $(function () {
+        $(document).on("changeDate clearDate", 'div.date-time div.date', function (e) {
+            var time = $(this).closest("div.date-time").find("div.time");
+            time.timepicker("setTime", e.date);
+        });
+
+        $(document).on("show.timepicker", 'div.date-time div.time', function (e) {
+            var time = $(this).closest("div.date-time").find("div.date");
+            var date = time.datepicker("getDate");
+            if (isNaN(date.getTime()))
+                e.time.cancel = true;
         });
     });
 });

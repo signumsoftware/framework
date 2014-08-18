@@ -20,7 +20,7 @@ namespace Signum.Utilities.ExpressionTrees
 		[MethodExpander(typeof(ExpandContainsAny))]
 		public static bool ContainsAny(this string value, params string[] keywords)
 		{
-			return keywords.Any((s) => value.Contains(s));
+			return keywords.Any((s) => value.Contains(s, StringComparison.InvariantCultureIgnoreCase));
 		}
 
 
@@ -33,7 +33,7 @@ namespace Signum.Utilities.ExpressionTrees
 		[MethodExpander(typeof(ExpandContainsAll))]
 		public static bool ContainsAll(this string value, params string[] keywords)
 		{
-			return keywords.All((s) => value.Contains(s));
+			return keywords.All((s) => value.Contains(s, StringComparison.InvariantCultureIgnoreCase));
 		}
 	}
 

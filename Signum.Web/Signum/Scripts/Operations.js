@@ -27,7 +27,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }, options);
 
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }).then(function (result) {
-            exports.assertModelStateErrors(result, options.prefix);
+            Validator.assertModelStateErrors(result, options.prefix);
             return Entities.EntityHtml.fromHtml(options.prefix, result);
         });
     }
@@ -55,7 +55,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.executeAjaxContextual = executeAjaxContextual;
 
-    function constructFromDefault(options) {
+    function constructFromDefault(options, openNewWindowOrEvent) {
         options = $.extend({
             avoidValidate: false,
             validationOptions: {},
@@ -66,9 +66,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return Promise.reject("confirmation");
 
         return exports.entityIsValidOrLite(options).then(function () {
-            return exports.constructFromAjax(options);
-        }).then(function (eHtml) {
-            return exports.openPopup(eHtml);
+            if (Navigator.isOpenNewWindow(openNewWindowOrEvent))
+                exports.constructFromSubmit(options);
+            else
+                return exports.constructFromAjax(options, exports.getNewPrefix(options)).then(function (eHtml) {
+                    return exports.openPopup(eHtml);
+                });
         });
     }
     exports.constructFromDefault = constructFromDefault;
@@ -79,23 +82,35 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: true
         }, options);
 
-        if (!newPrefix)
-            newPrefix = exports.getNewPrefix(options);
-
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options, newPrefix) }).then(function (html) {
             return Entities.EntityHtml.fromHtml(newPrefix, html);
         });
     }
     exports.constructFromAjax = constructFromAjax;
 
-    function constructFromDefaultContextual(options, newPrefix) {
+    function constructFromSubmit(options) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFrom,
+            isLite: true
+        }, options);
+
+        SF.submitOnly(options.controllerUrl, exports.entityRequestData(options, ""), true);
+    }
+    exports.constructFromSubmit = constructFromSubmit;
+
+    function constructFromDefaultContextual(options, openNewWindowOrEvent) {
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
-        return exports.constructFromAjaxContextual(options).then(function (eHtml) {
+        if (Navigator.isOpenNewWindow(openNewWindowOrEvent)) {
             exports.markCells(options.prefix);
-            return exports.openPopup(eHtml);
-        });
+            exports.constructFromSubmitContextual(options);
+        } else {
+            return exports.constructFromAjaxContextual(options, exports.getNewPrefix(options)).then(function (eHtml) {
+                exports.markCells(options.prefix);
+                return exports.openPopup(eHtml);
+            });
+        }
     }
     exports.constructFromDefaultContextual = constructFromDefaultContextual;
 
@@ -105,14 +120,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: true
         }, options);
 
-        if (!newPrefix)
-            newPrefix = exports.getNewPrefix(options);
-
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.contextualRequestData(options, newPrefix, runtimeInfo) }).then(function (html) {
             return Entities.EntityHtml.fromHtml(newPrefix, html);
         });
     }
     exports.constructFromAjaxContextual = constructFromAjaxContextual;
+
+    function constructFromSubmitContextual(options, runtimeInfo) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFrom,
+            isLite: true
+        }, options);
+
+        SF.submitOnly(options.controllerUrl, exports.contextualRequestData(options, "", runtimeInfo), true);
+    }
+    exports.constructFromSubmitContextual = constructFromSubmitContextual;
 
     function deleteDefault(options) {
         options = $.extend({
@@ -170,18 +192,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.deleteAjaxContextual = deleteAjaxContextual;
 
-    function constructFromManyDefault(options, newPrefix) {
-        options = $.extend({
-            controllerUrl: SF.Urls.operationConstructFromMany
-        }, options);
-
+    function constructFromManyDefault(options, openNewWindowOrEvent) {
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");
 
-        return exports.constructFromManyAjax(options).then(function (eHtml) {
+        if (Navigator.isOpenNewWindow(openNewWindowOrEvent)) {
             exports.markCells(options.prefix);
-            return exports.openPopup(eHtml);
-        });
+            exports.constructFromManySubmit(options);
+        } else {
+            return exports.constructFromManyAjax(options, exports.getNewPrefix(options)).then(function (eHtml) {
+                exports.markCells(options.prefix);
+                return exports.openPopup(eHtml);
+            });
+        }
     }
     exports.constructFromManyDefault = constructFromManyDefault;
 
@@ -191,14 +214,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             controllerUrl: SF.Urls.operationConstructFromMany
         }, options);
 
-        if (!newPrefix)
-            newPrefix = exports.getNewPrefix(options);
-
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.constructFromManyRequestData(options, newPrefix) }).then(function (html) {
             return Entities.EntityHtml.fromHtml(newPrefix, html);
         });
     }
     exports.constructFromManyAjax = constructFromManyAjax;
+
+    function constructFromManySubmit(options) {
+        options = $.extend({
+            isLite: true,
+            controllerUrl: SF.Urls.operationConstructFromMany
+        }, options);
+
+        SF.submitOnly(options.controllerUrl, exports.constructFromManyRequestData(options, ""), true);
+    }
+    exports.constructFromManySubmit = constructFromManySubmit;
 
     function confirmIfNecessary(options) {
         return !options.confirmMessage || confirm(options.confirmMessage);
@@ -291,20 +321,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(formValues, options.requestExtraJsonData);
     }
     exports.baseRequestData = baseRequestData;
-
-    function assertModelStateErrors(operationResult, prefix) {
-        if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
-            return false;
-
-        var modelState = operationResult.ModelState;
-
-        Validator.showErrors({ prefix: prefix }, modelState);
-
-        SF.Notify.error(lang.signum.error, 2000);
-
-        throw modelState;
-    }
-    exports.assertModelStateErrors = assertModelStateErrors;
 
     function entityIsValidOrLite(options) {
         if (options.isLite || options.avoidValidate)

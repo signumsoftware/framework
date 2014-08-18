@@ -29,11 +29,11 @@ namespace Signum.Web
                 throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))
             {
                 sb.AddLine(helper.HiddenRuntimeInfo(entityCombo));
 
-                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("hidden")).Class("hide")))
                 {
                     if (entityCombo.UntypedValue != null)
                     {
@@ -47,14 +47,14 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
+                using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
                 {
                     if (entityCombo.ReadOnly)
                         sb.AddLine(helper.FormControlStatic(entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
                     else
                         sb.AddLine(DropDownList(helper, entityCombo));
 
-                    using (sb.Surround(new HtmlTag("span", entityCombo.Compose("shownButton")).Class("input-group-btn")))
+                    using (sb.SurroundLine(new HtmlTag("span", entityCombo.Compose("shownButton")).Class("input-group-btn")))
                     {
                         if (entityCombo.UntypedValue == null)
                         {

@@ -40,24 +40,34 @@ namespace Signum.Entities
         public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
             where T : IRootEntity
         {
-            PropertyRoute result = Root(typeof(T));
+            return Root(typeof(T)).Continue(propertyRoute);
+        }
 
-            foreach (var mi in Reflector.GetMemberList(propertyRoute))
+        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
+        {
+            if (typeof(T) != this.Type)
+                throw new InvalidOperationException("Type mismatch between {0} and {1}".Formato(typeof(T).TypeName(), this.Type.TypeName())); 
+
+            var list = Reflector.GetMemberList(propertyRoute);
+
+            return Continue(list);
+        }
+
+        public PropertyRoute Continue(MemberInfo[] list)
+        {
+            var result = this;
+
+            foreach (var mi in list)
             {
-                if (mi is MethodInfo && ((MethodInfo)mi).IsInstantiationOf(MixinDeclarations.miMixin))
-                    result = result.Add(((MethodInfo)mi).GetGenericArguments()[0]);
-                else
-                    result = result.Add(mi);
+                result = result.Add(mi);
             }
             return result;
         }
-
      
         public PropertyRoute Add(string fieldOrProperty)
         {
             return Add(GetMember(fieldOrProperty));
         }
-
 
         MemberInfo GetMember(string fieldOrProperty)
         {
@@ -87,8 +97,11 @@ namespace Signum.Entities
             return match.Groups["type"].Value;
         }
 
-        public PropertyRoute Add(MemberInfo fieldOrProperty)
+        public PropertyRoute Add(MemberInfo member)
         {
+            if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
+                member = ((MethodInfo)member).GetGenericArguments()[0]; 
+
             if (this.Type.IsIIdentifiable() && PropertyRouteType != PropertyRouteType.Root)
             {
                 Implementations imp = GetImplementations();
@@ -97,10 +110,10 @@ namespace Signum.Entities
                 if (imp.IsByAll || (only = imp.Types.Only()) == null)
                     throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".Formato(imp));
 
-                return new PropertyRoute(Root(only), fieldOrProperty);
+                return new PropertyRoute(Root(only), member);
             }
 
-            return new PropertyRoute(this, fieldOrProperty);
+            return new PropertyRoute(this, member);
         }
 
         PropertyRoute(PropertyRoute parent, MemberInfo fieldOrProperty)
@@ -473,19 +486,30 @@ namespace Signum.Entities
             info.AddValue("property", property);
         }
 
-        public Expression<Func<T, string>> GetLambdaExpression<T>() where T : IdentifiableEntity
+        public PropertyRoute GetMListItemsRoute()
         {
-            if (typeof(T) != this.RootType)
-                throw new InvalidOperationException("Generic parameter T should be {0}".Formato(this.RootType));
+            for (var r = this; r != null; r = r.Parent)
+            {
+                if (r.PropertyRouteType == PropertyRouteType.MListItems)
+                    return r;
+            }
 
+            return null;
+        }
 
+        /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
+        /// <typeparam name="R">Result type</typeparam>
+        /// <returns></returns>
+        public Expression<Func<T, R>> GetLambdaExpression<T, R>()
+        {
             ParameterExpression pe = Expression.Parameter(typeof(T));
             Expression exp = null;
-            foreach (var p in this.Follow(a => a.Parent).Reverse())
+            foreach (var p in this.Follow(a => a.Parent).Reverse().SkipWhile(a=>a.Type != typeof(T)))
             {
                 switch (p.PropertyRouteType)
                 {
                     case PropertyRouteType.Root:
+                    case PropertyRouteType.MListItems:
                         exp = pe;
                         break;
                     case PropertyRouteType.FieldOrProperty:
@@ -500,15 +524,15 @@ namespace Signum.Entities
                     case PropertyRouteType.LiteEntity:
                         exp = Expression.Property(exp, "Entity"); 
                         break;
-                    case PropertyRouteType.MListItems:
                     default:
                         throw new InvalidOperationException("Unexpected {0}".Formato(p.PropertyRouteType)); 
                 }
             }
 
-            var selector = Expression.Lambda<Func<T, string>>(exp, pe);
+            var selector = Expression.Lambda<Func<T, R>>(exp, pe);
             return selector;
         }
+
     }
 
     public interface IImplementationsFinder

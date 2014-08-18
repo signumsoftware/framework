@@ -60,6 +60,11 @@ namespace Signum.Windows
             return Create && !Common.GetIsReadOnly(this);
         }
 
+        protected virtual bool CanMove()
+        {
+            return Move && !Common.GetIsReadOnly(this);
+        }
+
         protected new object OnFinding()
         {
             if (!CanFind())

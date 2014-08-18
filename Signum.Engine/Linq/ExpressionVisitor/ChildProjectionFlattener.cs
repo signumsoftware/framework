@@ -18,12 +18,12 @@ namespace Signum.Engine.Linq
         AliasGenerator aliasGenerator;
         private ChildProjectionFlattener(){}
 
-        public bool inMList = false;
+        public Type inMList = null;
 
-        protected override Expression VisitMListProjection(MListProjectionExpression mlp)
+        protected internal override Expression VisitMListProjection(MListProjectionExpression mlp)
         {
             var oldInEntity = inMList;
-            inMList = true;
+            inMList = mlp.Type;
             var result = VisitProjection(mlp.Projection);
             inMList = oldInEntity;
             return result;
@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
             return (ProjectionExpression)subqueryCleaned; 
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             if (currentSource == null)
             {
@@ -68,11 +68,11 @@ namespace Signum.Engine.Linq
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
 
-                    var childProj = new ProjectionExpression(proj.Select, 
+                    var childProj = new ProjectionExpression(proj.Select,
                         Expression.New(ciKVP, key, projector), proj.UniqueFunction, projType);
 
                     return new ChildProjectionExpression(childProj,
-                        Expression.Constant(0), inMList, proj.Type, new LookupToken());
+                        Expression.Constant(0), inMList != null, inMList ?? proj.Type, new LookupToken());
 
                 }
                 else
@@ -138,14 +138,14 @@ namespace Signum.Engine.Linq
                         Expression.New(ciKVP, key, projector), proj.UniqueFunction, projType);
 
                     return new ChildProjectionExpression(childProj,
-                        TupleReflection.TupleChainConstructor(columns.Select(a => a.Nullify())), inMList, proj.Type, new LookupToken());
+                        TupleReflection.TupleChainConstructor(columns.Select(a => a.Nullify())), inMList != null, inMList ?? proj.Type, new LookupToken());
                 }
             }
         }
 
         private SelectExpression WithoutOrder(SelectExpression sel)
         {
-            if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
+            if (sel.Top != null || (sel.OrderBy.Count == 0))
                 return sel;
 
             return new SelectExpression(sel.Alias, sel.IsDistinct, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy, sel.SelectOptions);
@@ -153,7 +153,7 @@ namespace Signum.Engine.Linq
 
         private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
         {
-            if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
+            if (sel.Top != null || (sel.OrderBy.Count == 0))
             {
                 innerOrders = null;
                 return sel;
@@ -226,7 +226,7 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
             {
-                if(select.GroupBy != null && select.GroupBy.Count == 0)
+                if(select.GroupBy.Count == 0)
                     return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be inproved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
 
 
@@ -258,12 +258,12 @@ namespace Signum.Engine.Linq
                 return new ColumnReplacer { Replacements = replacements }.Visit(expression); 
             }
 
-            protected override Expression VisitColumn(ColumnExpression column)
+            protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 return Replacements.TryGetC(column) ?? base.VisitColumn(column);
             }
 
-            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
             {
                 return child;
             }
@@ -289,7 +289,7 @@ namespace Signum.Engine.Linq
                 return ap.columns;
             }
 
-            protected override Expression VisitColumn(ColumnExpression column)
+            protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 if (externalAlias == column.Alias)
                     columns.Add(column);

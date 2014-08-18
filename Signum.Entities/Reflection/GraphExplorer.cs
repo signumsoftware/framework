@@ -226,6 +226,7 @@ namespace Signum.Entities.Reflection
                 n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n) :
                 n is Lite<IdentifiableEntity> ? GetAttributes((Lite<IdentifiableEntity>)n) :
                 n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n) :
+                n is MixinEntity ? GetAttributes((MixinEntity)n) :
                 n.GetType().IsMList() ? GetAttributes((IList)n) :
                 new[]
                 {
@@ -271,6 +272,16 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()), 
                new XAttribute("NodeRadius", 0),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
+            };
+        }
+
+        private static XAttribute[] GetAttributes(MixinEntity ee)
+        {
+            return new[]
+            {
+               new XAttribute("Label", (ee.ToString() ?? "[null]") +  Modified(ee)),
+               new XAttribute("TypeName", ee.GetType().TypeName()), 
                new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
             };
         }

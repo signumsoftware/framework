@@ -58,11 +58,13 @@ namespace Signum.Web
             if (entitySettings.ViewRoute != null)
                 return entitySettings.ViewRoute(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
 
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
+            var result = new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
                 id = id.TryToString()
             });
+
+            return result;
         }
 
         public static string NavigateRoute(IIdentifiable ie)
@@ -564,6 +566,14 @@ namespace Signum.Web
             return loadedModules.Add(methodName);
         }
 
+        public void AssertDefined(MethodBase methodBase)
+        {
+            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+
+            if (!loadedModules.Contains(name))
+                throw new InvalidOperationException("Call {0} first".Formato(name));
+        }
+
         protected internal string GetOrCreateTabID(ControllerBase c)
         {
             if (c.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
@@ -706,7 +716,6 @@ namespace Signum.Web
             SetDefaultOrder(findOptions, description);
 
             controller.ViewData.Model = new Context(null, "");
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -759,19 +768,19 @@ namespace Signum.Web
         protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, canAggregate);
+                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, SubTokensOptions.CanAnyAll| SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
 
         public virtual void SetSearchViewableAndCreable(FindOptions findOptions, QueryDescription description)
@@ -820,7 +829,6 @@ namespace Signum.Web
             SetDefaultOrder(findOptions, desc);
 
             controller.ViewData.Model = context;
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.FindMode] = mode;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -1172,6 +1180,19 @@ namespace Signum.Web
         }
 
 
+        public event Func<Lite<IdentifiableEntity>, IDisposable> RetrievingForView; 
+        internal IDisposable OnRetrievingForView(Lite<IdentifiableEntity> lite)
+        {
+            if (RetrievingForView == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (Func<Lite<IdentifiableEntity>, IDisposable> action in RetrievingForView.GetInvocationList())
+            {
+                result = Disposable.Combine(result, action(lite));
+            }
+            return result;
+        }
     }
 
     public enum JsonResultType

@@ -731,9 +731,9 @@ namespace Signum.Engine.DynamicQuery
 
             var body = at.Parent.BuildExpression(context);
 
-            var type = at.ConvertTo();
+            var type = at.Type;
 
-            if (type != null)
+            if (body.Type != type)
                 body = body.TryConvert(type);
 
             var lambda = Expression.Lambda(body, context.Parameter);

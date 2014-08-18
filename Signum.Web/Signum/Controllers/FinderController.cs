@@ -13,7 +13,7 @@ namespace Signum.Web.Controllers
 {
     public class FinderController : Controller
     {
-        [HttpPost]
+        [HttpPost, ActionSplitter("types")]
         public JsonNetResult Autocomplete(string types, string q, int l)
         {
             Type[] typeArray = EntityBase.ParseTypes(types);
@@ -43,18 +43,30 @@ namespace Signum.Web.Controllers
             return this.JsonNet(result);
         }
 
+        [ActionSplitter("webQueryName")]
+        public ContentResult Count(FindOptions findOptions)
+        {
+            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
+            {
+                FilterOptions = findOptions.FilterOptions
+            });
+
+            return this.Content(count.ToString());
+        }
+
+        [ActionSplitter("webQueryName")]
         public ActionResult Find(FindOptions findOptions)
         {
             return Navigator.Find(this, findOptions);
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult PartialFind(FindOptions findOptions, string prefix, bool isExplore)
         {
             return Navigator.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
             return Navigator.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
@@ -65,11 +77,11 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanElement);
             return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("webQueryName")]
         public ContentResult SelectedItemsContextMenu(string webQueryName, string implementationsKey, string prefix)
         {
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
@@ -109,7 +121,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+                fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -126,13 +138,13 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int options)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
+            var token = QueryUtils.Parse(tokenName, qd, (SubTokensOptions)options);
 
-            var combo = CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, prefix), SearchControlHelper.GetQueryTokenBuilderSettings(qd));
+            var combo = CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, prefix), SearchControlHelper.GetQueryTokenBuilderSettings(qd, (SubTokensOptions)options));
 
             return Content(combo.ToHtmlString());
         }

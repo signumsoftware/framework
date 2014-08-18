@@ -10,8 +10,7 @@
         </h2>
         @Html.ValidationSummaryAjax()
         @{ ViewData[ViewDataKeys.AvoidFullScreenButton] = true; }
-        @Html.Partial(ViewData[ViewDataKeys.PartialViewName].ToString())
+        @Html.Partial(Navigator.Manager.SearchControlView)
         @Html.AntiForgeryToken()
     </div>
-    <div class="clearall"></div>   
 }

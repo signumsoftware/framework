@@ -209,25 +209,25 @@ namespace Signum.Entities.DynamicQuery
         };
 
 
-        public static QueryToken SubToken(QueryToken token, QueryDescription qd, bool canAggregate, string key)
+        public static QueryToken SubToken(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
         {
-            var result = SubTokenBasic(token, qd, key);
+            var result = SubTokenBasic(token, qd, options, key);
 
             if (result != null)
                 return result;
 
-            if (canAggregate)
+            if ((options & SubTokensOptions.CanAggregate) != 0)
                 return AggregateTokens(token, qd).SingleOrDefaultEx(a => a.Key == key);
 
             return null;
         }
 
-        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, bool canAggregate)
+        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, SubTokensOptions options)
         {
-            var result = SubTokensBasic(token, qd);
+            var result = SubTokensBasic(token, qd, options);
 
-            if (canAggregate)
-                result.AddRange(AggregateTokens(token, qd));
+            if ((options & SubTokensOptions.CanAggregate) != 0)
+                result.InsertRange(0, AggregateTokens(token, qd));
 
             return result;
         }
@@ -259,7 +259,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        static QueryToken SubTokenBasic(QueryToken token, QueryDescription qd, string key)
+        static QueryToken SubTokenBasic(QueryToken token, QueryDescription qd, SubTokensOptions options, string key)
         {
             if (token == null)
             {
@@ -272,12 +272,12 @@ namespace Signum.Entities.DynamicQuery
             }
             else
             {
-                return token.SubTokenInternal(key);
+                return token.SubTokenInternal(key, options);
             }
         }
 
         public static Func<bool> MergeEntityColumns = null;
-        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd)
+        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd, SubTokensOptions options)
         {
             if (token == null)
             {
@@ -290,7 +290,7 @@ namespace Signum.Entities.DynamicQuery
 
                 dictonary.Add(entity.Key, entity);
 
-                foreach (var item in entity.SubTokensInternal().OrderBy(a => a.ToString()))
+                foreach (var item in entity.SubTokensInternal(options).OrderBy(a => a.ToString()))
                 {
                     if (!dictonary.ContainsKey(item.Key))
                     {
@@ -302,10 +302,15 @@ namespace Signum.Entities.DynamicQuery
 
             }
             else
-                return token.SubTokensInternal();
+                return token.SubTokensInternal(options);
         }
 
-        public static QueryToken Parse(string tokenString, QueryDescription qd, bool canAggregate)
+        public static bool IsColumnToken(string tokenString)
+        {
+            return tokenString.IndexOf('.') == -1 && tokenString != "Entity"; 
+        }
+
+        public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
         {
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
@@ -314,14 +319,14 @@ namespace Signum.Entities.DynamicQuery
 
             string firstPart = parts.FirstEx();
 
-            QueryToken result = SubToken(null, qd, canAggregate, firstPart);
+            QueryToken result = SubToken(null, qd, options, firstPart);
 
             if (result == null)
                 throw new FormatException("Column {0} not found on query {1}".Formato(firstPart, QueryUtils.GetCleanName(qd.QueryName)));
 
             foreach (var part in parts.Skip(1))
             {
-                var newResult = SubToken(result, qd, canAggregate, part);
+                var newResult = SubToken(result, qd, options, part);
 
                 if (newResult == null)
                     throw new FormatException("Token with key '{0}' not found on {1} of query {2}".Formato(part, result.FullKey(), QueryUtils.GetCleanName(qd.QueryName)));
@@ -454,5 +459,12 @@ namespace Signum.Entities.DynamicQuery
 
             return left;
         }
+    }
+
+    public enum SubTokensOptions
+    {
+        CanAggregate = 1,
+        CanAnyAll = 2,
+        CanElement = 4,
     }
 }

@@ -14,6 +14,7 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using System.ComponentModel;  
 using System.Collections;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -81,7 +82,18 @@ namespace Signum.Entities
             Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
 
             if (imp == null)
-                throw new InvalidOperationException(Error(t) + ". Set implementations for {0}".Formato(route));
+            {
+                var message = Error(t) + @". Set implementations for {0}.".Formato(route);
+
+                if(t.IsInterface || t.IsAbstract)
+                {
+                    message += @"\r\nConsider writing something like this in your Starter class: 
+sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribute(typeof(YourConcrete{2}));"
+                    .Formato(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
+                }
+
+                throw new InvalidOperationException(message);
+            }
 
             return imp.Value;
         }
@@ -116,11 +128,14 @@ namespace Signum.Entities
 
         static string Error(Type type)
         {
-            if (!type.IsIdentifiableEntity())
-                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+            if (type.IsInterface)
+                return "{0} is an interface".Formato(type.Name);
 
             if (type.IsAbstract)
                 return "{0} is abstract".Formato(type.Name);
+
+            if (!type.IsIdentifiableEntity())
+                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
 
             return null;
         }

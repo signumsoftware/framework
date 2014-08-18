@@ -383,8 +383,12 @@ namespace Signum.Windows
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
-                ColumnOptions.Add(new ColumnOption(FilterColumn));
-                ColumnOptionsMode = ColumnOptionsMode.Remove;
+
+                if (QueryUtils.IsColumnToken(FilterColumn))
+                {
+                    ColumnOptions.Add(new ColumnOption(FilterColumn));
+                    ColumnOptionsMode = ColumnOptionsMode.Remove;
+                }
                 if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
                     SearchOnLoad = true;
             }
@@ -401,7 +405,9 @@ namespace Signum.Windows
                 }
             }
 
-            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString(entityColumn.Implementations.Value.IsByAll ? "[All]" : entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString()
+                .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
+                .Formato(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
@@ -461,7 +467,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return arg.SubTokens(Description, canAggregate: false);
+            return arg.SubTokens(Description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)

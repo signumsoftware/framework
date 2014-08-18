@@ -73,6 +73,9 @@ namespace Signum.Engine
 
                 SaveGraph(schema, identifiables);
 
+                foreach (var node in identifiables)
+                    schema.OnSaved(node);
+
                 EntityCache.Add(identifiables);
                 EntityCache.Add(notModified);
 

@@ -14,7 +14,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {
-    public class QueryFilterer : SimpleExpressionVisitor
+    public class QueryFilterer : ExpressionVisitor
     {
         static GenericInvoker<Func<Schema, IQueryable, IQueryable>> miFilter = new GenericInvoker<Func<Schema, IQueryable, IQueryable>>((s,q) => s.OnFilterQuery<TypeDN>((IQueryable<TypeDN>)q));
 
