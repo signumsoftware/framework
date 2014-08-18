@@ -83,6 +83,7 @@
     <Compile Include="MimeTypes.cs" />
     <Compile Include="NaturalLanguage\English.cs" />
     <Compile Include="NaturalLanguage\Spanish.cs" />
+    <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="Statics.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
@@ -110,7 +111,7 @@
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="DebugTextWriter.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Profiler.cs" />
+    <Compile Include="Profiler\HeavyProfiler.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="DataStructures\DirectedEdgedGraph.cs" />
@@ -246,6 +247,9 @@
     <None Include="MimeTypes.md" />
     <None Include="MyRandom.md" />
     <None Include="NaturalLanguage\NaturalLangageTools.md" />
+    <None Include="Polymorphic.md" />
+    <None Include="Profiler\HeavyProfiler.md" />
+    <None Include="Profiler\TimeTracker.md" />
     <None Include="ProgressProxy.md" />
     <None Include="Reflection\ReflectionTools.md" />
     <None Include="SafeConsole.md" />
