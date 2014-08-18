@@ -451,7 +451,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
 
         [TestMethod]
-        public void UpdateWith()
+        public void UnsafeUpdatePart()
         {
             using (Transaction tr = new Transaction())
             {
@@ -552,8 +552,8 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 Database.Query<LabelDN>()
-                    .UnsafeUpdatePart(a => a.Owner.Entity)
-                    .Set(lb => lb.Name, a => a.Owner.Entity + "toStr")
+                    .UnsafeUpdatePart(lb => lb.Owner.Entity.Country)
+                    .Set(ctr => ctr.Name, lb => lb.Name)
                     .Execute();
             }
         }

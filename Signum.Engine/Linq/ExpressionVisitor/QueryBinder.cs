@@ -2540,7 +2540,22 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
-            return base.VisitUpdate(update);
+            var source = VisitSource(update.Source);
+            var where = Visit(update.Where);
+            var assigments = Visit(update.Assigments, VisitColumnAssigment);
+            if (source != update.Source || where != update.Where || assigments != update.Assigments)
+            {
+                var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
+                return new UpdateExpression(update.Table, select, where, assigments);
+            }
+            return update;
+        }
+
+        private SelectExpression WrapSelect(SourceExpression source)
+        {
+            Alias newAlias = aliasGenerator.NextSelectAlias();
+            var select = new SelectExpression(newAlias, false, null, new ColumnDeclaration[0] /*Rebinder*/, source, null, null, null, 0); 
+            return select;
         }
     }
 
