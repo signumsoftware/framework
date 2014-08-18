@@ -23,6 +23,7 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
+            public bool LogAlsoIfNotSaved { get; set; }
 
             //public Func<object[], T> Construct { get; set; } (inherited)
             public bool Lite { get { return false; } }
@@ -44,53 +45,70 @@ namespace Signum.Engine.Operations
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
-                    using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, null, args))
+                    OperationLogDN log = new OperationLogDN
                     {
-                        try
-                        {
-                            using (Transaction tr = new Transaction())
+                        Operation = Symbol.Operation,
+                        Start = TimeZoneManager.Now,
+                        User = UserHolder.Current.ToLite()
+                    };
+
+                    try
+                    {
+                        using (Transaction tr = new Transaction())
+                        { 
+                            T result;
+                            using (OperationLogic.AllowSave<T>())
+                            using (OperationLogic.OnSuroundOperation(this, null, log, args))
                             {
-                                OperationLogDN log = new OperationLogDN
+                                result = Construct(args);
+
+                                AssertEntity(result);
+
+                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    Operation = Symbol.Operation,
-                                    Start = TimeZoneManager.Now,
-                                    User = UserHolder.Current.ToLite()
-                                };
+                                    log.SetTarget(result);
+                                    log.End = TimeZoneManager.Now;
+                                }
+                                else
+                                    log = null;
+                            }
 
-                                OnBeginOperation();
-
-                                T entity = Construct(args);
-
-                                OnEndOperation(entity);
-
-                                if (!entity.IsNew)
-                                    log.Target = entity.ToLite();
-
-                                log.End = TimeZoneManager.Now;
+                            if (log != null)
                                 using (ExecutionMode.Global())
                                     log.Save();
 
-                                return tr.Commit(entity);
+                            return tr.Commit(result);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        OperationLogic.SetExceptionData(ex, null, args);
+
+                        if (LogAlsoIfNotSaved)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = ex.LogException();
+
+                            using (Transaction tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
+
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                                tr2.Commit();
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            OperationLogic.OnErrorOperation(this, null, args, ex);
-                            throw;
-                        }
+
+                        throw;
                     }
                 }
             }
 
-            protected virtual void OnBeginOperation()
+            protected virtual void AssertEntity(T entity)
             {
-                OperationLogic.OnBeginOperation(this, null);
-            }
-
-            protected virtual void OnEndOperation(T entity)
-            {
-                OperationLogic.OnEndOperation(this, entity);
             }
 
             public virtual void AssertIsValid()
@@ -160,70 +178,86 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
+            IIdentifiable IConstructorFromOperation.Construct(IIdentifiable origin, params object[] args)
             {
                 using (HeavyProfiler.Log("ConstructFrom", () => Symbol.Operation.Key))
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
-                    string error = OnCanConstruct(entity);
+                    string error = OnCanConstruct(origin);
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, entity, args))
+                    OperationLogDN log = new OperationLogDN
                     {
-                        try
+                        Operation = Symbol.Operation,
+                        Start = TimeZoneManager.Now,
+                        User = UserHolder.Current.ToLite(),
+                        Origin = origin.ToLiteFat(),
+                    };
+
+                    try
+                    {
+                        using (Transaction tr = new Transaction())
                         {
-                            using (Transaction tr = new Transaction())
+                            T result;
+                            using (OperationLogic.AllowSave(origin.GetType()))
+                            using (OperationLogic.AllowSave<T>())
+                            using (OperationLogic.OnSuroundOperation(this, log, origin, args))
                             {
-                                OperationLogDN log = new OperationLogDN
-                                {
-                                    Operation = Symbol.Operation,
-                                    Start = TimeZoneManager.Now,
-                                    User = UserHolder.Current.ToLite(),
-                                    Origin = entity.ToLiteFat(),
-                                };
+                                result = Construct((F)origin, args);
 
-                                OnBeginOperation((IdentifiableEntity)entity);
-
-                                T result = Construct((F)entity, args);
-
-                                OnEndOperation(result);
-
-                                log.End = TimeZoneManager.Now;
+                                AssertEntity(result);
 
                                 if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    log.Target = result == null || result.IsNew ? null : result.ToLite();
-
-                                    using (ExecutionMode.Global())
-                                        log.Save();
+                                    log.End = TimeZoneManager.Now;
+                                    log.SetTarget(result);
                                 }
-
-                                return tr.Commit(result);
+                                else
+                                {
+                                    log = null;
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, e);
-                            throw;
+
+                            if (log != null)
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                            return tr.Commit(result);
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        OperationLogic.SetExceptionData(ex, (IdentifiableEntity)origin, args);
+
+                        if (LogAlsoIfNotSaved)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = ex.LogException();
+
+                            using (Transaction tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
+
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                                tr2.Commit();
+                            }
+                        }
+
+                        throw;
+                    }
+
                 }
             }
 
-            protected virtual void OnBeginOperation(IdentifiableEntity entity)
+            protected virtual void AssertEntity(T entity)
             {
-                OperationLogic.OnBeginOperation(this, entity);
             }
-
-            protected virtual void OnEndOperation(T result)
-            {
-                OperationLogic.OnEndOperation(this, result);
-            }
-
 
             public virtual void AssertIsValid()
             {
@@ -249,6 +283,8 @@ namespace Signum.Engine.Operations
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
 
+            public bool LogAlsoIfNotSaved { get; set; }
+
             public Func<List<Lite<F>>, object[], T> Construct { get; set; }
 
             public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object[], T>> overrider)
@@ -267,59 +303,79 @@ namespace Signum.Engine.Operations
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Operation, inUserInterface: false);
 
-                    using (OperationLogic.AllowSave<F>())
-                    using (OperationLogic.AllowSave<T>())
-                    using (OperationLogic.OnSuroundOperation(this, null, args))
+                    OperationLogDN log = new OperationLogDN
                     {
-                        try
+                        Operation = Symbol.Operation,
+                        Start = TimeZoneManager.Now,
+                        User = UserHolder.Current.ToLite()
+                    };
+
+                    try
+                    {
+                        using (Transaction tr = new Transaction())
                         {
-                            using (Transaction tr = new Transaction())
+                            T result;
+
+                            using (OperationLogic.AllowSave<F>())
+                            using (OperationLogic.AllowSave<T>())
+                            using (OperationLogic.OnSuroundOperation(this, log, null, args))
                             {
-                                OperationLogDN log = new OperationLogDN
+                                result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
+
+                                AssertEntity(result);
+
+                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    Operation = Symbol.Operation,
-                                    Start = TimeZoneManager.Now,
-                                    User = UserHolder.Current.ToLite()
-                                };
+                                    log.End = TimeZoneManager.Now;
+                                    log.SetTarget(result);
+                                }
+                                else
+                                {
+                                    log = null;
+                                }
+                            }
 
-                                OnBeginOperation();
-
-                                T result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
-
-                                OnEndOperation(result);
-
-                                if (result != null && !result.IsNew)
-                                    log.Target = result.ToLite();
-
-                                log.End = TimeZoneManager.Now;
+                            if (log != null)
                                 using (ExecutionMode.Global())
                                     log.Save();
 
-                                return tr.Commit(result);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            OperationLogic.OnErrorOperation(this, null, args, e);
-                            throw;
+                            return tr.Commit(result);
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        OperationLogic.SetExceptionData(ex, null, args);
+
+                        if (LogAlsoIfNotSaved)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = ex.LogException();
+
+                            using (Transaction tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
+
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                                tr2.Commit();
+                            }
+                        }
+
+                        throw;
+                    }
                 }
-            }
-
-            protected virtual void OnBeginOperation()
-            {
-                OperationLogic.OnBeginOperation(this, null);
-            }
-
-            protected virtual void OnEndOperation(T result)
-            {
-                OperationLogic.OnEndOperation(this, result);
             }
 
             protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)
             {
                 return Construct(lites, args);
+            }
+
+            protected virtual void AssertEntity(T entity)
+            {
             }
 
             public virtual void AssertIsValid()
@@ -402,72 +458,56 @@ namespace Signum.Engine.Operations
                         User = UserHolder.Current.ToLite()
                     };
 
-                    using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.OnSuroundOperation(this, entity, args))
+                    try
                     {
-                        try
+                        using (Transaction tr = new Transaction())
                         {
-                            using (Transaction tr = new Transaction())
+                            using (OperationLogic.AllowSave(entity.GetType()))
+                            using (OperationLogic.OnSuroundOperation(this, log, entity, args))
                             {
-                                OnBeginOperation((T)entity);
-
                                 Execute((T)entity, args);
 
-                                OnEndOperation((T)entity);
+                                AssertEntity((T)entity);
 
                                 entity.Save(); //Nothing happens if already saved
 
-                                log.Target = entity.ToLite(); //in case AllowsNew == true
+                                log.SetTarget(entity);
                                 log.End = TimeZoneManager.Now;
-                                using (ExecutionMode.Global())
-                                    log.Save();
-
-                                tr.Commit();
                             }
+
+                            using (ExecutionMode.Global())
+                                log.Save();
+
+                            tr.Commit();
                         }
-                        catch (Exception ex)
-                        {
-                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        OperationLogic.SetExceptionData(ex, (IdentifiableEntity)entity, args);
 
-                            if (!entity.IsNew)
-                            {
-                                if (Transaction.InTestTransaction)
-                                    throw;
-
-                                var exLog = ex.LogException();
-
-                                using (Transaction tr2 = Transaction.ForceNew())
-                                {
-                                    OperationLogDN log2 = new OperationLogDN
-                                    {
-                                        Operation = log.Operation,
-                                        Start = log.Start,
-                                        User = log.User,
-                                        Target = entity.IsNew ? null : entity.ToLite(),
-                                        Exception = exLog.ToLite(),
-                                        End = TimeZoneManager.Now
-                                    };
-
-                                    using (ExecutionMode.Global())
-                                        log2.Save();
-
-                                    tr2.Commit();
-                                }
-                            }
+                        if (Transaction.InTestTransaction)
                             throw;
+
+                        var exLog = ex.LogException();
+
+                        using (Transaction tr2 = Transaction.ForceNew())
+                        {
+                            log.Target = entity.ToLite();
+                            log.Exception = exLog.ToLite();
+
+                            using (ExecutionMode.Global())
+                                log.Save();
+
+                            tr2.Commit();
                         }
+
+                        throw;
                     }
                 }
             }
 
-            protected virtual void OnBeginOperation(T entity)
+            protected virtual void AssertEntity(T entity)
             {
-                OperationLogic.OnBeginOperation(this, entity);
-            }
-
-            protected virtual void OnEndOperation(T entity)
-            {
-                OperationLogic.OnEndOperation(this, entity);
             }
 
             public virtual void AssertIsValid()
@@ -550,20 +590,17 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.OnSuroundOperation(this, entity, args))
+                    using (OperationLogic.OnSuroundOperation(this, log, entity, args))
                     {
                         try
                         {
                             using (Transaction tr = new Transaction())
                             {
-                                OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
-
                                 OnDelete((T)entity, args);
 
-                                OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
-
-                                log.Target = entity.ToLite(); //in case AllowsNew == true
+                                log.SetTarget(entity);
                                 log.End = TimeZoneManager.Now;
+
                                 using (ExecutionMode.Global())
                                     log.Save();
 
@@ -572,7 +609,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, ex);
+                            OperationLogic.SetExceptionData(ex, (IdentifiableEntity)entity, args);
 
                             if (Transaction.InTestTransaction)
                                 throw;
@@ -581,18 +618,11 @@ namespace Signum.Engine.Operations
 
                             using (Transaction tr2 = Transaction.ForceNew())
                             {
-                                var log2 = new OperationLogDN
-                                {
-                                    Operation = log.Operation,
-                                    Start = log.Start,
-                                    End = TimeZoneManager.Now,
-                                    Target = entity.ToLite(),
-                                    Exception = exLog.ToLite(),
-                                    User = log.User
-                                };
+                                log.Target = entity.ToLite();
+                                log.Exception = exLog.ToLite();
 
                                 using (ExecutionMode.Global())
-                                    log2.Save();
+                                    log.Save();
 
                                 tr2.Commit();
                             }
@@ -607,7 +637,6 @@ namespace Signum.Engine.Operations
             {
                 Delete(entity, args);
             }
-
 
             public virtual void AssertIsValid()
             {

@@ -1719,10 +1719,20 @@ namespace Signum.Engine.Linq
             {
                 foreach (var setter in setterExpressions)
                 {
-                    var toUpdateParam = setter.PropertyExpression.Parameters.Single();
-                    map.Add(toUpdateParam, toUpdate);
-                    Expression colExpression = Visit(setter.PropertyExpression.Body);
-                    map.Remove(toUpdateParam);
+                    Expression colExpression;
+                    try
+                    {
+                        var toUpdateParam = setter.PropertyExpression.Parameters.Single();
+                        map.Add(toUpdateParam, toUpdate);
+                        colExpression = Visit(setter.PropertyExpression.Body);
+                        map.Remove(toUpdateParam);
+                    }
+                    catch(CurrentSourceNotFoundException e)
+                    {
+                        throw new InvalidOperationException("The expression '{0}' can not be used as a propertyExpression. Consider using UnsafeUpdatePart"
+                            .Formato(setter.PropertyExpression.NiceToString()),
+                            e);
+                    }
 
                     var param = setter.ValueExpression.Parameters.Single();
                     map.Add(param, pr.Projector);
@@ -1999,14 +2009,9 @@ namespace Signum.Engine.Linq
 
         private SourceExpression GetCurrentSource(ExpansionRequest req)
         {
-#if DEBUG
-#else
-             if (currentSource.Count() == 1)
-                return currentSource.Peek(); 
-#endif
             var external = req.ExternalAlias(this);
 
-            return currentSource.First(s => //could be more than one on GroupBy aggregates
+            var result = currentSource.FirstOrDefault(s => //could be more than one on GroupBy aggregates
             {
                 if (external.IsEmpty())
                     return true;
@@ -2015,6 +2020,11 @@ namespace Signum.Engine.Linq
 
                 return external.Intersect(knownAliases).Any();
             });
+
+            if (result == null)
+                throw new CurrentSourceNotFoundException("Impossible to get current source for aliases " + external.ToString(", "));
+
+            return result;
         }
 
         HashSet<Alias> KnownAliases(SourceExpression source)
@@ -2605,7 +2615,7 @@ namespace Signum.Engine.Linq
                     {
                         using (this.OverrideColExpression(col.Reference))
                         {
-                            var entity =  CombineCoalesce(l.Reference, r.Reference);
+                            var entity = CombineCoalesce(l.Reference, r.Reference);
                             return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null);
                         }
                     }); 
@@ -2659,6 +2669,20 @@ namespace Signum.Engine.Linq
             Debug.Assert(result.Type == colExpression.Type);
 
             return result;
+        }
+
+        protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            if (!(colExpression is LiteReferenceExpression))
+                throw new InvalidOperationException("colExpression should be a LiteReferenceExpression in this stage");
+
+            var reference = ((LiteReferenceExpression)colExpression).Reference;
+
+            var newRef = this.OverrideColExpression(reference).Using(_ => Visit(lite.Reference));
+            if (newRef != lite.Reference)
+                return new LiteReferenceExpression(Lite.Generate(newRef.Type), newRef, null);
+
+            return lite;
         }
 
         protected internal override Expression VisitEntity(EntityExpression ee)
@@ -2805,5 +2829,17 @@ namespace Signum.Engine.Linq
 
             return new Disposable(() => this.colExpression = save);
         }
+    }
+
+    [Serializable]
+    public class CurrentSourceNotFoundException : Exception
+    {
+        public CurrentSourceNotFoundException() { }
+        public CurrentSourceNotFoundException(string message) : base(message) { }
+        public CurrentSourceNotFoundException(string message, Exception inner) : base(message, inner) { }
+        protected CurrentSourceNotFoundException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
     }
 }

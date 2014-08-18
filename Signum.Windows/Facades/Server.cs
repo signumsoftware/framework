@@ -216,6 +216,21 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.Save(entidad)); 
         }
 
+        public static bool Exists<T>(int id) where T : IdentifiableEntity
+        {
+            return Return((IBaseServer s) => s.Exists(typeof(T), id));
+        }
+
+        public static bool Exists<T>(Lite<T> lite) where T : class, IIdentifiable
+        {
+            return Return((IBaseServer s) => s.Exists(lite.EntityType, lite.Id));
+        }
+
+        public static bool Exists<T>(T entity) where T : class, IIdentifiable
+        {
+            return Return((IBaseServer s) => s.Exists(entity.GetType(), entity.Id));
+        }
+
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
             return (T)Return((IBaseServer s) => s.Retrieve(typeof(T), id)); 

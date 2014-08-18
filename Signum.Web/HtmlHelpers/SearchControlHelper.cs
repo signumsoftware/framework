@@ -176,7 +176,7 @@ namespace Signum.Web
         public static MvcHtmlString Header(Column col, OrderType? orderType)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("th")
+            using (sb.SurroundLine(new HtmlTag("th")
                 .Attr("draggable", "true")
                 .Attr("data-column-name", col.Name)
                 .Attr("data-nice-name", col.Token.NiceName())))
