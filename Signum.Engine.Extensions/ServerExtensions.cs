@@ -37,13 +37,15 @@ using Signum.Entities.UserAssets;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
 using Signum.Engine.DiffLog;
+using Signum.Entities.Isolation;
+using Signum.Engine.Isolation;
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IDashboardServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
-        IProfilerServer, IDiffLogServer
+        IProfilerServer, IDiffLogServer, IIsolationServer
     {
         public override IdentifiableEntity Retrieve(Type type, int id)
         {
@@ -418,10 +420,18 @@ namespace Signum.Services
         #endregion
 
 
-        public MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
+       public MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => DiffLogLogic.OperationLogNextPrev(log));
         }
+
+         #region IIsolationServer
+        public Lite<IsolationDN> GetOnlyIsolation(List<Lite<IdentifiableEntity>> selectedEntities)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => IsolationLogic.GetOnlyIsolation(selectedEntities));
+        }
+        #endregion
     }
 }
