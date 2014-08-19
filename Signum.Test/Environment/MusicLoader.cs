@@ -107,6 +107,7 @@ namespace Signum.Test.Environment
                 Dead = true,
                 LastAward = pa,
                 Status = Status.Single,
+                Friends = { smashingPumpkins.Members.SingleEx(a=>a.Name.Contains("Billy Corgan")).ToLite() }
             }.Execute(ArtistOperation.Save); ;
 
             new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }

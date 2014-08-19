@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Signum.Utilities.DataStructures;
 
 
 namespace Signum.Test.LinqProvider
@@ -470,6 +471,20 @@ namespace Signum.Test.LinqProvider
                              a.Name,
                              Songs = a.Songs.ToList(),
                          }).ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectMListPotentialDuplicates()
+        {
+            var sp = (from alb in Database.Query<AlbumDN>()
+                      let mich = ((ArtistDN)alb.Author)
+                      where mich.Name.Contains("Michael")
+                      select mich).ToList();
+
+            var single = sp.Distinct(ReferenceEqualityComparer<ArtistDN>.Default).SingleEx();
+
+            Assert.AreEqual(single.Friends.Distinct().Count(), single.Friends.Count);
         }
 
         [TestMethod]
