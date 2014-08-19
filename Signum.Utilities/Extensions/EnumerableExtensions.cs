@@ -446,7 +446,7 @@ namespace Signum.Utilities
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection, Random rng)
         {
             T[] elements = collection.ToArray();
-           
+
             for (int i = elements.Length - 1; i > 0; i--)
             {
                 int rnd = rng.Next(i + 1);
@@ -853,7 +853,7 @@ namespace Signum.Utilities
             return result.Select(a => a.Reverse());
         }
 
-     
+
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
         {
@@ -1106,7 +1106,7 @@ namespace Signum.Utilities
                 if (missing.Count != 0)
                     throw new InvalidOperationException("Error {0}\r\n Missing: {1}".Formato(action, missing.ToString(", ")));
 
-           return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 
@@ -1151,6 +1151,28 @@ namespace Signum.Utilities
                     isFirst = false;
                 }
             }
+        }
+
+        public static IEnumerable<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector, IEqualityComparer<K> comparer)
+        {
+            var hash = new HashSet<K>(comparer);
+            return source.Where(item => !hash.Add(selector(item)));
+        }
+
+        public static IEnumerable<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector)
+        {
+            return source.Duplicates(selector, null);
+        }
+
+        public static IEnumerable<T> Duplicates<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
+        {
+            var hash = new HashSet<T>(comparer);
+            return source.Where(item => !hash.Add(item));
+        }
+
+        public static IEnumerable<T> Duplicates<T>(this IEnumerable<T> source)
+        {
+            return source.Duplicates(EqualityComparer<T>.Default);
         }
     }
 
