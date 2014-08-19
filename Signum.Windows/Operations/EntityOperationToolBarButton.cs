@@ -161,23 +161,19 @@ namespace Signum.Windows.Operations
 
                     if (!eoc.ConfirmMessage())
                         return;
-                        
-                    bool serverCalled = false;
+
                     IIdentifiable result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, null, ctx =>
                     {
-                        serverCalled = true;
+                        var entity = eoc.OperationInfo.Lite.Value ?
+                            Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :
+                            Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
 
-                        if (eoc.OperationInfo.Lite.Value)
-                            return Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null));
-                        else
-
-                            return Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                        return eoc.NullEntityMessage(entity);
                     });
 
                     if (result != null)
                         Navigator.Navigate(result);
-                    else if(serverCalled)
-                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(eoc.OperationInfo.OperationSymbol.NiceToString()));
+                       
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.Delete)
                 {

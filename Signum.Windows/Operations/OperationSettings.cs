@@ -103,6 +103,14 @@ namespace Signum.Windows.Operations
 
             return MessageBox.Show(Window.GetWindow(EntityControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK; 
         }
+
+        public T NullEntityMessage<T>(T entity) where T : IdentifiableEntity
+        {
+            if (entity == null)
+                MessageBox.Show(Window.GetWindow(EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(OperationInfo.OperationSymbol.NiceToString()));
+           
+            return entity;
+        }
     }
 
     public class ConstructorSettings : OperationSettings
@@ -152,6 +160,14 @@ namespace Signum.Windows.Operations
                 return true;
 
             return MessageBox.Show(Window.GetWindow(SearchControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK;
+        }
+
+        public T NullEntityMessage<T>(T entity)
+        {
+            if (entity == null)
+                MessageBox.Show(Window.GetWindow(SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(OperationInfo.OperationSymbol.NiceToString()));
+
+            return entity;
         }
     }
 }
