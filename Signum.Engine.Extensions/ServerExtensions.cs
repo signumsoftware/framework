@@ -35,13 +35,15 @@ using Signum.Entities.Excel;
 using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
 using Signum.Engine.UserAssets;
+using Signum.Entities.Isolation;
+using Signum.Engine.Isolation;
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IDashboardServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
-        IProfilerServer
+        IProfilerServer, IIsolationServer
     {
 
         #region ILoginServer Members
@@ -410,6 +412,13 @@ namespace Signum.Services
         #endregion
 
 
-      
+
+        #region IIsolationServer
+        public Lite<IsolationDN> GetOnlyIsolation(List<Lite<IdentifiableEntity>> selectedEntities)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => IsolationLogic.GetOnlyIsolation(selectedEntities));
+        }
+        #endregion
     }
 }

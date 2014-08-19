@@ -99,6 +99,7 @@
     <Compile Include="Authorization\User.cs" />
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
+    <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationDN.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />

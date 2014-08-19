@@ -182,5 +182,24 @@ namespace Signum.Engine.Isolation
 
             return collection.Where(a => a.Isolation().Is(curr));
         }
+
+        public static Lite<IsolationDN> GetOnlyIsolation(List<Lite<IdentifiableEntity>> selectedEntities)
+        {
+            return selectedEntities.GroupBy(a => a.EntityType)
+                .Select(gr => strategies[gr.Key] == IsolationStrategy.None ? null : giGetOnlyIsolation.GetInvoker(gr.Key)(gr))
+                .NotNull()
+                .Only();
+        }
+
+
+        static GenericInvoker<Func<IEnumerable<Lite<IdentifiableEntity>>, Lite<IsolationDN>>> giGetOnlyIsolation = 
+            new GenericInvoker<Func<IEnumerable<Lite<IdentifiableEntity>>, Lite<IsolationDN>>>(list => GetOnlyIsolation<IdentifiableEntity>(list));
+        public static Lite<IsolationDN> GetOnlyIsolation<T>(IEnumerable<Lite<IdentifiableEntity>> selectedEntities) where T : IdentifiableEntity
+        {
+            return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
+                Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()
+                ).NotNull().Only();
+        }
+        
     }
 }
