@@ -107,7 +107,7 @@ namespace Signum.Utilities
             V result;
             if (!dictionary.TryGetValue(key, out result))
                 throw new KeyNotFoundException(messageWithFormat.Formato(key));
-            return result;
+           return result;
         }
 
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
