@@ -32,7 +32,9 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return ToEnum().ToString(); 
+            var en = ToEnum();
+
+            return Enum.IsDefined(typeof(T), en) ? en.ToString() : (this.toStr ?? en.ToString());  //for aux sync
         }
 
         public bool Equals(EnumEntity<T> other)

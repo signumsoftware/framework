@@ -455,7 +455,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                     Dictionary<string, IdentifiableEntity> shouldByName = should.ToDictionary(a => a.ToString());
 
                     List<IdentifiableEntity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                    Dictionary<string, IdentifiableEntity> currentByName = current.ToDictionary(a => a.ToString(), table.Name.Name);
+                    Dictionary<string, IdentifiableEntity> currentByName = current.ToDictionary(a => a.toStr, table.Name.Name);
 
                     string key = Replacements.KeyEnumsForTable(table.Name.Name);
 
@@ -499,7 +499,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                        (str, s, c) =>
                        {
                            if (s.id == c.id)
-                               return null;
+                               return table.UpdateSqlSync(c, comment: c.toStr);
 
                            var insert = table.InsertSqlSync(s);
 
