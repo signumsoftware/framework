@@ -75,11 +75,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void CoalesceFirstOrDefault()
         {
-            var text = Database.Query<BandDN>()
+            var list = Database.Query<BandDN>()
                .Select(b => b.Members.FirstOrDefault(a => a.Sex == Sex.Female) ?? b.Members.FirstOrDefault(a => a.Sex == Sex.Male))
-               .Select(a => a.ToLite()).QueryText();
-
-            Assert.IsFalse(text.Contains("Lazy"));
+               .Select(a => a.ToLite()).ToList();
         }
 
         [TestMethod]
