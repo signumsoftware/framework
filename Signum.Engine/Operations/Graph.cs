@@ -492,7 +492,7 @@ namespace Signum.Engine.Operations
 
                         using (Transaction tr2 = Transaction.ForceNew())
                         {
-                            log.Target = entity.ToLite();
+                            log.Target = entity.IsNew ? null : entity.ToLite();
                             log.Exception = exLog.ToLite();
 
                             using (ExecutionMode.Global())
