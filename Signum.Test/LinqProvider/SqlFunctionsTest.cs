@@ -73,6 +73,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void CoalesceFirstOrDefault()
+        {
+            var list = Database.Query<BandDN>()
+               .Select(b => b.Members.FirstOrDefault(a => a.Sex == Sex.Female) ?? b.Members.FirstOrDefault(a => a.Sex == Sex.Male))
+               .Select(a => a.ToLite()).ToList();
+        }
+
+        [TestMethod]
         public void StringContainsUnion()
         {
             var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
