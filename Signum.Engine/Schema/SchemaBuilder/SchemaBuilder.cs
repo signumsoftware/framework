@@ -623,11 +623,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateFieldName(PropertyRoute route, KindOfField tipoCampo)
+        public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             string name = Reflector.PropertyName(route.FieldInfo.Name);
 
-            switch (tipoCampo)
+            switch (kindOfField)
             {
                 case KindOfField.PrimaryKey:
                 case KindOfField.Value:
