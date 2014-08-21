@@ -654,7 +654,7 @@ namespace Signum.Engine.Operations
             return FindOperation(type, operationSymbol).OperationType;
         }
 
-        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> operationSymbols)
+        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lites, List<OperationSymbol> operationSymbols)
         {
             Dictionary<OperationSymbol, string> result = null;
             using (ExecutionMode.Global())

@@ -142,7 +142,7 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationContext 
     {
-        public Lite<IdentifiableEntity>[] Entities { get; set; }
+        public List<Lite<IdentifiableEntity>> Entities { get; set; }
         public SearchControl SearchControl { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public string CanExecute { get; set; }
@@ -151,8 +151,8 @@ namespace Signum.Windows.Operations
         public bool ConfirmMessage()
         {
             string message = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete && Entities.Length > 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() :
-                OperationInfo.OperationType == OperationType.Delete && Entities.Length == 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
+                OperationInfo.OperationType == OperationType.Delete && Entities.Count > 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() :
+                OperationInfo.OperationType == OperationType.Delete && Entities.Count == 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
 
             if (message == null)
                 return true;
