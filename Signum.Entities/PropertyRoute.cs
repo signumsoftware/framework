@@ -254,7 +254,7 @@ namespace Signum.Entities
                 case PropertyRouteType.FieldOrProperty:
                     return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                 case PropertyRouteType.Mixin:
-                    return "[{0}]".Formato(type.Name);
+                    return Parent.ToString() + "[{0}]".Formato(type.Name);
                 case PropertyRouteType.MListItems:
                     return Parent.ToString() + "/";
                 case PropertyRouteType.LiteEntity:
