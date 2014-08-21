@@ -100,6 +100,7 @@
     <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
+    <Compile Include="EnumEntity.cs" />
     <Compile Include="EnumMessages.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -141,7 +142,6 @@
     <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
     <Compile Include="IdentifiableEntity.cs" />
-    <Compile Include="EnumProxy.cs" />
     <Compile Include="MList.cs" />
     <Compile Include="Modifiable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
