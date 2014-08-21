@@ -12,6 +12,7 @@ using Signum.Utilities.Reflection;
 using System.Windows.Controls;
 using System.ServiceModel;
 using System.Windows.Threading;
+using Signum.Services;
 
 namespace Signum.Windows.Isolation
 {
@@ -163,27 +164,28 @@ namespace Signum.Windows.Isolation
         public static Lite<IsolationDN> GetIsolation(FrameworkElement element, Func<Lite<IsolationDN>, string> isValid = null)
         {
             var result = IsolationDN.Current;
+
+            if (result == null)
+            {
+                var entity = element == null ? null : element.DataContext as IdentifiableEntity;
+                if (entity != null)
+                    result = entity.TryIsolation();
+            }
+
+            if (result == null)
+            {
+                var sc = element as SearchControl ?? (element as SearchWindow).Try(s => s.SearchControl);
+                if (sc != null)
+                    result = Server.Return((IIsolationServer a) => a.GetOnlyIsolation(sc.SelectedItems.ToList()));
+            }
+
             if (result != null)
             {
                 var error = isValid == null ? null : isValid(result);
                 if (error != null)
-                    throw new ApplicationException(error); 
-                
+                    throw new ApplicationException(error);
+
                 return result;
-            }
-
-            var entity = element == null ? null: element.DataContext as IdentifiableEntity;
-            if (entity != null)
-            {
-                result = entity.TryIsolation();
-                if (result != null)
-                {
-                    var error = isValid == null ? null : isValid(result);
-                    if (error != null)
-                        throw new ApplicationException(error); 
-
-                    return result;
-                }
             }
 
             return SelectIsolationInteractively(element == null ? null : Window.GetWindow(element), isValid);

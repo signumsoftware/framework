@@ -22,8 +22,8 @@ namespace Signum.Entities.Processes
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string operationArguments;
-        public string OperationArguments
+        byte[] operationArguments;
+        public byte[] OperationArguments
         {
             get { return operationArguments; }
             private set { Set(ref operationArguments, value); }
@@ -32,8 +32,8 @@ namespace Signum.Entities.Processes
         [HiddenProperty]
         public object[] OperationArgs
         {
-            get { return OperationArguments.HasText() ? (object[])Serialization.FromString(OperationArguments) : null;}
-            set { OperationArguments = value == null ? null : Serialization.ToString(value); }
+            get { return OperationArguments != null ? (object[])Serialization.FromBytes(OperationArguments) : null;}
+            set { OperationArguments = value == null ? null : Serialization.ToBytes(value); }
         }
 
         public override string ToString()

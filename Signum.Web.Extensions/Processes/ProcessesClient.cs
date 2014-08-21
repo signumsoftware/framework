@@ -111,7 +111,7 @@ namespace Signum.Web.Processes
 
             if (cleanKeys.Any())
             {
-                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
+                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites, cleanKeys);
                 foreach (var cod in contexts)
                 {
                     var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);

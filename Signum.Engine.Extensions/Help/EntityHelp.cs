@@ -74,7 +74,7 @@ namespace Signum.Engine.Help
                                p.Value.UserDescription))
                        ) : null,
                        opers.Any() ? new XElement(_Operations,
-                           Operations.Select(o => new XElement(_Operation, 
+                           opers.Select(o => new XElement(_Operation, 
                                new XAttribute(_Key, o.Key),
                                o.Value.UserDescription))
                        ) : null

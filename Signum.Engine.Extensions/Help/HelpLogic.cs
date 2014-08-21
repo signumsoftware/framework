@@ -319,7 +319,7 @@ namespace Signum.Engine.Help
                             string type = r.SelectInteractive(link, TypeLogic.NameToType.Keys, "Type", sd);
 
                             if (type == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             return Link(letter, type, text);
                         }
@@ -328,14 +328,14 @@ namespace Signum.Engine.Help
                             string type = r.SelectInteractive(link.Before("."), TypeLogic.NameToType.Keys, "Type", sd);
 
                             if (type == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
 
                             string pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, sd);
 
                             if (pr == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             return Link(letter, type + "." + pr, text);
                         }
@@ -344,7 +344,7 @@ namespace Signum.Engine.Help
                             string query = r.SelectInteractive(link, QueryLogic.QueryNames.Keys, "Query", sd);
 
                             if (query == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             return Link(letter, query, text);
                         }
@@ -353,7 +353,7 @@ namespace Signum.Engine.Help
                             string operation = r.SelectInteractive(link,  SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", sd);
 
                             if (operation == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             return Link(letter, operation, text);
                         }
@@ -363,7 +363,7 @@ namespace Signum.Engine.Help
                             string @namespace = r.SelectInteractive(link, namespaces, "Namespace", sd);
 
                             if (@namespace == null)
-                                return m.Value;
+                                return Link(letter + "-error", link, text);
 
                             return Link(letter, @namespace, text);
                         }
