@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [Serializable]
     public class PermissionSymbol : Symbol
     {
         private PermissionSymbol() { } 

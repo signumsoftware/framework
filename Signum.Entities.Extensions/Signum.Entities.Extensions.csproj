@@ -92,7 +92,7 @@
     <Compile Include="Authorization\SessionLog.cs" />
     <Compile Include="Authorization\UserTicket.cs" />
     <Compile Include="Authorization\Services.cs" />
-    <Compile Include="Authorization\Permission.cs" />
+    <Compile Include="Authorization\PermissionSymbol.cs" />
     <Compile Include="Authorization\Rules.cs" />
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
@@ -110,7 +110,7 @@
     <Compile Include="SMS\SMSConfigurationDN.cs" />
     <Compile Include="Basics\CultureInfoDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
-    <Compile Include="Basics\TypeConditionName.cs" />
+    <Compile Include="Basics\TypeConditionSymbol.cs" />
     <Compile Include="Basics\PropertyRouteDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
