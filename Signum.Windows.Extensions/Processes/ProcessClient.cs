@@ -73,7 +73,7 @@ namespace Signum.Windows.Processes
             if (!Navigator.IsViewable(typeof(PackageOperationDN)))
                 return Enumerable.Empty<MenuItem>();
 
-            if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length == 1)
+            if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Count == 1)
                 return null;
 
             if (sc.Implementations.IsByAll)
