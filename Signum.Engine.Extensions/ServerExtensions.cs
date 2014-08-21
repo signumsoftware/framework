@@ -95,10 +95,10 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol, object[] operationArgs = null)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol, params object[] operationArgs)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
-                () => PackageLogic.CreatePackageOperation(lites, operationSymbol));
+                () => PackageLogic.CreatePackageOperation(lites, operationSymbol, operationArgs));
         }
         #endregion
 
