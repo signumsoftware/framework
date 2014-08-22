@@ -194,8 +194,17 @@
   <ItemGroup>
     <None Include="0.Introduction.md" />
     <None Include="1.BaseEntities.md" />
+    <None Include="ChangeTracking.md" />
+    <None Include="EnumEntity.md" />
+    <None Include="FieldAttributes.md" />
+    <None Include="Inheritance.md" />
     <None Include="Lite.md" />
+    <None Include="Mixin.md" />
     <None Include="MList.md" />
+    <None Include="PropertyAttributes.md" />
+    <None Include="Services\Services.md" />
+    <None Include="Symbol.md" />
+    <None Include="Validation.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
