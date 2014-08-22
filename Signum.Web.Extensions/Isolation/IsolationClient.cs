@@ -33,13 +33,24 @@ namespace Signum.Web.Isolation
                     !MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) ? null :
                     Module["getIsolation"](ClientConstructorManager.ExtraJsonParams, ctx.Prefix,
                     IsolationMessage.SelectAnIsolation.NiceToString(),
-                    IsolationLogic.Isolations.Value.Select(iso => iso.ToChooserOption()));
+                    GetIsolationChooserOptions(ctx.Type));
 
                 //Unnecessary with the filter
                 Constructor.Manager.PreConstructors += ctx =>
                     !MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) ? null :
                     IsolationDN.Override(GetIsolation(ctx.Controller.ControllerContext)); 
             }
+        }
+
+        private static IEnumerable<ChooserOption> GetIsolationChooserOptions(Type type)
+        {
+            var isolations = IsolationLogic.Isolations.Value.Select(iso => iso.ToChooserOption());
+            if (IsolationLogic.GetStrategy(type) != IsolationStrategy.Optional)
+                return isolations;
+
+            var list = isolations.ToList();
+            list.Add(new ChooserOption("", "Null"));
+            return list;
         }
 
         public static Lite<IsolationDN> GetIsolation(ControllerContext ctx)
