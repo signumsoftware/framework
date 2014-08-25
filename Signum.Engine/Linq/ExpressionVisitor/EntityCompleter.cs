@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
             select = new SelectExpression(alias, false, null, pc.Columns, select, null, null, null, 0);
 
             if (projector != proj.Projector)
-                return new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
+                return new ProjectionExpression(select, projector, proj.UniqueFunction, proj.Type);
 
             return proj;
         }
