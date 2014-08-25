@@ -380,7 +380,13 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js;**\*.ts;**\*.map" />
+      <EmbeddedResource Include="**\*.gif" />
+      <EmbeddedResource Include="**\*.png" />
+      <EmbeddedResource Include="**\*.jpg" />
+      <EmbeddedResource Include="**\*.css" />
+      <EmbeddedResource Include="**\*.js" />
+      <EmbeddedResource Include="**\*.ts" />
+      <EmbeddedResource Include="**\*.map" />
     </ItemGroup>
   </Target>
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
