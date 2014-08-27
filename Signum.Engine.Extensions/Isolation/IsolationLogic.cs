@@ -122,16 +122,12 @@ namespace Signum.Engine.Isolation
                 giRegisterFilterQuery.GetInvoker(item)(); 
             }
 
-            Schema.Current.EntityEvents<IsolationDN>().FilterQuery += query =>
+            Schema.Current.EntityEvents<IsolationDN>().FilterQuery += () =>
             {
                 if (IsolationDN.Current == null || ExecutionMode.InGlobal)
-                    return query;
+                    return null;
 
-                Expression<Func<IsolationDN, bool>> filter = a => a.ToLite() == IsolationDN.Current;
-
-                filter = (Expression<Func<IsolationDN, bool>>)DbQueryProvider.Clean(filter, false, null);
-
-                return query.Where(filter);
+                return a => a.ToLite() == IsolationDN.Current;
             };
         }
 
@@ -139,16 +135,12 @@ namespace Signum.Engine.Isolation
         static readonly GenericInvoker<Action> giRegisterFilterQuery = new GenericInvoker<Action>(() => Register_FilterQuery<IdentifiableEntity>());
         static void Register_FilterQuery<T>() where T : IdentifiableEntity
         {
-            Schema.Current.EntityEvents<T>().FilterQuery += query =>
+            Schema.Current.EntityEvents<T>().FilterQuery += () =>
             {
                 if (ExecutionMode.InGlobal || IsolationDN.Current == null)
-                    return query;
+                    return null;
 
-                Expression<Func<T, bool>> filter = a => a.Mixin<IsolationMixin>().Isolation == IsolationDN.Current;
-
-                filter = (Expression<Func<T, bool>>)DbQueryProvider.Clean(filter, false, null);
-
-                return query.Where(filter);
+                return a => a.Mixin<IsolationMixin>().Isolation == IsolationDN.Current;
             };
         }
 

@@ -41,15 +41,6 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => saveDisabled.Value = false);
         }
 
-        static IQueryable<T> TypeAuthLogic_FilterQuery<T>(IQueryable<T> query)
-            where T : IdentifiableEntity
-        {
-            if (!queryFilterDisabled.Value)
-                return WhereAllowed<T>(query);
-            return query;
-        }
-
-
         const string CreatedKey = "Created";
         const string ModifiedKey = "Modified";
 
@@ -290,7 +281,7 @@ namespace Signum.Engine.Authorization
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
-                return IsAllowedExpression(exp, allowed, inUserInterface) ?? Expression.Constant(true);
+                return IsAllowedExpression(exp, allowed, inUserInterface);
             }
         }
 
@@ -350,6 +341,33 @@ namespace Signum.Engine.Authorization
         }
 
 
+        static Expression<Func<T, bool>> TypeAuthLogic_FilterQuery<T>() 
+          where T : IdentifiableEntity
+        {
+            if (queryFilterDisabled.Value)
+                return null;
+
+            if (ExecutionMode.InGlobal || !AuthLogic.IsEnabled)
+                return null;
+
+            var ui = ExecutionMode.InUserInterface;
+            AssertMinimum<T>(ui);
+
+            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+
+            Expression body = IsAllowedExpression(e, TypeAllowedBasic.Read, ui);
+
+            var ce = body as ConstantExpression;
+            if (ce != null)
+            {
+                if (((bool)ce.Value))
+                    return null;
+            }
+
+            return Expression.Lambda<Func<T, bool>>(body, e);
+        }
+
+
         [MethodExpander(typeof(WhereAllowedExpander))]
         public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
             where T : IdentifiableEntity
@@ -359,14 +377,19 @@ namespace Signum.Engine.Authorization
 
             var ui = ExecutionMode.InUserInterface;
 
+            AssertMinimum<T>(ui);
+
+            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ui);
+        }
+
+        private static void AssertMinimum<T>(bool ui) where T : IdentifiableEntity
+        {
             var allowed = GetAllowed(typeof(T));
-            var max = ui ?  allowed.MaxUI(): allowed.MaxDB();
+            var max = ui ? allowed.MaxUI() : allowed.MaxDB();
             if (max < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException("Type {0} is not authorized{1}{2}".Formato(typeof(T).Name,
                     ui ? " in user interface" : null,
                     allowed.Conditions.Any() ? " for any condition" : null));
-
-            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ui);
         }
 
 
