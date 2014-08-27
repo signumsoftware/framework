@@ -152,7 +152,7 @@ namespace Signum.Engine.Authorization
                     List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
                         .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
 
-                    string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Error), "\r\n");
+                    string details = debugInfo.ToString(a => "  '{0}'  because {1}".Formato(a.Lite, a.Error), "\r\n");
 
                     throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(
                         typeAllowed.NiceToString(),
