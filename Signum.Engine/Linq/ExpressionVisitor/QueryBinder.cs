@@ -1249,7 +1249,7 @@ namespace Signum.Engine.Linq
 	                {
                         case "RowId": return mle.RowId;
                         case "Parent": return mle.Parent;
-                        case "Order": return mle.Order;
+                        case "Order": return mle.Order.ThrowIfNull(() => "{0} has no {1}".Formato(mle.Table.Name, m.Member.Name));
                         case "Element": return mle.Element;
                         default: 
                              throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".Formato(m.Member));
@@ -1901,7 +1901,7 @@ namespace Signum.Engine.Linq
                 EmbeddedEntityExpression cEmb = (EmbeddedEntityExpression)colExpression;
                 EmbeddedEntityExpression expEmb = (EmbeddedEntityExpression)expression;
 
-                var bindings = cEmb.Bindings.SelectMany(b => Assign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
+                var bindings = cEmb.Bindings.SelectMany(b => AdaptAssign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
 
                 if (cEmb.FieldEmbedded.HasValue != null)
                 {
@@ -2644,6 +2644,24 @@ namespace Signum.Engine.Linq
             }
 
             return b;
+        }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            if (node.NodeType != ExpressionType.Convert && node.NodeType != ExpressionType.TypeAs)
+                return base.VisitUnary(node);
+            else
+            {
+                var operand = Visit(node.Operand);
+
+                if (operand.Type == node.Type)
+                    return operand;
+
+                if(node.Operand == operand)
+                    return node;
+
+                return Expression.MakeUnary(node.NodeType, operand, node.Type); 
+            }
         }
 
         private Expression CombineCoalesce(Expression left, Expression right)
