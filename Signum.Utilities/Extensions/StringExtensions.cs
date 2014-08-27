@@ -442,7 +442,7 @@ namespace Signum.Utilities
                         return res;
                 }
 
-                index = newIndex;
+                index = newIndex + 1;
             }
 
             return ""; 

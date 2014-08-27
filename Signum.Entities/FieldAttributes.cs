@@ -301,12 +301,12 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
     public enum CombineStrategy
     {
         Union,
-        Switch,
+        Case,
     }
 
     public static class LinqHintEntities
     {
-        public static T CombineSwitch<T>(this T value) where T : IIdentifiable
+        public static T CombineCase<T>(this T value) where T : IIdentifiable
         {
             return value;
         }

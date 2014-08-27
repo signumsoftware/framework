@@ -183,7 +183,15 @@
     <Compile Include="Basics\TypesLogic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="0.Introduction.md" />
+    <None Include="Database.Delete.md" />
+    <None Include="Database.md" />
+    <None Include="Database.Query.Apendix.md" />
+    <None Include="Database.Query.md" />
+    <None Include="Database.Retrieve.md" />
+    <None Include="Database.Save.md" />
     <None Include="Operations\Operations.cd" />
+    <None Include="Schema.md" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>

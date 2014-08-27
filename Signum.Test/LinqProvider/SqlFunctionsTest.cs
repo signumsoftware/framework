@@ -69,7 +69,15 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringFunctionsPolymorphicSwitch()
         {
-            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineSwitch().Name.Contains("Jackson")));
+            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineCase().Name.Contains("Jackson")));
+        }
+
+        [TestMethod]
+        public void CoalesceFirstOrDefault()
+        {
+            var list = Database.Query<BandDN>()
+               .Select(b => b.Members.FirstOrDefault(a => a.Sex == Sex.Female) ?? b.Members.FirstOrDefault(a => a.Sex == Sex.Male))
+               .Select(a => a.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -81,7 +89,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringContainsSwitch()
         {
-            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineSwitch().ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineCase().ToString().Contains("Hola")).ToList();
         }
 
         [TestMethod]

@@ -157,6 +157,11 @@ namespace Signum.Engine
             return "Columns:" + tableName;
         }
 
+        public static string KeyEnumsForTable(string tableName)
+        {
+            return "Enums:" + tableName;
+        }
+
         public bool Interactive = true; 
 
         public string Apply(string replacementsKey, string textToReplace)

@@ -25,7 +25,7 @@ namespace Signum.Utilities
             return threadVariables.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
         }
 
-        public static IDisposable SetThreadContext(Dictionary<string, object> context)
+        public static IDisposable ImportThreadContext(Dictionary<string, object> context)
         {
             foreach (var kvp in context)
             {
@@ -135,7 +135,7 @@ namespace Signum.Utilities
     {
         ThreadLocal<T> store = new ThreadLocal<T>();
 
-        public ThreadVariable(string name) : base(name) { }
+        internal ThreadVariable(string name) : base(name) { }
 
         public override T Value
         {
@@ -153,7 +153,7 @@ namespace Signum.Utilities
     {
         public abstract Func<T> ValueFactory { get; set; }
 
-        public SessionVariable(string name)
+        protected internal SessionVariable(string name)
             : base(name)
         {
         }

@@ -94,6 +94,10 @@ div.sf-pagination-right > ul.pagination > .disabled > span
 
 
 
+.sf-search-results-container {
+    overflow-x:auto;
+}
+
 .sf-popup-fullscreen
 {
     font-size:18px;

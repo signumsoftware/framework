@@ -131,11 +131,18 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             Expression projector;
+            SelectExpression select = proj.Select;
             using (binder.SetCurrentSource(proj.Select))
                 projector = this.Visit(proj.Projector);
 
+            Alias alias = binder.aliasGenerator.NextSelectAlias();
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, alias);
+            projector = pc.Projector;
+
+            select = new SelectExpression(alias, false, null, pc.Columns, select, null, null, null, 0);
+
             if (projector != proj.Projector)
-                return new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
+                return new ProjectionExpression(select, projector, proj.UniqueFunction, proj.Type);
 
             return proj;
         }

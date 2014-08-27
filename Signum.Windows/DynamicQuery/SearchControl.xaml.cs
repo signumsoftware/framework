@@ -147,10 +147,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(Lite<IdentifiableEntity>[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite<IdentifiableEntity>[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(List<Lite<IdentifiableEntity>>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public List<Lite<IdentifiableEntity>> SelectedItems
         {
-            get { return (Lite<IdentifiableEntity>[])GetValue(SelectedItemsProperty); }
+            get { return (List<Lite<IdentifiableEntity>>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -547,7 +547,7 @@ namespace Signum.Windows
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).Try(r => r.Entity);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
             else
                 SelectedItems = null;
         }

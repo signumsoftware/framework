@@ -15,6 +15,7 @@ using Signum.Entities.Basics;
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
 using System.ComponentModel;
+using Signum.Entities.Internal;
 
 namespace Signum.Entities
 {
@@ -41,239 +42,242 @@ namespace Signum.Entities
         Lite<T> Clone(); 
     }
 
-    [Serializable]
-    public abstract class LiteImp  : Modifiable
+    namespace Internal
     {
-    
-    }
-
-    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
-    public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
-        where T : IdentifiableEntity
-    {
-        T entityOrNull;
-        int? id;
-        string toStr;
-
-        // Methods
-        private LiteImp()
+        [Serializable]
+        public abstract class LiteImp : Modifiable
         {
+
         }
 
-        public LiteImp(int id, string toStr)
+        [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
+        public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
+            where T : IdentifiableEntity
         {
-            if (typeof(T).IsAbstract)
-                throw new InvalidOperationException(typeof(T).Name + " is abstract"); 
+            T entityOrNull;
+            int? id;
+            string toStr;
 
-            this.id = id;
-            this.toStr = toStr;
-            this.Modified = ModifiedState.Clean;
-        }
-
-        public LiteImp(int id, string toStr, ModifiedState modified)
-        {
-            if (typeof(T).IsAbstract)
-                throw new InvalidOperationException(typeof(T).Name + " is abstract");
-
-            this.id = id;
-            this.toStr = toStr;
-            this.Modified = modified; 
-        }
-
-        public LiteImp(T entity, string toStr)
-        {
-            if (typeof(T).IsAbstract)
-                throw new InvalidOperationException(typeof(T).Name + " is abstract"); 
-
-            if (entity.GetType() != typeof(T))
-                throw new ArgumentNullException("entity");
-
-            this.entityOrNull = entity;
-            this.id = entity.IdOrNull;
-            this.toStr = toStr;
-        }
-
-        public IdentifiableEntity UntypedEntityOrNull
-        {
-            get { return (IdentifiableEntity)(object)entityOrNull; }
-        }
-
-        public T EntityOrNull
-        {
-            get { return entityOrNull; }
-        }
-
-        public bool IsNew
-        {
-            get { return entityOrNull != null && entityOrNull.IsNew; }
-        }
-
-        public T Entity 
-        {
-            get
+            // Methods
+            private LiteImp()
             {
-                if (entityOrNull == null)
-                    throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".Formato(this));
-                return entityOrNull;
             }
-        }
 
-        public Type EntityType
-        {
-            get { return typeof(T); }
-        }
-
-        public int Id
-        {
-            get
+            public LiteImp(int id, string toStr)
             {
-                if (id == null)
-                    throw new InvalidOperationException("The Lite is pointing to a new entity and has no Id yet");
-                return id.Value;
+                if (typeof(T).IsAbstract)
+                    throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+                this.id = id;
+                this.toStr = toStr;
+                this.Modified = ModifiedState.Clean;
             }
-        }
 
-        public int? IdOrNull
-        {
-            get { return id; }
-        }
-
-        public void SetEntity(IdentifiableEntity ei)
-        {
-            if (id == null)
-                throw new InvalidOperationException("New entities are not allowed");
-
-            if (id != ei.id || EntityType != ei.GetType())
-                throw new InvalidOperationException("Entities do not match");
-
-            this.entityOrNull = (T)ei;
-            if (ei != null && this.toStr == null)
-                this.toStr = ei.ToString();
-        }
-
-        public void ClearEntity()
-        {
-            if (id == null)
-                throw new InvalidOperationException("Removing entity not allowed in new Lite");
-
-            this.toStr = this.UntypedEntityOrNull.TryToString();
-            this.entityOrNull = null;
-        }
-
-        public void RefreshId()
-        {
-            id = UntypedEntityOrNull.Id;
-        }
-
-
-        protected internal override void PreSaving(ref bool graphModified)
-        {
-            if (UntypedEntityOrNull != null)
+            public LiteImp(int id, string toStr, ModifiedState modified)
             {
-                UntypedEntityOrNull.PreSaving(ref graphModified);
+                if (typeof(T).IsAbstract)
+                    throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+                this.id = id;
+                this.toStr = toStr;
+                this.Modified = modified;
             }
-        }
 
-        public override string ToString()
-        {
-            if (this.UntypedEntityOrNull != null)
-                return this.UntypedEntityOrNull.ToString();
-
-            return this.toStr;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
-
-            if (this == obj)
-                return true;
-
-            if (GetType() != obj.GetType())
-                return false;
-
-            Lite<T> lite = (LiteImp<T>)obj;
-            if (IdOrNull != null && lite.IdOrNull != null)
-                return Id == lite.Id;
-            else
-                return object.ReferenceEquals(this.entityOrNull, lite.EntityOrNull);
-        }
-
-        const int MagicMask = 123456853;
-        public override int GetHashCode()
-        {
-            return this.id == null ?
-                entityOrNull.GetHashCode() ^ MagicMask :
-                this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
-        }
-
-        public string Key()
-        {
-            return "{0};{1}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id);
-        }
-
-        public string KeyLong()
-        {
-            return "{0};{1};{2}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id, this.ToString());
-        }
-
-        public int CompareTo(Lite<IdentifiableEntity> other)
-        {
-            return ToString().CompareTo(other.ToString());
-        }
-
-        public int CompareTo(object obj)
-        {
-            if (obj is Lite<IdentifiableEntity>)
-                return CompareTo((Lite<IdentifiableEntity>)obj);
-
-            throw new InvalidOperationException("obj is not a Lite");
-        }
-
-        public void SetToString(string toStr)
-        {
-            this.toStr = toStr;
-        }
-
-        public Lite<T> Clone()
-        {
-            return new LiteImp<T>(Id, toStr); 
-        }
-
-        private LiteImp(SerializationInfo info, StreamingContext ctxt)
-        {
-            bool modifiedSet = false;
-
-            foreach (SerializationEntry item in info)
+            public LiteImp(T entity, string toStr)
             {
-                switch (item.Name)
+                if (typeof(T).IsAbstract)
+                    throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+                if (entity.GetType() != typeof(T))
+                    throw new ArgumentNullException("entity");
+
+                this.entityOrNull = entity;
+                this.id = entity.IdOrNull;
+                this.toStr = toStr;
+            }
+
+            public IdentifiableEntity UntypedEntityOrNull
+            {
+                get { return (IdentifiableEntity)(object)entityOrNull; }
+            }
+
+            public T EntityOrNull
+            {
+                get { return entityOrNull; }
+            }
+
+            public bool IsNew
+            {
+                get { return entityOrNull != null && entityOrNull.IsNew; }
+            }
+
+            public T Entity
+            {
+                get
                 {
-                    case "modified": this.Modified = (ModifiedState)Enum.Parse(typeof(ModifiedState), (string)item.Value); modifiedSet = true; break;
-                    case "entityOrNull": this.entityOrNull = (T)item.Value; break;
-                    case "id": this.id = (int)item.Value; break;
-                    case "toStr": this.toStr = (string)item.Value; break;
-                    default: throw new InvalidOperationException("Unexpected SerializationEntry");
+                    if (entityOrNull == null)
+                        throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".Formato(this));
+                    return entityOrNull;
                 }
             }
 
-            if (!modifiedSet)
-                this.Modified = ModifiedState.Clean;
-        }
+            public Type EntityType
+            {
+                get { return typeof(T); }
+            }
 
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (this.Modified != ModifiedState.Clean)
-                info.AddValue("modified", this.Modified.ToString(), typeof(string));
+            public int Id
+            {
+                get
+                {
+                    if (id == null)
+                        throw new InvalidOperationException("The Lite is pointing to a new entity and has no Id yet");
+                    return id.Value;
+                }
+            }
 
-            if (this.entityOrNull != null)
-                info.AddValue("entityOrNull", this.entityOrNull, typeof(T));
+            public int? IdOrNull
+            {
+                get { return id; }
+            }
 
-            if (this.id != null)
-                info.AddValue("id", this.id.Value, typeof(int));
+            public void SetEntity(IdentifiableEntity ei)
+            {
+                if (id == null)
+                    throw new InvalidOperationException("New entities are not allowed");
 
-            if (this.toStr != null)
-                info.AddValue("toStr", this.toStr, typeof(string));
+                if (id != ei.id || EntityType != ei.GetType())
+                    throw new InvalidOperationException("Entities do not match");
+
+                this.entityOrNull = (T)ei;
+                if (ei != null && this.toStr == null)
+                    this.toStr = ei.ToString();
+            }
+
+            public void ClearEntity()
+            {
+                if (id == null)
+                    throw new InvalidOperationException("Removing entity not allowed in new Lite");
+
+                this.toStr = this.UntypedEntityOrNull.TryToString();
+                this.entityOrNull = null;
+            }
+
+            public void RefreshId()
+            {
+                id = UntypedEntityOrNull.Id;
+            }
+
+
+            protected internal override void PreSaving(ref bool graphModified)
+            {
+                if (UntypedEntityOrNull != null)
+                {
+                    UntypedEntityOrNull.PreSaving(ref graphModified);
+                }
+            }
+
+            public override string ToString()
+            {
+                if (this.UntypedEntityOrNull != null)
+                    return this.UntypedEntityOrNull.ToString();
+
+                return this.toStr;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                    return false;
+
+                if (this == obj)
+                    return true;
+
+                if (GetType() != obj.GetType())
+                    return false;
+
+                Lite<T> lite = (LiteImp<T>)obj;
+                if (IdOrNull != null && lite.IdOrNull != null)
+                    return Id == lite.Id;
+                else
+                    return object.ReferenceEquals(this.entityOrNull, lite.EntityOrNull);
+            }
+
+            const int MagicMask = 123456853;
+            public override int GetHashCode()
+            {
+                return this.id == null ?
+                    entityOrNull.GetHashCode() ^ MagicMask :
+                    this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+            }
+
+            public string Key()
+            {
+                return "{0};{1}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id);
+            }
+
+            public string KeyLong()
+            {
+                return "{0};{1};{2}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id, this.ToString());
+            }
+
+            public int CompareTo(Lite<IdentifiableEntity> other)
+            {
+                return ToString().CompareTo(other.ToString());
+            }
+
+            public int CompareTo(object obj)
+            {
+                if (obj is Lite<IdentifiableEntity>)
+                    return CompareTo((Lite<IdentifiableEntity>)obj);
+
+                throw new InvalidOperationException("obj is not a Lite");
+            }
+
+            public void SetToString(string toStr)
+            {
+                this.toStr = toStr;
+            }
+
+            public Lite<T> Clone()
+            {
+                return new LiteImp<T>(Id, toStr);
+            }
+
+            private LiteImp(SerializationInfo info, StreamingContext ctxt)
+            {
+                bool modifiedSet = false;
+
+                foreach (SerializationEntry item in info)
+                {
+                    switch (item.Name)
+                    {
+                        case "modified": this.Modified = (ModifiedState)Enum.Parse(typeof(ModifiedState), (string)item.Value); modifiedSet = true; break;
+                        case "entityOrNull": this.entityOrNull = (T)item.Value; break;
+                        case "id": this.id = (int)item.Value; break;
+                        case "toStr": this.toStr = (string)item.Value; break;
+                        default: throw new InvalidOperationException("Unexpected SerializationEntry");
+                    }
+                }
+
+                if (!modifiedSet)
+                    this.Modified = ModifiedState.Clean;
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                if (this.Modified != ModifiedState.Clean)
+                    info.AddValue("modified", this.Modified.ToString(), typeof(string));
+
+                if (this.entityOrNull != null)
+                    info.AddValue("entityOrNull", this.entityOrNull, typeof(T));
+
+                if (this.id != null)
+                    info.AddValue("id", this.id.Value, typeof(int));
+
+                if (this.toStr != null)
+                    info.AddValue("toStr", this.toStr, typeof(string));
+            }
         }
     }
 

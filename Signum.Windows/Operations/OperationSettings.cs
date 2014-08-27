@@ -101,6 +101,14 @@ namespace Signum.Windows.Operations
 
             return MessageBox.Show(Window.GetWindow(EntityControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK; 
         }
+
+        public T NullEntityMessage<T>(T entity) where T : IdentifiableEntity
+        {
+            if (entity == null)
+                MessageBox.Show(Window.GetWindow(EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(OperationInfo.OperationSymbol.NiceToString()));
+           
+            return entity;
+        }
     }
 
     public class ConstructorSettings : OperationSettings
@@ -134,7 +142,7 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationContext 
     {
-        public Lite<IdentifiableEntity>[] Entities { get; set; }
+        public List<Lite<IdentifiableEntity>> Entities { get; set; }
         public SearchControl SearchControl { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public string CanExecute { get; set; }
@@ -143,13 +151,21 @@ namespace Signum.Windows.Operations
         public bool ConfirmMessage()
         {
             string message = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete && Entities.Length > 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() :
-                OperationInfo.OperationType == OperationType.Delete && Entities.Length == 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
+                OperationInfo.OperationType == OperationType.Delete && Entities.Count > 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() :
+                OperationInfo.OperationType == OperationType.Delete && Entities.Count == 1 ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
 
             if (message == null)
                 return true;
 
             return MessageBox.Show(Window.GetWindow(SearchControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK;
+        }
+
+        public T NullEntityMessage<T>(T entity)
+        {
+            if (entity == null)
+                MessageBox.Show(Window.GetWindow(SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(OperationInfo.OperationSymbol.NiceToString()));
+
+            return entity;
         }
     }
 }

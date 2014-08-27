@@ -10,87 +10,6 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
-    public static class TimeTracker
-    {
-        public static bool ShowDebug = false;
-        public static Dictionary<string, TimeTrackerEntry> IdentifiedElapseds = new Dictionary<string, TimeTrackerEntry>();
-        
-        public static T Start<T>(string identifier, Func<T> func)
-        {
-            using (Start(identifier))
-                return func();
-        }
-
-        public static IDisposable Start(string identifier)
-        {
-            Stopwatch sp = new Stopwatch();
-            sp.Start();
-
-            return new Disposable(() => { sp.Stop(); InsertEntity(sp.ElapsedMilliseconds, identifier); });
-        }
-
-        public static string GetTableString()
-        {
-            return IdentifiedElapseds.Select(kvp => new
-            {
-                Identified = kvp.Key,
-                kvp.Value.LastTime,
-                kvp.Value.MinTime,
-                kvp.Value.Average,
-                kvp.Value.MaxTime,
-                kvp.Value.Count
-            }).ToStringTable().FormatTable();
-        }
-
-        public static void InsertEntity(long milliseconds, string identifier)
-        {
-            lock (IdentifiedElapseds)
-            {
-                TimeTrackerEntry entry;
-                if (!IdentifiedElapseds.TryGetValue(identifier, out entry))
-                {
-                    entry = new TimeTrackerEntry();
-                    IdentifiedElapseds.Add(identifier, entry);
-                }
-
-                entry.LastTime = milliseconds;
-                entry.LastDate = DateTime.UtcNow;
-                entry.TotalTime += milliseconds;
-                entry.Count++;
-
-                if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.UtcNow; }
-                if (milliseconds > entry.MaxTime) { entry.MaxTime = milliseconds; entry.MaxDate = DateTime.UtcNow; }
-
-                if (ShowDebug)
-                    Debug.WriteLine(identifier + " - " + entry);
-            }
-        }
-    }
-
-    public class TimeTrackerEntry
-    {
-        public long LastTime = 0;
-        public long TotalTime = 0;
-        public int Count = 0;
-        public long MinTime = long.MaxValue;
-        public long MaxTime = long.MinValue;
-
-        public double Average
-        {
-            get { return (TotalTime / Count); }
-        }
-
-        public DateTime MinDate;
-        public DateTime MaxDate;
-        public DateTime LastDate;
-
-        public override string ToString()
-        {
-            return "Last: {0}ms, Min: {1}ms, Avg: {2}ms, Max: {3}ms, Count: {4}".Formato(
-                LastTime, MinTime, Average, MaxTime, Count);
-        }
-    }
-
     public static class HeavyProfiler
     {
         public static TimeSpan MaxEnabledTime = TimeSpan.FromMinutes(5);
@@ -170,6 +89,17 @@ namespace Signum.Utilities
         }
 
         public static T LogValue<T>(string role, Func<T> valueFactory)
+        {
+            if (!enabled)
+                return valueFactory();
+
+            using (HeavyProfiler.LogNoStackTrace(role))
+            {
+                return valueFactory();
+            }
+        }
+
+        public static T LogValueNoStackTrace<T>(string role, Func<T> valueFactory)
         {
             if (!enabled)
                 return valueFactory();
@@ -336,9 +266,9 @@ namespace Signum.Utilities
             return statistics;
         }
 
-        public static HeavyProfilerEntry Find(string indices)
+        public static HeavyProfilerEntry Find(string fullIndex)
         {
-            var array = indices.Split('.').Select(a => int.Parse(a)).ToArray();
+            var array = fullIndex.Split('.').Select(a => int.Parse(a)).ToArray();
 
             HeavyProfilerEntry entry = null;
 

@@ -52,12 +52,14 @@ namespace Signum.Windows.Operations
                 {
                     if (coc.ConfirmMessage())
                     {
-                        IIdentifiable result = Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.OperationSymbol));
+                        IIdentifiable result = (IdentifiableEntity)coc.SearchControl.SurroundConstruct(coc.OperationInfo.ReturnType, null, ctx =>
+                        {
+                            return coc.NullEntityMessage(
+                                Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.OperationSymbol)));
+                        });
 
                         if (result != null)
                             Navigator.Navigate(result);
-                        else
-                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.OperationSymbol.NiceToString()));
                     }
                 }
             };

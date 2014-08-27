@@ -226,13 +226,12 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
             {
-                if(select.GroupBy.Count == 0)
-                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be inproved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
-
+                if (select.GroupBy.Any())
+                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be improved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
 
                 IEnumerable<ColumnExpression> inner = Keys(select.From);
 
-                var result = inner.Select(ce=>select.Columns.FirstOrDefault(cd=>cd.Expression.Equals(ce)).Try(cd=>cd.GetReference(select.Alias))).ToList();
+                var result = inner.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce)).Try(cd => cd.GetReference(select.Alias))).ToList();
 
                 if (!select.IsDistinct)
                     return result;
@@ -242,10 +241,10 @@ namespace Signum.Engine.Linq
                 if (result.Any(c => c == null))
                     return result2;
 
-                if(result2.Any(c=>c == null))
+                if (result2.Any(c => c == null))
                     return result;
 
-                return result.Count > result2.Count ? result2 : result; 
+                return result.Count > result2.Count ? result2 : result;
             }
         }
 

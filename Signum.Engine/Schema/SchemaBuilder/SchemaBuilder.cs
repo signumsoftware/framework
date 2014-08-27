@@ -472,7 +472,7 @@ namespace Signum.Engine.Maps
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
             CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().Try(s => s.Strategy) ?? 
-                CombineStrategy.Switch;
+                CombineStrategy.Case;
 
             return new FieldImplementedBy(route.Type)
             {
@@ -623,11 +623,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateFieldName(PropertyRoute route, KindOfField tipoCampo)
+        public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             string name = Reflector.PropertyName(route.FieldInfo.Name);
 
-            switch (tipoCampo)
+            switch (kindOfField)
             {
                 case KindOfField.PrimaryKey:
                 case KindOfField.Value:

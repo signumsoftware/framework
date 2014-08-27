@@ -296,7 +296,7 @@ namespace Signum.Services
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<OperationSymbol> operatonSymbols)
+        public Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lite, List<OperationSymbol> operatonSymbols)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => OperationLogic.GetContextualCanExecute(lite, operatonSymbols));
