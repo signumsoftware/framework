@@ -31,7 +31,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".Formato(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
             }
@@ -43,8 +43,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBSave", () => "SaveParams"))
             using (Transaction tr = new Transaction())
             {
-
-                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
             }
