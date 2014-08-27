@@ -78,7 +78,7 @@ namespace Signum.Engine.Dashboard
                 {
                     sb.Schema.EntityEvents<UserQueryDN>().PreUnsafeDelete += query =>
                     {
-                        Database.MListQuery((DashboardDN cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartDN)mle.Element.Content).UserQuery)).UnsafeDelete();
+                        Database.MListQuery((DashboardDN cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartDN)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
                         Database.Query<UserQueryPartDN>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
                     };
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Dashboard
                 {
                     sb.Schema.EntityEvents<UserChartDN>().PreUnsafeDelete += query =>
                     {
-                        Database.MListQuery((DashboardDN cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartDN)mle.Element.Content).UserChart)).UnsafeDelete();
+                        Database.MListQuery((DashboardDN cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartDN)mle.Element.Content).UserChart)).UnsafeDeleteMList();
                         Database.Query<UserChartPartDN>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
                     };
 
