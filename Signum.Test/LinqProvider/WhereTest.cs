@@ -210,7 +210,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WherePolyExpressionMethodSwitch()
         {
-            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineSwitch().Lonely()).ToArray();
+            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineCase().Lonely()).ToArray();
         }
 
 
