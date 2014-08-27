@@ -32,18 +32,38 @@ namespace Signum.Engine.Linq
 
                 if (query.IsBase())
                 {
-                    Type identType = c.Type.GetGenericArguments().SingleEx();
+                    Type queryType = c.Type.GetGenericArguments().SingleEx();
 
-                    if (filter && Schema.Current.Tables.ContainsKey(identType))
+                    if (filter)
                     {
-                        LambdaExpression rawFilter = giFilter.GetInvoker(identType)(Schema.Current);
-
-                        if (rawFilter != null)
+                        if (typeof(IdentifiableEntity).IsAssignableFrom(queryType))
                         {
-                            Expression clean = ExpressionCleaner.Clean(rawFilter);
-                            Expression simplified = OverloadingSimplifier.Simplify(clean);
+                            LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
 
-                            return  Expression.Call(miWhere.MakeGenericMethod(identType), query.Expression, simplified);
+                            if (rawFilter != null)
+                            {
+                                Expression clean = ExpressionCleaner.Clean(rawFilter);
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+
+                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                            }
+                        }
+                        else if (queryType.IsInstantiationOf(typeof(MListElement<,>)))
+                        {
+                            Type entityType = queryType.GetGenericArguments()[0];
+
+                            LambdaExpression rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
+
+                            if (rawFilter != null)
+                            {
+                                var param = Expression.Parameter(queryType, "mle");
+                                var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
+
+                                Expression clean = ExpressionCleaner.Clean(lambda);
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+
+                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                            }
                         }
                     }
 
@@ -62,7 +82,6 @@ namespace Signum.Engine.Linq
         }
 
         bool disableQueryFilter = false;
-
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(LinqHints) && m.Method.Name == "DisableQueryFilter")
