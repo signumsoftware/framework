@@ -186,13 +186,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="0.Introduction.md" />
+    <None Include="Administrator.md" />
     <None Include="Database.Delete.md" />
     <None Include="Database.md" />
-    <None Include="Database.Query.Apendix.md" />
-    <None Include="Database.Query.md" />
+    <None Include="Database.Query.0.md" />
+    <None Include="Database.Query.1.Entity.md" />
+    <None Include="Database.Query.2.Inheritance.md" />
+    <None Include="Database.Query.3.Lite.md" />
+    <None Include="Database.Query.4.SelectMany.md" />
+    <None Include="Database.Query.5.Join.md" />
+    <None Include="Database.Query.6.ElementOperators.md" />
+    <None Include="Database.Query.7.SqlFunctions.md" />
+    <None Include="Database.Query.8.TypeMismatch.md" />
+    <None Include="Database.Query.Z.Apendix.md" />
     <None Include="Database.Retrieve.md" />
     <None Include="Database.Save.md" />
+    <None Include="Database.UnsafeDelete.md" />
+    <None Include="Database.UnsafeInsert.md" />
+    <None Include="Database.UnsafeUpdate.md" />
+    <None Include="EntityCache.md" />
     <None Include="Operations\Operations.cd" />
+    <None Include="Schema\EntityEvents.md" />
     <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
