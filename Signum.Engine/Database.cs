@@ -779,7 +779,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
+        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
             where E : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
@@ -845,6 +845,7 @@ namespace Signum.Engine
         #region UnsafeInsert
 
         public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
+            where E : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
