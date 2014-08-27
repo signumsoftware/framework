@@ -169,7 +169,7 @@
     <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
-    <Compile Include="Schema\Schema.EntityEvents.cs" />
+    <Compile Include="Schema\EntityEvents.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
