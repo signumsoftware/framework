@@ -948,6 +948,9 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Alert\Scripts\Alerts.ts" />
+    <EmbeddedResource Include="Alert\Scripts\Alerts.js">
+      <DependentUpon>Alerts.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="AuthAdmin\Content\AuthAdmin.css" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
@@ -960,6 +963,9 @@
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
     <TypeScriptCompile Include="AuthAdmin\Scripts\AuthAdmin.ts" />
+    <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdmin.js" >
+      <DependentUpon>AuthAdmin.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.generated.cs</LastGenOutput>
@@ -1009,6 +1015,9 @@
       <LastGenOutput>User.generated.cs</LastGenOutput>
     </None>
     <TypeScriptCompile Include="Auth\Scripts\Auth.ts" />
+    <EmbeddedResource Include="Auth\Scripts\Auth.js" >
+      <DependentUpon>Auth.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Auth\Views\SetPassword.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SetPassword.generated.cs</LastGenOutput>
@@ -1022,14 +1031,32 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
     <TypeScriptCompile Include="Cache\Scripts\Cache.ts" />
+    <EmbeddedResource Include="Cache\Scripts\Cache.js">
+      <DependentUpon>Cache.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Calendar\Content\calendar.css" />
     <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
+    <EmbeddedResource Include="Calendar\Scripts\calendar.js" >
+      <DependentUpon>calendar.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Chart\Content\Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
     <TypeScriptCompile Include="Chart\Scripts\Chart.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartUtils.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartColors.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartScript.ts" />
+    <EmbeddedResource Include="Chart\Scripts\Chart.js">
+      <DependentUpon>Chart.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Scripts\ChartColors.js">
+      <DependentUpon>ChartColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Scripts\ChartScript.js" >
+      <DependentUpon>ChartScript.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Scripts\ChartUtils.js" >
+      <DependentUpon>ChartUtils.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1038,6 +1065,12 @@
     <Content Include="Dashboard\Content\Dashboard.css" />
     <TypeScriptCompile Include="Dashboard\Scripts\Dashboard.ts" />
     <TypeScriptCompile Include="Dashboard\Scripts\GridRepeater.ts" />
+    <EmbeddedResource Include="Dashboard\Scripts\Dashboard.js">
+      <DependentUpon>Dashboard.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include ="Dashboard\Scripts\GridRepeater.js" >
+      <DependentUpon>GridRepeater.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Dashboard\Views\LinkListPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1058,17 +1091,32 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <TypeScriptCompile Include="Isolation\Scripts\Isolation.ts" />
+    <EmbeddedResource Include="Excel\Scripts\Excel.js">
+      <DependentUpon>Excel.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Files\Content\Files.css" />
     <Content Include="Files\Images\loading.gif" />
     <TypeScriptCompile Include="Files\Scripts\Files.ts" />
     <TypeScriptCompile Include="Help\Scripts\help.ts" />
+    <EmbeddedResource Include="Files\Scripts\Files.js" >
+      <DependentUpon>Files.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\Scripts\help.js" >
+      <DependentUpon>help.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <EmbeddedResource Include="Isolation\Scripts\Isolation.js" >
+      <DependentUpon>Isolation.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Mailing\Content\Mailing.css" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\ckeditor.d.ts" />
+    <EmbeddedResource Include="Mailing\Scripts\Mailing.js">
+      <DependentUpon>Mailing.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1076,6 +1124,15 @@
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
     <TypeScriptCompile Include="Note\Scripts\Notes.ts" />
+    <EmbeddedResource Include="Note\Scripts\Notes.js" >
+      <DependentUpon>Notes.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Omnibox\Scripts\Omnibox.js" >
+      <DependentUpon>Omnibox.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Processes\Scripts\Processes.js" >
+      <DependentUpon>Processes.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1107,6 +1164,9 @@
     </Content>
     <Content Include="Profiler\Content\Profiler.css" />
     <TypeScriptCompile Include="Profiler\Scripts\Profiler.ts" />
+    <EmbeddedResource Include="Profiler\Scripts\Profiler.js">
+      <DependentUpon>Profiler.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
@@ -1341,6 +1401,9 @@
     </None>
     <TypeScriptCompile Include="Excel\Scripts\Excel.ts" />
     <TypeScriptCompile Include="Scheduler\Scripts\Scheduler.ts" />
+    <EmbeddedResource Include="Scheduler\Scripts\Scheduler.js" >
+      <DependentUpon>Scheduler.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleMinutely.generated.cs</LastGenOutput>
@@ -1383,10 +1446,22 @@
     </None>
     <Content Include="SMS\Content\SMS.css" />
     <TypeScriptCompile Include="SMS\Scripts\SMS.ts" />
+    <EmbeddedResource Include="SMS\Scripts\SMS.js" >
+      <DependentUpon>SMS.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Translation\Content\Translation.css" />
     <TypeScriptCompile Include="Translation\Scripts\Translation.ts" />
     <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
     <TypeScriptCompile Include="UserAssets\Scripts\UserAssets.ts" />
+    <EmbeddedResource Include="Translation\Scripts\Translation.js">
+      <DependentUpon>Translation.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserAssets\Scripts\UserAssets.js">
+      <DependentUpon>UserAssets.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserQueries\Scripts\UserQuery.js" >
+      <DependentUpon>UserQuery.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Dashboard\Views\Web.config" />
@@ -1680,7 +1755,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js;**\*.ts;**\*.map" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map" />
     </ItemGroup>
   </Target>
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
