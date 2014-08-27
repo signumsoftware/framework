@@ -166,8 +166,10 @@
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
+    <Compile Include="Schema\Schema.EntityEvents.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
@@ -191,7 +193,7 @@
     <None Include="Database.Retrieve.md" />
     <None Include="Database.Save.md" />
     <None Include="Operations\Operations.cd" />
-    <None Include="Schema.md" />
+    <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>

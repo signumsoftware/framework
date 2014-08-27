@@ -175,12 +175,12 @@ namespace Signum.Engine.Linq
         }
 
 
-        static MethodInfo miSplitSwitch = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineSwitch()).GetGenericMethodDefinition();
+        static MethodInfo miSplitCase = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineCase()).GetGenericMethodDefinition();
         static MethodInfo miSplitUnion = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineUnion()).GetGenericMethodDefinition();
         private CombineStrategy GetStrategy(MethodInfo methodInfo)
         {
-            if (methodInfo.IsInstantiationOf(miSplitSwitch))
-                return CombineStrategy.Switch;
+            if (methodInfo.IsInstantiationOf(miSplitCase))
+                return CombineStrategy.Case;
 
             if (methodInfo.IsInstantiationOf(miSplitUnion))
                 return CombineStrategy.Union;
@@ -1249,7 +1249,7 @@ namespace Signum.Engine.Linq
 	                {
                         case "RowId": return mle.RowId;
                         case "Parent": return mle.Parent;
-                        case "Order": return mle.Order;
+                        case "Order": return mle.Order.ThrowIfNull(() => "{0} has no {1}".Formato(mle.Table.Name, m.Member.Name));
                         case "Element": return mle.Element;
                         default: 
                              throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".Formato(m.Member));
@@ -1268,7 +1268,7 @@ namespace Signum.Engine.Linq
             if (ib.Implementations.Count == 1)
                 return selector(ib.Implementations.Values.Single());
 
-            if (ib.Strategy == CombineStrategy.Switch)
+            if (ib.Strategy == CombineStrategy.Case)
             {
                 var dictionary = ib.Implementations.SelectDictionary(ee =>
                 {
@@ -1569,7 +1569,7 @@ namespace Signum.Engine.Linq
 
                 if (uType.IsAssignableFrom(ee.Type)) // upcasting
                 {
-                    return new ImplementedByExpression(uType, CombineStrategy.Switch, new Dictionary<Type, EntityExpression> { { operand.Type, ee } }.ToReadOnly());
+                    return new ImplementedByExpression(uType, CombineStrategy.Case, new Dictionary<Type, EntityExpression> { { operand.Type, ee } }.ToReadOnly());
                 }
                 else
                 {
@@ -1901,7 +1901,7 @@ namespace Signum.Engine.Linq
                 EmbeddedEntityExpression cEmb = (EmbeddedEntityExpression)colExpression;
                 EmbeddedEntityExpression expEmb = (EmbeddedEntityExpression)expression;
 
-                var bindings = cEmb.Bindings.SelectMany(b => Assign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
+                var bindings = cEmb.Bindings.SelectMany(b => AdaptAssign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
 
                 if (cEmb.FieldEmbedded.HasValue != null)
                 {
@@ -2644,6 +2644,24 @@ namespace Signum.Engine.Linq
             }
 
             return b;
+        }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            if (node.NodeType != ExpressionType.Convert && node.NodeType != ExpressionType.TypeAs)
+                return base.VisitUnary(node);
+            else
+            {
+                var operand = Visit(node.Operand);
+
+                if (operand.Type == node.Type)
+                    return operand;
+
+                if(node.Operand == operand)
+                    return node;
+
+                return Expression.MakeUnary(node.NodeType, operand, node.Type); 
+            }
         }
 
         private Expression CombineCoalesce(Expression left, Expression right)

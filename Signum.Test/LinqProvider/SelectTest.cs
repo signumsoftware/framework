@@ -212,7 +212,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectPolyExpressionPropertySwitch()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineSwitch().FullName).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineCase().FullName).ToArray();
         }
 
         [TestMethod]
@@ -224,7 +224,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectPolyExpressionMethodSwitch()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineSwitch().Lonely()).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineCase().Lonely()).ToArray();
         }
 
         [TestMethod]

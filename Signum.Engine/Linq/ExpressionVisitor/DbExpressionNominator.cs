@@ -359,7 +359,7 @@ namespace Signum.Engine.Linq
                 new[] { datePart, diff, exprStart });
 
             return Add(new CaseExpression(new[]{
-                new When(Expression.GreaterThan(add, end), Expression.Subtract(diff, Expression.Constant(1)))},
+                new When(Expression.GreaterThan(add, exprEnd), Expression.Subtract(diff, Expression.Constant(1)))},
                     diff));
         }
         

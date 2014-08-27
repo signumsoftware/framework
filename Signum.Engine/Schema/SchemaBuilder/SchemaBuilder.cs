@@ -472,7 +472,7 @@ namespace Signum.Engine.Maps
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
             CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().Try(s => s.Strategy) ?? 
-                CombineStrategy.Switch;
+                CombineStrategy.Case;
 
             return new FieldImplementedBy(route.Type)
             {

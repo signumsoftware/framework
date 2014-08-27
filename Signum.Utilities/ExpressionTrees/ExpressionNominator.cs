@@ -81,6 +81,18 @@ namespace Signum.Utilities.ExpressionTrees
 
             return node;
         }
+
+        protected override Expression VisitListInit(ListInitExpression node)
+        {
+            var bindings = Visit(node.Initializers, this.VisitElementInit);
+
+            if (this.hasDependencies)
+                return node; //Avoid nominate only the NewExpression
+
+            Visit(node.NewExpression);
+
+            return node;
+        }
     }
 
     public static class LinqHints
