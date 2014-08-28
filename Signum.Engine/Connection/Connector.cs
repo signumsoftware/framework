@@ -133,14 +133,9 @@ namespace Signum.Engine
             if (result == null)
                 return null;
 
+            connectionString = connectionString.Replace("+" + catalogPostfix, ""); // Remove toFind 
 
-            result.Replace("+", ""); 
-            if (index == -1)
-                return null;
-
-            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
-
-            return catalogPostfix;
+            return result + catalogPostfix;
         }
 
         public static string ExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
