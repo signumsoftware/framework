@@ -125,11 +125,16 @@ namespace Signum.Engine
         public abstract bool SupportsScalarSubqueryInAggregates { get; }
 
 
-        public static string TryExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
+        public static string TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
         {
             string toFind = "+" + catalogPostfix;
 
-            int index = connectionString.IndexOf(toFind);
+            string result = connectionString.TryBefore("+" + catalogPostfix).TryAfterLast("=");
+            if (result == null)
+                return null;
+
+
+            result.Replace("+", ""); 
             if (index == -1)
                 return null;
 

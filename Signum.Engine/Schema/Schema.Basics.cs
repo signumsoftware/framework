@@ -214,8 +214,9 @@ namespace Signum.Engine.Maps
             return tables; 
         }
 
-        
-
+        /// <summary>
+        /// Use this method also to change the Server
+        /// </summary>
         public void ToDatabase(DatabaseName databaseName)
         {
             this.Name = this.Name.OnDatabase(databaseName);
