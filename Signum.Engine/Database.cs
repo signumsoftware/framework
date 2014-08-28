@@ -17,6 +17,7 @@ using Signum.Utilities.Reflection;
 using System.Threading;
 using Signum.Entities.Basics;
 using System.Collections.ObjectModel;
+using Signum.Entities.Internal;
 
 namespace Signum.Engine
 {
@@ -30,7 +31,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".Formato(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
             }
@@ -42,8 +43,7 @@ namespace Signum.Engine
             using (HeavyProfiler.Log("DBSave", () => "SaveParams"))
             using (Transaction tr = new Transaction())
             {
-
-                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
             }
@@ -435,23 +435,18 @@ namespace Signum.Engine
         public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
             where T : class, IIdentifiable
         {
-            return RetrieveFromListOfLite((IEnumerable<Lite<IIdentifiable>>)lites).Cast<T>().ToList();
-        }
-
-        static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite<IIdentifiable>> lites)
-        {
             if (lites == null)
                 throw new ArgumentNullException("lites");
 
             if (lites.IsEmpty())
-                return new List<IdentifiableEntity>();
+                return new List<T>();
 
             using (Transaction tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
                     RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
 
-                var result = lites.Select(l => (IdentifiableEntity)dic[l.EntityType][l.Id]).ToList(); // keep same order
+                var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order
 
                 return tr.Commit(result);
             }
@@ -474,6 +469,9 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
+            if (lite.IsNew)
+                throw new ArgumentNullException("lite is New");
+
             giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
 
@@ -482,6 +480,9 @@ namespace Signum.Engine
         {
             if (ident == null)
                 throw new ArgumentNullException("ident");
+
+            if (ident.IsNew)
+                throw new ArgumentNullException("ident is New");
 
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
@@ -494,7 +495,7 @@ namespace Signum.Engine
             {
                 int result = Database.Query<T>().Where(a => a.Id == id).UnsafeDelete();
                 if (result != 1)
-                    throw new InvalidOperationException("ident not found in the database");
+                    throw new EntityNotFoundException(typeof(T), id);
             }
         }
 
@@ -564,9 +565,14 @@ namespace Signum.Engine
 
             using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".Formato(typeof(T).TypeName())))
             {
-                int result = Database.Query<T>().Where(a => ids.Contains(a.Id)).UnsafeDelete();
-                if (result != ids.Count())
-                    throw new InvalidOperationException("not all the elements have been deleted");
+                using (Transaction tr = new Transaction())
+                {
+                    int result = Database.Query<T>().Where(a => ids.Contains(a.Id)).UnsafeDelete();
+                    if (result != ids.Count())
+                        throw new InvalidOperationException("not all the elements have been deleted");
+                    tr.Commit();
+                }
+
             }
         }
 
@@ -772,7 +778,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
+        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
             where E : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
@@ -838,6 +844,7 @@ namespace Signum.Engine
         #region UnsafeInsert
 
         public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
+            where E : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {

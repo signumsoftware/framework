@@ -130,16 +130,16 @@ namespace Signum.Engine.Maps
         }
 
 
-        internal void OnSaved(IdentifiableEntity entity)
+        internal void OnSaved(IdentifiableEntity entity, SavedEventArgs args)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaved(entity);
+                ee.OnSaved(entity, args);
 
-            entityEventsGlobal.OnSaving(entity);
+            entityEventsGlobal.OnSaved(entity, args);
         }
 
         internal void OnRetrieved(IdentifiableEntity entity)
@@ -219,16 +219,16 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
+        internal Expression<Func<T, bool>> OnFilterQuery<T>()
             where T : IdentifiableEntity
         {
             AssertAllowed(typeof(T));
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
             if (ee == null)
-                return query;
+                return null;
 
-            return ee.OnFilterQuery(query);
+            return ee.OnFilterQuery();
         }
 
         internal bool HasQueryFilter(Type type)
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
@@ -288,7 +288,7 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 return Generating
@@ -327,6 +327,7 @@ namespace Signum.Engine.Maps
             this.Settings = settings;
             this.Assets = new SchemaAssets();
 
+            Generating += SchemaGenerator.SnapshotIsolation;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -528,21 +529,7 @@ namespace Signum.Engine.Maps
         public bool IsEnum { get; set; }
     }
 
-    internal interface IEntityEvents
-    {
-        void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
-        void OnSaving(IdentifiableEntity entity);
-        void OnSaved(IdentifiableEntity entity);
-        
-        void OnRetrieved(IdentifiableEntity entity);
-
-        void OnPreUnsafeUpdate(IUpdateable update);
-        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
-
-        ICacheController CacheController { get; }
-
-        bool HasQueryFilter { get; }
-    }
+  
 
     public interface ICacheController
     {
@@ -579,386 +566,7 @@ namespace Signum.Engine.Maps
         public abstract string TryGetToString(int id);
     }
 
-    public class EntityEvents<T> : IEntityEvents
-        where T : IdentifiableEntity
-    {
-        public event PreSavingEventHandler<T> PreSaving;
-        public event SavingEventHandler<T> Saving;
-        public event SavedEventHandler<T> Saved;
+    
 
-        public event RetrievedEventHandler<T> Retrieved;
 
-        public CacheControllerBase<T> CacheController { get; set; }
-
-        public event FilterQueryEventHandler<T> FilterQuery;
-
-        public event DeleteHandler<T> PreUnsafeDelete;
-        public event DeleteMlistHandler<T> PreUnsafeMListDelete;
-
-        public event UpdateHandler<T> PreUnsafeUpdate;
-
-        public event InsertHandler<T> PreUnsafeInsert;
-
-        internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
-        {
-            if (FilterQuery != null)
-                foreach (FilterQueryEventHandler<T> filter in FilterQuery.GetInvocationList())
-                    query = filter(query);
-
-            return query;
-        }
-
-        public bool HasQueryFilter
-        {
-            get { return FilterQuery != null; }
-        }
-
-        internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
-        {
-            if (PreUnsafeDelete != null)
-                foreach (DeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
-                    action(entityQuery);
-        }
-
-        internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
-        {
-            if (PreUnsafeMListDelete != null)
-                foreach (DeleteMlistHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
-                    action(mlistQuery, entityQuery);
-        }
-
-        void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
-        {
-            if (PreUnsafeUpdate != null)
-            {
-                var query = update.EntityQuery<T>();
-                foreach (UpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
-                    action(update, query);
-            }
-        }
-
-        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
-        {
-            if (PreUnsafeInsert != null)
-                foreach (InsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
-                    action(query, constructor, (IQueryable<T>)entityQuery);
-
-        }
-
-        void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
-        {
-            if (PreSaving != null)
-                PreSaving((T)entity, ref graphModified);
-        }
-
-        void IEntityEvents.OnSaving(IdentifiableEntity entity)
-        {
-            if (Saving != null)
-                Saving((T)entity);
-
-        }
-
-        void IEntityEvents.OnSaved(IdentifiableEntity entity)
-        {
-            if (Saved != null)
-                Saved((T)entity,null);
-
-        }
-
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
-        {
-            if (Retrieved != null)
-                Retrieved((T)entity);
-        }
-
-        ICacheController IEntityEvents.CacheController
-        {
-            get { return CacheController; }
-        }
-    }
-
-    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
-
-    public delegate void DeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate void DeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
-    public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
-
-    public class SavedEventArgs
-    {
-        public bool IsRoot { get; set; }
-        public bool WasNew { get; set; }
-        public bool WasSelfModified { get; set; }
-    }
-
-
-    public static class TableExtensions
-    {
-        internal static string UnScapeSql(this string name)
-        {
-            return name.Trim('[', ']');
-        }
-    }
-
-    public class ServerName : IEquatable<ServerName>
-    {
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Linked Servers: http://msdn.microsoft.com/en-us/library/ms188279.aspx
-        /// Not fully supported jet
-        /// </summary>
-        /// <param name="name"></param>
-        public ServerName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-        }
-
-        public override string ToString()
-        {
-            return Name.SqlEscape();
-        }
-
-        public bool Equals(ServerName other)
-        {
-            return other.Name == Name;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as ServerName;
-            return db != null && Equals(db);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        internal static ServerName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return new ServerName(name.UnScapeSql());
-        }
-    }
-
-    public class DatabaseName : IEquatable<DatabaseName>
-    {
-        public string Name { get; private set; }
-
-        public ServerName Server { get; private set; }
-
-        public DatabaseName(ServerName server, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.Server = server;
-        }
-
-        public override string ToString()
-        {
-            var result = Name.SqlEscape();
-
-            if (Server == null)
-                return result;
-
-            return Server.ToString() + "." + result;
-        }
-
-        public bool Equals(DatabaseName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Server, other.Server);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as DatabaseName;
-            return db != null && Equals(db);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
-        }
-
-        internal static DatabaseName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return new DatabaseName(ServerName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-    }
-
-    public class SchemaName : IEquatable<SchemaName>
-    {
-        public string Name { get; private set; }
-
-        readonly DatabaseName database;
-
-        public DatabaseName Database
-        {
-            get
-            {
-                if (database == null || ObjectName.CurrentOptions.AvoidDatabaseName)
-                    return null;
-
-                return database;
-            }
-        }
-
-        public static readonly SchemaName Default = new SchemaName(null, "dbo");
-
-        public bool IsDefault()
-        {
-            return Name == "dbo" && Database == null;
-        }
-
-        public SchemaName(DatabaseName database, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.database = database;
-        }
-
-        public override string ToString()
-        {
-            var result = Name.SqlEscape();
-
-            if (Database == null)
-                return result;
-
-            return Database.ToString() + "." + result;
-        }
-
-        public bool Equals(SchemaName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Database, other.Database);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as SchemaName;
-            return sc != null && Equals(sc);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
-        }
-
-        internal static SchemaName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return SchemaName.Default;
-
-            return new SchemaName(DatabaseName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-
-    }
-
-    public class ObjectName : IEquatable<ObjectName>
-    {
-        public string Name { get; private set; }
-
-        public SchemaName Schema { get; private set; }
-
-        public ObjectName(SchemaName schema, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            if (schema == null)
-                throw new ArgumentNullException("schema");
-
-            this.Name = name;
-            this.Schema = schema;
-        }
-
-        public override string ToString()
-        {
-            if (Schema == null || Schema.IsDefault())
-                return Name.SqlEscape();
-
-            return Schema.ToString() + "." + Name.SqlEscape();
-        }
-
-        public string ToStringDbo()
-        {
-            if (Schema == null)
-                return Name.SqlEscape();
-
-            return Schema.ToString() + "." + Name.SqlEscape();
-        }
-
-        public bool Equals(ObjectName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Schema, other.Schema);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as ObjectName;
-            return sc != null && Equals(sc);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Schema == null ? 0 : Schema.GetHashCode());
-        }
-
-        internal static ObjectName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            return new ObjectName(SchemaName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-
-        public ObjectName OnDatabase(DatabaseName databaseName)
-        {
-            return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
-        }
-
-        public ObjectName OnSchema(SchemaName schemaName)
-        {
-            return new ObjectName(schemaName, Name);
-        }
-
-        static readonly ThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");
-        public static IDisposable OverrideOptions(ObjectNameOptions options)
-        {
-            var old = optionsVariable.Value;
-            optionsVariable.Value = options;
-            return new Disposable(() => optionsVariable.Value = old);
-        }
-
-        public static ObjectNameOptions CurrentOptions
-        {
-            get { return optionsVariable.Value; }
-        }
-    }
-
-    public struct ObjectNameOptions
-    {
-        public bool IncludeDboSchema;
-        public DatabaseName OverrideDatabaseNameOnSystemQueries;
-        public bool AvoidDatabaseName;
-    }
 }

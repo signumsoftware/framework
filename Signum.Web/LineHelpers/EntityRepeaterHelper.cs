@@ -24,27 +24,27 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container SF-avoid-child-errors")))
+            using (sb.SurroundLine(new HtmlTag("fieldset", repeater.Prefix).Class("SF-repeater-field SF-control-container SF-avoid-child-errors")))
             {
                 sb.AddLine(helper.Hidden(repeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", repeater.Compose("hidden")).Class("hide")))
                 {
                 }
 
-                using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", repeater.Compose("header"))))
+                using (sb.SurroundLine(new HtmlTag("legend")))
+                using (sb.SurroundLine(new HtmlTag("div", repeater.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
+                    using (sb.SurroundLine(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {
                         sb.AddLine(EntityButtonHelper.Create(helper, repeater, btn: false));
                         sb.AddLine(EntityButtonHelper.Find(helper, repeater, btn: false));
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                using (sb.SurroundLine(new HtmlTag("div").Id(repeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (repeater.UntypedValue != null)
                     {
@@ -70,9 +70,9 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            using (sb.SurroundLine(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
-                using (sb.Surround(new HtmlTag("legend")))
+                using (sb.SurroundLine(new HtmlTag("legend")))
                 {
                     if (repeater.Remove)
                         sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));

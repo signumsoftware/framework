@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Threading;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -64,6 +65,20 @@ namespace Signum.Utilities.DataStructures
             for (ImmutableStack<T> f = stack; !f.IsEmpty; f = f.Pop())
                 r = r.Push(f.Peek());
             return r;
+        }
+
+        public static void SafeUpdate<T>(ref T variable, Func<T, T> repUpdateFunction) where T : class
+        {
+            T oldValue, newValue;
+            do
+            {
+                oldValue = variable;
+                newValue = repUpdateFunction(oldValue);
+
+                if (newValue == null)
+                    break;
+
+            } while (Interlocked.CompareExchange<T>(ref variable, newValue, oldValue) != oldValue);
         }
     }
 }

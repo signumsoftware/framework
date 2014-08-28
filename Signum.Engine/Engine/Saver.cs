@@ -15,27 +15,22 @@ namespace Signum.Engine
 {
     internal static class Saver
     {
-        public static void SaveAll(IdentifiableEntity[] entities)
-        {
-            if (entities == null || entities.Any(e => e == null))
-                throw new ArgumentNullException("entity");
-
-            Save(() => GraphExplorer.FromRoots(entities));
-        }
-
         public static void Save(IdentifiableEntity entity)
         {
-            Save(() => GraphExplorer.FromRoot(entity));
+            Save(new []{entity});
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(Func<DirectedGraph<Modifiable>> createGraph)
+        public static void Save(IdentifiableEntity[] entities)
         {
+            if (entities == null || entities.Any(e => e == null))
+                throw new ArgumentNullException("entity");
+
             using (var log = HeavyProfiler.LogNoStackTrace("PreSaving"))
             {
                 Schema schema = Schema.Current;
-                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph, (Modifiable m, ref bool graphModified) =>
+                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(entities), (Modifiable m, ref bool graphModified) =>
                 {
                     m.PreSaving(ref graphModified);
 
@@ -44,6 +39,9 @@ namespace Signum.Engine
                     if (ident != null)
                         schema.OnPreSaving(ident, ref graphModified);
                 });
+
+                HashSet<IdentifiableEntity> wasNew = modifiables.OfType<IdentifiableEntity>().Where(a=>a.IsNew).ToHashSet();
+                HashSet<IdentifiableEntity> wasSelfModified = modifiables.OfType<IdentifiableEntity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet();
 
                 log.Switch("Integrity");
 
@@ -74,7 +72,12 @@ namespace Signum.Engine
                 SaveGraph(schema, identifiables);
 
                 foreach (var node in identifiables)
-                    schema.OnSaved(node);
+                    schema.OnSaved(node, new SavedEventArgs
+                    {
+                        IsRoot = entities.Contains(node),
+                        WasNew = wasNew.Contains(node),
+                        WasSelfModified = wasSelfModified.Contains(node),
+                    });
 
                 EntityCache.Add(identifiables);
                 EntityCache.Add(notModified);

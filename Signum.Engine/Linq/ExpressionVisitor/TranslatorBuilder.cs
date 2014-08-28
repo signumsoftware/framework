@@ -135,7 +135,7 @@ namespace Signum.Engine.Linq
                 return pg.list; 
             }
 
-            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
             {
                 if (child.IsLazyMList)
                     list.Add(child);
@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
                 return pg.list;
             }
 
-            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
             {
                 var result = base.VisitChildProjection(child);
 
@@ -231,12 +231,12 @@ namespace Signum.Engine.Linq
                     b.IsValueType && b.Nullify() == a;
             }
 
-            protected override Expression VisitColumn(ColumnExpression column)
+            protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 return scope.GetColumnExpression(row, column.Alias, column.Name, column.Type);
             }
 
-            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
             {
                 Expression outer = Visit(child.OuterKey);
 
@@ -256,17 +256,17 @@ namespace Signum.Engine.Linq
                 return scope.LookupMList(row, child, field);
             }
 
-            protected override Expression VisitProjection(ProjectionExpression proj)
+            protected internal override Expression VisitProjection(ProjectionExpression proj)
             {
                 throw new InvalidOperationException("No ProjectionExpressions expected at this stage"); 
             }
 
-            protected override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+            protected internal override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
             {
                 throw new InvalidOperationException("Impossible to retrieve MixinEntity {0} without their main entity".Formato(me.Type.Name)); 
             }
 
-            protected override Expression VisitEntity(EntityExpression fieldInit)
+            protected internal override Expression VisitEntity(EntityExpression fieldInit)
             {
                 Expression id = Visit(NullifyColumn(fieldInit.ExternalId));
 
@@ -337,7 +337,7 @@ namespace Signum.Engine.Linq
             static Expression peModifiableState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
 
 
-            protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
+            protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
                 var embeddedParam = Expression.Parameter(eee.Type);
 
@@ -368,12 +368,12 @@ namespace Signum.Engine.Linq
                     Expression.Constant(null, block.Type));
             }
 
-            protected override Expression VisitImplementedBy(ImplementedByExpression rb)
+            protected internal override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
                 return rb.Implementations.Select(ee => new When(Visit(ee.Value.ExternalId).NotEqualsNulll(), Visit(ee.Value))).ToCondition(rb.Type);
             }
 
-            protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
+            protected internal override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
             {
                 return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(rba.Type),
                     Visit(NullifyColumn(rba.Id)),
@@ -383,7 +383,7 @@ namespace Signum.Engine.Linq
             static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
             static readonly ConstantExpression NullId = Expression.Constant(null, typeof(int?));
 
-            protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+            protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeFie.ExternalId)), NullId),
@@ -391,7 +391,7 @@ namespace Signum.Engine.Linq
                     NullType);
             }
      
-            protected override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+            protected internal override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
             {
                 return typeIb.TypeImplementations.Reverse().Aggregate((Expression)NullType, (acum, imp) => Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(imp.Value)), NullId),
@@ -401,7 +401,7 @@ namespace Signum.Engine.Linq
 
             static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
 
-            protected override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+            protected internal override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeIba.TypeColumn)), NullId),
@@ -414,7 +414,7 @@ namespace Signum.Engine.Linq
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
             }
 
-            protected override Expression VisitLiteValue(LiteValueExpression lite)
+            protected internal override Expression VisitLiteValue(LiteValueExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
 
@@ -472,7 +472,7 @@ namespace Signum.Engine.Linq
 
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null, ModifiedState.Clean));
 
-            protected override Expression VisitMListElement(MListElementExpression mle)
+            protected internal override Expression VisitMListElement(MListElementExpression mle)
             {
                 Type type = mle.Type;
 
@@ -505,7 +505,7 @@ namespace Signum.Engine.Linq
                 return null;
             }
 
-            protected override Expression VisitSqlConstant(SqlConstantExpression sce)
+            protected internal override Expression VisitSqlConstant(SqlConstantExpression sce)
             {
                 return Expression.Constant(sce.Value, sce.Type);
             }

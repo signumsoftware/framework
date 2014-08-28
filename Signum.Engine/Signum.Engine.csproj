@@ -166,8 +166,10 @@
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
+    <Compile Include="Schema\EntityEvents.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
@@ -183,7 +185,29 @@
     <Compile Include="Basics\TypesLogic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="0.Introduction.md" />
+    <None Include="Administrator.md" />
+    <None Include="Database.Delete.md" />
+    <None Include="Database.md" />
+    <None Include="Database.Query.0.md" />
+    <None Include="Database.Query.1.Entity.md" />
+    <None Include="Database.Query.2.Inheritance.md" />
+    <None Include="Database.Query.3.Lite.md" />
+    <None Include="Database.Query.4.SelectMany.md" />
+    <None Include="Database.Query.5.Join.md" />
+    <None Include="Database.Query.6.ElementOperators.md" />
+    <None Include="Database.Query.7.SqlFunctions.md" />
+    <None Include="Database.Query.8.TypeMismatch.md" />
+    <None Include="Database.Query.Z.Apendix.md" />
+    <None Include="Database.Retrieve.md" />
+    <None Include="Database.Save.md" />
+    <None Include="Database.UnsafeDelete.md" />
+    <None Include="Database.UnsafeInsert.md" />
+    <None Include="Database.UnsafeUpdate.md" />
+    <None Include="EntityCache.md" />
     <None Include="Operations\Operations.cd" />
+    <None Include="Schema\EntityEvents.md" />
+    <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +237,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Docs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

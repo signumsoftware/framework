@@ -39,7 +39,7 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            using (valueLine.UnitText == null ? null : sb.Surround(new HtmlTag("div").Class("input-group")))
+            using (valueLine.UnitText == null ? null : sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
                 sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
 
@@ -165,7 +165,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("input-group")))
+            using (sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
                 valueLine.ValueHtmlProps.AddCssClass("form-control");
 

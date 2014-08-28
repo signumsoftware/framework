@@ -239,6 +239,16 @@ var SF;
         return false;
     }
     SF.submitOnly = submitOnly;
+
+    function isTouchDevice() {
+        try  {
+            document.createEvent("TouchEvent");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    SF.isTouchDevice = isTouchDevice;
 })(SF || (SF = {}));
 
 once("serializeObject", function () {

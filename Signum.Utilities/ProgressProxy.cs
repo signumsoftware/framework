@@ -93,7 +93,7 @@ namespace Signum.Utilities
         {
             this.position = position;
             this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position);
+            OnChanged(ProgressAction.Task | ProgressAction.Position);
         }
 
         public void NextTask(string currentTask)

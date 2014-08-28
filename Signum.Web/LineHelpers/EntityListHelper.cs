@@ -23,11 +23,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityList.Prefix).Class("SF-entity-list SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityList.Prefix).Class("SF-entity-list SF-control-container")))
             {
                 sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", entityList.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityList.Compose("hidden")).Class("hide")))
                 {
                 }
 
@@ -39,7 +39,7 @@ namespace Signum.Web
                 if (entityList.ListHtmlProps.Any())
                     sbSelectContainer.Attrs(entityList.ListHtmlProps);
 
-                using (sbSelect.Surround(sbSelectContainer))
+                using (sbSelect.SurroundLine(sbSelectContainer))
                 {
                     if (entityList.UntypedValue != null)
                     {
@@ -48,11 +48,11 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", entityList.Compose("inputGroup")).Class("input-group")))
+                using (sb.SurroundLine(new HtmlTag("div", entityList.Compose("inputGroup")).Class("input-group")))
                 {
                     sb.Add(sbSelect.ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityList.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
+                    using (sb.SurroundLine(new HtmlTag("span", entityList.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
                     {
                         sb.AddLine(EntityButtonHelper.Create(helper, entityList, btn: true));
                         sb.AddLine(EntityButtonHelper.Find(helper, entityList, btn: true));

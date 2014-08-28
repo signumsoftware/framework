@@ -205,7 +205,7 @@ namespace Signum.Windows
     }
 
 
-    class RouteVisitor : SimpleExpressionVisitor
+    class RouteVisitor : ExpressionVisitor
     {
         StringBuilder sb = new StringBuilder();
 
@@ -216,9 +216,9 @@ namespace Signum.Windows
             return v.sb.ToString();
         }
 
-        protected override System.Linq.Expressions.Expression VisitMemberAccess(MemberExpression m)
+        protected override System.Linq.Expressions.Expression VisitMember(MemberExpression m)
         {
-            var result = base.VisitMemberAccess(m);
+            var result = base.VisitMember(m);
             if (sb.Length != 0)
                 sb.Append(".");
             sb.Append(m.Member.Name);

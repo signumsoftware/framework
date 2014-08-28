@@ -73,7 +73,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// It also simplifies and skip evaluating short circuited subexpresions
     /// Evaluates constant subexpressions 
 	/// </summary>
-	public class ExpressionCleaner: SimpleExpressionVisitor
+    public class ExpressionCleaner : ExpressionVisitor
 	{
         Func<Expression, Expression> partialEval;
 
@@ -154,9 +154,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
-            MemberExpression exp = (MemberExpression)base.VisitMemberAccess(m);
+            MemberExpression exp = (MemberExpression)base.VisitMember(m);
 
             Expression binded = BindMemberExpression(exp, false);
 

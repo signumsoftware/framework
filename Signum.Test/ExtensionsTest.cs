@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using System.Linq.Expressions;
 
 namespace Signum.Test
 {
@@ -17,7 +19,7 @@ namespace Signum.Test
         }
 
         [TestMethod]
-        public void Order()
+        public void DelegateOrder()
         {
             Action action = null;
             action += A;
@@ -35,5 +37,21 @@ namespace Signum.Test
         public void A() { a++; }
         public void B() { a *= 2; }
 
+
+        [TestMethod]
+        public void CompareExpression()
+        {
+            Expression<Func<int, int>> f1 = a => a;
+            Expression<Func<int, int>> f2 = a => a;
+            Expression<Func<int, int>> f3 = b => b;
+
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2, checkParameterNames: true));
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f2, checkParameterNames: false));
+            Assert.IsFalse(ExpressionComparer.AreEqual(f1, f3, checkParameterNames: true));
+            Assert.IsTrue(ExpressionComparer.AreEqual(f1, f3, checkParameterNames: false));
+
+            f1.Evaluate(1);
+            Assert2.Throws<InvalidOperationException>("cache", () => f2.Evaluate(2));
+        }
     }
 }

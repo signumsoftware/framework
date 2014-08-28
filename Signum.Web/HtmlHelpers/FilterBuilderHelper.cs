@@ -31,9 +31,9 @@ namespace Signum.Web
 
             var id = context.Compose("trFilter", index.ToString());
 
-            using (sb.Surround(new HtmlTag("tr").Id(id)))
+            using (sb.SurroundLine(new HtmlTag("tr").Id(id)))
             {
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     if (!filterOptions.Frozen)
                     {
@@ -45,7 +45,7 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("td")))
+                using (sb.SurroundLine(new HtmlTag("td")))
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
@@ -59,7 +59,7 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     var dic = new Dictionary<string, object> { { "class", "form-control" } };
                     if (filterOptions.Frozen)
@@ -78,7 +78,7 @@ namespace Signum.Web
                             dic));
                 }
 
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     Context valueContext = new Context(context, "value_" + index.ToString());
 

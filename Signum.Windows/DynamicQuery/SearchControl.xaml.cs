@@ -147,10 +147,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(Lite<IdentifiableEntity>[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite<IdentifiableEntity>[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(List<Lite<IdentifiableEntity>>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public List<Lite<IdentifiableEntity>> SelectedItems
         {
-            get { return (Lite<IdentifiableEntity>[])GetValue(SelectedItemsProperty); }
+            get { return (List<Lite<IdentifiableEntity>>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -226,6 +226,11 @@ namespace Signum.Windows
         {
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
+        }
+
+        public bool CanAddFilters
+        {
+            get { return this.ShowHeader && (this.ShowFilters || this.ShowFilterButton); }
         }
 
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
@@ -419,6 +424,23 @@ namespace Signum.Windows
 
             DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
 
+            if (this.CanAddFilters || this.AllowChangeColumns)
+            {
+                headerContextMenu = new ContextMenu();
+
+                if (this.CanAddFilters)
+                    headerContextMenu.Items.Add(new MenuItem { Header = SearchMessage.AddFilter.NiceToString() }.Handle(MenuItem.ClickEvent, filterHeader_Click));
+
+                if (this.CanAddFilters && this.AllowChangeColumns)
+                    headerContextMenu.Items.Add(new Separator());
+
+                if (this.AllowChangeColumns)
+                {
+                    headerContextMenu.Items.Add(new MenuItem { Header = SearchMessage.Rename.NiceToString() }.Handle(MenuItem.ClickEvent, renameMenu_Click));
+                    headerContextMenu.Items.Add(new MenuItem { Header = EntityControlMessage.Remove.NiceToString() }.Handle(MenuItem.ClickEvent, removeMenu_Click));
+                }
+            }
+
             GenerateListViewColumns();
 
             DynamicQueryServer.SetFilterTokens(FilterOptions, Description);
@@ -450,6 +472,7 @@ namespace Signum.Windows
             }
         }
 
+        ContextMenu headerContextMenu = null;
        
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -517,10 +540,15 @@ namespace Signum.Windows
 
         private void FillContextMenuItems()
         {
+            contextMenu.Items.Clear();
+
+            if (this.CanAddFilters && GetCellColumnHeader(contextMenu) != null)
+            {
+                contextMenu.Items.Add(new MenuItem { Header = SearchMessage.AddFilter.NiceToString() }.Handle(MenuItem.ClickEvent, filterCell_Click));
+            } 
+
             if (GetContextMenuItems != null)
             {
-                contextMenu.Items.Clear();
-
                 foreach (var fun in GetContextMenuItems.GetInvocationList().Cast<Func<SearchControl, IEnumerable<MenuItem>>>())
                 {
                     var items = fun(this).Try(a => a.ToList());
@@ -547,7 +575,7 @@ namespace Signum.Windows
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).Try(r => r.Entity);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
             else
                 SelectedItems = null;
         }
@@ -594,7 +622,7 @@ namespace Signum.Windows
                 Header = new SortGridViewColumnHeader
                 {
                     Content = col.DisplayName,
-                    ContextMenu = (ContextMenu)FindResource("contextMenu"),
+                    ContextMenu = headerContextMenu,
                     RequestColumn = col,
                 },
             };
@@ -933,31 +961,7 @@ namespace Signum.Windows
             Search(resetPage: true);
         }
 
-        FilterOption CreateFilter(SortGridViewColumnHeader header)
-        {
-            if (resultTable != null)
-            {
-                ResultRow row = (ResultRow)lvResult.SelectedItem;
-                if (row != null)
-                {
-                    object value = row[header.ResultColumn];
-
-                    return new FilterOption
-                    {
-                        Token = header.RequestColumn.Token,
-                        Operation = FilterOperation.EqualTo,
-                        Value = value is EmbeddedEntity ? null : value
-                    };
-                }
-            }
-
-            return new FilterOption
-            {
-                Token = header.RequestColumn.Token,
-                Operation = FilterOperation.EqualTo,
-                Value = FilterOption.DefaultValue(header.RequestColumn.Type),
-            };
-        }
+      
 
         private void btCreateColumn_Click(object sender, RoutedEventArgs e)
         {
@@ -987,7 +991,7 @@ namespace Signum.Windows
             if (!AllowChangeColumns)
                 return;
 
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
             string result = gvch.RequestColumn.DisplayName;
             if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
@@ -997,28 +1001,69 @@ namespace Signum.Windows
             }
         }
 
+        private static SortGridViewColumnHeader GetHeaderColumnHeader(object sender)
+        {
+            var context = (ContextMenu)((MenuItem)sender).Parent;
+
+            return (SortGridViewColumnHeader)context.PlacementTarget;
+        }
+
         private void removeMenu_Click(object sender, RoutedEventArgs e)
         {
             if (!AllowChangeColumns)
                 return;
 
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
             gvResults.Columns.Remove(gvch.Column);
 
             UpdateMultiplyMessage(true); 
         }
 
-        private void filter_Click(object sender, RoutedEventArgs e)
+        private void filterHeader_Click(object sender, RoutedEventArgs e)
         {
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
-            FilterOptions.Add(CreateFilter(gvch)); 
+            FilterOptions.Add(new FilterOption
+            {
+                Token = gvch.RequestColumn.Token,
+                Operation = FilterOperation.EqualTo,
+                Value = FilterOption.DefaultValue(gvch.RequestColumn.Type),
+            }); 
         }
 
-        private static SortGridViewColumnHeader GetMenuItemHeader(object sender)
+        private void filterCell_Click(object sender, RoutedEventArgs e)
         {
-            return (SortGridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            ContextMenu context = (ContextMenu)((MenuItem)sender).Parent;
+
+            SortGridViewColumnHeader gvch = GetCellColumnHeader(context);
+
+            if (gvch == null)
+                return;
+
+            ResultRow row = (ResultRow)lvResult.SelectedItem;
+            object value = row[gvch.ResultColumn];
+
+            FilterOptions.Add(new FilterOption
+            {
+                Token = gvch.RequestColumn.Token,
+                Operation =  FilterOperation.EqualTo,
+                Value = value is EmbeddedEntity ? null : value
+            });
+        }
+
+        private SortGridViewColumnHeader GetCellColumnHeader(ContextMenu context)
+        {
+            Point point = context.PointToScreen(new Point(0, 0));
+
+            Point newPoint = lvResult.PointFromScreen(point);
+
+            Point headerPoint = new Point(newPoint.X, 4);
+
+            HitTestResult hitResult = VisualTreeHelper.HitTest(lvResult, headerPoint);
+
+            SortGridViewColumnHeader gvch = hitResult.VisualHit.VisualParents().OfType<SortGridViewColumnHeader>().FirstOrDefault();
+            return gvch;
         }
 
         public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders, Pagination pagination)

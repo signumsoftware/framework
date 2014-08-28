@@ -32,7 +32,12 @@ namespace Signum.Web.Controllers
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            return Navigator.NormalPage(this, Database.Retrieve(t, id));
+            Lite<IdentifiableEntity> lite = Lite.Create(t, id);
+
+            using (Navigator.Manager.OnRetrievingForView(lite))
+            {
+                return Navigator.NormalPage(this, Database.Retrieve(lite));
+            }
         }
 
         [ActionSplitter("webTypeName")]
@@ -55,7 +60,13 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {
+                Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                using (Navigator.Manager.OnRetrievingForView(lite))
+                {
+                    entity = Database.Retrieve(lite);
+                }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
 
@@ -76,7 +87,13 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {
+                 Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                 using (Navigator.Manager.OnRetrievingForView(lite))
+                 {
+                     entity = Database.Retrieve(lite);
+                 }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
         
@@ -98,7 +115,13 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {    
+                 Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                 using (Navigator.Manager.OnRetrievingForView(lite))
+                 {
+                     entity = Database.Retrieve(lite);
+                 }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
 
@@ -114,8 +137,12 @@ namespace Signum.Web.Controllers
         public PartialViewResult NormalControl(string entityType, int id, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-
-            IdentifiableEntity entity = Database.Retrieve(type, id);
+            Lite<IdentifiableEntity> lite = Lite.Create(type, id);
+            IdentifiableEntity entity;
+            using (Navigator.Manager.OnRetrievingForView(lite))
+            {
+                entity = Database.Retrieve(lite);
+            }
 
             return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
         }

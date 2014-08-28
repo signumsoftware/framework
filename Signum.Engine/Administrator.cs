@@ -222,22 +222,6 @@ namespace Signum.Engine
             }
         }
 
-        public static void SetSnapshotIsolation(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(databaseName, value));
-        }
-
-        public static void MakeSnapshotIsolationDefault(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
-        }
-
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {

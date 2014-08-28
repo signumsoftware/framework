@@ -1180,6 +1180,19 @@ namespace Signum.Web
         }
 
 
+        public event Func<Lite<IdentifiableEntity>, IDisposable> RetrievingForView; 
+        internal IDisposable OnRetrievingForView(Lite<IdentifiableEntity> lite)
+        {
+            if (RetrievingForView == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (Func<Lite<IdentifiableEntity>, IDisposable> action in RetrievingForView.GetInvocationList())
+            {
+                result = Disposable.Combine(result, action(lite));
+            }
+            return result;
+        }
     }
 
     public enum JsonResultType

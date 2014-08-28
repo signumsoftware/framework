@@ -19,7 +19,7 @@ namespace Signum.Windows
     {
         internal static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {
-            if (sc.SelectedItems == null || sc.SelectedItems.Length != 1)
+            if (sc.SelectedItems == null || sc.SelectedItems.Count != 1)
                 return null;
 
             return from ql in LinksClient.GetForEntity(sc.SelectedItem.Clone(), sc).NotNull()

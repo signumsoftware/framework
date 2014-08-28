@@ -101,7 +101,7 @@ namespace Signum.Utilities
             }
         }
 
-        private void PrintOptions(int skip, int take)
+        void PrintOptions(int skip, int take)
         {
             var keys = dictionary.Keys.ToList();
             var max = Math.Min(keys.Count, skip + take);
@@ -171,7 +171,7 @@ namespace Signum.Utilities
             }
         }
 
-        public IEnumerable<WithDescription<V>> GetValuesRange(string line)
+        IEnumerable<WithDescription<V>> GetValuesRange(string line)
         {
             if (line.Contains('-'))
             {

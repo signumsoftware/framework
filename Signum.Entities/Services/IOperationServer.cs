@@ -58,9 +58,6 @@ namespace Signum.Services
         IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> cleanKeys);
-
-       
+        Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lites, List<OperationSymbol> cleanKeys);
     }
-
 }

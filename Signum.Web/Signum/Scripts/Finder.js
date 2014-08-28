@@ -1,7 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
-    exports.doubleScroll = true;
-
     (function (FilterOperation) {
         FilterOperation[FilterOperation["EqualTo"] = 0] = "EqualTo";
         FilterOperation[FilterOperation["DistinctTo"] = 1] = "DistinctTo";
@@ -330,7 +328,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     _this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
                 });
 
-                this.prefix.child("sfFullScreen").get().on("mousedown", function (e) {
+                this.prefix.child("sfFullScreen").get().on("mouseup", function (e) {
                     e.preventDefault();
                     _this.fullScreen(e);
                 });
@@ -344,48 +342,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return false;
             });
 
-            if (exports.doubleScroll) {
-                var div = this.prefix.child("divResults").get();
-
-                div.removeClass("table-responsive");
-                div.css("overflow-x", "auto");
-
-                var divUp = this.options.prefix.child("divResults_Up").tryGet();
-
-                if (!divUp.length) {
-                    divUp = $("<div>").attr("id", this.options.prefix.child("divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
-
-                    var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
-                }
-
-                div.scroll(function () {
-                    _this.syncSize();
-                    divUp.scrollLeft(div.scrollLeft());
-                });
-                divUp.scroll(function () {
-                    _this.syncSize();
-                    div.scrollLeft(divUp.scrollLeft());
-                });
-
-                this.syncSize();
-
-                window.onresize = function () {
-                    return _this.syncSize();
-                };
-            }
-
+            //if (SF.isTouchDevice()) { //UserQuery dropdown problems
+            //    this.element.find(".sf-query-button-bar")
+            //        .css("overflow-x", "auto")
+            //        .css("white-space", "nowrap");
+            //}
             if (this.options.searchOnLoad) {
                 this.searchOnLoad();
             }
-        };
-
-        SearchControl.prototype.syncSize = function () {
-            if (!exports.doubleScroll)
-                return;
-
-            this.prefix.child("tblResults_Up").get().width(this.prefix.child("tblResults").get().width());
-
-            this.prefix.child("divResults_Up").get().css("height", this.prefix.child("tblResults_Up").get().width() > this.prefix.child("divResults_Up").get().width() ? "15" : "1");
         };
 
         SearchControl.prototype.changeRowSelection = function ($rowSelectors, select) {
@@ -568,7 +532,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-                _this.syncSize();
                 _this.updateSelectedButton();
             });
         };
@@ -688,7 +651,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.addColumn = function () {
-            var _this = this;
             if (!this.options.allowChangeColumns || this.prefix.child("tblFilters").get().find("tbody").length == 0) {
                 throw "Adding columns is not allowed";
             }
@@ -713,12 +675,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 async: false
             }).then(function (html) {
                 $tblHeaders.append(html);
-                _this.syncSize();
             });
         };
 
         SearchControl.prototype.editColumn = function ($th) {
-            var _this = this;
             var colName = $th.find("span").text().trim();
 
             Navigator.valueLineBox({
@@ -730,7 +690,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).then(function (result) {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
-                _this.syncSize();
             });
         };
 
@@ -811,7 +770,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.removeColumn = function ($th) {
             $th.remove();
             this.clearResults();
-            this.syncSize();
         };
 
         SearchControl.prototype.clearResults = function () {
@@ -910,6 +868,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix = prefix;
             this.webQueryName = webQueryName;
             this.addFilterUrl = addFilterUrl;
+            if (SF.isTouchDevice()) {
+                element.find(".sf-filters-body").css("overflow-x", "auto").css("white-space", "nowrap");
+            }
+
             this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
             this.element.on("sf-new-subtokens-combo", function (event) {

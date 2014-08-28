@@ -77,8 +77,8 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBDoubleWhereSwitch()
         {
             var query = Database.Query<AlbumDN>()
-                .Where(a => a.Author.CombineSwitch().ToLite().ToString().Length > 0)
-                .Select(a => a.Author.CombineSwitch().ToLite());
+                .Where(a => a.Author.CombineCase().ToLite().ToString().Length > 0)
+                .Select(a => a.Author.CombineCase().ToLite());
 
             Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
@@ -181,7 +181,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let band = (BandDN)a.Author
-                        select new { Artist = band.ToString(), Author = a.Author.CombineSwitch().ToString() }).ToList();
+                        select new { Artist = band.ToString(), Author = a.Author.CombineCase().ToString() }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
         }
@@ -198,7 +198,7 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBWhereSwitch()
         {
             var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.CombineSwitch().ToLite())
+                .Select(a => a.Author.CombineCase().ToLite())
                 .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
@@ -266,7 +266,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicSwitch()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select a.Author.CombineSwitch().Name).ToList();
+                        select a.Author.CombineCase().Name).ToList();
         }
 
        [TestMethod]
@@ -287,7 +287,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicIBSwitch()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select a.Author.CombineSwitch().LastAward.ToLite()).ToList();
+                        select a.Author.CombineCase().LastAward.ToLite()).ToList();
         }
 
         [TestMethod]

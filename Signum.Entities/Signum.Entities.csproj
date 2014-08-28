@@ -100,6 +100,7 @@
     <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
+    <Compile Include="EnumEntity.cs" />
     <Compile Include="EnumMessages.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -141,7 +142,6 @@
     <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
     <Compile Include="IdentifiableEntity.cs" />
-    <Compile Include="EnumProxy.cs" />
     <Compile Include="MList.cs" />
     <Compile Include="Modifiable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -190,6 +190,22 @@
     <Content Include="Translations\Signum.Entities.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="0.Introduction.md" />
+    <None Include="1.BaseEntities.md" />
+    <None Include="ChangeTracking.md" />
+    <None Include="EntityKindAttribute.md" />
+    <None Include="EnumEntity.md" />
+    <None Include="FieldAttributes.md" />
+    <None Include="Inheritance.md" />
+    <None Include="Lite.md" />
+    <None Include="Mixin.md" />
+    <None Include="MList.md" />
+    <None Include="PropertyAttributes.md" />
+    <None Include="Services\Services.md" />
+    <None Include="Symbol.md" />
+    <None Include="Validation.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

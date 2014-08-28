@@ -430,7 +430,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public void DiffPrivate<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
+        void DiffPrivate<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
         {
             int posOld;
             int posNew;
@@ -451,13 +451,13 @@ namespace Signum.Utilities
             }
         }
 
-        private static void AddResults<T>(List<DiffPair<T>> list, Slice<T> slice, DiffAction action)
+        static void AddResults<T>(List<DiffPair<T>> list, Slice<T> slice, DiffAction action)
         {
             for (int i = 0; i < slice.Length; i++)
                 list.Add(new DiffPair<T>(action, slice[i]));
         }
 
-        private void TryDiff<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
+        void TryDiff<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
         {
             if (sliceOld.Length > 0 && sliceOld.Length > 0)
             {

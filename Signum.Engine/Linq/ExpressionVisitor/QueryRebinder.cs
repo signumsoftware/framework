@@ -30,7 +30,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             this.Visit(proj.Projector);
 
@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             var columns = CurrentScope.Keys.Where(ce => ce.Alias == table.Alias).ToList();
 
@@ -53,19 +53,19 @@ namespace Signum.Engine.Linq
             return table;
         }
 
-        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
             var columns = CurrentScope.Keys.Where(ce => ce.Alias == sqlFunction.Alias).ToList();
 
             CurrentScope.SetRange(columns, columns.Cast<Expression>());
 
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments)
                 return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             if (join.Condition != null)
                 this.Visit(join.Condition);
@@ -82,7 +82,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
             List<ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => k.Alias == set.Alias).ToList();
 
@@ -106,7 +106,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitDelete(DeleteExpression delete)
+        protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             Visit(delete.Where);
 
@@ -119,33 +119,33 @@ namespace Signum.Engine.Linq
             return delete;
         }
 
-        protected override Expression VisitUpdate(UpdateExpression update)
+        protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             Visit(update.Where);
-            update.Assigments.NewIfChange(VisitColumnAssigment);
+            Visit(update.Assigments, VisitColumnAssigment);
 
             var source = Visit(update.Source);
             var where = Visit(update.Where);
-            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
+            var assigments = Visit(update.Assigments, VisitColumnAssigment);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
 
             return update;
         }
 
-        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            Visit(insertSelect.Assigments, VisitColumnAssigment);
 
             var source = Visit(insertSelect.Source);
-            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
                 return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
 
             return insertSelect;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             Dictionary<ColumnExpression, Expression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (Expression)null);
             Dictionary<ColumnExpression, Expression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
@@ -157,17 +157,17 @@ namespace Signum.Engine.Linq
 
             this.Visit(select.Top);
             this.Visit(select.Where);
-            select.Columns.NewIfChange(VisitColumnDeclaration);
-            select.OrderBy.NewIfChange(VisitOrderBy);
-            select.GroupBy.NewIfChange(Visit);
+            Visit(select.Columns, VisitColumnDeclaration);
+            Visit(select.OrderBy, VisitOrderBy);
+            Visit(select.GroupBy, Visit);
 
             SourceExpression from = this.VisitSource(select.From);
 
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration); ;
+            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
+            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration); ;
 
             columns = AnswerAndExpand(columns, select.Alias, askedColumns);
 
@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
             return new Disposable(() => scopes = scopes.Pop());
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             Expression result;
             if (CurrentScope.TryGetValue(column, out result))
@@ -251,7 +251,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             var column = scalar.Select.Columns.SingleEx();
 

@@ -60,32 +60,32 @@ namespace Signum.Windows
         }
 
 
-        public static Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
+        public static List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
         {
             return Manager.FindMany(options);
         }
 
-        public static Lite<T>[] FindMany<T>()
+        public static List<Lite<T>> FindMany<T>()
          where T : IdentifiableEntity
         {
-            Lite<IdentifiableEntity>[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
+            List<Lite<IdentifiableEntity>> result = Manager.FindMany(new FindManyOptions(typeof(T)));
             if (result == null)
                 return null;
 
-            return result.Cast<Lite<T>>().ToArray();
+            return result.Cast<Lite<T>>().ToList();
         }
 
-        public static Lite<T>[] FindMany<T>(FindManyOptions options)
+        public static List<Lite<T>> FindMany<T>(FindManyOptions options)
             where T : IdentifiableEntity
         {
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
 
-            Lite<IdentifiableEntity>[] result = Manager.FindMany(options);
+            List<Lite<IdentifiableEntity>> result = Manager.FindMany(options);
             if (result == null)
                 return null;
 
-            return result.Cast<Lite<T>>().ToArray();
+            return result.Cast<Lite<T>>().ToList();
         }
         public static void NavigateUntyped(object entity)
         {
@@ -428,7 +428,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public virtual Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
+        public virtual List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
          
