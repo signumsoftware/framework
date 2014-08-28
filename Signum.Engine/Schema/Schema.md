@@ -129,6 +129,105 @@ Schema s = sb.Schema;
 ConnectionScope.Default = new Connection(connectionString, s);
 ```
 
+### Moving tables to other databases
+
+For big applications with lots of requests, the RDBMS tends to end up being the bottleneck. 
+
+Microsoft SQL Server has no support for sharding (horizontal partitioning), but we can move some tables to other databases/database servers to improve performance. 
+
+Another good strategy that we use often is moving the log tables (i.e.: `OperationLogDN`, `ExceptionDN`, `EmailMEssageDN`...) to a log database that we can backup less often, keeping the important data in principal database that we can move easily. 
+
+In order to do this, `Table` and `MListTable` classes have a `Name` property of type `ObjectName`, that represents a [four-part name](http://msdn.microsoft.com/en-us/library/ms177563.aspx).  
+
+```C#
+public class ObjectName : IEquatable<ObjectName>
+{
+    public string Name { get;  }
+    public SchemaName Schema { get; } //Mandatory, default dbo
+
+    public ObjectName(SchemaName schema, string name)
+}
+
+public class SchemaName : IEquatable<SchemaName>
+{
+    public string Name { get; }
+    public DatabaseName Database { get; } //Optional
+
+    public SchemaName(DatabaseName database, string name)
+}
+
+public class DatabaseName : IEquatable<DatabaseName>
+{
+     public string Name { get; }
+     public ServerName Server { get; } //Optional
+
+     public DatabaseName(ServerName server, string name)
+}
+
+public class ServerName : IEquatable<ServerName> 
+{
+     public string Name { get; }
+     public ServerName(string name) ;
+}
+```
+
+And `Table` also has some helper methods `ToSchema`, to change the schema, and `ToDatabase` to change the database (that could also be in another `ServerName` using linked servers). 
+
+```C#
+/// <summary>
+/// Use this method also to change the Server
+/// </summary>
+public void ToDatabase(DatabaseName databaseName)
+{
+    this.Name = this.Name.OnDatabase(databaseName);
+
+    foreach (var item in TablesMList())
+        item.ToDatabase(databaseName);
+}
+
+public void ToSchema(SchemaName schemaName)
+{
+    this.Name = this.Name.OnSchema(schemaName);
+
+    foreach (var item in TablesMList())
+        item.ToSchema(schemaName);
+}
+``` 
+
+
+Example: 
+
+```C#
+//Called at the end of `Starter.Start` method: 
+public static void SetLogDatabase(Schema schema, DatabaseName logDatabaseName)
+{
+    schema.Table<OperationLogDN>().ToDatabase(logDatabaseName);
+    schema.Table<ExceptionDN>().ToDatabase(logDatabaseName);
+}
+```
+
+Finally, is a common pattern to specify the name of both tables in the connection string, like this: 
+
+```
+Data Source=localhost\SQLEXPRESS2012;Initial Catalog=Southwind+_Log;User ID=sa;Password=sa
+```
+
+And use `Connector.TryExtractCatalogPostfix` to clean this connection string. 
+
+```C#
+public static void Start(string connectionString)
+{
+   //At the very beginning of Starter.Start
+   string logDatabase = Connector.TryExtractDatabaseNameWithPostfix(ref connectionString, "_Log");
+
+   //....
+
+   //At the very end of Starter.Start
+   if (logDatabase.HasText())
+       SetLogDatabase(sb.Schema, new DatabaseName(null, logDatabase));
+}
+```
+
 ## Override SchemaBuilder behaviour
 
 The last way of customizing the Schema is to inherit from `SchemaBuilder` and create your own `CustomSchemaBuilder` class and override any virtual method to customize types or names. 

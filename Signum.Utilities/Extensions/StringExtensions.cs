@@ -68,12 +68,12 @@ namespace Signum.Utilities
 
         static InvalidOperationException NotFound(string str, char separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in '{1}'".Formato(separator, str));
         }
 
         static InvalidOperationException NotFound(string str, string separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in '{1}'".Formato(separator, str));
         }
 
         public static string Before(this string str, char separator)
@@ -373,7 +373,7 @@ namespace Signum.Utilities
 
             return str.Substring(numChars);
         }
-    
+
         public static string RemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
@@ -400,7 +400,7 @@ namespace Signum.Utilities
 
             List<string> result = new List<string>();
 
-            for (int i = 0; i < str.Length; i += maxChars)
+            for (int i = 0; i < str.Length; i+= maxChars)
             {
                 if (i + maxChars < str.Length)
                     result.Add(str.Substring(i, maxChars));
@@ -432,11 +432,11 @@ namespace Signum.Utilities
             int index = 0;
 
             while (index < str.Length)
-            {
+        {
                 var newIndex = str.IndexOfAny(new[] { '\r', '\n' }, index).NotFound(str.Length);
 
                 if (newIndex > index + 1)
-                {
+            {
                     var res = str.Substring(index, newIndex - index).Trim();
                     if (res.Length > 0)
                         return res;
@@ -463,7 +463,7 @@ namespace Signum.Utilities
         public static string VerticalEtc(this string str, int maxLines, string etcString = "(...)")
         {
             if (str.HasText() && (str.Contains("\r\n")))
-            {
+        {
                 string[] arr = str.Split(new string[] { "\r\n" }, maxLines - 1, StringSplitOptions.None);
                 string res = arr.ToString("\r\n");
                 if (res.Length < str.Length)

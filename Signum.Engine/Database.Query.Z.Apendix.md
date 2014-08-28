@@ -81,9 +81,10 @@ public class BugDN : Entity
         Notify(() => Hours);
     }
 
+    static Expression<Func<BugDN, string>> ToStringExpression = e => e.Description;
     public override string ToString()
     {
-        return description;
+        return ToStringExpression.Evaluate(this);
     }
 }
 
@@ -154,7 +155,7 @@ public class ProjectDN : Entity
 [ImplementedBy(typeof(CustomerDN), typeof(DeveloperDN))]
 public interface IBugDiscoverer: IIdentifiable
 {
-
+    public string Name { get; }
 }
 
 
@@ -168,9 +169,10 @@ public class DeveloperDN : Entity, IBugDiscoverer
         set { Set(ref name, value); }
     }
 
+    static Expression<Func<DeveloperDN, string>> ToStringExpression = e => e.Name;
     public override string ToString()
     {
-        return name;
+        return ToStringExpression.Evaluate(this);
     }
 }
 
@@ -185,9 +187,10 @@ public class CustomerDN : Entity, IBugDiscoverer
         set { Set(ref name, value); }
     }
 
+    static Expression<Func<CustomerDN, string>> ToStringExpression = e => e.Name;
     public override string ToString()
     {
-        return name;
+        return ToStringExpression.Evaluate(this);
     }
 }
 ```

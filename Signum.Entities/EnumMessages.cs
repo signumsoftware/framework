@@ -128,12 +128,8 @@ Lose changes?")]
         [Description("Finder of {0}")]
         FinderOf0,
         Name,
-        [Description("New column")]
-        NewColumn,
         [Description("New column's Name")]
         NewColumnSName,
-        [Description("New filter")]
-        NewFilter,
         NoActionsFound,
         NoColumnSelected,
         NoFiltersSpecified,
