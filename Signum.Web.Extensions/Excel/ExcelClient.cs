@@ -26,7 +26,7 @@ namespace Signum.Web.Excel
     public class ExcelClient
     {
         public static string ViewPrefix = "~/Excel/Views/{0}.cshtml";
-        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Excel/Scripts/Report");
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Excel/Scripts/Excel");
 
         public static bool ToExcelPlain { get; private set; }
         public static bool ExcelReport { get; private set; }
