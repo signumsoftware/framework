@@ -1353,7 +1353,7 @@ namespace Signum.Engine.Linq
             if(expressions.All(e=>e.Value is EntityExpression || e.Value is ImplementedByExpression))
             {
                 var hs = expressions.Values.SelectMany(exp => exp is EntityExpression ?
-                    new[] { ((EntityExpression)exp).Type } :
+                    (IEnumerable<Type>)new[] { ((EntityExpression)exp).Type } :
                     ((ImplementedByExpression)exp).Implementations.Keys).ToHashSet();
 
 

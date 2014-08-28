@@ -1030,7 +1030,7 @@ namespace Signum.Utilities
 
             static EmptyReadOnlyDictionary()
             {
-                EmptyReadOnlyDictionary<K, V>.Instance = new ReadOnlyDictionary<K, V>();
+                EmptyReadOnlyDictionary<K, V>.Instance = new ReadOnlyDictionary<K, V>(new Dictionary<K, V>());
             }
         }
 
