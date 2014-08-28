@@ -41,7 +41,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" >
                     <m:QueryTokenBuilder x:Name="qtbFilters" SubTokensEvent="qtbFilters_SubTokensEvent" />
-                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc {x:Static e:SearchMessage.NewFilter}}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
+                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc {x:Static e:SearchMessage.AddFilter}}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
                 </StackPanel>
                 <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
             </Grid>
