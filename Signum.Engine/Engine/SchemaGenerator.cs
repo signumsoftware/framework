@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Engine.SchemaInfoTables;
 
 namespace Signum.Engine
 {
@@ -41,5 +42,26 @@ namespace Signum.Engine
                     select (from ie in EnumEntity.GetEntities(enumType)
                             select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
         }
+
+      
+        public static SqlPreCommand SnapshotIsolation()
+        {
+            var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
+
+            if (list.Contains(null))
+            {
+                list.Remove(null);
+                list.Add(Connector.Current.DatabaseName());
+            }
+
+            var cmd = list.Select(a =>
+                SqlPreCommand.Combine(Spacing.Simple,
+                //DisconnectUsers(a.name, "SPID" + i) : null,
+                SqlBuilder.SetSnapshotIsolation(a, true),
+                SqlBuilder.MakeSnapshotIsolationDefault(a, true))).Combine(Spacing.Double);
+
+            return cmd;
+        }
+        
     }
 }

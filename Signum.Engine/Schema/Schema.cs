@@ -327,6 +327,7 @@ namespace Signum.Engine.Maps
             this.Settings = settings;
             this.Assets = new SchemaAssets();
 
+            Generating += SchemaGenerator.SnapshotIsolation;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
