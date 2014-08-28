@@ -68,12 +68,12 @@ namespace Signum.Utilities
 
         static InvalidOperationException NotFound(string str, char separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found on '{1}'".Formato(separator, str));
         }
 
         static InvalidOperationException NotFound(string str, string separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found on '{1}'".Formato(separator, str));
         }
 
         public static string Before(this string str, char separator)
