@@ -115,6 +115,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="EntityControls\EntityStrip.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MultiSelectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -162,6 +166,9 @@
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\EnumWindowsExtensions.cs" />
+    <Compile Include="EntityControls\EntityStrip.xaml.cs">
+      <DependentUpon>EntityStrip.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MultiSelectorWindow.xaml.cs">
       <DependentUpon>MultiSelectorWindow.xaml</DependentUpon>
     </Compile>

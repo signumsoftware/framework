@@ -61,6 +61,7 @@ namespace Signum.Windows
             Func<T, string> elementText = null,
             string title = null,
             string message = null,
+            bool autoSelectOnlyElement = true,
             Window owner = null)
         {
             if (title == null)
@@ -68,6 +69,12 @@ namespace Signum.Windows
 
             if (message == null)
                 message = SearchMessage.SelectAnElement.NiceToString();
+
+            if (elements.Count() == 1 && autoSelectOnlyElement)
+            {
+                selectedElement = elements.SingleEx();
+                return true;
+            }
 
             if (elementIcon == null)
                 elementIcon = o => null;

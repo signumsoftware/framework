@@ -62,6 +62,7 @@ namespace Signum.Entities
 
         [Ignore]
         FieldInfo fieldInfo;
+        [HiddenProperty]
         public FieldInfo FieldInfo
         {
             get { return fieldInfo; }
@@ -82,6 +83,11 @@ namespace Signum.Entities
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        public bool BaseEquals(object obj)
+        {
+            return base.Equals(obj);
         }
 
         public override bool Equals(object obj)

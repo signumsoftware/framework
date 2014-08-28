@@ -129,6 +129,19 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity);
         }
 
+
+        internal void OnSaved(IdentifiableEntity entity)
+        {
+            AssertAllowed(entity.GetType());
+
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnSaved(entity);
+
+            entityEventsGlobal.OnSaving(entity);
+        }
+
         internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
@@ -233,7 +246,7 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
@@ -275,7 +288,7 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 return Generating
@@ -286,89 +299,27 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public class InitEventDictionary
-        {
-            Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
-            InitLevel? initLevel;
-
-            public Action this[InitLevel level]
-            {
-                get { return dict.TryGetC(level); }
-                set
-                {
-                    int current = dict.TryGetC(level).Try(d => d.GetInvocationList().Length) ?? 0;
-                    int @new = value.Try(d => d.GetInvocationList().Length) ?? 0;
-
-                    if (Math.Abs(current - @new) > 1)
-                        throw new InvalidOperationException("add or remove just one event handler each time");
-
-                    dict[level] = value;
-                }
-            }
-
-            public void InitializeUntil(InitLevel topLevel)
-            {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
-                {
-                    InitializeJust(current);
-                    initLevel = current;
-                }
-            }
-
-            void InitializeJust(InitLevel currentLevel)
-            {
-                using (HeavyProfiler.Log("InitializeJuts", () => currentLevel.ToString()))
-                {
-                    Action h = dict.TryGetC(currentLevel);
-                    if (h == null)
-                        return;
-
-                    var handlers = h.GetInvocationList().Cast<Action>();
-
-                    foreach (Action handler in handlers)
-                    {
-                        using (HeavyProfiler.Log("InitAction", () => "{0}.{1}".Formato(handler.Method.DeclaringType.TypeName(), handler.Method.MethodName())))
-                        {
-                            handler();
-                        }
-                    }
-                }
-            }
-
-            public override string ToString()
-            {
-                return dict.OrderBy(a => a.Key)
-                    .ToString(a => "{0} -> \r\n{1}".Formato(
-                        a.Key,
-                        a.Value.GetInvocationList().Select(h => h.Method).ToString(mi => "\t{0}.{1}".Formato(
-                            mi.DeclaringType.TypeName(),
-                            mi.MethodName()),
-                        "\r\n")
-                    ), "\r\n\r\n");
-            }
-        }
-
-        public InitEventDictionary Initializing = new InitEventDictionary();
+        public Action Initializing;
 
         public void Initialize()
         {
-            using (ExecutionMode.Global())
-                Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
-        }
+            if (Initializing == null)
+                return;
 
-        public void InitializeUntil(InitLevel level)
-        {
             using (ExecutionMode.Global())
-                Initializing.InitializeUntil(level);
-        }
+                foreach (Action item in Initializing.GetInvocationList())
+                    item();
 
+            Initializing = null;
+        }
 
         #endregion
 
         static Schema()
         {
             PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+            ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
         }
 
         internal Schema(SchemaSettings settings)
@@ -384,6 +335,7 @@ namespace Signum.Engine.Maps
 
             Synchronizing += SchemaSynchronizer.SnapshotIsolation;
             Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSystemDefaultConstraints;
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
@@ -580,6 +532,8 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity);
+        void OnSaved(IdentifiableEntity entity);
+        
         void OnRetrieved(IdentifiableEntity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
@@ -600,6 +554,7 @@ namespace Signum.Engine.Maps
         void Complete(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
+        string TryGetToString(int id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -621,6 +576,7 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(int id);
+        public abstract string TryGetToString(int id);
     }
 
     public class EntityEvents<T> : IEntityEvents
@@ -628,6 +584,7 @@ namespace Signum.Engine.Maps
     {
         public event PreSavingEventHandler<T> PreSaving;
         public event SavingEventHandler<T> Saving;
+        public event SavedEventHandler<T> Saved;
 
         public event RetrievedEventHandler<T> Retrieved;
 
@@ -701,6 +658,13 @@ namespace Signum.Engine.Maps
 
         }
 
+        void IEntityEvents.OnSaved(IdentifiableEntity entity)
+        {
+            if (Saved != null)
+                Saved((T)entity,null);
+
+        }
+
         void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
         {
             if (Retrieved != null)
@@ -728,7 +692,7 @@ namespace Signum.Engine.Maps
     {
         public bool IsRoot { get; set; }
         public bool WasNew { get; set; }
-        public bool WasModified { get; set; }
+        public bool WasSelfModified { get; set; }
     }
 
 

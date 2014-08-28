@@ -23,7 +23,7 @@ namespace Signum.Web
         public EntityList(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
-            Reorder = false;
+            Move = false;
         }
 
        

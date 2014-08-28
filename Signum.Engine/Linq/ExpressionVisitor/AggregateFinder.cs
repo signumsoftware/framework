@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return ap.hasAggregates;
         }
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             hasAggregates = true;
             return base.VisitAggregate(aggregate);

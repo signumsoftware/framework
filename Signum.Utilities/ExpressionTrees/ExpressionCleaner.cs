@@ -73,7 +73,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// It also simplifies and skip evaluating short circuited subexpresions
     /// Evaluates constant subexpressions 
 	/// </summary>
-	public class ExpressionCleaner: SimpleExpressionVisitor
+    public class ExpressionCleaner : ExpressionVisitor
 	{
         Func<Expression, Expression> partialEval;
 
@@ -154,9 +154,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
-            MemberExpression exp = (MemberExpression)base.VisitMemberAccess(m);
+            MemberExpression exp = (MemberExpression)base.VisitMember(m);
 
             Expression binded = BindMemberExpression(exp, false);
 
@@ -226,12 +226,25 @@ namespace Signum.Utilities.ExpressionTrees
             Type type = mi.DeclaringType;
 
             FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi != null)
-                return fi.GetValue(null) as LambdaExpression;
-            else if (efa != null)
-                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName())); 
+            if (fi == null)
+            {
+                if (efa != null)
+                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName()));
 
-            return null;
+                return null;
+            }
+
+            var obj = fi.GetValue(null);
+
+            if (obj == null)
+                throw new InvalidOperationException("Expression field '{0}' is null".Formato(name));
+
+            var result = obj as LambdaExpression;
+
+            if (result == null)
+                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".Formato(name, type.TypeName()));
+
+            return result;
         }
 
         static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;

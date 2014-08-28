@@ -33,6 +33,7 @@ namespace Signum.Engine.Maps
         {
             schema = new Schema(new SchemaSettings(dbms));
             Include<TypeDN>();
+            Settings.CanOverrideAttributes = MixinDeclarations.CanAddMixins = t => schema.Tables.ContainsKey(t) ? "{0} is already included in the Schema".Formato(t.TypeName()) : null;
         }
 
         protected SchemaBuilder(Schema schema)
@@ -283,12 +284,12 @@ namespace Signum.Engine.Maps
                 if (!Settings.FieldAttributes(route).Any(a => a is IgnoreAttribute))
                 {
                     if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
-                        throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                        throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, table, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fi.Name))
-                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fi.Name, type.TypeName()));
+                        throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".Formato(fi.Name, type.TypeName()));
 
                     result.Add(fi.Name, new EntityField(type, fi) { Field = field });
                 }
@@ -471,7 +472,7 @@ namespace Signum.Engine.Maps
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
             CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().Try(s => s.Strategy) ?? 
-                CombineStrategy.Switch;
+                CombineStrategy.Case;
 
             return new FieldImplementedBy(route.Type)
             {
@@ -516,17 +517,36 @@ namespace Signum.Engine.Maps
         {
             Type elementType = route.Type.ElementType();
 
-            Type type = route.Parent.Type;
+
+            if (!typeof(Entity).IsAssignableFrom(table.Type))
+                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not inherit from Entity. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
+
+            FieldValue order = null;
+            if(Settings.FieldAttributes(route).OfType<PreserveOrderAttribute>().Any())
+            {
+                var pair = Settings.GetSqlDbTypePair(typeof(int));
+
+                order = new FieldValue(typeof(int))
+                {
+                    Name = "Order",
+                    SqlDbType = pair.SqlDbType,
+                    UdtTypeName = pair.UdtTypeName,
+                    Nullable = false,
+                    Size = Settings.GetSqlSize(route, pair.SqlDbType),
+                    Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                };
+            }
 
             TableMList relationalTable = new TableMList(route.Type)
             {
                 Name = GenerateTableNameCollection(table, name),
+                PrimaryKey = new TableMList.PrimaryKeyColumn(),
                 BackReference = new FieldReference(table.Type)
                 {
-                    Name = GenerateBackReferenceName(type),
+                    Name = GenerateBackReferenceName(table.Type),
                     ReferenceTable = table
                 },
-                PrimaryKey = new TableMList.PrimaryKeyColumn(),
+                Order = order,
                 Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 
@@ -603,11 +623,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateFieldName(PropertyRoute route, KindOfField tipoCampo)
+        public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             string name = Reflector.PropertyName(route.FieldInfo.Name);
 
-            switch (tipoCampo)
+            switch (kindOfField)
             {
                 case KindOfField.PrimaryKey:
                 case KindOfField.Value:

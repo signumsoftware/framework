@@ -263,26 +263,26 @@ namespace Signum.Engine.Linq
             return base.VisitBinary(b);
         }
 
-        protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             Expression obj = MakeSqlValue(Visit(sqlFunction.Object));
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a=>MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
             return sqlFunction;
         }
 
-        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments)
                 return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
-        protected override Expression VisitCase(CaseExpression cex)
+        protected internal override Expression VisitCase(CaseExpression cex)
         {
-            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newWhens = Visit(cex.Whens, w => VisitWhen(w));
             var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
 
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
@@ -290,7 +290,7 @@ namespace Signum.Engine.Linq
             return cex;
         }
 
-        protected override When VisitWhen(When when)
+        protected internal override When VisitWhen(When when)
         {
             var newCondition = MakeSqlCondition(Visit(when.Condition));
             var newValue = MakeSqlValue(Visit(when.Value));
@@ -299,7 +299,7 @@ namespace Signum.Engine.Linq
             return when;
         }
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             Expression source = MakeSqlValue(Visit(aggregate.Source));
             if (source != aggregate.Source)
@@ -307,14 +307,14 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);
             Expression where = MakeSqlCondition(this.Visit(select.Where));
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
-            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => MakeSqlValue(Visit(e)));
+            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, e => MakeSqlValue(Visit(e)));
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
@@ -322,7 +322,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitIsNull(IsNullExpression isNull)
+        protected internal override Expression VisitIsNull(IsNullExpression isNull)
         {
             var newExpr = MakeSqlValue(Visit(isNull.Expression));
             if (newExpr != isNull.Expression)
@@ -330,7 +330,7 @@ namespace Signum.Engine.Linq
             return isNull;
         }
 
-        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        protected internal override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
         {
             var newExpr = MakeSqlValue(Visit(isNotNull.Expression));
             if (newExpr != isNotNull.Expression)
@@ -338,7 +338,7 @@ namespace Signum.Engine.Linq
             return isNotNull;
         }
 
-        protected override ColumnDeclaration VisitColumnDeclaration(ColumnDeclaration c)
+        protected internal override ColumnDeclaration VisitColumnDeclaration(ColumnDeclaration c)
         {
             var e = MakeSqlValue(Visit(c.Expression));
             if (e == c.Expression)
@@ -347,7 +347,7 @@ namespace Signum.Engine.Linq
             return new ColumnDeclaration(c.Name, e);
         }
 
-        protected override OrderExpression VisitOrderBy(OrderExpression o)
+        protected internal override OrderExpression VisitOrderBy(OrderExpression o)
         {
             var e = MakeSqlValue(Visit(o.Expression));
             if (e == o.Expression)
@@ -356,11 +356,11 @@ namespace Signum.Engine.Linq
             return new OrderExpression(o.OrderType, e);
         }
 
-        protected override Expression VisitUpdate(UpdateExpression update)
+        protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             var source = Visit(update.Source);
             var where = Visit(update.Where);
-            var assigments = update.Assigments.NewIfChange(c =>
+            var assigments = Visit(update.Assigments, c =>
             {
                 var exp = MakeSqlValue(Visit(c.Expression));
                 if (exp != c.Expression)
@@ -372,7 +372,7 @@ namespace Signum.Engine.Linq
             return update;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             SelectExpression source;
             using (InSql())
@@ -400,7 +400,7 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        protected override Expression VisitCommandAggregate(CommandAggregateExpression cea)
+        protected internal override Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             using (InSql())
                 return base.VisitCommandAggregate(cea);

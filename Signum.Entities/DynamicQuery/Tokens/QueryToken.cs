@@ -25,7 +25,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
-        protected abstract List<QueryToken> SubTokensOverride();
+        protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
 
 
         public virtual object QueryName
@@ -75,12 +75,12 @@ namespace Signum.Entities.DynamicQuery
             this.parent = parent;
         }
 
-        static ConcurrentDictionary<QueryToken, Dictionary<string, QueryToken>> subTokensOverrideCache = new ConcurrentDictionary<QueryToken, Dictionary<string, QueryToken>>();
+        static ConcurrentDictionary<Tuple<QueryToken, SubTokensOptions>, Dictionary<string, QueryToken>> subTokensOverrideCache =
+            new ConcurrentDictionary<Tuple<QueryToken, SubTokensOptions>, Dictionary<string, QueryToken>>();
 
-
-        public QueryToken SubTokenInternal(string key)
+        public QueryToken SubTokenInternal(string key, SubTokensOptions options)
         {
-            var result = CachedSubTokensOverride().TryGetC(key) ?? OnEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
+            var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
             if (result == null)
                 return null;
@@ -91,9 +91,9 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public List<QueryToken> SubTokensInternal()
+        public List<QueryToken> SubTokensInternal(SubTokensOptions options)
         {
-            return CachedSubTokensOverride().Values
+            return CachedSubTokensOverride(options).Values
                 .Concat(OnEntityExtension(this))
                 .Where(t => t.IsAllowed() == null)
                 .OrderByDescending(a=>a.Priority)
@@ -101,12 +101,12 @@ namespace Signum.Entities.DynamicQuery
                 .ToList();
         }
 
-        Dictionary<string, QueryToken> CachedSubTokensOverride()
+        Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
         {
-            return subTokensOverrideCache.GetOrAdd(this, qt => qt.SubTokensOverride().ToDictionary(a => a.Key));
+            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key));
         }
 
-        protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
+        protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
         {
             var ut = type.UnNullify();
             if (ut == typeof(DateTime))
@@ -137,7 +137,7 @@ namespace Signum.Entities.DynamicQuery
 
             if(IsCollection(type))
             {
-                return CollectionProperties(this);
+                return CollectionProperties(this, options);
             }
 
             if (typeof(IQueryTokenBag).IsAssignableFrom(type))
@@ -168,7 +168,7 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + QueryTokenMessage.Year.NiceToString()), 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + QueryTokenMessage.Month.NiceToString()), 
                 new MonthStartToken(parent), 
-
+                new WeekNumberToken(parent),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + QueryTokenMessage.Day.NiceToString()),
                 new DayOfYearToken(parent), 
                 new DayOfWeekToken(parent), 
@@ -189,14 +189,15 @@ namespace Signum.Entities.DynamicQuery
             }; 
         }
 
-        public static List<QueryToken> CollectionProperties(QueryToken parent)
+        public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
         {
-            var hasAllOrAny = parent.HasAllOrAny();
+            if (parent.HasAllOrAny())
+                options = options & ~SubTokensOptions.CanElement;
 
             List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 
             tokens.AddRange(from cet in EnumExtensions.GetValues<CollectionElementType>()
-                            where !cet.IsElement() || !hasAllOrAny
+                            where (options & (cet.IsElement() ? SubTokensOptions.CanElement : SubTokensOptions.CanAnyAll)) != 0
                             select new CollectionElementToken(parent, cet));
 
             return tokens;
@@ -390,6 +391,7 @@ namespace Signum.Entities.DynamicQuery
         Second,
         [Description("text")]
         Text,
-        Year
+        Year,
+        WeekNumber
     }
 }

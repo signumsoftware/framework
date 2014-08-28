@@ -27,14 +27,20 @@ namespace Signum.Web.Controllers
 {
     public class NavigatorController : Controller
     {
-        [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
+        [ValidateInput(false), ActionSplitter("webTypeName")]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
         public ViewResult View(string webTypeName, int id)
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            return Navigator.NormalPage(this, Database.Retrieve(t, id));
+            Lite<IdentifiableEntity> lite = Lite.Create(t, id);
+
+            using (Navigator.Manager.OnRetrievingForView(lite))
+            {
+                return Navigator.NormalPage(this, Database.Retrieve(lite));
+            }
         }
 
+        [ActionSplitter("webTypeName")]
         public ActionResult Create(string webTypeName)
         {
             Type type = Navigator.ResolveType(webTypeName);
@@ -47,13 +53,20 @@ namespace Signum.Web.Controllers
             return this.NormalPage(new NavigateOptions(entity));
         }
 
+        [ActionSplitter("entityType")]
         public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
         {
             Type type = Navigator.ResolveType(entityType);
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {
+                Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                using (Navigator.Manager.OnRetrievingForView(lite))
+                {
+                    entity = Database.Retrieve(lite);
+                }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
 
@@ -67,13 +80,20 @@ namespace Signum.Web.Controllers
             });
         }
 
+        [ActionSplitter("entityType")]
         public PartialViewResult PopupView(string entityType, int? id, string prefix, string partialViewName, bool? readOnly, bool? showOperations, bool? saveProtected)
         {
             Type type = Navigator.ResolveType(entityType);
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {
+                 Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                 using (Navigator.Manager.OnRetrievingForView(lite))
+                 {
+                     entity = Database.Retrieve(lite);
+                 }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
         
@@ -88,14 +108,20 @@ namespace Signum.Web.Controllers
             });
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("entityType")]
         public PartialViewResult PartialView(string entityType, int? id, string prefix, string partialViewName, bool? readOnly)
         {
             Type type = Navigator.ResolveType(entityType);
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
-                entity = Database.Retrieve(type, id.Value);
+            {    
+                 Lite<IdentifiableEntity> lite = Lite.Create(type, id.Value);
+                 using (Navigator.Manager.OnRetrievingForView(lite))
+                 {
+                     entity = Database.Retrieve(lite);
+                 }
+            }
             else
                 entity = (IdentifiableEntity)this.Construct(type);
 
@@ -107,12 +133,16 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, partialViewName);
         }
 
-        [HttpPost]
+        [HttpPost, ActionSplitter("entityType")]
         public PartialViewResult NormalControl(string entityType, int id, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-
-            IdentifiableEntity entity = Database.Retrieve(type, id);
+            Lite<IdentifiableEntity> lite = Lite.Create(type, id);
+            IdentifiableEntity entity;
+            using (Navigator.Manager.OnRetrievingForView(lite))
+            {
+                entity = Database.Retrieve(lite);
+            }
 
             return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
         }

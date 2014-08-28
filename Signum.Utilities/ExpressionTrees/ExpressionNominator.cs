@@ -13,7 +13,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// Performs bottom-up analysis to determine which nodes can possibly
     /// be part of an evaluated sub-tree.
     /// </summary>
-    public class ExpressionNominator : SimpleExpressionVisitor
+    public class ExpressionNominator : ExpressionVisitor
     {
         HashSet<Expression> candidates = new HashSet<Expression>();
         bool hasDependencies;
@@ -43,7 +43,7 @@ namespace Signum.Utilities.ExpressionTrees
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
 
-        protected override Expression Visit(Expression expression)
+        public override Expression Visit(Expression expression)
         {
             if (expression != null)
             {
@@ -68,6 +68,18 @@ namespace Signum.Utilities.ExpressionTrees
                 this.hasDependencies |= saveHasDependencies;
             }
             return expression;
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression node)
+        {
+            var bindings = Visit(node.Bindings, this.VisitMemberBinding);
+
+            if (this.hasDependencies)
+                return node; //Avoid nominate only the NewExpression
+
+            Visit(node.NewExpression); 
+
+            return node;
         }
     }
 

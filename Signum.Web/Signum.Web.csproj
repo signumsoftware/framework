@@ -87,6 +87,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="ControllerAttributes\ActionSplitter.cs" />
     <Compile Include="Facades\JsFunction.cs" />
     <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />
@@ -266,6 +267,40 @@
     <TypeScriptCompile Include="Signum\Scripts\Operations.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Polyfills.ts" />
     <TypeScriptCompile Include="Signum\Scripts\SF.UI.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Lines.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Validator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Navigator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Entities.ts" />
+    <EmbeddedResource Include="Signum\Scripts\Entities.js">
+      <DependentUpon>Entities.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Finder.js" >
+      <DependentUpon>Finder.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\globals.js">
+      <DependentUpon>globals.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Lines.js" >
+      <DependentUpon>Lines.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Navigator.js" >
+      <DependentUpon>Navigator.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Operations.js" >
+      <DependentUpon>Operations.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Polyfills.js">
+      <DependentUpon>Polyfills.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\SF.js">
+      <DependentUpon>SF.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\SF.UI.js" >
+      <DependentUpon>SF.UI.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Validator.js" >
+      <DependentUpon>Validator.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>
@@ -324,9 +359,6 @@
     <Content Include="Signum\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Signum\Scripts\Entities.ts" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Signum\Images\asc.gif" />
     <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\lineButtons.gif" />
@@ -341,9 +373,6 @@
       <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <TypeScriptCompile Include="Signum\Scripts\Lines.ts" />
-    <TypeScriptCompile Include="Signum\Scripts\Validator.ts" />
-    <TypeScriptCompile Include="Signum\Scripts\Navigator.ts" />
     <None Include="Signum\Views\Error.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Error.generated.cs</LastGenOutput>
@@ -379,7 +408,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js;**\*.ts;**\*.map" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map" />
     </ItemGroup>
   </Target>
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">

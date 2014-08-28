@@ -19,9 +19,13 @@
         <m:ErrorSummary DockPanel.Dock="Bottom"/>
         <m:EntityTitle DockPanel.Dock="Top" x:Name="entityTitle"/>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <ContentControl Content="{Binding Path=MainControl, ElementName=win}" Focusable="False"
+            <StackPanel>
+                <StackPanel x:Name="spTop"/>
+                <ContentControl Content="{Binding Path=MainControl, ElementName=win}" Focusable="False"
                         VerticalContentAlignment="Stretch" x:Name="contentControl" 
                         HorizontalContentAlignment="Stretch" MinWidth="40" MinHeight="40" Margin="5"/>
+                <StackPanel x:Name="spBottom"/>
+            </StackPanel>
         </ScrollViewer>
     </DockPanel>
 </Window>

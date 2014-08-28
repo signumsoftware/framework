@@ -32,17 +32,19 @@ namespace Signum.Web
 
         public List<SelectListItem> CreateComboItems()
         {
+            return CreateComboItems(EnumExtensions.UntypedGetValues(Type.UnNullify()),
+                addNull: UntypedValue == null ||
+                Type.IsNullable() && (PropertyRoute == null || !Validator.TryGetPropertyValidator(PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()));
+        }
+
+        public static List<SelectListItem> CreateComboItems(IEnumerable<Enum> enumValues, bool addNull)
+        {
             var items = new List<SelectListItem>();
 
-            if (UntypedValue == null ||
-                Type.IsNullable() && (PropertyRoute == null || !Validator.TryGetPropertyValidator(PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
-            {
+            if (addNull)
                 items.Add(new SelectListItem() { Text = "-", Value = "" });
-            }
 
-            items.AddRange(Enum.GetValues(Type.UnNullify())
-                .Cast<Enum>()
-                .Select(v => new SelectListItem()
+            items.AddRange(enumValues.Select(v => new SelectListItem()
                 {
                     Text = v.NiceToString(),
                     Value = v.ToString(),

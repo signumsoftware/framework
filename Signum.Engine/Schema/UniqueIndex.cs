@@ -14,7 +14,7 @@ namespace Signum.Engine.Maps
     public class Index
     {
         public ITable Table { get; private set; }
-        public IColumn[] Columns { get; internal set; }
+        public IColumn[] Columns { get; private set; }
 
         public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {
@@ -98,7 +98,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    class IndexWhereExpressionVisitor : SimpleExpressionVisitor
+    class IndexWhereExpressionVisitor : ExpressionVisitor
     {
         StringBuilder sb = new StringBuilder();
 
@@ -127,7 +127,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             switch (exp.NodeType)
             {
@@ -148,7 +148,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
             var f = GetField(b.Expression);
 
@@ -181,7 +181,7 @@ namespace Signum.Engine.Maps
             throw new NotSupportedException("'is' only works with ImplementedBy or Reference fields");
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             var field = GetField(m);
 

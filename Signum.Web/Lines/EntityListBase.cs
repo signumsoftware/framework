@@ -16,14 +16,15 @@ namespace Signum.Web
 {
     public static class EntityListBaseKeys
     {
-        public const string Indexes = "sfIndexes";
+        public const string RowId = "sfRowId";
+        public const string Index = "sfIndex";
         public const string List = "sfList";
         public const string ListPresent = "sfListPresent";
     }
 
     public abstract class EntityListBase : EntityBase
     {
-        public bool Reorder { get; set; }
+        public bool Move { get; set; }
 
         public int? MaxElements { get; set; }
 
@@ -45,7 +46,7 @@ namespace Signum.Web
                 result.Add("view", true);
             if (Navigate)
                 result.Add("navigate", true);
-            if (Reorder)
+            if (Move)
                 result.Add("reorder", true);
             if (MaxElements != null)
                 result.Add("maxElements", MaxElements.Value);
@@ -68,7 +69,7 @@ namespace Signum.Web
             Find = false;
             Create = false;
             Remove = false;
-            Reorder = false;
+            Move = false;
         }
 
         public Type ElementType

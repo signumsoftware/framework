@@ -328,7 +328,7 @@ namespace Signum.Windows.Operations
 
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetEntityOperationMenuItem(SearchControl sc)
         {
-            if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length != 1)
+            if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Count != 1)
                 return null;
 
             if (sc.Implementations.IsByAll)

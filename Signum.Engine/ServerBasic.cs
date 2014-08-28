@@ -269,7 +269,7 @@ namespace Signum.Services
         public void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                () => OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
+                () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
         }
 
         public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
@@ -296,7 +296,7 @@ namespace Signum.Services
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<OperationSymbol> operatonSymbols)
+        public Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lite, List<OperationSymbol> operatonSymbols)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => OperationLogic.GetContextualCanExecute(lite, operatonSymbols));

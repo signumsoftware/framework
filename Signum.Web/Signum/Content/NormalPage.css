@@ -28,3 +28,9 @@
     width: 100%;
     margin-bottom: 6px;
 }
+
+ul.dropdown-menu li a span.glyphicon {
+    margin-left: -10px;
+    margin-right: 10px;
+    font-size: 11px;
+}

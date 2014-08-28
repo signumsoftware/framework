@@ -12,28 +12,25 @@ namespace Signum.Utilities.ExpressionTrees
 {
     public class ExpressionComparer
     {
-        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterMap;
+        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope;
+        bool checkParameterNames = false;
 
         protected IDisposable ParameterScope()
         {
-            var saved = parameterMap;
-            parameterMap = new ScopedDictionary<ParameterExpression, ParameterExpression>(parameterMap);
-            return new Disposable(() => parameterMap = saved);
+            var saved = parameterScope;
+            parameterScope = new ScopedDictionary<ParameterExpression, ParameterExpression>(parameterScope);
+            return new Disposable(() => parameterScope = saved);
         }
 
-        protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope)
+        protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, bool checkParameterNames)
         {
-            this.parameterMap = parameterScope;
+            this.parameterScope = parameterScope;
+            this.checkParameterNames = checkParameterNames;
         }
 
-        public static bool AreEqual(Expression a, Expression b)
+        public static bool AreEqual( Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope = null, bool checkParameterNames = false)
         {
-            return AreEqual(null, a, b);
-        }
-
-        public static bool AreEqual(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, Expression a, Expression b)
-        {
-            return new ExpressionComparer(parameterScope).Compare(a, b);
+            return new ExpressionComparer(parameterScope, checkParameterNames).Compare(a, b);
         }
 
         protected virtual bool Compare(Expression a, Expression b)
@@ -152,10 +149,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareParameter(ParameterExpression a, ParameterExpression b)
         {
-            if (parameterMap != null)
+            if (parameterScope != null)
             {
                 ParameterExpression mapped;
-                if (parameterMap.TryGetValue(a, out mapped))
+                if (parameterScope.TryGetValue(a, out mapped))
                     return mapped == b;
             }
             return a == b;
@@ -184,12 +181,16 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 if (a.Parameters[i].Type != b.Parameters[i].Type)
                     return false;
+
+                if (checkParameterNames &&
+                    a.Parameters[i].Name != b.Parameters[i].Name)
+                    return false;
             }
 
             using (ParameterScope())
             {
                 for (int i = 0; i < n; i++)
-                    parameterMap.Add(a.Parameters[i], b.Parameters[i]);
+                    parameterScope.Add(a.Parameters[i], b.Parameters[i]);
 
                 return Compare(a.Body, b.Body);
             }
@@ -307,25 +308,31 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareElementInit(ElementInit a, ElementInit b)
         {
-            return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
+            return ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
                 && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
-        public static IEqualityComparer<E> GetComparer<E>() where E:Expression
+        public static IEqualityComparer<E> GetComparer<E>(bool checkParameterNames) where E : Expression
         {
-            return new ExpressionsComparer<E>(); 
+            return new ExpressionsEqualityComparer<E>(checkParameterNames);
         }
 
-        class ExpressionsComparer<E> : IEqualityComparer<E> where E : Expression
+        class ExpressionsEqualityComparer<E> : IEqualityComparer<E> where E : Expression
         {
+            bool checkParameterNames; 
+            public ExpressionsEqualityComparer(bool checkParameterNames)
+            {
+                this.checkParameterNames = checkParameterNames;
+            }
+
             public bool Equals(E x, E y)
             {
-                return ExpressionComparer.AreEqual(x, y);
+                return ExpressionComparer.AreEqual(x, y, parameterScope: null, checkParameterNames: checkParameterNames);
             }
 
             public int GetHashCode(E obj)
             {
-                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode(); 
+                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode();
             }
         }
     }

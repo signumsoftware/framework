@@ -5,12 +5,24 @@
     xmlns:d="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
     m:Common.TypeContext="{x:Type d:OperationLogDN}"
     MinWidth="300">
-    <StackPanel m:Common.IsReadOnly="True">
-        <m:EntityCombo m:Common.Route="Operation" />
-        <m:EntityLine m:Common.Route="Target" />
-        <m:ValueLine m:Common.Route="Start" />
-        <m:ValueLine m:Common.Route="End" />
-        <m:EntityLine m:Common.Route="User" />
-        <m:EntityLine m:Common.Route="Exception" />
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <m:EntityLine m:Common.Route="Operation" Grid.Column="0"  Grid.Row="0"/>
+            <m:EntityLine m:Common.Route="User" Grid.Column="1"  Grid.Row="0" />
+            <m:EntityLine m:Common.Route="Target"  Grid.Column="0"  Grid.Row="1"/>
+            <m:EntityLine m:Common.Route="Origin" Grid.Column="1"  Grid.Row="1" />
+            <m:ValueLine m:Common.Route="Start" Grid.Column="0"  Grid.Row="2" />
+            <m:ValueLine m:Common.Route="End" Grid.Column="1"  Grid.Row="2"/>
+        </Grid>
+        <m:EntityLine m:Common.CollapseIfNull="True" m:Common.Route="Exception" Grid.Column="1"  Grid.Row="1"/>
     </StackPanel>
 </UserControl>

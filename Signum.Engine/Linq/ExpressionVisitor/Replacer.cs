@@ -26,7 +26,7 @@ namespace Signum.Engine.Linq
             }.Visit(expression);
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if (exp != null && (exp == this.searchFor || exp.Equals(this.searchFor)))
             {

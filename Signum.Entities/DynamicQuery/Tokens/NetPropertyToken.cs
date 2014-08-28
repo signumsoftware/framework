@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Property(result.UnNullify(), PropertyInfo).Nullify();
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }

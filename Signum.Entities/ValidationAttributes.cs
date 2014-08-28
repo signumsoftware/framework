@@ -592,7 +592,7 @@ namespace Signum.Entities
                     case DateTimePrecision.Hours: return dtfi.ShortDatePattern + " " + "HH";
                     case DateTimePrecision.Minutes: return "g";
                     case DateTimePrecision.Seconds: return "G";
-                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern.Replace("ss", "ss.fff");
                     default: return "";
                 }
             }
@@ -917,7 +917,16 @@ namespace Signum.Entities
         [Description("The number of elements of {{0}} has to be {0} {1}")]
         TheNumberOfElementsOf0HasToBe01,
         [Description("Type {0} not allowed")]
-        Type0NotAllowed
+        Type0NotAllowed,
+
+        [Description("{0} is mandatory when {1} is not set")]
+        _0IsMandatoryWhen1IsNotSet,
+        [Description("{0} is mandatory when {1} is set")]
+        _0IsMandatoryWhen1IsSet,
+        [Description("{0} should be null when {1} is not set")]
+        _0ShouldBeNullWhen1IsNotSet,
+        [Description("{0} should be null when {1} is set")]
+        _0ShouldBeNullWhen1IsSet
     }
 
 

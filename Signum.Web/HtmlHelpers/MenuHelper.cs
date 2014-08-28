@@ -110,7 +110,7 @@ namespace Signum.Web
 
             bool isHeader = IsHeader(depth);
 
-            using (sb.Surround(new HtmlTag("li").Class(isActive ? "active" : null).Class(isHeader ? "dropdown-header" : this.children.HasItems() ? "dropdown" : null)))
+            using (sb.SurroundLine(new HtmlTag("li").Class(isActive ? "active" : null).Class(isHeader ? "dropdown-header" : this.children.HasItems() ? "dropdown" : null)))
             {
                 if (Link != null)
                 {
@@ -134,8 +134,9 @@ namespace Signum.Web
                 }
                 else if (this.children.HasItems() && !isHeader)
                 {
-                    using (sb.Surround(new HtmlTag("a").Attr("href", "#")
+                    using (sb.SurroundLine(new HtmlTag("a").Attr("href", "#")
                         .Class("dropdown-toggle")
+                        .Class(Class)
                         .Attr("data-toggle", "dropdown")))
                     {
                         if (Html != null)
@@ -153,7 +154,7 @@ namespace Signum.Web
 
                 if (this.children.HasItems() && !isHeader)
                 {
-                    using (sb.Surround(new HtmlTag("ul").Class("dropdown-menu")))
+                    using (sb.SurroundLine(new HtmlTag("ul").Class("dropdown-menu")))
                     {
                         bool lastHeader = false;
                         foreach (WebMenuItem menu in this.children)

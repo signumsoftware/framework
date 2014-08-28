@@ -232,7 +232,7 @@ namespace Signum.Windows
             
            
             RemoveVisibility = this.CanRemove().ToVisibility();
-            MoveVisibility = this.Move.ToVisibility();
+            MoveVisibility = this.CanMove().ToVisibility();
             ViewVisibility = this.View.ToVisibility();
         }
 

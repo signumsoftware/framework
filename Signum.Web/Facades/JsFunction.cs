@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -98,21 +99,28 @@ namespace Signum.Web
         {
             var varName = VarName(Module);
 
-            var arguments = this.Arguments.ToString(a => a == This ? "that" : JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
+            var arguments = this.Arguments.ToString(a =>
+                a == This ? "that" : 
+                a == Event ? "e" :                
+                JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
 
             var result = "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + arguments + "); });";
 
-            if (!this.Arguments.Contains(This))
+            if (!this.Arguments.Contains(This) && !this.Arguments.Contains(Event))
                 return result;
 
-            return "(function(that) { " + result + "})(this)";
+            return "(function(that, e) { " + result + " })(this, event)";
         }
 
         internal static string VarName(JsModule module)
         {
             var result = module.Name.TryAfterLast(".") ?? module.Name;
 
-            return result.TryAfterLast("/") ?? result;
+            result = result.TryAfterLast("/") ?? result;
+
+            result = Regex.Replace(result, "[^a-zA-Z0-9]", "");
+
+            return result;
         }
 
         public string ToHtmlString()
@@ -121,6 +129,7 @@ namespace Signum.Web
         }
 
         public static object This = new object();
+        public static object Event = new object();
 
       
 

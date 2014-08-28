@@ -17,9 +17,11 @@ namespace Signum.Web
     {
         public static IEnumerable<TypeElementContext<S>> TypeElementContext<S>(TypeContext<MList<S>> typeContext)
         {
-            for (int i = 0; i < typeContext.Value.Count; i++)
+            var innerList = ((IMListPrivate<S>)typeContext.Value).InnerList;
+
+            for (int i = 0; i < innerList.Count; i++)
             {
-                var econtext = new TypeElementContext<S>(typeContext.Value[i], typeContext, i);
+                var econtext = new TypeElementContext<S>(innerList[i].Value, typeContext, i, innerList[i].RowId);
                 yield return econtext;
             }
         }

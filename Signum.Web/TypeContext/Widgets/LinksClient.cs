@@ -67,7 +67,7 @@ namespace Signum.Web
 
     public static class LinksClient
     {
-        static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> entityLinks =
+        public static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> EntityLinks =
             new Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>(
                 merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
                 minimumType: typeof(IdentifiableEntity));
@@ -76,11 +76,11 @@ namespace Signum.Web
         public static void RegisterEntityLinks<T>(Func<Lite<T>, QuickLinkContext, QuickLink[]> getQuickLinks)
             where T : IdentifiableEntity
         {
-            var current = entityLinks.GetDefinition(typeof(T));
+            var current = EntityLinks.GetDefinition(typeof(T));
 
             current += (t, p0) => getQuickLinks((Lite<T>)t, p0);
 
-            entityLinks.SetDefinition(typeof(T), current);
+            EntityLinks.SetDefinition(typeof(T), current);
         }
 
 
@@ -90,7 +90,7 @@ namespace Signum.Web
 
             QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix }; 
 
-            var func  =  entityLinks.TryGetValue(ident.EntityType);
+            var func  =  EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
                 foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
@@ -126,6 +126,8 @@ namespace Signum.Web
         public string Text { get; set; }
         public double Order { get; set; }
         public string Name { get; set; }
+        public string Glyphicon { get; set; }
+        public string GlyphiconColor { get; set; }
 
         public QuickLink()
         {
@@ -137,6 +139,21 @@ namespace Signum.Web
         }
 
         public abstract MvcHtmlString Execute();
+
+        public MvcHtmlString TextAndIcon()
+        {
+            var txt = MvcHtmlString.Create(HttpUtility.HtmlEncode(Text));
+
+            if (Glyphicon == null)
+                return txt;
+
+            return new HtmlTag("span")
+                .Class("glyphicon")
+                .Class(Glyphicon)
+                .Attr("style", "color:" + GlyphiconColor)
+                .ToHtml()
+                .Concat(txt);
+        }
     }
 
     public class QuickLinkAction : QuickLink
@@ -159,7 +176,7 @@ namespace Signum.Web
 
         public override MvcHtmlString Execute()
         {
-            return new HtmlTag("a").Attr("href", Url).SetInnerText(Text);
+            return new HtmlTag("a").Attr("href", Url).InnerHtml(TextAndIcon());
         }
     }
 
@@ -198,7 +215,7 @@ namespace Signum.Web
 
             return new HtmlTag("a")
                 .Attr("onclick", JsModule.Finder["explore"](jsFindOptions).ToString())
-                .SetInnerText(Text);
+                .InnerHtml(TextAndIcon());
         }
     }
 
@@ -216,7 +233,7 @@ namespace Signum.Web
 
         public override MvcHtmlString Execute()
         {
-            return new HtmlTag("a").Attr("href", Navigator.NavigateRoute(lite)).SetInnerText(Text);
+            return new HtmlTag("a").Attr("href", Navigator.NavigateRoute(lite)).InnerHtml(TextAndIcon());
         }
     }
 }

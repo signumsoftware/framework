@@ -23,7 +23,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad();
+            MusicStarter.StartAndLoad();
             Schema.Current.EntityEvents<AlbumDN>().PreUnsafeInsert += (query, constructor, entityQuery) => { };
         }
 
@@ -85,6 +85,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 {
                     Parent = mle.Parent,
                     Element = mle.Element,
+                    Order = mle.Order,
                 });
                 //tr.Commit();
             }
@@ -104,8 +105,28 @@ namespace Signum.Test.LinqProviderUpdateDelete
                             Parent = mle.Parent,
                             Element = mle.Element,
                             RowId = mle.RowId + 1000,
+                            Order = mle.Order,
                         });
                 }
+                //tr.Commit();
+            }
+        }
+
+
+        [TestMethod]
+        public void InsertSimpleSingle()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int value = Database.Query<AlbumDN>().UnsafeInsert(a => new AlbumDN
+                {
+                    Author = a.Author,
+                    BonusTrack = a.BonusTrack,
+                    Label = Database.Query<LabelDN>().Single(l => l.Is(a.Label)),
+                    Name = a.Name + "copy",
+                    State = a.State,
+                    Year = a.Year,
+                }.SetReadonly(_ => _.Ticks, a.Ticks));
                 //tr.Commit();
             }
         }
