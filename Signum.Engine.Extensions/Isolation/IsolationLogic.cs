@@ -26,6 +26,7 @@ namespace Signum.Engine.Isolation
     public enum IsolationStrategy
     {
         Isolated,
+        Optional,
         None,
     }
 
@@ -66,6 +67,14 @@ namespace Signum.Engine.Isolation
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
                 SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
+
+                Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
+                {
+                    if (strategies.GetOrThrow(mi.MainEntity.GetType()) == IsolationStrategy.Isolated && mi.Isolation == null)
+                        return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                    return null;
+                };
             }
         }
 
@@ -86,7 +95,7 @@ namespace Signum.Engine.Isolation
 
         static void EntityEventsGlobal_PreSaving(IdentifiableEntity ident, ref bool graphModified)
         {
-            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) == IsolationStrategy.Isolated && IsolationDN.Current != null)
+            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) != IsolationStrategy.None && IsolationDN.Current != null)
             {
                 if (ident.Mixin<IsolationMixin>().Isolation == null)
                 {
@@ -117,7 +126,7 @@ namespace Signum.Engine.Isolation
                         (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
                         (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
 
-            foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated).Select(a => a.Key))
+            foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional).Select(a => a.Key))
             {
                 giRegisterFilterQuery.GetInvoker(item)(); 
             }
@@ -131,6 +140,10 @@ namespace Signum.Engine.Isolation
             };
         }
 
+        public static IsolationStrategy GetStrategy(Type type)
+        {
+            return strategies[type];
+        }
 
         static readonly GenericInvoker<Action> giRegisterFilterQuery = new GenericInvoker<Action>(() => Register_FilterQuery<IdentifiableEntity>());
         static void Register_FilterQuery<T>() where T : IdentifiableEntity
@@ -148,8 +161,13 @@ namespace Signum.Engine.Isolation
         {
             strategies.Add(typeof(T), strategy);
 
-            if (strategy == IsolationStrategy.Isolated)
+            if (strategy == IsolationStrategy.Isolated || strategy == IsolationStrategy.Optional)
                 MixinDeclarations.Register(typeof(T), typeof(IsolationMixin));
+
+            if (strategy == IsolationStrategy.Optional)
+            {
+                Schema.Current.Settings.OverrideAttributes((T e) => e.Mixin<IsolationMixin>().Isolation, new AttachToAllUniqueIndexesAttribute()); //Remove non-null 
+            }
         }
 
 

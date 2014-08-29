@@ -21,7 +21,10 @@ namespace Signum.Web.Isolation
             var iso = entity.Isolation();
 
             if (iso == null)
-                throw new InvalidOperationException("Isolation not set");
+            {
+                if (IsolationLogic.GetStrategy(entity.GetType()) == IsolationStrategy.Isolated)
+                    throw new InvalidOperationException("Isolation not set");
+            }
 
             return new IsolationWidget
             {
@@ -37,10 +40,13 @@ namespace Signum.Web.Isolation
 
             MvcHtmlString IWidget.ToHtml(HtmlHelper helper)
             {
+                if (Isolation == null)
+                    return MvcHtmlString.Empty;
+
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(helper.HiddenLite(TypeContextUtilities.Compose(Prefix, "Isolation"), Isolation));
-                sb.Add(new MvcHtmlString("<script>" + IsolationClient.Module["addIsolationPrefilter"](Isolation.Key()) + "</script>"));
                 sb.Add(new HtmlTag("span").SetInnerText(Isolation.ToString()));
+                //sb.Add(new MvcHtmlString("<script>" + IsolationClient.Module["addIsolationPrefilter"](Isolation.Key()) + "</script>"));
                 return sb.ToHtml();
             }
         }
