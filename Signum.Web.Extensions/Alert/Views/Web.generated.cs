@@ -44,7 +44,7 @@ WriteLiteral("<?xml version=\"1.0\"?>\r\n\r\n<configuration>\r\n  <configSection
 WriteLiteral(" name=\"system.web.webPages.razor\"");
 
 WriteLiteral(" type=\"System.Web.WebPages.Razor.Configuration.RazorWebSectionGroup, System.Web.W" +
-"ebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" +
+"ebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" +
 "\"");
 
 WriteLiteral(">\r\n      <section");
@@ -52,7 +52,7 @@ WriteLiteral(">\r\n      <section");
 WriteLiteral(" name=\"host\"");
 
 WriteLiteral(" type=\"System.Web.WebPages.Razor.Configuration.HostSection, System.Web.WebPages.R" +
-"azor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35\"");
+"azor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35\"");
 
 WriteLiteral(" requirePermission=\"false\"");
 
@@ -61,14 +61,14 @@ WriteLiteral(" />\r\n      <section");
 WriteLiteral(" name=\"pages\"");
 
 WriteLiteral(" type=\"System.Web.WebPages.Razor.Configuration.RazorPagesSection, System.Web.WebP" +
-"ages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35\"");
+"ages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35\"");
 
 WriteLiteral(" requirePermission=\"false\"");
 
 WriteLiteral(" />\r\n    </sectionGroup>\r\n  </configSections>\r\n\r\n  <system.web.webPages.razor>\r\n " +
 "   <host");
 
-WriteLiteral(" factoryType=\"System.Web.Mvc.MvcWebRazorHostFactory, System.Web.Mvc, Version=4.0." +
+WriteLiteral(" factoryType=\"System.Web.Mvc.MvcWebRazorHostFactory, System.Web.Mvc, Version=5.0." +
 "0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35\"");
 
 WriteLiteral(" />\r\n    <pages");
@@ -91,20 +91,28 @@ WriteLiteral(" />\r\n        <add");
 
 WriteLiteral(" namespace=\"System.Web.Routing\"");
 
-WriteLiteral(" />\r\n\t\t    <add");
+WriteLiteral(" />\r\n        <add");
+
+WriteLiteral(" namespace=\"System.Linq\"");
+
+WriteLiteral("/>\r\n        <add");
+
+WriteLiteral(" namespace=\"System.Collections.Generic\"");
+
+WriteLiteral("/>\r\n        <add");
 
 WriteLiteral(" namespace=\"Signum.Utilities\"");
 
-WriteLiteral(" />\r\n        <add");
+WriteLiteral("/>\r\n        <add");
 
 WriteLiteral(" namespace=\"Signum.Entities\"");
 
-WriteLiteral(" />\r\n        <add");
+WriteLiteral("/>\r\n        <add");
 
 WriteLiteral(" namespace=\"Signum.Web\"");
 
-WriteLiteral(" />\r\n      </namespaces>\r\n    </pages>\r\n  </system.web.webPages.razor>\r\n\r\n  <appS" +
-"ettings>\r\n    <add");
+WriteLiteral("/>\r\n      </namespaces>\r\n    </pages>\r\n  </system.web.webPages.razor>\r\n\r\n  <appSe" +
+"ttings>\r\n    <add");
 
 WriteLiteral(" key=\"webpages:Enabled\"");
 
@@ -130,13 +138,13 @@ WriteLiteral(@"/>
     -->
     <pages
         validateRequest=""false""
-        pageParserFilterType=""System.Web.Mvc.ViewTypeParserFilter, System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35""
-        pageBaseType=""System.Web.Mvc.ViewPage, System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35""
-        userControlBaseType=""System.Web.Mvc.ViewUserControl, System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"">
+        pageParserFilterType=""System.Web.Mvc.ViewTypeParserFilter, System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35""
+        pageBaseType=""System.Web.Mvc.ViewPage, System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35""
+        userControlBaseType=""System.Web.Mvc.ViewUserControl, System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"">
       <controls>
         <add");
 
-WriteLiteral(" assembly=\"System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3" +
+WriteLiteral(" assembly=\"System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31BF3" +
 "856AD364E35\"");
 
 WriteLiteral(" namespace=\"System.Web.Mvc\"");
