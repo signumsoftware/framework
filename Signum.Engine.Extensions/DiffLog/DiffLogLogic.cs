@@ -35,7 +35,7 @@ namespace Signum.Engine.DiffLog
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
         {
-            DiffLogStrategy strategy = Types.GetDefinition(operation.ReturnType ?? operation.Type).Try(a => a.Item1) ?? 0;
+            DiffLogStrategy strategy = Types.GetValue(operation.ReturnType ?? operation.Type).Try(a => a.Item1) ?? 0;
 
             var required = GetStrategy(operation);
 

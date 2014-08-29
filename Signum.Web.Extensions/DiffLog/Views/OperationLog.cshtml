@@ -143,7 +143,7 @@
                 {
                     var entity = (Lite<IdentifiableEntity>)e.Value.Target;
 
-                    var dump = entity.Exists() ? null : entity.Retrieve().Dump();
+                    var dump = !entity.Exists() ? null : entity.Retrieve().Dump();
 
                     var eq = diff.Value.EndGraph == dump;
 

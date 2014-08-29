@@ -606,7 +606,7 @@ WriteLiteralTo(__razor_template_writer, " ");
                 {
                     var entity = (Lite<IdentifiableEntity>)e.Value.Target;
 
-                    var dump = entity.Exists() ? null : entity.Retrieve().Dump();
+                    var dump = !entity.Exists() ? null : entity.Retrieve().Dump();
 
                     var eq = diff.Value.EndGraph == dump;
 
@@ -618,34 +618,34 @@ item => new System.Web.WebPages.HelperResult(__razor_template_writer => {
 
 WriteLiteralTo(__razor_template_writer, "\r\n    <span");
 
-WriteAttributeTo(__razor_template_writer, "class", Tuple.Create(" class=\"", 5087), Tuple.Create("\"", 5161)
-, Tuple.Create(Tuple.Create("", 5095), Tuple.Create("glyphicon", 5095), true)
-, Tuple.Create(Tuple.Create(" ", 5104), Tuple.Create("glyphicon-step-forward", 5105), true)
-, Tuple.Create(Tuple.Create(" ", 5127), Tuple.Create("colorIcon", 5128), true)
-, Tuple.Create(Tuple.Create(" ", 5137), Tuple.Create("red", 5138), true)
+WriteAttributeTo(__razor_template_writer, "class", Tuple.Create(" class=\"", 5088), Tuple.Create("\"", 5162)
+, Tuple.Create(Tuple.Create("", 5096), Tuple.Create("glyphicon", 5096), true)
+, Tuple.Create(Tuple.Create(" ", 5105), Tuple.Create("glyphicon-step-forward", 5106), true)
+, Tuple.Create(Tuple.Create(" ", 5128), Tuple.Create("colorIcon", 5129), true)
+, Tuple.Create(Tuple.Create(" ", 5138), Tuple.Create("red", 5139), true)
             
             #line 151 "..\..\DiffLog\Views\OperationLog.cshtml"
-, Tuple.Create(Tuple.Create(" ", 5141), Tuple.Create<System.Object, System.Int32>(eq ? "mini" : ""
+, Tuple.Create(Tuple.Create(" ", 5142), Tuple.Create<System.Object, System.Int32>(eq ? "mini" : ""
             
             #line default
             #line hidden
-, 5142), false)
+, 5143), false)
 );
 
 WriteLiteralTo(__razor_template_writer, "></span>\r\n    <span");
 
-WriteAttributeTo(__razor_template_writer, "class", Tuple.Create(" class=\"", 5181), Tuple.Create("\"", 5257)
-, Tuple.Create(Tuple.Create("", 5189), Tuple.Create("glyphicon", 5189), true)
-, Tuple.Create(Tuple.Create(" ", 5198), Tuple.Create("glyphicon-fast-forward", 5199), true)
-, Tuple.Create(Tuple.Create(" ", 5221), Tuple.Create("colorIcon", 5222), true)
-, Tuple.Create(Tuple.Create(" ", 5231), Tuple.Create("green", 5232), true)
+WriteAttributeTo(__razor_template_writer, "class", Tuple.Create(" class=\"", 5182), Tuple.Create("\"", 5258)
+, Tuple.Create(Tuple.Create("", 5190), Tuple.Create("glyphicon", 5190), true)
+, Tuple.Create(Tuple.Create(" ", 5199), Tuple.Create("glyphicon-fast-forward", 5200), true)
+, Tuple.Create(Tuple.Create(" ", 5222), Tuple.Create("colorIcon", 5223), true)
+, Tuple.Create(Tuple.Create(" ", 5232), Tuple.Create("green", 5233), true)
             
             #line 152 "..\..\DiffLog\Views\OperationLog.cshtml"
-, Tuple.Create(Tuple.Create(" ", 5237), Tuple.Create<System.Object, System.Int32>(eq ? "mini" : ""
+, Tuple.Create(Tuple.Create(" ", 5238), Tuple.Create<System.Object, System.Int32>(eq ? "mini" : ""
             
             #line default
             #line hidden
-, 5238), false)
+, 5239), false)
 );
 
 WriteLiteralTo(__razor_template_writer, "></span>\r\n    ");
