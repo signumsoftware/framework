@@ -199,7 +199,6 @@
     <Member Name="_0ShouldBeAnAggregate" Description="{0} debe ser un agregado" />
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeSet" Description="{0} debe establecerse" />
-    <Member Name="ChartToken" Description="Grafico" />
     <Member Name="Chart" Description="Gráfico" />
     <Member Name="Chart_ChartSettings" Description="Configuración del gráfico" />
     <Member Name="Chart_Dimension" Description="Dimensión" />
@@ -209,6 +208,7 @@
     <Member Name="Chart_ToggleInfo" Description="Mostrar/Ocultar información" />
     <Member Name="ChartFor" Description="Gráfico para" />
     <Member Name="ChartOf0" Description="Gráfico de {0}" />
+    <Member Name="ChartToken" Description="Grafico" />
     <Member Name="ChooseABasePalette" Description="Elegir una paleta base" />
     <Member Name="ColorsFor0" Description="Colores para {0}" />
     <Member Name="CreateNew" Description="Crear" />
@@ -330,6 +330,15 @@
     <Member Name="Days" Description="Días" />
     <Member Name="Months" Description="Meses" />
     <Member Name="Years" Description="Años" />
+  </Type>
+  <Type Name="DiffLogMessage">
+    <Member Name="CurrentEntity" Description="Entidad actual" />
+    <Member Name="NextLog" Description="Registro siguiente" />
+    <Member Name="PreviousLog" Description="Registro anterior" />
+  </Type>
+  <Type Name="DiffLogMixin">
+    <Member Name="EndGraph" Description="Grafo final" />
+    <Member Name="StartGraph" Description="Grafo inicial" />
   </Type>
   <Type Name="DisconnectedExportDN" Description="Exportación desconectada">
     <Member Name="BackupDatabase" Description="Copia de seguridad de base de datos" />
@@ -729,6 +738,7 @@
   </Type>
   <Type Name="IsolationMessage">
     <Member Name="Entity0HasIsolation1ButCurrentIsolationIs2" Description="Entidad {0} tiene aislamiento {1} pero el aislamiento actual es {2}" />
+    <Member Name="Entity0HasIsolation1ButEntity2HasIsolation3" Description="La entidad '{0}' tiene aislamiento {1} pero la entidad '{2}' tiene aislamiento {3}" />
     <Member Name="SelectAnIsolation" Description="Seleccione un aislamiento" />
   </Type>
   <Type Name="IsolationMixin">
@@ -1337,11 +1347,6 @@
     <Member Name="Stop" Description="Parada" />
   </Type>
   <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
-  <Type Name="UserViewLogDN" Description="Registro recurso de vista de usuario">
-    <Member Name="Asset" Description="Recurso" />
-    <Member Name="CreationDate" Description="Fecha de creación" />
-    <Member Name="User" Description="Usuario" />
-  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="Exportar a xml" />
     <Member Name="ImportPreview" Description="Previsualizar importación" />
@@ -1392,7 +1397,6 @@
     <Member Name="PasswordHash" Description="Hash de la contraseña" />
     <Member Name="PasswordNeverExpires" Description="La contraseña nunca caduca" />
     <Member Name="PasswordSetDate" Description="Establecer fecha de contraseña" />
-    <Member Name="Related" Description="Relacionado" />
     <Member Name="Role" Description="Rol" />
     <Member Name="State" Description="Estado" />
     <Member Name="UserName" Description="Login" />
@@ -1459,6 +1463,14 @@
     <Member Name="Device" Description="Dispositivo" />
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="ViewLogDN" Description="Registro de visita">
+    <Member Name="Duration" Description="Duración" />
+    <Member Name="EndDate" Description="Fecha de fin" />
+    <Member Name="StartDate" Description="Fecha de inicio" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="User" Description="Usuario" />
+    <Member Name="ViewAction" Description="Acción de vista" />
   </Type>
   <Type Name="WebDownload" Description="Descargar por web">
     <Member Name="FullWebPath" Description="Ruta web completa" />
