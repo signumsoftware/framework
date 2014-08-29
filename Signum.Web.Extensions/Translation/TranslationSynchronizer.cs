@@ -153,7 +153,7 @@ namespace Signum.Web.Translation
 
         public int TotalOriginalLength()
         {
-            var ci = Type.Assembly.Culture;
+            var ci = CultureInfo.GetCultureInfo(LocalizedAssembly.GetDefaultAssemblyCulture(Type.Assembly.Assembly));
 
             return (TypeConflict == null ? 0 : TypeConflict[ci].Original.Description.Length) +
                 MemberConflicts.Values.Sum(m => m[ci].Original.Length);
