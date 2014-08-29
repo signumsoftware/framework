@@ -54,11 +54,11 @@
             {
                 <tr style="background: #FFFFFF">
                     <td>
-                        <span class="processName">@pair.Key.Split(' ')[0]</span>
+                        <span class="processName">@(pair.Key.TryBefore(' ') ?? pair.Key)</span>
                     </td>
                     <td>
-                        @if (pair.Key.Split(' ').Length > 1)
-                        {<span class="entityName">@pair.Key.Split(' ')[1]</span>}
+                        @if (pair.Key.TryAfter(' ') != null)
+                        {<span class="entityName">@pair.Key.After(' ')</span>}
                     </td>
                     <td style="text-align:center; background:@getColor(pair.Value.Count / max.Count); ">@pair.Value.Count
                     </td>
