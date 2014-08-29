@@ -26,7 +26,7 @@
             </div>
             <div class="panel-body">
                 @Html.HiddenRuntimeInfo(tc, pp => pp.Content)
-                @Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = DashboardClient.PanelPartViews[part.Content.GetType()].Admin)
+                @Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = DashboardClient.PanelPartViews[part.Content.GetType()].AdminView)
             </div>
             <div class="sf-leftHandle" draggable="true"></div>
             <div class="sf-rightHandle" draggable="true"></div>
