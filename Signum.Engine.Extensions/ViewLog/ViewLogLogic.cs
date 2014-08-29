@@ -41,6 +41,7 @@ namespace Signum.Engine.ViewLog
                         Entity = e,
                         e.Id,
                         e.Target,
+                        e.ViewAction,
                         e.User,
                         e.Duration,
                         e.StartDate,
@@ -56,8 +57,24 @@ namespace Signum.Engine.ViewLog
                     dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogDN).NicePluralName()));
                 }
 
+                if (types.Contains(typeof(QueryDN)))
+                {
+                    DynamicQueryManager.Current.QueryExecuted += Current_QueryExecuted;
+                }
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName)
+        {
+            if (type == DynamicQueryManager.ExecuteType.ExecuteQuery ||
+                type == DynamicQueryManager.ExecuteType.ExecuteGroupQuery)
+            {
+                return LogView(QueryLogic.GetQuery(queryName).ToLite(), "Query");
+            }
+
+            return null;
         }
 
         static void ExceptionLogic_DeleteLogs(DateTime limit)

@@ -164,17 +164,29 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN GetHomePageDashboard()
         {
-            return Dashboards.Value.Values
+            var result =  Dashboards.Value.Values
                 .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
                 .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();
+
+            if (result == null)
+                return null;
+
+            using (ViewLogLogic.LogView(result.ToLite(), "GetHomePageDashboard"))
+                return result;
         }
 
         public static DashboardDN GetEmbeddedDashboard(Type entityType)
         {
-            return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
+            var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
                 .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
                 .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
+
+            if (result == null)
+                return null;
+
+            using (ViewLogLogic.LogView(result.ToLite(), "GetEmbeddedDashboard"))
+                return result;
         }
 
         public static List<Lite<DashboardDN>> GetDashboards()
