@@ -106,11 +106,11 @@
                         <table>
                             <tr>
                                 <td width="300">
-                                    <span class="processName">@pair.Key.Split(' ')[0]</span>
-                                    @if (pair.Key.Split(' ').Length > 1)
+                                    <span class="processName">@(pair.Key.TryBefore(' ') ?? pair.Key)</span>
+                                    @if (pair.Key.TryAfter(' ') != null)
                                     {
                                         <br />
-                                        <span class="entityName">@pair.Key.Split(' ')[1]</span>
+                                        <span class="entityName">@pair.Key.After(' ')</span>
                                     }
                                 </td>
                             </tr>

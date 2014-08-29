@@ -210,7 +210,7 @@ WriteLiteral(">");
 
             
             #line 109 "..\..\Profiler\Views\Times.cshtml"
-                                                         Write(pair.Key.Split(' ')[0]);
+                                                          Write(pair.Key.TryBefore(' ') ?? pair.Key);
 
             
             #line default
@@ -225,7 +225,7 @@ WriteLiteral("</span>\r\n");
             #line hidden
             
             #line 110 "..\..\Profiler\Views\Times.cshtml"
-                                     if (pair.Key.Split(' ').Length > 1)
+                                     if (pair.Key.TryAfter(' ') != null)
                                     {
 
             
@@ -241,7 +241,7 @@ WriteLiteral(">");
 
             
             #line 113 "..\..\Profiler\Views\Times.cshtml"
-                                                            Write(pair.Key.Split(' ')[1]);
+                                                            Write(pair.Key.After(' '));
 
             
             #line default
@@ -310,16 +310,16 @@ WriteLiteral(">\r\n                                        <span");
 
 WriteLiteral(" class=\"med\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 3496), Tuple.Create("\"", 3548)
-, Tuple.Create(Tuple.Create("", 3504), Tuple.Create("width:", 3504), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 3508), Tuple.Create("\"", 3560)
+, Tuple.Create(Tuple.Create("", 3516), Tuple.Create("width:", 3516), true)
             
             #line 132 "..\..\Profiler\Views\Times.cshtml"
-, Tuple.Create(Tuple.Create("", 3510), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.Average * ratio)
+, Tuple.Create(Tuple.Create("", 3522), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.Average * ratio)
             
             #line default
             #line hidden
-, 3510), false)
-, Tuple.Create(Tuple.Create("", 3546), Tuple.Create("px", 3546), true)
+, 3522), false)
+, Tuple.Create(Tuple.Create("", 3558), Tuple.Create("px", 3558), true)
 );
 
 WriteLiteral("></span>");
@@ -365,16 +365,16 @@ WriteLiteral(">\r\n                                        <span");
 
 WriteLiteral(" class=\"max\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 4093), Tuple.Create("\"", 4145)
-, Tuple.Create(Tuple.Create("", 4101), Tuple.Create("width:", 4101), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 4105), Tuple.Create("\"", 4157)
+, Tuple.Create(Tuple.Create("", 4113), Tuple.Create("width:", 4113), true)
             
             #line 143 "..\..\Profiler\Views\Times.cshtml"
-, Tuple.Create(Tuple.Create("", 4107), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.MaxTime * ratio)
+, Tuple.Create(Tuple.Create("", 4119), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.MaxTime * ratio)
             
             #line default
             #line hidden
-, 4107), false)
-, Tuple.Create(Tuple.Create("", 4143), Tuple.Create("px", 4143), true)
+, 4119), false)
+, Tuple.Create(Tuple.Create("", 4155), Tuple.Create("px", 4155), true)
 );
 
 WriteLiteral("></span>");
@@ -411,16 +411,16 @@ WriteLiteral(">\r\n                                        <span");
 
 WriteLiteral(" class=\"med\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 4555), Tuple.Create("\"", 4607)
-, Tuple.Create(Tuple.Create("", 4563), Tuple.Create("width:", 4563), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 4567), Tuple.Create("\"", 4619)
+, Tuple.Create(Tuple.Create("", 4575), Tuple.Create("width:", 4575), true)
             
             #line 150 "..\..\Profiler\Views\Times.cshtml"
-, Tuple.Create(Tuple.Create("", 4569), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.Average * ratio)
+, Tuple.Create(Tuple.Create("", 4581), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.Average * ratio)
             
             #line default
             #line hidden
-, 4569), false)
-, Tuple.Create(Tuple.Create("", 4605), Tuple.Create("px", 4605), true)
+, 4581), false)
+, Tuple.Create(Tuple.Create("", 4617), Tuple.Create("px", 4617), true)
 );
 
 WriteLiteral("></span>");
@@ -448,16 +448,16 @@ WriteLiteral(">\r\n                                        <span");
 
 WriteLiteral(" class=\"min\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 4977), Tuple.Create("\"", 5029)
-, Tuple.Create(Tuple.Create("", 4985), Tuple.Create("width:", 4985), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 4989), Tuple.Create("\"", 5041)
+, Tuple.Create(Tuple.Create("", 4997), Tuple.Create("width:", 4997), true)
             
             #line 157 "..\..\Profiler\Views\Times.cshtml"
-, Tuple.Create(Tuple.Create("", 4991), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.MinTime * ratio)
+, Tuple.Create(Tuple.Create("", 5003), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.MinTime * ratio)
             
             #line default
             #line hidden
-, 4991), false)
-, Tuple.Create(Tuple.Create("", 5027), Tuple.Create("px", 5027), true)
+, 5003), false)
+, Tuple.Create(Tuple.Create("", 5039), Tuple.Create("px", 5039), true)
 );
 
 WriteLiteral("></span>");
@@ -494,16 +494,16 @@ WriteLiteral(">\r\n                                        <span");
 
 WriteLiteral(" class=\"last\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 5437), Tuple.Create("\"", 5490)
-, Tuple.Create(Tuple.Create("", 5445), Tuple.Create("width:", 5445), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 5449), Tuple.Create("\"", 5502)
+, Tuple.Create(Tuple.Create("", 5457), Tuple.Create("width:", 5457), true)
             
             #line 164 "..\..\Profiler\Views\Times.cshtml"
-, Tuple.Create(Tuple.Create("", 5451), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.LastTime * ratio)
+, Tuple.Create(Tuple.Create("", 5463), Tuple.Create<System.Object, System.Int32>((int)(pair.Value.LastTime * ratio)
             
             #line default
             #line hidden
-, 5451), false)
-, Tuple.Create(Tuple.Create("", 5488), Tuple.Create("px", 5488), true)
+, 5463), false)
+, Tuple.Create(Tuple.Create("", 5500), Tuple.Create("px", 5500), true)
 );
 
 WriteLiteral("></span>");

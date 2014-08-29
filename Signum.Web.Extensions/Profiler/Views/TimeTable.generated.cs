@@ -171,7 +171,7 @@ WriteLiteral(">");
 
             
             #line 57 "..\..\Profiler\Views\TimeTable.cshtml"
-                                             Write(pair.Key.Split(' ')[0]);
+                                              Write(pair.Key.TryBefore(' ') ?? pair.Key);
 
             
             #line default
@@ -186,7 +186,7 @@ WriteLiteral("</span>\r\n                    </td>\r\n                    <td>\r
             #line hidden
             
             #line 60 "..\..\Profiler\Views\TimeTable.cshtml"
-                         if (pair.Key.Split(' ').Length > 1)
+                         if (pair.Key.TryAfter(' ') != null)
                         {
             
             #line default
@@ -199,7 +199,7 @@ WriteLiteral(">");
 
             
             #line 61 "..\..\Profiler\Views\TimeTable.cshtml"
-                                             Write(pair.Key.Split(' ')[1]);
+                                             Write(pair.Key.After(' '));
 
             
             #line default
@@ -208,25 +208,25 @@ WriteLiteral("</span>");
 
             
             #line 61 "..\..\Profiler\Views\TimeTable.cshtml"
-                                                                                }
+                                                                             }
 
             
             #line default
             #line hidden
 WriteLiteral("                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 1992), Tuple.Create("\"", 2071)
-, Tuple.Create(Tuple.Create("", 2000), Tuple.Create("text-align:center;", 2000), true)
-, Tuple.Create(Tuple.Create(" ", 2018), Tuple.Create("background:", 2019), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2004), Tuple.Create("\"", 2083)
+, Tuple.Create(Tuple.Create("", 2012), Tuple.Create("text-align:center;", 2012), true)
+, Tuple.Create(Tuple.Create(" ", 2030), Tuple.Create("background:", 2031), true)
             
             #line 63 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2030), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.Count / max.Count)
+, Tuple.Create(Tuple.Create("", 2042), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.Count / max.Count)
             
             #line default
             #line hidden
-, 2030), false)
-, Tuple.Create(Tuple.Create("", 2069), Tuple.Create(";", 2069), true)
-, Tuple.Create(Tuple.Create(" ", 2070), Tuple.Create("", 2070), true)
+, 2042), false)
+, Tuple.Create(Tuple.Create("", 2081), Tuple.Create(";", 2081), true)
+, Tuple.Create(Tuple.Create(" ", 2082), Tuple.Create("", 2082), true)
 );
 
 WriteLiteral(">");
@@ -240,16 +240,16 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("\r\n                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2142), Tuple.Create("\"", 2222)
-, Tuple.Create(Tuple.Create("", 2150), Tuple.Create("text-align:right;", 2150), true)
-, Tuple.Create(Tuple.Create(" ", 2167), Tuple.Create("background:", 2168), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2154), Tuple.Create("\"", 2234)
+, Tuple.Create(Tuple.Create("", 2162), Tuple.Create("text-align:right;", 2162), true)
+, Tuple.Create(Tuple.Create(" ", 2179), Tuple.Create("background:", 2180), true)
             
             #line 65 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2179), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.LastTime/max.LastTime)
+, Tuple.Create(Tuple.Create("", 2191), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.LastTime/max.LastTime)
             
             #line default
             #line hidden
-, 2179), false)
+, 2191), false)
 );
 
 WriteLiteral(">");
@@ -263,16 +263,16 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("\r\n                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2296), Tuple.Create("\"", 2376)
-, Tuple.Create(Tuple.Create("", 2304), Tuple.Create("text-align:right;", 2304), true)
-, Tuple.Create(Tuple.Create(" ", 2321), Tuple.Create("background:", 2322), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2308), Tuple.Create("\"", 2388)
+, Tuple.Create(Tuple.Create("", 2316), Tuple.Create("text-align:right;", 2316), true)
+, Tuple.Create(Tuple.Create(" ", 2333), Tuple.Create("background:", 2334), true)
             
             #line 67 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2333), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.MinTime / max.MinTime)
+, Tuple.Create(Tuple.Create("", 2345), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.MinTime / max.MinTime)
             
             #line default
             #line hidden
-, 2333), false)
+, 2345), false)
 );
 
 WriteLiteral(">");
@@ -286,16 +286,16 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("\r\n                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2449), Tuple.Create("\"", 2536)
-, Tuple.Create(Tuple.Create("", 2457), Tuple.Create("text-align:right;", 2457), true)
-, Tuple.Create(Tuple.Create(" ", 2474), Tuple.Create("background:", 2475), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2461), Tuple.Create("\"", 2548)
+, Tuple.Create(Tuple.Create("", 2469), Tuple.Create("text-align:right;", 2469), true)
+, Tuple.Create(Tuple.Create(" ", 2486), Tuple.Create("background:", 2487), true)
             
             #line 69 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2486), Tuple.Create<System.Object, System.Int32>(getColor((float)pair.Value.Average / max.Average)
+, Tuple.Create(Tuple.Create("", 2498), Tuple.Create<System.Object, System.Int32>(getColor((float)pair.Value.Average / max.Average)
             
             #line default
             #line hidden
-, 2486), false)
+, 2498), false)
 );
 
 WriteLiteral(">");
@@ -309,15 +309,15 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("\r\n                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2609), Tuple.Create("\"", 2671)
-, Tuple.Create(Tuple.Create("", 2617), Tuple.Create("background:", 2617), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2621), Tuple.Create("\"", 2683)
+, Tuple.Create(Tuple.Create("", 2629), Tuple.Create("background:", 2629), true)
             
             #line 71 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2628), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.MaxTime / max.MaxTime)
+, Tuple.Create(Tuple.Create("", 2640), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.MaxTime / max.MaxTime)
             
             #line default
             #line hidden
-, 2628), false)
+, 2640), false)
 );
 
 WriteLiteral(">");
@@ -331,16 +331,16 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("\r\n                    </td>\r\n                    <td");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2744), Tuple.Create("\"", 2828)
-, Tuple.Create(Tuple.Create("", 2752), Tuple.Create("text-align:right;", 2752), true)
-, Tuple.Create(Tuple.Create(" ", 2769), Tuple.Create("background:", 2770), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2756), Tuple.Create("\"", 2840)
+, Tuple.Create(Tuple.Create("", 2764), Tuple.Create("text-align:right;", 2764), true)
+, Tuple.Create(Tuple.Create(" ", 2781), Tuple.Create("background:", 2782), true)
             
             #line 73 "..\..\Profiler\Views\TimeTable.cshtml"
-, Tuple.Create(Tuple.Create("", 2781), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.TotalTime / max.TotalTime)
+, Tuple.Create(Tuple.Create("", 2793), Tuple.Create<System.Object, System.Int32>(getColor(pair.Value.TotalTime / max.TotalTime)
             
             #line default
             #line hidden
-, 2781), false)
+, 2793), false)
 );
 
 WriteLiteral(">");
