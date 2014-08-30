@@ -49,10 +49,13 @@ namespace Signum.Engine.DiffLog
 
             return new Disposable(() =>
             {
-                var target = log.GetTarget();
+                if (log != null)
+                {
+                    var target = log.GetTarget();
 
-                if (target != null && operation.OperationType != OperationType.Delete)
-                    log.Mixin<DiffLogMixin>().EndGraph = entity.Dump();
+                    if (target != null && operation.OperationType != OperationType.Delete)
+                        log.Mixin<DiffLogMixin>().EndGraph = entity.Dump();
+                }
             });
         }
 
