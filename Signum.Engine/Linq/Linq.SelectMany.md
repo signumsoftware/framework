@@ -1,4 +1,4 @@
-## Database.Query `SelectMany` differences
+## LINQ `SelectMany` differences
 
 `SelectMany` is a very simple operator, however, it creates some problems for people to grasp. You can see more about how `SelectMany` is meant to work [here](http://www.hookedonlinq.com/SelectManyOperator.ashx). 
 

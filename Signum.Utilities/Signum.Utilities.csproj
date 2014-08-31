@@ -213,7 +213,6 @@
     <None Include="Extensions\StringExtensions.md" />
     <None Include="Extensions\TimeSpanExtensions.md" />
     <None Include="Extensions\ExpressionExtensions.md" />
-    <None Include="0.Introduction.md" />
     <Content Include="Translations\Signum.Utilities.de.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -244,6 +243,8 @@
     <None Include="Extensions\EnumExtensions.md" />
     <None Include="Extensions\ListExtensions.md" />
     <None Include="Extensions\TreeHelper.md" />
+    <None Include="index.mdi" />
+    <None Include="Introduction.md" />
     <None Include="MimeTypes.md" />
     <None Include="MyRandom.md" />
     <None Include="NaturalLanguage\NaturalLangageTools.md" />
@@ -254,6 +255,7 @@
     <None Include="Reflection\ReflectionTools.md" />
     <None Include="SafeConsole.md" />
     <None Include="Serialization.md" />
+    <None Include="Statics.md" />
     <None Include="StringDistance.md" />
     <None Include="Synchronization\CultureInfoUtils.md" />
     <None Include="Synchronization\ThreadSafeEnumerator.md" />

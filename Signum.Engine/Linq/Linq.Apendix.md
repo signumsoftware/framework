@@ -1,4 +1,4 @@
-Database.Query.Apendix
+LINQ Apendix
 
 Here are the entity classes used as the Data Model. Just usual Signum Entities. 
 
