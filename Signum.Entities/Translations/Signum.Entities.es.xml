@@ -98,6 +98,7 @@
     <Member Name="Form" Description="Formulario" />
     <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="QueryString" Description="Cadena de consulta" />
+    <Member Name="Referenced" Description="Referenciado" />
     <Member Name="RequestUrl" Description="Url solicitada" />
     <Member Name="Session" Description="Sesión" />
     <Member Name="StackTrace" Description="Seguimiento de la pila" />
@@ -292,9 +293,7 @@
     <Member Name="FinderOf0" Description="Buscador de {0}" />
     <Member Name="First0Results" Description="primer[os] {0} resultado[s]." />
     <Member Name="Name" Description="Nombre" />
-    <Member Name="NewColumn" Description="Nueva columna" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
-    <Member Name="NewFilter" Description="Nuevo filtro" />
     <Member Name="NoActionsFound" Description="No se encontraron acciones" />
     <Member Name="NoColumnSelected" Description="Ninguna columna seleccionada" />
     <Member Name="NoFiltersSpecified" Description="Ningún filtro especificado" />
