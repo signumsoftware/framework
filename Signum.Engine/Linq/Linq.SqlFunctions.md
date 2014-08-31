@@ -1,5 +1,5 @@
 
-# Database.Query SQL Functions
+# LINQ SQL Functions
 
 There are some .Net functions that are supported by Linq to Signum and will be translated to Sql equivalents, so you have compile-time checking and you can forget about what the name of the function in Sql was. The list: 
 
