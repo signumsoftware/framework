@@ -501,8 +501,6 @@ Example:
 12345678987654321.ToComputerSize(); //10.97 PBytes
 ```
 
-**Note:** As [notes](http://en.wikipedia.org/wiki/Kibibyte), according to the International Electrotechnical Commission in 2000, multiples of 1024 should be noted using Kibi(Ki)
-instead of Kilo(K) to avoid confusion with multiples of 1000. It looks
-that this standard is being ignored and everybody stills using
-KiloByte(KB) to note 1024 Bytes, so we divide by 1024 in this extension
+> **Note:** As [notes](http://en.wikipedia.org/wiki/Kibibyte), according to the International Electrotechnical Commission in 2000, multiples of 1024 should be noted using Kibi(Ki)
+instead of Kilo(K) to avoid confusion with multiples of 1000. It looks that this standard is being ignored and everybody stills using KiloByte(KB) to note 1024 Bytes, so we divide by 1024 in this extension
 method.

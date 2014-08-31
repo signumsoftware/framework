@@ -103,7 +103,7 @@ public class OrderDN : Entity
 MixinDeclarations.Register<UserDN, UserEmployeeMixin>();
 ```
 
-***Note:*** *Signum.Windows also requires this information, but is automatically transited by the WCF webservice when started.* 
+> **Note:*** *Signum.Windows also requires this information, but is automatically transited by the WCF webservice when started.
 
 ## Business logic support
 

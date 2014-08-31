@@ -4,7 +4,7 @@
 
 Compiles and stores the result function in a cache. 
 
-**Important Note:** The cache uses simple reference comparison, so this method **should only be used for constant compile-generated expressions stored in a static field** otherwise the cache will eat all your memory!. In order to avoid this problem, the method can not be called with two different instances of identical expressions. 
+> **Important Note:** The cache uses simple reference comparison, so this method **should only be used for constant compile-generated expressions stored in a static field** otherwise the cache will eat all your memory!. In order to avoid this problem, the method can not be called with two different instances of identical expressions. 
 
 ```C#
    public static T CompileAndStore<T>(this Expression<T> expression)

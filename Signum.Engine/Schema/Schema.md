@@ -119,7 +119,7 @@ Usually, the underlying objects of these dictionaries are the same, depending of
 * `EmbeddedField` contains a nested `Dictionary` of `Fields` (with their own `IColumns`).
 * `MListField` has no `IColumn` at all, instead has a `MListTable` object. 
 
-**Important Note:** There's just no validation on Schema data structure, make modifications at your own risk and don't expect a nice exception message to be thrown if you do something silly.
+> **Important Note:** There's just no validation on Schema data structure, make modifications at your own risk and don't expect a nice exception message to be thrown if you do something silly.
 
 ```C#
 Schema s = sb.Schema;

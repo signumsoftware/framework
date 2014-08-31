@@ -354,7 +354,7 @@ Validator.PropertyValidator((MyEntityDN d) => d.Name).StaticPropertyValidation +
 };
 ```
 
-***Note:*** *Notice how we din't have to code pi.Is(()=> entity.Name) this time, becuase PropertyPack allready works at the property level.*
+> **Note:*** *Notice how we din't have to code pi.Is(()=> entity.Name) this time, becuase PropertyPack allready works at the property level.
 
 
 In order to make it work we need to register this change in the validation in every single start project that uses your entity (Client, Server, Loading Application...). Consider create a method or static constructor in a shared assembly.

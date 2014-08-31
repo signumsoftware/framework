@@ -76,7 +76,7 @@ public static Dictionary<K, List<T>> GroupToDictionaryDescending<T, K>(this IEnu
 public static Dictionary<K, List<V>> GroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
 ```
 
-**Note:** When you enumerate a Dictionary the KeyValuePairs are returned in the order they were introduced.
+> **Note:** When you enumerate a Dictionary the KeyValuePairs are returned in the order they were introduced.
 
 Example:
 

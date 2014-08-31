@@ -19,7 +19,7 @@ Given that lites are an important decision when designing your entities, hiding 
  }
 ```
 
-***Note:*** *Usually, any kind of mismatch between field and property types is not recommended, since is would affect Linq queries as well.*
+> **Note:*** *Usually, any kind of mismatch between field and property types is not recommended, since is would affect Linq queries as well.
 
 ### Lite\<T> class
 

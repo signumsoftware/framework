@@ -87,4 +87,4 @@ while (!numbers.Empty)
 //Byzantines
 ```
 
-**Note:** Note that, in the current implementation, the priority is the only information taken into account, not the order they where introduced.
+> **Note:** Note that, in the current implementation, the priority is the only information taken into account, not the order they where introduced.
