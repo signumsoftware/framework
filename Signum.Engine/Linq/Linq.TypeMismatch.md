@@ -1,4 +1,4 @@
-## Database.Query Type Mismatch
+## LINQ Type Mismatch
 
 Even if Signum Framework tries to reduce type-mismatch between C# and SQL to the minimum when generating the tables, there are situations where this is currently inevitable. 
 

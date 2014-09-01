@@ -1,4 +1,4 @@
-## Database.Query (Entity support)
+## LINQ (Entity support)
 
 You can mix values, entities, and `Lite<T>` in your results when calling Linq Queries. 
 

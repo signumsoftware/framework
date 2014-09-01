@@ -1,4 +1,4 @@
-## Database.Query `Join` differences
+## LINQ `Join` differences
 
 We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hard thing is to know where you are).
 
