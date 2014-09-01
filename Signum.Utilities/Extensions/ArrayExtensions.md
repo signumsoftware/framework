@@ -92,8 +92,7 @@ Example:
  var a = new[,] { { 1, 2 }, { 3, 4 } }.AddColumn(2, new[] { 5, 6 });
 ```
 
-**Note:*** Note that when using array initialization you are defining
-Columns, not Rows
+> **Note:** Note that when using array initialization you are defining Columns, not Rows
 
 ### SelectArray
 

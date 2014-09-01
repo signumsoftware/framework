@@ -38,7 +38,7 @@ Notice how `UnsafeDelete` will also remove all the collection of the affected en
 
 Before deleting the entities, `PreUnsafeDelete` will be called in [EntityEvents](EntityEvents.md). 
 
-**Note:** There's actually nothing **unsafe**  about `UnsafeDelete`. `Database.Delete` actually calls `UnsafeDelete` under the covers, but the name was chosen for familiarity with [UnsafeUpdate](Database.UnsafeUpdate.md) and [Database.UnsafeInsert.md].
+> **Note:** There's actually nothing **unsafe**  about `UnsafeDelete`. `Database.Delete` actually calls `UnsafeDelete` under the covers, but the name was chosen for familiarity with [UnsafeUpdate](Database.UnsafeUpdate.md) and [Database.UnsafeInsert.md].
 
 
 ## Database.UnsafeDeleteMList
