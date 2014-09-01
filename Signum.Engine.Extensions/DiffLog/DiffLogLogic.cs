@@ -25,6 +25,8 @@ namespace Signum.Engine.DiffLog
                 MixinDeclarations.AssertDeclared(typeof(OperationLogDN), typeof(DiffLogMixin));
 
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+
+                RegisterGraph<IdentifiableEntity>(DiffLogStrategy.All);
             }
         }
 
