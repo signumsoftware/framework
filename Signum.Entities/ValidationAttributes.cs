@@ -926,7 +926,9 @@ namespace Signum.Entities
         [Description("{0} should be null when {1} is not set")]
         _0ShouldBeNullWhen1IsNotSet,
         [Description("{0} should be null when {1} is set")]
-        _0ShouldBeNullWhen1IsSet
+        _0ShouldBeNullWhen1IsSet,
+        [Description("{0} should be null")]
+        _0ShouldBeNull
     }
 
 
