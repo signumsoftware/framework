@@ -75,7 +75,7 @@ public class Statics
 }
 ```
 
-**Note:** Importing and Exporting the context is similar to calling `ExecutionContext.Capture`/`Run` and store the values using `CallContext.LogicalSetData`/`LogicalGetData`. But AFAIK there's no way to use `LogicalSetData` without serialization (slow). 
+> **Note:** Importing and Exporting the context is similar to calling `ExecutionContext.Capture`/`Run` and store the values using `CallContext.LogicalSetData`/`LogicalGetData`. But AFAIK there's no way to use `LogicalSetData` without serialization (slow). 
 
 ### CleanThreadContextAndAssert
 

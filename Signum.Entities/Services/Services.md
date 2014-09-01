@@ -138,7 +138,7 @@ Finally, we have to configure the service in `web.condig`
   </system.serviceModel>
 ```
 
-**Note:** Signum Framework doesn't impose anything else to WPF connection than IBaseServer and using NetDataContract on any method. You're still free to play with WCF configuration
+> **Note:** Signum Framework doesn't impose anything else to WPF connection than IBaseServer and using NetDataContract on any method. You're still free to play with WCF configuration.
 
 ## Set-up the Client
 

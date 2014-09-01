@@ -186,7 +186,7 @@ Unfortunately, there's no way we can write an anonymous type... neither it's pos
 Expression<Func<PersonDN, var>> selector = (...)
 ```
 
-**Note:** Maybe if they whould have [choose 'auto' instead of 'var' as the keyword](http://stackoverflow.com/questions/1263527/better-word-for-inferring-variables-other-than-var-c/1263553#1263553) we could see this in some future versions, but with 'var'... I don't see this happening.
+> **Note:** Maybe if they whould have [choose 'auto' instead of 'var' as the keyword](http://stackoverflow.com/questions/1263527/better-word-for-inferring-variables-other-than-var-c/1263553#1263553) we could see this in some future versions, but with 'var'... I don't see this happening.
 
 So, in order to do that, we need to do a compiler trick using the Linq static class, also from [Tomás](http://tomasp.net/blog/dynamic-linq-queries.aspx): 
 

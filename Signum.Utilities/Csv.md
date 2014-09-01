@@ -80,9 +80,7 @@ Then we just read the file like this:
 var lines = Csv.ReadFile<CSVFileLine>("myFile.csv")
 ```
 
-**Note:** Take into account that the order each
-field/property is declared, not the name, is used to parse each line of
-the CSV file.
+> **Note:** Take into account that the order eachf ield/property is declared, not the name, is used to parse each line of the CSV file.
 
 There are many other overloads to use when you don't know the type
 
