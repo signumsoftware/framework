@@ -14,19 +14,19 @@ namespace Signum.Entities.DiffLog
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string startGraph;
-        public string StartGraph
+        string initialState;
+        public string InitialState
         {
-            get { return startGraph; }
-            set { Set(ref startGraph, value); }
+            get { return initialState; }
+            set { Set(ref initialState, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string endGraph;
-        public string EndGraph
+        string finalState;
+        public string FinalState
         {
-            get { return endGraph; }
-            set { Set(ref endGraph, value); }
+            get { return finalState; }
+            set { Set(ref finalState, value); }
         }
     }
 
@@ -35,5 +35,15 @@ namespace Signum.Entities.DiffLog
         PreviousLog,
         NextLog,
         CurrentEntity,
+
+        NavigatesToThePreviousOperationLog,
+        DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState,
+        StateWhenTheOperationStarted,
+        DifferenceBetweenInitialStateAndFinalState,
+        StateWhenTheOperationFinished,
+        DifferenceBetweenFinalStateAndTheInitialStateOfNextLog,
+        NavigatesToTheNextOperationLog,
+        DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity,
+        NavigatesToTheCurrentEntity,
     }
 }

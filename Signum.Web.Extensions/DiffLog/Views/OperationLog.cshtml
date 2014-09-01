@@ -82,62 +82,62 @@
         
         using (var tabs = Html.Tabs(e))
         {
-            if (diff.Value.StartGraph != null)
+            if (diff.Value.InitialState != null)
             {
                 var prev = minMax.Min;
 
-                if (prev != null && prev.Mixin<DiffLogMixin>().EndGraph != null)
+                if (prev != null && prev.Mixin<DiffLogMixin>().FinalState != null)
                 {
-                                  tabs.Tab(new Signum.Web.DiffLog.LinkTab( @<text> 
+                    tabs.Tab(new Signum.Web.DiffLog.LinkTab( @<text> 
 <span>@DiffLogMessage.PreviousLog.NiceToString()
     <span class="glyphicon glyphicon-new-window"/></span> 
-</text> , Navigator.NavigateRoute(prev)));
+</text> , Navigator.NavigateRoute(prev)) {  ToolTip = DiffLogMessage.NavigatesToThePreviousOperationLog.NiceToString() });
                     
-                    var eq = prev.Mixin<DiffLogMixin>().EndGraph == diff.Value.StartGraph;
+                    var eq = prev.Mixin<DiffLogMixin>().FinalState == diff.Value.InitialState;
 
                     tabs.Tab(new Tab("diffPrev", @<text>
     <span class="glyphicon glyphicon-fast-backward colorIcon red @(eq ? "mini" : "")"></span>
     <span class="glyphicon glyphicon-step-backward colorIcon green @(eq ? "mini" : "")"></span>
     </text>, 
-    @<pre>@TranslationClient.Diff(prev.Mixin<DiffLogMixin>().EndGraph, diff.Value.StartGraph)</pre>));
+    @<pre>@TranslationClient.Diff(prev.Mixin<DiffLogMixin>().FinalState, diff.Value.InitialState)</pre>) { ToolTip = DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.NiceToString() });
                 }
 
-                tabs.Tab("initialGraph", Html.PropertyNiceName(() => diff.Value.StartGraph), 
-    @<text><pre><code>@diff.Value.StartGraph</code></pre></text>);
+                tabs.Tab(new Tab("initialGraph", Html.PropertyNiceName(() => diff.Value.InitialState), 
+    @<text><pre><code>@diff.Value.InitialState</code></pre></text>) { ToolTip = DiffLogMessage.StateWhenTheOperationStarted.NiceToString() });
             }
 
-            if (diff.Value.StartGraph != null && diff.Value.EndGraph != null)
+            if (diff.Value.InitialState != null && diff.Value.FinalState != null)
             {
-                var eq = diff.Value.StartGraph == diff.Value.EndGraph;
+                var eq = diff.Value.InitialState == diff.Value.FinalState;
 
                 tabs.Tab(new Tab("diff", @<text>
     <span class="glyphicon glyphicon-step-backward colorIcon red @(eq ? "mini" : "")"></span>
     <span class="glyphicon glyphicon-step-forward colorIcon green @(eq ? "mini" : "")"></span>
     </text>, 
-    @<pre>@TranslationClient.Diff(diff.Value.StartGraph, diff.Value.EndGraph)</pre>) { Active = true });
+    @<pre>@TranslationClient.Diff(diff.Value.InitialState, diff.Value.FinalState)</pre>) { Active = true, ToolTip = DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.NiceToString() });
             }
 
-            if (diff.Value.EndGraph != null)
+            if (diff.Value.FinalState != null)
             {
-                tabs.Tab("endGraph", Html.PropertyNiceName(() => diff.Value.EndGraph), 
-    @<text><pre><code>@diff.Value.EndGraph</code></pre></text>);
+                tabs.Tab(new Tab("FinalState", Html.PropertyNiceName(() => diff.Value.FinalState), 
+    @<text><pre><code>@diff.Value.FinalState</code></pre></text>) { ToolTip = DiffLogMessage.StateWhenTheOperationFinished.NiceToString() });
 
                 var next = minMax.Max;
 
-                if (next != null && next.Mixin<DiffLogMixin>().StartGraph != null)
+                if (next != null && next.Mixin<DiffLogMixin>().InitialState != null)
                 {
-                    var eq = diff.Value.EndGraph == next.Mixin<DiffLogMixin>().StartGraph;
+                    var eq = diff.Value.FinalState == next.Mixin<DiffLogMixin>().InitialState;
 
                     tabs.Tab(new Tab("diffNext", @<text>
     <span class="glyphicon glyphicon-step-forward colorIcon red @(eq ? "mini" : "")"></span>
     <span class="glyphicon glyphicon-fast-forward colorIcon green @(eq ? "mini" : "")"></span>
     </text>, 
-    @<pre>@TranslationClient.Diff(diff.Value.EndGraph, next.Mixin<DiffLogMixin>().StartGraph)</pre>));
+    @<pre>@TranslationClient.Diff(diff.Value.FinalState, next.Mixin<DiffLogMixin>().InitialState)</pre>) { ToolTip = DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.NiceToString() });
 
-              tabs.Tab(new Signum.Web.DiffLog.LinkTab( @<text> 
+                    tabs.Tab(new Signum.Web.DiffLog.LinkTab( @<text> 
 <span>@DiffLogMessage.NextLog.NiceToString()
     <span class="glyphicon glyphicon-new-window"/></span> 
-</text> , Navigator.NavigateRoute(next)));
+</text> , Navigator.NavigateRoute(next)) { ToolTip = DiffLogMessage.NavigatesToTheNextOperationLog.NiceToString() });
                 }
                 else
                 {
@@ -145,18 +145,18 @@
 
                     var dump = !entity.Exists() ? null : entity.Retrieve().Dump();
 
-                    var eq = diff.Value.EndGraph == dump;
+                    var eq = diff.Value.FinalState == dump;
 
                     tabs.Tab(new Tab("diffCurrent", @<text>
     <span class="glyphicon glyphicon-step-forward colorIcon red @(eq ? "mini" : "")"></span>
     <span class="glyphicon glyphicon-fast-forward colorIcon green @(eq ? "mini" : "")"></span>
     </text>, 
-    @<pre>@TranslationClient.Diff(diff.Value.EndGraph, dump)</pre>));
+    @<pre>@TranslationClient.Diff(diff.Value.FinalState, dump)</pre>) { ToolTip = DiffLogMessage.DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity.NiceToString() });
 
                     tabs.Tab(new Signum.Web.DiffLog.LinkTab( @<text> 
 <span>@DiffLogMessage.CurrentEntity.NiceToString()
     <span class="glyphicon glyphicon-new-window"/></span> 
-</text> , Navigator.NavigateRoute(e.Value.Target)));
+</text> , Navigator.NavigateRoute(e.Value.Target)) { ToolTip = DiffLogMessage.NavigatesToTheCurrentEntity.NiceToString() });
                 }
             }
         }

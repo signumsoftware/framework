@@ -51,9 +51,9 @@ namespace Signum.Engine.DiffLog
                 return null;
 
             if (operation.OperationType == OperationType.Delete)
-                log.Mixin<DiffLogMixin>().StartGraph = entity.Dump();
+                log.Mixin<DiffLogMixin>().InitialState = entity.Dump();
             else if (operation.OperationType == OperationType.Execute && !entity.IsNew)
-                log.Mixin<DiffLogMixin>().StartGraph = ((IEntityOperation)operation).Lite ? entity.Dump() : RetrieveFresh(entity).Dump();
+                log.Mixin<DiffLogMixin>().InitialState = ((IEntityOperation)operation).Lite ? entity.Dump() : RetrieveFresh(entity).Dump();
 
             return new Disposable(() =>
             {
@@ -62,7 +62,7 @@ namespace Signum.Engine.DiffLog
                     var target = log.GetTarget();
 
                     if (target != null && operation.OperationType != OperationType.Delete)
-                        log.Mixin<DiffLogMixin>().EndGraph = entity.Dump();
+                        log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
                 }
             });
         }
@@ -91,8 +91,8 @@ namespace Signum.Engine.DiffLog
             var logs = Database.Query<OperationLogDN>().Where(a => a.Exception == null && a.Target == log.Target);
 
             return new MinMax<OperationLogDN>(
-                 log.Mixin<DiffLogMixin>().StartGraph == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
-                 log.Mixin<DiffLogMixin>().EndGraph == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
+                 log.Mixin<DiffLogMixin>().InitialState == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
+                 log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }
     }
 
