@@ -208,23 +208,23 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Chart\ChartScripts\Bars.xml" />
-    <Content Include="Chart\ChartScripts\BoxPack.xml" />
     <Content Include="Chart\ChartScripts\BubblePack.xml" />
     <Content Include="Chart\ChartScripts\Bubbleplot.xml" />
     <Content Include="Chart\ChartScripts\CalendarStream.xml" />
     <Content Include="Chart\ChartScripts\Columns.xml" />
-    <Content Include="Chart\ChartScripts\Doughnut.xml" />
     <Content Include="Chart\ChartScripts\Force graph.xml" />
     <Content Include="Chart\ChartScripts\Line.xml" />
     <Content Include="Chart\ChartScripts\MultiBars.xml" />
     <Content Include="Chart\ChartScripts\MultiColumns.xml" />
     <Content Include="Chart\ChartScripts\MultiLines.xml" />
     <Content Include="Chart\ChartScripts\ParallelCordiantes.xml" />
+    <Content Include="Chart\ChartScripts\Pie.xml" />
     <Content Include="Chart\ChartScripts\Punchcard.xml" />
     <Content Include="Chart\ChartScripts\Scatterplot.xml" />
     <Content Include="Chart\ChartScripts\StackedBars.xml" />
     <Content Include="Chart\ChartScripts\StackedColumns.xml" />
     <Content Include="Chart\ChartScripts\StackedLines.xml" />
+    <Content Include="Chart\ChartScripts\TreeMap.xml" />
     <Content Include="Chart\ChartScripts\WorldMap.xml" />
     <Content Include="Excel\DocumentFormat.OpenXml.dll" />
     <Content Include="Excel\DocumentFormat.OpenXml.xml" />
