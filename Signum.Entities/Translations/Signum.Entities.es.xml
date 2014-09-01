@@ -210,7 +210,7 @@
     <Member Name="ThereAreChangesContinue" Description="Existen cambios no guardados y se perderán.&#xD;&#xA;&#xD;&#xA;&#x9;¿Continuamos?" />
     <Member Name="ThereAreErrors" Description="Hay errores" />
   </Type>
-  <Type Name="OperationLogDN" Description="Registro de la operación">
+  <Type Name="OperationLogDN" Description="Registro de operación">
     <Member Name="Duration" Description="Duración" />
     <Member Name="End" Description="Final" />
     <Member Name="Exception" Description="Excepción" />
@@ -361,6 +361,7 @@
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
+    <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
     <Member Name="Be" Description="ser " />
