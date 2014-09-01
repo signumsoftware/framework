@@ -124,14 +124,9 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static void Apply<T>(ObservableCollection<Node<T>> collection, Action<ObservableCollection<Node<T>>> action)
+        public static ObservableCollection<Node<T>> Apply<T>(ObservableCollection<Node<T>> collection, Func<ObservableCollection<Node<T>>, ObservableCollection<Node<T>>> action)
         {
-            action(collection);
-
-            foreach (var item in collection)
-            {
-                Apply(item.Children, action);
-            }
+            return action(collection).Select(a => new Node<T>(a.Value, Apply(a.Children, action))).ToObservableCollection();
         }
     }
 
