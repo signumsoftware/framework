@@ -35,7 +35,15 @@ namespace Signum.Engine.DiffLog
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
         {
-            DiffLogStrategy strategy = Types.GetValue(operation.ReturnType ?? operation.Type).Try(a => a.Item1) ?? 0;
+            var type =
+                operation.OperationType == OperationType.Constructor ? operation.ReturnType :
+                operation.OperationType == OperationType.ConstructorFrom ? operation.ReturnType :
+                operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType :
+                operation.OperationType == OperationType.Execute ? entity.GetType() :
+                operation.OperationType == OperationType.Delete ? entity.GetType() :
+                new InvalidOperationException("Unexpected OperationType {0}".Formato(operation.OperationType)).Throw<Type>();
+
+            DiffLogStrategy strategy = Types.GetValue(type).Try(a => a.Item1) ?? 0;
 
             var required = GetStrategy(operation);
 
@@ -49,10 +57,13 @@ namespace Signum.Engine.DiffLog
 
             return new Disposable(() =>
             {
-                var target = log.GetTarget();
+                if (log != null)
+                {
+                    var target = log.GetTarget();
 
-                if (target != null && operation.OperationType != OperationType.Delete)
-                    log.Mixin<DiffLogMixin>().EndGraph = entity.Dump();
+                    if (target != null && operation.OperationType != OperationType.Delete)
+                        log.Mixin<DiffLogMixin>().EndGraph = entity.Dump();
+                }
             });
         }
 
