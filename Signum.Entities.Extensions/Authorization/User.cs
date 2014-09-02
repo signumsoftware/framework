@@ -35,7 +35,7 @@ namespace Signum.Entities.Authorization
             return null;
         }
 
-        [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
+        [NotNullable, UniqueIndex(AvoidAttachToUniqueIndexes=true), SqlDbType(Size = 100)]
         string userName;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string UserName

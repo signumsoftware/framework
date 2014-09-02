@@ -166,7 +166,7 @@ namespace Signum.Engine.Isolation
 
             if (strategy == IsolationStrategy.Optional)
             {
-                Schema.Current.Settings.OverrideAttributes((T e) => e.Mixin<IsolationMixin>().Isolation, new AttachToAllUniqueIndexesAttribute()); //Remove non-null 
+                Schema.Current.Settings.OverrideAttributes((T e) => e.Mixin<IsolationMixin>().Isolation, new AttachToUniqueIndexesAttribute()); //Remove non-null 
             }
         }
 
