@@ -96,6 +96,8 @@ namespace Signum.Engine.Maps
         {
             return IndexName;
         }
+
+        public bool AvoidAttachToUniqueIndexes { get; set; }
     }
 
     class IndexWhereExpressionVisitor : ExpressionVisitor
