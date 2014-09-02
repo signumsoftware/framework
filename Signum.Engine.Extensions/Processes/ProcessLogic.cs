@@ -202,15 +202,7 @@ namespace Signum.Engine.Processes
 
         public static IDisposable OnApplySession(ProcessDN process)
         {
-            if (ApplySession == null) 
-                return null;
-
-            IDisposable result = null;
-            foreach (Func<ProcessDN, IDisposable> item in ApplySession.GetInvocationList())
-            {
-                result = Disposable.Combine(result, item(process));
-            }
-            return result;
+            return Disposable.Combine(ApplySession, f => f(process));
         }
 
         public static void Register(ProcessAlgorithmSymbol processAlgorthm, IProcessAlgorithm logic)

@@ -323,28 +323,15 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
-        public static IDisposable OnApplySession(ITaskDN task)
-        {
-            if (ApplySession == null)
-                return null;
-
-            IDisposable result = null;
-            foreach (Func<ITaskDN, IDisposable> item in ApplySession.GetInvocationList())
-            {
-                result = Disposable.Combine(result, item(task));
-            }
-            return result;
-        }
-
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
-            using (OnApplySession(task))
+            using (Disposable.Combine(ApplySession, f => f(task)))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {
                     Task = task,
-                    ScheduledTask = scheduledTask, 
+                    ScheduledTask = scheduledTask,
                     User = user.ToLite(),
                     StartTime = TimeZoneManager.Now,
                     MachineName = Environment.MachineName,
@@ -378,7 +365,7 @@ namespace Signum.Engine.Scheduler
                         {
                             Task = stl.Task,
                             StartTime = stl.StartTime,
-                            ScheduledTask = scheduledTask, 
+                            ScheduledTask = scheduledTask,
                             User = stl.User,
                             MachineName = stl.MachineName,
                             ApplicationName = stl.ApplicationName,
