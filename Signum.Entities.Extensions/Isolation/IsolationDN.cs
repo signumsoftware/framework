@@ -102,7 +102,7 @@ namespace Signum.Entities.Isolation
         {
         }
 
-        [NotNullable, AttachToAllUniqueIndexes]
+        [NotNullable, AttachToUniqueIndexes]
         Lite<IsolationDN> isolation = IsRetrieving ? null : IsolationDN.Current;
         public Lite<IsolationDN> Isolation
         {
