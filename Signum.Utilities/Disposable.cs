@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Signum.Utilities
@@ -28,6 +29,32 @@ namespace Signum.Utilities
 
             return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
         }
+
+        public static IDisposable Combine<Del>(Del delegated, Func<Del, IDisposable> invoke)
+        {
+            if (delegated == null)
+                return null;
+
+            IDisposable result = null;
+            foreach (var func in ((MulticastDelegate)(object)delegated).GetInvocationList().Cast<Del>())
+            {
+                try
+                {
+                    result = Disposable.Combine(result, invoke(func));
+                }
+                catch (Exception e)
+                {
+                    if (result != null)
+                        result.Dispose();
+
+                    throw e;
+                }
+            }
+
+            return result;
+        }
+
+
     }
 
     

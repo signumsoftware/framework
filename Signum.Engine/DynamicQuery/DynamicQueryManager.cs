@@ -73,7 +73,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
 
-     
+
 
 
         T Execute<T>(ExecuteType executeType, object queryName, Func<DynamicQueryBucket, T> executor)
@@ -85,7 +85,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     var qb = GetQuery(queryName);
 
-                    using (OnQueryExecuted(executeType, queryName))
+                    using (Disposable.Combine(QueryExecuted, f => f(executeType, queryName)))
                     {
                         return executor(qb);
                     }
@@ -99,20 +99,6 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public event Func<ExecuteType, object, IDisposable> QueryExecuted;
-
-        private IDisposable OnQueryExecuted(ExecuteType executeType, object queryName)
-        {
-            if (QueryExecuted == null)
-                return null;
-
-            IDisposable disposable = null;
-            foreach (Func<ExecuteType, object, IDisposable> item in QueryExecuted.GetInvocationList())
-            {
-                disposable = Disposable.Combine(disposable, item(executeType, queryName));
-            }
-
-            return disposable;
-        }
 
         public enum ExecuteType
         {
