@@ -134,7 +134,12 @@ namespace Signum.Engine
 
         public static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
-            return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlEscape()));
+            if (objectName.Schema.Database == null)
+
+                return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlEscape()));
+
+            else
+                return new SqlPreCommandSimple("EXEC {2}.dbo.sp_executesql N'DROP INDEX {0}.{1}'".Formato(objectName.OnDatabase(null).ToString(), indexName.SqlEscape(), objectName.Schema.Database.ToString()));
         }
 
         public static SqlPreCommand ReCreateFreeIndex(ITable table, DiffIndex index, string oldTable, Dictionary<string, string> tableReplacements)
