@@ -60,61 +60,68 @@ namespace Signum.Windows.DiffLog
             TabItem selected = null;
             TabItem bestSelected = null; 
 
-            if (mixin.StartGraph != null)
+            if (mixin.InitialState != null)
             {
                 var prev = minMax.Min;
 
-                if (prev != null && prev.Mixin<DiffLogMixin>().EndGraph != null)
+                if (prev != null && prev.Mixin<DiffLogMixin>().FinalState != null)
                 {
                     tabs.Items.Add(new LinkTabItem
                     {
-                        Header = TextWithLinkIcon(DiffLogMessage.PreviousLog.NiceToString()),
+                        Header = TextWithLinkIcon(DiffLogMessage.PreviousLog.NiceToString())
+                        .Do(a => a.ToolTip = DiffLogMessage.NavigatesToThePreviousOperationLog.NiceToString()),
                         DataContext = prev,
                     });
 
                     tabs.Items.Add(new TabItem
                     {
-                        Header = IconPair("fast-back.png", "back.png", prev.Mixin<DiffLogMixin>().EndGraph == mixin.StartGraph),
-                        Content = Diff(prev.Mixin<DiffLogMixin>().EndGraph, mixin.StartGraph),
+                        Header = IconPair("fast-back.png", "back.png", prev.Mixin<DiffLogMixin>().FinalState == mixin.InitialState)
+                        .Do(a => a.ToolTip = DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.NiceToString()),
+                        Content = Diff(prev.Mixin<DiffLogMixin>().FinalState, mixin.InitialState),
                     });
                 }
 
                 tabs.Items.Add(selected = new TabItem
                 {
-                    Header = ReflectionTools.GetPropertyInfo(() => mixin.StartGraph).NiceName(),
-                    Content = new TextBlock(new Run(mixin.StartGraph)) { FontFamily = font },
+                    Header = new TextBlock { Text = ReflectionTools.GetPropertyInfo(() => mixin.InitialState).NiceName() }
+                        .Do(a => a.ToolTip = DiffLogMessage.StateWhenTheOperationStarted.NiceToString()),
+                    Content = new TextBlock(new Run(mixin.InitialState)) { FontFamily = font },
                 });
             }
 
-            if (mixin.StartGraph != null && mixin.EndGraph != null)
+            if (mixin.InitialState != null && mixin.FinalState != null)
             {
                 tabs.Items.Add(bestSelected = new TabItem
                 {
-                    Header = IconPair("back.png", "fore.png", mixin.StartGraph == mixin.EndGraph),
-                    Content = Diff(mixin.StartGraph, mixin.EndGraph),
+                    Header = IconPair("back.png", "fore.png", mixin.InitialState == mixin.FinalState)
+                        .Do(a => a.ToolTip = DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.NiceToString()),
+                    Content = Diff(mixin.InitialState, mixin.FinalState),
                 });
             }
 
-            if (mixin.EndGraph != null)
+            if (mixin.FinalState != null)
             {
                 tabs.Items.Add(selected = new TabItem
                 {
-                    Header = ReflectionTools.GetPropertyInfo(() => mixin.EndGraph).NiceName(),
-                    Content = new TextBlock(new Run(mixin.EndGraph)) { FontFamily = font },
+                    Header = new TextBlock { Text = ReflectionTools.GetPropertyInfo(() => mixin.FinalState).NiceName() }                    
+                        .Do(a => a.ToolTip = DiffLogMessage.StateWhenTheOperationFinished.NiceToString()),
+                    Content = new TextBlock(new Run(mixin.FinalState)) { FontFamily = font },
                 });
 
                 var next = minMax.Max;
-                if (next != null && next.Mixin<DiffLogMixin>().StartGraph != null)
+                if (next != null && next.Mixin<DiffLogMixin>().InitialState != null)
                 {
                     tabs.Items.Add(new TabItem
                     {
-                        Header = IconPair("fore.png", "fast-fore.png", mixin.EndGraph == next.Mixin<DiffLogMixin>().StartGraph),
-                        Content = Diff(mixin.EndGraph, next.Mixin<DiffLogMixin>().StartGraph),
+                        Header = IconPair("fore.png", "fast-fore.png", mixin.FinalState == next.Mixin<DiffLogMixin>().InitialState)                    
+                        .Do(a => a.ToolTip = DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.NiceToString()),
+                        Content = Diff(mixin.FinalState, next.Mixin<DiffLogMixin>().InitialState),
                     });
 
                     tabs.Items.Add(new LinkTabItem
                     {
-                        Header = TextWithLinkIcon(DiffLogMessage.NextLog.NiceToString()),
+                        Header = TextWithLinkIcon(DiffLogMessage.NextLog.NiceToString())
+                        .Do(a => a.ToolTip = DiffLogMessage.NavigatesToTheNextOperationLog.NiceToString()),
                         DataContext = next,
                     });
                 }
@@ -128,13 +135,15 @@ namespace Signum.Windows.DiffLog
 
                         tabs.Items.Add(new TabItem
                         {
-                            Header = IconPair("fore.png", "fast-fore.png", mixin.EndGraph == dump),
-                            Content = Diff(mixin.EndGraph, dump),
+                            Header = IconPair("fore.png", "fast-fore.png", mixin.FinalState == dump)
+                            .Do(a => a.ToolTip = DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.NiceToString()),
+                            Content = Diff(mixin.FinalState, dump),
                         });
 
                         tabs.Items.Add(new LinkTabItem
                         {
-                            Header = TextWithLinkIcon(DiffLogMessage.CurrentEntity.NiceToString()),
+                            Header = TextWithLinkIcon(DiffLogMessage.CurrentEntity.NiceToString())
+                            .Do(a => a.ToolTip = DiffLogMessage.NavigatesToTheCurrentEntity.NiceToString()),
                             DataContext = entity,
                         });
                     }
@@ -180,13 +189,11 @@ namespace Signum.Windows.DiffLog
                     { 
                         Child = new Image { Source =   ExtensionsImageLoader.GetImageSortName(first), Margin = margin },
                         Background = equal ? lightRed : red, 
-                        Margin = margin
                     },
                     new Border
                     { 
                         Child = new Image { Source =   ExtensionsImageLoader.GetImageSortName(second), Margin = margin }, 
                         Background = equal ? lightGreen : green, 
-                        Margin = margin
                     },
                 }
             };
