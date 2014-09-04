@@ -18,6 +18,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Dashboard
 {
@@ -164,8 +165,10 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN GetHomePageDashboard()
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
+
             var result =  Dashboards.Value.Values
-                .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
                 .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();
 
@@ -178,8 +181,10 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardDN GetEmbeddedDashboard(Type entityType)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
+
             var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(Dashboards.Value.GetOrThrow)
-                .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && d.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+                .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && isAllowed(d))
                 .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
 
             if (result == null)
@@ -191,19 +196,22 @@ namespace Signum.Engine.Dashboard
 
         public static List<Lite<DashboardDN>> GetDashboards()
         {
-            return Dashboards.Value.Where(d => d.Value.EntityType == null && d.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
+            return Dashboards.Value.Where(d => d.Value.EntityType == null && isAllowed(d.Value))
                 .Select(d => d.Key).ToList();
         }
 
         public static List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
             return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => Dashboards.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+                .Where(e => isAllowed(Dashboards.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<DashboardDN>> Autocomplete(string subString, int limit)
         {
-            return Dashboards.Value.Where(a => a.Value.EntityType == null && a.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
+            return Dashboards.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
         }
 
@@ -213,7 +221,9 @@ namespace Signum.Engine.Dashboard
             {
                 var result = Dashboards.Value.GetOrThrow(dashboard);
 
-                result.AssertAllowed(TypeAllowedBasic.Read, true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
+                if (isAllowed(result))
+                    throw new EntityNotFoundException(dashboard.EntityType, dashboard.Id);
 
                 return result;
             }

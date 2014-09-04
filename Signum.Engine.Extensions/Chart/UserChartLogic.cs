@@ -19,6 +19,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Chart
 {
@@ -109,19 +110,25 @@ namespace Signum.Engine.Chart
 
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+
             return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
-                .Where(e => UserCharts.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+                .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+
             return UserChartsByType.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => UserCharts.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+                .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<UserChartDN>> Autocomplete(string subString, int limit)
         {
-            return UserCharts.Value.Where(a => a.Value.EntityType == null && a.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+
+            return UserCharts.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
         }
 
@@ -131,7 +138,9 @@ namespace Signum.Engine.Chart
             {
                 var result = UserCharts.Value.GetOrThrow(userChart);
 
-                result.AssertAllowed(TypeAllowedBasic.Read, true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+                if (isAllowed(result))
+                    throw new EntityNotFoundException(userChart.EntityType, userChart.Id);
 
                 return result;
             }
