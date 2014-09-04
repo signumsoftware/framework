@@ -408,7 +408,7 @@ namespace Signum.Engine.Processes
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                using (ProcessLogic.ApplySession(CurrentExecution))
+                using (ProcessLogic.OnApplySession(CurrentExecution))
                 {
                     if (UserDN.Current == null)
                         UserDN.Current = AuthLogic.SystemUser;

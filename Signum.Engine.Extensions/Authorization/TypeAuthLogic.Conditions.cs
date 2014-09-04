@@ -222,28 +222,31 @@ namespace Signum.Engine.Authorization
             if (max < allowed)
                 return false;
 
-            var inMemory = IsAllowedInMemory<T>(entity, tac, allowed, inUserInterface);
-            if (inMemory.HasValue)
-                return inMemory.Value;
+            var inMemoryCodition = IsAllowedInMemory<T>(tac, allowed, inUserInterface);
+            if (inMemoryCodition != null)
+                return inMemoryCodition(entity);
          
             using (DisableQueryFilter())
                 return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
         }
 
-        private static bool? IsAllowedInMemory<T>(T entity, TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : IdentifiableEntity
+        private static Func<T, bool> IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : IdentifiableEntity
         {
-            foreach (var cond in tac.Conditions.Reverse())
+            if (tac.Conditions.Any(c => TypeConditionLogic.GetInMemoryCondition<T>(c.TypeCondition) == null))
+                return null;
+
+            return entity =>
             {
-                var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition);
+                foreach (var cond in tac.Conditions.Reverse())
+                {
+                    var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition);
 
-                if (func == null)
-                    return null;
+                    if (func(entity))
+                        return cond.Allowed.Get(inUserInterface) >= allowed;
+                }
 
-                if (func(entity))
-                    return cond.Allowed.Get(inUserInterface) >= allowed;
-            }
-
-            return tac.Fallback.Get(inUserInterface) >= allowed;
+                return tac.Fallback.Get(inUserInterface) >= allowed;
+            }; 
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -341,7 +344,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static Expression<Func<T, bool>> TypeAuthLogic_FilterQuery<T>() 
+        static FilterQueryResult<T> TypeAuthLogic_FilterQuery<T>() 
           where T : IdentifiableEntity
         {
             if (queryFilterDisabled.Value)
@@ -364,7 +367,9 @@ namespace Signum.Engine.Authorization
                     return null;
             }
 
-            return Expression.Lambda<Func<T, bool>>(body, e);
+            Func<T, bool> func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), TypeAllowedBasic.Read, ui);
+
+            return new FilterQueryResult<T>(Expression.Lambda<Func<T, bool>>(body, e), func);
         }
 
 

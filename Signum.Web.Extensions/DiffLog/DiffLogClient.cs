@@ -44,7 +44,7 @@ namespace Signum.Web.DiffLog
         public override void WriteHeader(TextWriter writer, Tab first, TypeContext context)
         {
             using (TabContainer.Surround(writer, new HtmlTag("li").Class("linkTab")))
-            using (TabContainer.Surround(writer, new HtmlTag("a").Attr("href", Url)))
+            using (TabContainer.Surround(writer, new HtmlTag("a").Attr("href", Url).Attr("title", this.ToolTip)))
                 this.Title.WriteTo(writer);
         }
     }

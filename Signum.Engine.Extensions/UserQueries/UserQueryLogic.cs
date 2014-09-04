@@ -17,6 +17,7 @@ using Signum.Utilities;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.UserQueries
 {
@@ -66,17 +67,17 @@ namespace Signum.Engine.UserQueries
                     Delete = (uq, _) => uq.Delete()
                 }.Register();
 
-                UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryDN>().ToDictionary(a => a.ToLite()), 
+                UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryDN>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryDN)));
 
                 UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryDN)));
-      
+
                 UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryDN)));
             }
         }
-   
+
         public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
             if (!userQuery.IsNew || userQuery.queryName == null)
@@ -102,19 +103,25 @@ namespace Signum.Engine.UserQueries
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryDN>(userInterface: true);
+
             return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
-                .Where(e => UserQueries.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+                .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType)
         {
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryDN>(userInterface: true);
+
             return UserQueriesByType.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => UserQueries.Value.GetOrThrow(e).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true)).ToList();
+                .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
         }
 
         public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
         {
-            return UserQueries.Value.Where(a => a.Value.EntityType == null && a.Value.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true))
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryDN>(userInterface: true);
+
+            return UserQueries.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
         }
 
@@ -124,7 +131,9 @@ namespace Signum.Engine.UserQueries
             {
                 var result = UserQueries.Value.GetOrThrow(userQuery);
 
-                result.AssertAllowed(TypeAllowedBasic.Read, true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryDN>(userInterface: true);
+                if (isAllowed(result))
+                    throw new EntityNotFoundException(userQuery.EntityType, userQuery.Id);
 
                 return result;
             }
