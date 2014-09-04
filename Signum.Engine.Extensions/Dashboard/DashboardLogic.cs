@@ -226,7 +226,7 @@ namespace Signum.Engine.Dashboard
             TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => uq.Owner.RefersTo(UserDN.Current));
 
-            RegisterParts(typeCondition);
+            RegisterPartsTypeCondition(typeCondition);
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -236,10 +236,10 @@ namespace Signum.Engine.Dashboard
             TypeConditionLogic.RegisterCompile<DashboardDN>(typeCondition,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-            RegisterParts(typeCondition);
+            RegisterPartsTypeCondition(typeCondition);
         }
 
-        private static void RegisterParts(TypeConditionSymbol typeCondition)
+        public static void RegisterPartsTypeCondition(TypeConditionSymbol typeCondition)
         {
             TypeConditionLogic.Register<CountSearchControlPartDN>(typeCondition,
                  cscp => Database.Query<DashboardDN>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
