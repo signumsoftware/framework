@@ -30,7 +30,7 @@ namespace Signum.Web.Isolation
                 Navigator.AddSetting(new EntitySettings<IsolationDN>());
 
                 Constructor.ClientManager.GlobalPreConstructors += ctx =>
-                    !MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) ? null :
+                    (!MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) || IsolationDN.Current != null) ? null :
                     Module["getIsolation"](ClientConstructorManager.ExtraJsonParams, ctx.Prefix,
                     IsolationMessage.SelectAnIsolation.NiceToString(),
                     GetIsolationChooserOptions(ctx.Type));
