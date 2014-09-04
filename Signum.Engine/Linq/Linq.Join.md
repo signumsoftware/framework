@@ -31,7 +31,7 @@ public static IQueryable<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(
 
 As you see, there's no explicit way to do `OUTER JOIN` with [Join operator](http://www.hookedonlinq.com/JoinOperator.ashx). 
 
-However, `GroupJoin` returns all the elements on outer collection, even if the group of the elements of the same key in inner is empty. By combining `GroupJoin` + `SelectMany` + `DefaultIfEmpty` you can archive `LEFT OUTER JOIN` behaviour.
+However, `GroupJoin` returns all the elements on outer collection, even if the group of the elements of the same key in inner is empty. By combining `GroupJoin` + `SelectMany` + `DefaultIfEmpty` you can achieve `LEFT OUTER JOIN` behaviour.
 
 ```C#
 using(BugContext db = new BugContext())

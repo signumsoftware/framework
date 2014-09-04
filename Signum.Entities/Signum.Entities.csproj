@@ -207,6 +207,7 @@
     <None Include="Mixin.md" />
     <None Include="MList.md" />
     <None Include="PropertyAttributes.md" />
+    <None Include="PropertyRoute.md" />
     <None Include="Services\Services.md" />
     <None Include="Symbol.md" />
     <None Include="Validation.md" />

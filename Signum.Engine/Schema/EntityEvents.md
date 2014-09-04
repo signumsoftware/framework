@@ -110,13 +110,13 @@ public class FilterQueryResult<T> : IFilterQueryResult where T : IdentifiableEnt
 }
 ```
 
-Use `FilterQuery` to filter all the queries implicitly on every `Database.Query<T>`, the way Authorization module and Isolation module do. 
+Use `FilterQuery` to filter all the queries implicitly, the was Authorization module and Isolation module do it. 
 
 `FilterQuery` takes effects in all queries of the LINQ provider, including simple `Database.Retrieve`, `UnsafeDelete`, `UnsafeUpdate`, `UnsafeInsert`, etc..
 
 When executing `Database.MListQuery<E, V>()`, will be automatically filtered based in the `FilterQuery` event of the `Parent` property (generic argument `E`).
 
-Finally, the `InMemoryFunction` is an alternative definition of `InDatabaseExpresson` expression that can be evaluated in-memory after retrieving the entity. This is useful to improve performance on cache scenarios like transparent cache (using `Database.Retrieve`/`RetrieveAll`/`RetrieveList` with cache module) or filtering shared data structures like `ResetLazy<T>`.   
+`InMemoryFunction` is an in.memory     
 
 ## PreUnsafeDelete
 
