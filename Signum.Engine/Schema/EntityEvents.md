@@ -101,14 +101,22 @@ Consider using `ModifiableEntity.PostRetrieving` instead if you have control of 
 `FilterQuery` is processed at the early stages of the LINQ provider pipeline to allow you add filters to `Database.Query<T>()` and `Database.MListQuery<E, V>()` expressions. 
 
 ```C#
-public delegate Expression<Func<T, bool>> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
+public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
+
+public class FilterQueryResult<T> : IFilterQueryResult where T : IdentifiableEntity
+{
+    public readonly Expression<Func<T, bool>> InDatabaseExpresson;
+    public readonly Func<T, bool> InMemoryFunction; //Optional
+}
 ```
 
 Use `FilterQuery` to filter all the queries implicitly, the was Authorization module and Isolation module do it. 
 
 `FilterQuery` takes effects in all queries of the LINQ provider, including simple `Database.Retrieve`, `UnsafeDelete`, `UnsafeUpdate`, `UnsafeInsert`, etc..
 
-When executing `Database.MListQuery<E, V>()`, will be automatically filtered based in the `FilterQuery` event of the `Parent` property (generic argument `E`).   
+When executing `Database.MListQuery<E, V>()`, will be automatically filtered based in the `FilterQuery` event of the `Parent` property (generic argument `E`).
+
+`InMemoryFunction` is an in.memory     
 
 ## PreUnsafeDelete
 
@@ -125,15 +133,15 @@ Schema.Current.EntityEvents<ProjectDN>().PreUnsafeDelete += query =>
 	query.SelectMany(proj => Database.Query<BugDN>().Where(b=>b.Project.RefersTo(proj)))
     .UnsafeDelete();
 ```
-## PreUnsafeDeleteMlistHandler
+## PreUnsafeMListDelete
 
-`PreUnsafeDeleteMlist` is invoked whenever `UnsafeDeleteMList` is invoked for a MListTable that belongs to the entity `T`. 
+`PreUnsafeMListDelete` is invoked whenever `UnsafeDeleteMList` is invoked for a MListTable that belongs to the entity `T`. 
 
 ```C#
-public delegate void PreUnsafeDeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
+public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
 ```
 
-## PreUnsafeUpdateHandler
+## PreUnsafeUpdate
 
 `PreUnsafeUpdate` is invoked whenever `UnsafeUpdate` is invoked in the table `T` or one of his MListTables that belongs to the entity `T`. 
 
@@ -142,9 +150,9 @@ public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T>
 ```
 
 
-## PreUnsafeInsertHandler
+## PreUnsafeInsert
 
-`PreUnsafeUpdateHandler` is invoked whenever `UnsafeInsert` is invoked in the table `T` or one of his MListTables that belongs to the entity `T`. 
+`PreUnsafeInsert` is invoked whenever `UnsafeInsert` is invoked in the table `T` or one of his MListTables that belongs to the entity `T`. 
 
 ```C#
 public delegate void PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);

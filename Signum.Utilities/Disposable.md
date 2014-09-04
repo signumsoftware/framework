@@ -1,6 +1,6 @@
 # Disposable
 
-This simple class implements `IDispoable` by executing an action taken as a parameter.
+This simple class implements `IDisposable` by executing an action taken as a parameter.
 
 ```C#
 public class Disposable: IDisposable
@@ -47,4 +47,39 @@ using (Time("Siesta"))
 //Starting Siesta
 //zzZzZZ
 //Siesta took 00:00:01.0010197
+```
+
+## Disposable.Combine
+
+Combines two disposables into one that executes the first one and the seccond one if both are non-null. 
+
+```C#
+public static IDisposable Combine(IDisposable first, IDisposable second)
+{
+    if (first == null || second == null)
+        return first ?? second;
+
+    return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
+}
+```
+
+A more complicated variation allows the typical use case: Combine events that return `IDisposable`.
+
+```C#
+ public static IDisposable Combine<Del>(Del delegated, Func<Del, IDisposable> invoke)
+```
+
+Example:
+
+
+```C#
+public static event Func<Pop3ConfigurationDN, IDisposable> SurroundReceiveEmail;
+
+public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
+{
+    using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
+	{
+	    //...
+	}
+}
 ```

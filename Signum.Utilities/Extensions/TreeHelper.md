@@ -38,7 +38,7 @@ Example:
 //    Node 7
 ```
 
-**Note:** If you're curious, below is the function we used to write the text, it uses [anonymous recursion](http://blogs.msdn.com/wesdyer/archive/2007/02/02/anonymous-recursion-in-c.aspx), and many `StringExtensions` like `Formato`, `Add`, `ToString` and `Ident`:
+> **Note:** If you're curious, below is the function we used to write the text, it uses [anonymous recursion](http://blogs.msdn.com/wesdyer/archive/2007/02/02/anonymous-recursion-in-c.aspx), and many `StringExtensions` like `Formato`, `Add`, `ToString` and `Ident`:
 
 ```c#
 ¬Func<¬Node<int>, string> toStr = null;

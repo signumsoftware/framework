@@ -22,10 +22,12 @@ namespace Signum.Entities
     public sealed class UniqueIndexAttribute : Attribute
     {
         public bool AllowMultipleNulls { get; set; }
+
+        public bool AvoidAttachToUniqueIndexes { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class AttachToAllUniqueIndexesAttribute : Attribute
+    public sealed class AttachToUniqueIndexesAttribute : Attribute
     {
     }
 

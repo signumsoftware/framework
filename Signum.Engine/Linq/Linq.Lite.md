@@ -61,7 +61,7 @@ LEFT OUTER JOIN ProjectDN AS pdn
   ON (bdn.idProject = pdn.Id)
 ```
 
-**Note:** `ToLite` method is defined in `Lite` static class, in `Signum.Entities`. 
+> **Note:** `ToLite` method is defined in `Lite` static class, in `Signum.Entities`. 
 
 Of course, this also works with `ImplementedBy` and `ImplementedByAll` references.
 

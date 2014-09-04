@@ -125,7 +125,7 @@ public static int CommentCount(this BugDN entity)
 }
 ```
 
-**Note:** Avoid using `InDB(selector)` to return collections. The current implementation has problem with the type-system and and the query translation. 
+> **Note:** Avoid using `InDB(selector)` to return collections. The current implementation has problem with the type-system and and the query translation. 
 
 ## `MListQuery(mListProperty)` (Advanced)
 

@@ -445,7 +445,6 @@ namespace Signum.Test.Environment
         string Secret { get; set; } 
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
     public enum AlbumState
     {
         [Ignore]

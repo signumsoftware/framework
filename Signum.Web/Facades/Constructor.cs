@@ -226,16 +226,8 @@ namespace Signum.Web
 
         public virtual ModifiableEntity SurroundConstruct(ConstructorContext ctx, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            IDisposable disposable = null;
-            try
+            using (Disposable.Combine(PreConstructors, f => f(ctx)))
             {
-
-                if (PreConstructors != null)
-                    foreach (Func<ConstructorContext, IDisposable> pre in PreConstructors.GetInvocationList())
-                    {
-                        disposable = Disposable.Combine(disposable, pre(ctx));
-                    }
-
                 var entity = constructor(ctx);
 
                 if (entity == null)
@@ -248,11 +240,6 @@ namespace Signum.Web
                     }
 
                 return entity;
-            }
-            finally
-            {
-                if (disposable != null)
-                    disposable.Dispose();
             }
         }
     }

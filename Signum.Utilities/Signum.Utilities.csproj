@@ -210,6 +210,8 @@
     <None Include="ExpressionTrees\QueryProvider.md" />
     <None Include="Extensions\ArgsExtensions.md" />
     <None Include="Extensions\ColorExtensions.md" />
+    <None Include="Extensions\index.mdi" />
+    <None Include="Extensions\Introduction.md" />
     <None Include="Extensions\PageExtensions.md" />
     <None Include="Extensions\ProgressEnumerator.md" />
     <None Include="Extensions\ReflectionExtensions.md" />
@@ -234,7 +236,6 @@
     <Content Include="Translations\Signum.Utilities.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Extensions\0.ExtensionMethods.md" />
     <None Include="Extensions\Extensions.md" />
     <None Include="Csv.md" />
     <None Include="Extensions\EnumerableExtensions.md" />

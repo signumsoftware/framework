@@ -40,37 +40,38 @@ namespace Signum.Engine
 
         public static SqlPreCommand SynchronizeSystemDefaultConstraints(Replacements replacements)
         {
-            var allConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
+            var allConstraints = Schema.Current.DatabaseNames().Select(db =>
             {
                 using (Administrator.OverrideDatabaseInViews(db))
                 {
-                    return (from t in Database.View<SysTables>()
-                            join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                            join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                            join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
-                            where ctr.is_system_named
-                            select new
-                            {
-                                table = new ObjectName(new SchemaName(db, s.name), t.name),
-                                column = c.name,
-                                constraint = ctr.name,
-                                definition = ctr.definition,
-                            }).ToList();
+                    var constaints = (from t in Database.View<SysTables>()
+                                      join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                                      join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                                      join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
+                                      where ctr.is_system_named
+                                      select new
+                                      {
+                                          table = new ObjectName(new SchemaName(db, s.name), t.name),
+                                          column = c.name,
+                                          constraint = ctr.name,
+                                          definition = ctr.definition,
+                                      }).ToList();
+
+                    if (!constaints.Any())
+                        return null;
+
+                    return new SqlPreCommandSimple(
+                        constaints.ToString(a => "-- because default constraint " + a.constraint + " in " + a.table.ToString() + "." + a.column, "\r\n") + @"
+                        declare @sql nvarchar(max)
+                        set @sql = ''
+                        select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
+                        from {0}sys.default_constraints dc
+                        join {0}sys.tables t on dc.parent_object_id = t.object_id
+                        exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + ".")));
                 }
             }).ToList();
 
-
-            if (!allConstraints.Any())
-                return null;
-
-            return new SqlPreCommandSimple(
-allConstraints.ToString(a => "-- because default constraint " + a.constraint + " in " + a.table.ToString() + "." + a.column, "\r\n") + @"
-declare @sql nvarchar(max)
-set @sql = ''
-select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
-from sys.default_constraints dc
-join sys.tables t on dc.parent_object_id = t.object_id
-exec sp_executesql @sql");
+            return allConstraints.Combine(Spacing.Simple);
         } 
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
