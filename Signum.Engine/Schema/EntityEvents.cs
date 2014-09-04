@@ -21,51 +21,32 @@ namespace Signum.Engine.Maps
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
-        public event DeleteHandler<T> PreUnsafeDelete;
-        public event DeleteMlistHandler<T> PreUnsafeMListDelete;
+        public event PreUnsafeDeleteHandler<T> PreUnsafeDelete;
+        public event PreUnsafeMListDeleteHandler<T> PreUnsafeMListDelete;
 
-        public event UpdateHandler<T> PreUnsafeUpdate;
+        public event PreUnsafeUpdateHandler<T> PreUnsafeUpdate;
 
-        public event InsertHandler<T> PreUnsafeInsert;
+        public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
 
-        internal Expression<Func<T, bool>> OnFilterQuery()
+        internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
-            Expression<Func<T, bool>> result = null;
+            if (FilterQuery == null)
+                return Enumerable.Empty<FilterQueryResult<T>>();
 
-            if (FilterQuery != null)
-                foreach (FilterQueryEventHandler<T> filter in FilterQuery.GetInvocationList())
-                    result = Combine(result, filter());
-
-            return result;
-        }
-
-        private Expression<Func<T, bool>> Combine(Expression<Func<T, bool>> result, Expression<Func<T, bool>> expression)
-        {
-            if (result == null)
-                return expression;
-
-            if (expression == null)
-                return result;
-
-            return a => result.Evaluate(a) && expression.Evaluate(a);
-        }
-
-        public bool HasQueryFilter
-        {
-            get { return FilterQuery != null; }
+            return FilterQuery.GetInvocationList().Cast<FilterQueryEventHandler<T>>().Select(f => f()).ToList();
         }
 
         internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
             if (PreUnsafeDelete != null)
-                foreach (DeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
+                foreach (PreUnsafeDeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
                     action(entityQuery);
         }
 
         internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
         {
             if (PreUnsafeMListDelete != null)
-                foreach (DeleteMlistHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
+                foreach (PreUnsafeMListDeleteHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
                     action(mlistQuery, entityQuery);
         }
 
@@ -74,7 +55,7 @@ namespace Signum.Engine.Maps
             if (PreUnsafeUpdate != null)
             {
                 var query = update.EntityQuery<T>();
-                foreach (UpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
+                foreach (PreUnsafeUpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
                     action(update, query);
             }
         }
@@ -82,7 +63,7 @@ namespace Signum.Engine.Maps
         void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             if (PreUnsafeInsert != null)
-                foreach (InsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
+                foreach (PreUnsafeInsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
                     action(query, constructor, (IQueryable<T>)entityQuery);
 
         }
@@ -123,18 +104,37 @@ namespace Signum.Engine.Maps
     public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate Expression<Func<T, bool>> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
+    public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
 
-    public delegate void DeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate void DeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
-    public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
+    public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
+    public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
+    public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
+    public delegate void PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
 
     public class SavedEventArgs
     {
         public bool IsRoot { get; set; }
         public bool WasNew { get; set; }
         public bool WasSelfModified { get; set; }
+    }
+
+    public interface IFilterQueryResult
+    {
+        LambdaExpression InDatabaseExpression{get;}
+    }
+
+    public class FilterQueryResult<T> : IFilterQueryResult where T : IdentifiableEntity
+    {
+        public FilterQueryResult(Expression<Func<T, bool>> inDatabaseExpression, Func<T, bool> inMemoryFunction)
+        {
+            this.InDatabaseExpresson = inDatabaseExpression;
+            this.InMemoryFunction = inMemoryFunction;
+        }
+
+        public readonly Expression<Func<T, bool>> InDatabaseExpresson;
+        public readonly Func<T, bool> InMemoryFunction;
+
+        LambdaExpression IFilterQueryResult.InDatabaseExpression { get { return this.InDatabaseExpresson; } }
     }
 
     internal interface IEntityEvents
@@ -149,7 +149,5 @@ namespace Signum.Engine.Maps
         void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
 
         ICacheController CacheController { get; }
-
-        bool HasQueryFilter { get; }
     }
 }

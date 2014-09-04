@@ -219,7 +219,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal Expression<Func<T, bool>> OnFilterQuery<T>()
+        internal FilterQueryResult<T> OnFilterQuery<T>()
             where T : IdentifiableEntity
         {
             AssertAllowed(typeof(T));
@@ -228,16 +228,95 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnFilterQuery();
+            FilterQueryResult<T> result = null;
+            foreach (var item in ee.OnFilterQuery())
+                result = CombineFilterResult(result, item);
+
+            return result;
         }
 
-        internal bool HasQueryFilter(Type type)
+        FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression) 
+            where T: IdentifiableEntity
         {
-            IEntityEvents ee = entityEvents.TryGetC(type);
-            if (ee == null)
-                return false;
+            if (result == null)
+                return expression;
 
-            return ee.HasQueryFilter;
+            if (expression == null)
+                return result;
+
+            if (result.InMemoryFunction == null || expression.InMemoryFunction == null)
+                return new FilterQueryResult<T>(a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a), null);
+
+            return new FilterQueryResult<T>(
+                a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a),
+                a => result.InMemoryFunction(a) && expression.InMemoryFunction(a));
+        }
+
+        public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
+            where T: IdentifiableEntity
+        {
+            using (userInterface ? ExecutionMode.UserInterface() : null)
+            {
+                EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+                if (ee == null)
+                    return a => true;
+
+                Func<T, bool> result = null;
+                foreach (var item in ee.OnFilterQuery().NotNull())
+                {
+                    if(item.InMemoryFunction == null)
+                        throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
+                        .Formato(item.InDatabaseExpresson.NiceToString()));
+
+                    result = CombineFunc(result, item.InMemoryFunction);
+                }
+
+                if (result == null)
+                    return a => true;
+
+                return result;
+            }
+        }
+
+        private Func<T, bool> CombineFunc<T>(Func<T, bool> result, Func<T, bool> func) where T : IdentifiableEntity
+        {
+            if (result == null)
+                return func;
+
+            if (func == null)
+                return result;
+
+            return a => result(a) && func(a);
+        }
+
+        public Expression<Func<T, bool>> GetInDatabaseFilter<T>()
+           where T : IdentifiableEntity
+        {
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            if (ee == null)
+                return null;
+
+            Expression<Func<T, bool>> result = null;
+            foreach (var item in ee.OnFilterQuery().NotNull())
+            {
+                result = CombineExpr(result, item.InDatabaseExpresson);
+            }
+
+            if (result == null)
+                return null;
+
+            return result;
+        }
+
+        private Expression<Func<T, bool>> CombineExpr<T>(Expression<Func<T, bool>> result, Expression<Func<T, bool>> func) where T : IdentifiableEntity
+        {
+            if (result == null)
+                return func;
+
+            if (func == null)
+                return result;
+
+            return a => result.Evaluate(a) && func.Evaluate(a);
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
