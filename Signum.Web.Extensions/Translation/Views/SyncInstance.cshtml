@@ -67,7 +67,7 @@ else
 
                     @if (mc.Value.OldOriginal != null)
                     {
-                        <span>@TranslationClient.Diff(mc.Value.OldOriginal, mc.Value.Original)</span>
+                        <pre>@TranslationClient.Diff(mc.Value.OldOriginal, mc.Value.Original)</pre>
                     }
                     else if(TranslatedInstanceLogic.RouteType(route.Key.Route).Value == TraducibleRouteType.Html)
                     {
@@ -75,7 +75,7 @@ else
                     }
                     else
                     {
-                        <span>@mc.Value.Original</span>   
+                        <pre>@mc.Value.Original</pre>   
                     }
                 </td>
             </tr>
