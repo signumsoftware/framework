@@ -1,4 +1,4 @@
-# Database.Query Element Operators
+# LINQ Element Operators
 
 Element operators is the name that Microsoft gives to this group of LINQ methods: `First`, `FirstOrDefault`, `Single` and `SingleOrDefault`. 
 

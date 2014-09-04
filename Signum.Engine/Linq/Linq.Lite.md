@@ -1,4 +1,4 @@
-# Database.Query `Lite<T>` support
+# LINQ `Lite<T>` support
 
 `Lite<T>` is fully supported in queries. If you don't know what a `Lite<T>` is, take a look [here](../Signum.Entities/Lite.md). 
 
@@ -61,7 +61,7 @@ LEFT OUTER JOIN ProjectDN AS pdn
   ON (bdn.idProject = pdn.Id)
 ```
 
-**Note:** `ToLite` method is defined in `Lite` static class, in `Signum.Entities`. 
+> **Note:** `ToLite` method is defined in `Lite` static class, in `Signum.Entities`. 
 
 Of course, this also works with `ImplementedBy` and `ImplementedByAll` references.
 

@@ -35,7 +35,7 @@ public class UserDN : Entity
 }
 ```
 
-***Note:*** *In case you don't know why the field is named `passwordHash` instead of password click [here](http://blog.codinghorror.com/youre-probably-storing-passwords-incorrectly/)*.
+>**Note:** *In case you don't know why the field is named `passwordHash` instead of password click [here](http://blog.codinghorror.com/youre-probably-storing-passwords-incorrectly/).
 
 
 And you need to be able to change user's password, it would be implemented like this: 

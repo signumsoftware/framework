@@ -11,6 +11,9 @@ using System.Web.Security;
 using Signum.Utilities;
 using System.Web.Routing;
 using Signum.Engine.Exceptions;
+using Signum.Engine.Basics;
+using Signum.Entities.Basics;
+using Signum.Entities;
 
 namespace Signum.Web
 {
@@ -19,7 +22,26 @@ namespace Signum.Web
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     public class SignumExceptionHandlerAttribute : HandleErrorAttribute
     {
-        public static Action<HandleErrorInfo> LogException;
+        public static Action<HandleErrorInfo> LogException = hei =>
+        {
+            hei.Exception.LogException(exLog =>
+            {
+                var ses = HttpContext.Current.Session;
+                var req = HttpContext.Current.Request;
+                
+                exLog.ControllerName = hei.ControllerName;
+                exLog.ActionName = hei.ActionName;
+                exLog.UserAgent = req.UserAgent;
+                exLog.RequestUrl = req.Url.TryToString();
+                exLog.UrlReferer = req.UrlReferrer.TryToString();
+                exLog.UserHostAddress = req.UserHostAddress;
+                exLog.UserHostName = req.UserHostName;
+                exLog.QueryString = ExceptionDN.Dump(req.QueryString);
+                exLog.Form = ExceptionDN.Dump(req.Form);
+                exLog.Session = ses == null ? "[No Session]" : ses.Cast<string>().ToString(key => key + ": " + ses[key].Dump(), "\r\n");
+            });
+        };
+ 
         public static Func<Exception, Exception> CleanException = e => e;
 
         public static Func<HttpContextBase, HandleErrorInfo, ActionResult> GetResult = (HttpContextBase context, HandleErrorInfo model) =>

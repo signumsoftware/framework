@@ -82,7 +82,7 @@ new[]{ 2, 3 }.Add(4).PreAnd(1).ForeEach(a => Console.Write(a));
 //Result: 1234
 ```
 
-**Note:** Use it with care! It has good performance if you're planning to
+> **Note:** Use it with care! It has good performance if you're planning to
 add just _ONE_ element, for more than one it's really expensive
 because the [cost is quadratic with recursive iterators](http://blogs.msdn.com/grantri/archive/2004/03/24/95787.aspx).
 

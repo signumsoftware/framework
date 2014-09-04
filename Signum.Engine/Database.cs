@@ -100,22 +100,32 @@ namespace Signum.Engine
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
             {
-                var cc = CanUseCache<T>();
-                if (cc != null)
-                {
-                    using (new EntityCache())
-                    using (var r = EntityCache.NewRetriever())
-                    {
-                        return r.Request<T>(id);
-                    }
-                }
-
                 if (EntityCache.Created)
                 {
                     T cached = EntityCache.Get<T>(id);
 
                     if (cached != null)
                         return cached;
+                }
+
+                var cc = GetCacheController<T>();
+                if (cc != null)
+                {
+                    var filter = GetFilterQuery<T>();
+                    if (filter == null || filter.InMemoryFunction != null)
+                    {
+                        T result;
+                        using (new EntityCache())
+                        using (var r = EntityCache.NewRetriever())
+                        {
+                            result = r.Request<T>(id);
+                        }
+
+                        if (filter != null && !filter.InMemoryFunction(result))
+                            throw new EntityNotFoundException(typeof(T), id);
+
+                        return result;
+                    }
                 }
 
                 var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
@@ -127,19 +137,24 @@ namespace Signum.Engine
             }
         }
 
-        static CacheControllerBase<T> CanUseCache<T>() where T : IdentifiableEntity
+        static CacheControllerBase<T> GetCacheController<T>() where T : IdentifiableEntity
         {
             CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
 
             if (cc == null || !cc.Enabled)
                 return null;
 
-            if (!EntityCache.HasRetriever && Schema.Current.HasQueryFilter(typeof(T)))
-                return null;
-
             cc.Load();
 
             return cc;
+        }
+
+        static FilterQueryResult<T> GetFilterQuery<T>() where T : IdentifiableEntity
+        {
+            if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA? 
+                return null;
+
+            return Schema.Current.OnFilterQuery<T>();
         }
 
         public static IdentifiableEntity Retrieve(Type type, int id)
@@ -163,9 +178,11 @@ namespace Signum.Engine
             {
                 try
                 {
-                    var cc = CanUseCache<T>();
-                    if (cc != null)
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
+                    {
                         return new LiteImp<T>(id, cc.GetToString(id));
+                    }
 
                     var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
                     if (result == null)
@@ -206,8 +223,8 @@ namespace Signum.Engine
             {
                 using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".Formato(typeof(T).TypeName())))
                 {
-                    var cc = CanUseCache<T>();
-                    if (cc != null)
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
                         return cc.GetToString(id);
 
                     return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
@@ -270,13 +287,23 @@ namespace Signum.Engine
             {
                 using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".Formato(typeof(T).TypeName())))
                 {
-                    var cc = CanUseCache<T>();
+                    var cc = GetCacheController<T>();
                     if (cc != null)
                     {
-                        using (new EntityCache())
-                        using (var r = EntityCache.NewRetriever())
+                        var filter = GetFilterQuery<T>();
+                        if (filter == null || filter.InMemoryFunction != null)
                         {
-                            return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                            List<T> result;
+                            using (new EntityCache())
+                            using (var r = EntityCache.NewRetriever())
+                            {
+                                result =  cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                            }
+
+                            if (filter != null)
+                                result = result.Where(filter.InMemoryFunction).ToList();
+
+                            return result;
                         }
                     }
 
@@ -308,10 +335,9 @@ namespace Signum.Engine
             {
                 using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".Formato(typeof(T).TypeName())))
                 {
-                    var cc = CanUseCache<T>();
-                    if (cc != null)
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
                     {
-
                         return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
                     }
 
@@ -344,18 +370,7 @@ namespace Signum.Engine
                 if (ids == null)
                     throw new ArgumentNullException("ids");
 
-                var cc = CanUseCache<T>();
-                if (cc != null)
-                {
-                    using (new EntityCache())
-                    using (var rr = EntityCache.NewRetriever())
-                    {
-                        return ids.Select(id => rr.Request<T>(id)).ToList();
-                    }
-                }
-
                 Dictionary<int, T> result = null;
-
                 if (EntityCache.Created)
                 {
                     result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
@@ -365,7 +380,7 @@ namespace Signum.Engine
 
                 if (ids.Count > 0)
                 {
-                    var retrieved = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToDictionary(a => a.Id);
+                    var retrieved = RetrieveFromDatabaseOrCache<T>(ids).ToDictionary(a => a.Id);
 
                     var missing = ids.Except(retrieved.Keys);
 
@@ -387,6 +402,32 @@ namespace Signum.Engine
             }
         }
 
+        private static List<T> RetrieveFromDatabaseOrCache<T>(List<int> ids) where T : IdentifiableEntity
+        {
+            var cc = GetCacheController<T>();
+            if (cc != null)
+            {
+                var filter = GetFilterQuery<T>();
+                if (filter == null || filter.InMemoryFunction != null)
+                {
+                    List<T> result;
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        result = ids.Select(id => rr.Request<T>(id)).ToList();
+                    }
+
+                    if (filter != null)
+                        result = result.Where(filter.InMemoryFunction).ToList();
+
+                    return result;
+                }
+            }
+
+            return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToList();
+        }
+
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
         {
             if (type == null)
@@ -406,8 +447,8 @@ namespace Signum.Engine
                 if (ids == null)
                     throw new ArgumentNullException("ids");
 
-                var cc = CanUseCache<T>();
-                if (cc != null)
+                var cc = GetCacheController<T>();
+                if (cc != null && GetFilterQuery<T>() == null)
                 {
                     return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
                 }

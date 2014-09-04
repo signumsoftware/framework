@@ -1,4 +1,4 @@
-## Database.Query `Join` differences
+## LINQ `Join` differences
 
 We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hard thing is to know where you are).
 
@@ -31,7 +31,7 @@ public static IQueryable<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(
 
 As you see, there's no explicit way to do `OUTER JOIN` with [Join operator](http://www.hookedonlinq.com/JoinOperator.ashx). 
 
-However, `GroupJoin` returns all the elements on outer collection, even if the group of the elements of the same key in inner is empty. By combining `GroupJoin` + `SelectMany` + `DefaultIfEmpty` you can archive `LEFT OUTER JOIN` behaviour.
+However, `GroupJoin` returns all the elements on outer collection, even if the group of the elements of the same key in inner is empty. By combining `GroupJoin` + `SelectMany` + `DefaultIfEmpty` you can achieve `LEFT OUTER JOIN` behaviour.
 
 ```C#
 using(BugContext db = new BugContext())

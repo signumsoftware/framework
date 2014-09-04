@@ -1,4 +1,4 @@
-## Database.Query (Entity support)
+## LINQ (Entity support)
 
 You can mix values, entities, and `Lite<T>` in your results when calling Linq Queries. 
 
@@ -147,7 +147,7 @@ FROM BugDN AS bdn
 WHERE (bdn.idFixer = 2)
 ```
 
-**Note:** For the sake of simplicity I'm removing `SqlParameters` in the SQL examples, but don't worry, you are 100% safe from SQL injection attacks while using Linq to Signum
+> **Note:** For the sake of simplicity I'm removing `SqlParameters` in the SQL examples, but don't worry, you are 100% safe from SQL injection attacks while using Linq to Signum
 
 ### Polymorphic Entity Equality
 

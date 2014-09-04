@@ -188,13 +188,9 @@ namespace Signum.Engine.Maps
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
         }
 
-        internal IndexType GetIndexType(PropertyRoute propertyRoute)
+        internal UniqueIndexAttribute GetUniqueIndexAttribute(PropertyRoute propertyRoute)
         {
-            UniqueIndexAttribute at = FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
-
-            return at == null ? IndexType.None :
-                at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
-                IndexType.Unique;
+            return FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
         }
 
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity

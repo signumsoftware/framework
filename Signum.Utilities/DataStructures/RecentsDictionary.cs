@@ -211,6 +211,13 @@ namespace Signum.Utilities.DataStructures
         {
             return this.GetEnumerator(); 
         }
+
+        public void Clean()
+        {
+            this.orderList.Clear();
+            this.linkToKey.Clear();
+            this.keyToLink.Clear();
+        }
     }
 
     //public class Program

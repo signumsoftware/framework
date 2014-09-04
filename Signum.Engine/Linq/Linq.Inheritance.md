@@ -1,4 +1,4 @@
-# Database.Query Inheritance
+# LINQ Inheritance
 
 ## Inheritance support
 Signum Framework uses polymorphic foreign key to implement [inheritance](../Signum.Entities/Inheritance.md), and LINQ to Signum supports all the expected operations naturally: 

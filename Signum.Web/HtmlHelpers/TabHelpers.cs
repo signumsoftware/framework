@@ -101,6 +101,7 @@ namespace Signum.Web
         public HelperResult Title;
         public HelperResult Body;
         public bool Active;
+        public string ToolTip;
 
         public Tab(string id, string title, MvcHtmlString body)
             : this(id, new HelperResult(writer => writer.Write(HttpUtility.HtmlEncode(title))), new HelperResult(writer => writer.Write(body)))
@@ -143,7 +144,7 @@ namespace Signum.Web
         public virtual void WriteHeader(TextWriter writer, Tab first, TypeContext context)
         {
             using (TabContainer.Surround(writer, new HtmlTag("li").Class(this == first ? "active" : null)))
-            using (TabContainer.Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(this.Id)).Attr("data-toggle", "tab")))
+            using (TabContainer.Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(this.Id)).Attr("data-toggle", "tab").Attr("title", this.ToolTip)))
                 this.Title.WriteTo(writer);
         }
 

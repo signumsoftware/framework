@@ -86,12 +86,12 @@ public interface IProcessDataDN : IIdentifiable
 }
 ```
 
-By using an interface inheriting from `IIdentifiable`, instead of a class inheriting from `IdentifiableEntity`, implementors are free to inherit from the class they want. 
+By using an interface inheriting from `IIdentifiable`, instead of a class inheriting from `IdentifiableEntity`, implementers are free to inherit from the class they want. 
 
 ## Entity
 Finally, the Entity class is a strong `IdentifiableEntity` with concurrency control support. This entity is meant to be the base class for most of your entities (i.e. Employee, Customer, Company...)
 
-We archive concurrency control by having a `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the `Transaction` started, so it is the same value for all the entities created or modified in the same transaction. 
+We achieve concurrency control by having a `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the `Transaction` started, so it is the same value for all the entities created or modified in the same transaction. 
 
 Each time we save an entity we also update the `Ticks` value.
 

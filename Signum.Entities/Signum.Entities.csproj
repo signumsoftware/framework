@@ -195,17 +195,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="0.Introduction.md" />
-    <None Include="1.BaseEntities.md" />
+    <None Include="BaseEntities.md" />
     <None Include="ChangeTracking.md" />
     <None Include="EntityKindAttribute.md" />
     <None Include="EnumEntity.md" />
     <None Include="FieldAttributes.md" />
+    <None Include="index.mdi" />
     <None Include="Inheritance.md" />
+    <None Include="Introduction.md" />
     <None Include="Lite.md" />
     <None Include="Mixin.md" />
     <None Include="MList.md" />
     <None Include="PropertyAttributes.md" />
+    <None Include="PropertyRoute.md" />
     <None Include="Services\Services.md" />
     <None Include="Symbol.md" />
     <None Include="Validation.md" />

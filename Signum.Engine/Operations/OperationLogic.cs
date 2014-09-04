@@ -235,16 +235,7 @@ namespace Signum.Engine.Operations
 
         internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogDN log, IIdentifiable entity, object[] args)
         {
-            if (SurroundOperation == null)
-                return null;
-
-            IDisposable result = null;
-            foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
-            {
-                result = Disposable.Combine(result, surround(operation, log, (IdentifiableEntity)entity, args));
-            }
-
-            return result;
+            return Disposable.Combine(SurroundOperation, f => f(operation, log, (IdentifiableEntity)entity, args));
         }
 
         internal static void SetExceptionData(Exception ex, IIdentifiable entity, object[] args)
