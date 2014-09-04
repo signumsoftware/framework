@@ -102,7 +102,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute("ExecuteQueryCount", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryCount(request));
         }
 
-        internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+        public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
             return Execute("ExecuteGroupQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
@@ -247,12 +247,7 @@ namespace Signum.Engine.DynamicQuery
             return extension;
         }
 
-        public void Unregister(Type type, string text)
-        {
-            RegisteredExtensions.GetDefinition(type);
-        }
-
-        internal object[] BatchExecute(BaseQueryRequest[] requests)
+        public object[] BatchExecute(BaseQueryRequest[] requests)
         {
             return requests.Select(r =>
             {

@@ -110,6 +110,11 @@ namespace Signum.Engine.DynamicQuery
             return this.Column(column, c => c.OverrideDisplayName = messageValue);
         }
 
+        public DynamicQueryCore<T> ColumnProperyRoutes<S>(Expression<Func<T, S>> column, params PropertyRoute[] routes)
+        {
+            return this.Column(column, c => c.PropertyRoutes = routes);
+        }
+
         public DynamicQueryCore<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
@@ -404,7 +409,7 @@ namespace Signum.Engine.DynamicQuery
 
         #endregion
 
-        #region OrederBy
+        #region OrderBy
 
         static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
         static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
