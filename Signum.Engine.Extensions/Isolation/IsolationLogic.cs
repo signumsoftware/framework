@@ -136,7 +136,9 @@ namespace Signum.Engine.Isolation
                 if (IsolationDN.Current == null || ExecutionMode.InGlobal)
                     return null;
 
-                return a => a.ToLite() == IsolationDN.Current;
+                return new FilterQueryResult<IsolationDN>(
+                    a => a.ToLite().Is(IsolationDN.Current), 
+                    a => a.ToLite().Is(IsolationDN.Current));
             };
         }
 
@@ -153,7 +155,9 @@ namespace Signum.Engine.Isolation
                 if (ExecutionMode.InGlobal || IsolationDN.Current == null)
                     return null;
 
-                return a => a.Mixin<IsolationMixin>().Isolation == IsolationDN.Current;
+                return new FilterQueryResult<T>(
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current),
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current));
             };
         }
 
