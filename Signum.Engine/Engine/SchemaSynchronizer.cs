@@ -62,12 +62,12 @@ namespace Signum.Engine
 
                     return new SqlPreCommandSimple(
                         constaints.ToString(a => "-- because default constraint " + a.constraint + " in " + a.table.ToString() + "." + a.column, "\r\n") + @"
-                        declare @sql nvarchar(max)
-                        set @sql = ''
-                        select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
-                        from {0}sys.default_constraints dc
-                        join {0}sys.tables t on dc.parent_object_id = t.object_id
-                        exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + ".")));
+declare @sql nvarchar(max)
+set @sql = ''
+select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
+from {0}sys.default_constraints dc
+join {0}sys.tables t on dc.parent_object_id = t.object_id
+exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + ".")));
                 }
             }).ToList();
 
