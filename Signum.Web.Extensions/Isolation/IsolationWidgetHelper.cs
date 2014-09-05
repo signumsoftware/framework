@@ -45,7 +45,7 @@ namespace Signum.Web.Isolation
 
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(helper.HiddenLite(TypeContextUtilities.Compose(Prefix, "Isolation"), Isolation));
-                sb.Add(new HtmlTag("span").SetInnerText(Isolation.ToString()));
+                sb.Add(new HtmlTag("span").Class("sf-quicklinks badge").SetInnerText(Isolation.ToString()));
                 //sb.Add(new MvcHtmlString("<script>" + IsolationClient.Module["addIsolationPrefilter"](Isolation.Key()) + "</script>"));
                 return sb.ToHtml();
             }
