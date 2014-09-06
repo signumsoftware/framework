@@ -187,7 +187,7 @@ namespace Signum.Web
             {
                 QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-                Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
+                Finder.SetTokens(FilterOptions, queryDescription, canAggregate: false);
             }
 
             var elements = Pagination != null ? Pagination.GetElementsPerPage() : null;
@@ -215,9 +215,9 @@ namespace Signum.Web
             }.NotNull().ToString("&");
 
             if (options.HasText())
-                return Navigator.FindRoute(QueryName) + "?" + options;
+                return Finder.FindRoute(QueryName) + "?" + options;
             else
-                return Navigator.FindRoute(QueryName);
+                return Finder.FindRoute(QueryName);
         }
 
         public JObject ToJS(string parentPrefix, string newPart)
@@ -233,10 +233,10 @@ namespace Signum.Web
             {
                 QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-                Navigator.SetTokens(this.FilterOptions, queryDescription, false);
+                Finder.SetTokens(this.FilterOptions, queryDescription, false);
             }
 
-            if (QueryName != null) op.Add("webQueryName", Navigator.ResolveWebQueryName(QueryName));
+            if (QueryName != null) op.Add("webQueryName", Finder.ResolveWebQueryName(QueryName));
             if (SearchOnLoad == true) op.Add("searchOnLoad", true);
             if (!Navigate) op.Add("navigate", false);
             if (!Create) op.Add("create", false);

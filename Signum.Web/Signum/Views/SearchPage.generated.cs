@@ -117,7 +117,7 @@ WriteLiteral("        ");
 
             
             #line 13 "..\..\Signum\Views\SearchPage.cshtml"
-   Write(Html.Partial(Navigator.Manager.SearchControlView));
+   Write(Html.Partial(Finder.Manager.SearchControlView));
 
             
             #line default

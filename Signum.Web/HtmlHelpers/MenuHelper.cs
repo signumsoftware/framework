@@ -89,7 +89,7 @@ namespace Signum.Web
 
                 FindOptions findOptions = Link as FindOptions;
                 if (findOptions != null)
-                    return Navigator.IsFindable(findOptions.QueryName);
+                    return Finder.IsFindable(findOptions.QueryName);
 
                 return true;
             }

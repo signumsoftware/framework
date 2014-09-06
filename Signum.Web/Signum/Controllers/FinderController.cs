@@ -46,7 +46,7 @@ namespace Signum.Web.Controllers
         [ActionSplitter("webQueryName")]
         public ContentResult Count(FindOptions findOptions)
         {
-            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
+            int count = Finder.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
             });
@@ -57,25 +57,25 @@ namespace Signum.Web.Controllers
         [ActionSplitter("webQueryName")]
         public ActionResult Find(FindOptions findOptions)
         {
-            return Navigator.Find(this, findOptions);
+            return Finder.Find(this, findOptions);
         }
 
         [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult PartialFind(FindOptions findOptions, string prefix, bool isExplore)
         {
-            return Navigator.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
+            return Finder.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
         }
 
         [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Navigator.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
+            return Finder.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
         }
 
         [HttpPost]
         public ContentResult AddColumn(string webQueryName, string tokenName)
         {
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            object queryName = Finder.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             QueryToken token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanElement);
             return Content(SearchControlHelper.Header(new Column(token, token.NiceName()), null).ToString());
@@ -88,7 +88,7 @@ namespace Signum.Web.Controllers
             if (lites.IsEmpty())
                 return Content("");
 
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            object queryName = Finder.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());
 
@@ -115,7 +115,7 @@ namespace Signum.Web.Controllers
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix, string value)
         {
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            object queryName = Finder.ResolveQueryName(webQueryName);
 
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
@@ -140,7 +140,7 @@ namespace Signum.Web.Controllers
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int options)
         {
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            object queryName = Finder.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             var token = QueryUtils.Parse(tokenName, qd, (SubTokensOptions)options);
 

@@ -41,7 +41,7 @@ namespace Signum.Web
             if (settings.ControllerUrl.HasText())
             {
                 sb.Add(MvcHtmlString.Create("<script>" + JsModule.Finder["QueryTokenBuilder.init"](context.Prefix,
-                    Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, (int)settings.Options, settings.RequestExtraJSonData).ToString()
+                    Finder.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, (int)settings.Options, settings.RequestExtraJSonData).ToString()
                     + "</script>"));
             }
         

@@ -208,7 +208,7 @@ namespace Signum.Windows
             Options = options;
             Label = QueryUtils.GetNiceName(Options.QueryName);
             //Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
-            IsVisible = Navigator.IsFindable(Options.QueryName);
+            IsVisible = Finder.IsFindable(Options.QueryName);
             ShowResultCount = showCount;
 
             if (ShowResultCount && IsVisible)
@@ -229,7 +229,7 @@ namespace Signum.Windows
         {
             EvaluateFunValues();
 
-            Navigator.Explore(Options);
+            Finder.Explore(Options);
         }
 
         private void EvaluateFunValues()
@@ -277,7 +277,7 @@ namespace Signum.Windows
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
             //Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
+            IsVisible = Finder.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
         }
 
         public override void Execute()

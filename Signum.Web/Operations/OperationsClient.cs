@@ -107,7 +107,7 @@ namespace Signum.Web.Operations
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (!request[ViewDataKeys.AvoidReturnRedirect].HasText())
-                return controller.RedirectHttpOrAjax(Navigator.FindRoute(type));
+                return controller.RedirectHttpOrAjax(Finder.FindRoute(type));
 
             return new ContentResult();
         }

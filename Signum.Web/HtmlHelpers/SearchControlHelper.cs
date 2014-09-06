@@ -50,11 +50,11 @@ namespace Signum.Web
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(findOptions.FilterOptions, description, false);
-            Navigator.SetTokens(findOptions.OrderOptions, description, false);
-            Navigator.SetTokens(findOptions.ColumnOptions, description, false);
-            Navigator.Manager.SetSearchViewableAndCreable(findOptions, description);
-            Navigator.Manager.SetDefaultOrder(findOptions, description);
+            Finder.SetTokens(findOptions.FilterOptions, description, false);
+            Finder.SetTokens(findOptions.OrderOptions, description, false);
+            Finder.SetTokens(findOptions.ColumnOptions, description, false);
+            Finder.Manager.SetSearchViewableAndCreable(findOptions, description);
+            Finder.Manager.SetDefaultOrder(findOptions, description);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
@@ -62,7 +62,7 @@ namespace Signum.Web
 
             viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
                 helper.ViewData[ViewDataKeys.Title] :
-                Navigator.Manager.SearchTitle(findOptions.QueryName);
+                Finder.Manager.SearchTitle(findOptions.QueryName);
 
             if (!options.ToolBarButton.IsNullOrEmpty())
                 viewData[ViewDataKeys.ManualToolbarButtons] = options.ToolBarButton;
@@ -70,7 +70,7 @@ namespace Signum.Web
             if (options.AvoidFullScreenButton)
                 viewData[ViewDataKeys.AvoidFullScreenButton] = true;
 
-            return helper.Partial(Navigator.Manager.SearchControlView, viewData);
+            return helper.Partial(Finder.Manager.SearchControlView, viewData);
         }
 
       

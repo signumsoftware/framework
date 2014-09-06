@@ -37,7 +37,7 @@ namespace Signum.Windows
 
         private static ResultTable Query(this QueryRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request));
         }
 
@@ -48,7 +48,7 @@ namespace Signum.Windows
 
         public static void QueryBatch(this QueryRequest request, Action<ResultTable> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((ResultTable)obj), @finally);
         }
 
@@ -80,7 +80,7 @@ namespace Signum.Windows
 
         private static ResultTable QueryGroup(this QueryGroupRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryGroup(request));
         }
 
@@ -91,7 +91,7 @@ namespace Signum.Windows
 
         public static void QueryGroupBatch(this QueryGroupRequest request, Action<ResultTable> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((ResultTable)obj), @finally);
         }
 
@@ -144,7 +144,7 @@ namespace Signum.Windows
 
         private static Lite<IdentifiableEntity> QueryUnique(this UniqueEntityRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
 
             return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
         }
@@ -156,7 +156,7 @@ namespace Signum.Windows
 
         private static void QueryUniqueBatch(this UniqueEntityRequest request, Action<Lite<IdentifiableEntity>> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((Lite<IdentifiableEntity>)obj), @finally);
         }
 
@@ -186,7 +186,7 @@ namespace Signum.Windows
 
         public static int QueryCount(this QueryCountRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
         }
 
@@ -197,7 +197,7 @@ namespace Signum.Windows
 
         private static void QueryCountBatch(this QueryCountRequest request, Action<int> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((int)obj), @finally);
         }
 

@@ -33,60 +33,7 @@ namespace Signum.Windows
         {
             Manager = manager;
         }
-
-        public static void Explore(ExploreOptions options)
-        {
-            Manager.Explore(options);
-        }
-
-        public static Lite<T> Find<T>()
-            where T : IdentifiableEntity
-        {
-            return (Lite<T>)Manager.Find(new FindOptions(typeof(T)));
-        }
-
-        public static Lite<T> Find<T>(FindOptions options)
-            where T : IdentifiableEntity
-        {
-            if (options.QueryName == null)
-                options.QueryName = typeof(T);
-
-            return (Lite<T>)Manager.Find(options);
-        }
-
-        public static Lite<IdentifiableEntity> Find(FindOptions options)
-        {
-            return Manager.Find(options);
-        }
-
-
-        public static List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
-        {
-            return Manager.FindMany(options);
-        }
-
-        public static List<Lite<T>> FindMany<T>()
-         where T : IdentifiableEntity
-        {
-            List<Lite<IdentifiableEntity>> result = Manager.FindMany(new FindManyOptions(typeof(T)));
-            if (result == null)
-                return null;
-
-            return result.Cast<Lite<T>>().ToList();
-        }
-
-        public static List<Lite<T>> FindMany<T>(FindManyOptions options)
-            where T : IdentifiableEntity
-        {
-            if (options.QueryName == null)
-                options.QueryName = typeof(T);
-
-            List<Lite<IdentifiableEntity>> result = Manager.FindMany(options);
-            if (result == null)
-                return null;
-
-            return result.Cast<Lite<T>>().ToList();
-        }
+      
         public static void NavigateUntyped(object entity)
         {
             Manager.Navigate(entity, new NavigateOptions());
@@ -158,10 +105,7 @@ namespace Signum.Windows
 
 
  
-        public static QuerySettings GetQuerySettings(object queryName)
-        {
-            return Manager.GetQuerySettings(queryName);
-        }
+    
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
@@ -173,10 +117,7 @@ namespace Signum.Windows
             return Manager.SelectTypes(parent, implementations, filterType);
         }
 
-        public static bool IsFindable(object queryName)
-        {
-            return Manager.OnIsFindable(queryName);
-        }
+       
 
         public static bool IsCreable(Type type, bool isSearchEntity = false)
         {
@@ -223,19 +164,11 @@ namespace Signum.Windows
             Navigator.Manager.EntitySettings.AddOrThrow(setting.StaticType, setting, "EntitySettings {0} repeated");
         }
 
-        public static void AddQuerySettings(List<QuerySettings> settings)
-        {
-            Navigator.Manager.QuerySettings.AddRange(settings, s => s.QueryName, s => s, "QuerySettings");
-        }
-
-        public static void AddQuerySetting(QuerySettings setting)
-        {
-            Navigator.Manager.QuerySettings.AddOrThrow(setting.QueryName, setting, "QuerySettings {0} repeated");
-        }
 
         public static void Initialize()
         {
-            Manager.Initialize();
+            Navigator.Manager.Initialize();
+            Finder.Manager.Initialize();
         }
 
         public static EntitySettings<T> EntitySettings<T>()
@@ -271,10 +204,9 @@ namespace Signum.Windows
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> EntitySettings { get; set; }
-        public Dictionary<object, QuerySettings> QuerySettings { get; set; }
 
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
-        public event Action<SearchWindow, object> TaskSearchWindow;
+
 
         bool multithreaded; 
 
@@ -282,7 +214,6 @@ namespace Signum.Windows
         {
             this.multithreaded = multithreaded;
             EntitySettings = new Dictionary<Type, EntitySettings>();
-            QuerySettings = new Dictionary<object, QuerySettings>();
 
             if (!Server.OfflineMode)
                 TypeDN.SetTypeNameAndResolveType(
@@ -302,15 +233,12 @@ namespace Signum.Windows
                 {
                     //Looking for a better place to do this
                     PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                    QueryToken.EntityExtensions = DynamicQueryServer.GetExtensionToken;
                 }
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
-                CompleteQuerySettings();
 
                 TaskNormalWindow += TaskSetIconNormalWindow;
-                TaskSearchWindow += TaskSetIconSearchWindow;
 
                 TaskNormalWindow += TaskSetLabelNormalWindow;    
 
@@ -318,17 +246,6 @@ namespace Signum.Windows
                     Initializing();
 
                 initialized = true;
-            }
-        }
-
-
-        void CompleteQuerySettings()
-        {
-            var dic = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings(a));
-            foreach (var kvp in dic)
-            {
-                if (!QuerySettings.ContainsKey(kvp.Key))
-                    QuerySettings.Add(kvp.Key, kvp.Value);
             }
         }
 
@@ -350,13 +267,9 @@ namespace Signum.Windows
                 );
         }
 
-        public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
         public ImageSource DefaultEntityIcon = ImageLoader.GetImageSortName("entity.png");
 
-        void TaskSetIconSearchWindow(SearchWindow sw, object qn)
-        {
-            sw.Icon = GetFindIcon(qn, true); 
-        }
+      
 
         void TaskSetIconNormalWindow(NormalWindow nw, ModifiableEntity entity)
         {
@@ -378,119 +291,10 @@ namespace Signum.Windows
             return useDefault ? DefaultEntityIcon : null;
         }
 
-        public ImageSource GetFindIcon(object queryName, bool useDefault)
-        {
-            var qs = QuerySettings.TryGetC(queryName);
-            if (qs != null && qs.Icon != null)
-                return qs.Icon;
+      
 
-            if (queryName is Type)
-            {
-                EntitySettings es = EntitySettings.TryGetC((Type)queryName);
-                if (es != null && es.Icon != null)
-                    return es.Icon;
-            }
-
-            return useDefault ? DefaultFindIcon : null;
-        }
-
-        public virtual string SearchTitle(object queryName)
-        {
-            return SearchMessage.FinderOf0.NiceToString().Formato(QueryUtils.GetNiceName(queryName));
-        }
-
-        public virtual Lite<IdentifiableEntity> Find(FindOptions options)
-        {
-            AssertFindable(options.QueryName);
-            
-            if (options.ReturnIfOne)
-            {
-                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
-                {
-                    FilterOptions = options.FilterOptions,
-                    UniqueType = UniqueType.SingleOrMany
-                });
-
-                if (lite != null)
-                {
-                    return lite;
-                }
-            }
-
-            SearchWindow sw = CreateSearchWindow(options);
-
-            sw.MultiSelection = false;
-
-            if (sw.ShowDialog() == true)
-            {
-                return sw.SelectedItem;
-            }
-            return null;
-        }
-
-        public virtual List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
-        {
-            AssertFindable(options.QueryName);
-         
-            SearchWindow sw = CreateSearchWindow(options);
-            if (sw.ShowDialog() == true)
-            {
-                return sw.SelectedItems;
-            }
-            return null;
-        }
-
-        public virtual void Explore(ExploreOptions options)
-        {
-            AssertFindable(options.QueryName);
-
-            if (options.NavigateIfOne)
-            {
-                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
-                {
-                    FilterOptions = options.FilterOptions,
-                    UniqueType = UniqueType.Only
-                });
-
-                if (lite != null)
-                {
-                    Navigate(lite, new NavigateOptions { Closed = options.Closed });
-                    return;
-                }
-            }
-
-            OpenIndependentWindow(() => CreateSearchWindow(options),
-                afterShown : null,
-                closed: options.Closed); 
-        }
-
-
-        protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)
-        {
-            SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
-            {
-                QueryName = options.QueryName,
-                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions.Select(c => c.CloneIfNecessary())),
-                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions.Select(c => c.CloneIfNecessary())),
-                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions.Select(c => c.CloneIfNecessary())),
-                ColumnOptionsMode = options.ColumnOptionsMode,
-                Pagination = options.Pagination ?? GetQuerySettings(options.QueryName).Pagination ?? FindOptions.DefaultPagination,
-                ShowFilters = options.ShowFilters,
-                ShowFilterButton = options.ShowFilterButton,
-                ShowFooter = options.ShowFooter,
-                ShowHeader = options.ShowHeader,
-                Title = options.WindowTitle ?? SearchTitle(options.QueryName)
-            };
-
-            if (options.InitializeSearchControl != null)
-                options.InitializeSearchControl(sw.SearchControl);
-
-            if (TaskSearchWindow != null)
-                TaskSearchWindow(sw, options.QueryName);
-
-            return sw;
-        }
-
+    
+    
         public virtual void Navigate(object entityOrLite, NavigateOptions options)
         {
             if (entityOrLite == null)
@@ -717,33 +521,7 @@ namespace Signum.Windows
         }
 
 
-        public event Func<object, bool> IsFindable;
-
-        internal protected virtual bool OnIsFindable(object queryName)
-        {
-            QuerySettings qs = QuerySettings.TryGetC(queryName);
-            if (qs == null || !qs.IsFindable)
-                return false;
-
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(queryName))
-                        return false;
-                }
-
-            return true;
-        }
-
-        internal protected virtual void AssertFindable(object queryName)
-        {      
-            QuerySettings qs = QuerySettings.TryGetC(queryName);
-            if (qs == null)
-                throw new InvalidOperationException(SearchMessage.Query0NotRegistered.NiceToString().Formato(queryName));
-
-            if (!OnIsFindable(queryName))
-                throw new UnauthorizedAccessException(SearchMessage.Query0NotAllowed.NiceToString().Formato(queryName));
-        }
+      
 
         public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations, Func<Type, bool> filterType)
         {
@@ -770,11 +548,6 @@ namespace Signum.Windows
         public EntitySettings GetEntitySettings(Type type)
         {
             return EntitySettings.TryGetC(type);
-        }
-
-        public QuerySettings GetQuerySettings(object queryName)
-        {
-            return QuerySettings.TryGetC(queryName);
         }
 
         HashSet<string> loadedModules = new HashSet<string>();

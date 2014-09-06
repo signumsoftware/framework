@@ -88,7 +88,7 @@ namespace Signum.Windows
                     return;
 
                 ImageSource source = 
-                    o is FindOptionsBase ? Navigator.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) : null;
+                    o is FindOptionsBase ? Finder.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) : null;
 
                 menuItem.Icon = source.ToSmallImage(); 
             }
@@ -115,7 +115,7 @@ namespace Signum.Windows
                 return;
 
             if (o is ExploreOptions)
-                Navigator.Explore((ExploreOptions)o);
+                Finder.Explore((ExploreOptions)o);
         }
 
         static void ProcessMenuItem(MenuItem menuItem)

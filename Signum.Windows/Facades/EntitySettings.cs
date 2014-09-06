@@ -166,7 +166,7 @@ namespace Signum.Windows
             get { return typeof(T); }
         }
 
-        public Func<T, PropertyRoute, Control> View { get; set; }
+        public Func<T, Control> View { get; set; }
 
         public bool IsCreable { get; set; }
         public bool IsViewable { get; set; }
@@ -186,13 +186,17 @@ namespace Signum.Windows
             if (typeContext == null && !(entity is IRootEntity))
                 throw new ArgumentException("An EmbeddedEntity neeed TypeContext");
 
-            return View((T)entity, typeContext ?? PropertyRoute.Root(entity.GetType()));
+            var control = View((T)entity);
+
+            Common.SetPropertyRoute(control, typeContext ?? PropertyRoute.Root(entity.GetType()));
+
+            return control;
         }
 
-        public void OverrideView(Func<EmbeddedEntity, PropertyRoute, Control, Control> overrideView)
+        public void OverrideView(Func<T, Control, Control> overrideView)
         {
             var viewEmbedded = View;
-            View = (e, tc) => overrideView(e, tc, viewEmbedded(e, tc));
+            View = e => overrideView(e, viewEmbedded(e));
         }
 
         internal override bool OnIsCreable(bool isSearchEntity)

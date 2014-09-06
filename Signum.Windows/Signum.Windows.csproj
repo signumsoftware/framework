@@ -172,6 +172,7 @@
     <Compile Include="EntityControls\EntityStrip.xaml.cs">
       <DependentUpon>EntityStrip.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Facades\Finder.cs" />
     <Compile Include="MultiSelectorWindow.xaml.cs">
       <DependentUpon>MultiSelectorWindow.xaml</DependentUpon>
     </Compile>

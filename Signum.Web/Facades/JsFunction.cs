@@ -184,7 +184,7 @@ namespace Signum.Web
                 name = Navigator.ResolveWebTypeName(type),
                 niceName = type.NiceName(),
                 creable = Navigator.IsCreable(type, isSearch),
-                findable = Navigator.IsFindable(type),
+                findable = Finder.IsFindable(type),
                 preConstruct = new JRaw(Constructor.ClientManager.GetPreConstructorScript(new ClientConstructorContext(type, prefix)))
             };
 
