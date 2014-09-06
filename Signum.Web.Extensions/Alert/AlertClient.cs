@@ -56,7 +56,7 @@ namespace Signum.Web.Alerts
             if (!Types.Contains(ie.GetType()))
                 return null;
 
-            if (!Navigator.IsFindable(typeof(AlertDN)))
+            if (!Finder.IsFindable(typeof(AlertDN)))
                 return null;
 
             return AlertWidgetHelper.CreateWidget(ctx);

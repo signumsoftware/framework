@@ -173,8 +173,8 @@ Write(Html.Hidden(query.Compose("Name"), query.Value.Name));
             #line hidden
             
             #line 30 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
-                     new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
+Write(Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+                     new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                      Html.Span(null, niceName, "form-control-static")));
 
             

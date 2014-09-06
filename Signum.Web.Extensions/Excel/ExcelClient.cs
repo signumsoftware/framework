@@ -105,7 +105,7 @@ namespace Signum.Web.Excel
                 {
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
-                    OnClick = Module["administerExcelReports"](ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
+                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportDN)),current),
                 });
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportCreate")

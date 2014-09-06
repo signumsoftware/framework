@@ -80,7 +80,7 @@ namespace Signum.Web.Chart
                     return null;
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                    Finder.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
 
@@ -141,7 +141,7 @@ namespace Signum.Web.Chart
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                Finder.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
@@ -152,7 +152,7 @@ namespace Signum.Web.Chart
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
+                Finder.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
@@ -201,7 +201,7 @@ namespace Signum.Web.Chart
             return new JObject
             {
                 {"prefix", prefix },
-                { "webQueryName", Navigator.ResolveWebQueryName(request.QueryName) },
+                { "webQueryName", Finder.ResolveWebQueryName(request.QueryName) },
                 { "orders", new JArray(request.Orders.Select(o=>new JObject { {"orderType" ,(int)o.OrderType} , {"columnName" ,o.Token.FullKey()}}))},
                 { "updateChartBuilderUrl", url.Action<ChartController>(cc => cc.UpdateChartBuilder(prefix)) },
                 { "fullScreenUrl", url.Action<ChartController>(cc => cc.FullScreen(prefix))},
@@ -217,7 +217,7 @@ namespace Signum.Web.Chart
             return new JObject
             {
                 {"prefix", prefix },
-                { "webQueryName", Navigator.ResolveWebQueryName(userChart.QueryName) },
+                { "webQueryName", Finder.ResolveWebQueryName(userChart.QueryName) },
                 { "updateChartBuilderUrl", url.Action<ChartController>(cc => cc.UpdateChartBuilder(prefix)) }
             };
         }

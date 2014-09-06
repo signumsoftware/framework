@@ -42,7 +42,7 @@
     ViewData[ViewDataKeys.FilterOptions] = filterOptions;
     ViewData[ViewDataKeys.QueryTokenSettings] = ChartClient.GetQueryTokenBuilderSettings(queryDescription,
         SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (Model.Value.GroupResults ? SubTokensOptions.CanAggregate : 0));
-    Html.RenderPartial(Navigator.Manager.FilterBuilderView);
+    Html.RenderPartial(Finder.Manager.FilterBuilderView);
             }
 
         </div>

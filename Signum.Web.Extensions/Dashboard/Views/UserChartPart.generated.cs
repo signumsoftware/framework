@@ -175,21 +175,21 @@ WriteLiteral("            ");
 
             
             #line 29 "..\..\Dashboard\Views\UserChartPart.cshtml"
-       Write(Html.Partial(Navigator.Manager.FilterBuilderView, crc));
+       Write(Html.Partial(Finder.Manager.FilterBuilderView, crc));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n            <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1320), Tuple.Create("\"", 1364)
+WriteAttribute("id", Tuple.Create(" id=\"", 1317), Tuple.Create("\"", 1361)
             
             #line 30 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1325), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 1322), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 1325), false)
+, 1322), false)
 );
 
 WriteLiteral(" class=\"SF-control-container\"");
@@ -230,14 +230,14 @@ WriteLiteral("\"], function (Chart) {\r\n                    var options = ");
 WriteLiteral(";\r\n                    new Chart.ChartRequest(options);\r\n                 });\r\n  " +
 "          </script>\r\n        </div>    \r\n        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1914), Tuple.Create("\"", 1947)
+WriteAttribute("id", Tuple.Create(" id=\"", 1911), Tuple.Create("\"", 1944)
             
             #line 40 "..\..\Dashboard\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1919), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+, Tuple.Create(Tuple.Create("", 1916), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 1919), false)
+, 1916), false)
 );
 
 WriteLiteral(" class=\"sf-search-results-container\"");

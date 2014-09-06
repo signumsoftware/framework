@@ -97,7 +97,7 @@ namespace Signum.Web.Auth
 
                 if (queries)
                 {
-                    manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
+                    Finder.Manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
                 }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>

@@ -82,7 +82,7 @@ WriteLiteral("\r\n");
  using (var tc = Html.TypeContext<UserQueryPartDN>())
 {
     UserQueryDN uq = tc.Value.UserQuery;
-    object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
     
     FindOptions fo = new FindOptions(queryName)
     {

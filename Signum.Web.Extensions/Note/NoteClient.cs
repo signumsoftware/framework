@@ -58,7 +58,7 @@ namespace Signum.Web.Notes
             if (!Types.Contains(ie.GetType()))
                 return null;
 
-            if (!Navigator.IsFindable(typeof(NoteDN)))
+            if (!Finder.IsFindable(typeof(NoteDN)))
                 return null;
 
             return NoteWidgetHelper.CreateWidget(ctx);

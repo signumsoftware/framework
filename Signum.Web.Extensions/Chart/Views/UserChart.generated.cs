@@ -184,14 +184,14 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 32 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName)));
+   Write(Html.Hidden("webQueryName", Finder.ResolveWebQueryName(queryName)));
 
             
             #line default
             #line hidden
             
             #line 32 "..\..\Chart\Views\UserChart.cshtml"
-                                                                              
+                                                                           
 
         using (var query = uc.SubContext(tc => tc.Query))
         {
@@ -247,8 +247,8 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 43 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
-                new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
+   Write(Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+                new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                 Html.Span(null, niceName, "form-control-static")));
 
             
@@ -392,14 +392,14 @@ WriteLiteral("\r\n        </div>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3171), Tuple.Create("\"", 3214)
+WriteAttribute("id", Tuple.Create(" id=\"", 3162), Tuple.Create("\"", 3205)
             
             #line 76 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 3176), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 3167), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 3176), false)
+, 3167), false)
 );
 
 WriteLiteral(" class=\"SF-control-container\"");

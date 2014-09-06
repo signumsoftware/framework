@@ -22,7 +22,7 @@ namespace Signum.Web.Mailing
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int options)
         {
-            object queryName = Navigator.ResolveQueryName(webQueryName);
+            object queryName = Finder.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             var token = QueryUtils.Parse(tokenName, qd, (SubTokensOptions)options);
 

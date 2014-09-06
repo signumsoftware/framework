@@ -26,7 +26,7 @@
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
         ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
             }
-            @Html.Partial(Navigator.Manager.FilterBuilderView, crc)
+            @Html.Partial(Finder.Manager.FilterBuilderView, crc)
             <div id="@crc.Compose("sfChartBuilderContainer")" class="SF-control-container">
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>

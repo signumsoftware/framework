@@ -30,24 +30,24 @@ namespace Signum.Web.Excel
         [HttpPost]
         public ActionResult ToExcelPlain(QueryRequest request)
         {
-            if (!Navigator.IsFindable(request.QueryName))
+            if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
 
-            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + ".xlsx");
+            return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
 
         [HttpPost]
         public ActionResult ExcelReport(QueryRequest request, Lite<ExcelReportDN> excelReport)
         {
-            if (!Navigator.IsFindable(request.QueryName))
+            if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             byte[] file = ExcelLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }

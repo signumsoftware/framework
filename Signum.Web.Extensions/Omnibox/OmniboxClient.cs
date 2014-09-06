@@ -133,7 +133,7 @@ namespace Signum.Web.Omnibox
 
             public override bool AllowedQuery(object queryName)
             {
-                return Navigator.IsFindable(queryName);
+                return Finder.IsFindable(queryName);
             }
 
             public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)

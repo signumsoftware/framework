@@ -45,12 +45,12 @@ namespace Signum.Web.UserQueries
                     findOptions.ApplyUserQuery(uq);
             }
 
-            return Navigator.Find(this, findOptions);
+            return Finder.Find(this, findOptions);
         }
 
         public ActionResult Create(QueryRequest request)
         {
-            if (!Navigator.IsFindable(request.QueryName))
+            if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var userQuery = ToUserQuery(request);

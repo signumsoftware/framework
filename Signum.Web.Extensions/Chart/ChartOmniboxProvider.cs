@@ -35,7 +35,7 @@ namespace Signum.Web.Chart
         public override string GetUrl(ChartOmniboxResult result)
         {
             if (result.QueryNameMatch != null)
-                return RouteHelper.New().Action("Index", "Chart", new { webQueryName = Navigator.ResolveWebQueryName(result.QueryName) });
+                return RouteHelper.New().Action("Index", "Chart", new { webQueryName = Finder.ResolveWebQueryName(result.QueryName) });
 
             return null;
         }

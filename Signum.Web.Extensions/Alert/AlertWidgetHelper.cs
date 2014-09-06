@@ -26,7 +26,7 @@ namespace Signum.Web.Alerts
 
         public static int CountAlerts(Lite<IdentifiableEntity> identifiable, string filterField)
         {
-            return Navigator.QueryCount(new CountOptions(typeof(AlertDN))
+            return Finder.QueryCount(new CountOptions(typeof(AlertDN))
             {
                 FilterOptions = 
                 {

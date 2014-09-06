@@ -79,7 +79,7 @@ namespace Signum.Web.Chart
 
                 OperationClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
                 {
-                    OnClick = ctx => ChartClient.Module["deleteUserChart"](ctx.Options(), Navigator.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName())),
+                    OnClick = ctx => ChartClient.Module["deleteUserChart"](ctx.Options(), Finder.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName())),
                     Contextual = { IsVisible = a => true },
                     ContextualFromMany = { IsVisible = a => true },
                 });

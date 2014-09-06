@@ -14,7 +14,7 @@ namespace Signum.Web.Notes
     {
         public static int CountNotes(Lite<IdentifiableEntity> identifiable)
         { 
-            return Navigator.QueryCount(new CountOptions(typeof(NoteDN))
+            return Finder.QueryCount(new CountOptions(typeof(NoteDN))
             {
                 FilterOptions = { new FilterOption("Target", identifiable) }
             });

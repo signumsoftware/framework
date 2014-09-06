@@ -29,7 +29,7 @@
             ViewData[ViewDataKeys.QueryDescription] = queryDescription;
         }
         
-        @Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName))
+        @Html.Hidden("webQueryName", Finder.ResolveWebQueryName(queryName))
 
         using (var query = uc.SubContext(tc => tc.Query))
         {
@@ -40,8 +40,8 @@
 
         var niceName = QueryUtils.GetNiceName(query.Value.ToQueryName());
         
-        @Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Navigator.IsFindable(queryName) ?
-                new HtmlTag("a").Class("form-control-static").Attr("href", Navigator.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
+        @Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+                new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                 Html.Span(null, niceName, "form-control-static"))
         }
     
