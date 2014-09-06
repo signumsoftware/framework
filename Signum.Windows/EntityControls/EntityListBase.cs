@@ -73,11 +73,11 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(Finder.IsFindable);
                 if (type == null)
                     return null;
 
-                value = Navigator.FindMany(new FindManyOptions { QueryName = type });
+                value = Finder.FindMany(new FindManyOptions { QueryName = type });
             }
             else
                 value = Finding();

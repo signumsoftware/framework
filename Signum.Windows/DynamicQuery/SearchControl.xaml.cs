@@ -313,7 +313,7 @@ namespace Signum.Windows
                 return;
             }
 
-            if (!Navigator.IsFindable(s.NewValue))
+            if (!Finder.IsFindable(s.NewValue))
             {
                 Common.VoteCollapsed(this);
                 return;
@@ -322,7 +322,7 @@ namespace Signum.Windows
             Common.VoteVisible(this);
 
 
-            Settings = Navigator.GetQuerySettings(s.NewValue);
+            Settings = Finder.GetQuerySettings(s.NewValue);
 
             Description = DynamicQueryServer.GetQueryDescription(s.NewValue);
 
@@ -359,7 +359,7 @@ namespace Signum.Windows
         {
             this.Loaded -= SearchControl_Loaded;
 
-            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Navigator.IsFindable(QueryName))
+            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Finder.IsFindable(QueryName))
             {
                 tokenBuilder.Token = null;
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();

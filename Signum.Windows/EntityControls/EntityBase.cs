@@ -253,7 +253,7 @@ namespace Signum.Windows
             if (this.NotSet(EntityBase.FindProperty) && Find)
                 Find = CleanType.IsEmbeddedEntity() ? false:
                     Implementations.Value.IsByAll ? false :
-                    Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
+                    Implementations.Value.Types.Any(t => Finder.IsFindable(t));
 
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;
@@ -417,11 +417,11 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(Finder.IsFindable);
                 if (type == null)
                     return null;
 
-                value = Navigator.Find(new FindOptions { QueryName = type });
+                value = Finder.Find(new FindOptions { QueryName = type });
             }
             else
                 value = Finding();

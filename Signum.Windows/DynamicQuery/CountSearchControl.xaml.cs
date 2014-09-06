@@ -255,7 +255,7 @@ namespace Signum.Windows
 
         public void DefaultClick()
         {
-            Navigator.Explore(new ExploreOptions(QueryName)
+            Finder.Explore(new ExploreOptions(QueryName)
             {
                 OrderOptions = OrderOptions.ToList(),
                 FilterOptions = FilterOptions.ToList(),

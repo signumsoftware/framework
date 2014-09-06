@@ -18,7 +18,7 @@ namespace Signum.Windows.MarkupExtensions
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return Navigator.IsFindable(queryName);
+            return Finder.IsFindable(queryName);
         }
     }
 
@@ -33,7 +33,7 @@ namespace Signum.Windows.MarkupExtensions
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return Navigator.IsFindable(queryName) ? Visibility.Visible : Visibility.Collapsed;
+            return Finder.IsFindable(queryName) ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }
