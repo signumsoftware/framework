@@ -208,44 +208,6 @@ namespace Signum.Windows
             obj.SetValue(LabelOnlyRouteProperty, value);
         }
 
-        [ThreadStatic]
-        static bool delayRoutes = false;
-
-        public static IDisposable DelayRoutes()
-        {
-            if (delayRoutes)
-                return null;
-
-            delayRoutes = true;
-
-            return new Disposable(() =>
-            {
-                delayRoutes = false;
-            });
-        }
-
-
-        public static readonly DependencyProperty DelayedRoutesProperty =
-            DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
-        public static bool GetDelayedRoutes(DependencyObject obj)
-        {
-            return (bool)obj.GetValue(DelayedRoutesProperty);
-        }
-        public static void SetDelayedRoutes(DependencyObject obj, bool value)
-        {
-            obj.SetValue(DelayedRoutesProperty, value);
-        }
-
-        public static void DelayedRoutesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            FrameworkElement fe = (FrameworkElement)d;
-
-            IDisposable del = DelayRoutes();
-
-            if (del != null)
-                fe.Initialized += (s, e2) => del.Dispose();
-        }
-
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             FrameworkElement fe = d as FrameworkElement;
@@ -266,7 +228,9 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if (!delayRoutes)
+            var parent = GetPropertyRoute(fe.Parent ?? fe);
+
+            if (parent != null)
                 InititializeRoute(fe, route, e.Property);
             else
             {
