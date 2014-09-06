@@ -38,7 +38,7 @@ namespace Signum.Web
             if (!webQueryName.HasText())
                 throw new InvalidOperationException("webQueryName not provided");
 
-            fo.QueryName = Navigator.ResolveQueryName(webQueryName);
+            fo.QueryName = Finder.ResolveQueryName(webQueryName);
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 

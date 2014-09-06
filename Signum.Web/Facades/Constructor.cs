@@ -202,7 +202,7 @@ namespace Signum.Web
             if (!(entity is IdentifiableEntity))
                 return;
 
-            object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
+            object queryName = Finder.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
             if (entity.GetType() != queryName as Type)
                 return;

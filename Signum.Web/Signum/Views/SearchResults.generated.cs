@@ -331,7 +331,7 @@ WriteLiteral("            ");
 
             
             #line 71 "..\..\Signum\Views\SearchResults.cshtml"
-       Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
+       Write(Html.Partial(Finder.Manager.PaginationSelectorView, Model));
 
             
             #line default

@@ -10,7 +10,7 @@
         </h2>
         @Html.ValidationSummaryAjax()
         @{ ViewData[ViewDataKeys.AvoidFullScreenButton] = true; }
-        @Html.Partial(Navigator.Manager.SearchControlView)
+        @Html.Partial(Finder.Manager.SearchControlView)
         @Html.AntiForgeryToken()
     </div>
 }

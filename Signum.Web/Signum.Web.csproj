@@ -114,6 +114,7 @@
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
     <Compile Include="ControllerAttributes\ActionSplitter.cs" />
+    <Compile Include="Facades\Finder.cs" />
     <Compile Include="Facades\JsFunction.cs" />
     <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />

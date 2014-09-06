@@ -239,7 +239,7 @@ WriteLiteral(">\r\n");
                    
                     ViewData[ViewDataKeys.InPopup] = true;
                     ViewData[ViewDataKeys.AvoidFullScreenButton] = true;
-                    Html.RenderPartial(Navigator.Manager.SearchControlView, Model);
+                    Html.RenderPartial(Finder.Manager.SearchControlView, Model);
                 
             
             #line default

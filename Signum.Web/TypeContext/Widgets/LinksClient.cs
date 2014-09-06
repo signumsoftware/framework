@@ -187,9 +187,9 @@ namespace Signum.Web
         public QuickLinkFind(FindOptions findOptions)
         {
             FindOptions = findOptions;
-            IsVisible = Navigator.IsFindable(findOptions.QueryName);
+            IsVisible = Finder.IsFindable(findOptions.QueryName);
             Text = QueryUtils.GetNiceName(findOptions.QueryName);
-            Name = Navigator.ResolveWebQueryName(findOptions.QueryName);
+            Name = Finder.ResolveWebQueryName(findOptions.QueryName);
         }
 
         public QuickLinkFind(object queryName, string columnName, object value, bool hideColumn) :
