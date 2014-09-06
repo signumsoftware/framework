@@ -23,14 +23,6 @@ namespace Signum.Windows.SMS
     {
         public SMSTemplateMessage()
         {
-            Common.SetDelayedRoutes(this, true);
-            InitializeComponent();
-            InitialSet();
-        }
-
-        public SMSTemplateMessage(PropertyRoute p)
-        {
-            Common.SetPropertyRoute(this, p);
             InitializeComponent();
             InitialSet();
         }

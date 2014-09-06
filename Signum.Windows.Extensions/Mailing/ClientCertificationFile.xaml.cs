@@ -22,15 +22,8 @@ namespace Signum.Windows.Mailing
     /// </summary>
     public partial class ClientCertificationFile : UserControl
     {
-       public ClientCertificationFile(PropertyRoute tc)
+        public ClientCertificationFile()
         {
-            Common.SetPropertyRoute(this, tc); 
-            InitializeComponent();
-        }
-
-       public ClientCertificationFile()
-        {
-            Common.SetDelayedRoutes(this, true);
             InitializeComponent();
         }
     }

@@ -22,15 +22,8 @@ namespace Signum.Windows.Mailing
     /// </summary>
     public partial class EmailRecipient : UserControl
     {
-       public EmailRecipient(PropertyRoute tc)
+        public EmailRecipient()
         {
-            Common.SetPropertyRoute(this, tc); 
-            InitializeComponent();
-        }
-
-       public EmailRecipient()
-        {
-            Common.SetDelayedRoutes(this, true);
             InitializeComponent();
         }
     }

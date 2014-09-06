@@ -48,7 +48,7 @@ namespace Signum.Windows.Chart
                 {
                     new EntitySettings<UserChartDN> { View = e => new UserChart(), Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png") },
                     new EntitySettings<ChartScriptDN> { View = e => new ChartScript(), Icon = ExtensionsImageLoader.GetImageSortName("chartScript.png") },
-                    new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
+                    new EmbeddedEntitySettings<ChartScriptParameterDN> { View = e => new ChartScriptParameter() }
                 });
 
                 UserAssetsClient.Start();

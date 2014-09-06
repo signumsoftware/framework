@@ -22,15 +22,8 @@ namespace Signum.Windows.Mailing
     /// </summary>
     public partial class EmailAddress : UserControl
     {
-       public EmailAddress(PropertyRoute tc)
+        public EmailAddress()
         {
-            Common.SetPropertyRoute(this, tc); 
-            InitializeComponent();
-        }
-
-       public EmailAddress()
-        {
-            Common.SetDelayedRoutes(this, true);
             InitializeComponent();
         }
     }

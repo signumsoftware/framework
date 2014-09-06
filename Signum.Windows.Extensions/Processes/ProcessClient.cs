@@ -59,8 +59,7 @@ namespace Signum.Windows.Processes
                 {
                     Navigator.EntitySettings<ProcessDN>().OverrideView((p, c) =>
                     {
-                        using (Common.DelayRoutes())
-                            c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
+                        c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
                         return c;
                     }); 
                 }

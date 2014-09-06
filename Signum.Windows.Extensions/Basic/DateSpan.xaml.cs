@@ -22,15 +22,8 @@ namespace Signum.Windows.Basics
     /// </summary>
     public partial class DateSpan : UserControl
     {
-        public DateSpan(PropertyRoute tc)
-        {
-            Common.SetPropertyRoute(this, tc); 
-            InitializeComponent();
-        }
-
         public DateSpan()
         {
-            Common.SetDelayedRoutes(this, true);
             InitializeComponent();
         }
 

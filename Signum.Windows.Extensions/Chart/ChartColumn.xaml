@@ -5,7 +5,7 @@
     xmlns:swc="clr-namespace:Signum.Windows.Chart"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     xmlns:ua="clr-namespace:Signum.Windows.UserAssets"
-    x:Name="me" m:Common.DelayedRoutes="True">
+    x:Name="me">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
