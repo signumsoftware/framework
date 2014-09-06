@@ -15,18 +15,16 @@ namespace Signum.Engine.Maps
         {
             SqlPreCommand views = GenerateViews();
             SqlPreCommand procedures = GenerateProcedures();
-            SqlPreCommand defaultConstraints = CreateDefaultConstraints();
 
-            return SqlPreCommand.Combine(Spacing.Triple, views, procedures, defaultConstraints);
+            return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
         }
 
         internal SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
             SqlPreCommand views = SyncViews(replacements);
             SqlPreCommand procedures = SyncProcedures(replacements);
-            SqlPreCommand defaultConstraints = SyncDefaultConstraints(replacements);
 
-            return SqlPreCommand.Combine(Spacing.Triple, views, procedures, defaultConstraints);
+            return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
         }
 
         static string Clean(string command)
@@ -172,82 +170,6 @@ namespace Signum.Engine.Maps
                 return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { AddGo = true };
             }
         }
-        #endregion
-
-        #region DefaultConstraints
-        public class DefaultConstaint
-        {
-            public string ConstraintName;
-            public string DefaultExpression;
-        }
-
-        public Dictionary<ObjectName, Dictionary<IColumn, DefaultConstaint>> DefaultContraints = new Dictionary<ObjectName, Dictionary<IColumn, DefaultConstaint>>();
-        public void IncludeDefaultConstraint(ITable table, IColumn column, string constraintName, string defaultExpression)
-        {
-            DefaultContraints.GetOrCreate(table.Name)[column] = new DefaultConstaint
-            {
-                ConstraintName = constraintName,
-                DefaultExpression = defaultExpression
-            };
-        }
-
-        public void IncludeDefaultConstraint<T>(Expression<Func<T, object>> lambdaToField, string defaultExpression) where T : IdentifiableEntity
-        {
-            Table table = Schema.Current.Table<T>();
-
-            var column = (IColumn)Schema.Current.Field(lambdaToField);
-
-            IncludeDefaultConstraint(table, column, "DF_{0}_{1}".Formato(table.Name, column.Name), defaultExpression);
-        }
-
-        SqlPreCommand CreateDefaultConstraints()
-        {
-            return (from t in DefaultContraints
-                    from c in t.Value
-                    select new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                         .Formato(t.Key.Name, c.Value.ConstraintName.SqlEscape(), c.Value.DefaultExpression, c.Key.Name.SqlEscape())))
-                        .Combine(Spacing.Double);
-        }
-
-        SqlPreCommand SyncDefaultConstraints(Replacements replacements)
-        {
-            var dbDefaultConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
-                {
-                    using (Administrator.OverrideDatabaseInViews(db))
-                    {
-                        return (from t in Database.View<SysTables>()
-                                join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                                join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                                join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
-                                where !ctr.is_system_named
-                                select new
-                                {
-                                    table = new ObjectName(new SchemaName(db, s.name), t.name),
-                                    column = c.name,
-                                    constraint = ctr.name,
-                                    definition = ctr.definition,
-                                }).ToList();
-                    }
-                }).AgGroupToDictionary(a => a.table,
-                gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
-
-            return Synchronizer.SynchronizeScript(
-                DefaultContraints,
-                dbDefaultConstraints,
-                (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(tn, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
-                (tn, oldDic) => oldDic.Select(kvp => SqlBuilder.AlterTableDropConstraint(tn, kvp.Value.constraintName)).Combine(Spacing.Simple),
-                (tn, newDic, oldDic) =>
-                    Synchronizer.SynchronizeScript(
-                    newDic.SelectDictionary(c => c.Name, dc => dc),
-                    oldDic,
-                    (cn, newDC) => SqlBuilder.AlterTableAddDefaultConstraint(tn, cn, newDC.ConstraintName, newDC.DefaultExpression),
-                    (cn, oldDC) => SqlBuilder.AlterTableDropConstraint(tn, oldDC.constraintName),
-                    (cn, newDC, oldDC) => Clean("(" + newDC.DefaultExpression.ToLower() + ")") == Clean(oldDC.definition) ? null :
-                        SqlPreCommand.Combine(Spacing.Simple,
-                        SqlBuilder.AlterTableDropConstraint(tn, oldDC.constraintName),
-                        SqlBuilder.AlterTableAddDefaultConstraint(tn, cn, newDC.ConstraintName, newDC.DefaultExpression)), Spacing.Simple),
-                        Spacing.Double);
-        } 
         #endregion
     }
 }
