@@ -37,7 +37,7 @@ namespace Signum.Windows.UserQueries
 
             var query = QueryClient.GetQueryName(uq.Query.Key);
 
-            Navigator.Explore(new ExploreOptions(query)
+            Finder.Explore(new ExploreOptions(query)
             {
                 InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
             });

@@ -141,7 +141,7 @@ namespace Signum.Windows.Chart
             {
                 if (currentEntity == null)
                 {
-                    var entity = Navigator.Find(new FindOptions(Server.GetType(uc.EntityType.ToString())));
+                    var entity = Finder.Find(new FindOptions(Server.GetType(uc.EntityType.ToString())));
 
                     if (entity == null)
                         return;
@@ -163,7 +163,7 @@ namespace Signum.Windows.Chart
                 {
                     DataContext = chartRequest,
                     Title = ChartMessage.ChartOf0.NiceToString().Formato(QueryUtils.GetNiceName(chartRequest.QueryName)),
-                    Icon = Navigator.Manager.GetFindIcon(chartRequest.QueryName, false) ?? ExtensionsImageLoader.GetImageSortName("chartIcon.png")
+                    Icon = Finder.Manager.GetFindIcon(chartRequest.QueryName, false) ?? ExtensionsImageLoader.GetImageSortName("chartIcon.png")
                 };
 
                 if (uc != null)

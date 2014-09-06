@@ -67,7 +67,7 @@ namespace Signum.Windows.Excel
             {
                 var query = QueryClient.GetQuery(sc.QueryName);
 
-                Navigator.Explore(new ExploreOptions(typeof(ExcelReportDN))
+                Finder.Explore(new ExploreOptions(typeof(ExcelReportDN))
                 {
                     ShowFilters = false,
                     ShowFilterButton = false,

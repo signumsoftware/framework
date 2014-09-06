@@ -23,7 +23,7 @@ namespace Signum.Windows.Omnibox
 
         public override void OnSelected(DynamicQueryOmniboxResult r, Window window)
         {
-            Navigator.Explore(new ExploreOptions(r.QueryNameMatch.Value)
+            Finder.Explore(new ExploreOptions(r.QueryNameMatch.Value)
             {
                 FilterOptions = r.Filters.Select(f =>
                 {

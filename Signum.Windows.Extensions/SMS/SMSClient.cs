@@ -40,7 +40,7 @@ namespace Signum.Windows.SMS
 
         public static IdentifiableEntity FindAssociatedTemplates(EntityOperationContext e)
         {
-            var template = Navigator.Find(new FindOptions(typeof(SMSTemplateDN))
+            var template = Finder.Find(new FindOptions(typeof(SMSTemplateDN))
             {
                 FilterOptions = new List<FilterOption>
                 {

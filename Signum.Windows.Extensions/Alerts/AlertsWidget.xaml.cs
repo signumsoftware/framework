@@ -170,7 +170,7 @@ namespace Signum.Windows.Alerts
                 eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
             }
 
-            Navigator.Explore(eo);
+            Finder.Explore(eo);
         }
     }
 }

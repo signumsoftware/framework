@@ -20,7 +20,7 @@ namespace Signum.Windows.Authorization
         {
             Started = true;
 
-            Navigator.Manager.IsFindable += qn => GetAllowed(qn);
+            Finder.Manager.IsFindable += qn => GetAllowed(qn);
 
             MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
 
@@ -51,7 +51,7 @@ namespace Signum.Windows.Authorization
                     tag is FindOptionsBase ? ((FindOptionsBase)tag).QueryName :
                     tag;
 
-                if (queryName != null && Navigator.Manager.QuerySettings.ContainsKey(queryName))
+                if (queryName != null && Finder.Manager.QuerySettings.ContainsKey(queryName))
                 {
                     if (!GetAllowed(queryName))
                         menuItem.Visibility = Visibility.Collapsed;

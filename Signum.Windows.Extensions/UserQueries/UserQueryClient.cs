@@ -162,7 +162,7 @@ namespace Signum.Windows.UserQueries
                 OrderType = of.OrderType,
             }).ToList();
 
-            var pagination = uq.GetPagination() ?? Navigator.GetQuerySettings(searchControl.QueryName).Pagination ?? FindOptions.DefaultPagination;
+            var pagination = uq.GetPagination() ?? Finder.GetQuerySettings(searchControl.QueryName).Pagination ?? FindOptions.DefaultPagination;
 
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders, pagination);
         }
@@ -194,7 +194,7 @@ namespace Signum.Windows.UserQueries
             countSearchControl.Text = uq.DisplayName + ": {0}";
             countSearchControl.LinkClick += (object sender, EventArgs e) =>
             {
-                Navigator.Explore(new ExploreOptions(countSearchControl.QueryName)
+                Finder.Explore(new ExploreOptions(countSearchControl.QueryName)
                 {
                     InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
                 });
@@ -205,7 +205,7 @@ namespace Signum.Windows.UserQueries
         {
             var query = QueryClient.GetQueryName(userQuery.Query.Key);
 
-            Navigator.Explore(new ExploreOptions(query)
+            Finder.Explore(new ExploreOptions(query)
             {
                 InitializeSearchControl = sc =>
                 {

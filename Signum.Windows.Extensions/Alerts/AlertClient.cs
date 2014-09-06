@@ -40,7 +40,7 @@ namespace Signum.Windows.Alerts
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
                     (obj is IdentifiableEntity && types.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew) &&
-                    Navigator.IsFindable(typeof(AlertDN)) ? new AlertsWidget() : null;
+                    Finder.IsFindable(typeof(AlertDN)) ? new AlertsWidget() : null;
             }
         }
     }

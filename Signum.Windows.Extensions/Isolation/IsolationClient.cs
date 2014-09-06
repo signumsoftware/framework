@@ -74,7 +74,7 @@ namespace Signum.Windows.Isolation
 
                 Async.OnShowInAnotherThread += Async_OnShowInAnotherThread;
 
-                Navigator.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
+                Finder.Manager.TaskSearchWindow += Manager_TaskSearchWindow;
             }
         }
 

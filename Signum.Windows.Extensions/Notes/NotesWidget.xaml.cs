@@ -101,7 +101,7 @@ namespace Signum.Windows.Notes
                 eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
             }
 
-            Navigator.Explore(eo);
+            Finder.Explore(eo);
         }
 
         void ViewNote(NoteDN note)

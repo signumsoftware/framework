@@ -79,7 +79,7 @@ namespace Signum.Windows.Chart
             if (!(DataContext is ChartRequest))
                 return;
 
-            Settings = Navigator.GetQuerySettings(Request.QueryName);
+            Settings = Finder.GetQuerySettings(Request.QueryName);
             Description = DynamicQueryServer.GetQueryDescription(Request.QueryName);
         }
 
@@ -319,7 +319,7 @@ namespace Signum.Windows.Chart
             {
                 var subFilters = lastRequest.GetFilter(row);
 
-                Navigator.Explore(new ExploreOptions(Request.QueryName)
+                Finder.Explore(new ExploreOptions(Request.QueryName)
                 {
                     FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
                     SearchOnLoad = true,
@@ -373,7 +373,7 @@ namespace Signum.Windows.Chart
                 var subFilters = lastRequest.KeyColumns.Select(t => 
                     new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false)));
 
-                Navigator.Explore(new ExploreOptions(Request.QueryName)
+                Finder.Explore(new ExploreOptions(Request.QueryName)
                 {
                     FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
                     SearchOnLoad = true,

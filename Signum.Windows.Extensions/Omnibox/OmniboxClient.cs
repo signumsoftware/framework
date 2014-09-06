@@ -96,7 +96,7 @@ namespace Signum.Windows.Omnibox
 
         public override bool AllowedQuery(object queryName)
         {
-            return Navigator.IsFindable(queryName);
+            return Finder.IsFindable(queryName);
         }
 
 
