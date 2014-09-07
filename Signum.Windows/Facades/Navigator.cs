@@ -327,6 +327,8 @@ namespace Signum.Windows
                         throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
 
                     Control ctrl = options.View != null ? options.View() : es.CreateView(entity, null);
+                    ctrl = es.OnOverrideView(entity, ctrl);
+
 
                     SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
                 }
@@ -357,6 +359,7 @@ namespace Signum.Windows
                 throw new Exception("{0} is not viewable".Formato(entity));
 
             Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
+            ctrl = es.OnOverrideView(entity, ctrl);
 
             NormalWindow win = CreateNormalWindow();
                 

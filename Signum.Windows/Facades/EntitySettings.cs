@@ -22,6 +22,7 @@ namespace Signum.Windows
         public abstract Type StaticType { get; }
 
         public abstract Control CreateView(ModifiableEntity entity, PropertyRoute typeContext);
+        public abstract Control OnOverrideView(ModifiableEntity entity, Control control);
 
         public DataTemplate DataTemplate { get; set; }
         public ImageSource Icon { get; set; }
@@ -44,6 +45,7 @@ namespace Signum.Windows
         }
 
         public Func<T, Control> View { get; set; }
+        public event Func<T, Control, Control> OverrideView;
 
         public EntityWhen IsCreable { get; set; }
         public bool IsViewable { get; set; }
@@ -115,17 +117,13 @@ namespace Signum.Windows
             return View((T)entity);
         }
 
-        public void OverrideView(Func<T, Control, Control> overrideView)
+        public override Control OnOverrideView(ModifiableEntity e, Control control)
         {
-            var view = View;
-            View = e =>
+            foreach (var f in OverrideView.GetInvocationListTyped())
             {
-                var ctrl = view(e);
-
-                ctrl = overrideView(e, ctrl);
-
-                return ctrl;
-            };
+                control = f((T)e, control);
+            }
+            return control;
         }
 
         public override Implementations FindImplementations(PropertyRoute route)
@@ -167,6 +165,7 @@ namespace Signum.Windows
         }
 
         public Func<T, Control> View { get; set; }
+        public event Func<T, Control, Control> OverrideView;
 
         public bool IsCreable { get; set; }
         public bool IsViewable { get; set; }
@@ -186,17 +185,20 @@ namespace Signum.Windows
             if (typeContext == null && !(entity is IRootEntity))
                 throw new ArgumentException("An EmbeddedEntity neeed TypeContext");
 
-            var control = View((T)entity);
+            Control control = View((T)entity);
 
             Common.SetPropertyRoute(control, typeContext ?? PropertyRoute.Root(entity.GetType()));
 
             return control;
         }
 
-        public void OverrideView(Func<T, Control, Control> overrideView)
+        public override Control OnOverrideView(ModifiableEntity entity, Control control)
         {
-            var viewEmbedded = View;
-            View = e => overrideView(e, viewEmbedded(e));
+            foreach (var f in OverrideView.GetInvocationListTyped())
+            {
+                control = f((T)entity, control);
+            }
+            return control;
         }
 
         internal override bool OnIsCreable(bool isSearchEntity)
