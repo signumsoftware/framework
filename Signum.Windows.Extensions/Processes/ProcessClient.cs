@@ -57,11 +57,11 @@ namespace Signum.Windows.Processes
 
                 if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
                 {
-                    Navigator.EntitySettings<ProcessDN>().OverrideView((p, c) =>
+                    Navigator.EntitySettings<ProcessDN>().OverrideView += (p, c) =>
                     {
                         c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
                         return c;
-                    }); 
+                    }; 
                 }
             }
         }

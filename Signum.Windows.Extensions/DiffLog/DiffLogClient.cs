@@ -14,11 +14,11 @@ namespace Signum.Windows.DiffLog
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.EntitySettings<OperationLogDN>().OverrideView((e, c)=>
+                Navigator.EntitySettings<OperationLogDN>().OverrideView += (e, c)=>
                 {
                     c.Child<StackPanel>().Children.Add(new DiffLogTabs());
                     return c;
-                }); 
+                }; 
             }
         }
     }
