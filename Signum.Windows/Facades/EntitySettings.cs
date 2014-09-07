@@ -76,9 +76,9 @@ namespace Signum.Windows
                     break;
 
                 case EntityKind.String:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = false;
-                    IsNavigable = EntityWhen.IsSearchEntity;
+                    IsNavigable = EntityWhen.IsSearch;
                     break;
                 case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
@@ -86,7 +86,7 @@ namespace Signum.Windows
                     IsNavigable = EntityWhen.Always;
                     break;
                 case EntityKind.Main:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
@@ -133,9 +133,9 @@ namespace Signum.Windows
             throw new InvalidOperationException("Call Server.FindImplementations for IdentifiableEntities");
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsCreable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsViewable()
@@ -143,9 +143,9 @@ namespace Signum.Windows
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(bool isSearchEntity)
+        internal override bool OnIsNavigable(bool isSearch)
         {
-            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsNavigable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsReadonly()
@@ -241,7 +241,7 @@ namespace Signum.Windows
     public enum EntityWhen
     {
         Always = 3,
-        IsSearchEntity = 2,
+        IsSearch = 2,
         IsLine = 1,
         Never = 0,
     }

@@ -416,7 +416,7 @@ namespace Signum.Windows
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
-                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
+                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearch: true));
 
             if (this.NotSet(EntityBase.CreateProperty) && Create)
                 Create = Implementations.IsByAll ? false :

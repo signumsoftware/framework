@@ -144,14 +144,14 @@ namespace Signum.Windows
             return Manager.OnIsViewable(entity.GetType(), entity);
         }
 
-        public static bool IsNavigable(Type type, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(type, null, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, isSearch);
         }
 
-        public static bool IsNavigable(IIdentifiable entity, bool isSearchEntity = false)
+        public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, isSearch);
         }
 
         public static void AddSettings(List<EntitySettings> settings)
