@@ -626,6 +626,11 @@
   <ItemGroup>
     <Resource Include="Images\role.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Common.md" />
+    <None Include="Facades\Constructor.md" />
+    <None Include="Introduction.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
