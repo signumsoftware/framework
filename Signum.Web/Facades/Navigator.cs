@@ -666,7 +666,7 @@ namespace Signum.Web
 
 
             if (IsCreable != null)
-                foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
+                foreach (var isCreable in IsCreable.GetInvocationListTyped())
                 {
                     if (!isCreable(type))
                         return false;
@@ -687,7 +687,7 @@ namespace Signum.Web
             }
 
             if (IsReadOnly != null)
-                foreach (Func<Type, ModifiableEntity, bool> isReadOnly in IsReadOnly.GetInvocationList())
+                foreach (var isReadOnly in IsReadOnly.GetInvocationListTyped())
                 {
                     if (isReadOnly(type, entity))
                         return true;
@@ -702,7 +702,7 @@ namespace Signum.Web
         {
             if (IsViewable != null)
             {
-                foreach (Func<Type, ModifiableEntity, bool> isViewable in IsViewable.GetInvocationList())
+                foreach (var isViewable in IsViewable.GetInvocationListTyped())
                 {
                     if (!isViewable(type, entity))
                         return false;

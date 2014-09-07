@@ -302,9 +302,9 @@ namespace Signum.Utilities
             if (DescriptionManager.DefaultDescriptionOptions == null)
                 return null;
 
-            foreach (Func<Type, DescriptionOptions?> action in DescriptionManager.DefaultDescriptionOptions.GetInvocationList())
+            foreach (var func in DescriptionManager.DefaultDescriptionOptions.GetInvocationListTyped())
             {
-                var result = action(type);
+                var result = func(type);
                 if (result != null)
                     return result.Value;
             }
@@ -318,7 +318,7 @@ namespace Signum.Utilities
             if (ShouldLocalizeMemeber == null)
                 return true;
 
-            foreach (Func<MemberInfo, bool> func in ShouldLocalizeMemeber.GetInvocationList())
+            foreach (var func in ShouldLocalizeMemeber.GetInvocationListTyped())
             {
                 if (!func(m))
                     return false;

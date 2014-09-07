@@ -189,7 +189,7 @@ namespace Signum.Entities
             //Static validation
             if (StaticPropertyValidation != null && (IsAplicableStaticPropertyValidation == null || IsAplicableStaticPropertyValidation(entity)))
             {
-                foreach (Func<T, PropertyInfo, string> item in StaticPropertyValidation.GetInvocationList())
+                foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
                 {
                     string result = item(entity, PropertyInfo);
                     if (result != null)

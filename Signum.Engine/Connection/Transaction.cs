@@ -158,7 +158,7 @@ namespace Signum.Engine
             {
                 while (PreRealCommit != null)
                 {
-                    foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
+                    foreach (var item in PreRealCommit.GetInvocationListTyped())
                     {
                         item(this.UserData);
                         PreRealCommit -= item;
@@ -170,7 +170,7 @@ namespace Signum.Engine
             {
                 if (PostRealCommit != null)
                 {
-                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
+                    foreach (var item in PostRealCommit.GetInvocationListTyped())
                     {
                         item(this.UserData);
                     }
@@ -271,11 +271,11 @@ namespace Signum.Engine
             public void CallPostRealCommit()
             {
                 if (PreRealCommit != null)
-                    foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
+                    foreach (var item in PreRealCommit.GetInvocationListTyped())
                         parent.PreRealCommit += parentUserData => item(this.UserData);
 
                 if (PostRealCommit != null)
-                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
+                    foreach (var item in PostRealCommit.GetInvocationListTyped())
                         parent.PostRealCommit += parentUserData => item(this.UserData);
             }
 
@@ -328,7 +328,7 @@ namespace Signum.Engine
                 {
                     while (PreRealCommit != null)
                     {
-                        foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
+                        foreach (var item in PreRealCommit.GetInvocationListTyped())
                         {
                             item(this.UserData);
                             PreRealCommit -= item;
@@ -343,7 +343,7 @@ namespace Signum.Engine
             {
                 if (PostRealCommit != null)
                 {
-                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
+                    foreach (var item in PostRealCommit.GetInvocationListTyped())
                     {
                         item(this.UserData);
                     }

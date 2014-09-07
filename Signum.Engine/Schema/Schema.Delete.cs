@@ -33,7 +33,7 @@ namespace Signum.Engine.Maps
             if (PreDeleteSqlSync == null)
                 return null;
 
-            return PreDeleteSqlSync.GetInvocationList().Cast<Func<IdentifiableEntity, SqlPreCommand>>().Select(a => a(ident)).Combine(Spacing.Simple);
+            return PreDeleteSqlSync.GetInvocationListTyped().Select(a => a(ident)).Combine(Spacing.Simple);
         }
     }
 }

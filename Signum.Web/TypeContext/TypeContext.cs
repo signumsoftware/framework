@@ -436,7 +436,7 @@ namespace Signum.Web
 
             var before = BeforeTabDictionary.TryGetC(containerId);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var b in before.GetInvocationListTyped())
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
@@ -448,7 +448,7 @@ namespace Signum.Web
 
             var after = AfterTabDictionary.TryGetC(containerId);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var a in after.GetInvocationListTyped())
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
@@ -462,7 +462,7 @@ namespace Signum.Web
         {
             var before = BeforeTabDictionary.TryGetC(item.Id);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var b in before.GetInvocationListTyped())
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
@@ -473,7 +473,7 @@ namespace Signum.Web
 
             var after = AfterTabDictionary.TryGetC(item.Id);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var a in after.GetInvocationListTyped())
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
@@ -519,12 +519,12 @@ namespace Signum.Web
         {
             var before = beforeLine.TryGetC(propertyRoute);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                foreach (var b in before.GetInvocationListTyped())
                     result = b(helper, tc).Concat(result);
 
             var after = afterLine.TryGetC(propertyRoute);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                foreach (var a in after.GetInvocationListTyped())
                     result = result.Concat(a(helper, tc));
 
             return result;

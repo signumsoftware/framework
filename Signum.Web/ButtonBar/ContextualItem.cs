@@ -36,7 +36,7 @@ namespace Signum.Web
             {
                 if (GetContextualItemsForLites != null)
                 {
-                    foreach (Func<SelectedItemsMenuContext, List<IMenuItem>> d in GetContextualItemsForLites.GetInvocationList())
+                    foreach (var d in GetContextualItemsForLites.GetInvocationListTyped())
                     {
                         var newItems = d(ctx);
 

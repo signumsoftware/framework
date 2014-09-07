@@ -291,6 +291,8 @@ namespace Signum.Windows
                         throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
 
                     Control ctrl = options.View != null ? options.View() : es.CreateView(entity, null);
+                    ctrl = es.OnOverrideView(entity, ctrl);
+
 
                     SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
                 }
@@ -321,6 +323,7 @@ namespace Signum.Windows
                 throw new Exception("{0} is not viewable".Formato(entity));
 
             Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
+            ctrl = es.OnOverrideView(entity, ctrl);
 
             NormalWindow win = CreateNormalWindow();
                 
@@ -399,15 +402,14 @@ namespace Signum.Windows
                 if (type.IsIdentifiableEntity())//HACK
                     return false;
                 else
-                    return true; 
+                    return true;
             }
 
-            if (IsCreable != null)
-                foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
-                {
-                    if (!isCreable(type))
-                        return false;
-                }
+            foreach (var isCreable in IsCreable.GetInvocationListTyped())
+            {
+                if (!isCreable(type))
+                    return false;
+            }
 
             return true;
         }
@@ -423,12 +425,11 @@ namespace Signum.Windows
                     return true;
             }
 
-            if (IsReadOnly != null)
-                foreach (Func<Type, ModifiableEntity, bool> isReadOnly in IsReadOnly.GetInvocationList())
-                {
-                    if (isReadOnly(type, entity))
-                        return true;
-                }
+            foreach (var isReadOnly in IsReadOnly.GetInvocationListTyped())
+            {
+                if (isReadOnly(type, entity))
+                    return true;
+            }
 
             return false;
         }
@@ -437,12 +438,11 @@ namespace Signum.Windows
 
         protected virtual bool IsViewableBase(Type type, ModifiableEntity entity)
         {
-            if (IsViewable != null)
-                foreach (Func<Type, ModifiableEntity, bool> isViewable in IsViewable.GetInvocationList())
-                {
-                    if (!isViewable(type, entity))
-                        return false;
-                }
+            foreach (var isViewable in IsViewable.GetInvocationListTyped())
+            {
+                if (!isViewable(type, entity))
+                    return false;
+            }
 
             return true;
         }
@@ -586,8 +586,7 @@ namespace Signum.Windows
 
             if (GetButtonBarElementGlobal != null)
             {
-                elements.AddRange(GetButtonBarElementGlobal.GetInvocationList()
-                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, List<FrameworkElement>>>()
+                elements.AddRange(GetButtonBarElementGlobal.GetInvocationListTyped()
                     .Select(d => d(entity, ctx))
                     .NotNull().SelectMany(d => d).NotNull().ToList());
             }
@@ -595,8 +594,7 @@ namespace Signum.Windows
             var getButtons = GetButtonBarElementByType.TryGetC(entity.GetType());
             if(getButtons != null)
             {
-                elements.AddRange(getButtons.GetInvocationList()
-                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>>()
+                elements.AddRange(getButtons.GetInvocationListTyped()
                     .Select(d => d(entity, ctx))
                     .NotNull().ToList());
             }
@@ -618,8 +616,7 @@ namespace Signum.Windows
 
             if (OnGetEmbeddedWigets != null)
             {
-                elements.AddRange(OnGetEmbeddedWigets.GetInvocationList()
-                    .Cast<Func<ModifiableEntity, ButtonBarEventArgs, EmbeddedWidget>>()
+                elements.AddRange(OnGetEmbeddedWigets.GetInvocationListTyped()
                     .Select(d => d(entity, ctx))
                     .NotNull().ToList());
             }

@@ -108,29 +108,26 @@ namespace Signum.Windows
             IDisposable disposable = null;
             try
             {
+                foreach (var pre in PreConstructors.GetInvocationListTyped())
+                {
+                    disposable = Disposable.Combine(disposable, pre(ctx));
 
-                if (PreConstructors != null)
-                    foreach (Func<ConstructorContext, IDisposable> pre in PreConstructors.GetInvocationList())
-                    {
-                        disposable = Disposable.Combine(disposable, pre(ctx));
-
-                        if (ctx.CancelConstruction)
-                            return null;
-                    }
+                    if (ctx.CancelConstruction)
+                        return null;
+                }
 
                 var entity = constructor(ctx);
 
                 if (entity == null || ctx.CancelConstruction)
                     return null;
 
-                if (PostConstructors != null)
-                    foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationList())
-                    {
-                        post(ctx, entity);
+                foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationListTyped())
+                {
+                    post(ctx, entity);
 
-                        if (ctx.CancelConstruction)
-                            return null;
-                    }
+                    if (ctx.CancelConstruction)
+                        return null;
+                }
 
                 return entity;
             }
