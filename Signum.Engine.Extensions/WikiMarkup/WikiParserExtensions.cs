@@ -107,8 +107,7 @@ namespace Signum.Engine.WikiMarkup
                 try
                 {
                     return settings.TokenParser
-                        .GetInvocationList()
-                        .Cast<Func<string, string>>()
+                        .GetInvocationListTyped()
                         .Select(a => a(text))
                         .NotNull()
                         .FirstEx();

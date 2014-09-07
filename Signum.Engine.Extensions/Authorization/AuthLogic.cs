@@ -362,10 +362,7 @@ namespace Signum.Engine.Authorization
 
         public static void SuggestChanges()
         {
-            if (SuggestRuleChanges == null)
-                return;
-
-            foreach (var item in SuggestRuleChanges.GetInvocationList().Cast<Func<Action<Lite<RoleDN>>>>())
+            foreach (var item in SuggestRuleChanges.GetInvocationListTyped())
             {
                 if (SafeConsole.Ask("{0}?".Formato(item.Method.Name.NiceName())))
                 {
@@ -398,7 +395,7 @@ namespace Signum.Engine.Authorization
                             new XAttribute("Name", r.ToString()),
                             GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
-                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
+                     ExportToXml.GetInvocationListTyped().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
@@ -446,8 +443,7 @@ namespace Signum.Engine.Authorization
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
                 ).Combine(Spacing.Simple);
 
-            SqlPreCommand result = ImportFromXml.GetInvocationList()
-                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()
+            SqlPreCommand result = ImportFromXml.GetInvocationListTyped()
                 .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
 
             result = SqlPreCommand.Combine(Spacing.Triple, result, UpdateLastAuthRules(doc.Root.Element("Exported")));

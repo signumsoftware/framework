@@ -256,8 +256,8 @@ namespace Signum.Web.Mailing
             if (body == null)
                 return null;
 
-            foreach (var item in TasksSetWebMailBody.GetInvocationList().Cast<Func<string, WebMailOptions, string>>())
-                body = item(body, options); 
+            foreach (var f in TasksSetWebMailBody.GetInvocationListTyped())
+                body = f(body, options); 
 
             return body;
         }
@@ -268,8 +268,8 @@ namespace Signum.Web.Mailing
             if (body == null)
                 return null;
 
-            foreach (var item in TasksGetWebMailBody.GetInvocationList().Cast<Func<string, WebMailOptions, string>>())
-                body = item(body, options);
+            foreach (var f in TasksGetWebMailBody.GetInvocationListTyped())
+                body = f(body, options);
 
             return body;
         }
