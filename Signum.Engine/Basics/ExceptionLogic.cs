@@ -141,13 +141,10 @@ namespace Signum.Engine.Basics
         {
             using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
             {
-                if(DeleteLogs != null)
-                {
-                    foreach (var action in DeleteLogs.GetInvocationList().Cast<Action<DateTime>>())
-	                {
-                        action(limitDate);
-	                }
-                }
+                foreach (var action in DeleteLogs.GetInvocationListTyped())
+	            {
+                    action(limitDate);
+	            }
 
                 int exceptions = Database.Query<ExceptionDN>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
 

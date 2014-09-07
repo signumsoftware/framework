@@ -125,7 +125,7 @@ namespace Signum.Windows
                 ProcessMenuItem(item);
             }
 
-            foreach (Action<MenuItem> action in Tasks.GetInvocationList())
+            foreach (var action in Tasks.GetInvocationListTyped())
             {
                 action(menuItem);
             }

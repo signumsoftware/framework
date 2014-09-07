@@ -93,8 +93,8 @@ namespace Signum.Windows
             else
             {
                 Action<Window> onWindowsReady = OnShowInAnotherThread == null ? null :
-                    OnShowInAnotherThread.GetInvocationList()
-                    .Cast<Func<Action<Window>>>().Select(a => a())
+                    OnShowInAnotherThread.GetInvocationListTyped()
+                    .Select(a => a())
                     .Aggregate((a, b) => w => { a(w); b(w); });
 
                 Dispatcher prevDispatcher = Dispatcher.CurrentDispatcher;

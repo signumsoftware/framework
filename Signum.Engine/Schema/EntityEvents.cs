@@ -33,20 +33,20 @@ namespace Signum.Engine.Maps
             if (FilterQuery == null)
                 return Enumerable.Empty<FilterQueryResult<T>>();
 
-            return FilterQuery.GetInvocationList().Cast<FilterQueryEventHandler<T>>().Select(f => f()).ToList();
+            return FilterQuery.GetInvocationListTyped().Select(f => f()).ToList();
         }
 
         internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
             if (PreUnsafeDelete != null)
-                foreach (PreUnsafeDeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
+                foreach (var action in PreUnsafeDelete.GetInvocationListTyped().Reverse())
                     action(entityQuery);
         }
 
         internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
         {
             if (PreUnsafeMListDelete != null)
-                foreach (PreUnsafeMListDeleteHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
+                foreach (var action in PreUnsafeMListDelete.GetInvocationListTyped().Reverse())
                     action(mlistQuery, entityQuery);
         }
 
@@ -55,7 +55,7 @@ namespace Signum.Engine.Maps
             if (PreUnsafeUpdate != null)
             {
                 var query = update.EntityQuery<T>();
-                foreach (PreUnsafeUpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
+                foreach (var action in PreUnsafeUpdate.GetInvocationListTyped().Reverse())
                     action(update, query);
             }
         }
@@ -63,7 +63,7 @@ namespace Signum.Engine.Maps
         void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             if (PreUnsafeInsert != null)
-                foreach (PreUnsafeInsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
+                foreach (var action in PreUnsafeInsert.GetInvocationListTyped().Reverse())
                     action(query, constructor, (IQueryable<T>)entityQuery);
 
         }

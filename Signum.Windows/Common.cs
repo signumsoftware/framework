@@ -263,7 +263,7 @@ namespace Signum.Windows
 
                     SetPropertyRoute(column, context);
 
-                    foreach (GridViewColumnCommonRouteTask task in GridViewColumnRouteTask.GetInvocationList())
+                    foreach (var task in GridViewColumnRouteTask.GetInvocationListTyped())
                         task(column, route, context);
                 }
                 else
@@ -273,7 +273,7 @@ namespace Signum.Windows
                         string route = (string)column.GetValue(Common.LabelOnlyRouteProperty);
                         PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
 
-                        foreach (GridViewColumnCommonRouteTask task in GridViewColumnLabelOnlyRouteTask.GetInvocationList())
+                        foreach (var task in GridViewColumnLabelOnlyRouteTask.GetInvocationListTyped())
                             task(column, route, context);
                     }
                 }
@@ -296,7 +296,7 @@ namespace Signum.Windows
 
                     SetPropertyRoute(column, context);
 
-                    foreach (DataGridColumnCommonRouteTask task in DataGridColumnRouteTask.GetInvocationList())
+                    foreach (var task in DataGridColumnRouteTask.GetInvocationListTyped())
                         task(column, route, context);
                 }
                 else
@@ -306,7 +306,7 @@ namespace Signum.Windows
                         string route = (string)column.GetValue(Common.LabelOnlyRouteProperty);
                         PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
 
-                        foreach (DataGridColumnCommonRouteTask task in DataGridColumnLabelOnlyRouteTask.GetInvocationList())
+                        foreach (var task in DataGridColumnLabelOnlyRouteTask.GetInvocationListTyped())
                             task(column, route, context);
                     }
                 }
@@ -326,12 +326,12 @@ namespace Signum.Windows
             {
                 SetPropertyRoute(fe, context);
 
-                foreach (CommonRouteTask task in RouteTask.GetInvocationList())
+                foreach (var task in RouteTask.GetInvocationListTyped())
                     task(fe, route, context);
             }
             else
             {
-                foreach (CommonRouteTask task in LabelOnlyRouteTask.GetInvocationList())
+                foreach (var task in LabelOnlyRouteTask.GetInvocationListTyped())
                     task(fe, route, context);
             }
         }

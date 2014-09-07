@@ -93,7 +93,7 @@ namespace Signum.Web
             var func  =  EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
-                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
+                foreach (var item in func.GetInvocationListTyped())
                 {
                     var array = item(ident, ctx);
                     if (array != null)

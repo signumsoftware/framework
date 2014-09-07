@@ -100,8 +100,7 @@ namespace Signum.Web
             if (GetWidget == null)
                 return MvcHtmlString.Empty;
 
-            List<IWidget> widgets = GetWidget.GetInvocationList()
-                .Cast<Func<WidgetContext, IWidget>>()
+            List<IWidget> widgets = GetWidget.GetInvocationListTyped()
                 .Select(d => d(ctx))
                 .NotNull()
                 .ToList();
@@ -127,8 +126,7 @@ namespace Signum.Web
             if (GetEmbeddedWidget == null)
                 return null;
 
-            List<IEmbeddedWidget> widgets = GetEmbeddedWidget.GetInvocationList()
-                .Cast<Func<WidgetContext, IEmbeddedWidget>>()
+            List<IEmbeddedWidget> widgets = GetEmbeddedWidget.GetInvocationListTyped()
                 .Select(d => d(ctx))
                 .NotNull()
                 .ToList();

@@ -274,13 +274,12 @@ namespace Signum.Windows
             if (qs == null || !qs.IsFindable)
                 return false;
 
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(queryName))
-                        return false;
-                }
-            
+            foreach (var isFindable in IsFindable.GetInvocationListTyped())
+            {
+                if (!isFindable(queryName))
+                    return false;
+            }
+
             return true;
         }
 

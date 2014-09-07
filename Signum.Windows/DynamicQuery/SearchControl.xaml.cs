@@ -526,7 +526,7 @@ namespace Signum.Windows
         {
             if (GetMenuItems != null)
             {
-                List<MenuItem> items = GetMenuItems.GetInvocationList().Cast<Func<SearchControl, MenuItem>>().Select(d => d(this)).NotNull().ToList();
+                List<MenuItem> items = GetMenuItems.GetInvocationListTyped().Select(d => d(this)).NotNull().ToList();
                 menu.Items.Clear();
                 foreach (MenuItem mi in items)
                     menu.Items.Add(mi);
@@ -549,7 +549,7 @@ namespace Signum.Windows
 
             if (GetContextMenuItems != null)
             {
-                foreach (var fun in GetContextMenuItems.GetInvocationList().Cast<Func<SearchControl, IEnumerable<MenuItem>>>())
+                foreach (var fun in GetContextMenuItems.GetInvocationListTyped())
                 {
                     var items = fun(this).Try(a => a.ToList());
 

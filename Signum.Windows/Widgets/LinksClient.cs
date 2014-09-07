@@ -76,7 +76,7 @@ namespace Signum.Windows
             var func = EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
-                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>())
+                foreach (var item in func.GetInvocationListTyped())
                 {
                     var array = item(ident, control);
                     if (array != null)

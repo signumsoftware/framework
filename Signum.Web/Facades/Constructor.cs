@@ -101,8 +101,7 @@ namespace Signum.Web
             if (concat == null)
                 return Default();
 
-            var pre = GlobalPreConstructors.GetInvocationList()
-                .Cast<Func<ClientConstructorContext, JsFunction>>()
+            var pre = GlobalPreConstructors.GetInvocationListTyped()
                 .Select(f => f(ctx)).NotNull().ToArray();
 
             if(pre.IsEmpty())
@@ -234,7 +233,7 @@ namespace Signum.Web
                     return null;
 
                 if (PostConstructors != null)
-                    foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationList())
+                    foreach (var post in PostConstructors.GetInvocationListTyped())
                     {
                         post(ctx, entity);
                     }

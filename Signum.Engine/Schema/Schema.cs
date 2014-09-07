@@ -67,14 +67,13 @@ namespace Signum.Engine.Maps
 
         public string IsAllowed(Type type)
         {
-            if (IsAllowedCallback != null)
-                foreach (Func<Type, string> f in IsAllowedCallback.GetInvocationList())
-                {
-                    string result = f(type);
+            foreach (var f in IsAllowedCallback.GetInvocationListTyped())
+            {
+                string result = f(type);
 
-                    if (result != null)
-                        return result;
-                }
+                if (result != null)
+                    return result;
+            }
 
             return null;
         }
@@ -330,8 +329,7 @@ namespace Signum.Engine.Maps
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
                 SqlPreCommand command = Synchronizing
-                    .GetInvocationList()
-                    .Cast<Func<Replacements, SqlPreCommand>>()
+                    .GetInvocationListTyped()
                     .Select(e =>
                     {
                         try
@@ -371,8 +369,7 @@ namespace Signum.Engine.Maps
             using (ExecutionMode.Global())
             {
                 return Generating
-                    .GetInvocationList()
-                    .Cast<Func<SqlPreCommand>>()
+                    .GetInvocationListTyped()
                     .Select(e => e())
                     .Combine(Spacing.Triple);
             }
@@ -387,7 +384,7 @@ namespace Signum.Engine.Maps
                 return;
 
             using (ExecutionMode.Global())
-                foreach (Action item in Initializing.GetInvocationList())
+                foreach (var item in Initializing.GetInvocationListTyped())
                     item();
 
             Initializing = null;
