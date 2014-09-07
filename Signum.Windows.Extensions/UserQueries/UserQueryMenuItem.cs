@@ -174,7 +174,7 @@ namespace Signum.Windows.UserQueries
                     }
                 }
 
-                if (Navigator.IsNavigable(typeof(UserQueryDN), isSearchEntity: true))
+                if (Navigator.IsNavigable(typeof(UserQueryDN), isSearch: true))
                 {
                     miResult.Items.Add(new Separator());
 
