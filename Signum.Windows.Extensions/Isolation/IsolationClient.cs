@@ -146,7 +146,7 @@ namespace Signum.Windows.Isolation
         {
             if (MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)))
             {
-                Lite<IsolationDN> isolation = GetIsolation(ctx.Element, IsValid.TryGetC(ctx.Type));
+                Lite<IsolationDN> isolation = GetIsolation(ctx, IsValid.TryGetC(ctx.Type));
 
                 if (isolation == null)
                 {
@@ -161,8 +161,10 @@ namespace Signum.Windows.Isolation
             return null;
         }
 
-        public static Lite<IsolationDN> GetIsolation(FrameworkElement element, Func<Lite<IsolationDN>, string> isValid = null)
+        public static Lite<IsolationDN> GetIsolation(ConstructorContext ctx, Func<Lite<IsolationDN>, string> isValid = null)
         {
+            var element = ctx.Element;
+
             var result = IsolationDN.Current;
 
             if (result == null)
@@ -175,7 +177,9 @@ namespace Signum.Windows.Isolation
             if (result == null)
             {
                 var sc = element as SearchControl ?? (element as SearchWindow).Try(s => s.SearchControl);
-                if (sc != null)
+                if (sc != null && ctx.OperationInfo != null && (
+                    ctx.OperationInfo.OperationType == OperationType.ConstructorFrom ||
+                    ctx.OperationInfo.OperationType == OperationType.ConstructorFromMany))
                     result = Server.Return((IIsolationServer a) => a.GetOnlyIsolation(sc.SelectedItems.ToList()));
             }
 
