@@ -1062,6 +1062,9 @@ namespace Signum.Windows
 
             HitTestResult hitResult = VisualTreeHelper.HitTest(lvResult, headerPoint);
 
+            if (hitResult == null)
+                return null;
+
             SortGridViewColumnHeader gvch = hitResult.VisualHit.VisualParents().OfType<SortGridViewColumnHeader>().FirstOrDefault();
             return gvch;
         }
