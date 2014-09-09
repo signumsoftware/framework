@@ -888,7 +888,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)));
+                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), null);
 
             if (result == null)
                 return;
