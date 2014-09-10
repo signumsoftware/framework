@@ -132,7 +132,7 @@ namespace Signum.Engine.UserQueries
                 var result = UserQueries.Value.GetOrThrow(userQuery);
 
                 var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryDN>(userInterface: true);
-                if (isAllowed(result))
+                if (!isAllowed(result))
                     throw new EntityNotFoundException(userQuery.EntityType, userQuery.Id);
 
                 return result;

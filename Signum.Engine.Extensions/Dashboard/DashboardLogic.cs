@@ -222,7 +222,7 @@ namespace Signum.Engine.Dashboard
                 var result = Dashboards.Value.GetOrThrow(dashboard);
 
                 var isAllowed = Schema.Current.GetInMemoryFilter<DashboardDN>(userInterface: true);
-                if (isAllowed(result))
+                if (!isAllowed(result))
                     throw new EntityNotFoundException(dashboard.EntityType, dashboard.Id);
 
                 return result;

@@ -139,7 +139,7 @@ namespace Signum.Engine.Chart
                 var result = UserCharts.Value.GetOrThrow(userChart);
 
                 var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
-                if (isAllowed(result))
+                if (!isAllowed(result))
                     throw new EntityNotFoundException(userChart.EntityType, userChart.Id);
 
                 return result;
