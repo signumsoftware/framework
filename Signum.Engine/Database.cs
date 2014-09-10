@@ -897,7 +897,7 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
+                    constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.Table(typeof(E));
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
 
@@ -920,7 +920,7 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c=>c.Parent));
+                    constructor = (Expression<Func<T, MListElement<E, V>>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c => c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
 

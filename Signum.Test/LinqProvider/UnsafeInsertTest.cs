@@ -24,7 +24,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public static void MyClassInitialize(TestContext testContext)
         {
             MusicStarter.StartAndLoad();
-            Schema.Current.EntityEvents<AlbumDN>().PreUnsafeInsert += (query, constructor, entityQuery) => { };
+            Schema.Current.EntityEvents<AlbumDN>().PreUnsafeInsert += (query, constructor, entityQuery) => constructor;
         }
 
         [TestInitialize]

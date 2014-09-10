@@ -60,12 +60,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
+        LambdaExpression IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             if (PreUnsafeInsert != null)
                 foreach (var action in PreUnsafeInsert.GetInvocationListTyped().Reverse())
-                    action(query, constructor, (IQueryable<T>)entityQuery);
+                    constructor = action(query, constructor, (IQueryable<T>)entityQuery);
 
+            return constructor;
         }
 
         void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
@@ -109,7 +110,7 @@ namespace Signum.Engine.Maps
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
     public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
     public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
-    public delegate void PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
+    public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
 
     public class SavedEventArgs
     {
@@ -146,7 +147,7 @@ namespace Signum.Engine.Maps
         void OnRetrieved(IdentifiableEntity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
-        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
+        LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
 
         ICacheController CacheController { get; }
     }
