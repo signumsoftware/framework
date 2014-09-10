@@ -78,6 +78,7 @@ namespace Signum.Engine.Isolation
             }
         }
 
+
         static IDisposable ProcessLogic_ApplySession(ProcessDN process)
         {
             return IsolationDN.Override(process.Data.TryIsolation());
@@ -159,7 +160,27 @@ namespace Signum.Engine.Isolation
                     a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current),
                     a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current));
             };
+
+            Schema.Current.EntityEvents<T>().PreUnsafeInsert += (IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery) =>
+            {
+                if (constructor.Body.Type == typeof(T)) 
+                {
+                    var newBody = Expression.Call(
+                      miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationDN>)),
+                      constructor.Body,
+                      Expression.Quote(isolationProperty),
+                      Expression.Constant(IsolationDN.Current));
+
+                    return Expression.Lambda(newBody, constructor.Parameters);
+                }
+
+                return constructor; //MListTable
+            }; 
         }
+
+        static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
+        static Expression<Func<IsolationMixin, Lite<IsolationDN>>> isolationProperty = (IsolationMixin m) => m.Isolation;
+
 
         public static void Register<T>(IsolationStrategy strategy) where T : IdentifiableEntity
         {
