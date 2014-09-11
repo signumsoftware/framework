@@ -222,8 +222,8 @@ namespace Signum.Windows
             var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement |(canAggregate? SubTokensOptions.CanAggregate : 0); 
             foreach (var f in filters)
             {
-                if (f.Token == null && f.Path.HasText())
-                    f.Token = QueryUtils.Parse(f.Path, qd, options);
+                if (f.Token == null && f.ColumnName.HasText())
+                    f.Token = QueryUtils.Parse(f.ColumnName, qd, options);
 
                 f.RefreshRealValue();
             }
@@ -234,7 +234,7 @@ namespace Signum.Windows
             var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
             foreach (var o in orders)
             {
-                o.Token = QueryUtils.Parse(o.Path, qd, options);
+                o.Token = QueryUtils.Parse(o.ColumnName, qd, options);
             }
         }
 
@@ -243,7 +243,7 @@ namespace Signum.Windows
             var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
             foreach (var c in columns)
             {
-                c.Token = QueryUtils.Parse(c.Path, qd, options);
+                c.Token = QueryUtils.Parse(c.ColumnName, qd, options);
             }
         }
 
@@ -255,7 +255,7 @@ namespace Signum.Windows
                     return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
                         columns.Select(co => co.ToColumn())).ToList();
                 case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
                 case ColumnOptionsMode.Replace:
                     return columns.Select(co => co.ToColumn()).ToList();
                 default:

@@ -298,14 +298,6 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
-        public static readonly DependencyProperty HideIfNotFindableProperty =
-            DependencyProperty.Register("HideIfNotFindable", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool HideIfNotFindable
-        {
-            get { return (bool)GetValue(HideIfNotFindableProperty); }
-            set { SetValue(HideIfNotFindableProperty, value); }
-        }
-
         private void QueryNameChanged(DependencyPropertyChangedEventArgs s)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || s.NewValue == null)
@@ -384,7 +376,7 @@ namespace Signum.Windows
             {
                 FilterOptions.Add(new FilterOption
                 {
-                    Path = FilterColumn,
+                    ColumnName = FilterColumn,
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));

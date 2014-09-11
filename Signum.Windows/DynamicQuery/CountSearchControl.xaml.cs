@@ -179,7 +179,7 @@ namespace Signum.Windows
             {
                 FilterOptions.Add(new FilterOption
                 {
-                    Path = FilterColumn,
+                    ColumnName = FilterColumn,
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
