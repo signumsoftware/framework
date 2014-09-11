@@ -8,6 +8,6 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" m:Common.IsReadOnly="False" />
-        <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400" FilterColumn="Package" x:Name="sc"/>
+        <m:SearchControl QueryName="{x:Type d:PackageLineDN}" FilterColumn="Package" x:Name="sc"/>
     </StackPanel>
 </UserControl>

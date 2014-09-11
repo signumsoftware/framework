@@ -5,6 +5,6 @@
             
              xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows">
     
-        <m:AutocompleteTextBox AutoCompleting="AutocompleteTextBox_Autocompleting" Closed="autoCompleteTb_Closed" x:Name="autoCompleteTb">
+        <m:AutocompleteTextBox Autocompleting="AutocompleteTextBox_Autocompleting" Closed="autoCompleteTb_Closed" x:Name="autoCompleteTb">
         </m:AutocompleteTextBox>
 </UserControl>
