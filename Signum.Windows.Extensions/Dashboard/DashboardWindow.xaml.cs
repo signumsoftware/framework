@@ -40,7 +40,7 @@ namespace Signum.Windows.Dashboard
 
         void DashboardWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearchEntity: true));
+            bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearch: true));
             this.tbDashboard.Cursor = canNavigate ? Cursors.Hand : Cursors.Arrow;   
  	        this.tbDashboard.Text = e.NewValue.TryToString();
         }
@@ -54,7 +54,7 @@ namespace Signum.Windows.Dashboard
 
         private void tbDashboard_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (Navigator.IsNavigable(Current, isSearchEntity: true))
+            if (Navigator.IsNavigable(Current, isSearch: true))
                 Navigator.Navigate(Current.ToLite());
         }
     }

@@ -368,13 +368,21 @@ namespace Signum.Engine.Mailing.Pop3
                         .SelectMany(text => gr.Key.cod == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text))
                         .ToArray();
 
-                        return Encoding.GetEncoding(gr.Key.end).GetString(bytes);
+                        return  GetEncoding(gr.Key.end).GetString(bytes);
                     }, "");
 
                     return result;
                 }
                 , options);
             }
+        }
+
+        private static Encoding GetEncoding(string encoding)
+        {
+            if(encoding.Equals("cp1252" , StringComparison.InvariantCultureIgnoreCase))
+                return Encoding.GetEncoding(1252);
+
+            return Encoding.GetEncoding(encoding);
         }
 
         private static byte[] DecodeQuotePrintable(string input)

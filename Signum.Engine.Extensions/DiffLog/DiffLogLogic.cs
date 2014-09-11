@@ -16,7 +16,7 @@ namespace Signum.Engine.DiffLog
 {
     public static class DiffLogLogic
     {
-        public static Polymorphic<Tuple<DiffLogStrategy>> Types = new Polymorphic<Tuple<DiffLogStrategy>>(minimumType: typeof(IdentifiableEntity)); 
+        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(IdentifiableEntity)); 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -26,30 +26,22 @@ namespace Signum.Engine.DiffLog
 
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
-                RegisterGraph<IdentifiableEntity>(DiffLogStrategy.All);
+                RegisterGraph<IdentifiableEntity>(oper => true);
             }
         }
 
-        public static void RegisterGraph<T>(DiffLogStrategy value) where T : IdentifiableEntity
+        public static void RegisterGraph<T>(Func<IOperation, bool> func) where T : IdentifiableEntity
         {
-            Types.SetDefinition(typeof(T), Tuple.Create(value));
+            Types.SetDefinition(typeof(T), func);
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
         {
-            var type =
-                operation.OperationType == OperationType.Constructor ? operation.ReturnType :
-                operation.OperationType == OperationType.ConstructorFrom ? operation.ReturnType :
-                operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType :
-                operation.OperationType == OperationType.Execute ? entity.GetType() :
-                operation.OperationType == OperationType.Delete ? entity.GetType() :
-                new InvalidOperationException("Unexpected OperationType {0}".Formato(operation.OperationType)).Throw<Type>();
+            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? null : entity.GetType();
 
-            DiffLogStrategy strategy = Types.GetValue(type).Try(a => a.Item1) ?? 0;
+            bool? strategy = type == null ? (bool?)null : Types.GetValue(type)(operation);
 
-            var required = GetStrategy(operation);
-
-            if ((strategy & required) == 0)
+            if (strategy == false)
                 return null;
 
             if (operation.OperationType == OperationType.Delete)
@@ -63,8 +55,11 @@ namespace Signum.Engine.DiffLog
                 {
                     var target = log.GetTarget();
 
-                    if (target != null && operation.OperationType != OperationType.Delete)
-                        log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
+                    if (target != null && operation.OperationType != OperationType.Delete && !target.IsNew)
+                    {
+                        if (strategy ?? Types.GetValue(target.GetType())(operation))
+                            log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
+                    }
                 }
             });
         }
@@ -75,19 +70,6 @@ namespace Signum.Engine.DiffLog
                 return entity.ToLite().Retrieve();
         }
 
-        private static DiffLogStrategy GetStrategy(IOperation operation)
-        {
-            switch (operation.OperationType)
-            {
-                case OperationType.Execute: return ((IEntityOperation)operation).Lite ? DiffLogStrategy.ExecuteLite : DiffLogStrategy.ExecuteNoLite;
-                case OperationType.Delete: return DiffLogStrategy.Delete;
-                case OperationType.Constructor: return DiffLogStrategy.Construct;
-                case OperationType.ConstructorFrom: return DiffLogStrategy.ConstructFrom;
-                case OperationType.ConstructorFromMany: return DiffLogStrategy.ConstructFromMany;
-                default: throw new InvalidOperationException("Unexpected OperationType " + operation.OperationType);
-            }
-        }
-
         public static MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
         {
             var logs = Database.Query<OperationLogDN>().Where(a => a.Exception == null && a.Target == log.Target);
@@ -96,20 +78,5 @@ namespace Signum.Engine.DiffLog
                  log.Mixin<DiffLogMixin>().InitialState == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
                  log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }
-    }
-
-    public enum DiffLogStrategy
-    {
-        /// <summary>
-        /// Save
-        /// </summary>
-        ExecuteNoLite = 1,
-        ExecuteLite = 2,
-        Construct = 4, 
-        ConstructFrom = 8, 
-        ConstructFromMany = 16, 
-        Delete = 32,
-
-        All = ExecuteNoLite | ExecuteLite | Construct | ConstructFrom | ConstructFromMany | Delete
     }
 }

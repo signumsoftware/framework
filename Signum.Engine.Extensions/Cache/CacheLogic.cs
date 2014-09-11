@@ -371,12 +371,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
             }
 
-            void UnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery)
+            LambdaExpression UnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
                 Transaction.PostRealCommit -= Transaction_PostRealCommit;
                 Transaction.PostRealCommit += Transaction_PostRealCommit;
+
+                return constructor;
             }
 
             void UnsafeUpdated(IUpdateable update, IQueryable<T> entityQuery)
