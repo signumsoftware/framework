@@ -188,14 +188,16 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeUpdate(update);
         }
 
-        internal void OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
+        internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             AssertAllowed(type);
 
             var ee = entityEvents.TryGetC(type);
 
-            if (ee != null)
-                ee.OnPreUnsafeInsert(query, constructor, entityQuery);
+            if (ee == null)
+                return constructor;
+         
+            return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
         public ICacheController CacheController(Type type)

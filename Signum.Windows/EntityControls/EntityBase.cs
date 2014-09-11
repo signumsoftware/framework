@@ -237,9 +237,9 @@ namespace Signum.Windows
                 if (View)
                     Navigate = false;
                 else
-                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearchEntity: false) :
+                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearch: false) :
                         Implementations.Value.IsByAll ? true :
-                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
+                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearch: false));
             }
 
             if (this.NotSet(EntityBase.FindProperty) && Find)
@@ -298,7 +298,7 @@ namespace Signum.Windows
             {
                 Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsNavigable(entityType, isSearchEntity: false);
+                return Navigator.IsNavigable(entityType, isSearch: false);
             }
             else
                 return Navigate;
@@ -383,7 +383,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                object entity = this.Construct(type);
+                object entity = this.Construct(type, null);
 
                 value = entity;
             }

@@ -226,14 +226,11 @@ Mixins won't make a lot of sense if the new properties could not be shown to the
 in `App.xaml.cs` or `EmployeeClient.cs`: 
 
 ```C#
-Navigator.EntitySettings<UserDN>().OverrideView((usr, ctrl) =>
+Navigator.EntitySettings<UserDN>().OverrideView += usr, ctrl =>
 {
-    using (Common.DelayRoutes())
-    {
-        ctrl.Child<EntityLine>("Role").After(new EntityLine().Set(Common.RouteProperty, "[UserEmployeeMixin].Employee"));
-    }
+    ctrl.Child<EntityLine>("Role").After(new EntityLine().Set(Common.RouteProperty, "[UserEmployeeMixin].Employee"));
     return ctrl;
-});
+};
 ```
 * Using `Child` and `After` extension methods you can find controls in the visual (or logical) tree and manipulate them. It's like jQuery for WPF!. 
 * `Common.DelayedRoutes` is necessary because the `EntityLine` is being created, then the `Route` is set, and finally added to the visual tree. If written in XAML will be the other way arround.

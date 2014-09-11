@@ -33,78 +33,42 @@ namespace Signum.Windows
         {
             Manager = manager;
         }
-      
-        public static void NavigateUntyped(object entity)
+
+        public static void NavigateUntyped(object entity, NavigateOptions options = null)
         {
-            Manager.Navigate(entity, new NavigateOptions());
+            Manager.Navigate(entity, options ?? new NavigateOptions());
         }
 
-        public static void NavigateUntyped(object entity, NavigateOptions options)
-        {
-            Manager.Navigate(entity, options);
-        }
-
-        public static void Navigate<T>(Lite<T> entity)
+        public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null)
             where T : class, IIdentifiable
         {
-            Manager.Navigate(entity, new NavigateOptions());
+            Manager.Navigate(entity, options ?? new NavigateOptions());
         }
 
-        public static void Navigate<T>(Lite<T> entity, NavigateOptions options)
-            where T : class, IIdentifiable
-        {
-            Manager.Navigate(entity, options);
-        }
-
-        public static void Navigate<T>(T entity)
+        public static void Navigate<T>(T entity, NavigateOptions options = null)
             where T : IIdentifiable
         {
-            Manager.Navigate(entity, new NavigateOptions());
+            Manager.Navigate(entity, options ?? new NavigateOptions());
         }
 
-        public static void Navigate<T>(T entity, NavigateOptions options)
-            where T : IIdentifiable
+
+        public static object ViewUntyped(object entity, ViewOptions options = null) 
         {
-            Manager.Navigate(entity, options);
+            return Manager.View(entity, options ?? new ViewOptions());
         }
 
-
-        public static object ViewUntyped(object entity)
-        {
-            return Manager.View(entity, new ViewOptions());
-        }
-
-        public static object ViewUntyped(object entity, ViewOptions options)    
-        {
-            return Manager.View(entity, options);
-        }
-
-        public static Lite<T> View<T>(Lite<T> entity) 
+        public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) 
             where T: class, IIdentifiable
         {
-            return (Lite<T>)Manager.View(entity, new ViewOptions());
+            return (Lite<T>)Manager.View(entity, options ?? new ViewOptions());
         }
 
-        public static Lite<T> View<T>(Lite<T> entity, ViewOptions options) 
-            where T: class, IIdentifiable
-        {
-            return (Lite<T>)Manager.View(entity, options);
-        }
-
-        public static T View<T>(T entity)
+        public static T View<T>(T entity, ViewOptions options = null)
             where T : ModifiableEntity
         {
-            return (T)Manager.View(entity, new ViewOptions());
+            return (T)Manager.View(entity, options ?? new ViewOptions());
         }
 
-        public static T View<T>(T entity, ViewOptions options)
-           where T : ModifiableEntity
-        {
-            return (T)Manager.View(entity, options);
-        }
-
-
- 
     
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
@@ -144,14 +108,14 @@ namespace Signum.Windows
             return Manager.OnIsViewable(entity.GetType(), entity);
         }
 
-        public static bool IsNavigable(Type type, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(type, null, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, isSearch);
         }
 
-        public static bool IsNavigable(IIdentifiable entity, bool isSearchEntity = false)
+        public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, isSearch);
         }
 
         public static void AddSettings(List<EntitySettings> settings)

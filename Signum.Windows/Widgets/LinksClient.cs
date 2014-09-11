@@ -271,7 +271,7 @@ namespace Signum.Windows
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
             //Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Finder.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: true);
+            IsVisible = Finder.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearch: true);
         }
 
         public override void Execute()

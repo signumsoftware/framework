@@ -408,7 +408,7 @@ namespace Signum.Windows
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
-                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
+                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearch: true));
 
             if (this.NotSet(EntityBase.CreateProperty) && Create)
                 Create = Implementations.IsByAll ? false :
@@ -880,7 +880,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)));
+                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), null);
 
             if (result == null)
                 return;
@@ -1053,6 +1053,9 @@ namespace Signum.Windows
             Point headerPoint = new Point(newPoint.X, 4);
 
             HitTestResult hitResult = VisualTreeHelper.HitTest(lvResult, headerPoint);
+
+            if (hitResult == null)
+                return null;
 
             SortGridViewColumnHeader gvch = hitResult.VisualHit.VisualParents().OfType<SortGridViewColumnHeader>().FirstOrDefault();
             return gvch;

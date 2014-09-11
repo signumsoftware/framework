@@ -628,8 +628,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Common.md" />
+    <None Include="Controls\AutoCompleteTextBox.md" />
+    <None Include="Controls\ColorPicker.md" />
+    <None Include="Controls\DateTimePicker.md" />
+    <None Include="Controls\NumericTextBox.md" />
+    <None Include="Converters\Converters.md" />
+    <None Include="DataBorder.md" />
+    <None Include="DynamicQuery\SearchControl.md" />
+    <None Include="EntityControls\EntityControls.md" />
     <None Include="Facades\Constructor.md" />
+    <None Include="Facades\Finder.md" />
+    <None Include="Facades\Navigator.md" />
+    <None Include="Facades\Server.md" />
     <None Include="Introduction.md" />
+    <None Include="LocExtension.md" />
+    <None Include="NormalWindow.md" />
+    <None Include="Widgets\LinksClient.md" />
+    <None Include="Widgets\WidgetPanel.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
