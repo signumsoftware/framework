@@ -180,11 +180,11 @@ namespace Signum.Web
         }
     }
 
-    public class QuickLinkFind : QuickLink
+    public class QuickLinkExplore : QuickLink
     {
         public FindOptions FindOptions { get; set; }
         
-        public QuickLinkFind(FindOptions findOptions)
+        public QuickLinkExplore(FindOptions findOptions)
         {
             FindOptions = findOptions;
             IsVisible = Finder.IsFindable(findOptions.QueryName);
@@ -192,13 +192,13 @@ namespace Signum.Web
             Name = Finder.ResolveWebQueryName(findOptions.QueryName);
         }
 
-        public QuickLinkFind(object queryName, string columnName, object value, bool hideColumn) :
+        public QuickLinkExplore(object queryName, string columnName, object value) :
             this(new FindOptions
             {
                 QueryName = queryName,
                 SearchOnLoad = true,
-                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
-                ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
+                ColumnOptionsMode = ColumnOptionsMode.Remove,
+                ColumnOptions = {new ColumnOption(columnName)},
                 ShowFilters = false,
                 FilterOptions = new List<FilterOption>
                 {
