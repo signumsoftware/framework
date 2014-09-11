@@ -29,7 +29,7 @@ namespace Signum.Windows
             remove { RemoveHandler(ClosedEvent, value); }
         }
 
-        public event Func<string, CancellationToken, IEnumerable> AutoCompleting;
+        public event Func<string, CancellationToken, IEnumerable> Autocompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutocompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutocompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
@@ -94,7 +94,7 @@ namespace Signum.Windows
         {
             delayTimer.Stop();
 
-            if (AutoCompleting == null) 
+            if (Autocompleting == null) 
                 throw new NullReferenceException("SeachMethod cannot be null.");
 
             string text = txtBox.Text;
@@ -106,7 +106,7 @@ namespace Signum.Windows
             {
                 Thread.CurrentThread.AssignCultures(parent);
                 Statics.ImportThreadContext(context);
-                return AutoCompleting(text, source.Token);
+                return Autocompleting(text, source.Token);
             }, source.Token);
 
             task.ContinueWith(res =>

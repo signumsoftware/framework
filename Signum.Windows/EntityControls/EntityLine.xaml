@@ -58,7 +58,7 @@
                     VerticalAlignment="Stretch" />
                 <m:AutocompleteTextBox 
                     x:Name="autocompleteTextBox"
-                    AutoCompleting="autocompleteTextBox_Autocompleting" 
+                    Autocompleting="autocompleteTextBox_Autocompleting" 
                     Closed="autocompleteTextBox_Closed"
                     Margin="-2,1,-2,-2"
                     Visibility="Hidden"/>

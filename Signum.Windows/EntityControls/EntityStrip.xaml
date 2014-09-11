@@ -41,7 +41,7 @@
                                 </Grid.ColumnDefinitions>
                                 <m:AutocompleteTextBox Margin="2 2 0 0"
                                 x:Name="autocompleteTextBox"
-                                AutoCompleting="autocompleteTextBox_Autocompleting" 
+                                Autocompleting="autocompleteTextBox_Autocompleting" 
                                 Closed="autocompleteTextBox_Closed"
                                 Visibility="Hidden" HorizontalAlignment="Stretch" MinWidth="80"/>
                                 <Button x:Name="btCreate" Grid.Column="1" Click="btCreate_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc {x:Static d:OperationMessage.Create}}"
