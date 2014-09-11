@@ -75,7 +75,7 @@ namespace Signum.Windows.Excel
                     {
                         new FilterOption 
                         { 
-                            Path = "Query", 
+                            ColumnName = "Query", 
                             Operation = FilterOperation.EqualTo, 
                             Value = query.ToLite(query.IsNew),
                             Frozen = true

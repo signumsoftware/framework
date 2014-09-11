@@ -136,7 +136,7 @@ namespace Signum.Windows.Chart
             if (Request.GroupResults)
             {
                 //so the values don't get affected till next SetResults
-                var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = Request.Filters.Select(f => new FilterOption { ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
                 var keyColunns = Request.Columns
                     .Zip(ResultTable.Columns, (t, c) => new { t.Token, Column = c })
                     .Where(a => !(a.Token.Token is AggregateToken)).ToArray();

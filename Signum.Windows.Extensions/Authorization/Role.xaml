@@ -12,7 +12,7 @@
         </GroupBox>
         <m:CountSearchControl x:Name="ReferedBySc" QueryName="{x:Static d:RoleQuery.RolesReferedBy}">
             <m:CountSearchControl.FilterOptions>
-                <m:FilterOption Path="Refered" Operation="EqualTo" Value="{Binding DataContext, ElementName=ReferedBySc}"  Frozen="True"/>
+                <m:FilterOption ColumnName="Refered" Operation="EqualTo" Value="{Binding DataContext, ElementName=ReferedBySc}"  Frozen="True"/>
             </m:CountSearchControl.FilterOptions>
         </m:CountSearchControl>
     </StackPanel>

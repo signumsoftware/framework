@@ -145,20 +145,20 @@ namespace Signum.Windows.UserQueries
             var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
                  searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
              {
-                 Path = qf.Token.Token.FullKey(),
+                 ColumnName = qf.Token.Token.FullKey(),
                  Operation = qf.Operation,
                  Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn)
              })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
-                Path = qc.Token.Token.FullKey(),
+                ColumnName = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.Token.FullKey(),
+                ColumnName = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
 
@@ -172,7 +172,7 @@ namespace Signum.Windows.UserQueries
             var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
-                    Path = qf.Token.Token.FullKey(),
+                    ColumnName = qf.Token.Token.FullKey(),
                     Operation = qf.Operation,
                     Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn)
                 })).ToList();
@@ -180,13 +180,13 @@ namespace Signum.Windows.UserQueries
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
 
-                Path = qc.Token.Token.FullKey(),
+                ColumnName = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName.DefaultText(null)
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.Token.FullKey(),
+                ColumnName = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
 
