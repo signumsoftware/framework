@@ -2,11 +2,11 @@
 
 The main responsibilities of `Navigator` is showing entities in a modal window (`View`) or an independent window (`Navigate`) using the custom control registered using `EntitySettings<T>`. 
 
-By default the entities are shown using a `NormalWindow`, that provides a common frame for any entity with a title bar, a button bar, validation summary and widgets panel, but the `NavigationManager` can be overriden to open any other kind of   
+By default the entities are shown using a `NormalWindow`, that provides a common frame for any entity with a title bar, a button bar, validation summary and widgets panel, but the `NavigationManager` can be overriden to open any other kind of control or window.  
 
 ## View
 
-`Navigator.View` method shows an entity to the user and returns the entity with potential changes. The behavior should block the thread in the meanwhile, and by default is implemented using `ShowDialog` to open a modal `NormalWindow`, but could be overridden to show always a different window.
+`Navigator.View` method shows an entity to the user and returns the entity with potential changes. The behavior should block the thread in the meanwhile, and by default is implemented using `ShowDialog` to open a modal `NormalWindow`, but could be overridden to show a different window.
 
 This method is used by default in the view (->) and create (+) buttons in `EntityLine` or `EntityList`, and can also be used to define a multi-step process that opens many dialog windows. 
 
@@ -59,7 +59,7 @@ order.Execute(OrderOperation.Modify, model);
 ## Navigate
 `Navigator.Navigate` method shows an entity to the user in an independent window. The behavior should not block the thread and by default is implemented using `Show` to open an independent `NormalWindow`, but could be overridden to open a new `Tab` in a tabbed application. 
 
-If `NavigationManager` is instantiated with `multithreaded = true` then the `NormalWindow` is opened using a different `Thread` and `Dispatcher`. This way any `ShowDialog` from this new entity won't block the rest of the application, but you have to take more care of [`Freeze`](http://msdn.microsoft.com/en-us/library/system.windows.freezable(v=vs.110).aspx) any resource that can be shared across different threads. 
+If `NavigationManager` is instantiated with `multithreaded = true` then the `NormalWindow` is opened using a different `Thread` and `Dispatcher`. This way any `ShowDialog` from this new entity won't block the rest of the application, but you have to take more care to [`Freeze`](http://msdn.microsoft.com/en-us/library/system.windows.freezable(v=vs.110).aspx) any resource that can be shared across different threads. 
 
 
 There are also three different overloads: 
