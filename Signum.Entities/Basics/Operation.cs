@@ -205,7 +205,6 @@ namespace Signum.Entities
         }
     }
 
-    [Flags]
     public enum OperationType
     {
         Execute,

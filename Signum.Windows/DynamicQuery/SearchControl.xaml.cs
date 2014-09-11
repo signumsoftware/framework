@@ -888,7 +888,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)));
+                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), null);
 
             if (result == null)
                 return;
@@ -1061,6 +1061,9 @@ namespace Signum.Windows
             Point headerPoint = new Point(newPoint.X, 4);
 
             HitTestResult hitResult = VisualTreeHelper.HitTest(lvResult, headerPoint);
+
+            if (hitResult == null)
+                return null;
 
             SortGridViewColumnHeader gvch = hitResult.VisualHit.VisualParents().OfType<SortGridViewColumnHeader>().FirstOrDefault();
             return gvch;
