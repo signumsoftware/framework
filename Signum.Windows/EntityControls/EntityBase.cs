@@ -79,14 +79,6 @@ namespace Signum.Windows
             set { SetValue(ViewProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewButtonsProperty =
-            DependencyProperty.Register("ViewButtons", typeof(ViewMode?), typeof(EntityBase), new UIPropertyMetadata(null));
-        public ViewMode? ViewButtons
-        {
-            get { return (ViewMode?)GetValue(ViewButtonsProperty); }
-            set { SetValue(ViewButtonsProperty, value); }
-        }
-
         public static readonly DependencyProperty NavigateProperty =
             DependencyProperty.Register("Navigate", typeof(bool), typeof(EntityBase), new UIPropertyMetadata(true));
         public bool Navigate

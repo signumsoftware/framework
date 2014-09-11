@@ -45,7 +45,9 @@ namespace Signum.Windows.Operations
                 { 
                     entity.GetType() == typeof(OperationLogDN) ? null : 
                         new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
-                        {OrderOptions ={ new OrderOption("Start") }}){ IsShy = true}
+                        {
+                            OrderOptions = { new OrderOption("Start") }
+                        }){ IsShy = true}
                 });
             }
         }

@@ -106,6 +106,7 @@ namespace Signum.Windows
         static EntityRepeater()
         {
             ViewProperty.OverrideMetadata(typeof(EntityRepeater), new FrameworkPropertyMetadata(false));
+            ViewOnCreateProperty.OverrideMetadata(typeof(EntityRepeater), new FrameworkPropertyMetadata(false));
         }
 
         public EntityRepeater()

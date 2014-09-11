@@ -291,6 +291,13 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
+        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+        {
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
+
+            return lite;
+        }
+
         static ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>>();
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
@@ -372,12 +379,7 @@ namespace Signum.Windows
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
-        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
-        {
-            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
-
-           return lite;
-        }
+        
 
     }
 
