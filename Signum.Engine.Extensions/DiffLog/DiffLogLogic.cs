@@ -37,7 +37,7 @@ namespace Signum.Engine.DiffLog
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
         {
-            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? null : entity.GetType();
+            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? entity.GetType() : null;
 
             bool? strategy = type == null ? (bool?)null : Types.GetValue(type)(operation);
 
