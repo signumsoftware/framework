@@ -674,7 +674,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity())
             {
                 if (runtimeInfo.IsNew || ctx.Value == null)
-                    return ctx.Controller.Construct<T>();
+                    return new ConstructorContext(ctx.Controller).Construct<T>();
 
                 return ctx.Value;
             }
@@ -698,7 +698,7 @@ namespace Signum.Web
                 if (identifiable != null && identifiable.IsNew)
                     return (T)(ModifiableEntity)identifiable;
                 else
-                    return controller.Construct<T>();
+                    return new ConstructorContext(controller).Construct<T>();
             }
 
             if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
@@ -873,7 +873,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)ctx.Controller.Construct(runtimeInfo.EntityType)).ToLiteFat());
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)new ConstructorContext(ctx.Controller).ConstructUntyped(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)

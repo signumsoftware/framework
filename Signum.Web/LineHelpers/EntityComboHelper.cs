@@ -71,7 +71,8 @@ namespace Signum.Web
 
                 if (entityCombo.Type.IsEmbeddedEntity() && entityCombo.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone((object)helper.ViewContext.Controller.Construct(entityCombo.Type.CleanType()));
+                    EmbeddedEntity embedded = (EmbeddedEntity)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(entityCombo.Type.CleanType());
+                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone(embedded);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityCombo, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityCombo, isTemplate: true), null));
                 }
 

@@ -69,10 +69,11 @@ namespace Signum.Web
                  }
 
                  if (entityLine.Type.IsEmbeddedEntity() && entityLine.Create)
-                {
-                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)helper.ViewContext.Controller.Construct(entityLine.Type.CleanType()));
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
-                }
+                 {
+                     EmbeddedEntity embedded = (EmbeddedEntity)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(entityLine.Type.CleanType());
+                     TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone(embedded);
+                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
+                 }
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityLine.UntypedValue))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));

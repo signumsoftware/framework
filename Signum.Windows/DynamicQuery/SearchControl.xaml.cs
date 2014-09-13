@@ -412,7 +412,7 @@ namespace Signum.Windows
 
             if (this.NotSet(EntityBase.CreateProperty) && Create)
                 Create = Implementations.IsByAll ? false :
-                         Implementations.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: true));
+                         Implementations.Types.Any(t => Navigator.IsCreable(t, isSearch: true));
 
             DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
 
@@ -880,7 +880,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)this.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), null);
+                (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(SelectType(t => Navigator.IsCreable(t, isSearch: true)));
 
             if (result == null)
                 return;

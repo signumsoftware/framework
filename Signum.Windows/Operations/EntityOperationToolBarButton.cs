@@ -162,7 +162,7 @@ namespace Signum.Windows.Operations
                     if (!eoc.ConfirmMessage())
                         return;
 
-                    IIdentifiable result = (IdentifiableEntity)eoc.EntityControl.SurroundConstruct(eoc.OperationInfo.ReturnType, eoc.OperationInfo, null, ctx =>
+                    IIdentifiable result = (IdentifiableEntity)new ConstructorContext(eoc.EntityControl, eoc.OperationInfo).SurroundConstructUntyped(eoc.OperationInfo.ReturnType, ctx =>
                     {
                         var entity = eoc.OperationInfo.Lite.Value ?
                             Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :

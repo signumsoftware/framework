@@ -225,7 +225,7 @@ namespace Signum.Windows
                 Create =
                     CleanType.IsEmbeddedEntity() ? Navigator.IsCreable(CleanType ) : 
                     Implementations.Value.IsByAll ? false:
-                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearch: false));
 
             if (this.NotSet(EntityBase.ViewProperty) && View)
                 View = CleanType.IsEmbeddedEntity() ? Navigator.IsViewable(CleanType) :
@@ -379,11 +379,11 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearch: false));
                 if (type == null)
                     return null;
 
-                object entity = this.Construct(type, null);
+                object entity = new ConstructorContext(this).ConstructUntyped(type);
 
                 value = entity;
             }

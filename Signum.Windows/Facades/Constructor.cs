@@ -22,32 +22,30 @@ namespace Signum.Windows
             Manager = manager;
         }
 
-        public static T Construct<T>(this FrameworkElement element, OperationInfo info, List<object> args = null)
-         where T : ModifiableEntity
-        {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), info, element, args), Manager.ConstructCore);
-        }
-
-        public static ModifiableEntity Construct(this FrameworkElement element, Type type, OperationInfo info, List<object> args = null)
-        {
-            return Manager.SurroundConstruct(new ConstructorContext(type, info, element, args), Manager.ConstructCore);
-        }
-
-        public static T SurroundConstruct<T>(this FrameworkElement element, OperationInfo info, Func<ConstructorContext, T> constructor)
-          where T : ModifiableEntity
-        {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), info, element, null), constructor);
-        }
-
-        public static T SurroundConstruct<T>(this FrameworkElement element, OperationInfo info, List<object> args, Func<ConstructorContext, T> constructor)
+        public static T Construct<T>(this ConstructorContext ctx)
             where T : ModifiableEntity
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), info, element, args), constructor);
+            return (T)ctx.SurroundConstructUntyped(typeof(T), Manager.ConstructCore);
         }
 
-        public static ModifiableEntity SurroundConstruct(this FrameworkElement element, Type type, OperationInfo info, List<object> args, Func<ConstructorContext, ModifiableEntity> constructor)
+        public static ModifiableEntity ConstructUntyped(this ConstructorContext ctx, Type type)
         {
-            return Manager.SurroundConstruct(new ConstructorContext(type, info, element, args), constructor);
+            return ctx.SurroundConstructUntyped(type, Manager.ConstructCore);
+        }
+
+        public static T SurroundConstruct<T>(this ConstructorContext ctx, Func<ConstructorContext, T> constructor)
+            where T : ModifiableEntity
+        {
+            ctx.Type = typeof(T);
+
+            return (T)Manager.SurroundConstruct(ctx, constructor);
+        }
+
+        public static ModifiableEntity SurroundConstructUntyped(this ConstructorContext ctx, Type type, Func<ConstructorContext, ModifiableEntity> constructor)
+        {
+            ctx.Type = type;
+
+            return Manager.SurroundConstruct(ctx, constructor);
         }
 
         public static void Register<T>(Func<ConstructorContext, T> constructor)
@@ -59,22 +57,18 @@ namespace Signum.Windows
 
     public class ConstructorContext
     {
-        public ConstructorContext(Type type, OperationInfo operationInfo, FrameworkElement element, List<object> args)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type"); 
+        public Type Type { get; internal set; }
+        public FrameworkElement Element { get; private set; }
+        public OperationInfo OperationInfo { get; private set; }
+        public List<object> Args { get; private set; }
+        public bool CancelConstruction { get; set; }
 
-            this.Type = type;
+        public ConstructorContext(FrameworkElement element = null, OperationInfo operationInfo = null, List<object> args = null)
+        {
             this.Element = element;
             this.Args = args ?? new List<object>();
             this.OperationInfo = operationInfo;
         }
-
-        public OperationInfo OperationInfo { get; private set; }
-        public Type Type { get; private set; }
-        public FrameworkElement Element { get; private set; }
-        public List<object> Args { get; private set; }
-        public bool CancelConstruction { get; set; }
     }
 
     public class ConstructorManager
