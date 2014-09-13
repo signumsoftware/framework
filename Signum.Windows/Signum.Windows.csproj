@@ -445,7 +445,6 @@
       <DependentUpon>QueryTokenRenderer.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicQuery\SortGridViewColumnHeader.cs" />
-    <Compile Include="Fluent\ControlExtensions.cs" />
     <Compile Include="Fluent\EntityExtensions.cs" />
     <Compile Include="Fluent\Fluent.cs" />
     <Compile Include="Fluent\FrameworkFactoryGenerator.cs" />

@@ -386,7 +386,7 @@ namespace Signum.Windows
                     ColumnOptions.Add(new ColumnOption(FilterColumn));
                     ColumnOptionsMode = ColumnOptionsMode.Remove;
                 }
-                if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
+                if (this.NotSet(SearchOnLoadProperty))
                     SearchOnLoad = true;
             }
 
