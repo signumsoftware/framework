@@ -135,6 +135,8 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
+    <Compile Include="Widgets\LinksClient.cs" />
+    <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
     <Compile Include="ValueLineBoxOptions.cs" />
@@ -258,8 +260,6 @@
     <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
-    <Compile Include="TypeContext\Widgets\LinksClient.cs" />
-    <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
