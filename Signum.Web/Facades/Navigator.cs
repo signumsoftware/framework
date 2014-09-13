@@ -638,7 +638,7 @@ namespace Signum.Web
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
-                return controller.Construct(runtimeInfo.EntityType);
+                return new ConstructorContext(controller).ConstructUntyped(runtimeInfo.EntityType);
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)

@@ -48,7 +48,7 @@ namespace Signum.Web.Controllers
             if (!type.IsIdentifiableEntity())
                 throw new InvalidOperationException("Only classes that inherit from IdentifiableEntity can be created using this Action"); 
 
-            var entity = (IdentifiableEntity)this.Construct(type);
+            var entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
 
             return this.NormalPage(new NavigateOptions(entity));
         }
@@ -68,7 +68,7 @@ namespace Signum.Web.Controllers
                 }
             }
             else
-                entity = (IdentifiableEntity)this.Construct(type);
+                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
 
@@ -95,7 +95,7 @@ namespace Signum.Web.Controllers
                  }
             }
             else
-                entity = (IdentifiableEntity)this.Construct(type);
+                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
         
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
@@ -123,7 +123,7 @@ namespace Signum.Web.Controllers
                  }
             }
             else
-                entity = (IdentifiableEntity)this.Construct(type);
+                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 

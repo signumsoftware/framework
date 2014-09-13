@@ -64,7 +64,8 @@ namespace Signum.Web
 
                 if (listDetail.ElementType.IsEmbeddedEntity() && listDetail.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0, null);
+                    T embedded = (T)(object)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(typeof(T));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>(embedded, (TypeContext)listDetail.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail), templateTC.Value.ToString()));
                 }
 

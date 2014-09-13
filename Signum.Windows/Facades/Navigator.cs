@@ -83,9 +83,9 @@ namespace Signum.Windows
 
        
 
-        public static bool IsCreable(Type type, bool isSearchEntity = false)
+        public static bool IsCreable(Type type, bool isSearch = false)
         {
-            return Manager.OnIsCreable(type, isSearchEntity);
+            return Manager.OnIsCreable(type, isSearch);
         }
 
         public static bool IsReadOnly(Type type)

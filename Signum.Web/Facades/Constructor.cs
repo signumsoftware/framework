@@ -29,32 +29,30 @@ namespace Signum.Web
             ClientManager = clientManager;
         }
 
-        public static T Construct<T>(this ControllerBase controller, List<object> args = null)
+        public static T Construct<T>(this ConstructorContext ctx)
             where T : ModifiableEntity
         {
-            return (T)controller.Construct(typeof(T), args);
+            return (T)ctx.SurroundConstructUntyped(typeof(T), Manager.ConstructCore);
         }
 
-        public static ModifiableEntity Construct(this ControllerBase controller, Type entityType, List<object> args = null)
+        public static ModifiableEntity ConstructUntyped(this ConstructorContext ctx, Type type)
         {
-            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, args), Manager.ConstructCore);
+            return ctx.SurroundConstructUntyped(type, Manager.ConstructCore);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, Func<ConstructorContext, T> constructor)
+        public static T SurroundConstruct<T>(this ConstructorContext ctx, Func<ConstructorContext, T> constructor)
             where T : ModifiableEntity
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, null), constructor);
+            ctx.Type = typeof(T);
+
+            return (T)Manager.SurroundConstruct(ctx, constructor);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, List<object> args, Func<ConstructorContext, T> constructor)
-            where T : ModifiableEntity
+        public static ModifiableEntity SurroundConstructUntyped(this ConstructorContext ctx, Type type, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, args), constructor);
-        }
+            ctx.Type = type;
 
-        public static ModifiableEntity SurroundConstruct(this ControllerBase controller, Type entityType, List<object> args, Func<ConstructorContext, ModifiableEntity> constructor)
-        {
-            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, null), constructor);
+            return Manager.SurroundConstruct(ctx, constructor);
         }
 
         public static void Register<T>(Func<ConstructorContext, T> constructor) where T:ModifiableEntity
@@ -147,19 +145,18 @@ namespace Signum.Web
 
     public class ConstructorContext
     {
-        public ConstructorContext(Type type, ControllerBase controller, List<object> args)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
+        public Type Type { get; internal set; }
+        public ControllerBase Controller { get; private set; }
+        public OperationInfo OperationInfo { get; private set; }
+        public List<object> Args { get; private set; }
 
-            this.Type = type;
+        public ConstructorContext(ControllerBase controller = null, OperationInfo info = null, List<object> args = null)
+        {
+
             this.Controller = controller;
+            this.OperationInfo = info;
             this.Args = args ?? new List<object>();
         }
-
-        public Type Type { get; private set; }
-        public ControllerBase Controller { get; private set; }
-        public List<object> Args { get; private set; }
     }
 
     public class ConstructorManager
