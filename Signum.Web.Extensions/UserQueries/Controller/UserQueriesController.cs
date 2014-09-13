@@ -45,7 +45,7 @@ namespace Signum.Web.UserQueries
                     findOptions.ApplyUserQuery(uq);
             }
 
-            return Finder.Find(this, findOptions);
+            return Finder.SearchPage(this, findOptions);
         }
 
         public ActionResult Create(QueryRequest request)
