@@ -255,7 +255,7 @@ namespace Signum.Web.Chart
 
         ViewResult OpenChartRequest(ChartRequest request, Lite<UserChartDN> currentUserChart)
         {
-            ViewData[ViewDataKeys.Title] = Finder.Manager.SearchTitle(request.QueryName);
+            ViewData[ViewDataKeys.Title] = QueryUtils.GetNiceName(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
             ViewData[ViewDataKeys.FilterOptions] =  request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
             ViewData["UserChart"] = currentUserChart;
