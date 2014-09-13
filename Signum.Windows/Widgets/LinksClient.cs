@@ -81,9 +81,8 @@ namespace Signum.Windows
                 Header = ql.Label,
                 Icon = ql.Icon.ToSmallImage(),
             }
+            .Set(AutomationProperties.NameProperty, ql.Name)
             .Bind(MenuItem.HeaderProperty, "Label");
-
-            AutomationProperties.SetName(mi, ql.Name);
 
             if (ql.ToolTip.HasText())
             {

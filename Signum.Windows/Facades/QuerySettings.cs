@@ -20,11 +20,8 @@ namespace Signum.Windows
     {
         public object QueryName { get; private set; }
 
-        public int? Top { get; set; }
         public ImageSource Icon { get; set; }
         public Pagination Pagination { get; set; }
-
-        internal QueryDescription QueryDescription { get; set; }
 
         public QuerySettings(object queryName)
         {
