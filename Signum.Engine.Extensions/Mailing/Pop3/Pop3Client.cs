@@ -43,7 +43,7 @@ namespace Signum.Engine.Mailing.Pop3
                 stream = connection.GetStream();
             }
 
-            reader = new StreamReader(stream, Encoding.ASCII);
+            reader = new StreamReader(stream, Encoding.UTF8);
 
             string response = reader.ReadLine();
             if (!response.StartsWith("+OK"))

@@ -38,7 +38,7 @@ namespace Signum.Windows.Dashboard.Admin
         {
             var imp = (Implementations)PropertyRoute.Construct((DashboardDN cp) => cp.Parts.First().Content).GetImplementations();
 
-            var type = Navigator.SelectType(Window.GetWindow(this), imp.Types, t => Navigator.IsCreable(t, isSearchEntity: false));
+            var type = Navigator.SelectType(Window.GetWindow(this), imp.Types, t => Navigator.IsCreable(t, isSearch: false));
 
             if (type == null)
                 return null;
@@ -48,7 +48,7 @@ namespace Signum.Windows.Dashboard.Admin
                 Row = Panel.Parts.IsEmpty() ? 0 : Panel.Parts.Max(a => Math.Max(a.Row, 0)) + 1,
                 Columns = 12,
                 StartColumn = 0,
-                Content = (IPartDN)this.Construct(type, null),
+                Content = (IPartDN)new ConstructorContext(this).ConstructUntyped(type),
                 Title = null,
             };
         }
