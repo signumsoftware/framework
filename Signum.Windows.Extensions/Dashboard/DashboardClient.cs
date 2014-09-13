@@ -84,9 +84,12 @@ namespace Signum.Windows.Dashboard
                     ViewControl = () => new LinkListPartView()
                 });
 
-                LinksClient.RegisterEntityLinks<DashboardDN>((cp, ctrl) => new[]{  
-                    !DashboardPermission.ViewDashboard.IsAuthorized() ? null:  
-                    new QuickLinkAction(DashboardMessage.Preview, () => Navigate(cp, null))
+                LinksClient.RegisterEntityLinks<DashboardDN>((cp, ctrl) => new[]
+                {  
+                    new QuickLinkAction(DashboardMessage.Preview, () => Navigate(cp, null)) 
+                    {
+                        IsVisible = DashboardPermission.ViewDashboard.IsAuthorized() 
+                    }
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>

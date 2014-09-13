@@ -19,8 +19,6 @@ namespace Signum.Windows.Isolation
 {
     public partial class IsolationWidget : UserControl, IWidget
     {
-        public decimal Order { get; set; }
-
         public event Action ForceShow;
 
         public IsolationWidget()
