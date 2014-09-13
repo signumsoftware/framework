@@ -57,13 +57,13 @@ namespace Signum.Web.Controllers
         [ActionSplitter("webQueryName")]
         public ActionResult Find(FindOptions findOptions)
         {
-            return Finder.Find(this, findOptions);
+            return Finder.SearchPage(this, findOptions);
         }
 
         [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult PartialFind(FindOptions findOptions, string prefix, bool isExplore)
         {
-            return Finder.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
+            return Finder.SearchPopup(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
         }
 
         [HttpPost, ActionSplitter("webQueryName")]

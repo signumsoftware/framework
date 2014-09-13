@@ -17,7 +17,6 @@ namespace Signum.Web
     {
         public object QueryName { get; private set; }
 
-        public Func<string> Title { get; set; }
         public Pagination Pagination { get; set; }
         public string WebQueryName { get; set; }
 

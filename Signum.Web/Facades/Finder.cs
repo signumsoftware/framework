@@ -29,24 +29,24 @@ namespace Signum.Web
             });
         }
 
-        public static ViewResult Find(this ControllerBase controller, object queryName)
+        public static ViewResult SearchPage(this ControllerBase controller, FindOptions findOptions)
         {
-            return Find(controller, new FindOptions(queryName));
+            return Manager.SearchPage(controller, findOptions);
         }
 
-        public static ViewResult Find(this ControllerBase controller, FindOptions findOptions)
+        public static PartialViewResult SearchPopup(this ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
-            return Manager.Find(controller, findOptions);
+            return Manager.SearchPopup(controller, findOptions, mode, context);
         }
 
-        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
+        public static PartialViewResult SearchPopup(this ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
         {
-            return Manager.PartialFind(controller, findOptions, mode, context);
+            return Manager.SearchPopup(controller, findOptions, mode, new Context(null, prefix));
         }
 
-        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Manager.PartialFind(controller, findOptions, mode, new Context(null, prefix));
+            return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
         }
 
         public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
@@ -57,16 +57,6 @@ namespace Signum.Web
         public static int QueryCount(CountOptions options)
         {
             return Manager.QueryCount(options);
-        }
-
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
-        {
-            return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
-        }
-
-        public static string SearchTitle(object queryName)
-        {
-            return Manager.SearchTitle(queryName);
         }
 
         public static void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
@@ -175,7 +165,7 @@ namespace Signum.Web
             }
         }
 
-        protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
+        protected internal virtual ViewResult SearchPage(ControllerBase controller, FindOptions findOptions)
         {
             if (!Finder.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
@@ -192,7 +182,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
 
             if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
+                controller.ViewData[ViewDataKeys.Title] = QueryUtils.GetNiceName(findOptions.QueryName);
             
             return new ViewResult()
             {
@@ -290,7 +280,7 @@ namespace Signum.Web
             }
         }
         
-        protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
+        protected internal virtual PartialViewResult SearchPopup(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
             if (!Finder.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
@@ -307,7 +297,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.QueryDescription] = desc;
             
             if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
+                controller.ViewData[ViewDataKeys.Title] = QueryUtils.GetNiceName(findOptions.QueryName);
             
             return new PartialViewResult
             {
@@ -315,15 +305,6 @@ namespace Signum.Web
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
-        }
-
-        public virtual string SearchTitle(object queryName)
-        {
-            QuerySettings qs = QuerySettings.TryGetC(queryName);
-            if (qs != null && qs.Title != null)
-                return qs.Title();
-            else
-                return QueryUtils.GetNiceName(queryName);
         }
 
         protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, Context context)

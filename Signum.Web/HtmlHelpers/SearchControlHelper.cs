@@ -61,8 +61,7 @@ namespace Signum.Web
             viewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
-                helper.ViewData[ViewDataKeys.Title] :
-                Finder.Manager.SearchTitle(findOptions.QueryName);
+                helper.ViewData[ViewDataKeys.Title] : QueryUtils.GetNiceName(findOptions.QueryName);
 
             if (!options.ToolBarButton.IsNullOrEmpty())
                 viewData[ViewDataKeys.ManualToolbarButtons] = options.ToolBarButton;
