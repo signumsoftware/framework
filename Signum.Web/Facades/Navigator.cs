@@ -126,18 +126,18 @@ namespace Signum.Web
         public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix = null)
         {  
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupOpen(new PopupViewOptions(tc));
+            return controller.PopupControl(new PopupViewOptions(tc));
         }
 
         public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, string prefix = null)
         {
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupOpen(new PopupNavigateOptions(tc));
+            return controller.PopupControl(new PopupNavigateOptions(tc));
         }
 
-        public static PartialViewResult PopupOpen(this ControllerBase controller, PopupOptionsBase viewOptions)
+        public static PartialViewResult PopupControl(this ControllerBase controller, PopupOptionsBase viewOptions)
         {
-            return Manager.PopupOpen(controller, viewOptions);
+            return Manager.PopupControl(controller, viewOptions);
         }
 
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
@@ -365,8 +365,6 @@ namespace Signum.Web
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
-
-        public Func<bool> AllowChangeColumns = () => true;
       
         public NavigationManager(string entityStateKeyToHash)
             : this(new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(entityStateKeyToHash))))
@@ -525,7 +523,7 @@ namespace Signum.Web
             return niceName + " " + ident.Id;
         }
 
-        protected internal virtual PartialViewResult PopupOpen(ControllerBase controller, PopupOptionsBase viewOptions)
+        protected internal virtual PartialViewResult PopupControl(ControllerBase controller, PopupOptionsBase viewOptions)
         {
             TypeContext typeContext = TypeContextUtilities.CleanTypeContext(viewOptions.TypeContext);
             Type cleanType = typeContext.UntypedValue.GetType();

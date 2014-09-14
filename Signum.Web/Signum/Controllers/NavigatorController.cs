@@ -72,7 +72,7 @@ namespace Signum.Web.Controllers
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
 
-            return this.PopupOpen(new PopupNavigateOptions(tc)
+            return this.PopupControl(new PopupNavigateOptions(tc)
             {
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
@@ -99,7 +99,7 @@ namespace Signum.Web.Controllers
         
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            return this.PopupOpen(new PopupViewOptions(tc)
+            return this.PopupControl(new PopupViewOptions(tc)
             {
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
@@ -211,7 +211,7 @@ namespace Signum.Web.Controllers
                         SaveProtected = saveProtected,
                         ShowOperations = showOperations
                     };
-                    return Navigator.PopupOpen(controller, viewOptions);
+                    return Navigator.PopupControl(controller, viewOptions);
                 case VisualConstructStyle.PopupNavigate:
                     var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix))
                     {
@@ -219,7 +219,7 @@ namespace Signum.Web.Controllers
                         ReadOnly = readOnly,
                         ShowOperations = showOperations
                     };
-                    return Navigator.PopupOpen(controller, navigateOptions);
+                    return Navigator.PopupControl(controller, navigateOptions);
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix, partialViewName);
                 case VisualConstructStyle.View:

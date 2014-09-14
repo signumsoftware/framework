@@ -84,7 +84,7 @@ namespace Signum.Web.Operations
                     (PopupOptionsBase)new PopupViewOptions(tc) :
                     (PopupOptionsBase)new PopupNavigateOptions(tc);
 
-                return controller.PopupOpen(popupOptions);
+                return controller.PopupControl(popupOptions);
             }
             else
             {
@@ -128,7 +128,7 @@ namespace Signum.Web.Operations
             if (newPrefix.HasText())
             {
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, newPrefix);
-                return controller.PopupOpen(new PopupNavigateOptions(tc));
+                return controller.PopupControl(new PopupNavigateOptions(tc));
             }
             else //NormalWindow
             {
