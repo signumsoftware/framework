@@ -68,7 +68,7 @@ namespace Signum.Web
             var newTabs = context.ViewOverrides == null ? tabs : 
                 context.ViewOverrides.ExpandTabs(tabs, containerId, helper, context);
 
-            if (newTabs.IsEmpty())
+            if (newTabs.IsNullOrEmpty())
                 return;
 
             TextWriter writer = helper.ViewContext.Writer;

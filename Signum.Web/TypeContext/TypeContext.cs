@@ -430,8 +430,22 @@ namespace Signum.Web
             return this;
         }
 
+        HashSet<string> hiddenTabs;
+
+        public ViewOverrides<T> HideTab(string id)
+        {
+            if (hiddenTabs == null)
+                hiddenTabs = new HashSet<string>();
+            hiddenTabs.Add(id);
+
+            return this;
+        }
+
         List<Tab> IViewOverrides.ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context)
         {
+            if (hiddenTabs != null && hiddenTabs.Contains(containerId))
+                return null;
+
             List<Tab> newTabs = new List<Tab>();
 
             var before = BeforeTabDictionary.TryGetC(containerId);
@@ -440,11 +454,11 @@ namespace Signum.Web
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
             foreach (var item in tabs)
-                Expand(item, helper, context, newTabs);
+                ExpandTab(item, helper, context, newTabs);
 
             var after = AfterTabDictionary.TryGetC(containerId);
             if (after != null)
@@ -452,13 +466,13 @@ namespace Signum.Web
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
             return newTabs;
         }
 
-        void Expand(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
+        void ExpandTab(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
         {
             var before = BeforeTabDictionary.TryGetC(item.Id);
             if (before != null)
@@ -466,10 +480,11 @@ namespace Signum.Web
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
-            newTabs.Add(item);
+            if (hiddenTabs == null || !hiddenTabs.Contains(item.Id))
+                newTabs.Add(item);
 
             var after = AfterTabDictionary.TryGetC(item.Id);
             if (after != null)
@@ -477,7 +492,7 @@ namespace Signum.Web
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
         }
 
