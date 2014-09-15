@@ -60,7 +60,7 @@ namespace Signum.Web.Processes
                 }
 
                 if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
-                    Navigator.EntitySettings<ProcessDN>().CreateViewOverride().AfterLine(p => p.Algorithm, 
+                    Navigator.EntitySettings<ProcessDN>().CreateViewOverrides().AfterLine(p => p.Algorithm, 
                         (html, tc) => html.EntityLine(tc, p => p.Mixin<UserProcessSessionMixin>().User));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
