@@ -169,7 +169,7 @@ namespace Signum.Web
 
         ViewOverrides<T> viewOverride;
 
-        public ViewOverrides<T> CreateViewOverride()
+        public ViewOverrides<T> CreateViewOverrides()
         {
             return viewOverride ?? (viewOverride = new ViewOverrides<T>());
         }
