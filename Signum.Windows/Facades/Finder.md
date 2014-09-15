@@ -2,7 +2,7 @@
 
 The main responsibilities of `Finder` is to open query result to search for a particular entity using a modal window (`Find` and `FindMany`) or just take a look at the entities and start actions from there in an independent window (`Explore`). 
 
-By default the entities are shown using a `SearchWindow`, but the `FindManager` can be overriden to open any other kind of control or window.
+By default `SearchWindow` is used, but the `FindManager` can be overridden to open any other kind of control or window.
 
 ## Find and FindMany
 `Finder.Find` method shows a query result to the user and returns the selected entity. The behavior should block the thread in the meanwhile, and by default is implemented using `ShowDialog` to open a modal `SearchWindow`, but could be overridden to show a different window.
@@ -70,3 +70,57 @@ The class `ExploreOptions` inherits all the options from `FindOptionsBase` but l
 
 * **NavigateIfOne:** Executes the query internally to test if there's just one result, and in this case navigates to the only entity without even opening the `SearchWindow`.
 * **Closed:** Event that will be fired when the windows is closed, could be used to refresh the original UI, but could be called in another thread.
+
+
+## QuerySettings
+
+`QuerySettings` let you configure how a query will be shown in the `SearchControl`, just as `EntitySettings` configures how an entity will be shown in the `NormalWindow`. It is non mandatory, and a default `QuerySettings` will be automatically created if none is provided. 
+
+```C#
+public class QuerySettings
+{
+    public object QueryName { get; }
+    public QuerySettings(object queryName);
+
+    public ImageSource Icon { get; set; }
+    public Pagination Pagination { get; set; }
+    public bool IsFindable { get; set; } 
+
+    public Dictionary<string, Func<Binding, DataTemplate>> Formatters;  
+}
+```
+
+* **QueryName:** The query to configure.
+* **Icon:** Optional 16x16 icon that will be shown in the windows and the MenuItems. 
+* **Pagination:** Override `FindOptions.DefaultPagination` for this particular query. 
+* **IsFindable:** Hides this particular query so is not findable. For example example if only available in Web interface. 
+* **Formatters:** Let you customize how to represent the cells of one particular column of this query by registering a `Func<Binding, DataTemplate>` in the column name. 
+
+
+Usually, instead of registering a `DataTemplate` for one particular query column, makes more sense to register it for one particular database column, and is applied in any query that uses it. 
+
+
+We can do this by using the static dictionary `PropertyFormatters`: 
+
+```C#
+public class QuerySettings
+{
+    public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
+
+    public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, 
+	    Func<Binding, DataTemplate> formatter)
+        where T : IRootEntity
+}
+```
+
+Example: 
+
+```C#
+QuerySettings.RegisterPropertyFormat((AlbumDN a) => a.BonusTrack.Duration, 
+                b => Fluent.GetDataTemplate(() => new TextBlock().Bind(TextBlock.TextProperty, b)));
+```
+
+> Note: In order to create a `DataTemplate` grammatically, consider using `FrameworkElementFactoryGenerator`. 
+
+
+Or, if you just want to register a template for one particular data type, or columns that contain certain attributes, you can use 
