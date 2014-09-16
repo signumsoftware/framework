@@ -22,7 +22,7 @@ namespace Signum.Web
 {
     public class SearchControl
     {
-        public string Prefix;
+        public string Prefix { get; internal set; }
         public ToolBarButton[] ToolBarButton { get; set; }
         public bool AvoidFullScreenButton { get; set; }
     }

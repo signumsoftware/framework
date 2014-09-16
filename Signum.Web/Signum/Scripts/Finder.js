@@ -323,14 +323,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
             }
 
+            this.prefix.child("sfFullScreen").tryGet().on("mouseup", function (e) {
+                e.preventDefault();
+                _this.fullScreen(e);
+            });
+
             if (this.options.showContextMenu) {
                 $tblResults.on("change", ".sf-td-selection", function (e) {
                     _this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
-                });
-
-                this.prefix.child("sfFullScreen").get().on("mouseup", function (e) {
-                    e.preventDefault();
-                    _this.fullScreen(e);
                 });
 
                 this.prefix.child("btnSelected").get().click(function (e) {

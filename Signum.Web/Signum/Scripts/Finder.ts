@@ -362,14 +362,14 @@ export class SearchControl {
             });
         }
 
+        this.prefix.child("sfFullScreen").tryGet().on("mouseup", e => {
+            e.preventDefault();
+            this.fullScreen(e);
+        });
+
         if (this.options.showContextMenu) {
             $tblResults.on("change", ".sf-td-selection", e=> {
                 this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
-            });
-
-            this.prefix.child("sfFullScreen").get().on("mouseup", e => {
-                e.preventDefault();
-                this.fullScreen(e);
             });
 
             this.prefix.child("btnSelected").get().click(e=> {
