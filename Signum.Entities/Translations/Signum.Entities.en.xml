@@ -31,12 +31,12 @@
     <Member Name="SessionExpired" Description="Sesion Expired" />
   </Type>
   <Type Name="EngineMessage">
-    <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concurrency error on the databe, Table = {0}, Id = {1}" />
+    <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concurrency error on the database, Table = {0}, Id = {1}" />
     <Member Name="EntityWithType0AndId1NotFound" Description="Entity with type {0} and Id {1} not found" />
     <Member Name="NoWayOfMappingType0Found" Description="No way of mapping type {0} found" />
     <Member Name="TheEntity0IsNew" Description="The entity {0} is new" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="There are '{0}' that refer to this entity" />
-    <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="There are records in '{0}' refearing to this table by column '{1}'" />
+    <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="There are records in '{0}' referring to this table by column '{1}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Unautorized access to {0} because {1}" />
   </Type>
   <Type Name="EntityControlMessage">
@@ -98,7 +98,7 @@
     <Member Name="noElementsSelected" Description="No elements selected" />
     <Member Name="noResults" Description="No results found" />
     <Member Name="onlyOneElement" Description="You can select only one element" />
-    <Member Name="popupErrors" Description="There are errors in the entity, you want to continue?" />
+    <Member Name="popupErrors" Description="There are errors in the entity, do you want to continue?" />
     <Member Name="popupErrorsStop" Description="There are errors in the entity" />
     <Member Name="removeColumn" Description="Remove column" />
     <Member Name="reorderColumn_MoveLeft" Description="Move left" />
@@ -127,9 +127,9 @@
     <Member Name="ContinueAnyway" Description="Continue anyway?" />
     <Member Name="ContinueWithErrors" Description="Continue with errors?" />
     <Member Name="FixErrors" Description="Fix Errors" />
-    <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Imposisible to Save, integrity check failed:&#xD;&#xA;&#xD;&#xA;" />
+    <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Impossible to Save, integrity check failed:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="Loading {0}..." />
-    <Member Name="LoseChanges" Description="There are changes that hasn't been saved. &#xD;&#xA;Lose changes?" />
+    <Member Name="LoseChanges" Description="There are changes that haven't been saved. &#xD;&#xA;Lose changes?" />
     <Member Name="NoDirectErrors" Description="No direct errors" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Reload" />
@@ -276,7 +276,7 @@
     <Member Name="HaveANumberOfElements01" Description="have a number of elements {0} {1}" />
     <Member Name="HaveAPrecisionOf" Description="have a precision of " />
     <Member Name="HaveBetween0And1Characters" Description="have between {0} and {1} characters" />
-    <Member Name="HaveMaximun0Characters" Description="have maximun {0} characters" />
+    <Member Name="HaveMaximun0Characters" Description="have maximum {0} characters" />
     <Member Name="HaveMinimum0Characters" Description="have minimum {0} characters" />
     <Member Name="HaveNoRepeatedElements" Description="have no repeated elements" />
     <Member Name="HaveValid0Format" Description="have a valid {0} format" />

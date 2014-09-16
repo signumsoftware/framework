@@ -41,7 +41,7 @@ namespace Signum.Entities
 
     public enum EngineMessage
     {
-        [Description("Concurrency error on the databe, Table = {0}, Id = {1}")]
+        [Description("Concurrency error on the database, Table = {0}, Id = {1}")]
         ConcurrencyErrorOnDatabaseTable0Id1,
         [Description("Entity with type {0} and Id {1} not found")]
         EntityWithType0AndId1NotFound,
@@ -51,7 +51,7 @@ namespace Signum.Entities
         TheEntity0IsNew,
         [Description("There are '{0}' that refer to this entity")]
         ThereAre0ThatReferThisEntity,
-        [Description("There are records in '{0}' refearing to this table by column '{1}'")]
+        [Description("There are records in '{0}' referring to this table by column '{1}'")]
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unautorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
@@ -72,13 +72,13 @@ namespace Signum.Entities
         ContinueWithErrors,
         [Description("Fix Errors")]
         FixErrors,
-        [Description(@"Imposisible to Save, integrity check failed:
+        [Description(@"Impossible to Save, integrity check failed:
 
 ")]
         ImpossibleToSaveIntegrityCheckFailed,
         [Description("Loading {0}...")]
         Loading0,
-        [Description(@"There are changes that hasn't been saved. 
+        [Description(@"There are changes that haven't been saved. 
 Lose changes?")]
         LoseChanges,
         NoDirectErrors,
@@ -246,7 +246,7 @@ Lose changes?")]
         searchForResults,
         [Description("Select only one element")]
         selectOnlyOneElement,
-        [Description("There are errors in the entity, you want to continue?")]
+        [Description("There are errors in the entity, do you want to continue?")]
         popupErrors,
         [Description("There are errors in the entity")]
         popupErrorsStop,
