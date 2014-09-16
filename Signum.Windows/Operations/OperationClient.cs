@@ -71,7 +71,6 @@ namespace Signum.Windows.Operations
         {
             return (OperationSymbol)obj.GetValue(ConstructFromOperationKeyProperty);
         }
-
         public static void SetConstructFromOperationKey(DependencyObject obj, OperationSymbol value)
         {
             obj.SetValue(ConstructFromOperationKeyProperty, value);

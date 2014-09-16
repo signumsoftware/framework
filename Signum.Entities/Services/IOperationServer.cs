@@ -38,10 +38,11 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
+        [OperationContract, NetDataContract]
+        void DeleteLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
-
+        void Delete(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
         IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args);

@@ -14,7 +14,7 @@ namespace Signum.Windows.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSymbol OperationSymbol { get; set; }
+        public OperationSymbol OperationSymbol { get; private set; }
         public string Text { get; set; }
         public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
@@ -37,13 +37,13 @@ namespace Signum.Windows.Operations
 
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
-            Description = () => OperationMessage.Create.NiceToString(),
+            Text = () => OperationMessage.Create.NiceToString(),
             SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value.FirstUpper(), RegexOptions.IgnoreCase),
             Background = Brushes.Green,
             AutomationName = "Create"
         }; 
 
-        public Func<string> Description;
+        public Func<string> Text;
         public Func<string, string> SimplifyName;
         public Brush Background;
         public string AutomationName;

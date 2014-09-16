@@ -180,7 +180,7 @@ namespace Signum.Windows.Operations
                     if (eoc.ConfirmMessage())
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.OperationSymbol, null));
+                        Server.Execute((IOperationServer s) => s.DeleteLite(lite, eoc.OperationInfo.OperationSymbol, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }
@@ -191,7 +191,7 @@ namespace Signum.Windows.Operations
         {
             ToolBarButton groupButton = new ToolBarButton
             {
-                Content = group.Description(),
+                Content = group.Text(),
                 ContextMenu = new ContextMenu(),
                 Background = group.Background,
             };

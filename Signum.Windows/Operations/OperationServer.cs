@@ -23,11 +23,18 @@ namespace Signum.Windows
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, symbol.Operation, args)); 
         }
 
-        public static void Delete<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
+        public static void Delete<T, B>(this T entity, DeleteSymbol<B> symbol, params object[] args)
             where T : class, IIdentifiable
             where B : class, IIdentifiable, T
         {
-            Server.Execute((IOperationServer s) => s.Delete(lite, symbol.Operation, args)); 
+            Server.Execute((IOperationServer s) => s.Delete(entity, symbol.Operation, args));
+        }
+
+        public static void DeleteLite<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
+            where T : class, IIdentifiable
+            where B : class, IIdentifiable, T
+        {
+            Server.Execute((IOperationServer s) => s.DeleteLite(lite, symbol.Operation, args)); 
         }
 
         public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)

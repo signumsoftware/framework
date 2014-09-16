@@ -417,7 +417,7 @@ namespace Signum.Engine.Operations
 
         #region Delete
 
-        public static void Delete<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
+        public static void DeleteLite<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
