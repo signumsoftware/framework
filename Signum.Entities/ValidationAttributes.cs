@@ -128,7 +128,7 @@ namespace Signum.Entities
                 string result =
                     min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().Formato(min, max) :
                     min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().Formato(min) :
-                    max != -1 ? ValidationMessage.HaveMaximun0Characters.NiceToString().Formato(max) : null;
+                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().Formato(max) : null;
 
                 if (allowNulls)
                     result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
@@ -890,8 +890,8 @@ namespace Signum.Entities
         HaveAPrecisionOf,
         [Description("have between {0} and {1} characters")]
         HaveBetween0And1Characters,
-        [Description("have maximun {0} characters")]
-        HaveMaximun0Characters,
+        [Description("have maximum {0} characters")]
+        HaveMaximum0Characters,
         [Description("have minimum {0} characters")]
         HaveMinimum0Characters,
         [Description("have no repeated elements")]
