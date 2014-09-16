@@ -35,5 +35,5 @@ Also Signum.Web does the same using ASP.Net MVC 3.0 / Razor / jQuery / Bootstrap
 
 * **[Signum Framework](http://www.signumsoftware.com/en/Framework)**: Know what makes Signum Framework suited for building complex business applications. 
 * **[Signum Extensions](http://www.signumsoftware.com/en/Framework)**: A set of ready-to-use modules that work with any Signum Framework application. 
-* **[Documentation](http://www.signumsoftware.com/en/Documentation)**: Tutorials (in CodeProject) and Documentation (from Markdown files in GitHub)
-* **[Create Application](http://www.signumsoftware.com/en/Documentation)**: The simplest way to get started. Create a new project by renaming and customizing Southwind example application.  
+* **[Documentation](http://www.signumsoftware.com/Documentation)**: Tutorials (in CodeProject) and Documentation (from Markdown files in GitHub)
+* **[Create Application](http://www.signumsoftware.com/en/DuplicateApplication)**: The simplest way to get started. Create a new project by renaming and customizing Southwind example application.  
