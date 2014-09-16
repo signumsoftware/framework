@@ -155,7 +155,6 @@ Lose changes?")]
         CreateNew0,
         [Description("All")]
         SearchControl_Pagination_All,
-        SelectAnElement,
         [Description("There is no {0}")]
         ThereIsNo0,
         Value,
@@ -171,9 +170,9 @@ Lose changes?")]
     {
         [Description("Constructor Selector")]
         ConstructorSelector,
-        [Description("Please, choose a value to continue:")]
+        [Description("Please choose a value to continue:")]
         PleaseChooseAValueToContinue,
-        [Description("Please Select a Constructor")]
+        [Description("Please select a Constructor")]
         PleaseSelectAConstructor,
         [Description("Please select one of the following types: ")]
         PleaseSelectAType,
@@ -181,7 +180,9 @@ Lose changes?")]
         TypeSelector,
         [Description("A value must be specified for {0}")]
         ValueMustBeSpecifiedFor0,
-        ChooseAValue
+        ChooseAValue,
+        SelectAnElement,
+        PleaseSelectAnElement
     }
 
     public enum ConnectionMessage
