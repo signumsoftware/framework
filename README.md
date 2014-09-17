@@ -11,7 +11,7 @@ Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1
 
 Signum.Windows dramatically simplifies writing a WPF user interface for your entities. 
 
-Also Signum.Web does the same using ASP.Net MVC 3.0 / Razor / jQuery / Bootstrap and TypeScript
+Also Signum.Web does the same using ASP.Net MVC 5.0 / Razor / jQuery / Bootstrap and TypeScript
 
 ### Main Features ###
 * Designed for vertical modules (aka: Bounded Context)
@@ -20,7 +20,7 @@ Also Signum.Web does the same using ASP.Net MVC 3.0 / Razor / jQuery / Bootstrap
 * Unified validation
 * Schema generation and synchronization
 * WPF smart-client interface
-* ASP.Net MVC 4.0 Razor
+* ASP.Net MVC 5.0 Razor
 
 
 ### Principles ###
