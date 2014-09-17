@@ -121,7 +121,7 @@ namespace Signum.Windows.UserQueries
                 if (MessageBox.Show(UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(current), UserQueryMessage.RemoveUserQuery.NiceToString(),
                     MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
-                    current.ToLite().Delete(UserQueryOperation.Delete);
+                    current.ToLite().DeleteLite(UserQueryOperation.Delete);
 
                     initialize();
 
