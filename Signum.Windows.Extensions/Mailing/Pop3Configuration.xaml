@@ -7,14 +7,13 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Active" />
-        <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Port" />
         <m:ValueLine m:Common.Route="Host" />
         <m:ValueLine m:Common.Route="Username" />
         <m:ValueLine m:Common.Route="Password" />
         <m:ValueLine m:Common.Route="EnableSSL" />
         <m:ValueLine m:Common.Route="ReadTimeout" />
-        <m:ValueLine m:Common.Route="MaxDownloadEmails" />
+        <m:ValueLine m:Common.Route="DeleteMessagesAfter" />
         <m:EntityRepeater m:Common.Route="ClientCertificationFiles" />
     </StackPanel>
 </UserControl>
