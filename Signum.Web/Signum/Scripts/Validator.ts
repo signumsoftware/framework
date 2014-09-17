@@ -128,7 +128,7 @@ function cleanFormInputs(form: JQuery): JQuery {
 }
 
 export function isModelState(result: any): boolean {
-    return typeof result == "Object" && typeof result.ModelState != "undefined";
+    return typeof result == "object" && typeof result.ModelState != "undefined";
 }
 
 export function assertModelStateErrors(result: any, prefix: string) {

@@ -103,7 +103,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     }
 
     function isModelState(result) {
-        return typeof result == "Object" && typeof result.ModelState != "undefined";
+        return typeof result == "object" && typeof result.ModelState != "undefined";
     }
     exports.isModelState = isModelState;
 
