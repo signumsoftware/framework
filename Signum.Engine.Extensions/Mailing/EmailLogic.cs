@@ -302,7 +302,7 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageDN, MailMessage> CustomCreateMailMessage;
 
-        protected MailMessage CreateMailMessage(EmailMessageDN email)
+        public MailMessage CreateMailMessage(EmailMessageDN email)
         {
             MailMessage message = new MailMessage()
             {
@@ -344,8 +344,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    MailMessage message = (CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : null) ??
-                        CreateMailMessage(email);
+                    MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 
                     CreateSmtpClient(email).Send(message);
 
@@ -420,8 +419,7 @@ namespace Signum.Engine.Mailing
                     {
                         SmtpClient client = CreateSmtpClient(email);
 
-                        MailMessage message = (CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : null) ??
-                            CreateMailMessage(email);
+                        MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 
                         email.Sent = null;
                         email.Save();
