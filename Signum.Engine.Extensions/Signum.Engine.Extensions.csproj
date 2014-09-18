@@ -142,9 +142,8 @@
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />
     <Compile Include="Mailing\EmailTemplateRenderer.cs" />
+    <Compile Include="Mailing\Pop3\IPop3Client.cs" />
     <Compile Include="Mailing\Pop3\Pop3ConfigurationLogic.cs" />
-    <Compile Include="Mailing\Pop3\MailMimeParser.cs" />
-    <Compile Include="Mailing\Pop3\Pop3Client.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
     <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />

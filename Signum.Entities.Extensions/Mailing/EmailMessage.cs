@@ -258,11 +258,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-
-
-
-
-
     [Serializable]
     public class EmailAttachmentDN : EmbeddedEntity
     {
@@ -311,6 +306,11 @@ namespace Signum.Entities.Mailing
         internal bool Similar(EmailAttachmentDN a)
         {
             return ContentId == a.ContentId || File.FileName == a.File.FileName;
+        }
+
+        public override string ToString()
+        {
+            return file.TryToString();
         }
     }
 
