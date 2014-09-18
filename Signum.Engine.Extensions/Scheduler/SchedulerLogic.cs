@@ -351,11 +351,18 @@ namespace Signum.Engine.Scheduler
                     ApplicationName = Schema.Current.ApplicationName
                 };
 
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    stl.Save();
+                 
+                    tr.Commit();
+                }
+
                 try
                 {
                     using (Transaction tr = new Transaction())
                     {
-                        stl.Save();
+                        
 
                         stl.ProductEntity = ExecuteTask.Invoke(task);
 
@@ -374,17 +381,9 @@ namespace Signum.Engine.Scheduler
 
                     using (Transaction tr2 = Transaction.ForceNew())
                     {
-                        ScheduledTaskLogDN cte2 = new ScheduledTaskLogDN
-                        {
-                            Task = stl.Task,
-                            StartTime = stl.StartTime,
-                            ScheduledTask = scheduledTask, 
-                            User = stl.User,
-                            MachineName = stl.MachineName,
-                            ApplicationName = stl.ApplicationName,
-                            EndTime = TimeZoneManager.Now,
-                            Exception = exLog,
-                        }.Save();
+                        stl.Exception = exLog;
+
+                        stl.Save();
 
                         tr2.Commit();
                     }
