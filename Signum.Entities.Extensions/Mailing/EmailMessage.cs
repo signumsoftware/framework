@@ -527,6 +527,9 @@ namespace Signum.Entities.Mailing
         RemainingMessages,
         ExceptionMessages,
         DefaultFromIsMandatory,
+        From,
+        To,
+        Attachments
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

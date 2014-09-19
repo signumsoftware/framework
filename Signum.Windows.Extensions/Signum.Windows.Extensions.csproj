@@ -276,6 +276,12 @@
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\EmailAttachment.xaml.cs">
+      <DependentUpon>EmailAttachment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\EmailMessage.xaml.cs">
+      <DependentUpon>EmailMessage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\EmailRecipient.xaml.cs">
       <DependentUpon>EmailRecipient.xaml</DependentUpon>
     </Compile>
@@ -672,6 +678,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Mailing\ClientCertificationFile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Mailing\EmailAttachment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Mailing\EmailMessage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

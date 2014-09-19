@@ -20,6 +20,14 @@ namespace Signum.Windows.Mailing
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                Navigator.AddSettings(new List<EntitySettings> 
+                { 
+                    new EntitySettings<EmailMessageDN> { View = e => new EmailMessage() },
+                    new EmbeddedEntitySettings<EmailAttachmentDN> { View = e => new EmailAttachment() },
+                    new EmbeddedEntitySettings<EmailAddressDN> { View = e => new EmailAddress() },
+                    new EmbeddedEntitySettings<EmailRecipientDN> { View = e => new EmailRecipient() }
+                });
+
                 if (smtp || pop3)
                     Navigator.AddSetting(new EmbeddedEntitySettings<ClientCertificationFileDN> { View = e => new ClientCertificationFile() });
 
@@ -28,8 +36,7 @@ namespace Signum.Windows.Mailing
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<SmtpConfigurationDN> { View = e => new SmtpConfiguration() },
-                        new EmbeddedEntitySettings<EmailAddressDN> { View = e => new EmailAddress() },
-                        new EmbeddedEntitySettings<EmailRecipientDN> { View = e => new EmailRecipient() }
+                        
                     });
                 }
 
