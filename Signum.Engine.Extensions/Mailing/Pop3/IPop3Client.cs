@@ -10,17 +10,17 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
 {
     public interface IPop3Client : IDisposable
     {
-        List<MessageInfo> GetMessageInfos();
+        List<MessageUid> GetMessageInfos();
 
-        EmailMessageDN GetMessage(MessageInfo messageInfo, Lite<Pop3ReceptionDN> reception);
+        EmailMessageDN GetMessage(MessageUid messageInfo, Lite<Pop3ReceptionDN> reception);
 
-        void DeleteMessage(MessageInfo messageInfo);
+        void DeleteMessage(MessageUid messageInfo);
         void Disconnect();
     }
 
-    public struct MessageInfo
+    public struct MessageUid
     {
-        public MessageInfo(string uid, int number, int size)
+        public MessageUid(string uid, int number, int size)
         {
             Uid = uid;
             Number = number;
