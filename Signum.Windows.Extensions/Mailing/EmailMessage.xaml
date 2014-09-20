@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="Signum.Windows.Mailing.EmailMessage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Mailing;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="{x:Type d:EmailMessageDN}"
+    MinWidth="300">
+    <Grid m:Common.IsReadOnly="{Binding State, Converter={m:NotEquals {x:Static d:EmailMessageState.Created}}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0">
+            <GroupBox Header="{m:Loc {x:Static d:EmailMessageMessage.From}}">
+                <m:EntityLine m:Common.Route="From" m:Common.LabelVisible="False" />
+            </GroupBox>
+            <GroupBox Header="{m:Loc {x:Static d:EmailMessageMessage.To}}">
+                <m:EntityList m:Common.Route="Recipients" />
+            </GroupBox>
+            <GroupBox Header="{m:Loc {x:Static d:EmailMessageMessage.Attachments}}">
+                <m:EntityList m:Common.Route="Attachments" />
+            </GroupBox>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <m:ValueLine m:Common.Route="State" />
+            <m:ValueLine m:Common.Route="Sent" />
+            <m:EntityLine m:Common.Route="Exception" />
+            <m:EntityLine m:Common.Route="Template" />
+            <m:EntityLine m:Common.Route="Package" />
+            <m:ValueLine m:Common.Route="IsBodyHtml" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
+            <m:EntityLine m:Common.Route="Target" />
+            <m:ValueLine m:Common.Route="Subject" />
+            <GroupBox Header="{m:Loc {x:Static d:EmailMessageMessage.Message}}">
+                <m:TextArea m:Common.Route="Body" MinHeight="100" MaxWidth="400" />
+            </GroupBox>
+        </StackPanel>
+    </Grid>
+    
+</UserControl>
