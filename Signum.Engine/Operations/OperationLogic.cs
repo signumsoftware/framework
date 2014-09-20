@@ -369,7 +369,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IExecuteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            var op = Find<IExecuteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Execute(entity, args);
             return (T)(IIdentifiable)entity;
         }
@@ -386,7 +386,7 @@ namespace Signum.Engine.Operations
             where B : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
-            var op = Find<IExecuteOperation>(lite.EntityType, symbol.Operation).AssertLite();
+            var op = Find<IExecuteOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             op.Execute(entity, args);
             return entity;
         }
@@ -404,7 +404,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IEntityOperation>(entity.GetType(), symbol.Operation);
+            var op = Find<IEntityOperation>(entity.GetType(), symbol.Symbol);
             return op.CanExecute(entity);
         }
 
@@ -422,7 +422,7 @@ namespace Signum.Engine.Operations
             where B : class, IIdentifiable
         {
             IIdentifiable entity = lite.RetrieveAndForget();
-            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Operation);
+            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Symbol);
             op.Delete(entity, args);
         }
 
@@ -437,7 +437,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IDeleteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            var op = Find<IDeleteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Delete(entity, args);
         }
 
@@ -458,7 +458,7 @@ namespace Signum.Engine.Operations
         public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)
             where T : class, IIdentifiable
         {
-            var op = Find<IConstructOperation>(typeof(T), symbol.Operation);
+            var op = Find<IConstructOperation>(typeof(T), symbol.Symbol);
             return (T)op.Construct(args);
         }
         #endregion
@@ -470,7 +470,7 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(object)entity);
+            var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(object)entity);
             return (T)op.Construct(entity, args);
         }
 
@@ -485,7 +485,7 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Operation).AssertLite();
+            var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
@@ -538,33 +538,33 @@ namespace Signum.Engine.Operations
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Symbol);
         }
 
         public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol) 
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Operation);
+            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Symbol);
         }
 
         public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbol)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Operation);
+            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Symbol);
         }
 
         public static Graph<T>.Execute FindExecute<T>(ExecuteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Symbol);
         }
 
         public static Graph<T>.Delete FindDelete<T>(DeleteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Symbol);
         }
 
         static T AssertLite<T>(this T result)

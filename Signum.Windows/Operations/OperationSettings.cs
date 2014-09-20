@@ -21,7 +21,7 @@ namespace Signum.Windows.Operations
 
         public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.OperationSymbol = symbol.Operation;
+            this.OperationSymbol = symbol.Symbol;
         }
 
         public OperationSettings(OperationSymbol operationSymbol)

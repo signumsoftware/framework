@@ -25,31 +25,31 @@ namespace Signum.Entities
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.Simple Simple([CallerMemberName]string memberName = null)
             {
-                return new SimpleImp { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new SimpleImp { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.From<F> From<F>([CallerMemberName]string memberName = null)
                 where F : class,  IIdentifiable
             {
-                return new FromImp<F> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.FromMany<F>  FromMany<F>([CallerMemberName]string memberName = null)
                 where F : class, IIdentifiable
             {
-                return new FromManyImp<F> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromManyImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [Serializable]
             class SimpleImp : ConstructSymbol<T>.Simple
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
                 }
             }
 
@@ -57,8 +57,13 @@ namespace Signum.Entities
             class FromImp<F> : ConstructSymbol<T>.From<F>
                 where F : class, IIdentifiable
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
+                {
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
+                }
+
                 {
                     get { return operation; }
                     internal set { this.operation = value; }
@@ -69,11 +74,12 @@ namespace Signum.Entities
             class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
                 where F : class, IIdentifiable
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
+                }
                 }
             }
         }
@@ -86,14 +92,14 @@ namespace Signum.Entities
         public static ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
             where T : class,  IIdentifiable
         {
-            return new ExecuteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
             where T : class, IIdentifiable
         {
-            return new DeleteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
 
@@ -101,11 +107,13 @@ namespace Signum.Entities
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IIdentifiable
         {
-            OperationSymbol operation;
-            public OperationSymbol Operation
+            OperationSymbol symbol;
+            public OperationSymbol Symbol
             {
-                get { return operation; }
-                internal set { this.operation = value; }
+                get { return symbol; }
+                internal set { this.symbol = value; }
+            }
+            {
             }
         }
 
@@ -113,11 +121,11 @@ namespace Signum.Entities
         class DeleteSymbolImp<T> : DeleteSymbol<T>
           where T : class, IIdentifiable
         {
-            OperationSymbol operation;
-            public OperationSymbol Operation
+            OperationSymbol symbol;
+            public OperationSymbol Symbol
             {
-                get { return operation; }
-                internal set { this.operation = value; }
+                get { return symbol; }
+                internal set { this.symbol = value; }
             }
         }
 
@@ -132,7 +140,7 @@ namespace Signum.Entities
 
     public interface IOperationSymbolContainer
     {
-        OperationSymbol Operation { get; }
+        OperationSymbol Symbol { get; }
     }
 
     public interface IEntityOperationSymbolContainer : IOperationSymbolContainer

@@ -20,7 +20,7 @@ namespace Signum.Web.Operations
     {
         public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.OperationSymbol = symbol.Operation; 
+            this.OperationSymbol = symbol.Symbol; 
         }
 
         public OperationSymbol OperationSymbol { get; private set; }
