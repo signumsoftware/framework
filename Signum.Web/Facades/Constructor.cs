@@ -94,13 +94,15 @@ namespace Signum.Web
             if (!ctx.Type.IsIdentifiableEntity())
                 return Default();
 
+            var def = OperationClient.Manager.ClientConstruct(ctx);
+
             var concat = GlobalPreConstructors + PreConstructors.TryGetC(ctx.Type);
 
-            if (concat == null)
+            if (concat == null && def == null)
                 return Default();
 
             var pre = GlobalPreConstructors.GetInvocationListTyped()
-                .Select(f => f(ctx)).NotNull().ToArray();
+                .Select(f => f(ctx)).And(def).NotNull().ToArray();
 
             if(pre.IsEmpty())
                 return Default();
@@ -183,7 +185,7 @@ namespace Signum.Web
             }
 
             if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
-                return OperationClient.Manager.ConstructSingle(ctx.Type);
+                return OperationClient.Manager.Construct(ctx);
 
             return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
         }

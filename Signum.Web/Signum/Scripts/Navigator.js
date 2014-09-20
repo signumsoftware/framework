@@ -354,6 +354,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(obj, options.requestExtraJsonData);
     }
 
+    function chooseConstructor(extraJsonData, prefix, title, options) {
+        return exports.chooser(prefix, title, options).then(function (co) {
+            if (!co)
+                return null;
+
+            return $.extend(extraJsonData, { operationFullKey: co.value });
+        });
+    }
+    exports.chooseConstructor = chooseConstructor;
+
     function typeChooser(prefix, types) {
         return exports.chooser(prefix, lang.signum.chooseAType, types, function (a) {
             return a.niceName;

@@ -140,7 +140,7 @@
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
     <Compile Include="ValueLineBoxOptions.cs" />
-    <Compile Include="Operations\OperationsClient.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">

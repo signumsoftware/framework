@@ -21,12 +21,12 @@ namespace Signum.Windows.Operations
 {
     public static class ConstructFromManyMenuItemConsturctor
     {
-        public static MenuItem Construct(ContextualOperationContext coc)
+        public static MenuItem Construct(IContextualOperationContext coc)
         { 
             MenuItem miResult = new MenuItem
             {
-                Header = OperationClient.GetText(coc.OperationInfo.OperationSymbol),
-                Icon = OperationClient.GetImage(coc.OperationInfo.OperationSymbol).ToSmallImage(),
+                Header = OperationClient.GetText(coc.Type, coc.OperationInfo.OperationSymbol),
+                Icon = OperationClient.GetImage(coc.Type, coc.OperationInfo.OperationSymbol).ToSmallImage(),
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
@@ -42,24 +42,21 @@ namespace Signum.Windows.Operations
 
             miResult.Click += (object sender, RoutedEventArgs e) =>
             {
-                Type entityType = coc.SearchControl.EntityType;
-
                 coc.SearchControl.SetDirtySelectedItems();
 
-                if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
-                    coc.OperationSettings.Click(coc);
+                if (coc.OperationSettings != null && coc.OperationSettings.HasClick)
+                    coc.OperationSettings.OnClick(coc);
                 else
                 {
                     if (coc.ConfirmMessage())
                     {
                         IdentifiableEntity result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
-                        {
-                            return coc.NullEntityMessage(
-                                Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.OperationSymbol)));
-                        });
+                            Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), coc.Type, coc.OperationInfo.OperationSymbol, ctx.Args)));
 
                         if (result != null)
                             Navigator.Navigate(result);
+                        else
+                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.OperationSymbol.NiceToString()));
                     }
                 }
             };

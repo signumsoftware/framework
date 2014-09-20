@@ -7,6 +7,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 
 namespace Signum.Web
@@ -350,9 +351,9 @@ namespace Signum.Web
                 if (es != null)
                     return es.WebTypeName;
 
-                return TypeLogic.TryGetCleanName(type) ?? type.Name;
+                return TypeLogic.TryGetCleanName(type) ?? Reflector.CleanTypeName(type);
             }
-            
+
             return queryName.ToString();
         }
 
