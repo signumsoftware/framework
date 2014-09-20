@@ -18,8 +18,8 @@ namespace Signum.Engine.Operations
         public class Construct : _Construct<T>, IConstructOperation
         {
             protected readonly ConstructSymbol<T>.Simple Symbol;
-            Type IOperation.Type { get { return typeof(T); } }
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
+            Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
@@ -127,8 +127,8 @@ namespace Signum.Engine.Operations
             where F : class, IIdentifiable
         {
             protected readonly ConstructSymbol<T>.From<F> Symbol;
-            Type IOperation.Type { get { return typeof(F); } }
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
+            Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
 
             public bool Lite { get; set; }
@@ -276,8 +276,8 @@ namespace Signum.Engine.Operations
             where F : class, IIdentifiable
         {
             protected readonly ConstructSymbol<T>.FromMany<F> Symbol;
-            Type IOperation.Type { get { return typeof(F); } }
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
+            Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
 
             bool IOperation.Returns { get { return true; } }
@@ -394,8 +394,8 @@ namespace Signum.Engine.Operations
         public class Execute : _Execute<T>, IExecuteOperation
         {
             protected readonly ExecuteSymbol<T> Symbol;
-            Type IOperation.Type { get { return typeof(T); } }
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
+            Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Execute; } }
             public bool Lite { get; set; }
             bool IOperation.Returns { get { return true; } }
@@ -525,8 +525,8 @@ namespace Signum.Engine.Operations
         public class Delete : _Delete<T>, IDeleteOperation
         {
             protected readonly DeleteSymbol<T> Symbol;
-            Type IOperation.Type { get { return typeof(T); } }
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
+            Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Delete; } }
             public bool Lite { get; set; }
             bool IOperation.Returns { get { return false; } }

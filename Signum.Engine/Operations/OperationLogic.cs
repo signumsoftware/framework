@@ -265,18 +265,18 @@ namespace Signum.Engine.Operations
 
         public static void Register(this IOperation operation)
         {
-            if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.Type.Name));
+            if (!operation.OverridenType.IsIIdentifiable())
+                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.OverridenType.Name));
 
             operation.AssertIsValid();
 
-            operations.GetOrAddDefinition(operation.Type).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
+            operations.GetOrAddDefinition(operation.OverridenType).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
 
             operationsFromKey.Reset();
 
             if (IsExecuteNoLite(operation))
             {
-                SetProtectedSave(operation.Type, true);
+                SetProtectedSave(operation.OverridenType, true);
             }
         }
 
@@ -287,12 +287,12 @@ namespace Signum.Engine.Operations
 
         public static void RegisterReplace(this IOperation operation)
         {
-            if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+            if (!operation.OverridenType.IsIIdentifiable())
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.OverridenType));
 
             operation.AssertIsValid();
 
-            operations.GetOrAddDefinition(operation.Type)[operation.OperationSymbol] = operation;
+            operations.GetOrAddDefinition(operation.OverridenType)[operation.OperationSymbol] = operation;
 
             operationsFromKey.Reset(); //unnecesarry?
         }
@@ -698,7 +698,7 @@ namespace Signum.Engine.Operations
     public interface IOperation
     {
         OperationSymbol OperationSymbol { get; }
-        Type Type { get; }
+        Type OverridenType { get; }
         OperationType OperationType { get; }
         bool Returns { get; }
         Type ReturnType { get; }
