@@ -137,6 +137,7 @@ namespace Signum.Engine.Operations
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
 
+            Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanConstruct != null; } }
 
             public bool AllowsNew { get; set; }
@@ -283,6 +284,8 @@ namespace Signum.Engine.Operations
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
 
+            Type IConstructorFromManyOperation.BaseType { get { return Symbol.BaseType; } }
+
             public bool LogAlsoIfNotSaved { get; set; }
 
             public Func<List<Lite<F>>, object[], T> Construct { get; set; }
@@ -388,7 +391,6 @@ namespace Signum.Engine.Operations
             {
                 return "{0} ConstructFromMany {1} -> {2}".Formato(Symbol, typeof(F), typeof(T));
             }
-
         }
 
         public class Execute : _Execute<T>, IExecuteOperation
@@ -401,6 +403,7 @@ namespace Signum.Engine.Operations
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return null; } }
 
+            Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
 
             public bool AllowsNew { get; set; }
@@ -534,6 +537,7 @@ namespace Signum.Engine.Operations
 
             public bool AllowsNew { get { return false; } }
 
+            Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
 
             //public Action<T, object[]> Delete { get; set; } (inherited)

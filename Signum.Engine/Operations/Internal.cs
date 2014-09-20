@@ -20,6 +20,8 @@ namespace Signum.Engine.Operations.Internal
     public interface IConstructorFromManyOperation : IOperation
     {
         IIdentifiable Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] parameters);
+
+        Type BaseType { get; }
     }
 
     public interface IExecuteOperation : IEntityOperation

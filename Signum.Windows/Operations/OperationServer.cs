@@ -56,7 +56,6 @@ namespace Signum.Windows
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromLite(lite, symbol.Operation, args)); 
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromLite(lite, symbol.Symbol, args)); 
         }
 

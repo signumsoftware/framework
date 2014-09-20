@@ -344,6 +344,7 @@ namespace Signum.Engine.Operations
                 HasStates = (oper as IGraphHasFromStatesOperation).Try(eo => eo.HasFromStates) ?? false,
                 HasCanExecute = (oper as IEntityOperation).Try(eo => eo.HasCanExecute) ?? false,
                 AllowsNew = (oper as IEntityOperation).Try(eo => eo.AllowsNew) ?? false,
+                BaseType = (oper as IEntityOperation).Try(eo => eo.BaseType) ?? (oper as IConstructorFromManyOperation).Try(eo => eo.BaseType)
             };
         }
 
@@ -702,7 +703,6 @@ namespace Signum.Engine.Operations
         OperationType OperationType { get; }
         bool Returns { get; }
         Type ReturnType { get; }
-
         void AssertIsValid();
     }
 
@@ -712,6 +712,7 @@ namespace Signum.Engine.Operations
         bool AllowsNew { get; }
         string CanExecute(IIdentifiable entity);
         bool HasCanExecute { get; }
+        Type BaseType { get; }
     }
 
 

@@ -64,9 +64,9 @@ namespace Signum.Entities
                     internal set { this.symbol = value; }
                 }
 
+                public Type BaseType
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return typeof(F); }
                 }
             }
 
@@ -80,6 +80,10 @@ namespace Signum.Entities
                     get { return symbol; }
                     internal set { this.symbol = value; }
                 }
+
+                public Type BaseType
+                {
+                    get { return typeof(F); }
                 }
             }
         }
@@ -113,7 +117,10 @@ namespace Signum.Entities
                 get { return symbol; }
                 internal set { this.symbol = value; }
             }
+
+            public Type BaseType
             {
+                get { return typeof(T); }
             }
         }
 
@@ -127,14 +134,11 @@ namespace Signum.Entities
                 get { return symbol; }
                 internal set { this.symbol = value; }
             }
-        }
 
-        public static string NotDefinedForMessage(OperationSymbol operation, IEnumerable<Type> notDefined)
-        {
-            if (notDefined.Any())
-                return "{0} is not defined for {1}".Formato(operation.NiceToString(), notDefined.CommaAnd(a => a.NiceName()));
-
-            return null;
+            public Type BaseType
+            {
+                get { return typeof(T); }
+            }
         }
     }
 
@@ -150,7 +154,15 @@ namespace Signum.Entities
     public interface IEntityOperationSymbolContainer<in T> : IEntityOperationSymbolContainer
         where T : class, IIdentifiable
     {
+        Type BaseType { get; }
     }
+
+    public interface IConstructFromManySymbolContainer<in T> : IOperationSymbolContainer
+       where T : class, IIdentifiable
+    {
+        Type BaseType { get; }
+    }
+
 
     public static class ConstructSymbol<T>
         where T : class, IIdentifiable
@@ -164,16 +176,18 @@ namespace Signum.Entities
         {
         }
 
-        public interface FromMany<in F> : IOperationSymbolContainer
+        public interface FromMany<in F> : IConstructFromManySymbolContainer<F>
             where F : class, IIdentifiable
         {
         }
     }
 
 
+
     public interface ExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
         where T : class, IIdentifiable
     {
+       
     }
 
     public interface DeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
@@ -196,6 +210,7 @@ namespace Signum.Entities
 
         public bool Returns { get; internal set; }
         public Type ReturnType { get; internal set; }
+        public Type BaseType { get; internal set; }
 
         public override string ToString()
         {
