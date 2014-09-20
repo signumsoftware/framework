@@ -41,5 +41,13 @@ namespace Signum.Entities
                 fieldRoute.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray(),
                 route);
         }
+
+        public void AssertIntegrityCheck()
+        {
+            string error = this.IntegrityCheck();
+
+            if (error.HasText())
+                throw new ApplicationException(error);
+        }
     }
 }
