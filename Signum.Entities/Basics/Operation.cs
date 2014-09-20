@@ -236,4 +236,5 @@ namespace Signum.Entities
         ConstructorFrom,
         ConstructorFromMany
     }
+
 }

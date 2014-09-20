@@ -500,7 +500,9 @@ namespace Signum.Engine.Operations
         #region ConstructFromMany
         public static IdentifiableEntity ServiceConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationSymbol, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationSymbol).Construct(lites, args);
+            var onlyType = type ?? lites.Select(a => a.EntityType).Distinct().Only();
+
+            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
         }
 
         public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
@@ -508,7 +510,9 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), symbol.Operation).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
+            var onlyType = lites.Select(a => a.EntityType).Distinct().Only();
+
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(onlyType ?? typeof(F), symbol.Symbol).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
         }
         #endregion
 
