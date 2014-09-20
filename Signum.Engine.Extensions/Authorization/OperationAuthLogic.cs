@@ -243,7 +243,7 @@ namespace Signum.Engine.Authorization
                 var operation = OperationLogic.FindOperation(t, operationKey);
 
                 Type resultType = operation.OperationType == OperationType.ConstructorFrom ||
-                    operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType : operation.Type;
+                    operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType : operation.OverridenType;
 
                 var result = operationAllowed(resultType);
 
@@ -251,7 +251,7 @@ namespace Signum.Engine.Authorization
                     return result;
 
                 Type fromType = operation.OperationType == OperationType.ConstructorFrom ||
-                    operation.OperationType == OperationType.ConstructorFromMany ? operation.Type : null;
+                    operation.OperationType == OperationType.ConstructorFromMany ? operation.OverridenType : null;
 
                 if (fromType == null)
                     return result;

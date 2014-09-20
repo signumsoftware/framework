@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
 using Signum.Web.Basic;
+using Signum.Entities.Processes;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -119,10 +120,10 @@ namespace Signum.Web.Mailing
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate)
+                    new EntityOperationSettings<EmailTemplateDN>(EmailMessageOperation.CreateMailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
-                        OnClick = ctx => Module["createMailFromTemplate"](ctx.Options(), JsFunction.Event, 
+                        Click = ctx => Module["createMailFromTemplate"](ctx.Options(), JsFunction.Event, 
                             new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
@@ -138,14 +139,14 @@ namespace Signum.Web.Mailing
 
                     OperationClient.AddSettings(new List<OperationSettings>
                     {
-                        new EntityOperationSettings(NewsletterOperation.RemoveRecipients)
+                        new EntityOperationSettings<NewsletterDN>(NewsletterOperation.RemoveRecipients)
                         {
-                            OnClick = ctx => Module["removeRecipients"](ctx.Options(),
+                            Click = ctx => Module["removeRecipients"](ctx.Options(),
                                 new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
                                 ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
                         },
 
-                        new EntityOperationSettings(NewsletterOperation.Send)
+                        new EntityOperationSettings<NewsletterDN>(NewsletterOperation.Send)
                         {
                             Group = EntityOperationGroup.None,
                         }

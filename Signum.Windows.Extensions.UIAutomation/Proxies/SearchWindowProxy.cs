@@ -419,7 +419,7 @@ namespace Signum.Windows.UIAutomation
             where T : IdentifiableEntity
             where F : class, IIdentifiable
         {
-            AutomationElement element = ConstructFrom(symbol.Operation, timeOut);
+            AutomationElement element = ConstructFrom(symbol.Symbol, timeOut);
 
             return new NormalWindowProxy<T>(element);
         }

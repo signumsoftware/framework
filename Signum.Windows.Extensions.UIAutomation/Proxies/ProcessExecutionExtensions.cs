@@ -25,7 +25,7 @@ namespace Signum.Windows.UIAutomation
             using (var pe = normalWindow.ConstructFrom(symbol))
             {
                 pe.Execute(ProcessOperation.Execute);
-                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Operation), timeout);
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Symbol), timeout);
             }
         }
 
@@ -33,7 +33,7 @@ namespace Signum.Windows.UIAutomation
         {
             using (var pe = normalWindow.ConstructFrom(symbol))
             {
-                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Operation), timeout);
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(symbol.Symbol), timeout);
             }
         }
     }

@@ -36,10 +36,10 @@ namespace Signum.Windows.Processes
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
-                    new EntityOperationSettings(ProcessOperation.Cancel){ Icon = Image("stop.png") },
-                    new EntityOperationSettings(ProcessOperation.Execute){ Icon = Image("play.png") },
-                    new EntityOperationSettings(ProcessOperation.Suspend){ Icon = Image("pause.png") },
+                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
+                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
+                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Execute){ Icon = Image("play.png") },
+                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Suspend){ Icon = Image("pause.png") },
                 });
 
                 if (packageOperation || package)
@@ -66,6 +66,9 @@ namespace Signum.Windows.Processes
             }
         }
 
+        static readonly GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
+            new GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((sc, oi, settings) =>
+                new ContextualOperationContext<IdentifiableEntity>(sc, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
 
         static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {
@@ -78,25 +81,18 @@ namespace Signum.Windows.Processes
             if (sc.Implementations.IsByAll)
                 return null;
 
-            var types = sc.SelectedItems.Select(a => a.EntityType).Distinct().ToList();
+            var type = sc.SelectedItems.Select(a => a.EntityType).Distinct().Only();
 
-            var result = (from t in sc.Implementations.Types
-                          from oi in OperationClient.Manager.OperationInfos(t)
+            if (type == null)
+                return null;
+
+            var result = (from oi in OperationClient.Manager.OperationInfos(type)
                           where oi.IsEntityOperation
-                          group new { t, oi } by oi.OperationSymbol into g
-                          let oi = g.First().oi
-                          let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
-                          let coc = new ContextualOperationContext
-                          {
-                              Entities = sc.SelectedItems,
-                              SearchControl = sc,
-                              OperationInfo = oi,
-                              OperationSettings = os.Try(a => a.ContextualFromMany),
-                              CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t))),
-                          }
+                          let os = OperationClient.Manager.GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
+                          let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(sc, oi, os.Try(a => a.ContextualFromManyUntyped))
                           where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                              os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.Click == null || os.ContextualFromMany.Click != null)) :
-                              os.ContextualFromMany.IsVisible(coc)
+                              !os.ContextualFromManyUntyped.HasIsVisible ? (oi.Lite == true && !os.HasIsVisible && oi.OperationType != OperationType.ConstructorFrom && (!os.HasClick || os.ContextualFromManyUntyped.HasClick)) :
+                              os.ContextualFromManyUntyped.OnIsVisible(coc)
                           select coc).ToList();
 
             if (result.IsEmpty())
@@ -121,7 +117,7 @@ namespace Signum.Windows.Processes
         }
 
 
-        static ProcessDN ProcessOperation_Plan(EntityOperationContext args)
+        static ProcessDN ProcessOperation_Plan(EntityOperationContext<ProcessDN> args)
         {
             DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, Window.GetWindow(args.SenderButton)))
