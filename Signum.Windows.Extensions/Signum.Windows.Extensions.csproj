@@ -337,6 +337,9 @@
     <Compile Include="Scheduler\ScheduleRuleHourly.xaml.cs">
       <DependentUpon>ScheduleRuleHourly.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\MultipleSMS.xaml.cs">
+      <DependentUpon>MultipleSMS.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
     </Compile>
@@ -748,6 +751,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Scheduler\ScheduleRuleHourly.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SMS\MultipleSMS.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

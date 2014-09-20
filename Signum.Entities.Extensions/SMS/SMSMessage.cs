@@ -10,12 +10,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
-    public static class SMSProviderOperation
-    {
-        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessage = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
-        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
-    }
-
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class SMSMessageDN : Entity, IProcessLineDataDN
     {
@@ -152,6 +146,36 @@ namespace Signum.Entities.SMS
         public static readonly ConstructSymbol<SMSMessageDN>.From<SMSTemplateDN> CreateSMSFromSMSTemplate = OperationSymbol.Construct<SMSMessageDN>.From<SMSTemplateDN>();
         public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSWithTemplateFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
         public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
+
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessages = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
+    }
+
+    [Serializable]
+    public class MultipleSMSModel : ModelEntity
+    {
+        string message;
+        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
+        public string Message
+        {
+            get { return message; }
+            set { Set(ref message, value); }
+        }
+
+        string from;
+        [StringLengthValidator(AllowNulls = false)]
+        public string From
+        {
+            get { return from; }
+            set { Set(ref from, value); }
+        }
+
+        bool certified;
+        public bool Certified
+        {
+            get { return certified; }
+            set { Set(ref certified, value); }
+        }
     }
 
     public static class SMSMessageProcess

@@ -40,7 +40,7 @@ namespace Signum.Web.Extensions.SMS.Views
     #line default
     #line hidden
     
-    #line 6 "..\..\SMS\Views\MultipleSMS.cshtml"
+    #line 5 "..\..\SMS\Views\MultipleSMS.cshtml"
     using Signum.Utilities;
     
     #line default
@@ -48,12 +48,6 @@ namespace Signum.Web.Extensions.SMS.Views
     
     #line 3 "..\..\SMS\Views\MultipleSMS.cshtml"
     using Signum.Web;
-    
-    #line default
-    #line hidden
-    
-    #line 5 "..\..\SMS\Views\MultipleSMS.cshtml"
-    using Signum.Web.Extensions.SMS.Models;
     
     #line default
     #line hidden
@@ -76,7 +70,7 @@ namespace Signum.Web.Extensions.SMS.Views
 WriteLiteral("\r\n\r\n");
 
             
-            #line 9 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 8 "..\..\SMS\Views\MultipleSMS.cshtml"
 Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
             
@@ -85,7 +79,7 @@ Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 WriteLiteral("\r\n\r\n");
 
             
-            #line 11 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 10 "..\..\SMS\Views\MultipleSMS.cshtml"
  using (var e = Html.TypeContext<MultipleSMSModel>())
 {
 
@@ -101,7 +95,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 14 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 13 "..\..\SMS\Views\MultipleSMS.cshtml"
    Write(Html.ValueLine(e, s => s.Message, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
@@ -120,7 +114,7 @@ WriteLiteral(" class=\"sf-sms-characters-left\"");
 WriteLiteral(">\r\n            <p>\r\n                <span>");
 
             
-            #line 23 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 22 "..\..\SMS\Views\MultipleSMS.cshtml"
                  Write(SmsMessage.RemainingCharacters.NiceToString());
 
             
@@ -143,20 +137,20 @@ WriteLiteral(" />\r\n        </div>\r\n    </div>\r\n");
 WriteLiteral("    <br />\r\n");
 
             
-            #line 31 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 30 "..\..\SMS\Views\MultipleSMS.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 31 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 30 "..\..\SMS\Views\MultipleSMS.cshtml"
 Write(Html.ValueLine(e, s => s.From));
 
             
             #line default
             #line hidden
             
-            #line 31 "..\..\SMS\Views\MultipleSMS.cshtml"
+            #line 30 "..\..\SMS\Views\MultipleSMS.cshtml"
                                    
 }
 
