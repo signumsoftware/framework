@@ -2,7 +2,7 @@
 
 The main responsibilities of `Navigator` is showing entities in a modal window (`View`) or an independent window (`Navigate`) using the custom control registered using `EntitySettings<T>`. 
 
-By default the entities are shown using a `NormalWindow`, that provides a common frame for any entity with a title bar, a button bar, validation summary and widgets panel, but the `NavigationManager` can be overriden to open any other kind of control or window.  
+By default the entities are shown using a `NormalWindow`, that provides a common frame for any entity with a title bar, a button bar, validation summary and widgets panel, but the `NavigationManager` can be overridden to open any other kind of control or window.  
 
 ## View
 
@@ -90,9 +90,22 @@ The optional `NavigateOptions` let us change some behavior:
 
 `EntitySettings<T>` class, and `EmbeddedEntitySettings<T>` class are used to register the default `View` of an entity.
 
-* **View**: A `Func<T, Control>` that will be used as the custom control for an entity. Different controls could be used depending on the entity if necessary, but usually use the same control and modify visibility of some elements is enough. If `View` is not set, the entities won't be `Viewable`. 
+* **View**: A `Func<T, Control>` that will be used as the custom control for an entity. Different controls could be used depending on the entity if necessary, but usually use the same control and modify visibility of some elements is enough. If `View` is not set, the entities won't be `IsViewable`. 
 
-Additionally we can override any default behavior that is not properly deduced from the [EntityKind](../../Signum.Entities/EntityKindAttribute.md) of the entity, for strange cases, but as a general rule choosing the right `EntityKind` will make it unnecessary. 
+Additionally we can override any default behavior that is not properly deduced from the [EntityKind](../../Signum.Entities/EntityKindAttribute.md) of the entity for rare cases, but as a general rule choosing the right `EntityKind` will make it unnecessary:
+
+
+|               |IsCreable    |	IsViewable	|IsNavigable| IsReadOnly
+|--------------:|:-----------:|:-----------:|:---------:|:-----------:
+| SystemString	| 	          |      	    |	        | ✓
+| System	    | 	          |✓            |Always	    | ✓
+| Relational	| 	          |             |     	    | ✓
+| String	    | IsSearch    |	            |IsSearch	| 
+| Shared	    | Always	  |✓	        |Always	    | 
+| Main	        | IsSearch    |✓	        |Always	    | 
+| Part	        | IsLine	  |✓	        |    	    | 
+| SharedPart	| IsLine	  |✓	        |Always	    | 
+
 
 * **IsCreable**: Indicates if the entity can be created from search-like control (like `SearchControl`) and/or a line-like control (like an `EntityLine`). For example:
 	* Doesn't make sense create a `CountryDN` on the fly from an address using a line, so it will be `EntityWhen.IsSearch`.
@@ -129,6 +142,8 @@ public static EntitySettings EntitySettings(Type type)
 
 This methods will throw an exception if the `EntitySettings` is not previously registered. 
 
+### OverrideView
+
 You can use this methods, in combination with `OverrideView` event, to customize some controls that are not under your control: 
 
 ```C#
@@ -140,3 +155,33 @@ Navigator.EntitySettings<UserDN>().OverrideView += (usr, ctrl) =>
     return ctrl;
 });
 ```
+
+### Check features 
+
+Finally, `Navigator` exposes a set of methods to determine if an entity (or a particular instance) can be Navigated, Viewed, Created or should be ReadOnly. 
+
+```C#
+public static bool IsCreable(Type type, bool isSearch = false)
+
+public static bool IsReadOnly(Type type)
+public static bool IsReadOnly(ModifiableEntity entity)
+
+public static bool IsViewable(Type type)
+public static bool IsViewable(ModifiableEntity entity)
+
+public static bool IsNavigable(Type type, bool isSearch = false)
+public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
+``` 
+
+In order to answer this questions, `Navigator` takes into account the configuration in the `EntitySettings` (usualy inherited from the `EntityKind`) as well as the events defined in `NavigationManager`: 
+
+```C#
+public class NavigationManager
+{
+    public event Func<Type, bool> IsCreable;
+    public event Func<Type, ModifiableEntity, bool> IsReadOnly;
+    public event Func<Type, ModifiableEntity, bool> IsViewable; //Used for IsViewable and IsNavigable
+}
+```
+
+This events can be used to consistently disable parts of the user interface by third party modules, like Authorization (depending of the role) or Disconnected (depending if working connected or disconnected). 
