@@ -382,13 +382,25 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
     return $.extend(obj, options.requestExtraJsonData);
 }
 
-export function chooseConstructor(extraJsonData: FormObject, prefix: string, title: string, options: ChooserOption[]): Promise<FormObject> {
+export interface ConstructChooserOption {
+    value: string;
+    toStr: string;
+    operationConstructor: (form: FormObject) => Promise<FormObject>
+}
 
-    return chooser(prefix, title, options).then(co=> {
+export function chooseConstructor(extraJsonData: FormObject, prefix: string, title: string, options: ConstructChooserOption[]): Promise<FormObject> {
+
+    return chooser(prefix, title, options).then(co=>
+    {
         if (!co)
             return null;
 
-        return <any>$.extend(extraJsonData, { operationFullKey: co.value })
+        extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value }); 
+
+        if (co.operationConstructor)
+            return <any>co.operationConstructor(extraJsonData);
+
+        return extraJsonData;
     });
 }
 

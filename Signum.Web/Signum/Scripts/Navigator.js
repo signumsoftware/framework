@@ -359,7 +359,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (!co)
                 return null;
 
-            return $.extend(extraJsonData, { operationFullKey: co.value });
+            extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value });
+
+            if (co.operationConstructor)
+                return co.operationConstructor(extraJsonData);
+
+            return extraJsonData;
         });
     }
     exports.chooseConstructor = chooseConstructor;
