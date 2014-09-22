@@ -18,6 +18,8 @@ using System.Collections.Concurrent;
 using Signum.Web.PortableAreas;
 using Signum.Web.Controllers;
 using Signum.Utilities.Reflection;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 #endregion
 
 namespace Signum.Web.Operations
@@ -344,16 +346,18 @@ namespace Signum.Web.Operations
 
         #region Constructor
 
-        static readonly GenericInvoker<Func<OperationInfo, ConstructorContext, ClientConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>> newConstructorOperationContext =
-             new GenericInvoker<Func<OperationInfo, ConstructorContext, ClientConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>>((oi, ctx, cctx, settings) =>
-                new ConstructorOperationContext<IdentifiableEntity>(oi, ctx, cctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+        static readonly GenericInvoker<Func<OperationInfo, ClientConstructorContext, ConstructorOperationSettingsBase, IClientConstructorOperationContext>> newClientConstructorOperationContext =
+             new GenericInvoker<Func<OperationInfo, ClientConstructorContext, ConstructorOperationSettingsBase, IClientConstructorOperationContext>>((oi, cctx, settings) =>
+                new ClientConstructorOperationContext<IdentifiableEntity>(oi, cctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+
+    
 
         protected internal JsFunction ClientConstruct(ClientConstructorContext ctx)
         {
             var dic = (from oi in OperationInfos(ctx.Type)
                        where oi.OperationType == OperationType.Constructor
                        let os = GetSettings<ConstructorOperationSettingsBase>(ctx.Type, oi.OperationSymbol)
-                       let coc = newConstructorOperationContext.GetInvoker(ctx.Type)(oi, null, ctx, os)
+                       let coc = newClientConstructorOperationContext.GetInvoker(ctx.Type)(oi, ctx, os)
                        where os != null && os.HasIsVisible ? os.OnIsVisible(coc) : true
                        select coc).ToDictionary(a => a.OperationInfo.OperationSymbol);
 
@@ -362,16 +366,57 @@ namespace Signum.Web.Operations
 
             return JsModule.Navigator["chooseConstructor"](ClientConstructorManager.ExtraJsonParams, ctx.Prefix,
                  SelectorMessage.PleaseSelectAConstructor.NiceToString(),
-                 dic.Keys.Select(iso => iso.ToChooserOption()));
+                 dic.Select(kvp => new
+                 {
+                     value = kvp.Key.Key,
+                     toStr = kvp.Value.Settings.Try(s => s.Text) ?? kvp.Key.NiceToString(),
+                     operationConstructor = !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
+                 }));
         }
 
+        private string PromiseRequire(JsFunction func)
+        {
+            return
+@"function(extraArgs){ 
+    return new Promise(function(resolve){
+        require(['{moduleNames}'], function({moduleVars}){
+            {moduleVars}.{functionName}({arguments}).then(function(args) { resolve(args); });
+        });
+    });
+}".Replace("{moduleNames}", func.Module.Name)
+ .Replace("{moduleVars}",  JsFunction.VarName(func.Module))
+ .Replace("{functionName}", func.FunctionName)
+ .Replace("{arguments}", func.Arguments.ToString(a => a == ClientConstructorManager.ExtraJsonParams ? "extraArgs" : JsonConvert.SerializeObject(a, func.JsonSerializerSettings), ", "));
+        }
+
+        static readonly GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>> newConstructorOperationContext =
+        new GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>>((oi, ctx, settings) =>
+            new ConstructorOperationContext<IdentifiableEntity>(oi, ctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+
         protected internal virtual IdentifiableEntity Construct(ConstructorContext ctx)
+        {
+            OperationInfo constructor = GetConstructor(ctx);
+
+            var settings = GetSettings<ConstructorOperationSettingsBase>(ctx.Type, constructor.OperationSymbol);
+
+            var result = settings != null && settings.HasConstructor ? settings.OnConstructor(newConstructorOperationContext.GetInvoker(ctx.Type)(constructor, ctx, settings)) :
+                OperationLogic.ServiceConstruct(ctx.Type, constructor.OperationSymbol);
+
+            ctx.Controller.ViewData[ViewDataKeys.WriteEntityState] = true;
+
+            return result;
+        }
+
+        private OperationInfo GetConstructor(ConstructorContext ctx)
         {
             var operation = ctx.Controller.TryGetOperationKeyAsset();
 
             OperationInfo constructor = OperationInfos(ctx.Type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor && (operation == null || a.OperationSymbol.Equals(operation)));
 
-            return OperationLogic.ServiceConstruct(ctx.Type, constructor.OperationSymbol);
+            if (constructor == null)
+                throw new InvalidOperationException("No Constructor operation found");
+
+            return constructor;
         }
 
         internal bool HasConstructOperationsAllowedAndVisible(Type type)
@@ -386,7 +431,7 @@ namespace Signum.Web.Operations
                 if (os == null || !os.HasIsVisible)
                     return true;
 
-                var ctx = newConstructorOperationContext.GetInvoker(type)(oi, null, null, os);
+                var ctx = newClientConstructorOperationContext.GetInvoker(type)(oi, null, os);
 
                 return os.OnIsVisible(ctx);
             });

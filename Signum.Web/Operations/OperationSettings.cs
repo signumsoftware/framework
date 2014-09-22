@@ -40,10 +40,13 @@ namespace Signum.Web.Operations
     public abstract class ConstructorOperationSettingsBase : OperationSettings
     {
         public abstract bool HasIsVisible { get; }
-        public abstract bool OnIsVisible(IConstructorOperationContext ctx);
+        public abstract bool OnIsVisible(IClientConstructorOperationContext ctx);
 
         public abstract bool HasConstructor { get; }
-        public abstract JsFunction OnConstructor(IConstructorOperationContext ctx);
+        public abstract IdentifiableEntity OnConstructor(IConstructorOperationContext ctx);
+
+        public abstract bool HasClientConstructor { get; }
+        public abstract JsFunction OnClientConstructor(IClientConstructorOperationContext ctx);
 
         protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
             : base(constructOperation)
@@ -54,8 +57,10 @@ namespace Signum.Web.Operations
 
     public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IIdentifiable
     {
-        public Func<ConstructorOperationContext<T>, bool> IsVisible { get; set; }
-        public Func<ConstructorOperationContext<T>, JsFunction> Constructor { get; set; }
+        public Func<ClientConstructorOperationContext<T>, bool> IsVisible { get; set; }
+        public Func<ClientConstructorOperationContext<T>, JsFunction> ClientConstructor { get; set; }
+
+        public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
 
         public ConstructorOperationSettings(ConstructSymbol<T>.Simple constructOperation)
             : base(constructOperation)
@@ -64,21 +69,56 @@ namespace Signum.Web.Operations
 
         public override bool HasIsVisible { get { return IsVisible != null; } }
 
-        public override bool OnIsVisible(IConstructorOperationContext ctx)
+        public override bool OnIsVisible(IClientConstructorOperationContext ctx)
         {
-            return IsVisible((ConstructorOperationContext<T>)ctx);
+            return IsVisible((ClientConstructorOperationContext<T>)ctx);
+        }
+
+        public override bool HasClientConstructor { get { return ClientConstructor != null; } }
+
+        public override JsFunction OnClientConstructor(IClientConstructorOperationContext ctx)
+        {
+            return ClientConstructor((ClientConstructorOperationContext<T>)ctx);
         }
 
         public override bool HasConstructor { get { return Constructor != null; } }
 
-        public override JsFunction OnConstructor(IConstructorOperationContext ctx)
+        public override IdentifiableEntity OnConstructor(IConstructorOperationContext ctx)
         {
-            return Constructor((ConstructorOperationContext<T>)ctx);
+            return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
         }
+
+     
 
         public override Type OverridenType
         {
             get { return typeof(T); }
+        }
+    }
+
+    public interface IClientConstructorOperationContext
+    {
+        OperationInfo OperationInfo { get; }
+        ClientConstructorContext ClientConstructorContext { get; }
+        ConstructorOperationSettingsBase Settings { get; }
+    }
+
+    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IIdentifiable
+    {
+        public OperationInfo OperationInfo { get; private set; }
+        public ClientConstructorContext ClientConstructorContext { get; private set; }
+        public ConstructorOperationSettings<T> Settings { get; private set; }
+
+        public ClientConstructorOperationContext(OperationInfo info, ClientConstructorContext clientContext, ConstructorOperationSettings<T> settings)
+        {
+            this.OperationInfo = info;
+            this.ClientConstructorContext = clientContext;
+            this.Settings = settings;
+        }
+
+        ConstructorOperationSettingsBase IClientConstructorOperationContext.Settings
+        {
+            get { return Settings; }
         }
     }
 
@@ -93,14 +133,12 @@ namespace Signum.Web.Operations
     {
         public OperationInfo OperationInfo { get; private set; }
         public ConstructorContext ConstructorContext { get; private set; }
-        public ClientConstructorContext ClientConstructorContext { get; private set; }
         public ConstructorOperationSettings<T> Settings { get; private set; }
 
-        public ConstructorOperationContext(OperationInfo info, ConstructorContext context, ClientConstructorContext clientContext, ConstructorOperationSettings<T> settings)
+        public ConstructorOperationContext(OperationInfo info, ConstructorContext context, ConstructorOperationSettings<T> settings)
         {
             this.OperationInfo = info;
             this.ConstructorContext = context;
-            this.ClientConstructorContext = clientContext;
             this.Settings = settings;
         }
 
