@@ -107,6 +107,26 @@ export class EntityValue {
             throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
     }
 
+    key(): string {
+        return this.runtimeInfo.key() + ";" + this.toStr;
+    }
+
+    public static fromKey(key: string): EntityValue {
+        if (SF.isEmpty(key))
+            return null;
+
+        var index = key.indexOf(";");
+        if (index == -1)
+            throw Error("{0} not found".format(";"));
+
+        index = key.indexOf(";");
+
+        if (index == -1)
+            return new EntityValue(RuntimeInfo.parse(key));
+
+        return new EntityValue(RuntimeInfo.parse(key.substr(0, index)), key.substr(index + 1));
+    }
+
     isLoaded() {
         return false;
     }
