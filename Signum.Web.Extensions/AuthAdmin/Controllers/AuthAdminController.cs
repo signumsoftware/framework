@@ -65,7 +65,7 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            return this.PopupNavigate(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()));
+            return this.PopupNavigate(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()), new PopupNavigateOptions(""));
         }
 
         [HttpPost]
@@ -87,7 +87,7 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            return this.PopupNavigate(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()));
+            return this.PopupNavigate(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()), new PopupNavigateOptions(""));
         }
 
         [HttpPost]
@@ -110,7 +110,7 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            return this.PopupNavigate(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()));
+            return this.PopupNavigate(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()), new PopupNavigateOptions(""));
         }
 
         [HttpPost]
