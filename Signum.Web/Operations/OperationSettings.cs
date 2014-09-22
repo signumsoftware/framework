@@ -167,8 +167,14 @@ namespace Signum.Web.Operations
 
     public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IIdentifiable
     {
-        public ContextualOperationSettings(IOperationSymbolContainer symbol)
-            : base(symbol)
+        public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
+        {
+        }
+
+
+        internal ContextualOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
         {
         }
 
@@ -303,11 +309,11 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings<T> ContextualFromMany { get; private set; }
         public ContextualOperationSettings<T> Contextual { get; private set; }
 
-        public EntityOperationSettings(IOperationSymbolContainer symbol)
-            : base(symbol)
+        public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
         {
-            this.Contextual = new ContextualOperationSettings<T>(symbol);
-            this.ContextualFromMany = new ContextualOperationSettings<T>(symbol); 
+            this.Contextual = new ContextualOperationSettings<T>(symbolContainer);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer); 
         }
 
         static EntityOperationSettings()
