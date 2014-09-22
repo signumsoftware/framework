@@ -370,7 +370,7 @@ namespace Signum.Web.Operations
                  {
                      value = kvp.Key.Key,
                      toStr = kvp.Value.Settings.Try(s => s.Text) ?? kvp.Key.NiceToString(),
-                     operationConstructor = !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
+                     operationConstructor = kvp.Value.Settings == null || !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
                  }));
         }
 
