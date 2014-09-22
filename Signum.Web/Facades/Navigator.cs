@@ -87,24 +87,14 @@ namespace Signum.Web
             return result;
         }
 
-        public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity)
+        public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity, NavigateOptions options = null)
         {
-            return Manager.NormalPage(controller, new NavigateOptions(entity));
+            return Manager.NormalPage(controller, entity, options ?? new NavigateOptions());
         }
 
-        public static ViewResult NormalPage(this ControllerBase controller, NavigateOptions options)
+        public static PartialViewResult NormalControl(this ControllerBase controller, IRootEntity entity, NavigateOptions options = null)
         {
-            return Manager.NormalPage(controller, options);
-        }
-
-        public static PartialViewResult NormalControl(this ControllerBase controller, IRootEntity entity)
-        {
-            return Manager.NormalControl(controller, new NavigateOptions(entity));
-        }
-
-        public static PartialViewResult NormalControl(this ControllerBase controller, NavigateOptions options)
-        {
-            return Manager.NormalControl(controller, options);
+            return Manager.NormalControl(controller, entity, options ?? new NavigateOptions());
         }
 
         public static string GetOrCreateTabID(ControllerBase c)
@@ -123,21 +113,14 @@ namespace Signum.Web
             return tabID;
         }
 
-        public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix = null)
-        {  
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupControl(new PopupViewOptions(tc));
+        public static PartialViewResult PopupView(this ControllerBase controller, ModifiableEntity entity, PopupViewOptions options)
+        {
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix, options.PropertyRoute), options);
         }
 
-        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, string prefix = null)
+        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, PopupNavigateOptions options)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupControl(new PopupNavigateOptions(tc));
-        }
-
-        public static PartialViewResult PopupControl(this ControllerBase controller, PopupOptionsBase viewOptions)
-        {
-            return Manager.PopupControl(controller, viewOptions);
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix), options);
         }
 
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
@@ -460,9 +443,9 @@ namespace Signum.Web
             return Guid.NewGuid().ToString();
         }
 
-        protected internal virtual ViewResult NormalPage(ControllerBase controller, NavigateOptions options)
+        protected internal virtual ViewResult NormalPage(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            FillViewDataForViewing(controller, options);
+            FillViewDataForViewing(controller, rootEntity, options);
 
             return new ViewResult()
             {
@@ -473,9 +456,9 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, NavigateOptions options)
+        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            FillViewDataForViewing(controller, options);
+            FillViewDataForViewing(controller, rootEntity, options);
 
             return new PartialViewResult()
             {
@@ -485,12 +468,12 @@ namespace Signum.Web
             };
         }
 
-        private void FillViewDataForViewing(ControllerBase controller, NavigateOptions options)
+        private void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(options.Entity, "");
+            TypeContext tc = TypeContextUtilities.UntypedNew(rootEntity, "");
             controller.ViewData.Model = tc;
 
-            var entity = (ModifiableEntity)options.Entity;
+            var entity = (ModifiableEntity)rootEntity;
 
             controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
             tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
@@ -523,28 +506,27 @@ namespace Signum.Web
             return niceName + " " + ident.Id;
         }
 
-        protected internal virtual PartialViewResult PopupControl(ControllerBase controller, PopupOptionsBase viewOptions)
+        protected internal virtual PartialViewResult PopupControl(ControllerBase controller, TypeContext typeContext, PopupOptionsBase popupOptions)
         {
-            TypeContext typeContext = TypeContextUtilities.CleanTypeContext(viewOptions.TypeContext);
             Type cleanType = typeContext.UntypedValue.GetType();
 
             ModifiableEntity entity = (ModifiableEntity)typeContext.UntypedValue;
             AssertViewableEntitySettings(entity);
             
             controller.ViewData.Model = typeContext;
-            controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            controller.ViewData[ViewDataKeys.PartialViewName] = popupOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
             typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
-            bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
+            bool isReadOnly = popupOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
                 typeContext.ReadOnly = true;
 
-            ViewMode mode = viewOptions.ViewMode;
+            ViewMode mode = popupOptions.ViewMode;
             controller.ViewData[ViewDataKeys.ViewMode] = mode;
-            controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
+            controller.ViewData[ViewDataKeys.ShowOperations] = popupOptions.ShowOperations;
             if (mode == ViewMode.View)
             {
-                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)viewOptions).SaveProtected ??
+                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)popupOptions).SaveProtected ??
                     OperationLogic.IsSaveProtected(entity.GetType());
             }
 

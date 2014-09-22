@@ -14,6 +14,15 @@ There are three main design principles that we follow in order to make `Signum.W
 
 * **Use common web libraries if necessary:** Signum.Framework tries to be conservative adding dependencies   to third-party libraries, building on top of .Net Framework alone. However, client-side web development is way too austere if done using just the DOM and no other libraries. We took `jQuery` and `Bootstrap` as base dependencies of `Signum.Web`, and we also promote `TypeScript` as the language for writing client-side interaction.  
 
+## Prerequisites
+
+In order to fully understand Signum.Web is necessary to have some knowledge of modern web development in .Net:
+
+* **ASP.Net MVC:** Controllers, Actions, Views, Routes, Filters...
+* **HTML5, CSS3 and JavaScript:** CSS selectors and jQuery
+* **Typescript:** Classes and Interfaces, Promises, External modules...
+* **Bootstrap:** Grid System and Forms.    
+
 ## Overview
 
 The two main pages in a `Signum.Web` application are the [SearchPage](../Signum/Views/SearchPage.m), that is mostly auto-generated from a [registered query](../Signum.Engine/DynamicQuery/DynamicQueries.md"), and the [NormalPage](../Signum/Views/NormalPage.md) that provides a common frame for the detail view of any entity and contains a **custom control** for each type of entity.  
