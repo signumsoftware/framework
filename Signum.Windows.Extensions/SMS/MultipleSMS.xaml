@@ -1,0 +1,15 @@
+<UserControl x:Class="Signum.Windows.SMS.MultipleSMS"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.SMS;assembly=Signum.Entities.Extensions"
+    xmlns:swsms="clr-namespace:Signum.Windows.SMS"            
+    m:Common.TypeContext="{x:Type d:MultipleSMSModel}"
+    m:Common.MinLabelWidth="120"
+    MinWidth="300" MaxWidth="300">
+    <StackPanel>
+        <m:ValueLine  m:Common.Route="From" />
+        <m:ValueLine  m:Common.Route="Certified" />
+        <m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message"  Margin="0,3,0,0" />
+    </StackPanel>
+</UserControl>

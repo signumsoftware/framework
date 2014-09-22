@@ -64,7 +64,7 @@ namespace Signum.Windows.Authorization
         OperationSymbol operationKey;
         public OperationVisiblityExtension(object value)
         {
-            this.operationKey = (value is IOperationSymbolContainer) ? ((IOperationSymbolContainer)value).Operation : (OperationSymbol)value;
+            this.operationKey = (value is IOperationSymbolContainer) ? ((IOperationSymbolContainer)value).Symbol : (OperationSymbol)value;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

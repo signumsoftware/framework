@@ -35,7 +35,7 @@ namespace Signum.Web.Chart
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Finder.SetTokens(findOptions.FilterOptions, queryDescription, false);
+            FilterOption.SetFilterTokens(findOptions.FilterOptions, queryDescription, false);
 
             var request = new ChartRequest(findOptions.QueryName)
             {

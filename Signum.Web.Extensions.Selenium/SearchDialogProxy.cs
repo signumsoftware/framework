@@ -773,7 +773,7 @@ namespace Signum.Web.Selenium
 
         public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false)
         {
-            ExecuteClick(symbolContainer.Operation, consumeConfirmation);
+            ExecuteClick(symbolContainer.Symbol, consumeConfirmation);
         }
 
         public void ExecuteClick(OperationSymbol operationSymbol, bool consumeConfirmation = false)
@@ -787,7 +787,7 @@ namespace Signum.Web.Selenium
 
         public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true)
         {
-            DeleteClick(symbolContainer.Operation);
+            DeleteClick(symbolContainer.Symbol);
         }
 
         public void DeleteClick(OperationSymbol operationSymbol, bool consumeConfirmation = true)
@@ -799,7 +799,7 @@ namespace Signum.Web.Selenium
 
         public PopupControl<ProcessDN> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
         {
-            return DeleteProcessClick(symbolContainer.Operation);
+            return DeleteProcessClick(symbolContainer.Symbol);
         }
 
         public PopupControl<ProcessDN> DeleteProcessClick(OperationSymbol operationSymbol)
@@ -832,7 +832,7 @@ namespace Signum.Web.Selenium
 
         public bool IsDisabled(IOperationSymbolContainer symbol)
         {
-            return IsDisabled(symbol.Operation.KeyWeb());
+            return IsDisabled(symbol.Symbol.KeyWeb());
         }
 
         public PopupControl<T> MenuClickPopup<T>(string itemId, string prefix = "New")
@@ -848,12 +848,12 @@ namespace Signum.Web.Selenium
         public PopupControl<T> MenuClickPopup<T>(IOperationSymbolContainer contanier, string prefix = "New")
             where T : IdentifiableEntity
         {
-            return MenuClickPopup<T>(contanier.Operation.KeyWeb(), prefix);
+            return MenuClickPopup<T>(contanier.Symbol.KeyWeb(), prefix);
         }
 
         public NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : IdentifiableEntity
         {
-            return MenuClickNormalPage<T>(contanier.Operation.KeyWeb());
+            return MenuClickNormalPage<T>(contanier.Symbol.KeyWeb());
         }
 
         private NormalPage<T> MenuClickNormalPage<T>(string itemId) where T : IdentifiableEntity

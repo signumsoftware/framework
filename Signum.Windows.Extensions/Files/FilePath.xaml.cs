@@ -59,7 +59,7 @@ namespace Signum.Windows.Files
         #region IHaveToolBarElements Members
 
 
-        public List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx)
+        public List<FrameworkElement> GetToolBarElements(object dataContext, EntityButtonContext ctx)
         {
             ToolBarButton button = new ToolBarButton()
             {

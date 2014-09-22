@@ -132,16 +132,16 @@ namespace Signum.Web.Auth
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(UserOperation.SetPassword) 
+                    new EntityOperationSettings<UserDN>(UserOperation.SetPassword) 
                     { 
-                        OnClick = ctx => Module["setPassword"](ctx.Options(), 
+                        Click = ctx => Module["setPassword"](ctx.Options(), 
                             ctx.Url.Action((AuthController c)=>c.SetPasswordModel()),
                             ctx.Url.Action((AuthController c)=>c.SetPasswordOnOk()))
                     },
 
-                    new EntityOperationSettings(UserOperation.SaveNew) 
+                    new EntityOperationSettings<UserDN>(UserOperation.SaveNew) 
                     { 
-                         OnClick = ctx => Module["saveNew"](ctx.Options(), 
+                         Click = ctx => Module["saveNew"](ctx.Options(), 
                             ctx.Url.Action((AuthController c)=>c.SaveNewUser()))
                     }
                 });

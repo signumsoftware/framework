@@ -178,7 +178,7 @@ namespace Signum.Web.Files
 
                 var dqm = DynamicQueryManager.Current;
                
-                QuerySettings.FormatRules.Add(new FormatterRule(
+                QuerySettings.FormatRules.Add(new FormatterRule("WebImage",
                        col => col.Type == typeof(WebImage),
                        col => new CellFormatter((help, obj) => ((WebImage)obj).FullWebPath == null ? null :
                            new HtmlTag("img")
@@ -187,7 +187,7 @@ namespace Signum.Web.Files
                            .Attr("style", "width:80px").ToHtmlSelf()) { TextAlign = "center" }
                  ));
 
-                QuerySettings.FormatRules.Add(new FormatterRule(
+                QuerySettings.FormatRules.Add(new FormatterRule("WebDownload",
                        col => col.Type == typeof(WebDownload),
                        col => new CellFormatter((help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
                           new MvcHtmlString("<a href='{0}'>{1}</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }

@@ -45,8 +45,8 @@ namespace Signum.Windows.Scheduler
                     Text = () => TaskMessage.Execute.NiceToString() + "...",
                 };
 
-                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
-                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskDN>(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskDN>(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
             }
         }
 

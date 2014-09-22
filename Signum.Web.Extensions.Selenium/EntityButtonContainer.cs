@@ -34,7 +34,7 @@ namespace Signum.Web.Selenium
         public static string OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : IdentifiableEntity
         {
-            return container.ButtonLocator(symbol.Operation.KeyWeb());
+            return container.ButtonLocator(symbol.Symbol.KeyWeb());
         }
 
         public static string KeyWeb(this OperationSymbol operationSymbol)
@@ -52,7 +52,7 @@ namespace Signum.Web.Selenium
         public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : IdentifiableEntity
         {
-            return container.ButtonEnabled(symbol.Operation.KeyWeb());
+            return container.ButtonEnabled(symbol.Symbol.KeyWeb());
         }
 
         public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
@@ -65,7 +65,7 @@ namespace Signum.Web.Selenium
         public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : IdentifiableEntity
         {
-            return container.ButtonDisabled(symbol.Operation.KeyWeb());
+            return container.ButtonDisabled(symbol.Symbol.KeyWeb());
         }
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
@@ -76,7 +76,7 @@ namespace Signum.Web.Selenium
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : IdentifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonClick(symbol.Symbol.KeyWeb());
         }
 
         public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
@@ -135,7 +135,7 @@ namespace Signum.Web.Selenium
         public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
             where T : IdentifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonClick(symbol.Symbol.KeyWeb());
 
             container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
 
@@ -145,7 +145,7 @@ namespace Signum.Web.Selenium
         public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, string prefix = "New")
             where T : ModifiableEntity
         {
-            container.ButtonClick(symbol.Operation.KeyWeb());
+            container.ButtonClick(symbol.Symbol.KeyWeb());
 
             var popup = new PopupControl<T>(container.Selenium, prefix);
 

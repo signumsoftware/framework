@@ -830,7 +830,6 @@
       <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
     </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
-    <Compile Include="SMS\Models\MultipleSMSModel.cs" />
     <Compile Include="SMS\SMSClient.cs" />
     <Compile Include="SMS\Views\MultipleSMS.generated.cs">
       <AutoGen>True</AutoGen>

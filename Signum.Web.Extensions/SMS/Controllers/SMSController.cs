@@ -22,7 +22,6 @@ using Signum.Entities.SMS;
 using Signum.Engine.Operations;
 using Signum.Engine.SMS;
 using Signum.Entities.Processes;
-using Signum.Web.Extensions.SMS.Models;
 using Signum.Web.Operations;
 #endregion
 
@@ -75,7 +74,7 @@ namespace Signum.Web.SMS
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
-            var process = OperationLogic.ConstructFromMany(lites, SMSProviderOperation.SendSMSMessagesFromTemplate, template.Retrieve());
+            var process = OperationLogic.ConstructFromMany(lites, SMSMessageOperation.SendSMSMessagesFromTemplate, template.Retrieve());
 
             return this.DefaultConstructResult(process);
         }
@@ -83,7 +82,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public PartialViewResult SendMultipleSMSMessagesModel()
         {
-            return this.PopupView(new MultipleSMSModel());
+            return this.PopupView(new MultipleSMSModel(), new PopupViewOptions(""));
         }
 
         [HttpPost]
@@ -95,13 +94,7 @@ namespace Signum.Web.SMS
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
-            var cp = new CreateMessageParams
-            {
-                Message = model.Message,
-                From = model.From,
-            };
-
-            var process = OperationLogic.ConstructFromMany(lites, SMSProviderOperation.SendSMSMessage, cp);
+            var process = OperationLogic.ConstructFromMany(lites, SMSMessageOperation.SendSMSMessages, model);
 
             return this.DefaultConstructResult(process);
         }

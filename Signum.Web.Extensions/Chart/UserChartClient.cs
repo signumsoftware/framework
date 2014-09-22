@@ -77,9 +77,9 @@ namespace Signum.Web.Chart
                 UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryName =>
                     QueryLogic.GetQuery(queryName));
 
-                OperationClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
+                OperationClient.AddSetting(new EntityOperationSettings<UserChartDN>(UserChartOperation.Delete)
                 {
-                    OnClick = ctx => ChartClient.Module["deleteUserChart"](ctx.Options(), Finder.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName())),
+                    Click = ctx => ChartClient.Module["deleteUserChart"](ctx.Options(), Finder.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName())),
                     Contextual = { IsVisible = a => true },
                     ContextualFromMany = { IsVisible = a => true },
                 });
