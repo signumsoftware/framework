@@ -29,11 +29,6 @@ namespace Signum.Windows.Operations
             this.OperationSymbol = symbol.Symbol;
         }
 
-        public OperationSettings(OperationSymbol operationSymbol)
-        {
-            this.OperationSymbol = operationSymbol;
-        }
-
         public override string ToString()
         {
             return "{0}({1})".Formato(this.GetType().TypeName(), OperationSymbol.Key);
@@ -281,7 +276,7 @@ namespace Signum.Windows.Operations
     public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IIdentifiable
     {
         public Func<EntityOperationContext<T>, string> ConfirmMessage { get; set; }
-        public Func<EntityOperationContext<T>, IdentifiableEntity> Click { get; set; }
+        public Func<EntityOperationContext<T>, T> Click { get; set; }
         public Func<EntityOperationContext<T>, bool> IsVisible { get; set; }
 
         public ContextualOperationSettings<T> ContextualFromMany { get; private set; }
@@ -312,7 +307,7 @@ namespace Signum.Windows.Operations
 
         public override IdentifiableEntity OnClick(IEntityOperationContext ctx)
         {
-            return this.Click((EntityOperationContext<T>)ctx);
+            return (IdentifiableEntity)(IIdentifiable)this.Click((EntityOperationContext<T>)ctx);
         }
 
         public override bool HasIsVisible
