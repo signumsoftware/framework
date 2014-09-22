@@ -264,3 +264,8 @@ tr.sf-entity-ctxmenu-success
 {
     margin-right: 4px;
 }
+
+ul.sf-context-menu li a:not([disabled])
+{
+    cursor:pointer;
+}
