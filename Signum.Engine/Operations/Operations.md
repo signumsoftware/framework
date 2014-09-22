@@ -93,7 +93,14 @@ Each declared operation field name will be used as the label for the UI buttons,
 
 Operations are **declared** in the entities assembly, using the static factory methods in `OperationSymbol`.
 
-But operations are **implemented** in the logic assembly, by instantiating and registering objects of the inner classes inside `Graph<T>` (simple) and `Graph<T, S>` (with state). 
+But operations are **implemented** in the logic assembly, by instantiating objects of the inner classes inside `Graph<T>` (simple) and `Graph<T, S>` (with state) and registering them in `OperationLogic` class. 
+
+```C#
+public static class OperationLogic
+{
+    public static void Register(this IOperation operation)
+}
+```
 
 Simple example in `OrderLogic.Start` instantiating inner classes directly: 
 
@@ -259,7 +266,7 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 }
 ```
 
-Example invoking the operatons. 
+Example invoking the operatons using `OperationLogic.Execute` extension method: 
 
 ```C#
 var order = new OrderDN().Execute(OrderOperation.SaveNew);  //Entity is new but works because AllowsNew = true
@@ -301,7 +308,7 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 ```
 
 
-Example invoking the operatons. 
+Example invoking the operations using `OperationLogic.Delete` extension method: 
 
 ```C#
 order.ToLite().Delete(OrderOperation.Delete); //Entity will be retrieved from the database
@@ -347,10 +354,10 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 }
 ```
 
-Manual invocation:
+Manual invocation using `OperationLogic.Construct`:
 
 ```C#
-OrderDN order = OrderLogic.Create(OrderOperation.Create); //Type inferred from OrderOperation.Create 
+OrderDN order = OperationLogic.Construct(OrderOperation.Create); //Type inferred from OrderOperation.Create 
 ```
 
 ### ConstructFrom
@@ -389,7 +396,7 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 }
 ```
 
-Manual invocation:
+Manual invocation using `OperationLogic.ConstructFrom` extension method:
 
 ```C#
 //Type inferred from OrderOperation.CreateOrderFromCustomer 
@@ -442,10 +449,10 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 }
 ```
 
-Manual invocation:
+Manual invocation using `OperationLogic.ConstructFromMany` method:
 
 ```C#
-//Type inferred from OrderOperation.CreateOrderFromCustomer 
+//Type inferred from OrderOperation.CreateOrderFromProducts 
 OrderDN order = OperationLogic.ConstructFromMany(OrderOperation.CreateOrderFromProducts, products); 
 ```
 

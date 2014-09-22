@@ -81,8 +81,6 @@ namespace Signum.Windows
             return Manager.SelectTypes(parent, implementations, filterType);
         }
 
-       
-
         public static bool IsCreable(Type type, bool isSearch = false)
         {
             return Manager.OnIsCreable(type, isSearch);
@@ -568,19 +566,19 @@ namespace Signum.Windows
             }
         }
 
-        public event Func<ModifiableEntity, ButtonBarEventArgs, List<FrameworkElement>> GetButtonBarElementGlobal;
-        public Dictionary<Type, Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type, Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement>>();
+        public event Func<ModifiableEntity, EntityButtonContext, List<FrameworkElement>> GetButtonBarElementGlobal;
+        public Dictionary<Type, Func<ModifiableEntity, EntityButtonContext, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type, Func<ModifiableEntity, EntityButtonContext, FrameworkElement>>();
 
-        public void RegisterGetButtonBarElement<T>(Func<T, ButtonBarEventArgs, FrameworkElement> action) where T: ModifiableEntity
+        public void RegisterGetButtonBarElement<T>(Func<T, EntityButtonContext, FrameworkElement> action) where T: ModifiableEntity
         {
-            Func<ModifiableEntity, ButtonBarEventArgs, FrameworkElement> casted = (obj, args) => action((T)obj, args);
+            Func<ModifiableEntity, EntityButtonContext, FrameworkElement> casted = (obj, args) => action((T)obj, args);
 
             var prev = GetButtonBarElementByType.TryGetC(typeof(T));
 
             GetButtonBarElementByType[typeof(T)] = prev + casted;
         }
 
-        internal List<FrameworkElement> GetToolbarButtons(ModifiableEntity entity, ButtonBarEventArgs ctx)
+        internal List<FrameworkElement> GetToolbarButtons(ModifiableEntity entity, EntityButtonContext ctx)
         {
             List<FrameworkElement> elements = new List<FrameworkElement>();
 
@@ -608,9 +606,9 @@ namespace Signum.Windows
         }
 
 
-        public event Func<ModifiableEntity, ButtonBarEventArgs, EmbeddedWidget> OnGetEmbeddedWigets;
+        public event Func<ModifiableEntity, EntityButtonContext, EmbeddedWidget> OnGetEmbeddedWigets;
 
-        internal List<EmbeddedWidget> GetEmbeddedWigets(ModifiableEntity entity, ButtonBarEventArgs ctx)
+        internal List<EmbeddedWidget> GetEmbeddedWigets(ModifiableEntity entity, EntityButtonContext ctx)
         {
             List<EmbeddedWidget> elements = new List<EmbeddedWidget>();
 

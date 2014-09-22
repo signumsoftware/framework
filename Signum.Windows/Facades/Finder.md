@@ -19,6 +19,7 @@ public static Lite<IdentifiableEntity> Find(FindOptions options)
 
 All of this overloads will return `null` if the user cancels the operation.
 
+### FindOptions
 The optional `FindOptions` let us change some behavior.
 
 Properties that `FindOptions` inherits from `QueryOptions`:
@@ -35,7 +36,7 @@ Properties that `FindOptions` inherits from `FindOptionsBase`:
 * **ShowFilters:** Control if the filter panel should be visible. Default `true`.
 * **ShowFilterButton:** Control if the filter button should be visible. Default `true`.
 * **ShowHeader:** Controls if the whole header should be visible, if `false` overrides the two previous property and also hides the search button and the extensible `MenuItems`. Default `true`.
-* **ShowFooter:** Controls if the footer should be visible, if `false` hides all the pagination controls in the bottom. Default `true`.   
+* **ShowFooter:** Controls if the footer should be visible, if `false` hides all the pagination controls in the bottom. Default `true`.
 
 And finally, properties directly from `FindOptions`: 
 
@@ -66,6 +67,7 @@ public virtual void Explore(ExploreOptions options)
 
 The method returns `void` because it opens an independent windows.
 
+### ExploreOptions
 The class `ExploreOptions` inherits all the options from `FindOptionsBase` but let us change some behavior: 
 
 * **NavigateIfOne:** Executes the query internally to test if there's just one result, and in this case navigates to the only entity without even opening the `SearchWindow`.
@@ -93,7 +95,10 @@ public class QuerySettings
 * **QueryName:** The query to configure.
 * **Icon:** Optional 16x16 icon that will be shown in the windows and the MenuItems. 
 * **Pagination:** Override `FindOptions.DefaultPagination` for this particular query. 
-* **IsFindable:** Hides this particular query so is not findable. For example example if only available in Web interface. 
+* **IsFindable:** Hides this particular query so is not findable. For example example if only available in Web interface.
+ 
+> `Finder` also provides the `IsFindable` method to test if a query is findable or not.  
+ 
 * **Formatters:** Let you customize how to represent the cells of one particular column of this query by registering a `Func<Binding, DataTemplate>` in the column name. 
 
 
@@ -123,4 +128,33 @@ QuerySettings.RegisterPropertyFormat((AlbumDN a) => a.BonusTrack.Duration,
 > Note: In order to create a `DataTemplate` grammatically, consider using `FrameworkElementFactoryGenerator`. 
 
 
-Or, if you just want to register a template for one particular data type, or columns that contain certain attributes, you can use 
+Or, if you just want to register a template for one particular data type, or columns that contain certain attributes, you can use `FormatRules`
+
+```C#
+public class QuerySettings
+{
+    public static List<FormatterRule> FormatRules { get; set; }
+}
+
+public class FormatterRule
+{
+    public string Name { get; set; }
+
+    public Func<Column, Func<Binding, DataTemplate>> Formatter { get; set; }
+    public Func<Column, bool> IsApplicable { get; set; }
+
+    public FormatterRule(string name, 
+		Func<Column, bool> isApplicable, 
+		Func<Column, Func<Binding, DataTemplate>> formatter)
+}
+```
+
+For each column, the first `FormatRule` that returns `true` when evaluating `IsApplicable` is used. Actually, since the rules are ordered from more general to most specific, they are checked backwards using `Last` operator.
+
+```C#
+QuerySettings.Rules.Add(new FormatterRule("TimeSpan", 
+	isApplicable: c=>c.Type.UnNullify() == typeof(TimeSpan), 
+	formatter: c => b => Fluent.GetDataTemplate(() => new TextBlock().Bind(TextBlock.TextProperty, b))),
+```
+
+ 

@@ -187,7 +187,7 @@ namespace Signum.Windows
                 ColumnOptionsMode = ColumnOptionsMode.Remove;
             }
 
-            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+            FilterOption.SetFilterTokens(FilterOptions, qd);
 
             AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
@@ -276,11 +276,11 @@ namespace Signum.Windows
            
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
-            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+            FilterOption.SetFilterTokens(FilterOptions, qd);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            DynamicQueryServer.SetOrderTokens(OrderOptions, qd);
+            OrderOption.SetOrderTokens(OrderOptions, qd);
         }
     }
 }

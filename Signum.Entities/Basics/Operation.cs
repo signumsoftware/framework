@@ -25,31 +25,31 @@ namespace Signum.Entities
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.Simple Simple([CallerMemberName]string memberName = null)
             {
-                return new SimpleImp { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new SimpleImp { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.From<F> From<F>([CallerMemberName]string memberName = null)
                 where F : class,  IIdentifiable
             {
-                return new FromImp<F> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.FromMany<F>  FromMany<F>([CallerMemberName]string memberName = null)
                 where F : class, IIdentifiable
             {
-                return new FromManyImp<F> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromManyImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [Serializable]
             class SimpleImp : ConstructSymbol<T>.Simple
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
                 }
             }
 
@@ -57,11 +57,16 @@ namespace Signum.Entities
             class FromImp<F> : ConstructSymbol<T>.From<F>
                 where F : class, IIdentifiable
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
+                }
+
+                public Type BaseType
+                {
+                    get { return typeof(F); }
                 }
             }
 
@@ -69,11 +74,16 @@ namespace Signum.Entities
             class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
                 where F : class, IIdentifiable
             {
-                OperationSymbol operation;
-                public OperationSymbol Operation
+                OperationSymbol symbol;
+                public OperationSymbol Symbol
                 {
-                    get { return operation; }
-                    internal set { this.operation = value; }
+                    get { return symbol; }
+                    internal set { this.symbol = value; }
+                }
+
+                public Type BaseType
+                {
+                    get { return typeof(F); }
                 }
             }
         }
@@ -86,14 +96,14 @@ namespace Signum.Entities
         public static ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
             where T : class,  IIdentifiable
         {
-            return new ExecuteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
             where T : class, IIdentifiable
         {
-            return new DeleteSymbolImp<T> { Operation = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
 
@@ -101,11 +111,16 @@ namespace Signum.Entities
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IIdentifiable
         {
-            OperationSymbol operation;
-            public OperationSymbol Operation
+            OperationSymbol symbol;
+            public OperationSymbol Symbol
             {
-                get { return operation; }
-                internal set { this.operation = value; }
+                get { return symbol; }
+                internal set { this.symbol = value; }
+            }
+
+            public Type BaseType
+            {
+                get { return typeof(T); }
             }
         }
 
@@ -113,26 +128,23 @@ namespace Signum.Entities
         class DeleteSymbolImp<T> : DeleteSymbol<T>
           where T : class, IIdentifiable
         {
-            OperationSymbol operation;
-            public OperationSymbol Operation
+            OperationSymbol symbol;
+            public OperationSymbol Symbol
             {
-                get { return operation; }
-                internal set { this.operation = value; }
+                get { return symbol; }
+                internal set { this.symbol = value; }
             }
-        }
 
-        public static string NotDefinedForMessage(OperationSymbol operation, IEnumerable<Type> notDefined)
-        {
-            if (notDefined.Any())
-                return "{0} is not defined for {1}".Formato(operation.NiceToString(), notDefined.CommaAnd(a => a.NiceName()));
-
-            return null;
+            public Type BaseType
+            {
+                get { return typeof(T); }
+            }
         }
     }
 
     public interface IOperationSymbolContainer
     {
-        OperationSymbol Operation { get; }
+        OperationSymbol Symbol { get; }
     }
 
     public interface IEntityOperationSymbolContainer : IOperationSymbolContainer
@@ -142,7 +154,15 @@ namespace Signum.Entities
     public interface IEntityOperationSymbolContainer<in T> : IEntityOperationSymbolContainer
         where T : class, IIdentifiable
     {
+        Type BaseType { get; }
     }
+
+    public interface IConstructFromManySymbolContainer<in T> : IOperationSymbolContainer
+       where T : class, IIdentifiable
+    {
+        Type BaseType { get; }
+    }
+
 
     public static class ConstructSymbol<T>
         where T : class, IIdentifiable
@@ -156,16 +176,18 @@ namespace Signum.Entities
         {
         }
 
-        public interface FromMany<in F> : IOperationSymbolContainer
+        public interface FromMany<in F> : IConstructFromManySymbolContainer<F>
             where F : class, IIdentifiable
         {
         }
     }
 
 
+
     public interface ExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
         where T : class, IIdentifiable
     {
+       
     }
 
     public interface DeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
@@ -188,6 +210,7 @@ namespace Signum.Entities
 
         public bool Returns { get; internal set; }
         public Type ReturnType { get; internal set; }
+        public Type BaseType { get; internal set; }
 
         public override string ToString()
         {
@@ -213,4 +236,5 @@ namespace Signum.Entities
         ConstructorFrom,
         ConstructorFromMany
     }
+
 }

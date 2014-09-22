@@ -60,7 +60,7 @@ As you see, as long as the end (the root) of the expression tree you have the ri
 
 ### DynamicMethod builders
 
-Reflection is great. It makes huge code reductions. But it's famous for being slow, and this fame is well deserved. According to [http://msdn.microsoft.com/en-us/magazine/cc163759.aspx|this article], there are important performance differences when calling a Method and, presumably, the same could be said for Fields and Properties.
+Reflection is great. It makes huge code reductions. But it's famous for being slow, and this fame is well deserved. According to [this article](http://msdn.microsoft.com/en-us/magazine/cc163759.aspx), there are important performance differences when calling a Method and, presumably, the same could be said for Fields and Properties.
 
 DynamicMethods, however, let you __compile__ a small function dynamically generated, returning a delegate. This way you can cache the delegate somewhere and not pay the performance penalty when doing this operation, like assigning a particular field in a particular type of objects, or calling a particular method. 
 

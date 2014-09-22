@@ -174,7 +174,7 @@ By overriding `PropertyValidation`, we can tell the validation system witch is t
 protected override string PropertyValidation(PropertyInfo pi)
 {
     if (pi.Is(() => Name) && name == "Neo" && dateOfBirth.Year < 1999)
-        return "No body was named Neo before The Matrix";
+        return "Nobody was named Neo before The Matrix";
 
     return null;
 }
@@ -450,7 +450,7 @@ Also, you can use `IdentifiableEntity.IdentifiableIntegrityCheck`, that does the
 
 As we have seen, using `PropertyValidation` you can make a property validation dependent of another property like this: 
 
-```
+```C#
 public class PersonDN : Entity
 {
     string name;
@@ -470,7 +470,7 @@ public class PersonDN : Entity
     public override string PropertyValidation(PropertyInfo pi)
     {
         if(pi.Is(()=>Name) && Name == "Neo" && DateOfBirth.Year < 1999)
-            return "No body was named Neo before The Matrix"; 
+            return "Nobody was named Neo before The Matrix"; 
     }
 }
 ```
@@ -576,7 +576,7 @@ public class PersonDN : Entity
     public override string PropertyValidation(PropertyInfo pi)
     {
         if(pi.Is(()=>Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
-            return "No body was named Neo before The Matrix"; 
+            return "Nobody was named Neo before The Matrix"; 
     }
 
     static PersonDN()

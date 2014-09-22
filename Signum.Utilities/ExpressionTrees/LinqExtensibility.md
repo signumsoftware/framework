@@ -275,7 +275,7 @@ public static bool Is<T>(this T entity1, T entity2)
 }
 ```
 
-Finally we create the class IsExpander, implementing IMethodExpander.Expand method.   
+Finally we create the class `IsExpander`, implementing `IMethodExpander.Expand` method.   
 
 ```C#
 class IsExpander : IMethodExpander
@@ -322,7 +322,7 @@ public static class ExpressionExtensions
 }
 ```
 
-The last method is the most important one. Signum Framework has LINQ extensibility built-in, but other providers like Linq to SQL or Linq to Entities do not. By calling ToExpandable over the first table of the expression, you will be able to use the three extensibility models on other providers as well. [http://tomasp.net/blog/linq-expand.aspx|See more here].   
+The last method is the most important one. Signum Framework has LINQ extensibility built-in, but other providers like Linq to SQL or Linq to Entities do not. By calling ToExpandable over the first table of the expression, you will be able to use the three extensibility models on other providers as well. [See more here](http://tomasp.net/blog/linq-expand.aspx).   
 
 # Conclusion
 Even if the explanation is a bit too long, the three extensibility options are quite simple. By using them you can clean and reduce your queries, teaching the provider how to translate your own business concepts to SQL queries and removing redundancy. 

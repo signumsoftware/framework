@@ -7,6 +7,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 
 namespace Signum.Web
@@ -44,12 +45,12 @@ namespace Signum.Web
             return Manager.SearchPopup(controller, findOptions, mode, new Context(null, prefix));
         }
 
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
+        public static PartialViewResult SearchResults(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
             return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
         }
 
-        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
+        public static Lite<IdentifiableEntity> FindUnique(UniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -57,21 +58,6 @@ namespace Signum.Web
         public static int QueryCount(CountOptions options)
         {
             return Manager.QueryCount(options);
-        }
-
-        public static void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(filters, queryDescription, canAggregate);
-        }
-
-        public static void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(orders, queryDescription, canAggregate);
-        }
-
-        public static void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(columns, queryDescription, canAggregate);
         }
 
         public static void AddQuerySettings(List<QuerySettings> settings)
@@ -120,6 +106,7 @@ namespace Signum.Web
     {
         public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
+        public Func<bool> AllowChangeColumns = () => true;
         
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");
@@ -193,12 +180,12 @@ namespace Signum.Web
             };
         }
 
-         protected internal virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
+        protected internal virtual Lite<IdentifiableEntity> FindUnique(UniqueOptions options)
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
-            SetTokens(options.OrderOptions, queryDescription, canAggregate: false);
+            FilterOption.SetFilterTokens(options.FilterOptions, queryDescription, canAggregate: false);
+            OrderOption.SetOrderTokens(options.OrderOptions, queryDescription, canAggregate: false);
 
             var request = new UniqueEntityRequest
             {
@@ -215,7 +202,7 @@ namespace Signum.Web
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
+            FilterOption.SetFilterTokens(options.FilterOptions, queryDescription, canAggregate: false);
 
             var request = new QueryCountRequest
             { 
@@ -226,23 +213,9 @@ namespace Signum.Web
             return DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
-        protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, SubTokensOptions.CanAnyAll| SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
-        }
 
-        protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
-        }
+    
 
-        protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
-        }
 
         
         public virtual void SetSearchViewableAndCreable(FindOptions findOptions, QueryDescription description)
@@ -262,8 +235,8 @@ namespace Signum.Web
                     (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, true)));
             }
         }
-
-        public virtual void SetDefaultOrder(FindOptions findOptions, QueryDescription description)
+        
+        internal static void SetDefaultOrder(FindOptions findOptions, QueryDescription description)
         {
             var entityColumn = description.Columns.SingleOrDefaultEx(cd => cd.IsEntity);
 
@@ -350,9 +323,9 @@ namespace Signum.Web
                 if (es != null)
                     return es.WebTypeName;
 
-                return TypeLogic.TryGetCleanName(type) ?? type.Name;
+                return TypeLogic.TryGetCleanName(type) ?? Reflector.CleanTypeName(type);
             }
-            
+
             return queryName.ToString();
         }
 

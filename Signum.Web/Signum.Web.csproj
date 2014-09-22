@@ -140,7 +140,7 @@
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
     <Compile Include="ValueLineBoxOptions.cs" />
-    <Compile Include="Operations\OperationsClient.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
@@ -286,6 +286,12 @@
     <Content Include="Signum\Headers\bootstrap\bootstrap.datepicker.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.timepicker.d.ts" />
     <Content Include="packages.config" />
+    <Content Include="Introduction.md" />
+    <Content Include="Facades\Constructor.md" />
+    <Content Include="Facades\Finder.md" />
+    <Content Include="Facades\JsFunction.md" />
+    <Content Include="Facades\Navigator.md" />
+    <Content Include="Operations\OperationsClient.md" />
     <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />

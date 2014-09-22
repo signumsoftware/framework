@@ -40,42 +40,42 @@ namespace Signum.Web
             set { formatters = value; }
         }
 
-    
+
         static QuerySettings()
         {
             FormatRules = new List<FormatterRule>
             {
-                new FormatterRule(c=>true, c=> new CellFormatter((h,o) =>
+                new FormatterRule("object", c=>true, c=> new CellFormatter((h,o) =>
                 {
                     return o != null ? o.ToString().EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false }),
 
-                new FormatterRule(c => c.Type.UnNullify().IsEnum, c => new CellFormatter((h,o) => 
+                new FormatterRule("Enum", c => c.Type.UnNullify().IsEnum, c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((Enum)o).NiceToString().EncodeHtml() : MvcHtmlString.Empty;
                 })),
 
-                new FormatterRule(c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
+                new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
                     return h.LightEntityLine((Lite<IIdentifiable>)o, false);
                 })),
 
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
+                new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(TimeSpan), c => new CellFormatter((h,o) => 
+                new FormatterRule("TimeSpan",  c=>c.Type.UnNullify() == typeof(TimeSpan), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
-                new FormatterRule(c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
+                new FormatterRule("Number", c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
                 {
                     return o != null? ((IFormattable)o).TryToString(c.Format).EncodeHtml(): MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
-                new FormatterRule(c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
+                new FormatterRule("Number with Unit", c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
                 {
                     if (o != null)
                     {
@@ -87,7 +87,7 @@ namespace Signum.Web
                     return MvcHtmlString.Empty;
                 }){ TextAlign = "right"}),
 
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => new CellFormatter((h,o) => 
+                new FormatterRule("bool", c=>c.Type.UnNullify() == typeof(bool), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? new HtmlTag("input")
                         .Attr("type", "checkbox")
@@ -132,7 +132,7 @@ namespace Signum.Web
 
 
         public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> propertyRoute, CellFormatter formatter)
-         where T : IRootEntity
+            where T : IRootEntity
         {
             PropertyFormatters.Add(PropertyRoute.Construct(propertyRoute), formatter);
         }
@@ -140,11 +140,14 @@ namespace Signum.Web
 
     public class FormatterRule
     {
+        public string Name { get; private set; }
+
         public Func<Column, CellFormatter> Formatter { get; set; }
         public Func<Column, bool> IsApplyable { get; set; }
 
-        public FormatterRule(Func<Column, bool> isApplyable, Func<Column, CellFormatter> formatter)
+        public FormatterRule(string name, Func<Column, bool> isApplyable, Func<Column, CellFormatter> formatter)
         {
+            Name = name;
             IsApplyable = isApplyable;
             Formatter = formatter;
         }

@@ -15,7 +15,7 @@ Additionally, many modules add their own interfaces.
 ### NetDataContractAttribute
 
 All of these interfaces share a common philosophy. They use `NetDataContractAttribute` that changes 
-[`NetDataContractSerializer`](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.netdatacontractserializeaspx).
+[`NetDataContractSerializer`](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.netdatacontractserializer(v=vs.110).aspx).
 
 `NetDataContractAttribute` uses is like WCF's Cinderella. A hidden gem completely despised by Microsoft. It allows shared-Type communication between client and server. That means that the same types are going to be used on both sides of the channel, so the assembly where these entities are defined has to be available on both sides as well. 
 

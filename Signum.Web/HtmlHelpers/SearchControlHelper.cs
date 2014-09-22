@@ -50,11 +50,11 @@ namespace Signum.Web
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Finder.SetTokens(findOptions.FilterOptions, description, false);
-            Finder.SetTokens(findOptions.OrderOptions, description, false);
-            Finder.SetTokens(findOptions.ColumnOptions, description, false);
+            FilterOption.SetFilterTokens(findOptions.FilterOptions, description, false);
+            OrderOption.SetOrderTokens(findOptions.OrderOptions, description, false);
+            ColumnOption.SetColumnTokens(findOptions.ColumnOptions, description, false);
             Finder.Manager.SetSearchViewableAndCreable(findOptions, description);
-            Finder.Manager.SetDefaultOrder(findOptions, description);
+            FinderManager.SetDefaultOrder(findOptions, description);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;

@@ -1,6 +1,6 @@
-﻿# What is an extension method?
+# What is an extension method?
 
-[ExtensionMethods](http://msdn.microsoft.com/en-us/library/bb383977.aspx|ExtensionMethods)
+[ExtensionMethods](http://msdn.microsoft.com/en-us/library/bb383977.aspx)
 are a nice feature added in C# 3.0 that allow us to 'pretend' that
 a method is an instance method of an object where really it's defined in
 a static class outside of the type. This small difference can make a

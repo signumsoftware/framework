@@ -50,7 +50,7 @@ namespace Signum.Web.Controllers
 
             var entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
 
-            return this.NormalPage(new NavigateOptions(entity));
+            return this.NormalPage(entity);
         }
 
         [ActionSplitter("entityType")]
@@ -70,9 +70,7 @@ namespace Signum.Web.Controllers
             else
                 entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
 
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-
-            return this.PopupOpen(new PopupNavigateOptions(tc)
+            return this.PopupNavigate(entity, new PopupNavigateOptions(prefix)
             {
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
@@ -96,10 +94,8 @@ namespace Signum.Web.Controllers
             }
             else
                 entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
-        
-            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            return this.PopupOpen(new PopupViewOptions(tc)
+            return this.PopupView(entity, new PopupViewOptions(prefix)
             {
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
@@ -144,7 +140,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(lite);
             }
 
-            return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
+            return this.NormalControl(entity, new NavigateOptions { ReadOnly = readOnly, PartialViewName = partialViewName });
         }
 
         [HttpPost]
@@ -204,26 +200,24 @@ namespace Signum.Web.Controllers
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix))
+                    return controller.PopupView(ident, new PopupViewOptions(prefix)
                     {
                         PartialViewName = partialViewName,
                         ReadOnly = readOnly,
                         SaveProtected = saveProtected,
                         ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, viewOptions);
+                    });
                 case VisualConstructStyle.PopupNavigate:
-                    var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix))
+                    return controller.PopupNavigate(ident, new PopupNavigateOptions(prefix)
                     {
                         PartialViewName = partialViewName,
                         ReadOnly = readOnly,
                         ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, navigateOptions);
+                    });
                 case VisualConstructStyle.PartialView:
-                    return Navigator.PartialView(controller, ident, prefix, partialViewName);
+                    return controller.PartialView(ident, prefix, partialViewName);
                 case VisualConstructStyle.View:
-                    return Navigator.NormalPage(controller, new NavigateOptions(ident) { PartialViewName = partialViewName });
+                    return controller.NormalPage(ident, new NavigateOptions { PartialViewName = partialViewName });
                 default:
                     throw new InvalidOperationException();
             }

@@ -307,6 +307,8 @@ return Database.Query<CustomerDN>()
     .Autocomplete(term, 5);  //Defined in AutoCompleteUtils
 ```
 
+> **Note:** For languages with **accents** (like Spanish or French), you need to change the SQL Server Collation options at the column, database or server level. 
+
 ## EntityCombo
 
 `EntityCombo` is used to represent entity properties when the expected range of possible entities to choose from is smaller and you want to show them all. 
