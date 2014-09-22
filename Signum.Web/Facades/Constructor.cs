@@ -74,7 +74,6 @@ namespace Signum.Web
         }
 
         public Type Type { get; private set; }
-        public HtmlHelper Helper { get; private set; }
         public string Prefix { get; private set; }
     }
 
@@ -94,25 +93,31 @@ namespace Signum.Web
             if (!ctx.Type.IsIdentifiableEntity())
                 return Default();
 
-            var concat = GlobalPreConstructors + PreConstructors.TryGetC(ctx.Type);
+            List<JsFunction> list = new List<JsFunction>();
 
-            if (concat == null)
+            if (GlobalPreConstructors != null)
+                list.AddRange(GlobalPreConstructors.GetInvocationListTyped().Select(f => f(ctx)));
+
+            var pre = PreConstructors.TryGetC(ctx.Type);
+
+            if (pre != null)
+                list.Add(pre(ctx));
+            else
+                list.Add(OperationClient.Manager.ClientConstruct(ctx));
+
+            list.RemoveAll(a => a == null);
+
+            if (list.IsEmpty())
                 return Default();
 
-            var pre = GlobalPreConstructors.GetInvocationListTyped()
-                .Select(f => f(ctx)).NotNull().ToArray();
+            var modules = list.Select(p => p.Module).Distinct();
 
-            if(pre.IsEmpty())
-                return Default();
-
-            var modules = pre.Select(p => p.Module).Distinct();
-
-            var code = pre.Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
+            var code = list.AsEnumerable().Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
 @"if(extraArgs == null) return Promise.resolve(null);
 " + InvokeFunction(js) + @"
 .then(function(extraArgs){ 
 " + acum.Indent(4) + @"
-});"); 
+});");
 
             var result =
 @"function(extraArgs){ 
@@ -125,7 +130,6 @@ namespace Signum.Web
 }".Replace("{moduleNames}", modules.ToString(m => "'" + m.Name + "'", ", "))
   .Replace("{moduleVars}", modules.ToString(m => JsFunction.VarName(m), ", "))
   .Replace("{code}", code.Indent(12));
-
 
             return result;
         }
@@ -183,7 +187,7 @@ namespace Signum.Web
             }
 
             if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
-                return OperationClient.Manager.ConstructSingle(ctx.Type);
+                return OperationClient.Manager.Construct(ctx);
 
             return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
         }

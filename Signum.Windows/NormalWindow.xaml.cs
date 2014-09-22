@@ -124,7 +124,7 @@ namespace Signum.Windows
             if(entity == null)
                 return;
 
-            ButtonBarEventArgs ctx = new ButtonBarEventArgs
+            EntityButtonContext ctx = new EntityButtonContext
             {
                 MainControl = MainControl,
                 ViewButtons = ViewMode,
@@ -319,10 +319,10 @@ namespace Signum.Windows
 
     public interface IHaveToolBarElements
     {
-        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
+        List<FrameworkElement> GetToolBarElements(object dataContext, EntityButtonContext ctx);
     }
 
-    public class ButtonBarEventArgs
+    public class EntityButtonContext
     {
         public Control MainControl { get; set; }
         public ViewMode ViewButtons { get; set; }

@@ -221,6 +221,15 @@ namespace Signum.Web
             return Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
+        public static Lite<T> TryParseLite<T>(this ControllerBase controller, string requestKey)
+            where T : class, IIdentifiable
+        {
+            var key = controller.ControllerContext.HttpContext.Request[requestKey];
+            if (key == null)
+                return null;
+            return Lite.Parse<T>(key);
+        }
+
         public static Lite<T> ParseLite<T>(this ControllerBase controller, string requestKey)
             where T : class, IIdentifiable
         {

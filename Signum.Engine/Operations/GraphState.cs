@@ -70,7 +70,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
 
             }
         }
@@ -107,7 +107,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
             }
         }
 
@@ -238,7 +238,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (FromStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol.Symbol));
             }
         }
 

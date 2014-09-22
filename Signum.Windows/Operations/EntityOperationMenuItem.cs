@@ -21,7 +21,7 @@ namespace Signum.Windows.Operations
 {
     public static class EntityOperationMenuItemConsturctor
     {
-        public static MenuItem Construct(ContextualOperationContext coc)
+        public static MenuItem Construct(IContextualOperationContext coc)
         {
             MenuItem miResult = new MenuItem()
             {
@@ -44,8 +44,8 @@ namespace Signum.Windows.Operations
             {
                 coc.SearchControl.SetDirtySelectedItems();
 
-                if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
-                    coc.OperationSettings.Click(coc);
+                if (coc.OperationSettings != null && coc.OperationSettings.HasClick)
+                    coc.OperationSettings.OnClick(coc);
                 else
                 {
                     var lite = coc.SearchControl.SelectedItems.Single();
@@ -58,11 +58,12 @@ namespace Signum.Windows.Operations
                                 Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.OperationSymbol));
                                 break;
                             case OperationType.Delete:
-                                Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.OperationSymbol));
+                                Server.Execute((IOperationServer os) => os.DeleteLite(lite, coc.OperationInfo.OperationSymbol));
                                 break;
                             case OperationType.ConstructorFrom:
                                 {
-                                    var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol));
+                                    var result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
+                                        Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol)));
 
                                     if (result == null)
                                     {

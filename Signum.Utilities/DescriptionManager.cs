@@ -209,6 +209,16 @@ namespace Signum.Utilities
             return a.ToString().NiceName();
         }
 
+        public static string NiceName<R>(Expression<Func<R>> expressionToProperty)
+        {
+            return ReflectionTools.GetPropertyInfo(expressionToProperty).NiceName();
+        }
+
+        public static string NiceName<T, R>(Expression<Func<T, R>> expressionToProperty)
+        {
+            return ReflectionTools.GetPropertyInfo(expressionToProperty).NiceName();
+        }
+
         public static string NiceName(this FieldInfo fi)
         {
             return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);

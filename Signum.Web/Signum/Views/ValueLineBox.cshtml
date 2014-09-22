@@ -18,7 +18,7 @@
                 @Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
                 {
                     LabelText = options.labelText,
-                    FormGroupStyle = options.labelText.HasText() ? Signum.Web.FormGroupStyle.None : FormGroupStyle.Basic,
+                    FormGroupStyle = options.labelText.HasText() ? FormGroupStyle.Basic : FormGroupStyle.None,
                     Format = options.format,
                     UnitText = options.unit,
                 })

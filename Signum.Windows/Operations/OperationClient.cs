@@ -71,36 +71,54 @@ namespace Signum.Windows.Operations
         {
             return (OperationSymbol)obj.GetValue(ConstructFromOperationKeyProperty);
         }
-
         public static void SetConstructFromOperationKey(DependencyObject obj, OperationSymbol value)
         {
             obj.SetValue(ConstructFromOperationKeyProperty, value);
         }
 
-        public static ImageSource GetImage(OperationSymbol operation)
+        public static ImageSource GetImage(Type type, OperationSymbol operation)
         {
-            return Manager.GetImage(operation, Manager.Settings.TryGetC(operation));
+            return Manager.GetImage(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
         }
 
-        public static string GetText(OperationSymbol operation)
+        public static string GetText(Type type, OperationSymbol operation)
         {
-            return Manager.GetText(operation, Manager.Settings.TryGetC(operation));
+            return Manager.GetText(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
         }
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
         }
 
         public static void AddSettings(List<OperationSettings> settings)
         {
-            Manager.Settings.AddRange(settings, s => s.OperationSymbol, s => s, "EntitySettings");
+            foreach (var item in settings)
+            {
+                AddSetting(item);
+            }
+        }
+
+        public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IIdentifiable
+        {
+            return Manager.GetSettings<EntityOperationSettings<T>>(typeof(T), operation.Symbol);
+        }
+
+        public static ConstructorOperationSettings<T> GetConstructorSettings<T>(ConstructSymbol<T>.Simple operation) where T : class, IIdentifiable
+        {
+            return Manager.GetSettings<ConstructorOperationSettings<T>>(typeof(T), operation.Symbol);
+        }
+
+        public static ContextualOperationSettings<T> GetContextualSettings<T>(IConstructFromManySymbolContainer<T> operation) where T : class, IIdentifiable
+        {
+            return Manager.GetSettings<ContextualOperationSettings<T>>(typeof(T), operation.Symbol);
         }
     }
 
     public class OperationManager
     {
-        public Dictionary<OperationSymbol, OperationSettings> Settings = new Dictionary<OperationSymbol, OperationSettings>();
+        public Polymorphic<Dictionary<OperationSymbol, OperationSettings>> Settings =
+            new Polymorphic<Dictionary<OperationSymbol, OperationSettings>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
 
         public Func<OperationSymbol, bool> IsSave = e => e.ToString().EndsWith(".Save");
 
@@ -111,15 +129,11 @@ namespace Signum.Windows.Operations
             new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
         };
 
-        public EntityOperationSettings GetSettings(IEntityOperationSymbolContainer operation)
-        {
-            return GetSettings<EntityOperationSettings>(operation.Operation);
-        }
-
-        public OS GetSettings<OS>(OperationSymbol operation)
+        public OS GetSettings<OS>(Type type, OperationSymbol operation)
             where OS : OperationSettings
         {
-            OperationSettings settings = Settings.TryGetC(operation);
+            OperationSettings settings = Settings.TryGetValue(type).TryGetC(operation);
+
             if (settings != null)
             {
                 var result = settings as OS;
@@ -134,7 +148,7 @@ namespace Signum.Windows.Operations
         }
 
         ConcurrentDictionary<Type, List<OperationInfo>> operationInfoCache = new ConcurrentDictionary<Type, List<OperationInfo>>();
-        public List<OperationInfo> OperationInfos(Type entityType)
+        public IEnumerable<OperationInfo> OperationInfos(Type entityType)
         {
             return operationInfoCache.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.GetOperationInfos(t)));
         }
@@ -145,7 +159,11 @@ namespace Signum.Windows.Operations
             return hasConstructOperations.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.HasConstructOperations(t)));
         }
 
-        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, ButtonBarEventArgs ctx)
+        static readonly GenericInvoker<Func<IdentifiableEntity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>> newEntityOperationContext =
+            new GenericInvoker<Func<IdentifiableEntity,OperationInfo,EntityButtonContext,EntityOperationSettingsBase,IEntityOperationContext>>((entity, oi, ctx, settings)=>
+                new EntityOperationContext<IdentifiableEntity>(entity, oi, ctx, (EntityOperationSettings<IdentifiableEntity>)settings));
+
+        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, EntityButtonContext ctx)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -154,19 +172,11 @@ namespace Signum.Windows.Operations
 
             Type type = ident.GetType();
 
-            var operations = (from oi in OperationInfos(ident.GetType())
+            var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
-                              let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
-                              let eoc = new EntityOperationContext
-                              {
-                                  Entity = (IdentifiableEntity)entity,
-                                  EntityControl = ctx.MainControl,
-                                  OperationInfo = oi,
-                                  ViewButtons = ctx.ViewButtons,
-                                  ShowOperations = ctx.ShowOperations,
-                                  OperationSettings = os,
-                              }
-                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.ShowOperations
+                              let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
+                              let eoc = newEntityOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ident, oi, ctx, os)
+                              where (os != null && os.HasIsVisible) ? os.OnIsVisible(eoc) : ctx.ShowOperations
                               select eoc).ToList();
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
@@ -223,7 +233,7 @@ namespace Signum.Windows.Operations
             return buttons.ToList();
         }
 
-        private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
+        private EntityOperationGroup GetDefaultGroup(IEntityOperationContext eoc)
         {
             if (eoc.OperationSettings != null && eoc.OperationSettings.Group != null)
                 return eoc.OperationSettings.Group == EntityOperationGroup.None ? null : eoc.OperationSettings.Group;
@@ -265,14 +275,18 @@ namespace Signum.Windows.Operations
             return operation.NiceToString();
         }
 
+        static readonly GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>> newConstructorOperationContext = 
+             new GenericInvoker<Func<OperationInfo,ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>>((oi, ctx, settings)=>
+                new ConstructorOperationContext<IdentifiableEntity>(oi, ctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
 
         protected internal virtual IdentifiableEntity Construct(ConstructorContext ctx)
         {
             var dic = (from oi in OperationInfos(ctx.Type)
                        where oi.OperationType == OperationType.Constructor
-                       let os = GetSettings<ConstructorSettings>(oi.OperationSymbol)
-                       where os == null || os.IsVisible == null || os.IsVisible(oi)
-                       select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.OperationSymbol);
+                       let os = GetSettings<ConstructorOperationSettingsBase>(ctx.Type, oi.OperationSymbol)
+                       let coc = newConstructorOperationContext.GetInvoker(ctx.Type)(oi, ctx, os)
+                       where os != null && os.HasIsVisible ? os.OnIsVisible(coc) : true
+                       select coc).ToDictionary(a => a.OperationInfo.OperationSymbol);
 
             if (dic.Count == 0)
                 return null;
@@ -285,49 +299,48 @@ namespace Signum.Windows.Operations
             else
             {
                 if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
-                    elementIcon: k => OperationClient.GetImage(k),
-                    elementText: k => OperationClient.GetText(k),
+                    elementIcon: k => OperationClient.GetImage(ctx.Type, k),
+                    elementText: k => OperationClient.GetText(ctx.Type, k),
                     title: SelectorMessage.ConstructorSelector.NiceToString(),
                     message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
                     owner: Window.GetWindow(ctx.Element)))
                     return null;
             }
 
-            var pair = dic[selected];
+            var selCoc = dic[selected];
 
-            if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                return pair.OperationSettings.Constructor(pair.OperationInfo, ctx);
+            if (selCoc.Settings != null && selCoc.Settings.HasConstructor)
+                return selCoc.Settings.OnConstructor(selCoc);
             else
                 return Server.Return((IOperationServer s) => s.Construct(ctx.Type, selected, ctx.Args));
         }
 
+
+        static readonly GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext = 
+            new GenericInvoker<Func<SearchControl,OperationInfo,ContextualOperationSettingsBase,IContextualOperationContext>>((sc, oi, settings)=>
+                new ContextualOperationContext<IdentifiableEntity>(sc, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
 
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetConstructorFromManyMenuItems(SearchControl sc)
         {
             if (sc.SelectedItems.IsNullOrEmpty())
                 return null;
 
-            var types = sc.SelectedItems.Select(a => a.EntityType).Distinct().ToList();
+            var type = sc.SelectedItems.Select(a => a.EntityType).Distinct().Only();
 
-            return (from t in types
-                    from oi in OperationInfos(t)
+            if (type == null)
+                return null;
+
+            return (from oi in OperationInfos(type)
                     where oi.OperationType == OperationType.ConstructorFromMany
-                    group new { t, oi } by oi.OperationSymbol into g
-                    let os = GetSettings<ContextualOperationSettings>(g.Key)
-                    let coc = new ContextualOperationContext
-                    {
-                        Entities = sc.SelectedItems,
-                        SearchControl = sc,
-                        OperationSettings = os,
-                        OperationInfo = g.First().oi,
-                        CanExecute = OperationSymbol.NotDefinedForMessage(g.Key, types.Except(g.Select(a => a.t)))
-                    }
-                    where os == null || os.IsVisible == null || os.IsVisible(coc)
+                    let os = GetSettings<ContextualOperationSettingsBase>(type, oi.OperationSymbol)
+                    let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? oi.BaseType)(sc, oi, os)
+                    where os == null || !os.HasIsVisible || os.OnIsVisible(coc)
                     select ConstructFromManyMenuItemConsturctor.Construct(coc))
                     .OrderBy(Common.GetOrder)
                    .ToList();
         }
 
+   
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetEntityOperationMenuItem(SearchControl sc)
         {
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Count != 1)
@@ -336,19 +349,15 @@ namespace Signum.Windows.Operations
             if (sc.Implementations.IsByAll)
                 return null;
 
-            var operations = (from oi in OperationInfos(sc.SelectedItem.EntityType)
+            var type = sc.SelectedItem.EntityType;
+
+            var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation
-                              let os = GetSettings<EntityOperationSettings>(oi.OperationSymbol)
-                              let coc = new ContextualOperationContext
-                              {
-                                  Entities = sc.SelectedItems,
-                                  SearchControl = sc,
-                                  OperationSettings = os == null ? null : os.Contextual,
-                                  OperationInfo = oi,
-                              }
+                              let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
+                              let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? sc.SelectedItem.EntityType)(sc, oi, os == null ? null : os.ContextualUntyped)
                               where os == null ? oi.Lite == true :
-                                    os.Contextual.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && (os.Click == null || os.Contextual.Click != null)) :
-                                    os.Contextual.IsVisible(coc)
+                                   os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
+                                   oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
                               select coc).ToList();
 
             if (operations.IsEmpty())
@@ -383,14 +392,20 @@ namespace Signum.Windows.Operations
 
         internal bool HasConstructOperationsAllowedAndVisible(Type type)
         {
-             return OperationInfos(type).Any(oi=>
-             {
-                 if (oi.OperationType != OperationType.Constructor)
-                     return false;
+            return OperationInfos(type).Any(oi =>
+            {
+                if (oi.OperationType != OperationType.Constructor)
+                    return false;
 
-                 var os = GetSettings<ConstructorSettings>(oi.OperationSymbol);
-                 return os == null || os.IsVisible == null || os.IsVisible(oi); 
-             }); 
+                var os = GetSettings<ConstructorOperationSettingsBase>(type, oi.OperationSymbol);
+
+                if (os == null || !os.HasIsVisible)
+                    return true;
+
+                var ctx = newConstructorOperationContext.GetInvoker(type)(oi, null, os);
+
+                return os.OnIsVisible(ctx);
+            });
         }
     }
 

@@ -469,8 +469,8 @@ WriteAttribute("id", Tuple.Create(" id=\"", 3924), Tuple.Create("\"", 3966)
 , 3929), false)
 );
 
-WriteLiteral(">\r\n                    <li>hi there!</li>\r\n                </ul>\r\n            </d" +
-"iv>\r\n");
+WriteLiteral(">\r\n                    <li>Error: DropDown not initialized</li>\r\n                " +
+"</ul>\r\n            </div>\r\n");
 
             
             #line 78 "..\..\Signum\Views\SearchControl.cshtml"
@@ -516,14 +516,14 @@ WriteLiteral("\r\n\r\n");
             #line hidden
 WriteLiteral("             <a");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4583), Tuple.Create("\"", 4618)
+WriteAttribute("id", Tuple.Create(" id=\"", 4605), Tuple.Create("\"", 4640)
             
             #line 92 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4588), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
+, Tuple.Create(Tuple.Create("", 4610), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
             
             #line default
             #line hidden
-, 4588), false)
+, 4610), false)
 );
 
 WriteLiteral(" class=\"sf-query-button btn btn-default\"");
@@ -545,28 +545,28 @@ WriteLiteral("></span>\r\n            </a>\r\n");
             #line hidden
 WriteLiteral("\r\n    </div>\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4792), Tuple.Create("\"", 4825)
+WriteAttribute("id", Tuple.Create(" id=\"", 4814), Tuple.Create("\"", 4847)
             
             #line 98 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4797), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+, Tuple.Create(Tuple.Create("", 4819), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 4797), false)
+, 4819), false)
 );
 
 WriteLiteral(" class=\"sf-search-results-container table-responsive\"");
 
 WriteLiteral(">\r\n        <table");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4896), Tuple.Create("\"", 4929)
+WriteAttribute("id", Tuple.Create(" id=\"", 4918), Tuple.Create("\"", 4951)
             
             #line 99 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 4901), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
+, Tuple.Create(Tuple.Create("", 4923), Tuple.Create<System.Object, System.Int32>(Model.Compose("tblResults")
             
             #line default
             #line hidden
-, 4901), false)
+, 4923), false)
 );
 
 WriteLiteral(" class=\"sf-search-results  table table-hover  table-condensed\"");
@@ -695,14 +695,14 @@ WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbod
             #line hidden
 WriteLiteral("\r\n                <tr>\r\n                    <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6334), Tuple.Create("\"", 6357)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 6356), Tuple.Create("\"", 6379)
             
             #line 128 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 6344), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 6366), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 6344), false)
+, 6366), false)
 );
 
 WriteLiteral(">");

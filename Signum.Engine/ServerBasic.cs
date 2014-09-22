@@ -266,10 +266,16 @@ namespace Signum.Services
                 () => (IdentifiableEntity)OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
         }
 
-        public void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
+        public void DeleteLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
+                 () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
+        }
+
+        public void Delete(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
+        {
+            Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                 () => OperationLogic.ServiceDelete((IdentifiableEntity)entity, operationSymbol, args));
         }
 
         public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
@@ -305,6 +311,8 @@ namespace Signum.Services
         #endregion
 
 
-      
+
+
+
     }
 }

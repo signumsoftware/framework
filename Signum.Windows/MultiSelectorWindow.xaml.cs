@@ -55,10 +55,10 @@ namespace Signum.Windows
            Window owner = null)
         {
             if (title == null)
-                title = SearchMessage.SelectAnElement.NiceToString();
+                title = SelectorMessage.SelectAnElement.NiceToString();
 
             if (message == null)
-                message = SearchMessage.SelectAnElement.NiceToString();
+                message = SelectorMessage.PleaseSelectAnElement.NiceToString();
 
             if (elementIcon == null)
                 elementIcon = o => null;
@@ -98,8 +98,8 @@ namespace Signum.Windows
             InitializeComponent();
 
             AutomationProperties.SetName(this, "MultiSelectorWindow");
-            
-			this.Message = SearchMessage.SelectAnElement.NiceToString();
+
+            this.Message = SelectorMessage.SelectAnElement.NiceToString();
         }
 
         private void btAccept_Click(object sender, RoutedEventArgs e)

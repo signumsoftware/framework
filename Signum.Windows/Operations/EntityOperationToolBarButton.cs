@@ -16,7 +16,7 @@ namespace Signum.Windows.Operations
 {
     public static class EntityOperationToolBarButton
     {
-        public static bool MoveToSearchControls(EntityOperationContext eoc)
+        public static bool MoveToSearchControls(IEntityOperationContext eoc)
         {
             var controls = eoc.EntityControl.Children<SearchControl>()
                 .Where(sc => eoc.OperationInfo.OperationSymbol.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
@@ -46,7 +46,7 @@ namespace Signum.Windows.Operations
             return true;
         }
 
-        public static ToolBarButton NewToolbarButton(EntityOperationContext eoc)
+        public static ToolBarButton NewToolbarButton(IEntityOperationContext eoc)
         {
             var man = OperationClient.Manager;
 
@@ -80,7 +80,7 @@ namespace Signum.Windows.Operations
         }
 
 
-        internal static MenuItem NewMenuItem(EntityOperationContext eoc, EntityOperationGroup group)
+        internal static MenuItem NewMenuItem(IEntityOperationContext eoc, EntityOperationGroup group)
         {
             var man = OperationClient.Manager;
 
@@ -115,14 +115,14 @@ namespace Signum.Windows.Operations
             return menuItem;
         }
 
-        static void OperationExecute(EntityOperationContext eoc)
+        static void OperationExecute(IEntityOperationContext eoc)
         {
             if (eoc.CanExecute != null)
                 throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
 
-            if (eoc.OperationSettings != null && eoc.OperationSettings.Click != null)
+            if (eoc.OperationSettings != null && eoc.OperationSettings.HasClick)
             {
-                IIdentifiable newIdent = eoc.OperationSettings.Click(eoc);
+                IIdentifiable newIdent = eoc.OperationSettings.OnClick(eoc);
                 if (newIdent != null)
                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
             }
@@ -168,7 +168,10 @@ namespace Signum.Windows.Operations
                             Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :
                             Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
 
-                        return eoc.NullEntityMessage(entity);
+                        if (entity == null)
+                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
+
+                        return entity;
                     });
 
                     if (result != null)
@@ -180,7 +183,7 @@ namespace Signum.Windows.Operations
                     if (eoc.ConfirmMessage())
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.OperationSymbol, null));
+                        Server.Execute((IOperationServer s) => s.DeleteLite(lite, eoc.OperationInfo.OperationSymbol, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }
@@ -191,7 +194,7 @@ namespace Signum.Windows.Operations
         {
             ToolBarButton groupButton = new ToolBarButton
             {
-                Content = group.Description(),
+                Content = group.Text(),
                 ContextMenu = new ContextMenu(),
                 Background = group.Background,
             };

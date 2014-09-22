@@ -382,6 +382,27 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
     return $.extend(obj, options.requestExtraJsonData);
 }
 
+export interface ConstructChooserOption {
+    value: string;
+    toStr: string;
+    operationConstructor: (form: FormObject) => Promise<FormObject>
+}
+
+export function chooseConstructor(extraJsonData: FormObject, prefix: string, title: string, options: ConstructChooserOption[]): Promise<FormObject> {
+
+    return chooser(prefix, title, options).then(co=>
+    {
+        if (!co)
+            return null;
+
+        extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value }); 
+
+        if (co.operationConstructor)
+            return <any>co.operationConstructor(extraJsonData);
+
+        return extraJsonData;
+    });
+}
 
 export function typeChooser(prefix: string, types: Entities.TypeInfo[]): Promise<Entities.TypeInfo> {
     return chooser(prefix, lang.signum.chooseAType, types, a=> a.niceName, a=> a.name);

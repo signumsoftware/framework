@@ -49,10 +49,7 @@ namespace Signum.Web
 
         public JsFunctionConstructor this[string functionName]
         {
-            get
-            {
-                return args => new JsFunction(this, functionName, args);
-            }
+            get { return args => new JsFunction(this, functionName, args); }
         }
 
         public override string ToString()
