@@ -133,6 +133,10 @@ namespace Signum.Windows
                 new UIPropertyMetadata((d, e) => ((EntityBase)d).SetType((Type)e.NewValue)));
 
             Common.ValuePropertySelector.SetDefinition(typeof(EntityBase), EntityProperty);
+
+            Common.IsReadOnlyProperty.OverrideMetadata(typeof(EntityBase),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits, 
+                    (d, e) => ((EntityBase)d).UpdateVisibility()));
         }
 
         public EntityBase()
@@ -141,26 +145,6 @@ namespace Signum.Windows
             this.CommandBindings.Add(new CommandBinding(FindCommand, btFind_Click));
             this.CommandBindings.Add(new CommandBinding(RemoveCommand, btRemove_Click));
             this.CommandBindings.Add(new CommandBinding(ViewCommand, btView_Click));
-        }
-
-        public bool dynamicReadOnly;
-        public bool DynamicReadOnly
-        {
-            get { return dynamicReadOnly; }
-            set
-            {
-                if (value != dynamicReadOnly)
-                {
-                    DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(Common.IsReadOnlyProperty, typeof(EntityBase));
-
-                    if (value)
-                        dpd.AddValueChanged(this, IsReadOnlyChanged);
-                    else
-                        dpd.RemoveValueChanged(this, IsReadOnlyChanged);
-
-                    dynamicReadOnly = true;
-                }
-            }
         }
 
         void IsReadOnlyChanged(object sender, EventArgs e)
