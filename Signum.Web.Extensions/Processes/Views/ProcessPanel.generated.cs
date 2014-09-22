@@ -120,7 +120,7 @@ WriteLiteral("    ");
 
             
             #line 12 "..\..\Processes\Views\ProcessPanel.cshtml"
-Write(Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable")));
+Write(Html.Partial(ProcessClient.ViewPrefix.Formato("ProcessPanelTable")));
 
             
             #line default
@@ -131,7 +131,7 @@ WriteLiteral("            ");
 
             
             #line 15 "..\..\Processes\Views\ProcessPanel.cshtml"
-        Write(ProcessesClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())));
+        Write(ProcessClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())));
 
             
             #line default

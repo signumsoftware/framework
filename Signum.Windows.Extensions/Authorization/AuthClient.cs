@@ -53,9 +53,9 @@ namespace Signum.Windows.Authorization
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings(UserOperation.SetPassword){ IsVisible = e => false },
-                    new EntityOperationSettings(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
-                    new EntityOperationSettings(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
+                    new EntityOperationSettings<UserDN>(UserOperation.SetPassword){ IsVisible = e => false },
+                    new EntityOperationSettings<UserDN>(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
+                    new EntityOperationSettings<UserDN>(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
                 });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("UpdateAuthCache",

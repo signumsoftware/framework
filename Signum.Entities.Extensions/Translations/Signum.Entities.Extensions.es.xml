@@ -488,12 +488,15 @@
     <Member Name="UniqueIdentifier" Description="Identificador único" />
   </Type>
   <Type Name="EmailMessageMessage">
+    <Member Name="Attachments" Description="Adjuntos" />
     <Member Name="DefaultFromIsMandatory" Description="Desde por defecto es obligatorio" />
     <Member Name="ExceptionMessages" Description="Mensajes excepción" />
+    <Member Name="From" Description="De" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="Messages" Description="Mensajes" />
     <Member Name="RemainingMessages" Description="Mensajes pendientes" />
     <Member Name="TheEmailMessageCannotBeSentFromState0" Description="El email no se pueden enviar desde el estado {0}" />
+    <Member Name="To" Description="Para" />
   </Type>
   <Type Name="EmailMessageOperation">
     <Member Name="CreateMail" Description="Crear email" />

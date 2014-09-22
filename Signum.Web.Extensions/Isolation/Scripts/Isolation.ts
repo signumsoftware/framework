@@ -16,7 +16,7 @@ export function addIsolationPrefilter(isolationKey: string)
 }
 
 
-export function getIsolation(extraJsonData: any, prefix: string, title: string, isolations: Navigator.ChooserOption[]) : Promise<any> {
+export function getIsolation(extraJsonData: FormObject, prefix: string, title: string, isolations: Navigator.ChooserOption[]): Promise<FormObject> {
 
     var iso = getCurrentIsolation(prefix);
 

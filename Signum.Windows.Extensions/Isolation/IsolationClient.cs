@@ -34,7 +34,7 @@ namespace Signum.Windows.Isolation
                 Constructor.Manager.PreConstructors += Constructor_PreConstructors;
 
                 WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
-                    new IsolationWidget().Set(Common.OrderProperty, -1) : null;
+                    new IsolationWidget().Set(Common.OrderProperty, -1.0) : null;
 
                 List<Lite<IsolationDN>> isolations = null;
 

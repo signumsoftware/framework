@@ -41,7 +41,7 @@ namespace Signum.Web.Notes
                 WidgetsHelper.GetWidget += WidgetsHelper_GetWidget;
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(NoteOperation.CreateNoteFromEntity) 
+                    new EntityOperationSettings<IdentifiableEntity>(NoteOperation.CreateNoteFromEntity) 
                     { 
                         IsVisible  = _ => false
                     }

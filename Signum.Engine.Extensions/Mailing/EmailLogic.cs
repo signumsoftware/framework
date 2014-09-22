@@ -102,7 +102,6 @@ namespace Signum.Engine.Mailing
             SenderManager.Send(email);
         }
 
-
         public static void SendMailAsync(this ISystemEmail systemEmail)
         {
             foreach (var email in systemEmail.CreateEmailMessage())
@@ -294,7 +293,6 @@ namespace Signum.Engine.Mailing
         }
     }
 
-
     public class EmailSenderManager
     {
         public EmailSenderManager()
@@ -302,7 +300,9 @@ namespace Signum.Engine.Mailing
 
         }
 
-        protected MailMessage CreateMailMessage(EmailMessageDN email)
+        public static Func<EmailMessageDN, MailMessage> CustomCreateMailMessage;
+
+        public MailMessage CreateMailMessage(EmailMessageDN email)
         {
             MailMessage message = new MailMessage()
             {
@@ -344,7 +344,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    MailMessage message = CreateMailMessage(email);
+                    MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 
                     CreateSmtpClient(email).Send(message);
 
@@ -407,9 +407,6 @@ namespace Signum.Engine.Mailing
         {
             using (OperationLogic.AllowSave<EmailMessageDN>())
             {
-
-                
-
                 try
                 {
                     if (!EmailLogic.Configuration.SendEmails)
@@ -422,7 +419,7 @@ namespace Signum.Engine.Mailing
                     {
                         SmtpClient client = CreateSmtpClient(email);
 
-                        MailMessage message = CreateMailMessage(email);
+                        MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 
                         email.Sent = null;
                         email.Save();
@@ -466,8 +463,5 @@ namespace Signum.Engine.Mailing
                 }
             }
         }
-
-
-
     }
 }

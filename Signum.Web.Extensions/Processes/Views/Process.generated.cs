@@ -383,7 +383,7 @@ WriteLiteral("            ");
 
             
             #line 65 "..\..\Processes\Views\Process.cshtml"
-        Write(ProcessesClient.Module["refreshProgress"](e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")));
+        Write(ProcessClient.Module["refreshProgress"](e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")));
 
             
             #line default
@@ -409,7 +409,7 @@ WriteLiteral("            ");
 
             
             #line 73 "..\..\Processes\Views\Process.cshtml"
-        Write(ProcessesClient.Module["refreshPage"](e.Prefix));
+        Write(ProcessClient.Module["refreshPage"](e.Prefix));
 
             
             #line default

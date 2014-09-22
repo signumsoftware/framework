@@ -187,18 +187,18 @@ namespace Signum.Windows.UIAutomation
               where T : IdentifiableEntity
         {
             var entityId = window.EntityId;
-            var button = window.GetOperationButton(symbol.Operation);
+            var button = window.GetOperationButton(symbol.Symbol);
 
             window.Element.WaitDataContextChangedAfter(
                 action: () => button.ButtonInvoke(),
                 timeOut : timeOut ?? OperationTimeouts.ExecuteTimeout,
-                actionDescription: () => "Executing {0} from {1}".Formato(symbol.Operation, entityId));
+                actionDescription: () => "Executing {0} from {1}".Formato(symbol.Symbol, entityId));
         }
 
         public static AutomationElement ExecuteCapture<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
             where T : IdentifiableEntity
         {
-            return window.OperationCapture(symbol.Operation, timeOut); 
+            return window.OperationCapture(symbol.Symbol, timeOut); 
         }
 
         public static NormalWindowProxy<T> ConstructFrom<F, FB, T>(this NormalWindowProxy<F> window, ConstructSymbol<T>.From<FB> symbol, int? timeOut = null)
@@ -206,7 +206,7 @@ namespace Signum.Windows.UIAutomation
             where FB : class, IIdentifiable
             where F : IdentifiableEntity, FB
         {
-            AutomationElement element = window.OperationCapture(symbol.Operation, timeOut);
+            AutomationElement element = window.OperationCapture(symbol.Symbol, timeOut);
 
             return new NormalWindowProxy<T>(element);
         }

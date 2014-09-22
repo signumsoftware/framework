@@ -15,7 +15,6 @@ using System.IO;
 using System.Web.Routing;
 using Signum.Entities.SMS;
 using Signum.Web.Operations;
-using Signum.Web.Extensions.SMS.Models;
 using System.Linq.Expressions;
 using Newtonsoft.Json.Linq;
 using Signum.Engine.DynamicQuery;
@@ -53,23 +52,23 @@ namespace Signum.Web.SMS
 
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
-                    new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+                    new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
-                        OnClick = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(), JsFunction.Event, 
+                        Click = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms)=>sms.CreateSMSMessageFromTemplate()), 
                             SmsTemplateFindOptions(ctx.Entity.GetType()).ToJS(ctx.Prefix, "New"))
                     },
 
-                    new ContextualOperationSettings(SMSProviderOperation.SendSMSMessagesFromTemplate)
+                    new ContextualOperationSettings<IdentifiableEntity>(SMSMessageOperation.SendSMSMessagesFromTemplate)
                     {
-                        OnClick = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(), JsFunction.Event, 
+                        Click  = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms )=>sms.SendMultipleMessagesFromTemplate()), 
-                            SmsTemplateFindOptions(DynamicQueryManager.Current.GetQuery(ctx.QueryName).EntityImplementations.Types.Single()).ToJS(ctx.Prefix, "New"))
+                            SmsTemplateFindOptions(ctx.SingleType).ToJS(ctx.Prefix, "New"))
                     },
 
-                    new ContextualOperationSettings(SMSProviderOperation.SendSMSMessage)
+                    new ContextualOperationSettings<IdentifiableEntity>(SMSMessageOperation.SendSMSMessages)
                     {
-                        OnClick = ctx => Module["sentMultipleSms"](ctx.Options(), JsFunction.Event, ctx.Prefix, 
+                        Click  = ctx => Module["sentMultipleSms"](ctx.Options(), JsFunction.Event, ctx.Prefix, 
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleSMSMessagesModel()),
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleMessages()))
                     },
@@ -82,10 +81,10 @@ namespace Signum.Web.SMS
             return new FindOptions(typeof(SMSTemplateDN))
             {
                 FilterOptions = new List<FilterOption> 
-                                { 
-                                    { new FilterOption("IsActive", true) { Frozen = true } },
-                                    { new FilterOption("AssociatedType", type.ToTypeDN().ToLite()) }
-                                }
+                { 
+                    { new FilterOption("IsActive", true) { Frozen = true } },
+                    { new FilterOption("AssociatedType", type.ToTypeDN().ToLite()) }
+                }
             };
         }
     }

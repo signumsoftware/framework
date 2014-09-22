@@ -39,9 +39,9 @@ namespace Signum.Web.Processes
             ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
-                return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
+                return PartialView(ProcessClient.ViewPrefix.Formato("ProcessPanelTable"), state);
             else
-                return View(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
+                return View(ProcessClient.ViewPrefix.Formato("ProcessPanel"), state);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

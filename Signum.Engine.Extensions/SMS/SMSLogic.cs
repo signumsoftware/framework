@@ -130,7 +130,7 @@ namespace Signum.Engine.SMS
             phoneNumberProviders[typeof(T)] = phoneExpression;
             cultureProviders[typeof(T)] = cultureExpression;
 
-            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessage)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessages)
             {
                 Construct = (providers, args) =>
                 {
@@ -143,9 +143,11 @@ namespace Signum.Engine.SMS
 
                     numbers = splitNumbers;
 
-                    CreateMessageParams createParams = args.GetArg<CreateMessageParams>();
+                    MultipleSMSModel model = args.GetArg<MultipleSMSModel>();
 
-                    if (!createParams.Message.HasText())
+                    string str = model.IntegrityCheck();
+
+                    if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
 
                     SMSSendPackageDN package = new SMSSendPackageDN().Save();
@@ -153,7 +155,17 @@ namespace Signum.Engine.SMS
                     var packLite = package.ToLite();
 
                     using (OperationLogic.AllowSave<SMSMessageDN>())
-                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred, createParams.Certified)).SaveList();
+                        numbers.Select(n => new SMSMessageDN
+                        {
+                            DestinationNumber = n.Exp,
+                            SendPackage = packLite,
+                            Referred = n.Referred,
+
+                            Message = model.Message,
+                            From = model.From,
+                            Certified = model.Certified,
+                            State = SMSMessageState.Created,
+                        }).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -205,7 +217,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessagesFromTemplate)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -507,7 +519,7 @@ namespace Signum.Engine.SMS
             });
         }
 
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template, List<string> phones)
+        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(MultipleSMSModel template, List<string> phones)
         {
             var messages = new List<SMSMessageDN>();
             var IDs = Provider.SMSMultipleSendAction(template, phones);
@@ -602,29 +614,9 @@ namespace Signum.Engine.SMS
     public interface ISMSProvider
     {
         string SMSSendAndGetTicket(SMSMessageDN message);
-        List<string> SMSMultipleSendAction(CreateMessageParams template, List<string> phones);
+        List<string> SMSMultipleSendAction(MultipleSMSModel template, List<string> phones);
         SMSMessageState SMSUpdateStatusAction(SMSMessageDN message);
     }
 
-    [Serializable]
-    public class CreateMessageParams
-    {
-        public string Message;
-        public string From;
-        public bool Certified;
-
-        public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
-        {
-            return new SMSMessageDN
-            {
-                Message = this.Message,
-                From = this.From,
-                State = SMSMessageState.Created,
-                DestinationNumber = destinationNumber,
-                SendPackage = packLite,
-                Referred = referred,
-                Certified = certified
-            };
-        }
-    }
+  
 }
