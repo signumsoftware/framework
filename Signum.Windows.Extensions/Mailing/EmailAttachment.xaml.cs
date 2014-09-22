@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using Signum.Entities.Files;
+using Signum.Entities.Mailing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +26,11 @@ namespace Signum.Windows.Mailing
         public EmailAttachment()
         {
             InitializeComponent();
+        }
+
+        private Signum.Entities.Files.IFile File_Creating()
+        {
+            return new FilePathDN(EmailFileType.Attachment);
         }
     }
 }

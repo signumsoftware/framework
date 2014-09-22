@@ -6,6 +6,6 @@
     xmlns:d="clr-namespace:Signum.Entities.Mailing;assembly=Signum.Entities.Extensions"
     MinWidth="300">
     <StackPanel>
-        <f:FileLine m:Common.Route="File" />
+        <f:FileLine m:Common.Route="File" Creating="File_Creating" />
     </StackPanel>
 </UserControl>
