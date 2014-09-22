@@ -63,6 +63,11 @@ namespace Signum.Web
             return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, prefix);
         }
 
+        public static TypeContext UntypedNew(ModifiableEntity entity, string prefix, PropertyRoute route)
+        {
+            return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, (TypeContext)null, prefix, route);
+        }
+
         public static string Compose(string prefix, string nameToAppend)
         {
             return prefix.Add(TypeContext.Separator, nameToAppend);

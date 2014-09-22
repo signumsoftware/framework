@@ -79,12 +79,10 @@ namespace Signum.Web.Operations
 
             if (prefix.HasText())
             {
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                var popupOptions = request[ViewDataKeys.ViewMode] == ViewMode.View.ToString() ?
-                    (PopupOptionsBase)new PopupViewOptions(tc) :
-                    (PopupOptionsBase)new PopupNavigateOptions(tc);
-
-                return controller.PopupControl(popupOptions);
+                if (request[ViewDataKeys.ViewMode] == ViewMode.View.ToString())
+                    return controller.PopupView(entity, new PopupViewOptions(prefix));
+                else
+                    return controller.PopupNavigate(entity, new PopupNavigateOptions(prefix));
             }
             else
             {
@@ -127,8 +125,7 @@ namespace Signum.Web.Operations
 
             if (newPrefix.HasText())
             {
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, newPrefix);
-                return controller.PopupControl(new PopupNavigateOptions(tc));
+                return controller.PopupNavigate(entity, new PopupNavigateOptions(newPrefix));
             }
             else //NormalWindow
             {
