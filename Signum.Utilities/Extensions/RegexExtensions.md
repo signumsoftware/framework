@@ -171,5 +171,3 @@ Example:
 `
 typeof(string).Assembly.GetTypes().MostSimilar(a => a.Name, "Quonsole"); //return the System.Console Type object. 
 `
-
-  [1]: http://msdn.microsoft.com/en-us/library/system.text.regularexpressions.regex.aspx|Regex

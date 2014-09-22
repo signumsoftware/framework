@@ -1,4 +1,4 @@
-﻿# Introduction
+# Introduction
 
 Signum.Utilities is the very basic assembly of Signum Framework. It's
 referenced by any other assembly in the framework and, can be used
@@ -12,7 +12,7 @@ design lines below:
 -   **Functional over Imperative:** Once you get used, functional style
     is more readable, scalable and shorter. Lambda expressions are here
     to stay.
--   **Handy over Intellectually gratifying:** No [Y-Conbinator](http://en.wikipedia.org/wiki/Y_combinator|Y) here.
+-   **Handy over Intellectually gratifying:** No [Y-Combinator](http://en.wikipedia.org/wiki/Y_combinator) here.
 -   **No dependencies:** Without dependent assemblies it can easily be
     added to any project.
 

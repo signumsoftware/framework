@@ -37,7 +37,7 @@ public static decimal ToDecimal(this string str, string error)
 
 ### Mod and DivMod
 Implements the [Modulo operation](http://en.wikipedia.org/wiki/Modulo_operation) (not to confuse with reminder operation, or %). 
-Useful because n.mod(4) will always be in the range [0..3], while n % 4 is in the range [-3...3] (for n < 0). 
+Useful because `n.mod(4)` will always be in the range `[0..3]`, while `n % 4` is in the range `[-3...3]`  because is negative for `n < 0`. 
 
 ```C#
 public static int Mod(this int a, int b)
@@ -135,7 +135,7 @@ public static T Do<T>(this T t, Action<T> action)
 
 As you see, it returns the initial object to allow chainability.
 
-`Do` is useful when you need to [an object initializer](http://msdn.microsoft.com/en-us/library/bb384062.aspx|initialize) but you need to call
+`Do` is useful when you need to [an object initializer](http://msdn.microsoft.com/en-us/library/bb384062.aspx) but you need to call
 methods or attach events as well.
 
 ```C#
