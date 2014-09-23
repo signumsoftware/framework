@@ -783,6 +783,11 @@
     <Member Name="NotAllowed" Description="No está permitido" />
     <Member Name="TextPruning" Description="Poda de texto" />
   </Type>
+  <Type Name="MultipleSMSModel" Description="SMS múltiple">
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="From" Description="De" />
+    <Member Name="Message" Description="Mensaje" />
+  </Type>
   <Type Name="NewsletterDeliveryDN" Description="Entrega de Newsletter">
     <Member Name="Newsletter" Description="Newsletter" />
     <Member Name="Recipient" Description="Destinatario" />
@@ -1191,6 +1196,8 @@
     <Member Name="CreateSMSWithTemplateFromEntity" Description="Crear SMS con plantilla desde entidad" />
     <Member Name="CreateUpdateStatusPackage" Description="Crear paquete de actualización de estado" />
     <Member Name="Send" Description="Enviar" />
+    <Member Name="SendSMSMessages" Description="Enviar mensajes SMS" />
+    <Member Name="SendSMSMessagesFromTemplate" Description="Enviar SMS desde Plantilla" />
     <Member Name="UpdateStatus" Description="Actualización de estado" />
   </Type>
   <Type Name="SMSMessageProcess">
@@ -1205,10 +1212,6 @@
   </Type>
   <Type Name="SMSPackageDN" Description="Paquete de SMS">
     <Member Name="Name" Description="Nombre" />
-  </Type>
-  <Type Name="SMSProviderOperation">
-    <Member Name="SendSMSMessage" Description="Enviar mensaje SMS" />
-    <Member Name="SendSMSMessagesFromTemplate" Description="Enviar mensajes SMS de plantilla" />
   </Type>
   <Type Name="SMSSendPackageDN" Description="Paquete de envios SMS" />
   <Type Name="SMSTemplateDN" Description="Plantilla SMS">
