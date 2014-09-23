@@ -186,10 +186,12 @@ namespace Signum.Windows.Operations
     {
         public List<Lite<T>> Entities { get; private set; }
         public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
-        public SearchControl SearchControl { get; private set; }
+
         public OperationInfo OperationInfo { get; private set; }
-        public string CanExecute { get; set; }
         public ContextualOperationSettings<T> OperationSettings { get; private set; }
+
+        public SearchControl SearchControl { get; private set; }
+        public string CanExecute { get; set; }
         public MenuItem SenderMenuItem { get; set; }
 
         public ContextualOperationContext(SearchControl searchControl, OperationInfo info, ContextualOperationSettings<T> settings)

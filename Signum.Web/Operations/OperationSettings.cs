@@ -178,19 +178,9 @@ namespace Signum.Web.Operations
         {
         }
 
-        public Func<ContextualOperationContext<T>, string> ConfirmMessage { get; set; }
         public Func<ContextualOperationContext<T>, bool> IsVisible { get; set; }
+        public Func<ContextualOperationContext<T>, string> ConfirmMessage { get; set; }
         public Func<ContextualOperationContext<T>, JsFunction> Click { get; set; }
-
-        public override bool HasClick
-        {
-            get { return Click != null; }
-        }
-
-        public override JsFunction OnClick(IContextualOperationContext ctx)
-        {
-            return Click((ContextualOperationContext<T>)ctx);
-        }
 
         public override bool HasIsVisible
         {
@@ -200,6 +190,16 @@ namespace Signum.Web.Operations
         public override bool OnIsVisible(IContextualOperationContext ctx)
         {
             return IsVisible((ContextualOperationContext<T>)ctx);
+        }
+
+        public override bool HasClick
+        {
+            get { return Click != null; }
+        }
+
+        public override JsFunction OnClick(IContextualOperationContext ctx)
+        {
+            return Click((ContextualOperationContext<T>)ctx);
         }
 
         public override Type OverridenType
@@ -223,14 +223,16 @@ namespace Signum.Web.Operations
     public class ContextualOperationContext<T> : IContextualOperationContext 
         where T : class, IIdentifiable
     {
+
+        public List<Lite<T>> Entities { get; private set; }
+        public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
+
         public OperationInfo OperationInfo { get; private set; }
         public ContextualOperationSettings<T> OperationSettings { get; set; }
 
         public SelectedItemsMenuContext Context { get; private set; }
         public string Prefix { get { return Context.Prefix; } }    
         public UrlHelper Url { get { return Context.Url; } }
-        public List<Lite<T>> Entities { get ; private set; }
-        public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
         public object QueryName { get { return Context.QueryName; } }
 
         public string CanExecute { get; set; }
@@ -323,19 +325,9 @@ namespace Signum.Web.Operations
                 BootstrapStyle.Default;
         }
 
-        public Func<EntityOperationContext<T>, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext<T>, bool> IsVisible { get; set; }
         public Func<EntityOperationContext<T>, JsFunction> Click { get; set; }
-
-        public override bool HasClick
-        {
-            get { return Click != null; }
-        }
-
-        public override JsFunction OnClick(IEntityOperationContext ctx)
-        {
-            return Click((EntityOperationContext<T>)ctx);
-        }
+        public Func<EntityOperationContext<T>, string> ConfirmMessage { get; set; }
 
         public override bool HasIsVisible
         {
@@ -347,12 +339,20 @@ namespace Signum.Web.Operations
             return IsVisible((EntityOperationContext<T>)ctx);
         }
 
+        public override bool HasClick
+        {
+            get { return Click != null; }
+        }
+
+        public override JsFunction OnClick(IEntityOperationContext ctx)
+        {
+            return Click((EntityOperationContext<T>)ctx);
+        }
+
         public override Type OverridenType
         {
             get { return typeof(T); }
         }
-
-
 
         public override ContextualOperationSettingsBase ContextualUntyped
         {
@@ -387,8 +387,9 @@ namespace Signum.Web.Operations
         public bool ShowOperations { get { return Context.ShowOperations; } }
 
         public OperationInfo OperationInfo { get; private set; }
-        public T Entity { get; private set; }
         public EntityOperationSettings<T> OperationSettings { get; private set; }
+
+        public T Entity { get; private set; }
         public string CanExecute { get; set; }
 
         public EntityOperationContext(T entity, OperationInfo operationInfo, EntityButtonContext context, EntityOperationSettings<T> settings)
