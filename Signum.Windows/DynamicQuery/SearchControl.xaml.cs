@@ -414,7 +414,7 @@ namespace Signum.Windows
                 Create = Implementations.IsByAll ? false :
                          Implementations.Types.Any(t => Navigator.IsCreable(t, isSearch: true));
 
-            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+            ColumnOption.SetColumnTokens(ColumnOptions, Description);
 
             if (this.CanAddFilters || this.AllowChangeColumns)
             {
@@ -435,12 +435,12 @@ namespace Signum.Windows
 
             GenerateListViewColumns();
 
-            DynamicQueryServer.SetFilterTokens(FilterOptions, Description);
+            FilterOption.SetFilterTokens(FilterOptions, Description);
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
-            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
+            OrderOption.SetOrderTokens(OrderOptions, Description);
 
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
@@ -597,7 +597,7 @@ namespace Signum.Windows
                 return;
             }
 
-            List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
+            List<Column> columns = ColumnOption.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 
             gvResults.Columns.Clear();
 
@@ -732,7 +732,7 @@ namespace Signum.Windows
                 FilterOptions.Clear();
                 var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
 
-                DynamicQueryServer.SetFilterTokens(newFilters, Description);
+                FilterOption.SetFilterTokens(newFilters, Description);
                 FilterOptions.AddRange(newFilters);
             }
         }
@@ -1069,7 +1069,7 @@ namespace Signum.Windows
 
                 ColumnOptions.Clear();
                 ColumnOptions.AddRange(columns);
-                DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+                ColumnOption.SetColumnTokens(ColumnOptions, Description);
                 ColumnOptionsMode = columnOptionsMode;
                 GenerateListViewColumns();
 
@@ -1079,13 +1079,13 @@ namespace Signum.Windows
                         SimpleFilterBuilder = null;
 
                     FilterOptions.Clear();
-                    DynamicQueryServer.SetFilterTokens(filters, Description);
+                    FilterOption.SetFilterTokens(filters, Description);
                     FilterOptions.AddRange(filters);
                 }
 
                 OrderOptions.Clear();
                 OrderOptions.AddRange(orders);
-                DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
+                OrderOption.SetOrderTokens(OrderOptions, Description);
                 SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
                 UpdateMultiplyMessage(true);

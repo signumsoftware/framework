@@ -69,7 +69,7 @@ namespace Signum.Web.Controllers
         [HttpPost, ActionSplitter("webQueryName")]
         public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, bool showFooter, string prefix)
         {
-            return Finder.Search(this, queryRequest, allowSelection, navigate, showFooter, prefix);
+            return Finder.SearchResults(this, queryRequest, allowSelection, navigate, showFooter, prefix);
         }
 
         [HttpPost]

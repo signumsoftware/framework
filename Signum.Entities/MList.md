@@ -129,6 +129,6 @@ But there are other considerations:
 * In the MList example you'll typically modify the `OrderLineDN` by saving the `OrderDN`, even if the user interface will promote this, while in the second example you'll typically navigate to the `OrderLineDN` to make the changes, and will be logged independently.
 * In one MList example the dependency goes from `OrderDN` to `OrderLineDN`, while in the back reference example is the other way around. This could be a problem if the two entities are in different modules. 
 
-In this particular case, `MList` makes more sense, but for other cases, like Countries in a Continent, a back reference and [expressionMethods](.../Signum.Utilities/ExpressionTrees/LinqExtensibility.md) is a better option. 
+In this particular case, `MList` makes more sense, but for other cases, like Countries in a Continent, a back reference and [expressionMethods](../Signum.Utilities/ExpressionTrees/LinqExtensibility.md) is a better option. 
 
   

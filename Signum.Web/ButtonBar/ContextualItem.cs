@@ -21,13 +21,8 @@ namespace Signum.Web
 
     public static class ContextualItemsHelper
     {
-        public static bool SelectedItemsMenuInSearchPage = false;
+        public static bool SelectedItemsMenuInSearchPage = true;
         public static event Func<SelectedItemsMenuContext, List<IMenuItem>> GetContextualItemsForLites;
-
-        public static void Start()
-        {
-            SelectedItemsMenuInSearchPage = true;
-        }
 
         public static List<IMenuItem> GetContextualItemListForLites(SelectedItemsMenuContext ctx)
         {

@@ -12,6 +12,13 @@ There are three main design principles that we follow in order to make `Signum.W
 
 * **Fill WPF Gaps:** WPF has archived excellent results in defining the foundations for windows presentation development, but it has been poor in the final polishing for building real life applications. There is no `DateTimePicker` control, no `ColorPiker`, neither easy auto-completion in `TextBox`. We tried to fill these gaps to make it usable until Microsoft comes up with an official alternative. 
 
+
+## Prerequisites
+
+In order to fully understand Signum.Web is necessary to have some knowledge of modern web development in .Net:
+
+* **WPF:** Panels, Bindings, DependencyProperties, Templates, Styles... 
+
 ## Overview
 
 The two main windows in a `Signum.Windows` application are the [SearchWindows](DynamicQuery/SearchControl.m), that is mostly auto-generated from a [registered query](../Signum.Engine/DynamicQuery/DynamicQueries.md"), and the [NormalWindow](NormalWindow.md) that provides a common frame for the detail view of any entity and contains a **custom control** for each type of entity.  

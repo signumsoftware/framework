@@ -56,16 +56,16 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetColumnTokens(options.ColumnOptions, qd);
-            SetFilterTokens(options.FilterOptions, qd);
-            SetOrderTokens(options.OrderOptions, qd);
+            ColumnOption.SetColumnTokens(options.ColumnOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd);
 
             var request = new QueryRequest
             {
                 QueryName = options.QueryName,
                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
-                Columns = MergeColumns(options.ColumnOptions, options.ColumnOptionsMode, qd),
+                Columns = ColumnOption.MergeColumns(options.ColumnOptions, options.ColumnOptionsMode, qd),
                 Pagination = options.Pagination ?? QueryOptions.DefaultPagination,
             };
             return request;
@@ -99,9 +99,9 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetColumnTokens(options.ColumnOptions, qd, canAggregate:true);
-            SetFilterTokens(options.FilterOptions, qd, canAggregate: true);
-            SetOrderTokens(options.OrderOptions, qd, canAggregate: true);
+            ColumnOption.SetColumnTokens(options.ColumnOptions, qd, canAggregate:true);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd, canAggregate: true);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd, canAggregate: true);
 
             var request = new QueryGroupRequest
             {
@@ -115,8 +115,7 @@ namespace Signum.Windows
         #endregion
 
         #region QueryUnique
-        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)
-   where T : class, IIdentifiable
+        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)where T : class, IIdentifiable
         {
             return (Lite<T>)new UniqueOptions(typeof(T))
             {
@@ -164,8 +163,8 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetFilterTokens(options.FilterOptions, qd);
-            SetOrderTokens(options.OrderOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd);
 
             var request = new UniqueEntityRequest
             {
@@ -205,7 +204,7 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetFilterTokens(options.FilterOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
 
             var request = new QueryCountRequest
             {
@@ -215,53 +214,6 @@ namespace Signum.Windows
             return request;
         }
         #endregion
-
-
-        public static void SetFilterTokens(IEnumerable<FilterOption> filters, QueryDescription qd, bool canAggregate = false)
-        {
-            var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement |(canAggregate? SubTokensOptions.CanAggregate : 0); 
-            foreach (var f in filters)
-            {
-                if (f.Token == null && f.ColumnName.HasText())
-                    f.Token = QueryUtils.Parse(f.ColumnName, qd, options);
-
-                f.RefreshRealValue();
-            }
-        }
-
-        public static void SetOrderTokens(IEnumerable<OrderOption> orders, QueryDescription qd, bool canAggregate = false)
-        {
-            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
-            foreach (var o in orders)
-            {
-                o.Token = QueryUtils.Parse(o.ColumnName, qd, options);
-            }
-        }
-
-        public static void SetColumnTokens(IEnumerable<ColumnOption> columns, QueryDescription qd, bool canAggregate = false)
-        {
-            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0); 
-            foreach (var c in columns)
-            {
-                c.Token = QueryUtils.Parse(c.ColumnName, qd, options);
-            }
-        }
-
-        public static List<Column> MergeColumns(IEnumerable<ColumnOption> columns, ColumnOptionsMode mode, QueryDescription qd)
-        {
-            switch (mode)
-            {
-                case ColumnOptionsMode.Add:
-                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
-                        columns.Select(co => co.ToColumn())).ToList();
-                case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
-                case ColumnOptionsMode.Replace:
-                    return columns.Select(co => co.ToColumn()).ToList();
-                default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(mode));
-            }
-        }    
 
         #region Batch
         class RequestTuple

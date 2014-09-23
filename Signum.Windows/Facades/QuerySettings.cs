@@ -94,7 +94,7 @@ namespace Signum.Windows
 
     public class FormatterRule
     {
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         public Func<Column, Func<Binding, DataTemplate>> Formatter { get; set; }
         public Func<Column, bool> IsApplicable { get; set; }

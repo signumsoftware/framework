@@ -328,6 +328,18 @@ namespace Signum.Windows
                  Value = Dispatcher.Return(()=>Value)
             };
         }
+
+        public static void SetFilterTokens(IEnumerable<FilterOption> filters, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var f in filters)
+            {
+                if (f.Token == null && f.ColumnName.HasText())
+                    f.Token = QueryUtils.Parse(f.ColumnName, qd, options);
+
+                f.RefreshRealValue();
+            }
+        }
     }
 
     public class OrderOption : Freezable
@@ -375,6 +387,15 @@ namespace Signum.Windows
                 OrderType = OrderType
             };
         }
+
+        public static void SetOrderTokens(IEnumerable<OrderOption> orders, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var o in orders)
+            {
+                o.Token = QueryUtils.Parse(o.ColumnName, qd, options);
+            }
+        }
     }
 
     public class ColumnOption : Freezable
@@ -415,5 +436,30 @@ namespace Signum.Windows
                 ColumnName = ColumnName,
             };
         }
+
+        public static void SetColumnTokens(IEnumerable<ColumnOption> columns, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var c in columns)
+            {
+                c.Token = QueryUtils.Parse(c.ColumnName, qd, options);
+            }
+        }
+
+        public static List<Column> MergeColumns(IEnumerable<ColumnOption> columns, ColumnOptionsMode mode, QueryDescription qd)
+        {
+            switch (mode)
+            {
+                case ColumnOptionsMode.Add:
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
+                        columns.Select(co => co.ToColumn())).ToList();
+                case ColumnOptionsMode.Remove:
+                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
+                case ColumnOptionsMode.Replace:
+                    return columns.Select(co => co.ToColumn()).ToList();
+                default:
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(mode));
+            }
+        }    
     }
 }

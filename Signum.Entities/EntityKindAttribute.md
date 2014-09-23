@@ -25,16 +25,19 @@ Classifies the role of the entity in the system:
 
 * **Shared:** Created and shared by other entities. *(ie: a CustomerDN that can be created while creating the order)*.  
 
-* **Main:** Used and shared by other entities, but too big/important to be created from other entity. *(ie: OrderDN)*.  
+* **Main:** Used and shared by other entities, but too big/important to be created or modified from other entity. *(ie: OrderDN)*.  
 
 * **Part:** Entity that belongs to just one entity and should be saved together, but that can not be implemented as `EmbeddedEntity` (usually to enable polymorphism). *(ie: ProductExtensionDN)*.
 
 * **SharedPart:** Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space. *(ie: AddressDN)*.
 
+
+The decision you take will affect the default in the user interface and operations:
+
 |               |SaveProtected	|IsCreable    |	IsViewable	|IsNavigable| IsReadOnly
 |--------------:|:-------------:|:-----------:|:-----------:|:---------:|:-----------:
 | SystemString	|	            | 	          |      	    |	        | ✓
-| System	    |	            | 	          |✓            |Always	    | ✓
+| System	    |	            | 	          |✓           |Always	    | ✓
 | Relational	|	            | 	          |             |     	    | ✓
 | String	    |✓	            | IsSearch    |	            |IsSearch	| 
 | Shared	    |✓	            | Always	  |✓	        |Always	    | 

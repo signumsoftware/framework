@@ -99,12 +99,10 @@ namespace Signum.Web.Operations
 
             if (prefix.HasText())
             {
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                var popupOptions = request[ViewDataKeys.ViewMode] == ViewMode.View.ToString() ?
-                    (PopupOptionsBase)new PopupViewOptions(tc) :
-                    (PopupOptionsBase)new PopupNavigateOptions(tc);
-
-                return controller.PopupOpen(popupOptions);
+                if (request[ViewDataKeys.ViewMode] == ViewMode.View.ToString())
+                    return controller.PopupView(entity, new PopupViewOptions(prefix));
+                else
+                    return controller.PopupNavigate(entity, new PopupNavigateOptions(prefix));
             }
             else
             {
@@ -147,8 +145,7 @@ namespace Signum.Web.Operations
 
             if (newPrefix.HasText())
             {
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, newPrefix);
-                return controller.PopupOpen(new PopupNavigateOptions(tc));
+                return controller.PopupNavigate(entity, new PopupNavigateOptions(newPrefix));
             }
             else //NormalWindow
             {
@@ -370,7 +367,7 @@ namespace Signum.Web.Operations
                  {
                      value = kvp.Key.Key,
                      toStr = kvp.Value.Settings.Try(s => s.Text) ?? kvp.Key.NiceToString(),
-                     operationConstructor = !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
+                     operationConstructor = kvp.Value.Settings == null || !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
                  }));
         }
 
