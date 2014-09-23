@@ -308,7 +308,6 @@
     <Member Name="Rename" Description="Renombrar" />
     <Member Name="Search" Description="Buscar" />
     <Member Name="SearchControl_Pagination_All" Description="Todos" />
-    <Member Name="SelectAnElement" Description="Seleccione un elemento" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="Value" Description="Valor" />
     <Member Name="View" Description="Ver" />
@@ -319,7 +318,9 @@
     <Member Name="ConstructorSelector" Description="Selector de constructor" />
     <Member Name="PleaseChooseAValueToContinue" Description="Por favor, elige un valor para continuar:" />
     <Member Name="PleaseSelectAConstructor" Description="Por favor seleccione un Constructor" />
+    <Member Name="PleaseSelectAnElement" Description="Por favor, seleccione un elemento" />
     <Member Name="PleaseSelectAType" Description="Por favor seleccione uno de los siguientes tipos: " />
+    <Member Name="SelectAnElement" Description="Seleccione un elemento" />
     <Member Name="TypeSelector" Description="Selector de tipo" />
     <Member Name="ValueMustBeSpecifiedFor0" Description="Se debe indicar un valor para {0}" />
   </Type>
@@ -373,7 +374,7 @@
     <Member Name="HaveANumberOfElements01" Description="tiene un número de elementos {0} {1}" />
     <Member Name="HaveAPrecisionOf" Description="tener una precisión de " />
     <Member Name="HaveBetween0And1Characters" Description="tener entre {0} y {1} caracteres" />
-    <Member Name="HaveMaximun0Characters" Description="tener máximo {0} caracteres" />
+    <Member Name="HaveMaximum0Characters" Description="tener máximo {0} caracteres" />
     <Member Name="HaveMinimum0Characters" Description="tener mínimo {0} caracteres" />
     <Member Name="HaveNoRepeatedElements" Description="no debe tener elementos repetidos" />
     <Member Name="HaveValid0Format" Description="debe tener un formato {0} válido" />
