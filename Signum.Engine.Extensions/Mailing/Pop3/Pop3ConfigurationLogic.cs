@@ -163,6 +163,9 @@ namespace Signum.Engine.Mailing.Pop3
 
                 SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, () =>
                 {
+                    if (!EmailLogic.Configuration.ReciveEmails)
+                        throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
+
                     foreach (var item in Database.Query<Pop3ConfigurationDN>().Where(a => a.Active).ToList())
                     {
                         item.ReceiveEmails();
@@ -177,6 +180,9 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
         {
+            if (!EmailLogic.Configuration.ReciveEmails)
+                throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
+
             using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
             {
                 Pop3ReceptionDN reception = Transaction.ForceNew().Using(tr => tr.Commit(

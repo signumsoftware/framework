@@ -32,6 +32,14 @@ namespace Signum.Entities.Mailing
             set { Set(ref sendEmails, value); }
         }
 
+        bool reciveEmails;
+        public bool ReciveEmails
+        {
+            get { return reciveEmails; }
+            set { Set(ref reciveEmails, value); }
+        }
+
+
         [SqlDbType(Size = 100)]
         string overrideEmailAddress;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
