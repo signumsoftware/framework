@@ -2,6 +2,7 @@
 
 @using (var sc = Html.TypeContext<EmailConfigurationDN>()) 
 {
+	@Html.ValueLine(sc, ca => ca.ReciveEmails)
 	@Html.ValueLine(sc, ca => ca.SendEmails)
     @Html.ValueLine(sc, ca => ca.OverrideEmailAddress)
     @Html.EntityCombo(sc, ca => ca.DefaultCulture)
