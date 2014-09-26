@@ -88,7 +88,8 @@ namespace Signum.Windows.Operations
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "{0} repeated");
+            Manager.Settings.ClearCache();
         }
 
         public static void AddSettings(List<OperationSettings> settings)
@@ -97,6 +98,12 @@ namespace Signum.Windows.Operations
             {
                 AddSetting(item);
             }
+        }
+
+        public static void ReplaceSetting(OperationSettings setting)
+        {
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType)[setting.OperationSymbol] = setting;
+            Manager.Settings.ClearCache();
         }
 
         public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IIdentifiable
