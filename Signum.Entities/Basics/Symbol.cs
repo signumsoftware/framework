@@ -18,7 +18,7 @@ namespace Signum.Entities
     {
 
         static Dictionary<Type, Dictionary<string, Symbol>> Symbols = new Dictionary<Type, Dictionary<string, Symbol>>();
-        static Dictionary<Type, Dictionary<string, int>> Ids = new Dictionary<Type, Dictionary<string, int>>();
+        static Dictionary<Type, Dictionary<string, PrimaryKey>> Ids = new Dictionary<Type, Dictionary<string, PrimaryKey>>();
 
         public Symbol() { }
       
@@ -47,7 +47,7 @@ namespace Signum.Entities
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
             {
-                var id = dic.TryGetS(this.key);
+                PrimaryKey? id = dic.TryGetS(this.key);
                 if (id != null)
                     this.SetId(id.Value);
             }
@@ -107,7 +107,7 @@ namespace Signum.Entities
             return this.FieldInfo.NiceName();
         }
 
-        public static void SetSymbolIds<S>(Dictionary<string, int> symbolIds)
+        public static void SetSymbolIds<S>(Dictionary<string, PrimaryKey> symbolIds)
             where S : Symbol
         {
             Symbol.Ids[typeof(S)] = symbolIds;
@@ -125,7 +125,7 @@ namespace Signum.Entities
             }
         }
 
-        private void SetId(int id)
+        private void SetId(PrimaryKey id)
         {
             this.id = id;
             this.IsNew = false;
@@ -134,7 +134,7 @@ namespace Signum.Entities
                 this.Modified = ModifiedState.Sealed;
         }
 
-        internal static Dictionary<string, int> GetSymbolIds(Type type)
+        internal static Dictionary<string, PrimaryKey> GetSymbolIds(Type type)
         {
             return Symbol.Ids.GetOrThrow(type);
         }

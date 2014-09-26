@@ -21,7 +21,7 @@ namespace Signum.Entities
         {
             return new EnumEntity<T>()
             {
-                id = Convert.ToInt32(t),
+                id = new PrimaryKey(Convert.ToInt32(t)),
             };
         }
 
@@ -60,7 +60,7 @@ namespace Signum.Entities
             if(value == null) return null; 
 
             IdentifiableEntity ident = (IdentifiableEntity)Activator.CreateInstance(Generate(value.GetType()));
-            ident.Id = Convert.ToInt32(value);
+            ident.Id = new PrimaryKey(Convert.ToInt32(value));
 
             return ident;
         }

@@ -246,7 +246,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootSumSomeNull()
         {
-            Assert.IsTrue(Database.Query<ArtistDN>().Sum(a => a.LastAward.Id) > 0);
+            Assert.IsTrue(Database.Query<ArtistDN>().Sum(a => (int)a.LastAward.Id.Object) > 0);
         }
 
         [TestMethod]
@@ -374,13 +374,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SumSum()
         {
-            var first = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
+            var first = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => (int)m.Id.Object));
         }
 
         [TestMethod]
         public void SumGroupbySum()
         {
-            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => m.Id)));
+            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object)));
         }
 
         [TestMethod]

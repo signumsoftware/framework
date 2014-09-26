@@ -950,6 +950,8 @@ namespace Signum.Web
 
     public class MListMapping<S> : BaseMListMapping<S>
     {
+        public Type RowIdType = typeof(int);
+
         public MListMapping()
             : base()
         {
@@ -969,7 +971,7 @@ namespace Signum.Web
 
                 IMListPrivate<S> mlistPriv = ctx.Value;
 
-                var dic = mlistPriv == null ? new Dictionary<int, MList<S>.RowIdValue>() :
+                var dic = mlistPriv == null ? new Dictionary<PrimaryKey, MList<S>.RowIdValue>() :
                     mlistPriv.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a);
 
                 var newList = new List<MList<S>.RowIdValue>();
@@ -978,11 +980,10 @@ namespace Signum.Web
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    int? rowId = itemCtx.Inputs.TryGetC(EntityListBaseKeys.RowId).ToInt();
-
-                    if (rowId.HasValue)
+                    PrimaryKey rowId;
+                    if (TryParse(itemCtx.Inputs.TryGetC(EntityListBaseKeys.RowId), out rowId))
                     {
-                        var oldValue = dic.GetOrThrow(rowId.Value, "No RowID {0} found");
+                        var oldValue = dic.GetOrThrow(rowId, "No RowID {0} found");
 
                         itemCtx.Value = oldValue.Value;
                         itemCtx.Value = ElementMapping(itemCtx);
@@ -994,7 +995,7 @@ namespace Signum.Web
                             var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
 
                             if (oldValue.Value.Equals(val))
-                                newList.Add(new MList<S>.RowIdValue(val, rowId.Value, oldValue.OldIndex));
+                                newList.Add(new MList<S>.RowIdValue(val, rowId, oldValue.OldIndex));
                             else
                                 newList.Add(new MList<S>.RowIdValue(val));
                         }
@@ -1024,6 +1025,21 @@ namespace Signum.Web
                 }
 
                 return ctx.Value;
+            }
+        }
+
+        public bool TryParse(string value, out PrimaryKey id)
+        {
+            object val;
+            if (ReflectionTools.TryParse(value, RowIdType, out val))
+            {
+                id = new PrimaryKey((IComparable)val);
+                return true;
+            }
+            else
+            {
+                id = default(PrimaryKey);
+                return false;
             }
         }
 

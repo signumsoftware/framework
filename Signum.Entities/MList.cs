@@ -27,7 +27,7 @@ namespace Signum.Entities
         [Serializable]
         public struct RowIdValue : IEquatable<RowIdValue>, IComparable<RowIdValue>, ISerializable
         {
-            public readonly int? RowId;
+            public readonly PrimaryKey? RowId;
             public readonly T Value;
             public readonly int? OldIndex; 
 
@@ -38,7 +38,7 @@ namespace Signum.Entities
                 this.OldIndex = null;
             }
 
-            public RowIdValue(T value, int rowId, int? oldIndex)
+            public RowIdValue(T value, PrimaryKey rowId, int? oldIndex)
             {
                 this.Value = value;
                 this.RowId = rowId;
@@ -99,7 +99,7 @@ namespace Signum.Entities
                 {
                     switch (item.Name)
                     {
-                        case "rowid": this.RowId = (int?)item.Value; break;
+                        case "rowid": this.RowId = (PrimaryKey?)item.Value; break;
                         case "oldindex": this.OldIndex = (int?)item.Value; break;
                         case "value": this.Value = (T)item.Value; break;
                         default: throw new InvalidOperationException("Unexpected SerializationEntry");
@@ -632,7 +632,7 @@ namespace Signum.Entities
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
         }
 
-        void IMListPrivate.SetRowId(int index, int rowId)
+        void IMListPrivate.SetRowId(int index, PrimaryKey rowId)
         {
             var prev = this.innerList[index]; 
 
@@ -642,7 +642,7 @@ namespace Signum.Entities
             this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }
 
-        void IMListPrivate.ForceRowId(int index, int rowId)
+        void IMListPrivate.ForceRowId(int index, PrimaryKey rowId)
         {
             var prev = this.innerList[index];
 
@@ -677,8 +677,8 @@ namespace Signum.Entities
 
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
-        void SetRowId(int index, int rowId);
-        void ForceRowId(int index, int rowId);
+        void SetRowId(int index, PrimaryKey rowId);
+        void ForceRowId(int index, PrimaryKey rowId);
 
         void InnerListModified(IList newItems, IList oldItems); 
     }

@@ -20,12 +20,12 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.All)]
     public abstract class IdentifiableEntity : ModifiableEntity, IIdentifiable
     {
-        internal int? id = null; //primary key
+        internal PrimaryKey? id = null; //primary key
         [Ignore]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
         [HiddenProperty, Description("Id")]
-        public int Id
+        public PrimaryKey Id
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
-        public int? IdOrNull
+        public PrimaryKey? IdOrNull
         {
             get { return id; }
         }
@@ -107,7 +107,7 @@ namespace Signum.Entities
         {
             return id == null ?
                 base.GetHashCode() :
-                StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value;
+                StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value.GetHashCode();
         }
 
         public IdentifiableEntity()
@@ -182,10 +182,10 @@ namespace Signum.Entities
 
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
-        int Id { get; }
+        PrimaryKey Id { get; }
 
         [HiddenProperty]
-        int? IdOrNull { get; }
+        PrimaryKey? IdOrNull { get; }
 
         [HiddenProperty]
         bool IsNew { get; }
@@ -204,11 +204,14 @@ namespace Signum.Entities
     /// Its a struct to avoid another object in heap
     /// The default value represents an invalid state.  
     /// </summary>
-    public struct PrimaryKey : IEquatable<PrimaryKey>
+    [Serializable]
+    public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>
     {
-        public readonly object Object;
+        public static Polymorphic<Type> PrimaryKeyType = new Polymorphic<Type>(minimumType: typeof(IdentifiableEntity));
 
-        public PrimaryKey(object obj)
+        public readonly IComparable Object;
+
+        public PrimaryKey(IComparable obj)
         {
             if(obj == null)
                 throw new InvalidOperationException(""); 
@@ -237,6 +240,19 @@ namespace Signum.Entities
                 throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".Formato(other.Object.GetType(), this.Object.GetType()));
 
             return other.Object.Equals(this.Object);
+        }
+
+        public int CompareTo(object obj)
+        {
+            return CompareTo((PrimaryKey)obj);
+        }
+
+        public int CompareTo(PrimaryKey other)
+        {
+            if (other.Object.GetType() != this.Object.GetType())
+                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".Formato(other.Object.GetType(), this.Object.GetType()));
+
+            return this.Object.CompareTo(other.Object);
         }
 
         public static implicit operator PrimaryKey(int id)
@@ -278,13 +294,6 @@ namespace Signum.Entities
             return new PrimaryKey(id.Value);
         }
 
-        public static implicit operator PrimaryKey?(string id)
-        {
-            if (id == null)
-                return null;
-
-            return new PrimaryKey(id);
-        }
 
         public static explicit operator int(PrimaryKey key)
         {
@@ -301,11 +310,6 @@ namespace Signum.Entities
             return (Guid)key.Object;
         }
 
-        public static explicit operator string(PrimaryKey key)
-        {
-            return (string)key.Object;
-        }
-
         public static bool operator ==(PrimaryKey a, PrimaryKey b)
         {
             return a.Equals(b);
@@ -314,6 +318,62 @@ namespace Signum.Entities
         public static bool operator !=(PrimaryKey a, PrimaryKey b)
         {
             return !a.Equals(b);
+        }
+
+        public static bool operator <=(PrimaryKey a, PrimaryKey b)
+        {
+            return a.Object.CompareTo(b.Object) <= 0;
+        }
+
+        public static bool operator <(PrimaryKey a, PrimaryKey b)
+        {
+            return a.Object.CompareTo(b.Object) < 0;
+        }
+
+        public static bool operator >=(PrimaryKey a, PrimaryKey b)
+        {
+            return a.Object.CompareTo(b.Object) >= 0;
+        }
+
+        public static bool operator >(PrimaryKey a, PrimaryKey b)
+        {
+            return a.Object.CompareTo(b.Object) > 0;
+        }
+
+        public static bool TryParse(string value, Type entityType, out PrimaryKey id)
+        {
+            object val;
+            if (ReflectionTools.TryParse(value, PrimaryKeyType.GetValue(entityType), out  val))
+            {
+                id = new PrimaryKey((IComparable)val);
+                return true;
+            }
+            else
+            {
+                id = default(PrimaryKey);
+                return false;
+            }
+        }
+
+        public static PrimaryKey Parse(string value, Type type)
+        {
+            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, PrimaryKeyType.GetValue(type)));
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    sealed class PrimaryKeyAttribute : Attribute
+    {
+        readonly Type type;
+
+        public Type Type
+        {
+            get { return type; }
+        }
+
+        public PrimaryKeyAttribute(Type type)
+        {
+            this.type = type;
         }
     }
 }

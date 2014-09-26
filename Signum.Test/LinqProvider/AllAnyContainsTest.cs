@@ -33,7 +33,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsIEnumerableId()
         {
-            IEnumerable<int> ids = new[] { 1, 2, 3 }.Select(a => a);
+            IEnumerable<PrimaryKey> ids = new PrimaryKey[] { 1, 2, 3 }.Select(a => a);
 
             var artist = Database.Query<ArtistDN>().Where(a => ids.Contains(a.Id)).ToList();
         }
@@ -41,7 +41,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsArrayId()
         {
-            List<int> ids = new List<int>{ 1, 2, 3 };
+            List<PrimaryKey> ids = new List<PrimaryKey> { 1, 2, 3 };
 
             var artist = Database.Query<ArtistDN>().Where(a => ids.Contains(a.Id)).ToList();
         }
@@ -49,7 +49,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsListId()
         {
-            int[] ids = new[] { 1, 2, 3 };
+            PrimaryKey[] ids = new PrimaryKey[] { 1, 2, 3 };
 
             var artist = Database.Query<ArtistDN>().Where(a => ids.Contains(a.Id)).ToList();
         }

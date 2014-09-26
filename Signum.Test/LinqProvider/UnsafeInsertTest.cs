@@ -68,7 +68,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                         State = a.State,
                         Year = a.Year,
                     }.SetReadonly(_ => _.Ticks, a.Ticks)
-                    .SetReadonly(_ => _.Id, a.Id + 100));
+                    .SetReadonly(_ => _.Id, (int)a.Id + 100));
                 }
 
                 //tr.Commit();
@@ -104,7 +104,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                         {
                             Parent = mle.Parent,
                             Element = mle.Element,
-                            RowId = mle.RowId + 1000,
+                            RowId = (int)mle.RowId + 1000,
                             Order = mle.Order,
                         });
                 }

@@ -63,7 +63,7 @@ namespace Signum.Services
         }
 
         #region IBaseServer
-        public virtual IdentifiableEntity Retrieve(Type type, int id)
+        public virtual IdentifiableEntity Retrieve(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.Retrieve(type, id));
@@ -118,7 +118,7 @@ namespace Signum.Services
              () => MixinDeclarations.Declarations);
         }
 
-        public virtual bool Exists(Type type, int id)
+        public virtual bool Exists(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => Database.Exists(type, id));
@@ -136,7 +136,7 @@ namespace Signum.Services
                 () => TimeZoneManager.Now);
         }
 
-        public virtual string GetToStr(Type type, int id)
+        public virtual string GetToStr(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Database.GetToStr(type, id));
@@ -148,13 +148,13 @@ namespace Signum.Services
                 () => entity.InDB(e => e.Ticks));
         }
 
-        public Dictionary<string, int> GetSymbolIds(Type type)
+        public Dictionary<string, PrimaryKey> GetSymbolIds(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                  () => Symbol.GetSymbolIds(type));
         }
 
-        public Dictionary<string, Tuple<int,string>> GetSemiSymbolIdsAndNames(Type type)
+        public Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                  () => SemiSymbol.GetSemiSymbolIdsAndNames(type));

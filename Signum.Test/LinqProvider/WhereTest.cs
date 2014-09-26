@@ -345,7 +345,7 @@ namespace Signum.Test.LinqProvider
                 Database.Query<ArtistDN>().Select(a => Throw(a.Id)).ToList());
         }
 
-        public static bool Throw(int a)
+        public static bool Throw(PrimaryKey a)
         {
             throw new ArgumentException("a");
         }
@@ -353,11 +353,11 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DistinctWithNulls()
         {
-            var nullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (int?)null)).Count();
-            var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (int?)1)).Count();
+            var nullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (PrimaryKey?)null)).Count();
+            var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (PrimaryKey?)1)).Count();
 
-            var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((int?)null, alb.Id)).Count();
-            var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((int?)1, alb.Id)).Count();
+            var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)null, alb.Id)).Count();
+            var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)1, alb.Id)).Count();
         }
     }
 }

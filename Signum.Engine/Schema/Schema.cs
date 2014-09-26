@@ -591,7 +591,7 @@ namespace Signum.Engine.Maps
             return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
         }
 
-        public Type GetType(int id)
+        public Type GetType(PrimaryKey id)
         {
             return typeCachesLazy.Value.IdToType[id];
         }
@@ -614,12 +614,12 @@ namespace Signum.Engine.Maps
         bool Enabled { get; }
         void Load();
 
-        IEnumerable<int> GetAllIds();
+        IEnumerable<PrimaryKey> GetAllIds();
 
         void Complete(IdentifiableEntity entity, IRetriever retriver);
 
-        string GetToString(int id);
-        string TryGetToString(int id);
+        string GetToString(PrimaryKey id);
+        string TryGetToString(PrimaryKey id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -631,7 +631,7 @@ namespace Signum.Engine.Maps
         public abstract bool Enabled { get; }
         public abstract void Load();
 
-        public abstract IEnumerable<int> GetAllIds();
+        public abstract IEnumerable<PrimaryKey> GetAllIds();
 
         void ICacheController.Complete(IdentifiableEntity entity, IRetriever retriver)
         {
@@ -640,8 +640,8 @@ namespace Signum.Engine.Maps
 
         public abstract void Complete(T entity, IRetriever retriver);
 
-        public abstract string GetToString(int id);
-        public abstract string TryGetToString(int id);
+        public abstract string GetToString(PrimaryKey id);
+        public abstract string TryGetToString(PrimaryKey id);
     }
 
     

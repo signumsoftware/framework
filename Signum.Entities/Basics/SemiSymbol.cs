@@ -14,7 +14,7 @@ namespace Signum.Entities.Basics
     public abstract class SemiSymbol : IdentifiableEntity
     {
         static Dictionary<Type, Dictionary<string, SemiSymbol>> Symbols = new Dictionary<Type, Dictionary<string, SemiSymbol>>();
-        static Dictionary<Type, Dictionary<string, Tuple<int, string>>> Ids = new Dictionary<Type, Dictionary<string, Tuple<int, string>>>();
+        static Dictionary<Type, Dictionary<string, Tuple<PrimaryKey, string>>> Ids = new Dictionary<Type, Dictionary<string, Tuple<PrimaryKey, string>>>();
 
         public SemiSymbol() { }
 
@@ -106,7 +106,7 @@ namespace Signum.Entities.Basics
             return ToStringExpression.Evaluate(this);
         }
 
-        public static void SetSemiSymbolIdsAndNames<S>(Dictionary<string, Tuple<int, string>> symbolIds)
+        public static void SetSemiSymbolIdsAndNames<S>(Dictionary<string, Tuple<PrimaryKey, string>> symbolIds)
             where S : SemiSymbol
         {
             SemiSymbol.Ids[typeof(S)] = symbolIds;
@@ -124,7 +124,7 @@ namespace Signum.Entities.Basics
             }
         }
 
-        private void SetIdAndName(Tuple<int, string> idAndName)
+        private void SetIdAndName(Tuple<PrimaryKey, string> idAndName)
         {
             this.id = idAndName.Item1;
             this.name = idAndName.Item2;
@@ -134,7 +134,7 @@ namespace Signum.Entities.Basics
                 this.Modified = ModifiedState.Sealed;
         }
 
-        internal static Dictionary<string, Tuple<int, string>> GetSemiSymbolIdsAndNames(Type type)
+        internal static Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type)
         {
             return SemiSymbol.Ids.GetOrThrow(type);
         }

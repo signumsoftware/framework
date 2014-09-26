@@ -20,7 +20,7 @@ namespace Signum.Services
     public interface IBaseServer
     {
         [OperationContract, NetDataContract]
-        IdentifiableEntity Retrieve(Type type, int id);
+        IdentifiableEntity Retrieve(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
         IdentifiableEntity Save(IdentifiableEntity entity); 
@@ -53,18 +53,18 @@ namespace Signum.Services
         DateTime ServerNow();
 
         [OperationContract, NetDataContract]
-        string GetToStr(Type type, int id);
+        string GetToStr(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
-        bool Exists(Type type, int id);
+        bool Exists(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
         long Ticks(Lite<Entity> entity);
 
         [OperationContract, NetDataContract]
-        Dictionary<string, int> GetSymbolIds(Type type);
+        Dictionary<string, PrimaryKey> GetSymbolIds(Type type);
 
         [OperationContract, NetDataContract]
-        Dictionary<string, Tuple<int, string>> GetSemiSymbolIdsAndNames(Type type);
+        Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type);
     }
 }

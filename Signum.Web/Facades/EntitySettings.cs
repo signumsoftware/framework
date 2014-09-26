@@ -18,7 +18,7 @@ namespace Signum.Web
     public abstract class EntitySettings
     {
         public virtual string WebTypeName { get; set; }
-        public Func<UrlHelper, Type, int?, string> ViewRoute { get; set; }
+        public Func<UrlHelper, Type, PrimaryKey?, string> ViewRoute { get; set; }
 
         public abstract Type StaticType { get; }
      

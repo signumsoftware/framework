@@ -355,7 +355,7 @@ namespace Signum.Engine.Linq
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)a.IdOrNull).NotNull().ToArray());
 
             return EntityIn(newItem, entityIDs);
         }
@@ -365,7 +365,7 @@ namespace Signum.Engine.Linq
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => (object)a.IdOrNull).NotNull().ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 
         }
@@ -549,7 +549,7 @@ namespace Signum.Engine.Linq
 
                 return new EntityExpression(
                     ei.GetType(),
-                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null, null, avoidExpandOnRetrieving: true);
+                    Expression.Constant(ei.IdOrNull), null, null, null, avoidExpandOnRetrieving: true);
             }
             
             return null;
@@ -568,7 +568,7 @@ namespace Signum.Engine.Linq
             {
                 Lite<IIdentifiable> lite = (Lite<IIdentifiable>)c.Value;
 
-                Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
+                Expression id = Expression.Constant(lite.IdOrNull);
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null, null, false);
 

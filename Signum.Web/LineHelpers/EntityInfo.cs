@@ -35,11 +35,11 @@ namespace Signum.Web
     public class RuntimeInfo
     {
         public Type EntityType { get; private set; }
-        public int? IdOrNull { get; private set; }
+        public PrimaryKey? IdOrNull { get; private set; }
         public bool IsNew { get; private set; }
         public long? Ticks { get; private set; }
 
-        public RuntimeInfo(Type type, int? idOrNull, bool isNew, long? ticks) 
+        public RuntimeInfo(Type type, PrimaryKey? idOrNull, bool isNew, long? ticks) 
         {
             if(type == null)
                 throw new ArgumentNullException("type"); 
@@ -93,9 +93,11 @@ namespace Signum.Web
 
             string entityTypeString = parts[0];
 
+            Type type = Navigator.ResolveType(entityTypeString);
+
             return new RuntimeInfo(
-                Navigator.ResolveType(entityTypeString),
-                (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
+                type,
+                (parts[1].HasText()) ? PrimaryKey.Parse(parts[1], type) : (PrimaryKey?)null,
                 parts[2] == "n",
                 parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
             );

@@ -39,12 +39,12 @@ namespace Signum.Engine
                 }
             }
 
-            public bool Contains(Type type, int id)
+            public bool Contains(Type type, PrimaryKey id)
             {
                 return dic.ContainsKey(new IdentityTuple(type, id));
             }
 
-            public IdentifiableEntity Get(Type type, int id)
+            public IdentifiableEntity Get(Type type, PrimaryKey id)
             {
                 return dic.TryGetC(new IdentityTuple(type, id));
             }
@@ -162,22 +162,22 @@ namespace Signum.Engine
         }
 
 
-        public static bool Contains<T>(int id) where T : IdentifiableEntity
+        public static bool Contains<T>(PrimaryKey id) where T : IdentifiableEntity
         {
             return Contains(typeof(T), id);
         }
 
-        public static bool Contains(Type type, int id)
+        public static bool Contains(Type type, PrimaryKey id)
         {
             return Current.Contains(type, id); 
         }
 
-        public static T Get<T>(int id) where T : IdentifiableEntity
+        public static T Get<T>(PrimaryKey id) where T : IdentifiableEntity
         {
             return (T)Get(typeof(T), id);
         }
 
-        public static IdentifiableEntity Get(Type type, int id)
+        public static IdentifiableEntity Get(Type type, PrimaryKey id)
         {
             return Current.Get(type, id);
         }
@@ -192,7 +192,7 @@ namespace Signum.Engine
             Current.ReleaseRetriever(retriever);
         }
 
-        public static T Construct<T>(int id) where T : IdentifiableEntity
+        public static T Construct<T>(PrimaryKey id) where T : IdentifiableEntity
         {
             var result = Constructor<T>.Call();
             result.id = id;
@@ -225,7 +225,7 @@ namespace Signum.Engine
     internal struct IdentityTuple : IEquatable<IdentityTuple>
     {
         public readonly Type Type;
-        public readonly int Id;
+        public readonly PrimaryKey Id;
 
         public IdentityTuple(Lite<IdentifiableEntity> lite)
         {
@@ -239,7 +239,7 @@ namespace Signum.Engine
             this.Id = entiy.Id;
         }
 
-        public IdentityTuple(Type type, int id)
+        public IdentityTuple(Type type, PrimaryKey id)
         {
             this.Type = type;
             this.Id = id;
@@ -262,7 +262,7 @@ namespace Signum.Engine
 
         public bool Equals(IdentityTuple other)
         {
-            return Id == other.Id && this.Type == other.Type;
+            return this.Type == other.Type && Id == other.Id;
         }
     }
 

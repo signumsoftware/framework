@@ -172,11 +172,11 @@ namespace Signum.Engine.Exceptions
     public class EntityNotFoundException : Exception
     {
         public Type Type { get; private set; }
-        public int[] Ids { get; private set; }
+        public PrimaryKey[] Ids { get; private set; }
 
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public EntityNotFoundException(Type type, params int[] ids)
+        public EntityNotFoundException(Type type, params PrimaryKey[] ids)
             : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().Formato(type.Name, ids.ToString(", ")))
         {
             this.Type = type;
@@ -188,11 +188,11 @@ namespace Signum.Engine.Exceptions
     public class ConcurrencyException: Exception
     {
         public Type Type { get; private set; }
-        public int[] Ids { get; private set; }
+        public PrimaryKey[] Ids { get; private set; }
 
         protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public ConcurrencyException(Type type, params int[] ids)
+        public ConcurrencyException(Type type, params PrimaryKey[] ids)
             : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().Formato(type.NiceName(), ids.ToString(", ")))
         {
             this.Type = type;

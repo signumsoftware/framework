@@ -45,12 +45,13 @@ namespace Signum.Engine.DynamicQuery
             types = types.Where(t => Schema.Current.IsAllowed(t) == null);
 
             List<Lite<IdentifiableEntity>> results = new List<Lite<IdentifiableEntity>>();
-            int? id = subString.ToInt(numberStyles);
-            if (id.HasValue)
+          
+            foreach (var t in types)
             {
-                foreach (var t in types)
+                PrimaryKey id;
+                if (PrimaryKey.TryParse(subString, t, out id))
                 {
-                    var lite = miLiteById.GetInvoker(t).Invoke(id.Value);
+                    var lite = miLiteById.GetInvoker(t).Invoke(id);
                     if (lite != null)
                     {
                         results.Add(lite);
@@ -60,15 +61,15 @@ namespace Signum.Engine.DynamicQuery
                     }
                 }
             }
-            else
+
+
+            foreach (var t in types)
             {
-                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                    subString = subString.Trim('\'', '"');
-
-                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var t in types)
+                PrimaryKey id;
+                if (!PrimaryKey.TryParse(subString, t, out id))
                 {
+                    var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
                     results.AddRange(miLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
                     if (results.Count >= count)
@@ -87,8 +88,8 @@ namespace Signum.Engine.DynamicQuery
 
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                int? id = subString.ToInt();
-                if (id.HasValue)
+                PrimaryKey id;
+                if (PrimaryKey.TryParse(subString, typeof(T), out id))
                 {
                     Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
@@ -99,10 +100,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                    subString = subString.Trim('\'', '"');
-
-                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
@@ -119,8 +117,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                int? id = subString.ToInt();
-                if (id.HasValue)
+                PrimaryKey id;
+                if (PrimaryKey.TryParse(subString, typeof(T), out id))
                 {
                     Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
@@ -131,10 +129,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                    subString = subString.Trim('\'', '"');
-
-                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 results.AddRange(query.Where(a =>  a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
@@ -144,9 +139,9 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> miLiteById =
-            new GenericInvoker<Func<int, Lite<IdentifiableEntity>>>(id => LiteById<TypeDN>(id));
-        static Lite<IdentifiableEntity> LiteById<T>(int id)
+        static GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>> miLiteById =
+            new GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>>(id => LiteById<TypeDN>(id));
+        static Lite<IdentifiableEntity> LiteById<T>(PrimaryKey id)
             where T : IdentifiableEntity
         {
             return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();

@@ -95,8 +95,8 @@ namespace Signum.Engine
             return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
 
-        static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
-        public static T Retrieve<T>(int id) where T : IdentifiableEntity
+        static GenericInvoker<Func<PrimaryKey, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
+        public static T Retrieve<T>(PrimaryKey id) where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
             {
@@ -157,12 +157,12 @@ namespace Signum.Engine
             return Schema.Current.OnFilterQuery<T>();
         }
 
-        public static IdentifiableEntity Retrieve(Type type, int id)
+        public static IdentifiableEntity Retrieve(Type type, PrimaryKey id)
         {
             return giRetrieve.GetInvoker(type)(id);
         }
 
-        public static Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+        public static Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -170,8 +170,8 @@ namespace Signum.Engine
             return giRetrieveLite.GetInvoker(type)(id);
         }
 
-        static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> giRetrieveLite = new GenericInvoker<Func<int, Lite<IdentifiableEntity>>>(id => RetrieveLite<IdentifiableEntity>(id));
-        public static Lite<T> RetrieveLite<T>(int id)
+        static GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>>(id => RetrieveLite<IdentifiableEntity>(id));
+        public static Lite<T> RetrieveLite<T>(PrimaryKey id)
             where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".Formato(typeof(T).TypeName())))
@@ -210,13 +210,13 @@ namespace Signum.Engine
             return lite;
         }
 
-        public static string GetToStr(Type type, int id)
+        public static string GetToStr(Type type, PrimaryKey id)
         {
             return giGetToStr.GetInvoker(type)(id);
         }
 
-        static GenericInvoker<Func<int, string>> giGetToStr = new GenericInvoker<Func<int, string>>(id => GetToStr<IdentifiableEntity>(id));
-        public static string GetToStr<T>(int id)
+        static GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<IdentifiableEntity>(id));
+        public static string GetToStr<T>(PrimaryKey id)
             where T : IdentifiableEntity
         {
             try
@@ -256,8 +256,8 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<int, bool>> giExist = new GenericInvoker<Func<int, bool>>(id => Exists<IdentifiableEntity>(id));
-        public static bool Exists<T>(int id)
+        static GenericInvoker<Func<PrimaryKey, bool>> giExist = new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<IdentifiableEntity>(id));
+        public static bool Exists<T>(PrimaryKey id)
             where T : IdentifiableEntity
         {
             try
@@ -272,7 +272,7 @@ namespace Signum.Engine
             }
         }
 
-        public static bool Exists(Type type, int id)
+        public static bool Exists(Type type, PrimaryKey id)
         {
             return giExist.GetInvoker(type)(id);
 
@@ -361,8 +361,8 @@ namespace Signum.Engine
         }
 
 
-        static GenericInvoker<Func<List<int>, IList>> giRetrieveList = new GenericInvoker<Func<List<int>, IList>>(ids => RetrieveList<IdentifiableEntity>(ids));
-        public static List<T> RetrieveList<T>(List<int> ids)
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<IdentifiableEntity>(ids));
+        public static List<T> RetrieveList<T>(List<PrimaryKey> ids)
             where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".Formato(typeof(T).TypeName())))
@@ -370,7 +370,7 @@ namespace Signum.Engine
                 if (ids == null)
                     throw new ArgumentNullException("ids");
 
-                Dictionary<int, T> result = null;
+                Dictionary<PrimaryKey, T> result = null;
                 if (EntityCache.Created)
                 {
                     result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
@@ -395,14 +395,14 @@ namespace Signum.Engine
                 else
                 {
                     if (result == null)
-                        result = new Dictionary<int, T>();
+                        result = new Dictionary<PrimaryKey, T>();
                 }
 
                 return ids.Select(id => result[id]).ToList(); //Preserve order
             }
         }
 
-        private static List<T> RetrieveFromDatabaseOrCache<T>(List<int> ids) where T : IdentifiableEntity
+        private static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : IdentifiableEntity
         {
             var cc = GetCacheController<T>();
             if (cc != null)
@@ -428,7 +428,7 @@ namespace Signum.Engine
             return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToList();
         }
 
-        public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
+        public static List<IdentifiableEntity> RetrieveList(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -438,8 +438,8 @@ namespace Signum.Engine
         }
 
 
-        static GenericInvoker<Func<List<int>, IList>> giRetrieveListLite = new GenericInvoker<Func<List<int>, IList>>(ids => RetrieveListLite<IdentifiableEntity>(ids));
-        public static List<Lite<T>> RetrieveListLite<T>(List<int> ids)
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<IdentifiableEntity>(ids));
+        public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".Formato(typeof(T).TypeName())))
@@ -464,7 +464,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<int> ids)
+        public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -496,7 +496,7 @@ namespace Signum.Engine
         #endregion
 
         #region Delete
-        public static void Delete(Type type, int id)
+        public static void Delete(Type type, PrimaryKey id)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -528,8 +528,8 @@ namespace Signum.Engine
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
-        static GenericInvoker<Action<int>> giDeleteId = new GenericInvoker<Action<int>>(id => Delete<IdentifiableEntity>(id));
-        public static void Delete<T>(int id)
+        static GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<IdentifiableEntity>(id));
+        public static void Delete<T>(PrimaryKey id)
             where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBDelete", () => typeof(T).TypeName()))
@@ -589,7 +589,7 @@ namespace Signum.Engine
             }
         }
 
-        public static void DeleteList(Type type, IList<int> ids)
+        public static void DeleteList(Type type, IList<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -597,8 +597,8 @@ namespace Signum.Engine
             giDeleteList.GetInvoker(type)(ids);
         }
 
-        static GenericInvoker<Action<IList<int>>> giDeleteList = new GenericInvoker<Action<IList<int>>>(l => DeleteList<IdentifiableEntity>(l));
-        public static void DeleteList<T>(IList<int> ids)
+        static GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<IdentifiableEntity>(l));
+        public static void DeleteList<T>(IList<PrimaryKey> ids)
             where T : IdentifiableEntity
         {
             if (ids == null)
@@ -934,7 +934,7 @@ namespace Signum.Engine
 
     public class MListElement<E, V> where E : IdentifiableEntity
     {
-        public int RowId { get; set; }
+        public PrimaryKey RowId { get; set; }
         public int Order { get; set; }
         public E Parent { get; set; }
         public V Element { get; set; }

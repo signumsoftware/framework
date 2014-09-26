@@ -96,7 +96,7 @@ namespace Signum.Web
 
             if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
             {
-                int? idOrNull = null;
+                PrimaryKey? idOrNull = null;
                 Type type = itemTC.Value.GetType();
                 if (type.IsLite())
                     idOrNull = ((Lite<IIdentifiable>)itemTC.Value).IdOrNull;

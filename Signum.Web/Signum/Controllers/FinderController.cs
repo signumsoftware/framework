@@ -178,7 +178,7 @@ namespace Signum.Web.Controllers
             link = Navigator.NavigateRoute(lite);
         }
 
-        public int id;
+        public PrimaryKey id;
         public string text;
         public string type;
         public string link;

@@ -200,15 +200,17 @@ namespace Signum.Entities.DynamicQuery
 
         static object DeserializeLite(string str, Type defaultEntityType)
         {
-            int id = int.Parse(str.Before(';'));
+            string idStr = str.Before(';'); 
 
-            string after = str.After(';');
+            string tmp = str.After(';');
 
-            string type = after.Before(';');
+            string typeStr = tmp.Before(';');
 
-            string toStr = after.After(';');
+            string toStr = tmp.After(';');
 
-            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : TypeDN.TryGetType(type), id, toStr);
+            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeDN.TryGetType(typeStr);
+
+            return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }
     }
 

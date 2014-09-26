@@ -282,20 +282,20 @@ namespace Signum.Test.LinqProvider
         public void SelectThrowsIntSumNullable()
         {
             Assert2.Throws<FieldReaderException>(() =>
-                Database.Query<AlbumDN>().Select(a => a.Id + ((ArtistDN)a.Author).Id).ToArray());
+                Database.Query<AlbumDN>().Select(a => (int)a.Id + (int)((ArtistDN)a.Author).Id).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowaIntSumNullableCasting()
         {
             Assert2.Throws<FieldReaderException>(() => 
-                Database.Query<AlbumDN>().Select(a => (int?)(a.Id + ((ArtistDN)a.Author).Id)).ToArray());
+                Database.Query<AlbumDN>().Select(a => (int?)((int)a.Id + (int)((ArtistDN)a.Author).Id)).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowaIntSumNullableCastingInSql()
         {
-            var list = Database.Query<AlbumDN>().Select(a => (int?)(a.Id + ((ArtistDN)a.Author).Id).InSql()).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => (int?)((int)a.Id + (int)((ArtistDN)a.Author).Id).InSql()).ToArray();
         }
 
 
@@ -400,8 +400,8 @@ namespace Signum.Test.LinqProvider
                     DeadCount = b.Members.Count(m => m.Dead),
                     MinId = b.Members.Min(m => m.Id),
                     MaxId = b.Members.Max(m => m.Id),
-                    AvgId = b.Members.Average(m => m.Id),
-                    SumId = b.Members.Sum(m => m.Id),
+                    AvgId = b.Members.Average(m => (int)m.Id),
+                    SumId = b.Members.Sum(m => (int)m.Id),
                 }).ToList();
         }
 

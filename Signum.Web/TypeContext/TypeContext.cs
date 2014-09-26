@@ -383,9 +383,9 @@ namespace Signum.Web
     public class TypeElementContext<T> : TypeContext<T>
     {
         public int Index { get; private set; }
-        public int? RowId { get; private set; }
+        public PrimaryKey? RowId { get; private set; }
 
-        public TypeElementContext(T value, TypeContext parent, int index, int? rowId)
+        public TypeElementContext(T value, TypeContext parent, int index, PrimaryKey? rowId)
             : base(value, parent, index.ToString(), parent.PropertyRoute.Add("Item"))
         {
             this.Index = index;

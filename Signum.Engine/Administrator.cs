@@ -101,7 +101,7 @@ namespace Signum.Engine
         }
 
 
-        public static T SetId<T>(this T ident, int? id)
+        public static T SetId<T>(this T ident, PrimaryKey? id)
             where T : IdentifiableEntity
         {
             ident.id = id;
@@ -149,14 +149,14 @@ namespace Signum.Engine
             return ident;
         }
 
-        public static T SetNotModifiedGraph<T>(this T ident, int id)
+        public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
             where T : IdentifiableEntity
         {
             foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
             {
                 item.SetNotModified();
                 if (item is IdentifiableEntity)
-                    ((IdentifiableEntity)item).SetId(-1);
+                    ((IdentifiableEntity)item).SetId(new PrimaryKey("invalidId"));
             }
 
             ident.SetId(id);

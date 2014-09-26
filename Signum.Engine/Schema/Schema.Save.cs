@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
 
                     var forbidden = new Forbidden(graph, ident);
 
-                    ident.id = (int)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar();
+                    ident.id = new PrimaryKey((IComparable)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar());
 
                     ident.IsNew = false;
 
@@ -278,7 +278,7 @@ namespace Signum.Engine.Maps
                     {
                         IdentifiableEntity ident = idents[i];
 
-                        ident.id = (int)dt.Rows[i][0];
+                        ident.id = new PrimaryKey((IComparable)dt.Rows[i][0]);
                         ident.IsNew = false;
                     }
 
@@ -473,7 +473,7 @@ namespace Signum.Engine.Maps
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
                         if (dt.Rows.Count > 0)
-                            throw new ConcurrencyException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+                            throw new ConcurrencyException(table.Type, dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToArray());
 
                         if (table.saveCollections.Value != null)
                             table.saveCollections.Value.UpdateCollections(idents.Select(e => new EntityForbidden(e, new Forbidden(graph, e))).ToList());
@@ -493,7 +493,7 @@ namespace Signum.Engine.Maps
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
                         if (dt.Rows.Count > 0)
-                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToArray());
 
                         for (int i = 0; i < num; i++)
                         {
@@ -785,9 +785,9 @@ namespace Signum.Engine.Maps
             public struct MListDelete
             {
                 public readonly Entity Entity;
-                public readonly int[] ExceptRowIds;
+                public readonly PrimaryKey[] ExceptRowIds;
 
-                public MListDelete(Entity ident, int[] exceptRowIds)
+                public MListDelete(Entity ident, PrimaryKey[] exceptRowIds)
                 {
                     this.Entity = ident;
                     this.ExceptRowIds = exceptRowIds;
@@ -797,7 +797,7 @@ namespace Signum.Engine.Maps
             internal bool hasOrder = false;
             internal bool isEmbeddedEntity = false;
             internal Func<string, string> sqlUpdate;
-            public Func<Entity, int, T, int, Forbidden, string, List<DbParameter>> UpdateParameters;
+            public Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>> UpdateParameters;
             public ConcurrentDictionary<int, Action<List<MListUpdate>>> updateCache =
                 new ConcurrentDictionary<int, Action<List<MListUpdate>>>();
 
@@ -857,7 +857,7 @@ namespace Signum.Engine.Maps
 
                             var parameters = InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, "");
 
-                            pair.MList.SetRowId(pair.Index, (int)new SqlPreCommandSimple(sql, parameters).ExecuteScalar());
+                            pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)new SqlPreCommandSimple(sql, parameters).ExecuteScalar()));
                             if (this.hasOrder)
                                 pair.MList.SetOldIndex(pair.Index);
                         };
@@ -883,7 +883,7 @@ namespace Signum.Engine.Maps
                             {
                                 var pair = list[i];
 
-                                pair.MList.SetRowId(pair.Index,(int)dt.Rows[i][0]);
+                                pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)dt.Rows[i][0]));
 
                                 if (this.hasOrder)
                                     pair.MList.SetOldIndex(pair.Index);
@@ -1104,7 +1104,7 @@ namespace Signum.Engine.Maps
                 var trios = new List<Table.Trio>();
                 var assigments = new List<Expression>();
 
-                var paramRowId = Expression.Parameter(typeof(int), "rowId");
+                var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
 
                 string idParent = "idParent";
                 string rowId = "rowId";
@@ -1124,7 +1124,7 @@ namespace Signum.Engine.Maps
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, Table.fiId)));
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, paramRowId));
 
-                var expr = Expression.Lambda<Func<IdentifiableEntity, int, T, int, Forbidden, string, List<DbParameter>>>(
+                var expr = Expression.Lambda<Func<IdentifiableEntity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
                     Table.CreateBlock(parameters, assigments), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramPostfix);
                 result.UpdateParameters = expr.Compile();
             }
@@ -1222,7 +1222,7 @@ namespace Signum.Engine.Maps
             return Expression.Call(mi, value, forbidden);
         }
 
-        static int? GetIdForLite(Lite<IIdentifiable> lite, Forbidden forbidden)
+        static PrimaryKey? GetIdForLite(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -1238,7 +1238,7 @@ namespace Signum.Engine.Maps
             return lite.Id;
         }
 
-        static int? GetIdForLiteCleanEntity(Lite<IIdentifiable> lite, Forbidden forbidden)
+        static PrimaryKey? GetIdForLiteCleanEntity(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -1255,13 +1255,13 @@ namespace Signum.Engine.Maps
             return lite.Id;
         }
 
-        static int? GetIdForEntity(IIdentifiable value, Forbidden forbidden)
+        static PrimaryKey? GetIdForEntity(IIdentifiable value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
             IdentifiableEntity ie = (IdentifiableEntity)value;
-            return forbidden.Contains(ie) ? (int?)null : ie.Id;
+            return forbidden.Contains(ie) ? (PrimaryKey?)null : ie.Id;
         }
 
         static MethodInfo miGetTypeForLite = ReflectionTools.GetMethodInfo(() => GetTypeForLite(null, new Forbidden()));
@@ -1417,7 +1417,7 @@ namespace Signum.Engine.Maps
 
         static MethodInfo miConvertType = ReflectionTools.GetMethodInfo((FieldImplementedByAll fe) => fe.ConvertType(null));
 
-        int? ConvertType(Type type)
+        PrimaryKey? ConvertType(Type type)
         {
             if (type == null)
                 return null;

@@ -466,7 +466,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
                     var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => new { s, c }).Where(a =>a.Value.s.id != a.Value.c.id).ToDictionary();
 
-                    HashSet<int> usedIds = current.Select(a => a.Id).ToHashSet();
+                    HashSet<PrimaryKey> usedIds = current.Select(a => a.Id).ToHashSet();
 
                     Dictionary<string, IdentifiableEntity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
 
@@ -521,7 +521,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
         {
             var instance = (IdentifiableEntity)Activator.CreateInstance(current.GetType());
             instance.toStr = current.toStr;
-            instance.id = current.id.Value + 1000000;
+            instance.id = (int)current.id.Value + 1000000;
             return instance;
         }
 

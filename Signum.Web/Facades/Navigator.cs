@@ -52,7 +52,7 @@ namespace Signum.Web
         public const string ViewRouteName = "sfView";
         public const string CreateRouteName = "sfCreate";
 
-        public static string NavigateRoute(Type type, int? id)
+        public static string NavigateRoute(Type type, PrimaryKey? id)
         {
             var entitySettings = EntitySettings(type);
             if (entitySettings.ViewRoute != null)

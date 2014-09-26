@@ -18,12 +18,12 @@ namespace Signum.Engine.Basics
    
     public static class TypeLogic
     {
-        public static Dictionary<int, Type> IdToType
+        public static Dictionary<PrimaryKey, Type> IdToType
         {
             get { return Schema.Current.typeCachesLazy.Value.IdToType; }
         }
 
-        public static Dictionary<Type, int> TypeToId
+        public static Dictionary<Type, PrimaryKey> TypeToId
         {
             get { return Schema.Current.typeCachesLazy.Value.TypeToId; }
         }
@@ -180,8 +180,8 @@ namespace Signum.Engine.Basics
     {
         public readonly Dictionary<Type, TypeDN> TypeToDN;
         public readonly Dictionary<TypeDN, Type> DnToType;
-        public readonly Dictionary<int, Type> IdToType;
-        public readonly Dictionary<Type, int> TypeToId;
+        public readonly Dictionary<PrimaryKey, Type> IdToType;
+        public readonly Dictionary<Type, PrimaryKey> TypeToId;
 
         public TypeCaches(Schema current)
         {

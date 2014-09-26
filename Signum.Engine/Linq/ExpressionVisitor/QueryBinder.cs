@@ -1619,12 +1619,12 @@ namespace Signum.Engine.Linq
 
         internal static ConstantExpression TypeConstant(Type type)
         {
-            int id = TypeId(type);
+            PrimaryKey id = TypeId(type);
 
             return Expression.Constant(id, typeof(int?));
         }
 
-        internal static int TypeId(Type type)
+        internal static PrimaryKey TypeId(Type type)
         {
             return TypeLogic.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
         }

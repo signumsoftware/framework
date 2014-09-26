@@ -239,7 +239,7 @@ namespace Signum.Test.LinqProvider
         public void TableValuedFunction()
         {
             var list = Database.Query<AlbumDN>()
-                .Where(a => MinimumExtensions.MinimumTableValued(a.Id * 2, a.Id).Select(m => m.MinValue).First() > 2).Select(a => a.Id).ToList();
+                .Where(a => MinimumExtensions.MinimumTableValued((int)a.Id * 2, (int)a.Id).Select(m => m.MinValue).First() > 2).Select(a => a.Id).ToList();
         }
 
         [TestMethod]
@@ -288,7 +288,7 @@ namespace Signum.Test.LinqProvider
         public void SimplifyMinimumTableValued()
         {
             var result = (from b in Database.Query<BandDN>()
-                          let min = MinimumExtensions.MinimumTableValued(b.Id, b.Id).FirstOrDefault().MinValue
+                          let min = MinimumExtensions.MinimumTableValued((int)b.Id, (int)b.Id).FirstOrDefault().MinValue
                           select b.Name).ToList();
         }
 

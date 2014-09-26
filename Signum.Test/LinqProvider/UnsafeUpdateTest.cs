@@ -160,10 +160,10 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
 
                 int count = Database.Query<AlbumDN>().UnsafeUpdate()
-                    .Set(a => a.BonusTrack, a => a.Id % 2 == 0 ? song : null)
+                    .Set(a => a.BonusTrack, a => (int)a.Id % 2 == 0 ? song : null)
                 .Execute();
 
-                Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
+                Assert.IsTrue(Database.Query<AlbumDN>().All(a => (int)a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
 
                 //tr.Commit();
             }
@@ -194,7 +194,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 LabelDN label = Database.Query<LabelDN>().FirstEx();
 
                 int count = Database.Query<AlbumDN>().UnsafeUpdate()
-                    .Set(a => a.Label, a => a.Id % 2 == 0 ? label : null)
+                    .Set(a => a.Label, a => (int)a.Id % 2 == 0 ? label : null)
                     .Execute();
                 //tr.Commit();
             }
@@ -526,7 +526,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                                  LabelId = a.Label.Id,
                                  mle
                              }).UnsafeUpdateMListPart(p => p.mle)
-                            .Set(mle => mle.Element.Seconds, p => p.LabelId)
+                            .Set(mle => mle.Element.Seconds, p => (int)p.LabelId)
                             .Execute();
 
                 var list = Database.MListQuery((AlbumDN a) => a.Songs);
