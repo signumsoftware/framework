@@ -551,7 +551,7 @@ namespace Signum.Engine.Cache
                     if (CacheLogic.LogWriter != null)
                         CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
                         object obj = rowReader(fr);
                         result[idGetter(obj)] = obj; //Could be repeated joins
@@ -710,7 +710,7 @@ namespace Signum.Engine.Cache
                     if (CacheLogic.LogWriter != null)
                         CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
                         object obj = rowReader(fr);
                         int parentId = parentIdGetter(obj);
@@ -841,7 +841,7 @@ namespace Signum.Engine.Cache
                     if (CacheLogic.LogWriter != null)
                         CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
                         var kvp = rowReader(fr);
                         result[kvp.Key] = kvp.Value;

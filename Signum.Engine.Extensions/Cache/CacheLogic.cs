@@ -32,17 +32,17 @@ namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
-        public static TextWriter LogWriter;
-
         public static bool AssertOnStart = true;
 
         public static bool DropStaleServices = true;
 
         public static bool IsLocalDB = false;
 
+        public static bool WithSqlDependency { get; internal set; }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Signum.Engine.Cache
         ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
         ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
         /// </summary>
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, bool? withSqlDependency = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -62,11 +62,20 @@ namespace Signum.Engine.Cache
 
                 sb.Schema.Synchronizing += Synchronize;
                 sb.Schema.Generating += () => Synchronize(null).Try(s => s.ToSimple());
+
+                if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
+                    throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
+
+                WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
             }
         }
 
+        public static TextWriter LogWriter;
         public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, Type type, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
         {
+            if (!WithSqlDependency)
+                throw new InvalidOperationException("ToListWithInvalidation requires SqlDependency");
+
             ITranslateResult tr;
             using (ObjectName.OverrideOptions(new ObjectNameOptions { IncludeDboSchema = true, AvoidDatabaseName = true }))
                 tr = ((DbQueryProvider)simpleQuery.Provider).GetRawTranslateResult(simpleQuery.Expression);
@@ -112,7 +121,7 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".Formato(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
-                subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, CacheLogic.ForceOnStart, fr =>
+                subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, ForceOnStart, fr =>
                     {
                         if (reader == null)
                             reader = new SimpleReader(fr, EntityCache.NewRetriever());
@@ -121,6 +130,23 @@ namespace Signum.Engine.Cache
                     });
 
             return list;
+        }
+
+        public static void ExecuteDataReaderOpionalDependency(this SqlConnector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
+        {
+            if (WithSqlDependency)
+            {
+                connector.ExecuteDataReaderDependency(preCommand, change, ForceOnStart, forEach);
+            }
+            else
+            {
+                using (var dr = preCommand.UnsafeExecuteDataReader())
+                {
+                    FieldReader reader = new FieldReader(dr);
+                    while (dr.Read())
+                        forEach(reader);
+                }
+            }
         }
 
         class SimpleReader : IProjectionRow
@@ -158,7 +184,7 @@ namespace Signum.Engine.Cache
 
         public static SqlPreCommand Synchronize(Replacements replacements)
         {
-            if(ExecutionMode.IsSynchronizeSchemaOnly)
+            if(ExecutionMode.IsSynchronizeSchemaOnly || !WithSqlDependency)
                 return null;
 
             SqlConnector connector = (SqlConnector)Connector.Current;
@@ -243,6 +269,12 @@ namespace Signum.Engine.Cache
 
         internal static void ForceOnStart()
         {
+            if (!WithSqlDependency)
+            {
+                started = true;
+                return;
+            }
+
             lock (startKeyLock)
             {
                 SqlConnector connector = (SqlConnector)Connector.Current;
@@ -569,6 +601,8 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
+            AssertStarted(sb);
+
             EntityData data = EntityDataOverrides.TryGetS(typeof(T)) ?? EntityKindCache.GetEntityData(typeof(T));
 
             if (data == EntityData.Master)
