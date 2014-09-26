@@ -25,7 +25,9 @@ namespace Signum.Engine.Processes
     {
         static Dictionary<Lite<ProcessDN>, ExecutingProcess> executing = new Dictionary<Lite<ProcessDN>, ExecutingProcess>();
 
-        static Timer timer;
+        static Timer timerNextExecution;
+        static Timer timerPeriodic;
+        public static int PoolingPeriodMilliseconds; 
 
         internal static DateTime? nextPlannedExecution;
 
@@ -118,6 +120,14 @@ namespace Signum.Engine.Processes
             return IsSharedExpression.Evaluate(p);
         }
 
+        public static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
+        {
+            if (CacheLogic.WithSqlDependency)
+                query.ToListWithInvalidation(typeof(ProcessDN), action, a => WakeUp(action, a));
+
+            return query.ToList();
+        }
+
         public static void StartRunningProcesses()
         {
             if (running)
@@ -140,11 +150,16 @@ namespace Signum.Engine.Processes
                          select p).SetAsQueued();
 
                         CancelNewProcesses = new CancellationTokenSource();
+
                         autoResetEvent.Set();
-                        timer = new Timer(ob => WakeUp("Timer", null), // main timer
+
+                        timerNextExecution = new Timer(ob => WakeUp("TimerNextExecution", null), // main timer
                              null,
                              Timeout.Infinite,
                              Timeout.Infinite);
+
+                        if (!CacheLogic.WithSqlDependency)
+                            timerPeriodic = new Timer(ob => WakeUp("TimerPeriodic", null), null, PoolingPeriodMilliseconds, PoolingPeriodMilliseconds);
 
                         while (autoResetEvent.WaitOne())
                         {
@@ -161,7 +176,7 @@ namespace Signum.Engine.Processes
                                         .Where(p => p.IsMine() || p.IsShared())
                                         .Where(p => p.State == ProcessState.Planned)
                                         .Select(p => p.PlannedDate)
-                                        .ToListWithInvalidation(typeof(ProcessDN), "Planned dependency", args => WakeUp("Planned dependency", args));
+                                        .ToListWakeup("Planned dependency");
 
                                 SetNextPannedExecution(list.Min());
 
@@ -177,7 +192,7 @@ namespace Signum.Engine.Processes
                                             .Where(p => p.State == ProcessState.Queued)
                                             .Where(p => p.IsMine() || p.IsShared())
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
-                                            .ToListWithInvalidation(typeof(ProcessDN), "Queued depencency", args => WakeUp("Queued dependency", args));
+                                            .ToListWakeup("Planned dependency");
 
                                         var afordable = queued
                                             .OrderByDescending(p => p.MachineName == Environment.MachineName)
@@ -249,7 +264,7 @@ namespace Signum.Engine.Processes
                                                 .Where(p => p.State == ProcessState.Suspending)
                                                 .Where(p => p.IsMine())
                                                 .Select(a => a.ToLite())
-                                                .ToListWithInvalidation(typeof(ProcessDN), "Suspending dependency", args => WakeUp("Suspending dependency", args));
+                                                .ToListWakeup("Suspending dependency");
 
                                         foreach (var s in suspending)
                                         {
@@ -308,7 +323,7 @@ namespace Signum.Engine.Processes
 
             if (next == null)
             {
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                timerNextExecution.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
@@ -318,7 +333,7 @@ namespace Signum.Engine.Processes
                 else
                     ts = ts.Add(TimeSpan.FromSeconds(2));
 
-                timer.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
+                timerNextExecution.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
             }
 
         }
@@ -328,7 +343,10 @@ namespace Signum.Engine.Processes
             if (!running)
                 throw new InvalidOperationException("ProcessLogic is not running");
 
-            timer.Dispose();
+            timerNextExecution.Dispose();
+            if (timerPeriodic != null)
+                timerPeriodic.Dispose();
+
             CancelNewProcesses.Cancel();
 
             WakeUp("Stop", null);
