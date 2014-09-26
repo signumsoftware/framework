@@ -198,4 +198,122 @@ namespace Signum.Entities
     {
 
     }
+
+    /// <summary>
+    /// Represents a PrimaryKey of type int, long, Guid or string, for example.
+    /// Its a struct to avoid another object in heap
+    /// The default value represents an invalid state.  
+    /// </summary>
+    public struct PrimaryKey : IEquatable<PrimaryKey>
+    {
+        public readonly object Object;
+
+        public PrimaryKey(object obj)
+        {
+            if(obj == null)
+                throw new InvalidOperationException(""); 
+
+            this.Object = obj;
+        }
+
+        public override string ToString()
+        {
+            return Object.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PrimaryKey && this.Equals((PrimaryKey)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Object.GetHashCode();
+        }
+
+        public bool Equals(PrimaryKey other)
+        {
+            if (other.Object.GetType() != this.Object.GetType())
+                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".Formato(other.Object.GetType(), this.Object.GetType()));
+
+            return other.Object.Equals(this.Object);
+        }
+
+        public static implicit operator PrimaryKey(int id)
+        {
+            return new PrimaryKey(id);
+        }
+
+        public static implicit operator PrimaryKey?(int? id)
+        {
+            if (id == null)
+                return null;
+
+            return new PrimaryKey(id.Value);
+        }
+
+        public static implicit operator PrimaryKey(long id)
+        {
+            return new PrimaryKey(id);
+        }
+
+        public static implicit operator PrimaryKey?(long? id)
+        {
+            if (id == null)
+                return null;
+
+            return new PrimaryKey(id.Value);
+        }
+
+        public static implicit operator PrimaryKey(Guid id)
+        {
+            return new PrimaryKey(id);
+        }
+
+        public static implicit operator PrimaryKey?(Guid? id)
+        {
+            if (id == null)
+                return null;
+
+            return new PrimaryKey(id.Value);
+        }
+
+        public static implicit operator PrimaryKey?(string id)
+        {
+            if (id == null)
+                return null;
+
+            return new PrimaryKey(id);
+        }
+
+        public static explicit operator int(PrimaryKey key)
+        {
+            return (int)key.Object;
+        }
+
+        public static explicit operator long(PrimaryKey key)
+        {
+            return (long)key.Object;
+        }
+
+        public static explicit operator Guid(PrimaryKey key)
+        {
+            return (Guid)key.Object;
+        }
+
+        public static explicit operator string(PrimaryKey key)
+        {
+            return (string)key.Object;
+        }
+
+        public static bool operator ==(PrimaryKey a, PrimaryKey b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(PrimaryKey a, PrimaryKey b)
+        {
+            return !a.Equals(b);
+        }
+    }
 }

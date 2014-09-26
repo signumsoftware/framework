@@ -98,6 +98,7 @@
     <Compile Include="LinqProvider\WhereTest.cs" />
     <Compile Include="LinqProvider\SelectTest.cs" />
     <Compile Include="MetaTest.cs" />
+    <Compile Include="PrimaryKeyTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NiceToStringTest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
