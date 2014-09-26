@@ -44,11 +44,19 @@ namespace Signum.Engine
             this.Version = version;
             if (version >= SqlServerVersion.SqlServer2008)
             {
-                schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+                var s = schema.Settings;
 
-                schema.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-                schema.Settings.UdtSqlName.Add(typeof(SqlGeography), "Geography");
-                schema.Settings.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
+                if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
+                    schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
+                    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
+                    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
 
