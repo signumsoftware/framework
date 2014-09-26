@@ -46,6 +46,9 @@ namespace Signum.Engine
       
         public static SqlPreCommand SnapshotIsolation()
         {
+            if (!Connector.Current.AllowsSetSnapshotIsolation)
+                return null;
+
             var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
 
             if (list.Contains(null))

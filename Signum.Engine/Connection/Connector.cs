@@ -150,6 +150,20 @@ namespace Signum.Engine
 
             return catalogPostfix;
         }
+
+        public abstract bool AllowsSetSnapshotIsolation { get; }
+
+        public abstract void FixType(ref SqlDbType type, ref int? size, ref int? scale);
+
+        public abstract bool AllowsIndexWithWhere(string where);
+
+        public abstract SqlPreCommand ShringDatabase(string schemaName);
+
+        public abstract bool AllowsConvertToDate { get; }
+
+        public abstract bool AllowsConvertToTime { get; }
+
+        public abstract bool SupportsSqlDependency { get; }
     }
 
   

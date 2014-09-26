@@ -69,14 +69,14 @@ namespace Signum.Engine.Maps
                 if (string.IsNullOrEmpty(Where))
                     return null;
 
-                if (Schema.Current.Settings.DBMS > DBMS.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains))
+                if (Connector.Current.AllowsIndexWithWhere(Where))
                     return null;
 
                 return "VIX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
             }
         }
 
-        static List<string> ComplexWhereKeywords = new List<string>() { "OR" };
+       
 
         protected override string ColumnSignature()
         {

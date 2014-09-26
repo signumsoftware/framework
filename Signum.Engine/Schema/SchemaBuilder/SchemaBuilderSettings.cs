@@ -14,14 +14,6 @@ using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Maps
 {
-    public enum DBMS
-    {
-        SqlCompact,
-        SqlServer2005,
-        SqlServer2008,
-        SqlServer2012,
-    }
-
     public class SchemaSettings
     {
         public SchemaSettings()
@@ -29,26 +21,10 @@ namespace Signum.Engine.Maps
 
         }
 
-        public SchemaSettings(DBMS dbms)
-        {
-            DBMS = dbms;
-            if (dbms >= Maps.DBMS.SqlServer2008)
-            {
-                TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-
-                UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-                UdtSqlName.Add(typeof(SqlGeography), "Geography");
-                UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
-            }
-        }
-
-
         public Func<Type, string> CanOverrideAttributes = null;
 
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16; 
-
-        public DBMS DBMS { get; private set; }
 
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
@@ -266,15 +242,6 @@ namespace Signum.Engine.Maps
                 desambiguatedNames = new Dictionary<Type, string>();
 
             desambiguatedNames[type] = cleanName;
-        }
-
-        internal void FixType(ref SqlDbType type, ref int? size, ref int? scale)
-        {
-            if (DBMS == Maps.DBMS.SqlCompact && (type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
-            {
-                type = SqlDbType.NText;
-                size = null;
-            }
         }
 
         public SqlDbTypePair GetSqlDbTypePair(Type type)

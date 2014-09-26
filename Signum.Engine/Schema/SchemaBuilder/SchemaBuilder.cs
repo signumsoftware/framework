@@ -29,9 +29,9 @@ namespace Signum.Engine.Maps
             get { return schema.Settings; }
         }
 
-        public SchemaBuilder(DBMS dbms)
+        public SchemaBuilder()
         {
-            schema = new Schema(new SchemaSettings(dbms));
+            schema = new Schema(new SchemaSettings());
             Include<TypeDN>();
             Settings.CanOverrideAttributes = MixinDeclarations.CanAddMixins = t => schema.Tables.ContainsKey(t) ? "{0} is already included in the Schema".Formato(t.TypeName()) : null;
         }

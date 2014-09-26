@@ -88,7 +88,7 @@ namespace Signum.Engine
 
         public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
         {
-            Schema.Current.Settings.FixType(ref type, ref size, ref scale);
+            Connector.Current.FixType(ref type, ref size, ref scale);
 
             return "{0} {1}{2} {3}{4}{5}".Formato(
                 name.SqlEscape(),
