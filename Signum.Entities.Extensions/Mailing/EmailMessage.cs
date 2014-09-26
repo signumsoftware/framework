@@ -284,9 +284,9 @@ namespace Signum.Entities.Mailing
             }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [NotNullable, SqlDbType(Size = 300)]
         string contentId;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 300)]
         public string ContentId
         {
             get { return contentId; }
