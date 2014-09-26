@@ -269,6 +269,8 @@ namespace Signum.Engine.Processes
                         p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName: ProcessDN.None;
 
                         p.SetAsQueued();
+
+                        ProcessRunnerLogic.WakeUp("Execute in this machine", null);
                     }
                 }.Register();
 

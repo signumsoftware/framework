@@ -145,7 +145,7 @@ namespace Signum.Web.UserQueries
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).Try(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = Lite.Create<UserQueryDN>(PrimaryKey.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString(), typeof(UserQueryDN)));
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName).OrderBy(a => a.ToString()))
             {

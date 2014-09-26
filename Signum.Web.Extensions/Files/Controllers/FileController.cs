@@ -30,28 +30,6 @@ namespace Signum.Web.Files
 {
     public class FileController : Controller
     {
-        [HttpPost]
-        public PartialViewResult PartialView(string prefix, string fileType, int? sfId)
-        {
-            Type type = typeof(FilePathDN);
-            FilePathDN entity = null;
-            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).Try(e => e.IdOrNull))
-            {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve<FilePathDN>(sfId.Value);
-                else
-                {
-                    entity = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
-                }
-            }
-            ViewData["IdValueField"] = prefix;
-            ViewData["FileType"] = fileType;
-
-            string partialViewName = Navigator.Manager.EntitySettings[type].OnPartialViewName(entity);
-
-            return Navigator.PartialView(this, entity, prefix, partialViewName);
-        }
-
         public ActionResult Upload()
         {
             string fileName = Request.Files.Cast<string>().Single();

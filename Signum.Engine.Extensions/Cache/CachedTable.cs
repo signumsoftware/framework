@@ -207,7 +207,7 @@ namespace Signum.Engine.Cache
               new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
                   new CachedTableMList<IdentifiableEntity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
-            static Expression NullId = Expression.Constant(null, typeof(int?));
+            static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
 
             public Expression MaterializeField(Field field)
             {
@@ -483,12 +483,12 @@ namespace Signum.Engine.Cache
     {
         Table table;
 
-        ResetLazy<Dictionary<int, object>> rows;
+        ResetLazy<Dictionary<PrimaryKey, object>> rows;
 
         Func<FieldReader, object> rowReader;
         Action<object, IRetriever, T> completer;
         Expression<Action<object, IRetriever, T>> completerExpression;
-        Func<object, int> idGetter;
+        Func<object, PrimaryKey> idGetter;
         Func<object, string> toStrGetter;
 
         public CachedTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
@@ -530,11 +530,11 @@ namespace Signum.Engine.Cache
 
                 completer = completerExpression.Compile();
 
-                idGetter = ctr.GetGetter<int>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
+                idGetter = ctr.GetGetter<PrimaryKey>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
                 toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
             }
 
-            rows = new ResetLazy<Dictionary<int, object>>(() =>
+            rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
             {
                 CacheLogic.OnStart();
 
@@ -543,7 +543,7 @@ namespace Signum.Engine.Cache
 
                 var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
 
-                Dictionary<int, object> result = new Dictionary<int, object>();
+                Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                 using (MeasureLoad())
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
@@ -577,7 +577,7 @@ namespace Signum.Engine.Cache
             rows.Load();
         }
 
-        public string GetToString(int id)
+        public string GetToString(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
             var origin = rows.Value.TryGetC(id);
@@ -587,7 +587,7 @@ namespace Signum.Engine.Cache
             return toStrGetter(origin);
         }
 
-        public string TryGetToString(int id)
+        public string TryGetToString(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
             var origin = rows.Value.TryGetC(id);
@@ -608,7 +608,7 @@ namespace Signum.Engine.Cache
             completer(origin, retriever, entity);
         }
 
-        internal IEnumerable<int> GetAllIds()
+        internal IEnumerable<PrimaryKey> GetAllIds()
         {
             Interlocked.Increment(ref hits);
             return rows.Value.Keys;
@@ -634,15 +634,15 @@ namespace Signum.Engine.Cache
     {
         TableMList table;
 
-        ResetLazy<Dictionary<int, Dictionary<int, object>>> relationalRows;
+        ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
 
         static ParameterExpression result = Expression.Parameter(typeof(T));
 
         Func<FieldReader, object> rowReader;
         Expression<Func<object, IRetriever, MList<T>.RowIdValue>> activatorExpression;
         Func<object, IRetriever, MList<T>.RowIdValue> activator;
-        Func<object, int> parentIdGetter;
-        Func<object, int> rowIdGetter;
+        Func<object, PrimaryKey> parentIdGetter;
+        Func<object, PrimaryKey> rowIdGetter;
 
         public CachedTableMList(ICacheLogicController controller, TableMList table, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
             : base(controller)
@@ -689,11 +689,11 @@ namespace Signum.Engine.Cache
 
                 activator = activatorExpression.Compile();
 
-                parentIdGetter = ctr.GetGetter<int>(table.BackReference);
-                rowIdGetter = ctr.GetGetter<int>(table.PrimaryKey);
+                parentIdGetter = ctr.GetGetter<PrimaryKey>(table.BackReference);
+                rowIdGetter = ctr.GetGetter<PrimaryKey>(table.PrimaryKey);
             }
 
-            relationalRows = new ResetLazy<Dictionary<int, Dictionary<int, object>>>(() =>
+            relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
             {
                 CacheLogic.OnStart();
 
@@ -701,7 +701,7 @@ namespace Signum.Engine.Cache
 
                 var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
 
-                Dictionary<int, Dictionary<int, object>> result = new Dictionary<int, Dictionary<int, object>>();
+                Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
 
                 using (MeasureLoad())
                 using (Connector.Override(subConnector))
@@ -713,10 +713,10 @@ namespace Signum.Engine.Cache
                     ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
                         object obj = rowReader(fr);
-                        int parentId = parentIdGetter(obj);
+                        PrimaryKey parentId = parentIdGetter(obj);
                         var dic = result.TryGetC(parentId);
                         if (dic == null)
-                            result[parentId] = dic = new Dictionary<int, object>();
+                            result[parentId] = dic = new Dictionary<PrimaryKey, object>();
 
                         dic[rowIdGetter(obj)] = obj;
                     });
@@ -741,7 +741,7 @@ namespace Signum.Engine.Cache
             relationalRows.Load();
         }
 
-        public MList<T> GetMList(int id, IRetriever retriever)
+        public MList<T> GetMList(PrimaryKey id, IRetriever retriever)
         {
             Interlocked.Increment(ref hits);
 
@@ -786,8 +786,8 @@ namespace Signum.Engine.Cache
     {
         Table table;
 
-        Func<FieldReader, KeyValuePair<int, string>> rowReader;
-        ResetLazy<Dictionary<int, string>> toStrings;
+        Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader;
+        ResetLazy<Dictionary<PrimaryKey, string>> toStrings;
 
         public CachedLiteTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
             : base(controller)
@@ -818,13 +818,13 @@ namespace Signum.Engine.Cache
                 ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
                 var kvpConstructor = Expression.New(CachedTableConstructor.ciKVPIntString,
-                    FieldReader.GetExpression(reader, 0, typeof(int)),
+                    FieldReader.GetExpression(reader, 0, typeof(PrimaryKey)),
                     FieldReader.GetExpression(reader, 1, typeof(string)));
 
-                rowReader = Expression.Lambda<Func<FieldReader, KeyValuePair<int, string>>>(kvpConstructor, reader).Compile();
+                rowReader = Expression.Lambda<Func<FieldReader, KeyValuePair<PrimaryKey, string>>>(kvpConstructor, reader).Compile();
             }
 
-            toStrings = new ResetLazy<Dictionary<int, string>>(() =>
+            toStrings = new ResetLazy<Dictionary<PrimaryKey, string>>(() =>
             {
                 CacheLogic.OnStart();
 
@@ -832,7 +832,7 @@ namespace Signum.Engine.Cache
 
                 var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
 
-                Dictionary<int, string> result = new Dictionary<int, string>();
+                Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
 
                 using (MeasureLoad())
                 using (Connector.Override(subConnector))
@@ -867,7 +867,7 @@ namespace Signum.Engine.Cache
         }
 
 
-        public Lite<T> GetLite(int id, IRetriever retriever)
+        public Lite<T> GetLite(PrimaryKey id, IRetriever retriever)
         {
             Interlocked.Increment(ref hits);
 

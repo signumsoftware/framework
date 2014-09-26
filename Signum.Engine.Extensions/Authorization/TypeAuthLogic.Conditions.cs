@@ -130,9 +130,9 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static GenericInvoker<Action<int[], TypeAllowedBasic>> miAssertAllowed = 
-            new GenericInvoker<Action<int[], TypeAllowedBasic>>((a, tab) => AssertAllowed<IdentifiableEntity>(a, tab));
-        static void AssertAllowed<T>(int[] requested, TypeAllowedBasic typeAllowed)
+        static GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>> miAssertAllowed =
+            new GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>>((a, tab) => AssertAllowed<IdentifiableEntity>(a, tab));
+        static void AssertAllowed<T>(PrimaryKey[] requested, TypeAllowedBasic typeAllowed)
             where T : IdentifiableEntity
         {
             using (DisableQueryFilter())
@@ -146,7 +146,7 @@ namespace Signum.Engine.Authorization
                 if (found.Length != requested.Length)
                     throw new EntityNotFoundException(typeof(T), requested.Except(found.Select(a => a.Id)).ToArray());
 
-                int[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
+                PrimaryKey[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
                 if (notFound.Any())
                 {
                     List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))

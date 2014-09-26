@@ -80,18 +80,16 @@ namespace Signum.Engine.Authorization
             using (AuthLogic.Disable())
             using (Transaction tr = new Transaction())
             {
-                Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
+                Tuple<PrimaryKey, string> pair = UserTicketDN.ParseTicket(ticket);
 
                 UserDN user = Database.Retrieve<UserDN>(pair.Item1);
                 CleanExpiredTickets(user);
-
 
                 UserTicketDN userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
                 }
-
                 
                 UserTicketDN result = new UserTicketDN
                 {

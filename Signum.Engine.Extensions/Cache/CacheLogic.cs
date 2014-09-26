@@ -491,21 +491,21 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 cachedTable.ResetAll(forceReset: true);
             }
 
-            public override IEnumerable<int> GetAllIds()
+            public override IEnumerable<PrimaryKey> GetAllIds()
             {
                 AssertEnabled();
 
                 return cachedTable.GetAllIds();
             }
 
-            public override string GetToString(int id)
+            public override string GetToString(PrimaryKey id)
             {
                 AssertEnabled();
 
                 return cachedTable.GetToString(id);
             }
 
-            public override string TryGetToString(int id)
+            public override string TryGetToString(PrimaryKey id)
             {
                 AssertEnabled();
 

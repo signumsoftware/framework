@@ -266,15 +266,12 @@ namespace Signum.Entities.Omnibox
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
-                        int id;
-                        if (int.TryParse(omniboxToken.Value, out id))
-                        {
-                            var imp = queryToken.GetImplementations().Value;
+                        var imp = queryToken.GetImplementations().Value;
 
-                            if (!imp.IsByAll)
-                            {
-                                return imp.Types.Select(t =>new ValueTuple { Value = CreateLite(t, id) }).ToArray();
-                            }
+                        if (!imp.IsByAll)
+                        {
+                            return imp.Types.Select(t => CreateLite(t, omniboxToken.Value))
+                                .NotNull().Select(t => new ValueTuple { Value = t }).ToArray();
                         }
                     }break;
                 case FilterType.Embedded:
@@ -314,9 +311,13 @@ namespace Signum.Entities.Omnibox
             return new[] { new ValueTuple { Value = UnknownValue, Match = null } };
         }
 
-        Lite<IdentifiableEntity> CreateLite(Type type, int id)
+        Lite<IdentifiableEntity> CreateLite(Type type, string value)
         {
-            return Lite.Create(type, id, "{0} {1}".Formato(type.NiceName(), id));
+            PrimaryKey id;
+            if (PrimaryKey.TryParse(value, type, out id))
+                return Lite.Create(type, id, "{0} {1}".Formato(type.NiceName(), id));
+
+            return null;
         }
 
         bool? ParseBool(string val)

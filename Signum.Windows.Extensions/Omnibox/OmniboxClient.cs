@@ -100,7 +100,7 @@ namespace Signum.Windows.Omnibox
         }
 
 
-        public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+        public override Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
         {
             if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
                 return null;

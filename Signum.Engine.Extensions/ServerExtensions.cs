@@ -47,7 +47,7 @@ namespace Signum.Services
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer, IDiffLogServer, IIsolationServer
     {
-        public override IdentifiableEntity Retrieve(Type type, int id)
+        public override IdentifiableEntity Retrieve(Type type, PrimaryKey id)
         {
             using (ViewLogLogic.LogView(Lite.Create(type, id), "WCFRetrieve"))
                 return base.Retrieve(type, id);

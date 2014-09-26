@@ -66,11 +66,6 @@ namespace Signum.Web.Excel
         {
             if (ctx.Prefix.HasText())
                 return null;
-
-            Lite<UserQueryDN> currentUserQuery = null;
-            string url = (ctx.ControllerContext.RouteData.Route as Route).Try(r => r.Url);
-            if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
             
             if (ExcelReport) 
             {

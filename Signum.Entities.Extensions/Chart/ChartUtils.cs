@@ -189,7 +189,7 @@ namespace Signum.Entities.Chart
         }
 
 
-        public static Func<Type, int, Color?> GetChartColor = (type, id) => null;
+        public static Func<Type, PrimaryKey, Color?> GetChartColor = (type, id) => null;
 
         //Manual Json printer for performance and pretty print
         public static object DataJson(ChartRequest request, ResultTable resultTable)

@@ -27,7 +27,7 @@ namespace Signum.Engine.Processes
 
         static Timer timerNextExecution;
         static Timer timerPeriodic;
-        public static int PoolingPeriodMilliseconds; 
+        public static int PoolingPeriodMilliseconds = 30 * 1000;
 
         internal static DateTime? nextPlannedExecution;
 
@@ -120,7 +120,7 @@ namespace Signum.Engine.Processes
             return IsSharedExpression.Evaluate(p);
         }
 
-        public static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
+        internal static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
         {
             if (CacheLogic.WithSqlDependency)
                 query.ToListWithInvalidation(typeof(ProcessDN), action, a => WakeUp(action, a));
@@ -301,7 +301,7 @@ namespace Signum.Engine.Processes
             }, TaskCreationOptions.LongRunning);
         }
 
-        private static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
         {
             using (HeavyProfiler.Log("WakeUp", () => "WakeUp! "+ reason + ToString(args)))
             {

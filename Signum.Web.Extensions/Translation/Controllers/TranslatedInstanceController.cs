@@ -93,7 +93,7 @@ namespace Signum.Web.Translation.Controllers
                             Key = new LocalizedInstanceKey(
                                 PropertyRoute.Parse(type, regexIndexer.Replace(route, "/")),
                                 Lite.Parse(m.Groups["instance"].Value),
-                                regexIndexer.Match(route).Let(mi => mi.Success ? int.Parse(mi.Groups["num"].Value) : (int?)null)
+                                regexIndexer.Match(route).Let(mi => mi.Success ? PrimaryKey.Parse(mi.Groups["num"].Value, type) : (PrimaryKey?)null)
                                 ),
                             TranslatedText = Request.Form[k].DefaultText(null),
                         }).ToList();

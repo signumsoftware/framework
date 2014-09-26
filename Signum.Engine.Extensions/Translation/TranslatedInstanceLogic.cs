@@ -54,7 +54,8 @@ namespace Signum.Engine.Translation
 
                 LocalizationCache = sb.GlobalLazy(() => Database.Query<TranslatedInstanceDN>()
                     .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
-                    gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance, a.RowId))),
+                    gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance,
+                          a.RowId.HasText() ? PrimaryKey.Parse(a.RowId, a.Instance.GetType()) : (PrimaryKey?)null))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
 
                 sb.Schema.Initializing += () =>
@@ -219,7 +220,7 @@ namespace Signum.Engine.Translation
                     !Database.Query<TranslatedInstanceDN>().Any(ti =>
                         ti.Instance.RefersTo(mle.Parent) &&
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
-                        ti.RowId == mle.RowId &&
+                        ti.RowId == mle.RowId.ToString() &&
                         ti.Culture == ci.ToCultureInfoDN() &&
                         ti.OriginalText == str)
                     select mle).Any();
@@ -288,7 +289,7 @@ namespace Signum.Engine.Translation
             return TranslatedField(lite, route, null, fallbackString);
         }
 
-        public static string TranslatedField(Lite<IdentifiableEntity> lite, PropertyRoute route, int? rowId, string fallbackString)
+        public static string TranslatedField(Lite<IdentifiableEntity> lite, PropertyRoute route, PrimaryKey? rowId, string fallbackString)
         {
             var result = TranslatedInstanceLogic.GetTranslatedInstance(lite, route, rowId);
 
@@ -299,7 +300,7 @@ namespace Signum.Engine.Translation
         }
 
 
-        public static TranslatedInstanceDN GetTranslatedInstance(Lite<IdentifiableEntity> lite, PropertyRoute route, int? rowId)
+        public static TranslatedInstanceDN GetTranslatedInstance(Lite<IdentifiableEntity> lite, PropertyRoute route, PrimaryKey? rowId)
         {
             var hastMList = route.GetMListItemsRoute() != null;
 
@@ -367,7 +368,7 @@ namespace Signum.Engine.Translation
             {
                 Instance = r.Key.Instance.Key(),
                 Path = r.Key.Route.PropertyString(),
-                RowId = r.Key.RowId,
+                RowId = r.Key.RowId.TryToString(),
                 Original = r.Value.OriginalText,
                 Translated = r.Value.TranslatedText
             }).ToList();
@@ -390,7 +391,7 @@ namespace Signum.Engine.Translation
                         {
                             Instance = ic.Instance.Key(),
                             Path = pr.Key.Route.PropertyString(),
-                            RowId = pr.Key.RowId,
+                            RowId = pr.Key.RowId.TryToString(),
                             Original = pr.Value.GetOrThrow(TranslatedInstanceLogic.DefaultCulture).Original,
                             Translated = null
                         }).ToList();
@@ -415,10 +416,12 @@ namespace Signum.Engine.Translation
 
             var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
             {
-                 Culture = culture,
-                 Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]), Lite.Parse<IdentifiableEntity>(cellValues[0]), cellValues[2].DefaultText(null).Try(int.Parse)),
-                 OriginalText = cellValues[3],
-                 TranslatedText = cellValues[4]
+                Culture = culture,
+                Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
+                    Lite.Parse<IdentifiableEntity>(cellValues[0]),
+                    cellValues[2].DefaultText(null).Try(s => PrimaryKey.Parse(s, type))),
+                OriginalText = cellValues[3],
+                TranslatedText = cellValues[4]
             });
 
             SaveRecords(records, type, culture);
@@ -498,7 +501,7 @@ namespace Signum.Engine.Translation
                         Culture = n.Culture.ToCultureInfoDN(),
                         PropertyRoute = routes.GetOrThrow(n.Key.Route),
                         Instance = n.Key.Instance,
-                        RowId  = n.Key.RowId,
+                        RowId  = n.Key.RowId.TryToString(),
                         OriginalText = n.OriginalText,
                         TranslatedText = n.TranslatedText,
                     }.Save(),
@@ -544,7 +547,7 @@ namespace Signum.Engine.Translation
         public readonly Lite<IdentifiableEntity> Lite;
         public readonly PropertyRoute ElementRoute;
         public readonly T Value;
-        public readonly int RowId;
+        public readonly PrimaryKey RowId;
 
         internal TranslatableElement(Lite<IdentifiableEntity> entity, PropertyRoute route, MList<T>.RowIdValue item)
         {
@@ -588,9 +591,9 @@ namespace Signum.Engine.Translation
     public struct IndexedPropertyRoute : IEquatable<IndexedPropertyRoute>
     {
         public readonly PropertyRoute Route;
-        public readonly int? RowId;
+        public readonly PrimaryKey? RowId;
 
-        public IndexedPropertyRoute(PropertyRoute route, int? rowId)
+        public IndexedPropertyRoute(PropertyRoute route, PrimaryKey? rowId)
         {
             this.Route = route;
             this.RowId = rowId;
@@ -635,7 +638,7 @@ namespace Signum.Engine.Translation
     {
         public string Instance; 
         public string Path;
-        public int? RowId; 
+        public string RowId; 
         public string Original; 
         public string Translated; 
     }
@@ -644,9 +647,9 @@ namespace Signum.Engine.Translation
     {
         public readonly PropertyRoute Route;
         public readonly Lite<IdentifiableEntity> Instance;
-        public readonly int? RowId; 
+        public readonly PrimaryKey? RowId; 
 
-        public LocalizedInstanceKey(PropertyRoute route, Lite<IdentifiableEntity> instance, int? rowId)
+        public LocalizedInstanceKey(PropertyRoute route, Lite<IdentifiableEntity> instance, PrimaryKey? rowId)
         {
             if (route == null) throw new ArgumentNullException("route");
             if (instance == null) throw new ArgumentNullException("entity");

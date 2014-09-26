@@ -53,11 +53,11 @@ namespace Signum.Entities.Authorization
             return "{0}|{1}".Formato(user.Id, ticket);
         }
 
-        public static Tuple<int, string> ParseTicket(string ticket)
+        public static Tuple<PrimaryKey, string> ParseTicket(string ticket)
         {
             Match m = Regex.Match(ticket, @"^(?<id>\d+)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
-            return new Tuple<int, string>(int.Parse(m.Groups["id"].Value), m.Groups["ticket"].Value);
+            return new Tuple<PrimaryKey, string>(PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserDN)), m.Groups["ticket"].Value);
         }
     }
 }

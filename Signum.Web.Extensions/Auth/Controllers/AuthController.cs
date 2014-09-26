@@ -279,7 +279,7 @@ namespace Signum.Web.Auth
             return RedirectToAction("ResetPasswordSuccess");
         }
 
-        ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string error)
+        ViewResult ResetPasswordSetNewError(PrimaryKey idResetPasswordRequest, string error)
         {
             ModelState.AddModelError("_FORM", error);
             ViewData["rpr"] = idResetPasswordRequest;

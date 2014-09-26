@@ -34,22 +34,24 @@ namespace Signum.Entities.Omnibox
             }
             else if (tokens[1].Type == OmniboxTokenType.Number)
             {
-                int id;
-                if (!int.TryParse(tokens[1].Value, out id))
-                    yield break;
-
                 foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
-                    Lite<IdentifiableEntity> lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
+                    Type type = (Type)match.Value;
 
-                    yield return new EntityOmniboxResult
+                    PrimaryKey id;
+                    if(PrimaryKey.TryParse(tokens[1].Value, type, out id))
                     {
-                        Type = (Type)match.Value,
-                        TypeMatch = match,
-                        Id = id,
-                        Lite = lite,
-                        Distance = match.Distance,
-                    };
+                        Lite<IdentifiableEntity> lite = OmniboxParser.Manager.RetrieveLite(type, id);
+
+                        yield return new EntityOmniboxResult
+                        {
+                            Type = (Type)match.Value,
+                            TypeMatch = match,
+                            Id = id,
+                            Lite = lite,
+                            Distance = match.Distance,
+                        };
+                    }
                 }
             }
             else if (tokens[1].Type == OmniboxTokenType.String)
@@ -111,7 +113,7 @@ namespace Signum.Entities.Omnibox
         public Type Type { get; set; }
         public OmniboxMatch TypeMatch { get; set; }
 
-        public int? Id { get; set; }
+        public PrimaryKey? Id { get; set; }
 
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }

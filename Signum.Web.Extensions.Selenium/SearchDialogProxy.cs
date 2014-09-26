@@ -60,7 +60,7 @@ namespace Signum.Web.Selenium
             this.Dispose();
         }
 
-        public void SelectById(int id)
+        public void SelectById(PrimaryKey id)
         {
             this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, id);
             this.SearchControl.Search();

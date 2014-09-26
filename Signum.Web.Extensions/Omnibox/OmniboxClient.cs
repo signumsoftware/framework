@@ -136,7 +136,7 @@ namespace Signum.Web.Omnibox
                 return Finder.IsFindable(queryName);
             }
 
-            public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+            public override Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
             {
                 if (!Database.Exists(type, id))
                     return null;

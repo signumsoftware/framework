@@ -262,7 +262,7 @@ namespace Signum.Windows.UIAutomation
             SearchWindowProxy.Select(win, index);
         }
 
-        public void FindSelectId(int id, int? timeOut = null)
+        public void FindSelectId(PrimaryKey id, int? timeOut = null)
         {
             var win = FindCapture(timeOut);
             using (var searchWindow = new SearchWindowProxy(win))

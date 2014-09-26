@@ -98,7 +98,7 @@ namespace Signum.Web.Selenium
         }
 
 
-        public NormalPage<T> NormalPage<T>(int id) where T : IdentifiableEntity
+        public NormalPage<T> NormalPage<T>(PrimaryKey id) where T : IdentifiableEntity
         {
             return NormalPage<T>(Lite.Create<T>(id));
         }
@@ -128,7 +128,7 @@ namespace Signum.Web.Selenium
             return new NormalPage<T>(selenium, null);
         }
 
-        protected virtual string NavigateRoute(Type type, int? id)
+        protected virtual string NavigateRoute(Type type, PrimaryKey? id)
         {
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
