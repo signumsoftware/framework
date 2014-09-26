@@ -113,14 +113,14 @@ namespace Signum.Web
             return tabID;
         }
 
-        public static PartialViewResult PopupView(this ControllerBase controller, ModifiableEntity entity, PopupViewOptions options)
+        public static PartialViewResult PopupView(this ControllerBase controller, ModifiableEntity entity, PopupViewOptions options = null)
         {
-            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix, options.PropertyRoute), options);
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix, options.PropertyRoute), options ?? new PopupViewOptions(controller.Prefix()));
         }
 
-        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, PopupNavigateOptions options)
+        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, PopupNavigateOptions options = null)
         {
-            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix), options);
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, options.Prefix), options ?? new PopupNavigateOptions(controller.Prefix()));
         }
 
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
