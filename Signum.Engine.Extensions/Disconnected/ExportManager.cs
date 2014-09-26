@@ -100,7 +100,7 @@ namespace Signum.Engine.Disconnected
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateDatabase, s => l).Execute()))
                             connectionString = CreateDatabase(machine);
 
-                        var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
+                        var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current, ((SqlConnector)Connector.Current).Version);
 
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateSchema, s => l).Execute()))
