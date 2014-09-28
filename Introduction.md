@@ -1,6 +1,6 @@
 # Signum Framework
 
-Welcome to Signum Framework Documentation, the main source of information Framework. 
+Welcome to Signum Framework Documentation, the main source of information regarding the Framework. 
 
 
 ## Introduction to the documentation
@@ -22,7 +22,7 @@ In order to get used to the API, **a good level of C# is necessary**. Also some 
 
 This documentation tries to be a good reference that covers most of the framework. 
 
-Is not auto-generated from source code comments, but redacted manually. This means that not every single public method will be explained, on the other side it does a better job introducing each class, giving rationale, comparing with alternatives and giving recommendations.  
+It is not auto-generated from source code comments, but redacted manually. This means that not every single public method will be explained, on the other side it does a better job introducing each class, giving rationale, comparing with alternatives and giving recommendations.  
 
 While the documentation comes from the Markdown files that are distributed with the source code, it's ordered in a way that is easier to follow. 
 
