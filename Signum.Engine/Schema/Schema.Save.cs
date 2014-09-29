@@ -177,25 +177,25 @@ namespace Signum.Engine.Maps
                     var assigments = new List<Expression>();
                     var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
                     var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+                    var paramSuffix = Expression.Parameter(typeof(string), "suffix");
 
                     var cast = Expression.Parameter(table.Type, "casted");
                     assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
                     foreach (var item in table.Fields.Values)
-                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramSuffix);
                     
                     if(table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
-                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
-                    result.SqlInsertPattern = (post) =>
+                    result.SqlInsertPattern = (suffix) =>
                         "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
-                        trios.ToString(p => p.ParameterName + post, ", "));
+                        trios.ToString(p => p.ParameterName + suffix, ", "));
 
                     var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
-                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
+                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramSuffix);
 
                     result.InsertParameters = expr.Compile();
 
@@ -298,27 +298,27 @@ namespace Signum.Engine.Maps
                     var assigments = new List<Expression>();
                     var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
                     var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+                    var paramSuffix = Expression.Parameter(typeof(string), "suffix");
 
                     var cast = Expression.Parameter(table.Type, "casted");
                     assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
                     foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
-                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramSuffix);
 
                     if (table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
-                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
-                    result.SqlInsertPattern = (post, output) =>
+                    result.SqlInsertPattern = (suffix, output) =>
                         "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                        trios.ToString(p => p.ParameterName + post, ", "));
+                        trios.ToString(p => p.ParameterName + suffix, ", "));
 
 
                     var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
-                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
+                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramSuffix);
 
                     result.InsertParameters = expr.Compile();
 
@@ -517,17 +517,17 @@ namespace Signum.Engine.Maps
                     var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
                     var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
                     var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
-                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+                    var paramSuffix = Expression.Parameter(typeof(string), "suffix");
 
                     var cast = Expression.Parameter(table.Type);
                     assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
                     foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
-                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramSuffix);
 
                     if (table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
-                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
                     var pb = Connector.Current.ParameterBuilder;
 
@@ -535,31 +535,31 @@ namespace Signum.Engine.Maps
 
                     string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
 
-                    result.SqlUpdatePattern = (post, output) =>
+                    result.SqlUpdatePattern = (suffix, output) =>
                     {
                         string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
                             table.Name,
-                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + post).Indent(2), ",\r\n"),
-                            idParamName + post);
+                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
+                            idParamName + suffix);
 
                         if (typeof(Entity).IsAssignableFrom(table.Type))
-                            update += " AND ticks = {0}".Formato(oldTicksParamName + post);
+                            update += " AND ticks = {0}".Formato(oldTicksParamName + suffix);
 
                         if (!output)
                             return update;
                         else
-                            return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + post);
+                            return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + suffix);
                     };
 
                     List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
 
-                    parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
 
                     if (typeof(Entity).IsAssignableFrom(table.Type))
-                        parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
+                        parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), SqlDbType.BigInt, null, false, paramOldTicks));
 
                     var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
-                        CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
+                        CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramSuffix);
 
                     result.UpdateParameters = expr.Compile();
 
@@ -696,11 +696,11 @@ namespace Signum.Engine.Maps
 
         public class Trio
         {
-            public Trio(IColumn column, Expression value, Expression postfix)
+            public Trio(IColumn column, Expression value, Expression suffix)
             {
                 this.SourceColumn = column.Name;
                 this.ParameterName = Engine.ParameterBuilder.GetParameterName(column.Name);
-                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.UdtTypeName, column.Nullable, value);
+                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, suffix), column.SqlDbType, column.UdtTypeName, column.Nullable, value);
             }
 
             public string SourceColumn;
@@ -714,9 +714,9 @@ namespace Signum.Engine.Maps
 
             static MethodInfo miConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
-            internal static Expression Concat(string baseName, Expression postfix)
+            internal static Expression Concat(string baseName, Expression suffix)
             {
-                return Expression.Call(null, miConcat, Expression.Constant(baseName), postfix);
+                return Expression.Call(null, miConcat, Expression.Constant(baseName), suffix);
             }
         }
 
@@ -1043,8 +1043,8 @@ namespace Signum.Engine.Maps
 
             result.Getter = ident => (MList<T>)FullGetter(ident);
 
-            result.sqlDelete = post => "DELETE {0} WHERE {1} = {2}".Formato(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + post));
-            result.DeleteParameter = (ident, post) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + post), false, ident.Id);
+            result.sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".Formato(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix));
+            result.DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), false, ident.Id);
 
             result.sqlDeleteExcept = num =>
             {
@@ -1073,25 +1073,25 @@ namespace Signum.Engine.Maps
             var paramItem = Expression.Parameter(typeof(T), "item");
             var paramOrder = Expression.Parameter(typeof(int), "order");
             var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-            var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+            var paramSuffix = Expression.Parameter(typeof(string), "suffix");
             
             
             {
                 var trios = new List<Table.Trio>();
                 var assigments = new List<Expression>();
 
-                BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
+                BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
                 if (this.Order != null)
-                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramPostfix);
-                Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
+                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
+                Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-                result.sqlInsert = (post, output) => "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
+                result.sqlInsert = (suffix, output) => "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                     output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                    trios.ToString(p => p.ParameterName + post, ", "));
+                    trios.ToString(p => p.ParameterName + suffix, ", "));
 
                 var expr = Expression.Lambda<Func<IdentifiableEntity, T, int, Forbidden, string, List<DbParameter>>>(
-                    Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramItem, paramOrder, paramForbidden, paramPostfix);
+                    Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix);
 
                 result.InsertParameters = expr.Compile();
             }
@@ -1109,23 +1109,23 @@ namespace Signum.Engine.Maps
                 string idParent = "idParent";
                 string rowId = "rowId";
 
-                //BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
+                //BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
                 if (this.Order != null)
-                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramPostfix);
-                Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
+                    Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
+                Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-                result.sqlUpdate = post => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".Formato(Name,
-                    trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + post).Indent(2), ",\r\n"),
-                    this.BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(idParent + post),
-                    this.PrimaryKey.Name.SqlEscape(), ParameterBuilder.GetParameterName(rowId + post));
+                result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".Formato(Name,
+                    trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
+                    this.BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(idParent + suffix),
+                    this.PrimaryKey.Name.SqlEscape(), ParameterBuilder.GetParameterName(rowId + suffix));
 
                 var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, Table.fiId)));
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, paramRowId));
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramSuffix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, Table.fiId)));
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), SqlBuilder.PrimaryKeyType, null, false, paramRowId));
 
                 var expr = Expression.Lambda<Func<IdentifiableEntity, int, T, int, Forbidden, string, List<DbParameter>>>(
-                    Table.CreateBlock(parameters, assigments), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramPostfix);
+                    Table.CreateBlock(parameters, assigments), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramSuffix);
                 result.UpdateParameters = expr.Compile();
             }
 
@@ -1182,22 +1182,22 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        protected internal virtual void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix) { }
+        protected internal virtual void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix) { }
     }
 
     public partial class FieldPrimaryKey
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(this, value, postfix));
+            trios.Add(new Table.Trio(this, value, suffix));
         }
     }
 
     public partial class FieldValue
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(this, value, postfix));
+            trios.Add(new Table.Trio(this, value, suffix));
         }
     }
 
@@ -1295,17 +1295,17 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(this, this.GetIdFactory(value, forbidden), postfix));
+            trios.Add(new Table.Trio(this, this.GetIdFactory(value, forbidden), suffix));
         }
     }
 
     public partial class FieldEnum
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(this, Expression.Convert(value, Nullable ? typeof(int?) : typeof(int)), postfix));
+            trios.Add(new Table.Trio(this, Expression.Convert(value, Nullable ? typeof(int?) : typeof(int)), suffix));
         }
     }
 
@@ -1315,13 +1315,13 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
             ParameterExpression embedded = Expression.Parameter(this.FieldType, "embedded");
 
             if (HasValue != null)
             {
-                trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType)), postfix));
+                trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType)), suffix));
 
                 assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
 
@@ -1331,7 +1331,7 @@ namespace Signum.Engine.Maps
                         Expression.Condition(
                             Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
                             Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
-                            Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, postfix);
+                            Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, suffix);
                 }
             }
             else
@@ -1341,7 +1341,7 @@ namespace Signum.Engine.Maps
                 foreach (var ef in EmbeddedFields.Values)
                 {
                     ef.Field.CreateParameter(trios, assigments,
-                        Expression.Field(embedded, ef.FieldInfo), forbidden, postfix);
+                        Expression.Field(embedded, ef.FieldInfo), forbidden, suffix);
                 }
             }
         }
@@ -1358,7 +1358,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMixin
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
             ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
 
@@ -1366,14 +1366,14 @@ namespace Signum.Engine.Maps
             foreach (var ef in Fields.Values)
             {
                 ef.Field.CreateParameter(trios, assigments,
-                    Expression.Field(mixin, ef.FieldInfo), forbidden, postfix);
+                    Expression.Field(mixin, ef.FieldInfo), forbidden, suffix);
             }
         }
     }
 
     public partial class FieldImplementedBy
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
             ParameterExpression ibType = Expression.Parameter(typeof(Type), "ibType");
             ParameterExpression ibId = Expression.Parameter(typeof(int?), "ibId");
@@ -1386,7 +1386,7 @@ namespace Signum.Engine.Maps
             foreach (var imp in ImplementationColumns)
             {
                 trios.Add(new Table.Trio(imp.Value,
-                    Expression.Condition(Expression.Equal(ibType, Expression.Constant(imp.Key)), ibId, Expression.Constant(null, typeof(int?))), postfix
+                    Expression.Condition(Expression.Equal(ibType, Expression.Constant(imp.Key)), ibId, Expression.Constant(null, typeof(int?))), suffix
                     ));
             }
         }
@@ -1409,10 +1409,10 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(Column, this.GetIdFactory(value, forbidden), postfix));
-            trios.Add(new Table.Trio(ColumnType, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), postfix));
+            trios.Add(new Table.Trio(Column, this.GetIdFactory(value, forbidden), suffix));
+            trios.Add(new Table.Trio(ColumnType, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden)), suffix));
         }
 
         static MethodInfo miConvertType = ReflectionTools.GetMethodInfo((FieldImplementedByAll fe) => fe.ConvertType(null));
