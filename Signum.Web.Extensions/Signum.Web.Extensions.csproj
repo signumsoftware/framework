@@ -1066,7 +1066,6 @@
     <Content Include="Chart\Content\Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
     <TypeScriptCompile Include="Chart\Scripts\Chart.ts" />
-    <TypeScriptCompile Include="Chart\Scripts\ChartUtils.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartColors.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartScript.ts" />
     <EmbeddedResource Include="Chart\Scripts\Chart.js">
@@ -1078,17 +1077,18 @@
     <EmbeddedResource Include="Chart\Scripts\ChartScript.js">
       <DependentUpon>ChartScript.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Chart\Scripts\ChartUtils.js">
-      <DependentUpon>ChartUtils.ts</DependentUpon>
-    </EmbeddedResource>
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartRequestView.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Dashboard\Content\Dashboard.css" />
+    <TypeScriptCompile Include="Chart\Scripts\ChartUtils.ts" />
     <TypeScriptCompile Include="Dashboard\Scripts\Dashboard.ts" />
     <TypeScriptCompile Include="Dashboard\Scripts\GridRepeater.ts" />
+    <EmbeddedResource Include="Chart\Scripts\ChartUtils.js">
+      <DependentUpon>ChartUtils.ts</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Scripts\Dashboard.js">
       <DependentUpon>Dashboard.ts</DependentUpon>
     </EmbeddedResource>

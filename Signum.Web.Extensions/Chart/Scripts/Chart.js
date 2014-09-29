@@ -1,8 +1,7 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="ChartUtils.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "colorbrewer", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, colorbrewer, d3) {
-    ChartUtils;
-    colorbrewer;
+    var rubish = colorbrewer.hasOwnProperty;
 
     function openChart(prefix, url) {
         Finder.getFor(prefix).then(function (sc) {
