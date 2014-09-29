@@ -624,18 +624,18 @@ namespace Signum.Engine.Maps
         ResetLazy<CollectionsCache> saveCollections;
 
 
-        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
+        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null, string suffix = "")
         {
             PrepareEntitySync(ident);
             SetToStrField(ident);
 
             SqlPreCommandSimple insert = Identity ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern("", false),
-                    inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment) :
+                    inserterIdentity.Value.SqlInsertPattern(suffix, false),
+                    inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment) :
                 new SqlPreCommandSimple(
-                    inserterDisableIdentity.Value.SqlInsertPattern(""),
-                    inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
+                    inserterDisableIdentity.Value.SqlInsertPattern(suffix),
+                    inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment);
 
             if (!includeCollections)
                 return insert;

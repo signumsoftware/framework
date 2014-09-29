@@ -25,11 +25,11 @@ namespace Signum.Engine
         {
             List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
 
-            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double);
+            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).ToSimple();
 
-            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double);
+            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).ToSimple();
             
-            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double);
+            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double).ToSimple();
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }
@@ -40,7 +40,7 @@ namespace Signum.Engine
                     let enumType = EnumEntity.Extract(t.Type)
                     where enumType != null
                     select (from ie in EnumEntity.GetEntities(enumType)
-                            select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
+                            select t.InsertSqlSync(ie, suffix: t.Name.Name + ie.id.Value)).Combine(Spacing.Simple)).Combine(Spacing.Double).ToSimple();
         }
 
       
