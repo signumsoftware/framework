@@ -7,8 +7,11 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-import ChartUtils = require("ChartUtils"); ChartUtils;
-import colorbrewer = require("colorbrewer"); colorbrewer;
+import ChartUtils = require("ChartUtils");
+import colorbrewer = require("colorbrewer");
+
+var rubish = colorbrewer.hasOwnProperty;
+
 import d3 = require("d3")
 
 
@@ -157,7 +160,7 @@ export class ChartRequest {
         return Finder.serializeOrders(this.options.orders);
     }
 
-    public constructor(options: ChartRequestOptions) {
+     constructor(options: ChartRequestOptions) {
 
         this.options = options;
 
