@@ -305,6 +305,23 @@ namespace Signum.Engine
 
         }
 
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            using (SqlConnection con = EnsureConnection())
+            using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection,
+                options,
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
+            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            {
+                foreach (DataColumn c in dt.Columns)
+                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+
+                bulkCopy.DestinationTableName = destinationTable.ToString();
+                bulkCopy.WriteToServer(dt);
+            }
+        }
+
         public override string DatabaseName()
         {
             return new SqlConnection(connectionString).Database;

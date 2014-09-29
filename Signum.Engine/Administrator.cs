@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Collections.Concurrent;
 using Signum.Engine.Linq;
 using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -471,6 +472,65 @@ namespace Signum.Engine
                             Column = c,
                         }).ToList();
             });
+        }
+
+        public static void BulkInsert<T>(IEnumerable<T> entities, 
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default) 
+            where T : IdentifiableEntity
+        {
+            DataTable dt = new DataTable();
+            var t = Schema.Current.Table<T>();
+            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+            {
+                dt.Columns.Add(new DataColumn(c.Name));
+            }
+
+            foreach (var e in entities)
+            {
+                dt.Rows.Add(t.BulkInsertDataRow(e));
+            }
+
+
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                Executor.BulkCopy(dt, t.Name, options);
+            else
+            {
+                using (Transaction tr = new Transaction())
+                {
+                    Executor.BulkCopy(dt, t.Name, options);
+
+                    tr.Commit();
+                }
+            }
+
+        }
+
+        public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
+            IEnumerable<MListElement<E, V>> entities,
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            where E : Entity
+        {
+            DataTable dt = new DataTable();
+            var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
+            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+                dt.Columns.Add(new DataColumn(c.Name));
+
+            foreach (var e in entities)
+            {
+                dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+            }
+
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                Executor.BulkCopy(dt, t.Name, options);
+            else
+            {
+                using (Transaction tr = new Transaction())
+                {
+                    Executor.BulkCopy(dt, t.Name, options);
+
+                    tr.Commit();
+                }
+            }
         }
     }
 }

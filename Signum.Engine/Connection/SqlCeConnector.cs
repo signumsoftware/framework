@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -240,6 +241,11 @@ namespace Signum.Engine
             }
         }
 
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public override string DatabaseName()
         {
             return new SqlCeConnection(connectionString).Database;
@@ -291,6 +297,8 @@ namespace Signum.Engine
         {
             get { return false; }
         }
+
+       
     }
 
     public class SqlCeParameterBuilder : ParameterBuilder

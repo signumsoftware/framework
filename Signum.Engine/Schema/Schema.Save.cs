@@ -86,6 +86,14 @@ namespace Signum.Engine.Maps
             }
         }
 
+        internal object[] BulkInsertDataRow(IdentifiableEntity ident)
+        {
+            var parameters = Identity ?
+                inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
+                inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+
+            return parameters.Select(a => a.Value).ToArray();
+        }
 
         class InsertCacheDisableIdentity
         {
@@ -583,9 +591,9 @@ namespace Signum.Engine.Maps
             {
                 using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
                 {
-                    List<TableMList.IRelationalCache> caches =
+                    var caches =
                         (from rt in table.TablesMList()
-                         select giCreateCache.GetInvoker(rt.Field.FieldType)(rt)).ToList();
+                         select rt.cache.Value).ToList();
 
                     if (caches.IsEmpty())
                         return null;
@@ -615,9 +623,6 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache> saveCollections;
 
-        static GenericInvoker<Func<TableMList, TableMList.IRelationalCache>> giCreateCache =
-            new GenericInvoker<Func<TableMList, TableMList.IRelationalCache>>(
-            (TableMList rt) => rt.CreateCache<int>());
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
@@ -734,14 +739,16 @@ namespace Signum.Engine.Maps
 
     public partial class TableMList
     {
-        internal interface IRelationalCache
+        internal interface IMListCache
         {
             SqlPreCommand RelationalUpdateSync(Entity parent);
             void RelationalInserts(List<EntityForbidden> entities);
             void RelationalUpdates(List<EntityForbidden> entities);
+
+            object[] BulkInsertDataRow(Entity entity, object value, int order);
         }
 
-        internal class RelationalCache<T> : IRelationalCache
+        internal class TableMListCache<T> : IMListCache
         {
             internal Func<string, string> sqlDelete;
             public Func<Entity, string, DbParameter> DeleteParameter;
@@ -909,6 +916,10 @@ namespace Signum.Engine.Maps
                 }
             }
 
+            public object[] BulkInsertDataRow(Entity entity, object value, int order)
+            {
+                return InsertParameters(entity, (T)value, order, new Forbidden(null), "").Select(a => a.Value).ToArray(); 
+            }
 
             public Func<Entity, MList<T>> Getter;
 
@@ -1033,13 +1044,24 @@ namespace Signum.Engine.Maps
                         collection.Select((e, i) => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, i, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
+
+
+
+
+           
         }
 
-        internal RelationalCache<T> CreateCache<T>()
+        static GenericInvoker<Func<TableMList, IMListCache>> giCreateCache =
+            new GenericInvoker<Func<TableMList, IMListCache>>((TableMList rt) => rt.CreateCache<int>());
+
+
+        internal Lazy<IMListCache> cache;
+
+        TableMListCache<T> CreateCache<T>()
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            RelationalCache<T> result = new RelationalCache<T>();
+            TableMListCache<T> result = new TableMListCache<T>();
 
             result.Getter = ident => (MList<T>)FullGetter(ident);
 
@@ -1131,8 +1153,6 @@ namespace Signum.Engine.Maps
 
             return result;
         }
-
-      
     }
 
     internal static class SaveUtils

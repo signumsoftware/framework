@@ -210,3 +210,27 @@ public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> oldEntity, Lite<
 public static void MoveAllForeignKeysConsole<T>(Lite<T> oldEntity, Lite<T> newEntity)
    where T : IdentifiableEntity
 ```
+
+### BulkInsert
+
+Uses `SqlBulkCopy` to load a set of entities in the database as fast as possible. Only simple inserts will be made, with no graph analysis or validation taking place.
+
+
+```C#
+public static void BulkInsert<T>(IEnumerable<T> entities, 
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default) 
+            where T : IdentifiableEntity
+```
+
+The operation will be embedded in the current transaction if `SqlBulkCopyOptions.UseInternalTransaction` is not set.
+
+The Id for the entities should be set if the table does not have `Identity=true`.
+
+Finally, in order to insert entities with MList, a call to `BulkInsertMList` is necessary. 
+
+```C#
+public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
+    IEnumerable<MListElement<E, V>> entities,
+    SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+    where E : Entity
+```
