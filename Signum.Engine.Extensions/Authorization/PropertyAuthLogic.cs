@@ -72,6 +72,8 @@ namespace Signum.Engine.Authorization
                         routesDicCache[type] = dic;
                     }
 
+                    var routes = Database.Query<PropertyRouteDN>().ToDictionary(a => a.ToPropertyRoute());
+
                     return cache.ImportXml(x, "Properties", "Property", roles, s =>
                     {
                         var pp = new PropertyPair(s);
@@ -85,10 +87,13 @@ namespace Signum.Engine.Authorization
                         if (route == null)
                             return null;
 
-                        var property = PropertyRouteLogic.ToPropertyRouteDN(route);
-                        if (property.IsNew)
-                            property.Save();
-                            
+                        var property = routes.GetOrCreate(route, () => new PropertyRouteDN
+                         {
+                             Route = route,
+                             RootType = TypeLogic.TypeToDN[route.RootType],
+                             Path = route.PropertyString()
+                         }.Save());
+
                         return property;
 
                     }, EnumExtensions.ToEnum<PropertyAllowed>);
