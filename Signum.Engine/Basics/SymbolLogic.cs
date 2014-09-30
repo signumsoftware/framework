@@ -62,9 +62,9 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table<T>();
 
-            IEnumerable<T> should = getSymbols(); 
+            IEnumerable<T> should = getSymbols();
 
-            return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple).ToSimple();
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)

@@ -924,6 +924,7 @@ namespace Signum.Engine.Maps
         public TableMList(Type collectionType)
         {
             this.CollectionType = collectionType;
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
         }
 
         public override string ToString()
@@ -984,6 +985,11 @@ namespace Signum.Engine.Maps
         public void ToSchema(SchemaName schemaName)
         {
             this.Name = this.Name.OnSchema(schemaName);
+        }
+
+        internal object[] BulkInsertDataRow(Entity entity, object value, int order)
+        {
+            return this.cache.Value.BulkInsertDataRow(entity, value, order);
         }
     }
 }

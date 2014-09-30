@@ -44,6 +44,7 @@ namespace Signum.Engine
             return sb.ToString(); 
         }
 
+
         protected internal abstract void PlainSql(StringBuilder sb);
 
         public abstract SqlPreCommandSimple ToSimple();
@@ -112,14 +113,13 @@ namespace Signum.Engine
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
-        internal const string GO = ";\r\nGO";
-
         protected internal override bool EndsWithGo
         {
-            get { return AddGo; }
+            get { return GoAfter; }
         }
 
-        public bool AddGo { get; set; }
+        public bool GoBefore { get; set; }
+        public bool GoAfter { get; set; }
 
         public string Sql { get; private set; }
         public List<DbParameter> Parameters { get; private set; }
@@ -142,10 +142,13 @@ namespace Signum.Engine
 
         protected internal override void GenerateScript(StringBuilder sb)
         {
+            if (GoBefore)
+                sb.Append("GO\r\n");
+
             sb.Append(Sql);
 
-            if (AddGo)
-                sb.Append(GO);
+            if (GoAfter)
+                sb.Append(";\r\nGO");
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -227,6 +230,13 @@ namespace Signum.Engine
             }
 
             return this;
+        }
+
+        public List<SqlPreCommandSimple> SplitGOs()
+        {
+            return this.Sql.Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => new SqlPreCommandSimple(s))
+                .ToList();
         }
 
     }
