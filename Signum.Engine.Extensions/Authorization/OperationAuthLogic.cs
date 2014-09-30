@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
                      coercer:  OperationCoercer.Instance);
 
                 AuthLogic.SuggestRuleChanges += SuggestOperationRules;
-                AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", s=>s.Key, b => b.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", s=>s.Key, b => b.ToString(), OperationLogic.RegisteredOperations);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = typeof(OperationSymbol).Name;

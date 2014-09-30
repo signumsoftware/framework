@@ -302,7 +302,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString)
+        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, IEnumerable<K> keys)
         {
             var rules = runtimeRules.Value;
 
@@ -311,7 +311,7 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
+                         from k in keys
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
                          where !allowed.Equals(allowedBase)
