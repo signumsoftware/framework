@@ -492,7 +492,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
 
-            controller.ViewData[ViewDataKeys.WriteEntityState] = options.WriteEntityState;
+            controller.ViewData[ViewDataKeys.WriteEntityState] = options.WriteEntityState || (bool?)controller.ViewData[ViewDataKeys.WriteEntityState] == true;
 
             AssertViewableEntitySettings(entity);
 
