@@ -634,8 +634,6 @@ namespace Signum.Engine.Authorization
                         try
                         {
                              command = ImportRulesScript(doc);
-
-                             command.Leaves().GroupsOf(100).ProgressForeach(a => "", null, (gr, w) => Executor.ExecuteNonQuery(gr.Select(a => a.PlainSql()).ToString(";\r\n")));
                         }
                         catch (InvalidRoleGraphException ex)
                         {
