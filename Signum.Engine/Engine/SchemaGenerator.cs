@@ -39,8 +39,8 @@ namespace Signum.Engine
             return (from t in Schema.Current.Tables.Values
                     let enumType = EnumEntity.Extract(t.Type)
                     where enumType != null
-                    select (from ie in EnumEntity.GetEntities(enumType)
-                            select t.InsertSqlSync(ie, suffix: t.Name.Name + ie.id.Value)).Combine(Spacing.Simple)).Combine(Spacing.Double).ToSimple();
+                    select EnumEntity.GetEntities(enumType).Select((e, i) => t.InsertSqlSync(e, suffix: t.Name.Name + i)).Combine(Spacing.Simple)
+                    ).Combine(Spacing.Double).ToSimple();
         }
 
       
