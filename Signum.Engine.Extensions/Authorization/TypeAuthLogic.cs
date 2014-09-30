@@ -53,7 +53,7 @@ namespace Signum.Engine.Authorization
 
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml();
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToDN.Keys.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
                 AuthLogic.SuggestRuleChanges += SuggestTypeRules;
             }

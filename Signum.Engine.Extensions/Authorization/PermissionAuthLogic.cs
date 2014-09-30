@@ -74,7 +74,8 @@ namespace Signum.Engine.Authorization
                     BasicPermission.AutomaticUpgradeOfOperations,
                     BasicPermission.AutomaticUpgradeOfQueries);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(), PermissionAuthLogic.RegisteredPermission);
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(), 
+                    exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = typeof(PermissionSymbol).Name;

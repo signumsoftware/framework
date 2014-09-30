@@ -44,7 +44,8 @@ namespace Signum.Engine.Authorization
                     PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes));
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), 
+                    exportAll ? TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes).ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();

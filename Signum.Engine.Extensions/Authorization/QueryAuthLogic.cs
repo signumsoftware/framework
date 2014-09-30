@@ -44,7 +44,8 @@ namespace Signum.Engine.Authorization
                     coercer: QueryCoercer.Instance);
 
                 AuthLogic.SuggestRuleChanges += SuggestQueryRules;
-                AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString(), QueryLogic.QueryNames.Values);
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString(), 
+                    exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
                     string replacementKey = typeof(QueryDN).Name;
