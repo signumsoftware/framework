@@ -492,6 +492,8 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
 
+            controller.ViewData[ViewDataKeys.WriteEntityState] = options.WriteEntityState;
+
             AssertViewableEntitySettings(entity);
 
             tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(entity);

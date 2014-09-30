@@ -1336,7 +1336,7 @@ export class EntityStrip extends EntityList {
             "</li>" 
             );
 
-        this.prefix.child(EntityStrip.key_itemsContainer).get().find(" ." + EntityStrip.key_input).before(li);
+        this.prefix.child(EntityStrip.key_itemsContainer).get().children(" ." + EntityStrip.key_input).before(li);
 
     }
 
