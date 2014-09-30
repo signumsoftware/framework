@@ -319,5 +319,52 @@ namespace Signum.Test
                 //tr.Commit();
             }
         }
+
+        [TestMethod]
+        public void BulkInsert()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                var max = Database.Query<NoteWithDateDN>().Max(a => a.Id);
+
+                var list = Database.Query<AlbumDN>().Select(a => new NoteWithDateDN
+                {
+                    CreationTime = DateTime.Now,
+                    Text = "Nice album " + a.Name,
+                    Target = a
+                }).ToList();
+
+                Administrator.BulkInsert(list);
+
+                Database.Query<NoteWithDateDN>().Where(a => a.Id > max).UnsafeDelete(); 
+
+                tr.Commit();
+            }
+
+        }
+
+
+        [TestMethod]
+        public void BulkInsertMList()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                var max = Database.MListQuery((AlbumDN a) => a.Songs).Max(a => a.RowId);
+
+                var list = Database.Query<AlbumDN>().Select(a => new MListElement<AlbumDN, SongDN>
+                {
+                    Order = 100,
+                    Element = new SongDN { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
+                    Parent = a,
+                }).ToList();
+
+                Administrator.BulkInsertMList((AlbumDN a) => a.Songs, list);
+
+                Database.MListQuery((AlbumDN a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
+
+                tr.Commit();
+            }
+
+        }
     }
 }

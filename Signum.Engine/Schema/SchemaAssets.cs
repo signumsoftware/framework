@@ -40,12 +40,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name) + Definition) { AddGo = true };
+                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name) + Definition) { GoBefore = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name) + Definition) { AddGo = true };
+                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name) + Definition) { GoBefore = true };
             } 
         }
 
@@ -162,12 +162,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateSql()
             {
-                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { AddGo = true };
+                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
             }
 
             public SqlPreCommandSimple AlterSql()
             {
-                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { AddGo = true };
+                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
             }
         }
         #endregion

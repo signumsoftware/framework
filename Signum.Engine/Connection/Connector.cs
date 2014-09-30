@@ -98,6 +98,7 @@ namespace Signum.Engine
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
         protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options);
 
         public abstract string DatabaseName();
 
@@ -164,6 +165,7 @@ namespace Signum.Engine
         public abstract bool AllowsConvertToTime { get; }
 
         public abstract bool SupportsSqlDependency { get; }
+     
     }
 
   
