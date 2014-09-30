@@ -322,6 +322,13 @@ WriteLiteral("\r\n");
    
     var fullTree = Model.Follow(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 
+    
+    int max = fullTree.Max(a=>a.Depth);
+    while(fullTree.Count > ProfilerClient.MaxEntriesToDisplay && Model.Depth + 1 < max )
+    {
+        fullTree.RemoveAll(a=>a.Depth == max);
+        max--;
+    }
 
             
             #line default
@@ -335,7 +342,7 @@ WriteLiteral(">\r\n    $(function() {\r\n");
 WriteLiteral("       ");
 
             
-            #line 91 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 98 "..\..\Profiler\Views\HeavyDetails.cshtml"
    Write(ProfilerClient.Module["heavyDetailsChart"](fullTree.HeavyDetailsToJson(), Model.Depth));
 
             

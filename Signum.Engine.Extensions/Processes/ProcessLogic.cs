@@ -165,7 +165,7 @@ namespace Signum.Engine.Processes
 
                 if (userProcessSession)
                 {
-                    PropertyAuthLogic.AvoidAutomaticUpgrade.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
+                    PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
                     MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {

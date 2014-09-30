@@ -356,7 +356,7 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(role).Count;
         }
 
-        public static event Func<XElement> ExportToXml;
+        public static event Func<bool, XElement> ExportToXml;
         public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand> ImportFromXml;
         public static event Func<Action<Lite<RoleDN>>> SuggestRuleChanges;
 
@@ -381,7 +381,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static XDocument ExportRules()
+        public static XDocument ExportRules(bool exportAll = false)
         {
             var imported = Database.Query<LastAuthRulesImportDN>().SingleOrDefault();
 
@@ -395,7 +395,7 @@ namespace Signum.Engine.Authorization
                             new XAttribute("Name", r.ToString()),
                             GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
-                     ExportToXml.GetInvocationListTyped().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
+                     ExportToXml.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
@@ -630,6 +630,8 @@ namespace Signum.Engine.Authorization
                         try
                         {
                              command = ImportRulesScript(doc);
+
+                             command.Leaves().GroupsOf(100).ProgressForeach(a => "", null, (gr, w) => Executor.ExecuteNonQuery(gr.Select(a => a.PlainSql()).ToString(";\r\n")));
                         }
                         catch (InvalidRoleGraphException ex)
                         {

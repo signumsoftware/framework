@@ -27,6 +27,8 @@ namespace Signum.Web.Profiler
 {
     public static class ProfilerClient
     {
+        public static int MaxEntriesToDisplay = 2000;
+
         public static string ViewPrefix = "~/Profiler/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Profiler/Scripts/Profiler");
 
@@ -95,5 +97,6 @@ namespace Signum.Web.Profiler
         {
             return htmlHelper.ActionLink(linkText, "HeavyRoute", new { indices }); 
         }
+
     }
 }

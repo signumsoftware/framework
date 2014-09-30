@@ -69,9 +69,13 @@ namespace Signum.Engine.Authorization
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 
-                RegisterPermissions(BasicPermission.AdminRules);
+                RegisterPermissions(BasicPermission.AdminRules, 
+                    BasicPermission.AutomaticUpgradeOfProperties,
+                    BasicPermission.AutomaticUpgradeOfOperations,
+                    BasicPermission.AutomaticUpgradeOfQueries);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString());
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(), 
+                    exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = typeof(PermissionSymbol).Name;
@@ -111,6 +115,11 @@ namespace Signum.Engine.Authorization
 
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleDN> role)
         {
+            //if (permissionSymbol == BasicPermission.AutomaticUpgradeOfOperations ||
+            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfProperties ||
+            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfQueries)
+            //    return true;
+
             return cache.GetAllowed(role, permissionSymbol);
         }
 
