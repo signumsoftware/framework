@@ -308,6 +308,45 @@ namespace Signum.Engine.Maps
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
+
+        internal Type GetType(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.BigInt: return typeof(long);
+                case SqlDbType.Binary: return typeof(byte[]);
+                case SqlDbType.Bit: return typeof(bool);
+                case SqlDbType.Char: return typeof(char);
+                case SqlDbType.Date: return typeof(DateTime);
+                case SqlDbType.DateTime: return typeof(DateTime);
+                case SqlDbType.DateTime2: return typeof(DateTime);
+                case SqlDbType.DateTimeOffset: return typeof(DateTimeOffset);
+                case SqlDbType.Decimal: return typeof(decimal);
+                case SqlDbType.Float: return typeof(double);
+                case SqlDbType.Image: return typeof(byte[]);
+                case SqlDbType.Int: return typeof(int);
+                case SqlDbType.Money: return typeof(decimal);
+                case SqlDbType.NChar: return typeof(string);
+                case SqlDbType.NText: return typeof(string);
+                case SqlDbType.NVarChar: return typeof(string);
+                case SqlDbType.Real: return typeof(float);
+                case SqlDbType.SmallDateTime: return typeof(DateTime);
+                case SqlDbType.SmallInt: return typeof(short);
+                case SqlDbType.SmallMoney: return typeof(decimal);               
+                case SqlDbType.Text: return typeof(string);
+                case SqlDbType.Time: return typeof(TimeSpan);
+                case SqlDbType.Timestamp: return typeof(TimeSpan);
+                case SqlDbType.TinyInt: return typeof(int);               
+                case SqlDbType.UniqueIdentifier: return typeof(Guid);
+                case SqlDbType.VarBinary: return typeof(byte[]);
+                case SqlDbType.VarChar: return typeof(string);
+                case SqlDbType.Xml: return typeof(string);
+                case SqlDbType.Variant:
+                case SqlDbType.Structured:
+                case SqlDbType.Udt: 
+                default: throw new InvalidOperationException();
+            }
+        }
     }
 
     public class SqlDbTypePair
