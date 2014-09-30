@@ -69,7 +69,10 @@ namespace Signum.Engine.Authorization
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 
-                RegisterPermissions(BasicPermission.AdminRules, BasicPermission.AutomaticRuleUpgrade);
+                RegisterPermissions(BasicPermission.AdminRules, 
+                    BasicPermission.AutomaticUpgradeOfProperties,
+                    BasicPermission.AutomaticUpgradeOfOperations,
+                    BasicPermission.AutomaticUpgradeOfQueries);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>

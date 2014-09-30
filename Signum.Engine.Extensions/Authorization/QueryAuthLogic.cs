@@ -199,7 +199,7 @@ namespace Signum.Engine.Authorization
                 baseValues.Any(a => a.Value) :
                 baseValues.All(a => a.Value);
 
-            if (!BasicPermission.AutomaticRuleUpgrade.IsAuthorized(role) || QueryAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+            if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || QueryAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                 return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
@@ -212,7 +212,7 @@ namespace Signum.Engine.Authorization
         {
             return key =>
             {
-                if (!BasicPermission.AutomaticRuleUpgrade.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+                if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                     return AuthLogic.GetDefaultAllowed(role);
 
                 return GetDefault(key, role);

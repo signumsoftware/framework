@@ -24,6 +24,8 @@ namespace Signum.Entities.Authorization
     public static class BasicPermission
     {
         public static readonly PermissionSymbol AdminRules = new PermissionSymbol();
-        public static readonly PermissionSymbol AutomaticRuleUpgrade = new PermissionSymbol();
+        public static readonly PermissionSymbol AutomaticUpgradeOfProperties = new PermissionSymbol();
+        public static readonly PermissionSymbol AutomaticUpgradeOfQueries = new PermissionSymbol();
+        public static readonly PermissionSymbol AutomaticUpgradeOfOperations = new PermissionSymbol();
     }
 }

@@ -268,7 +268,7 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)):
                 Min(baseValues.Select(a => a.Value));
 
-            if (!BasicPermission.AutomaticRuleUpgrade.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+            if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
@@ -318,7 +318,7 @@ namespace Signum.Engine.Authorization
         {
             return key => 
             {
-                if (!BasicPermission.AutomaticRuleUpgrade.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+                if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                     return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
 
                 return GetDefault(key, role);
