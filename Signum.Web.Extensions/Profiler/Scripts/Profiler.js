@@ -91,7 +91,7 @@ define(["require", "exports", "d3"], function(require, exports, d3) {
         }).attr('height', entryHeight - 1).attr('fill', function (v) {
             return v.Color;
         }).attr('stroke', function (v) {
-            return v.Depth == currentDepth ? '#000' : '#fff';
+            return v.Depth == currentDepth ? '#000' : '#ccc';
         });
 
         groups.append('svg:rect').attr('class', 'shape-before').attr('x', function (v) {

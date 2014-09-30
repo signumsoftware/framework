@@ -100,7 +100,7 @@ export function heavyDetailsChart(data: ProfilerEntry[], currentDepth) {
         .attr('width', function (v) { return v.Depth < currentDepth ? x(currentEntry.End) - x(currentEntry.BeforeStart) : x(v.End) - x(v.BeforeStart); })
         .attr('height', entryHeight - 1)
         .attr('fill', function (v) { return v.Color; })
-        .attr('stroke', function (v) { return v.Depth == currentDepth ? '#000' : '#fff'; });
+        .attr('stroke', function (v) { return v.Depth == currentDepth ? '#000' : '#ccc'; });
 
     groups.append('svg:rect').attr('class', 'shape-before')
         .attr('x', function (v) { return v.Depth < currentDepth ? 0 : x(v.BeforeStart); })
