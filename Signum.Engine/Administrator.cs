@@ -488,6 +488,8 @@ namespace Signum.Engine
             var t = Schema.Current.Table<T>();
             using (Transaction tr = new Transaction())
             {
+                Schema.Current.OnPreBulkInsert(typeof(T));
+
                 using (DisableIdentity<T>())
                 {
                     DataTable dt = CreateDataTable<T>(list, t);
@@ -502,24 +504,25 @@ namespace Signum.Engine
             }
         }
 
-        public static void BulkInsert<T>(IEnumerable<T> entities, 
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default) 
+        public static void BulkInsert<T>(IEnumerable<T> entities,
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
             where T : IdentifiableEntity
         {
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
             var t = Schema.Current.Table<T>();
 
             DataTable dt = CreateDataTable<T>(entities, t);
 
-            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                Executor.BulkCopy(dt, t.Name, options);
-            else
+            using (Transaction tr = new Transaction())
             {
-                using (Transaction tr = new Transaction())
-                {
-                    Executor.BulkCopy(dt, t.Name, options);
+                Schema.Current.OnPreBulkInsert(typeof(T));
 
+                Executor.BulkCopy(dt, t.Name, options);
+
+                if (tr != null)
                     tr.Commit();
-                }
             }
         }
 
@@ -540,13 +543,16 @@ namespace Signum.Engine
             return dt;
         }
 
-       
+
 
         public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
             IEnumerable<MListElement<E, V>> entities,
             SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
             where E : Entity
         {
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
             SchemaSettings ss = Schema.Current.Settings;
             DataTable dt = new DataTable();
             var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
@@ -558,16 +564,13 @@ namespace Signum.Engine
                 dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
             }
 
-            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                Executor.BulkCopy(dt, t.Name, options);
-            else
+            using (Transaction tr = options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
             {
-                using (Transaction tr = new Transaction())
-                {
-                    Executor.BulkCopy(dt, t.Name, options);
+                Schema.Current.OnPreBulkInsert(typeof(E));
 
-                    tr.Commit();
-                }
+                Executor.BulkCopy(dt, t.Name, options);
+
+                tr.Commit();
             }
         }
     }

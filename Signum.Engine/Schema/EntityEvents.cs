@@ -27,6 +27,7 @@ namespace Signum.Engine.Maps
         public event UpdateHandler<T> PreUnsafeUpdate;
 
         public event InsertHandler<T> PreUnsafeInsert;
+        public event BulkInsetHandler<T> PreBulkInsert;
 
         internal Expression<Func<T, bool>> OnFilterQuery()
         {
@@ -87,6 +88,14 @@ namespace Signum.Engine.Maps
 
         }
 
+        void IEntityEvents.OnPreBulkInsert()
+        {
+            if (PreBulkInsert != null)
+                foreach (BulkInsetHandler<T> action in PreBulkInsert.GetInvocationList().Reverse())
+                    action();
+
+        }
+
         void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             if (PreSaving != null)
@@ -129,6 +138,7 @@ namespace Signum.Engine.Maps
     public delegate void DeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
     public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
+    public delegate void BulkInsetHandler<T>();
 
     public class SavedEventArgs
     {
@@ -147,6 +157,7 @@ namespace Signum.Engine.Maps
 
         void OnPreUnsafeUpdate(IUpdateable update);
         void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
+        void OnPreBulkInsert();
 
         ICacheController CacheController { get; }
 
