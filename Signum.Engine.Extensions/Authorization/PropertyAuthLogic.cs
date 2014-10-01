@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static readonly HashSet<PropertyRoute> AvoidAutomaticUpgrade = new HashSet<PropertyRoute>();
+        public readonly static HashSet<PropertyRoute> AvoidAutomaticUpgradeCollection = new HashSet<PropertyRoute>();
 
         public static void Start(SchemaBuilder sb, bool queries)
         {
@@ -44,7 +44,8 @@ namespace Signum.Engine.Authorization
                     PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString());
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), 
+                    exportAll ? TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes).ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
@@ -190,7 +191,7 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
 
-            if (PropertyAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+            if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                 return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
@@ -236,7 +237,13 @@ namespace Signum.Engine.Authorization
 
         public Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role)
         {
-            return pr => GetDefault(pr, role);
+            return pr =>
+            {
+                if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(pr))
+                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Modify : PropertyAllowed.None;
+
+                return GetDefault(pr, role);
+            };
         }
     }
 

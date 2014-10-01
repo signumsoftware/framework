@@ -25,6 +25,8 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
+        public readonly static HashSet<object> AvoidAutomaticUpgradeCollection = new HashSet<object>();
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -42,7 +44,8 @@ namespace Signum.Engine.Authorization
                     coercer: QueryCoercer.Instance);
 
                 AuthLogic.SuggestRuleChanges += SuggestQueryRules;
-                AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString());
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString(), 
+                    exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
                     string replacementKey = typeof(QueryDN).Name;
@@ -197,6 +200,9 @@ namespace Signum.Engine.Authorization
                 baseValues.Any(a => a.Value) :
                 baseValues.All(a => a.Value);
 
+            if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || QueryAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+                return best;
+
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
 
@@ -205,7 +211,13 @@ namespace Signum.Engine.Authorization
 
         public Func<object, bool> MergeDefault(Lite<RoleDN> role)
         {
-            return key => GetDefault(key, role);
+            return key =>
+            {
+                if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+                    return AuthLogic.GetDefaultAllowed(role);
+
+                return GetDefault(key, role);
+            };
         }
 
         bool GetDefault(object key, Lite<RoleDN> role)
