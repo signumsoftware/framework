@@ -537,7 +537,7 @@ namespace Signum.Engine
             {
                 if (!e.IsNew)
                     throw new InvalidOperationException("Entites should be new");
-
+                t.SetToStrField(e);
                 dt.Rows.Add(t.BulkInsertDataRow(e));
             }
             return dt;
