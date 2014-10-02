@@ -195,9 +195,9 @@ namespace Signum.Engine.Processes
         {
             var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < limit);
 
-            query.SelectMany(a=>a.ExceptionLines()).UnsafeDelete();
+            query.SelectMany(a=>a.ExceptionLines()).UnsafeDeleteChunks();
 
-            query.UnsafeDelete();
+            query.UnsafeDeleteChunks();
         }
 
         public static IDisposable OnApplySession(ProcessDN process)
