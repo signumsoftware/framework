@@ -81,6 +81,16 @@ export class FileLine extends Lines.EntityBase {
         xhr.setRequestHeader("X-sfFileType", this.options.fileType);
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
+        var extraParams: FormObject = {};
+        SF.addAjaxExtraParameters(extraParams);
+        if (extraParams != {}) {
+            for (var key in extraParams) {
+                if (extraParams.hasOwnProperty(key)) {
+                    xhr.setRequestHeader(key, extraParams[key]);
+                }
+            }
+        }
+
         var self = this;
         xhr.onload = function (e) {
             var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
@@ -136,6 +146,16 @@ export class FileLine extends Lines.EntityBase {
         $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
 
         $("<input type='hidden' name='" + this.options.prefix + "_sfFileType' value='" + this.options.fileType + "'/>").appendTo($fileForm);
+
+        var extraParams: FormObject = {};
+        SF.addAjaxExtraParameters(extraParams);
+        if (extraParams != {}) {
+            for (var key in extraParams) {
+                if (extraParams.hasOwnProperty(key)) {
+                    $("<input type='hidden' />").attr("name", key).val(extraParams[key]).appendTo($fileForm);
+                }
+            }
+        }
 
         var $tabId = $("#" + Entities.Keys.tabId).clone().appendTo($fileForm);
         var $antiForgeryToken = $("input[name=" + Entities.Keys.antiForgeryToken + "]").clone().appendTo($fileForm);
