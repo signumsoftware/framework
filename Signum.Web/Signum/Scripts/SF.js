@@ -24,9 +24,33 @@ var SF;
     }
     SF.log = log;
 
+    var ajaxExtraParameters = [];
+    function registerAjaxExtraParameters(getExtraParams) {
+        if (getExtraParams != null)
+            ajaxExtraParameters.push(getExtraParams);
+    }
+    SF.registerAjaxExtraParameters = registerAjaxExtraParameters;
+    function addAjaxExtraParameters(originalParams) {
+        if (ajaxExtraParameters.length > 0) {
+            ajaxExtraParameters.forEach(function (addExtraParametersFunc) {
+                addExtraParametersFunc(originalParams);
+            });
+        }
+    }
+    SF.addAjaxExtraParameters = addAjaxExtraParameters;
+
     once("setupAjaxRedirectPrefilter", function () {
-        return setupAjaxRedirect();
+        setupAjaxRedirect();
+        setupAjaxExtraParameters();
     });
+
+    function setupAjaxExtraParameters() {
+        $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+            var data = $.extend({}, originalOptions.data);
+            addAjaxExtraParameters(data);
+            options.data = $.param(data);
+        });
+    }
 
     function setupAjaxRedirect() {
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
