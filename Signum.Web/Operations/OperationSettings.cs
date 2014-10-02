@@ -57,7 +57,7 @@ namespace Signum.Web.Operations
 
         static GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>> giCreate =
            new GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>>(symbol => new ConstructorOperationSettings<IdentifiableEntity>(symbol));
-        public ConstructorOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        public static ConstructorOperationSettingsBase Create(Type type, OperationSymbol symbol)
         {
             return giCreate.GetInvoker(type)(symbol);
         }
@@ -100,8 +100,6 @@ namespace Signum.Web.Operations
         {
             return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
         }
-
-     
 
         public override Type OverridenType
         {
@@ -179,7 +177,7 @@ namespace Signum.Web.Operations
 
         static GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>> giCreate =
             new GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>>(symbol => new ContextualOperationSettings<IdentifiableEntity>(symbol));
-        public ContextualOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        public static ContextualOperationSettingsBase Create(Type type, OperationSymbol symbol)
         {
             return giCreate.GetInvoker(type)(symbol);
         }
@@ -330,7 +328,7 @@ namespace Signum.Web.Operations
 
         static GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>> giCreate =
             new GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>>(symbol => new EntityOperationSettings<IdentifiableEntity>(symbol));
-        public EntityOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        public static EntityOperationSettingsBase Create(Type type, OperationSymbol symbol)
         {
             return giCreate.GetInvoker(type)(symbol);
         }
