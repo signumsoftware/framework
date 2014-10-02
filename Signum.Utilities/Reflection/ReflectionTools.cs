@@ -217,12 +217,12 @@ namespace Signum.Utilities.Reflection
 
         public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
         {
-            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
         public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
         {
-            return ci.DeclaringType.MakeGenericType(types).GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.MakeGenericType(types).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
 
