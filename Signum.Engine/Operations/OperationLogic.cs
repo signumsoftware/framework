@@ -158,7 +158,7 @@ namespace Signum.Engine.Operations
 
         public static void ExceptionLogic_DeleteLogs(DateTime limitDate)
         {
-            Database.Query<OperationLogDN>().Where(o => o.Start < limitDate).UnsafeDelete();
+            Database.Query<OperationLogDN>().Where(o => o.Start < limitDate).UnsafeDeleteChunks();
         }
 
         static void OperationLogic_Initializing()
