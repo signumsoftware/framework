@@ -1,10 +1,8 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Navigator) {
     function addIsolationPrefilter(isolationKey) {
-        $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
-            var data = originalOptions.data;
-
-            options.data = $.param($.extend({}, data, { Isolation: getCurrentIsolation(data.prefix || "") }));
+        SF.registerAjaxExtraParameters(function (originalParams) {
+            $.extend(originalParams, { Isolation: getCurrentIsolation(originalParams["prefix"] || "") });
         });
     }
     exports.addIsolationPrefilter = addIsolationPrefilter;
