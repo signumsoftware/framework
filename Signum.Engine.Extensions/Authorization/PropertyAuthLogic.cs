@@ -157,17 +157,23 @@ namespace Signum.Engine.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
-            PropertyAllowed paProperty = cache.GetAllowed(RoleDN.Current.ToLite(), route);
-            if (paProperty < requested)
+            if (route.PropertyRouteType == PropertyRouteType.Root)
             {
                 PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
                 if (paType < requested)
                     return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), paType, RoleDN.Current);
 
-                return "Property {0} is set to {1} for {2}".Formato(route, paProperty, RoleDN.Current);
+                return null;
             }
+            else
+            {
+                PropertyAllowed paProperty = cache.GetAllowed(RoleDN.Current.ToLite(), route);
 
-            return null;
+                if (paProperty < requested)
+                    return "Property {0} is set to {1} for {2}".Formato(route, paProperty, RoleDN.Current);
+
+                return null;
+            }
         }
 
         public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
