@@ -9,7 +9,7 @@ namespace Signum.Entities
     [Serializable]
     public class CorruptMixin : MixinEntity
     {
-        CorruptMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        CorruptMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         bool corrupt;
         public bool Corrupt
@@ -57,17 +57,17 @@ namespace Signum.Entities
             return new Disposable(() => allowed.Value = true);
         }
 
-        public static event Action<IdentifiableEntity, string> SaveCorrupted;
+        public static event Action<Entity, string> SaveCorrupted;
 
-        public static void OnSaveCorrupted(IdentifiableEntity corruptEntity, string integrity)
+        public static void OnSaveCorrupted(Entity corruptEntity, string integrity)
         {
             if (SaveCorrupted != null)
                 SaveCorrupted(corruptEntity, integrity);
         }
 
-        public static event Action<IdentifiableEntity> CorruptionRemoved;
+        public static event Action<Entity> CorruptionRemoved;
 
-        public static void OnCorruptionRemoved(IdentifiableEntity corruptEntity)
+        public static void OnCorruptionRemoved(Entity corruptEntity)
         {
             if (CorruptionRemoved != null)
                 CorruptionRemoved(corruptEntity);

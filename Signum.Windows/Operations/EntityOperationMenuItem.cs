@@ -62,7 +62,7 @@ namespace Signum.Windows.Operations
                                 break;
                             case OperationType.ConstructorFrom:
                                 {
-                                    var result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
+                                    var result = (Entity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
                                         Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol)));
 
                                     if (result == null)

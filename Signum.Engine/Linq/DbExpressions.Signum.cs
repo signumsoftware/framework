@@ -19,8 +19,8 @@ namespace Signum.Engine.Linq
 {
     internal class EntityExpression : DbExpression
     {
-        public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.id);
-        public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((IdentifiableEntity ie) =>ie.toStr);
+        public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((Entity ei) =>ei.id);
+        public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((Entity ie) =>ie.toStr);
         public static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
         public readonly Table Table;
@@ -39,11 +39,14 @@ namespace Signum.Engine.Linq
             if (type == null) 
                 throw new ArgumentNullException("type");
 
-            if (!type.IsIdentifiableEntity())
+            if (!type.IsEntity())
                 throw new ArgumentException("type");
             
             if (externalId == null) 
                 throw new ArgumentNullException("externalId");
+
+            if (externalId.Type != typeof(PrimaryKey?))
+                throw new ArgumentException("externalId should be a PrimaryKey");
             
             this.Table = Schema.Current.Table(type);
             this.ExternalId = externalId;
@@ -333,7 +336,7 @@ namespace Signum.Engine.Linq
         public TypeImplementedByExpression(IDictionary<Type, Expression> typeImplementations)
             : base(DbExpressionType.TypeImplementedBy, typeof(Type))
         {
-            if (typeImplementations == null || typeImplementations.Any(a => a.Value.Type.UnNullify() != typeof(int)))
+            if (typeImplementations == null || typeImplementations.Any(a => a.Value.Type.UnNullify() != typeof(PrimaryKey)))
                 throw new ArgumentException("typeId");
 
             this.TypeImplementations = typeImplementations.ToReadOnly();
@@ -452,6 +455,27 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(ExpressionVisitor visitor)
         {
             return ((DbExpressionVisitor)visitor).VisitMListElement(this);
+        }
+    }
+
+    internal class PrimaryKeyExpression : DbExpression
+    {
+        public readonly Expression Value;
+
+        public PrimaryKeyExpression(Expression value)
+            : base(DbExpressionType.PrimaryKey, typeof(PrimaryKey?))
+        {
+            this.Value = value;
+        }
+
+        public override string ToString()
+        {
+            return "(PrimaryKey?)(" + Value.NiceToString() + ")";
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitPrimaryKey(this);
         }
     }
 }

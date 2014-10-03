@@ -20,7 +20,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class AutocompleteUtils
     {
-        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
+        public static List<Lite<Entity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
@@ -40,11 +40,11 @@ namespace Signum.Engine.DynamicQuery
 
         static NumberStyles numberStyles = NumberStyles.Integer | NumberStyles.AllowThousands;
 
-        static List<Lite<IdentifiableEntity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
+        static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
             types = types.Where(t => Schema.Current.IsAllowed(t) == null);
 
-            List<Lite<IdentifiableEntity>> results = new List<Lite<IdentifiableEntity>>();
+            List<Lite<Entity>> results = new List<Lite<Entity>>();
           
             foreach (var t in types)
             {
@@ -81,7 +81,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using(ExecutionMode.UserInterface())
             {
@@ -111,7 +111,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public static List<Lite<T>> Autocomplete<T>(this IEnumerable<Lite<T>> query, string subString, int count)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (ExecutionMode.UserInterface())
             {
@@ -139,18 +139,18 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>> miLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>>(id => LiteById<TypeDN>(id));
-        static Lite<IdentifiableEntity> LiteById<T>(PrimaryKey id)
-            where T : IdentifiableEntity
+        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> miLiteById =
+            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeDN>(id));
+        static Lite<Entity> LiteById<T>(PrimaryKey id)
+            where T : Entity
         {
             return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
         }
 
-        static GenericInvoker<Func<string[], int, List<Lite<IdentifiableEntity>>>> miLiteContaining =
-            new GenericInvoker<Func<string[], int, List<Lite<IdentifiableEntity>>>>((parts, c) => LiteContaining<TypeDN>(parts, c));
-        static List<Lite<IdentifiableEntity>> LiteContaining<T>(string[] parts, int count)
-            where T : IdentifiableEntity
+        static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> miLiteContaining =
+            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeDN>(parts, c));
+        static List<Lite<Entity>> LiteContaining<T>(string[] parts, int count)
+            where T : Entity
         {
             return Database.Query<T>()
                 .Where(a => a.ToString().ContainsAll(parts))
@@ -158,11 +158,11 @@ namespace Signum.Engine.DynamicQuery
                 .Select(a => a.ToLite())
                 .Take(count)
                 .AsEnumerable()
-                .Cast<Lite<IdentifiableEntity>>()
+                .Cast<Lite<Entity>>()
                 .ToList();
         }
 
-        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
+        public static List<Lite<Entity>> FindAllLite(Implementations implementations)
         {
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");

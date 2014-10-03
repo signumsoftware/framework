@@ -90,8 +90,8 @@ namespace Signum.Web
             MvcHtmlString result;
             if (entityLine.Navigate)
             {
-                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ??
-                           (entityLine.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
+                var lite = (entityLine.UntypedValue as Lite<IEntity>) ??
+                           (entityLine.UntypedValue as IEntity).Try(i => i.ToLite(i.IsNew));
 
                 result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         lite.TryToString(),

@@ -160,8 +160,8 @@ namespace Signum.Test.LinqProvider
         }
 
         public List<Lite<LT>> SelectAuthorsLite<T, LT>()
-            where T : IdentifiableEntity, LT
-            where LT : class, IIdentifiable
+            where T : Entity, LT
+            where LT : class, IEntity
         {
             return Database.Query<T>().Select(a => a.ToLite<LT>()).ToList(); //an explicit convert is injected in this scenario
         }

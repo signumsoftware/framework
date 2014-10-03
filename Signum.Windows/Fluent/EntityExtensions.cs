@@ -80,7 +80,7 @@ namespace Signum.Windows
         public static string GetErrors(Modifiable mod)
         {
             var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(mod is IdentifiableEntity));
+            string error = GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(mod is Entity));
             return error;
         }
 

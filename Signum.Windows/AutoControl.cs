@@ -84,7 +84,7 @@ namespace Signum.Windows
 
             Type t = pi.PropertyType;
             Type lt = t.CleanType();
-            if (Reflector.IsIIdentifiable(lt))
+            if (Reflector.IsIEntity(lt))
             {
                 if (EntityKindCache.IsLowPopulation(lt))
                     return new XElement(m + "EntityCombo", new XAttribute(m + "Common.Route", pi.Name));
@@ -99,7 +99,7 @@ namespace Signum.Windows
             if (Reflector.IsMList(t))
             {
                 Type et = t.ElementType();
-                if (Reflector.IsIIdentifiable(et.CleanType()))
+                if (Reflector.IsIEntity(et.CleanType()))
                     return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(m + "EntityList", new XAttribute(m + "Common.Route", pi.Name), new XAttribute("MaxHeight", "150")));
 

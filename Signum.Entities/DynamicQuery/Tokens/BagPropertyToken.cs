@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var cleanType = PropertyInfo.PropertyType.CleanType();
 
-            if (!typeof(IIdentifiable).IsAssignableFrom(cleanType))
+            if (!typeof(IEntity).IsAssignableFrom(cleanType))
                 return null;
 
             var fi = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);

@@ -198,7 +198,7 @@ namespace Signum.Engine.Linq
                 m.Method.Name == "Truncate"))
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
-            if (m.Method.Name == "ToString" && m.Object != null && typeof(IIdentifiable).IsAssignableFrom(m.Object.Type))
+            if (m.Method.Name == "ToString" && m.Object != null && typeof(IEntity).IsAssignableFrom(m.Object.Type))
                 return Visit(Expression.Property(m.Object, piToStringProperty));
 
             if (m.Object != null)
@@ -214,7 +214,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.ToStringProperty);
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IEntity ii) => ii.ToStringProperty);
 
 
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)
@@ -460,7 +460,7 @@ namespace Signum.Engine.Linq
                     }
             }
 
-            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
+            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IEntity).IsAssignableFrom(source.Type))
             {
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
@@ -483,7 +483,7 @@ namespace Signum.Engine.Linq
                     return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
 
-                if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
+                if (typeof(Entity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
                 {
                     var pr = PropertyRoute.Root(source.Type).Add(pi);
 
@@ -508,7 +508,7 @@ namespace Signum.Engine.Linq
 
         internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
         {
-            if (!cleanType.IsIIdentifiable() && !cleanType.IsLite())
+            if (!cleanType.IsIEntity() && !cleanType.IsLite())
                 return (Implementations?)null;
 
             var only = propertyRoutes.Only();

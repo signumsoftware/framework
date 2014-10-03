@@ -19,16 +19,16 @@ namespace Signum.Engine
     {
         internal class RealEntityCache
         {
-            readonly Dictionary<IdentityTuple, IdentifiableEntity> dic = new Dictionary<IdentityTuple,IdentifiableEntity>();
+            readonly Dictionary<IdentityTuple, Entity> dic = new Dictionary<IdentityTuple,Entity>();
 
-            public void Add(IdentifiableEntity ie)
+            public void Add(Entity ie)
             {
                 if (ie == null)
                     throw new ArgumentNullException("ie");
 
                 var tuple = new IdentityTuple(ie);
 
-                IdentifiableEntity ident = dic.TryGetC(tuple);
+                Entity ident = dic.TryGetC(tuple);
 
                 if (ident == null)
                     dic.Add(tuple, ie);
@@ -44,7 +44,7 @@ namespace Signum.Engine
                 return dic.ContainsKey(new IdentityTuple(type, id));
             }
 
-            public IdentifiableEntity Get(Type type, PrimaryKey id)
+            public Entity Get(Type type, PrimaryKey id)
             {
                 return dic.TryGetC(new IdentityTuple(type, id));
             }
@@ -53,7 +53,7 @@ namespace Signum.Engine
             {
                 DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
 
-                foreach (var ident in modifiables.OfType<IdentifiableEntity>().Where(ident => !ident.IsNew))
+                foreach (var ident in modifiables.OfType<Entity>().Where(ident => !ident.IsNew))
                     Add(ident);
             }
 
@@ -86,7 +86,7 @@ namespace Signum.Engine
                 get{return retriever != null; }
             }
 
-            internal bool TryGetValue(IdentityTuple tuple, out IdentifiableEntity result)
+            internal bool TryGetValue(IdentityTuple tuple, out Entity result)
             {
                 return dic.TryGetValue(tuple, out result);
             }
@@ -138,14 +138,14 @@ namespace Signum.Engine
         }
 
         public static void AddMany<T>(params T[] objects)
-            where T: IdentifiableEntity
+            where T: Entity
         {
             foreach (var item in objects)
                 Add(item);
         }
 
         public static void Add<T>(IEnumerable<T> objects)
-            where T: IdentifiableEntity
+            where T: Entity
         {
             foreach (var item in objects)
                 Add(item);
@@ -156,13 +156,13 @@ namespace Signum.Engine
             Current.AddFullGraph(ie);
         }
 
-        public static void Add(IdentifiableEntity ie)
+        public static void Add(Entity ie)
         {
             Current.Add(ie);
         }
 
 
-        public static bool Contains<T>(PrimaryKey id) where T : IdentifiableEntity
+        public static bool Contains<T>(PrimaryKey id) where T : Entity
         {
             return Contains(typeof(T), id);
         }
@@ -172,12 +172,12 @@ namespace Signum.Engine
             return Current.Contains(type, id); 
         }
 
-        public static T Get<T>(PrimaryKey id) where T : IdentifiableEntity
+        public static T Get<T>(PrimaryKey id) where T : Entity
         {
             return (T)Get(typeof(T), id);
         }
 
-        public static IdentifiableEntity Get(Type type, PrimaryKey id)
+        public static Entity Get(Type type, PrimaryKey id)
         {
             return Current.Get(type, id);
         }
@@ -192,14 +192,14 @@ namespace Signum.Engine
             Current.ReleaseRetriever(retriever);
         }
 
-        public static T Construct<T>(PrimaryKey id) where T : IdentifiableEntity
+        public static T Construct<T>(PrimaryKey id) where T : Entity
         {
             var result = Constructor<T>.Call();
             result.id = id;
             return result;
         }
 
-        static class Constructor<T> where T : IdentifiableEntity
+        static class Constructor<T> where T : Entity
         {
             static Func<T> call;
             public static Func<T> Call
@@ -227,13 +227,13 @@ namespace Signum.Engine
         public readonly Type Type;
         public readonly PrimaryKey Id;
 
-        public IdentityTuple(Lite<IdentifiableEntity> lite)
+        public IdentityTuple(Lite<Entity> lite)
         {
             this.Type = lite.EntityType;
             this.Id = lite.Id;
         }
 
-        public IdentityTuple(IdentifiableEntity entiy)
+        public IdentityTuple(Entity entiy)
         {
             this.Type = entiy.GetType();
             this.Id = entiy.Id;

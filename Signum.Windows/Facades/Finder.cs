@@ -28,13 +28,13 @@ namespace Signum.Windows
         }
 
         public static Lite<T> Find<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return (Lite<T>)Manager.Find(new FindOptions(typeof(T)));
         }
 
         public static Lite<T> Find<T>(FindOptions options)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
@@ -42,21 +42,21 @@ namespace Signum.Windows
             return (Lite<T>)Manager.Find(options);
         }
 
-        public static Lite<IdentifiableEntity> Find(FindOptions options)
+        public static Lite<Entity> Find(FindOptions options)
         {
             return Manager.Find(options);
         }
 
 
-        public static List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
+        public static List<Lite<Entity>> FindMany(FindManyOptions options)
         {
             return Manager.FindMany(options);
         }
 
         public static List<Lite<T>> FindMany<T>()
-         where T : IdentifiableEntity
+         where T : Entity
         {
-            List<Lite<IdentifiableEntity>> result = Manager.FindMany(new FindManyOptions(typeof(T)));
+            List<Lite<Entity>> result = Manager.FindMany(new FindManyOptions(typeof(T)));
             if (result == null)
                 return null;
 
@@ -64,12 +64,12 @@ namespace Signum.Windows
         }
 
         public static List<Lite<T>> FindMany<T>(FindManyOptions options)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
 
-            List<Lite<IdentifiableEntity>> result = Manager.FindMany(options);
+            List<Lite<Entity>> result = Manager.FindMany(options);
             if (result == null)
                 return null;
 
@@ -173,13 +173,13 @@ namespace Signum.Windows
             return SearchMessage.FinderOf0.NiceToString().Formato(QueryUtils.GetNiceName(queryName));
         }
 
-        public virtual Lite<IdentifiableEntity> Find(FindOptions options)
+        public virtual Lite<Entity> Find(FindOptions options)
         {
             AssertFindable(options.QueryName);
 
             if (options.ReturnIfOne)
             {
-                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
+                Lite<Entity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -203,7 +203,7 @@ namespace Signum.Windows
         }
 
 
-        public virtual List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
+        public virtual List<Lite<Entity>> FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
 
@@ -221,7 +221,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
+                Lite<Entity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only

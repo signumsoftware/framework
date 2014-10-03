@@ -76,7 +76,7 @@ namespace Signum.Web
                 if (bl.Type.IsMList())
                     route = route.Add("Item");
 
-                if (route.Type.CleanType().IsIIdentifiable())
+                if (route.Type.CleanType().IsIEntity())
                 {
                     IImplementationsFinder finder = typeof(ModelEntity).IsAssignableFrom(route.RootType) ?
                         (IImplementationsFinder)Navigator.EntitySettings(route.RootType) : Schema.Current;
@@ -182,9 +182,9 @@ namespace Signum.Web
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).EntityType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IEntity>)obj).EntityType))
             {
-                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
+                Lite<IEntity> lite = (Lite<IEntity>)obj;
                 return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
             }
 
@@ -193,7 +193,7 @@ namespace Signum.Web
                 Type liteType = Lite.Extract(type);
                 if (liteType.IsAssignableFrom(objType))
                 {
-                    return ((IdentifiableEntity)obj).ToLite();
+                    return ((Entity)obj).ToLite();
                 }
             }
 

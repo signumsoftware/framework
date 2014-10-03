@@ -13,8 +13,8 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public abstract class Symbol : IdentifiableEntity
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false)]
+    public abstract class Symbol : Entity
     {
 
         static Dictionary<Type, Dictionary<string, Symbol>> Symbols = new Dictionary<Type, Dictionary<string, Symbol>>();

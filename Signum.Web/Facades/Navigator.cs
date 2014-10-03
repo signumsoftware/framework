@@ -67,12 +67,12 @@ namespace Signum.Web
             return result;
         }
 
-        public static string NavigateRoute(IIdentifiable ie)
+        public static string NavigateRoute(IEntity ie)
         {
             return NavigateRoute(ie.GetType(), ie.Id);
         }
 
-        public static string NavigateRoute(Lite<IIdentifiable> lite)
+        public static string NavigateRoute(Lite<IEntity> lite)
         {
             return NavigateRoute(lite.EntityType, lite.Id);
         }
@@ -163,7 +163,7 @@ namespace Signum.Web
             Navigator.Manager.EntitySettings.AddRange(settings, s => s.StaticType, s => s, "EntitySettings");
         }
 
-        public static EntitySettings<T> EntitySettings<T>() where T : IdentifiableEntity
+        public static EntitySettings<T> EntitySettings<T>() where T : Entity
         {
             return (EntitySettings<T>)EntitySettings(typeof(T));
         }
@@ -222,7 +222,7 @@ namespace Signum.Web
         }
 
         public static Lite<T> TryParseLite<T>(this ControllerBase controller, string requestKey)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             var key = controller.ControllerContext.HttpContext.Request[requestKey];
             if (key == null)
@@ -231,7 +231,7 @@ namespace Signum.Web
         }
 
         public static Lite<T> ParseLite<T>(this ControllerBase controller, string requestKey)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             return Lite.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]);
         }
@@ -256,7 +256,7 @@ namespace Signum.Web
             return (T)Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
-        public static Lite<T> ExtractLite<T>(this ControllerBase controller, string prefix = null) where T : class, IIdentifiable
+        public static Lite<T> ExtractLite<T>(this ControllerBase controller, string prefix = null) where T : class, IEntity
         {
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix ?? controller.Prefix());
         }
@@ -338,7 +338,7 @@ namespace Signum.Web
             Finder.Manager.Initialize();
         }
 
-        internal static void AssertNotReadonly(IdentifiableEntity ident)
+        internal static void AssertNotReadonly(Entity ident)
         {
             if (Navigator.IsReadOnly(ident))
                 throw new UnauthorizedAccessException("{0} is read-only".Formato(ident));
@@ -504,7 +504,7 @@ namespace Signum.Web
 
             string niceName = mod.GetType().NiceName();
 
-            IdentifiableEntity ident = mod as IdentifiableEntity;
+            Entity ident = mod as Entity;
             if (ident == null)
                 return niceName;
 
@@ -583,7 +583,7 @@ namespace Signum.Web
             if (es != null)
                 return es.WebTypeName;
 
-            if (type.IsIdentifiableEntity())
+            if (type.IsEntity())
             {
                 var cleanName = TypeLogic.TryGetCleanName(type);
                 if (cleanName != null)
@@ -591,7 +591,7 @@ namespace Signum.Web
             }
 
             throw new InvalidOperationException("Impossible to resolve WebTypeName for '{0}' because is not registered in Navigator's EntitySettings".Formato(type.Name) + 
-                (type.IsIdentifiableEntity() ? " or the Schema" : null));
+                (type.IsEntity() ? " or the Schema" : null));
         }
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerBase controller, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
@@ -631,7 +631,7 @@ namespace Signum.Web
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)
-            where T:class, IIdentifiable
+            where T:class, IEntity
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
@@ -823,8 +823,8 @@ namespace Signum.Web
         }
 
 
-        public event Func<Lite<IdentifiableEntity>, IDisposable> RetrievingForView; 
-        internal IDisposable OnRetrievingForView(Lite<IdentifiableEntity> lite)
+        public event Func<Lite<Entity>, IDisposable> RetrievingForView; 
+        internal IDisposable OnRetrievingForView(Lite<Entity> lite)
         {
             return Disposable.Combine(RetrievingForView, f => f(lite));
         }

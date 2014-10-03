@@ -719,7 +719,9 @@ namespace Signum.Entities
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     public sealed class PreserveOrderAttribute : Attribute
-    {  
+    {
+        public string Name { get; set; }
+
         public PreserveOrderAttribute()
         {
         }

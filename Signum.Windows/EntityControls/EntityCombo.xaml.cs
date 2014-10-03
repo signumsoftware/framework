@@ -51,7 +51,7 @@ namespace Signum.Windows
             set { SetValue(SortElementsProperty, value); }
         }
 
-        public event Func<IEnumerable<Lite<IIdentifiable>>> LoadData;
+        public event Func<IEnumerable<Lite<IEntity>>> LoadData;
 
         static EntityCombo()
         {
@@ -156,7 +156,7 @@ namespace Signum.Windows
 
         public void LoadNow()
         {
-            IEnumerable<Lite<IIdentifiable>> data;
+            IEnumerable<Lite<IEntity>> data;
             if (LoadData != null)
             {
                 data = LoadData();
@@ -177,7 +177,7 @@ namespace Signum.Windows
                 combo.Items.Clear();
                 if(NullValue)
                     combo.Items.Add(NullValueString); 
-                foreach (Lite<IIdentifiable> lite in data)
+                foreach (Lite<IEntity> lite in data)
                 {
                     combo.Items.Add(lite);
                 }

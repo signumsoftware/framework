@@ -57,7 +57,7 @@ namespace Signum.Web
 
                 new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
-                    return h.LightEntityLine((Lite<IIdentifiable>)o, false);
+                    return h.LightEntityLine((Lite<IEntity>)o, false);
                 })),
 
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
@@ -155,10 +155,10 @@ namespace Signum.Web
 
     public class EntityFormatterRule
     {
-        public Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> Formatter { get; set; }
-        public Func<Lite<IIdentifiable>, bool> IsApplyable { get; set; }
+        public Func<HtmlHelper, Lite<IEntity>, MvcHtmlString> Formatter { get; set; }
+        public Func<Lite<IEntity>, bool> IsApplyable { get; set; }
 
-        public EntityFormatterRule(Func<Lite<IIdentifiable>, bool> isApplyable, Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> formatter)
+        public EntityFormatterRule(Func<Lite<IEntity>, bool> isApplyable, Func<HtmlHelper, Lite<IEntity>, MvcHtmlString> formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;
@@ -181,7 +181,7 @@ namespace Signum.Web
             if(!WriteData)
                 return MvcHtmlString.Empty;
 
-            string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
+            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value.TryToString();
 
             return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }

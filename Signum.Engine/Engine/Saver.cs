@@ -15,14 +15,14 @@ namespace Signum.Engine
 {
     internal static class Saver
     {
-        public static void Save(IdentifiableEntity entity)
+        public static void Save(Entity entity)
         {
             Save(new []{entity});
         }
 
-        static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
+        static readonly Entity[] None = new Entity[0];
 
-        public static void Save(IdentifiableEntity[] entities)
+        public static void Save(Entity[] entities)
         {
             if (entities == null || entities.Any(e => e == null))
                 throw new ArgumentNullException("entity");
@@ -34,14 +34,14 @@ namespace Signum.Engine
                 {
                     m.PreSaving(ref graphModified);
 
-                    IdentifiableEntity ident = m as IdentifiableEntity;
+                    Entity ident = m as Entity;
 
                     if (ident != null)
                         schema.OnPreSaving(ident, ref graphModified);
                 });
 
-                HashSet<IdentifiableEntity> wasNew = modifiables.OfType<IdentifiableEntity>().Where(a=>a.IsNew).ToHashSet();
-                HashSet<IdentifiableEntity> wasSelfModified = modifiables.OfType<IdentifiableEntity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet();
+                HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a=>a.IsNew).ToHashSet();
+                HashSet<Entity> wasSelfModified = modifiables.OfType<Entity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet();
 
                 log.Switch("Integrity");
 
@@ -54,7 +54,7 @@ namespace Signum.Engine
                 GraphExplorer.PropagateModifications(modifiables.Inverse());
 
                 //colapsa modifiables (collections and embeddeds) keeping indentifiables only
-                DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
+                DirectedGraph<Entity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
                 foreach (var node in identifiables)
                     schema.OnSaving(node);
@@ -63,7 +63,7 @@ namespace Signum.Engine
                 identifiables.RemoveEdges(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
 
                 //Remove all the nodes that are not modified
-                List<IdentifiableEntity> notModified = identifiables.Where(node => !node.IsGraphModified).ToList();
+                List<Entity> notModified = identifiables.Where(node => !node.IsGraphModified).ToList();
 
                 notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
 
@@ -86,10 +86,10 @@ namespace Signum.Engine
             }
         }
 
-        private static void SaveGraph(Schema schema, DirectedGraph<IdentifiableEntity> identifiables)
+        private static void SaveGraph(Schema schema, DirectedGraph<Entity> identifiables)
         {
             //takes apart the 'forbidden' connections from the good ones
-            DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
+            DirectedGraph<Entity> backEdges = identifiables.FeedbackEdgeSet();
 
             if (backEdges.IsEmpty())
                 backEdges = null;
@@ -98,12 +98,12 @@ namespace Signum.Engine
 
             Dictionary<TypeNew, int> stats = identifiables.GroupCount(ident => new TypeNew(ident.GetType(), ident.IsNew));
 
-            DirectedGraph<IdentifiableEntity> clone = identifiables.Clone();
-            DirectedGraph<IdentifiableEntity> inv = identifiables.Inverse();
+            DirectedGraph<Entity> clone = identifiables.Clone();
+            DirectedGraph<Entity> inv = identifiables.Inverse();
 
             while (clone.Count > 0)
             {
-                IGrouping<TypeNew, IdentifiableEntity> group = clone.Sinks()
+                IGrouping<TypeNew, Entity> group = clone.Sinks()
                     .GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew))
                     .WithMin(g => stats[g.Key] - g.Count());
 
@@ -122,7 +122,7 @@ namespace Signum.Engine
             }
         }
 
-        private static void SaveGroup(Schema schema, IGrouping<TypeNew, IdentifiableEntity> group, DirectedGraph<IdentifiableEntity> backEdges)
+        private static void SaveGroup(Schema schema, IGrouping<TypeNew, Entity> group, DirectedGraph<Entity> backEdges)
         {
             Table table = schema.Table(group.Key.Type);
 

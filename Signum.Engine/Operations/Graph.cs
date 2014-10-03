@@ -13,7 +13,7 @@ namespace Signum.Engine.Operations
     public delegate F Overrider<F>(F baseFunc); 
 
     public class Graph<T>
-         where T : class, IIdentifiable
+         where T : class, IEntity
     {
         public class Construct : _Construct<T>, IConstructOperation
         {
@@ -39,7 +39,7 @@ namespace Signum.Engine.Operations
                 this.Construct = overrider(this.Construct);
             }
 
-            IIdentifiable IConstructOperation.Construct(params object[] args)
+            IEntity IConstructOperation.Construct(params object[] args)
             {
                 using (HeavyProfiler.Log("Construct", () => Symbol.Symbol.Key))
                 {
@@ -124,7 +124,7 @@ namespace Signum.Engine.Operations
         }
 
         public class ConstructFrom<F> : IConstructorFromOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
             protected readonly ConstructSymbol<T>.From<F> Symbol;
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
@@ -163,12 +163,12 @@ namespace Signum.Engine.Operations
                 this.Lite = true;
             }
 
-            string IEntityOperation.CanExecute(IIdentifiable entity)
+            string IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanConstruct(entity);
             }
 
-            string OnCanConstruct(IIdentifiable entity)
+            string OnCanConstruct(IEntity entity)
             {
                 if (entity.IsNew && !AllowsNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
@@ -179,7 +179,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            IIdentifiable IConstructorFromOperation.Construct(IIdentifiable origin, params object[] args)
+            IEntity IConstructorFromOperation.Construct(IEntity origin, params object[] args)
             {
                 using (HeavyProfiler.Log("ConstructFrom", () => Symbol.Symbol.Key))
                 {
@@ -230,7 +230,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (IdentifiableEntity)origin, args);
+                        OperationLogic.SetExceptionData(ex, (Entity)origin, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -274,7 +274,7 @@ namespace Signum.Engine.Operations
         }
 
         public class ConstructFromMany<F> : IConstructorFromManyOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
             protected readonly ConstructSymbol<T>.FromMany<F> Symbol;
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
@@ -300,7 +300,7 @@ namespace Signum.Engine.Operations
                 this.Symbol = symbol;
             }
 
-            IIdentifiable IConstructorFromManyOperation.Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] args)
+            IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object[] args)
             {
                 using (HeavyProfiler.Log("ConstructFromMany", () => Symbol.Symbol.Key))
                 {
@@ -428,7 +428,7 @@ namespace Signum.Engine.Operations
                 this.Lite = true;
             }
 
-            string IEntityOperation.CanExecute(IIdentifiable entity)
+            string IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanExecute((T)entity);
             }
@@ -444,7 +444,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IExecuteOperation.Execute(IIdentifiable entity, params object[] args)
+            void IExecuteOperation.Execute(IEntity entity, params object[] args)
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
                 {
@@ -486,7 +486,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (IdentifiableEntity)entity, args);
+                        OperationLogic.SetExceptionData(ex, (Entity)entity, args);
 
                         if (Transaction.InTestTransaction)
                             throw;
@@ -560,7 +560,7 @@ namespace Signum.Engine.Operations
                 this.Lite = true;
             }
 
-            string IEntityOperation.CanExecute(IIdentifiable entity)
+            string IEntityOperation.CanExecute(IEntity entity)
             {
                 return OnCanDelete((T)entity);
             }
@@ -576,7 +576,7 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
-            void IDeleteOperation.Delete(IIdentifiable entity, params object[] args)
+            void IDeleteOperation.Delete(IEntity entity, params object[] args)
             {
                 using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
                 {
@@ -613,7 +613,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.SetExceptionData(ex, (IdentifiableEntity)entity, args);
+                            OperationLogic.SetExceptionData(ex, (Entity)entity, args);
 
                             if (Transaction.InTestTransaction)
                                 throw;

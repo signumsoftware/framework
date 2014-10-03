@@ -20,7 +20,7 @@ namespace Signum.Web.Controllers
 
             MappingContext context = mod.UntypedApplyChanges(this, route: route).UntypedValidateGlobal();
 
-            IIdentifiable ident = context.UntypedValue as IIdentifiable;
+            IEntity ident = context.UntypedValue as IEntity;
             string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;
             string newToStr = context.UntypedValue.ToString();
 

@@ -43,7 +43,7 @@ namespace Signum.Web.Operations
         public abstract bool OnIsVisible(IClientConstructorOperationContext ctx);
 
         public abstract bool HasConstructor { get; }
-        public abstract IdentifiableEntity OnConstructor(IConstructorOperationContext ctx);
+        public abstract Entity OnConstructor(IConstructorOperationContext ctx);
 
         public abstract bool HasClientConstructor { get; }
         public abstract JsFunction OnClientConstructor(IClientConstructorOperationContext ctx);
@@ -55,7 +55,7 @@ namespace Signum.Web.Operations
         }
     }
 
-    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IIdentifiable
+    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IEntity
     {
         public Func<ClientConstructorOperationContext<T>, bool> IsVisible { get; set; }
         public Func<ClientConstructorOperationContext<T>, JsFunction> ClientConstructor { get; set; }
@@ -83,9 +83,9 @@ namespace Signum.Web.Operations
 
         public override bool HasConstructor { get { return Constructor != null; } }
 
-        public override IdentifiableEntity OnConstructor(IConstructorOperationContext ctx)
+        public override Entity OnConstructor(IConstructorOperationContext ctx)
         {
-            return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
+            return (Entity)(IEntity)Constructor((ConstructorOperationContext<T>)ctx);
         }
 
      
@@ -103,7 +103,7 @@ namespace Signum.Web.Operations
         ConstructorOperationSettingsBase Settings { get; }
     }
 
-    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IIdentifiable
+    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IEntity
     {
         public OperationInfo OperationInfo { get; private set; }
         public ClientConstructorContext ClientConstructorContext { get; private set; }
@@ -129,7 +129,7 @@ namespace Signum.Web.Operations
         ConstructorOperationSettingsBase Settings { get; }
     }
 
-    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IIdentifiable
+    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IEntity
     {
         public OperationInfo OperationInfo { get; private set; }
         public ConstructorContext ConstructorContext { get; private set; }
@@ -165,7 +165,7 @@ namespace Signum.Web.Operations
         }
     }
 
-    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IIdentifiable
+    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IEntity
     {
         public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
             : base(symbolContainer)
@@ -221,7 +221,7 @@ namespace Signum.Web.Operations
     }
 
     public class ContextualOperationContext<T> : IContextualOperationContext 
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
 
         public List<Lite<T>> Entities { get; private set; }
@@ -306,7 +306,7 @@ namespace Signum.Web.Operations
         public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
     }
 
-    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IIdentifiable
+    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IEntity
     {
         public ContextualOperationSettings<T> ContextualFromMany { get; private set; }
         public ContextualOperationSettings<T> Contextual { get; private set; }
@@ -370,14 +370,14 @@ namespace Signum.Web.Operations
         EntityButtonContext Context { get; }
 
         OperationInfo OperationInfo { get; }
-        IIdentifiable Entity { get; }
+        IEntity Entity { get; }
         EntityOperationSettingsBase OperationSettings { get; }
         string CanExecute { get; set; }
 
         JsOperationOptions Options();
     }
 
-    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IIdentifiable
+    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IEntity
     {
         public EntityButtonContext Context { get; private set; }
         public UrlHelper Url { get { return Context.Url; } }
@@ -422,7 +422,7 @@ namespace Signum.Web.Operations
         }
 
 
-        IIdentifiable IEntityOperationContext.Entity
+        IEntity IEntityOperationContext.Entity
         {
             get { return this.Entity; }
         }

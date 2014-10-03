@@ -122,7 +122,7 @@ WriteLiteral("\r\n");
             #line 31 "..\..\Signum\Views\SearchResults.cshtml"
  foreach (var row in queryResult.Rows)
 {
-    Lite<IIdentifiable> entityField = row.Entity;
+    Lite<IEntity> entityField = row.Entity;
 
             
             #line default

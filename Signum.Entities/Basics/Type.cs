@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class TypeDN : IdentifiableEntity
+    public class TypeDN : Entity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;

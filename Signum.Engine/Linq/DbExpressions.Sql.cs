@@ -65,7 +65,7 @@ namespace Signum.Engine.Linq
         MList,
         MListProjection,
         MListElement,
-        
+        PrimaryKey,
     }
 
 

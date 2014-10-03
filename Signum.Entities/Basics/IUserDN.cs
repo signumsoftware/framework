@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Signum.Entities.Basics
 {
-    public interface IUserDN : IIdentifiable
+    public interface IUserDN : IEntity
     {
     }
 

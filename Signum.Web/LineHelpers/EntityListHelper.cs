@@ -99,10 +99,10 @@ namespace Signum.Web
                 PrimaryKey? idOrNull = null;
                 Type type = itemTC.Value.GetType();
                 if (type.IsLite())
-                    idOrNull = ((Lite<IIdentifiable>)itemTC.Value).IdOrNull;
+                    idOrNull = ((Lite<IEntity>)itemTC.Value).IdOrNull;
 
-                if (type.IsIdentifiableEntity())
-                    idOrNull = ((IdentifiableEntity)(object)itemTC.Value).IdOrNull;
+                if (type.IsEntity())
+                    idOrNull = ((Entity)(object)itemTC.Value).IdOrNull;
 
                 optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
             }

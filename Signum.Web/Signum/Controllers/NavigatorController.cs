@@ -32,7 +32,7 @@ namespace Signum.Web.Controllers
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            Lite<IdentifiableEntity> lite = Lite.Create(t, id);
+            Lite<Entity> lite = Lite.Create(t, id);
 
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
@@ -45,10 +45,10 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(webTypeName);
 
-            if (!type.IsIdentifiableEntity())
+            if (!type.IsEntity())
                 throw new InvalidOperationException("Only classes that inherit from IdentifiableEntity can be created using this Action"); 
 
-            var entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
+            var entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
 
             return this.NormalPage(entity);
         }
@@ -58,17 +58,17 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(entityType);
 
-            IdentifiableEntity entity = null;
+            Entity entity = null;
             if (id.HasText())
             {
-                Lite<IdentifiableEntity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
+                Lite<Entity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
                 using (Navigator.Manager.OnRetrievingForView(lite))
                 {
                     entity = Database.Retrieve(lite);
                 }
             }
             else
-                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
 
             return this.PopupNavigate(entity, new PopupNavigateOptions(prefix)
             {
@@ -83,17 +83,17 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(entityType);
 
-            IdentifiableEntity entity = null;
+            Entity entity = null;
             if (id.HasText())
             {
-                Lite<IdentifiableEntity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
+                Lite<Entity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
                  using (Navigator.Manager.OnRetrievingForView(lite))
                  {
                      entity = Database.Retrieve(lite);
                  }
             }
             else
-                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
 
             return this.PopupView(entity, new PopupViewOptions(prefix)
             {
@@ -109,19 +109,19 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(entityType);
 
-            IdentifiableEntity entity = null;
+            Entity entity = null;
             if (id.HasText())
             {    
-                 Lite<IdentifiableEntity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
+                 Lite<Entity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
                  using (Navigator.Manager.OnRetrievingForView(lite))
                  {
                      entity = Database.Retrieve(lite);
                  }
             }
             else
-                entity = (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
 
-            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew((Entity)entity, prefix);
 
             if (readOnly == true)
                 tc.ReadOnly = true;
@@ -133,8 +133,8 @@ namespace Signum.Web.Controllers
         public PartialViewResult NormalControl(string entityType, PrimaryKey id, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-            Lite<IdentifiableEntity> lite = Lite.Create(type, id);
-            IdentifiableEntity entity;
+            Lite<Entity> lite = Lite.Create(type, id);
+            Entity entity;
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
                 entity = Database.Retrieve(lite);
@@ -191,7 +191,7 @@ namespace Signum.Web.Controllers
 
         private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
         {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
+            Entity ident = entity as Entity;
 
             if (ident == null)
                 throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities");

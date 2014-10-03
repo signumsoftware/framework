@@ -175,8 +175,8 @@ namespace Signum.Engine.Linq
         }
 
 
-        static MethodInfo miSplitCase = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineCase()).GetGenericMethodDefinition();
-        static MethodInfo miSplitUnion = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineUnion()).GetGenericMethodDefinition();
+        static MethodInfo miSplitCase = ReflectionTools.GetMethodInfo((Entity e) => e.CombineCase()).GetGenericMethodDefinition();
+        static MethodInfo miSplitUnion = ReflectionTools.GetMethodInfo((Entity e) => e.CombineUnion()).GetGenericMethodDefinition();
         private CombineStrategy GetStrategy(MethodInfo methodInfo)
         {
             if (methodInfo.IsInstantiationOf(miSplitCase))
@@ -556,10 +556,10 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
+                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite<IEntity>>() : col.Cast<Lite<IEntity>>().ToList());
                     case DbExpressionType.Entity:
                     case DbExpressionType.ImplementedBy:
-                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
+                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<Entity>() : col.Cast<Entity>().ToList());
                     default:
                         return SmartEqualizer.In(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
                 }
@@ -1168,7 +1168,7 @@ namespace Signum.Engine.Linq
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, ee.Type.TypeName()));
                     
-                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
+                    if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
                         return ee.ExternalId.UnNullify();
 
                     Expression result = Completed(ee).GetBinding(fi);
@@ -1236,7 +1236,7 @@ namespace Signum.Engine.Linq
                 {
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
-                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
+                    if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
                         return iba.Id.UnNullify();
 
                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
@@ -1808,8 +1808,8 @@ namespace Signum.Engine.Linq
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
         }
 
-        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (IdentifiableEntity a) => a.Id, 1)).GetGenericMethodDefinition();
-        static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((IdentifiableEntity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((Entity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
     
         public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body)
         {
@@ -2102,7 +2102,7 @@ namespace Signum.Engine.Linq
         
      
 
-        internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
+        internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(PrimaryKey?));
 
         public Expression MakeLite(Expression entity, Expression customToStr)
         {
@@ -2477,9 +2477,7 @@ namespace Signum.Engine.Linq
                 {
                     TableRequest tr = r as TableRequest;
 
-                    var externalID = DbExpressionNominator.FullNominate(tr.CompleteEntity.ExternalId);
-
-                    Expression equal = SmartEqualizer.EqualNullable(externalID, tr.CompleteEntity.GetBinding(EntityExpression.IdField));
+                    Expression equal = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(tr.CompleteEntity.ExternalId, tr.CompleteEntity.GetBinding(EntityExpression.IdField)));
                     source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, tr.Table, equal);
                 }
                 else if (r is UniqueRequest)
@@ -2772,7 +2770,7 @@ namespace Signum.Engine.Linq
                 colExpression is ImplementedByExpression ||
                 colExpression is ImplementedByAllExpression)
             {
-                var ident = (IdentifiableEntity)c.Value;
+                var ident = (Entity)c.Value;
 
                 return GetEntityConstant(ident == null ? nullId : Expression.Constant(ident.Id), ident == null ? null : ident.GetType());
             }
@@ -2783,7 +2781,7 @@ namespace Signum.Engine.Linq
             if (colExpression is LiteReferenceExpression)
             {
                 var colLite =  ((LiteReferenceExpression)colExpression);
-                var lite = (Lite<IIdentifiable>)c.Value;
+                var lite = (Lite<IEntity>)c.Value;
 
                 using(OverrideColExpression(colLite.Reference))
                 {

@@ -24,7 +24,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityStrip : EntityListBase
     {
-        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
+        public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting;
 
         public static readonly DependencyProperty AutocompleteProperty =
             DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityStrip), new FrameworkPropertyMetadata(true));

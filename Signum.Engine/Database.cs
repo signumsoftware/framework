@@ -25,32 +25,32 @@ namespace Signum.Engine
     {
         #region Save
         public static void SaveList<T>(this IEnumerable<T> entities)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".Formato(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<Entity>().ToArray());
 
                 tr.Commit();
             }
         }
 
-        public static void SaveParams(params IIdentifiable[] entities)
+        public static void SaveParams(params IEntity[] entities)
         {
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveParams"))
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(entities.Cast<IdentifiableEntity>().ToArray());
+                Saver.Save(entities.Cast<Entity>().ToArray());
 
                 tr.Commit();
             }
         }
 
         public static T Save<T>(this T entity)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
@@ -61,14 +61,14 @@ namespace Signum.Engine
                 using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".Formato(typeof(T).TypeName())))
                 using (Transaction tr = new Transaction())
                 {
-                    Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
+                    Saver.Save((Entity)(IEntity)entity);
 
                     return tr.Commit(entity);
                 }
             }
             catch (Exception e)
             {
-                e.Data["entity"] = ((IdentifiableEntity)(IIdentifiable)entity).BaseToString();
+                e.Data["entity"] = ((Entity)(IEntity)entity).BaseToString();
 
                 throw;
             }
@@ -76,7 +76,7 @@ namespace Signum.Engine
         #endregion
 
         #region Retrieve
-        public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
+        public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
@@ -87,7 +87,7 @@ namespace Signum.Engine
             return lite.EntityOrNull;
         }
 
-        public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
+        public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
@@ -95,8 +95,8 @@ namespace Signum.Engine
             return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
 
-        static GenericInvoker<Func<PrimaryKey, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
-        public static T Retrieve<T>(PrimaryKey id) where T : IdentifiableEntity
+        static GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, Entity>>(id => Retrieve<Entity>(id));
+        public static T Retrieve<T>(PrimaryKey id) where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
             {
@@ -137,7 +137,7 @@ namespace Signum.Engine
             }
         }
 
-        static CacheControllerBase<T> GetCacheController<T>() where T : IdentifiableEntity
+        static CacheControllerBase<T> GetCacheController<T>() where T : Entity
         {
             CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
 
@@ -149,7 +149,7 @@ namespace Signum.Engine
             return cc;
         }
 
-        static FilterQueryResult<T> GetFilterQuery<T>() where T : IdentifiableEntity
+        static FilterQueryResult<T> GetFilterQuery<T>() where T : Entity
         {
             if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA? 
                 return null;
@@ -157,12 +157,12 @@ namespace Signum.Engine
             return Schema.Current.OnFilterQuery<T>();
         }
 
-        public static IdentifiableEntity Retrieve(Type type, PrimaryKey id)
+        public static Entity Retrieve(Type type, PrimaryKey id)
         {
             return giRetrieve.GetInvoker(type)(id);
         }
 
-        public static Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
+        public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -170,9 +170,9 @@ namespace Signum.Engine
             return giRetrieveLite.GetInvoker(type)(id);
         }
 
-        static GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<IdentifiableEntity>>>(id => RetrieveLite<IdentifiableEntity>(id));
+        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => RetrieveLite<Entity>(id));
         public static Lite<T> RetrieveLite<T>(PrimaryKey id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".Formato(typeof(T).TypeName())))
             {
@@ -200,7 +200,7 @@ namespace Signum.Engine
             }
         }
 
-        public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IIdentifiable
+        public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 return null;
@@ -215,9 +215,9 @@ namespace Signum.Engine
             return giGetToStr.GetInvoker(type)(id);
         }
 
-        static GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<IdentifiableEntity>(id));
+        static GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<Entity>(id));
         public static string GetToStr<T>(PrimaryKey id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             try
             {
@@ -243,7 +243,7 @@ namespace Signum.Engine
         #region Exists
 
         public static bool Exists<T>(this Lite<T> lite)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             try
             {
@@ -256,9 +256,9 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, bool>> giExist = new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<IdentifiableEntity>(id));
+        static GenericInvoker<Func<PrimaryKey, bool>> giExist = new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
         public static bool Exists<T>(PrimaryKey id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             try
             {
@@ -281,7 +281,7 @@ namespace Signum.Engine
 
         #region Retrieve All Lists Lites
         public static List<T> RetrieveAll<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             try
             {
@@ -318,18 +318,18 @@ namespace Signum.Engine
         }
 
         static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeDN>());
-        public static List<IdentifiableEntity> RetrieveAll(Type type)
+        public static List<Entity> RetrieveAll(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = giRetrieveAll.GetInvoker(type)();
-            return list.Cast<IdentifiableEntity>().ToList();
+            return list.Cast<Entity>().ToList();
         }
 
         static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new GenericInvoker<Func<IList>>(() => Database.RetrieveAllLite<TypeDN>());
         public static List<Lite<T>> RetrieveAllLite<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             try
             {
@@ -351,19 +351,19 @@ namespace Signum.Engine
             }
         }
 
-        public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
+        public static List<Lite<Entity>> RetrieveAllLite(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = giRetrieveAllLite.GetInvoker(type)();
-            return list.Cast<Lite<IdentifiableEntity>>().ToList();
+            return list.Cast<Lite<Entity>>().ToList();
         }
 
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<IdentifiableEntity>(ids));
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<Entity>(ids));
         public static List<T> RetrieveList<T>(List<PrimaryKey> ids)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".Formato(typeof(T).TypeName())))
             {
@@ -402,7 +402,7 @@ namespace Signum.Engine
             }
         }
 
-        private static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : IdentifiableEntity
+        private static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : Entity
         {
             var cc = GetCacheController<T>();
             if (cc != null)
@@ -428,19 +428,19 @@ namespace Signum.Engine
             return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToList();
         }
 
-        public static List<IdentifiableEntity> RetrieveList(Type type, List<PrimaryKey> ids)
+        public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = giRetrieveList.GetInvoker(type)(ids);
-            return list.Cast<IdentifiableEntity>().ToList();
+            return list.Cast<Entity>().ToList();
         }
 
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<IdentifiableEntity>(ids));
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".Formato(typeof(T).TypeName())))
             {
@@ -464,17 +464,17 @@ namespace Signum.Engine
             }
         }
 
-        public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
+        public static List<Lite<Entity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = (IList)giRetrieveListLite.GetInvoker(type).Invoke(ids);
-            return list.Cast<Lite<IdentifiableEntity>>().ToList();
+            return list.Cast<Lite<Entity>>().ToList();
         }
 
         public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             if (lites == null)
                 throw new ArgumentNullException("lites");
@@ -505,7 +505,7 @@ namespace Signum.Engine
         }
 
         public static void Delete<T>(this Lite<T> lite)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
@@ -517,7 +517,7 @@ namespace Signum.Engine
         }
 
         public static void Delete<T>(this T ident)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             if (ident == null)
                 throw new ArgumentNullException("ident");
@@ -528,9 +528,9 @@ namespace Signum.Engine
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
-        static GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<IdentifiableEntity>(id));
+        static GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<Entity>(id));
         public static void Delete<T>(PrimaryKey id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (HeavyProfiler.Log("DBDelete", () => typeof(T).TypeName()))
             {
@@ -542,7 +542,7 @@ namespace Signum.Engine
 
 
         public static void DeleteList<T>(IList<T> collection)
-            where T : IIdentifiable
+            where T : IEntity
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -563,7 +563,7 @@ namespace Signum.Engine
         }
 
         public static void DeleteList<T>(IList<Lite<T>> collection)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -597,9 +597,9 @@ namespace Signum.Engine
             giDeleteList.GetInvoker(type)(ids);
         }
 
-        static GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<IdentifiableEntity>(l));
+        static GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<Entity>(l));
         public static void DeleteList<T>(IList<PrimaryKey> ids)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             if (ids == null)
                 throw new ArgumentNullException("ids");
@@ -621,14 +621,14 @@ namespace Signum.Engine
 
         #region Query
         public static IQueryable<T> Query<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>());
         }
 
         [MethodExpander(typeof(MListQueryExpander))]
         public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
@@ -649,23 +649,23 @@ namespace Signum.Engine
 
         [MethodExpander(typeof(MListElementsExpander))]
         public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
-                where E : IdentifiableEntity
+                where E : Entity
         {
             return MListQuery(mListProperty).Where(mle => mle.Parent == entity);
         }
 
         [MethodExpander(typeof(MListElementsExpander))]
         public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
-                where E : IdentifiableEntity
+                where E : Entity
         {
             return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite() == entity);
         }
 
         class MListElementsExpander : IMethodExpander
         {
-            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<IdentifiableEntity, int>(null)).GetGenericMethodDefinition();
-            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<IdentifiableEntity>(null, a => false)).GetGenericMethodDefinition();
-            static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.ToLite()).GetGenericMethodDefinition();
+            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null)).GetGenericMethodDefinition();
+            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null, a => false)).GetGenericMethodDefinition();
+            static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
@@ -691,22 +691,22 @@ namespace Signum.Engine
         }
 
         public static IQueryable<E> InDB<E>(this E entity)
-             where E : class, IIdentifiable
+             where E : class, IEntity
         {
             return (IQueryable<E>)giInDB.GetInvoker(typeof(E), entity.GetType()).Invoke(entity);
         }
 
         [MethodExpander(typeof(InDbExpander))]
-        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
         {
             return entity.InDB().Select(selector).SingleEx();
         }
 
-        static GenericInvoker<Func<IIdentifiable, IQueryable>> giInDB =
-            new GenericInvoker<Func<IIdentifiable, IQueryable>>((ie) => InDB<IdentifiableEntity, IdentifiableEntity>((IdentifiableEntity)ie));
+        static GenericInvoker<Func<IEntity, IQueryable>> giInDB =
+            new GenericInvoker<Func<IEntity, IQueryable>>((ie) => InDB<Entity, Entity>((Entity)ie));
         static IQueryable<S> InDB<S, RT>(S entity)
-            where S : class, IIdentifiable
-            where RT : IdentifiableEntity, S
+            where S : class, IEntity
+            where RT : Entity, S
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
@@ -723,7 +723,7 @@ namespace Signum.Engine
         }
 
         public static IQueryable<E> InDB<E>(this Lite<E> lite)
-           where E : class, IIdentifiable
+           where E : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
@@ -732,16 +732,16 @@ namespace Signum.Engine
         }
 
         [MethodExpander(typeof(InDbExpander))]
-        public static R InDB<E, R>(this Lite<E> lite, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+        public static R InDB<E, R>(this Lite<E> lite, Expression<Func<E, R>> selector) where E : class, IEntity
         {
             return lite.InDB().Select(selector).SingleEx();
         }
 
-        static GenericInvoker<Func<Lite<IIdentifiable>, IQueryable>> giInDBLite =
-            new GenericInvoker<Func<Lite<IIdentifiable>, IQueryable>>(l => InDB<IIdentifiable, IdentifiableEntity>((Lite<IdentifiableEntity>)l));
+        static GenericInvoker<Func<Lite<IEntity>, IQueryable>> giInDBLite =
+            new GenericInvoker<Func<Lite<IEntity>, IQueryable>>(l => InDB<IEntity, Entity>((Lite<Entity>)l));
         static IQueryable<S> InDB<S, RT>(Lite<RT> lite)
-            where S : class, IIdentifiable
-            where RT : IdentifiableEntity, S
+            where S : class, IEntity
+            where RT : Entity, S
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
@@ -777,11 +777,11 @@ namespace Signum.Engine
 
                 var staticType = genericArguments[0];
 
-                var entityType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
+                var entityType = isLite ? ((Lite<Entity>)value).EntityType : value.GetType();
 
                 Expression query = !isLite ?
-                    giInDB.GetInvoker(staticType, entityType)((IIdentifiable)value).Expression :
-                    giInDBLite.GetInvoker(staticType, entityType)((Lite<IdentifiableEntity>)value).Expression;
+                    giInDB.GetInvoker(staticType, entityType)((IEntity)value).Expression :
+                    giInDBLite.GetInvoker(staticType, entityType)((Lite<Entity>)value).Expression;
 
                 var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
 
@@ -801,7 +801,7 @@ namespace Signum.Engine
 
         #region UnsafeDelete
         public static int UnsafeDelete<T>(this IQueryable<T> query)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
@@ -820,7 +820,7 @@ namespace Signum.Engine
         }
 
         public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
@@ -841,25 +841,25 @@ namespace Signum.Engine
 
         #region UnsafeUpdate
         public static IUpdateable<E> UnsafeUpdate<E>(this IQueryable<E> query)
-          where E : IdentifiableEntity
+          where E : Entity
         {
             return new Updateable<E>(query, null);
         }
 
         public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
-             where E : IdentifiableEntity
+             where E : Entity
         {
             return new Updateable<MListElement<E, V>>(query, null);
         }
 
         public static IUpdateablePart<A, E> UnsafeUpdatePart<A, E>(this IQueryable<A> query, Expression<Func<A, E>> partSelector)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             return new UpdateablePart<A, E>(query, partSelector, null);
         }
 
         public static IUpdateablePart<A, MListElement<E, V>> UnsafeUpdateMListPart<A, E, V>(this IQueryable<A> query, Expression<Func<A, MListElement<E, V>>> partSelector)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             return new UpdateablePart<A, MListElement<E, V>>(query, partSelector, null);
         }
@@ -885,7 +885,7 @@ namespace Signum.Engine
         #region UnsafeInsert
 
         public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
@@ -908,7 +908,7 @@ namespace Signum.Engine
 
          
         public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty,  Expression<Func<T, MListElement<E, V>>> constructor)
-               where E : IdentifiableEntity
+               where E : Entity
         {
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
@@ -932,7 +932,7 @@ namespace Signum.Engine
         #endregion
     }
 
-    public class MListElement<E, V> where E : IdentifiableEntity
+    public class MListElement<E, V> where E : Entity
     {
         public PrimaryKey RowId { get; set; }
         public int Order { get; set; }
@@ -964,7 +964,7 @@ namespace Signum.Engine
 
         Type EntityType { get; }
 
-        IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity;
+        IQueryable<E> EntityQuery<E>() where E : Entity;
     }
 
     //E -> E
@@ -1004,7 +1004,7 @@ namespace Signum.Engine
                 this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
         }
 
-        public IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity
+        public IQueryable<E> EntityQuery<E>() where E : Entity
         {
             var result = query.Select(partSelector);
 
@@ -1063,7 +1063,7 @@ namespace Signum.Engine
                 this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
         }
 
-        public IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity
+        public IQueryable<E> EntityQuery<E>() where E : Entity
         {
             return UpdateableConverter.Convert<T, E>(query);
         }
@@ -1087,4 +1087,6 @@ namespace Signum.Engine
             this.ValueExpression = valueExpression; 
         }
     }
+
+    public interface IView : IRootEntity { }
 }

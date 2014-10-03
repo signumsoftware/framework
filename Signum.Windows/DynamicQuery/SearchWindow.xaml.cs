@@ -91,18 +91,18 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
-          DependencyProperty.Register("SelectedItem", typeof(Lite<IdentifiableEntity>), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public Lite<IdentifiableEntity> SelectedItem
+          DependencyProperty.Register("SelectedItem", typeof(Lite<Entity>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public Lite<Entity> SelectedItem
         {
-            get { return (Lite<IdentifiableEntity>)GetValue(SelectedItemProperty); }
+            get { return (Lite<Entity>)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(List<Lite<IdentifiableEntity>>), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public List<Lite<IdentifiableEntity>> SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(List<Lite<Entity>>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public List<Lite<Entity>> SelectedItems
         {
-            get { return (List<Lite<IdentifiableEntity>>)GetValue(SelectedItemsProperty); }
+            get { return (List<Lite<Entity>>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 

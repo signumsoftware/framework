@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public static class EntityInfoHelper
     {
-        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IIdentifiable> lite)
+        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IEntity> lite)
         {
             return helper.Hidden(name, lite.KeyLong());
         }
@@ -50,7 +50,7 @@ namespace Signum.Web
             this.Ticks = ticks;
         }
 
-        public RuntimeInfo(Lite<IIdentifiable> lite) :
+        public RuntimeInfo(Lite<IEntity> lite) :
             this(lite.EntityType, lite.IdOrNull, lite.IdOrNull == null, null)
         {
         }
@@ -60,7 +60,7 @@ namespace Signum.Web
         {
         }
 
-        public RuntimeInfo(IIdentifiable entity)
+        public RuntimeInfo(IEntity entity)
             : this(entity.GetType(), entity.IdOrNull, entity.IsNew,
                  entity is Entity ? ((Entity)entity).Ticks : (long?)null)
         {
@@ -103,7 +103,7 @@ namespace Signum.Web
             );
         }
 
-        public Lite<IdentifiableEntity> ToLite()
+        public Lite<Entity> ToLite()
         {
             if (IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");

@@ -17,9 +17,6 @@ namespace Signum.Engine
 {
     public static class SqlBuilder
     {
-        public readonly static SqlDbType PrimaryKeyType = SqlDbType.Int;
-        public readonly static string PrimaryKeyName = "Id";
-
         #region Create Tables
         public static SqlPreCommand CreateTableSql(ITable t)
         {
@@ -231,7 +228,7 @@ namespace Signum.Engine
                 ForeignKeyName(table.Name.Name, fieldName),
                 fieldName.SqlEscape(),
                 foreignTable.Name,
-                PrimaryKeyName.SqlEscape()));
+                foreignTable.PrimaryKey.Name.SqlEscape()));
         }
 
         public static string ForeignKeyName(string table, string fieldName)

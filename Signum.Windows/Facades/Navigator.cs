@@ -40,13 +40,13 @@ namespace Signum.Windows
         }
 
         public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             Manager.Navigate(entity, options ?? new NavigateOptions());
         }
 
         public static void Navigate<T>(T entity, NavigateOptions options = null)
-            where T : IIdentifiable
+            where T : IEntity
         {
             Manager.Navigate(entity, options ?? new NavigateOptions());
         }
@@ -58,7 +58,7 @@ namespace Signum.Windows
         }
 
         public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) 
-            where T: class, IIdentifiable
+            where T: class, IEntity
         {
             return (Lite<T>)Manager.View(entity, options ?? new ViewOptions());
         }
@@ -111,7 +111,7 @@ namespace Signum.Windows
             return Manager.OnIsNavigable(type, null, isSearch);
         }
 
-        public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
+        public static bool IsNavigable(IEntity entity, bool isSearch = false)
         {
             return Manager.OnIsNavigable(entity.GetType(), entity, isSearch);
         }
@@ -134,7 +134,7 @@ namespace Signum.Windows
         }
 
         public static EntitySettings<T> EntitySettings<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return (EntitySettings<T>)EntitySettings(typeof(T));
         }
@@ -262,7 +262,7 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
+            Type type = entityOrLite is Lite<Entity> ? ((Lite<Entity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             OpenIndependentWindow(() =>
             {
@@ -277,7 +277,7 @@ namespace Signum.Windows
                     ModifiableEntity entity = entityOrLite as ModifiableEntity;
                     if (entity == null)
                     {
-                        Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
+                        Lite<Entity> lite = (Lite<Entity>)entityOrLite;
                         entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
                     }
 
@@ -313,7 +313,7 @@ namespace Signum.Windows
             if (entity == null)
             {
                 liteType = Lite.Extract(entityOrLite.GetType());
-                entity = Server.Retrieve((Lite<IdentifiableEntity>)entityOrLite);
+                entity = Server.Retrieve((Lite<Entity>)entityOrLite);
             }
 
             EntitySettings es = AssertViewableEntitySettings(entity);
@@ -337,7 +337,7 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                IdentifiableEntity ident = (IdentifiableEntity)result;
+                Entity ident = (Entity)result;
 
                 bool saveProtected = ((ViewOptions)options).SaveProtected ?? OperationClient.SaveProtected(ident.GetType());
 
@@ -376,7 +376,7 @@ namespace Signum.Windows
 
             if (options is ViewOptions)
                 win.SaveProtected = ((ViewOptions)options).SaveProtected ??
-                    (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
+                    (typeof(Entity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
 
             if (TaskNormalWindow != null)
                 TaskNormalWindow(win, entity);
@@ -397,7 +397,7 @@ namespace Signum.Windows
             }
             else
             {
-                if (type.IsIdentifiableEntity())//HACK
+                if (type.IsEntity())//HACK
                     return false;
                 else
                     return true;
@@ -460,7 +460,7 @@ namespace Signum.Windows
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, IIdentifiable entity, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, IEntity entity, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
@@ -535,7 +535,7 @@ namespace Signum.Windows
                     return template;
             }
 
-            if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
+            if (entityType.IsModifiableEntity() || entityType.IsIEntity())
             {
                 DataTemplate template = EntitySettings.TryGetC(entityType).Try(ess => ess.DataTemplate);
                 if (template != null)

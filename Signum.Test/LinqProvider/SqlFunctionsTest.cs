@@ -210,7 +210,7 @@ namespace Signum.Test.LinqProvider
         }
 
         public void Dump<T,S>(Expression<Func<T, S>> bla)
-            where T:IdentifiableEntity
+            where T:Entity
         {
             Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }

@@ -39,7 +39,7 @@ namespace Signum.Windows
 
         void LinksWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
+            Entity ident = e.NewValue as Entity;
 
             ObservableCollection<QuickLink> links = ident != null && !ident.IsNew ? LinksClient.GetForEntity(ident.ToLiteFat(), Control) : new ObservableCollection<QuickLink>();
 

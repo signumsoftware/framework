@@ -50,7 +50,7 @@ namespace Signum.Web
             return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
         }
 
-        public static Lite<IdentifiableEntity> FindUnique(UniqueOptions options)
+        public static Lite<Entity> FindUnique(UniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -75,12 +75,12 @@ namespace Signum.Web
             return Manager.QuerySettings.GetOrThrow(queryName, "no QuerySettings for queryName {0} found");
         }
 
-        public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) where T : class, IIdentifiable
+        public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) where T : class, IEntity
         {
             return ParseLiteKeys<T>(controller.ControllerContext.RequestContext.HttpContext.Request["liteKeys"]);
         }
 
-        public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IIdentifiable
+        public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IEntity
         {
             return liteKeys.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Lite.Parse<T>).ToList();
         }
@@ -180,7 +180,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual Lite<IdentifiableEntity> FindUnique(UniqueOptions options)
+        protected internal virtual Lite<Entity> FindUnique(UniqueOptions options)
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 

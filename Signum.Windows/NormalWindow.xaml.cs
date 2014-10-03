@@ -95,7 +95,7 @@ namespace Signum.Windows
         {
             if (e.Refresh)
             {
-                var l = ((IdentifiableEntity)this.DataContext).ToLite().Retrieve();
+                var l = ((Entity)this.DataContext).ToLite().Retrieve();
                 this.DataContext = null;
                 this.DataContext = l;
                 e.Handled = true;
@@ -149,7 +149,7 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (this.DataContext is IdentifiableEntity && SaveProtected)
+            if (this.DataContext is Entity && SaveProtected)
             {
                 if (!this.HasChanges())
                     DialogResult = true;
@@ -259,14 +259,14 @@ namespace Signum.Windows
 
         void RefreshEnabled()
         {
-            buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).Try(ei => !ei.IsNew) ?? false;
+            buttonBar.ReloadButton.IsEnabled = (DataContext as Entity).Try(ei => !ei.IsNew) ?? false;
         }
 
         private void Reload_Click(object sender, RoutedEventArgs e)
         {
             if (this.LooseChangesIfAny())
             {
-                IdentifiableEntity ei = (IdentifiableEntity)DataContext;
+                Entity ei = (Entity)DataContext;
                 DataContext = null;  // Equal returns true 
                 DataContext = Server.Retrieve(ei.GetType(), ei.Id);
             }

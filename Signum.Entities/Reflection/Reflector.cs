@@ -58,7 +58,7 @@ namespace Signum.Entities.Reflection
         {
             return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
                     from t in a.GetTypes()
-                    where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                    where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
                     let da = t.SingleAttributeInherit<DescriptionOptionsAttribute>()
                     where da == null || da.Options.IsSet(DescriptionOptions.Members)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -75,7 +75,7 @@ namespace Signum.Entities.Reflection
 
         static DescriptionOptions? DescriptionManager_IsIIdentifiable(Type t)
         {
-             return t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+             return t.IsInterface && typeof(IEntity).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         static DescriptionOptions? DescriptionManager_IsQuery(Type t)
@@ -113,9 +113,9 @@ namespace Signum.Entities.Reflection
             return typeof(Modifiable).IsAssignableFrom(t);
         }
 
-        public static bool IsIIdentifiable(this Type type)
+        public static bool IsIEntity(this Type type)
         {
-            return typeof(IIdentifiable).IsAssignableFrom(type);
+            return typeof(IEntity).IsAssignableFrom(type);
         }
 
         public static bool IsIRootEntity(this Type type)
@@ -130,12 +130,12 @@ namespace Signum.Entities.Reflection
 
         public static bool IsModifiableIdentifiableOrLite(this Type t)
         {
-            return t.IsModifiable() || t.IsIIdentifiable() || t.IsLite();
+            return t.IsModifiable() || t.IsIEntity() || t.IsLite();
         }
 
-        public static bool IsIdentifiableEntity(this Type ft)
+        public static bool IsEntity(this Type ft)
         {
-            return typeof(IdentifiableEntity).IsAssignableFrom(ft);
+            return typeof(Entity).IsAssignableFrom(ft);
         }
 
         public static bool IsEmbeddedEntity(this Type t)

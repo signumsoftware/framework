@@ -50,7 +50,7 @@ namespace Signum.Windows.Operations
                 {
                     if (coc.ConfirmMessage())
                     {
-                        IdentifiableEntity result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
+                        Entity result = (Entity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
                             Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), coc.Type, coc.OperationInfo.OperationSymbol, ctx.Args)));
 
                         if (result != null)

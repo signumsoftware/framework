@@ -136,8 +136,8 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             if (type.IsAbstract)
                 return "{0} is abstract".Formato(type.Name);
 
-            if (!type.IsIdentifiableEntity())
-                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+            if (!type.IsEntity())
+                return "{0} is not {1}".Formato(type.Name, typeof(Entity).Name);
 
             return null;
         }
@@ -236,19 +236,19 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class SqlDbTypeAttribute : Attribute
     {
-        SqlDbType? type;
+        SqlDbType? sqlDbType;
         int? size;
         int? scale;
 
         public SqlDbType SqlDbType
         {
-            get { return type.Value; }
-            set { type = value; }
+            get { return sqlDbType.Value; }
+            set { sqlDbType = value; }
         }
 
         public bool HasSqlDbType
         {
-            get { return type.HasValue; }
+            get { return sqlDbType.HasValue; }
         }
 
         public int Size
@@ -275,9 +275,77 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
         public string UdtTypeName { get; set; }
     }
-    
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    public sealed class PrimaryKeyAttribute : Attribute
+    {
+        public PrimaryKeyAttribute(Type type, string name = "id")
+        {
+            this.Type = type;
+            this.Name = name;
+        }
+
+        public Type Type { get; set; }
+
+        public string Name { get; set; }
+
+        SqlDbType? sqlDbType;
+        public SqlDbType SqlDbType
+        {
+            get { return sqlDbType.Value; }
+            set { sqlDbType = value; }
+        }
+
+        public bool HasSqlDbType
+        {
+            get { return sqlDbType.HasValue; }
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public sealed class ColumnNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public ColumnNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Field)]
-    public class ForceForeignKeyAttribute : Attribute
+    sealed class ViewPrimaryKeyAttribute : Attribute
+    { 
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    public sealed class TableNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+        public string SchemaName { get; set; }
+        public string DatabaseName { get; set; }
+        public string ServerName { get; set; }
+
+        public TableNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+ 
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+    public sealed class TicksFieldAttribute : Attribute
+    {
+        public bool HasTicks { get; private set; }
+
+        public TicksFieldAttribute(bool hasTicks)
+        {
+            this.HasTicks = hasTicks;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class AvoidForeignKeyAttribute : Attribute
     {
 
     }
@@ -308,12 +376,12 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
     public static class LinqHintEntities
     {
-        public static T CombineCase<T>(this T value) where T : IIdentifiable
+        public static T CombineCase<T>(this T value) where T : IEntity
         {
             return value;
         }
 
-        public static T CombineUnion<T>(this T value) where T : IIdentifiable
+        public static T CombineUnion<T>(this T value) where T : IEntity
         {
             return value;
         }

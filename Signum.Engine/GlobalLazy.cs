@@ -35,7 +35,7 @@ namespace Signum.Engine
                     if (type.IsAbstract)
                         throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".Formato(type));
 
-                    if (!Reflector.IsIdentifiableEntity(type))
+                    if (!Reflector.IsEntity(type))
                         throw new InvalidOperationException("Impossible to invalidate using {0} because is not and IdentifiableEntity".Formato(type));
                 }
 

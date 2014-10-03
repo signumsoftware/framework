@@ -91,7 +91,7 @@ namespace Signum.Test.LinqProvider
 
             var problematic = graph.Where(a =>
                 a.IsGraphModified &&
-                a is IdentifiableEntity && (((IdentifiableEntity)a).IdOrNull == null || ((IdentifiableEntity)a).IsNew));
+                a is Entity && (((Entity)a).IdOrNull == null || ((Entity)a).IsNew));
 
             if (problematic.Any())
                 throw new AssertFailedException("Some non-retrived elements: {0}".Formato(problematic.ToString(", ")));  

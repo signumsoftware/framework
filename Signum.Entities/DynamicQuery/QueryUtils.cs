@@ -96,7 +96,7 @@ namespace Signum.Entities.DynamicQuery
                     if (type.IsLite())
                         return FilterType.Lite;
 
-                    if (type.IsIIdentifiable())
+                    if (type.IsIEntity())
                         return FilterType.Lite;
 
                     if (type.IsEmbeddedEntity())
@@ -385,7 +385,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
+        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity ident) => ident.ToLite()).GetGenericMethodDefinition();
         internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
         {
             if (expression.Type.IsLite())
@@ -402,7 +402,7 @@ namespace Signum.Entities.DynamicQuery
 
         internal static Expression BuildLite(this Expression expression)
         {
-            if (Reflector.IsIIdentifiable(expression.Type))
+            if (Reflector.IsIEntity(expression.Type))
                 return Expression.Call(miToLite.MakeGenericMethod(expression.Type), expression);
 
             return expression;
@@ -410,7 +410,7 @@ namespace Signum.Entities.DynamicQuery
 
         internal static Type BuildLite(this Type type)
         {
-            if (Reflector.IsIIdentifiable(type))
+            if (Reflector.IsIEntity(type))
                 return Lite.Generate(type);
 
             return type;

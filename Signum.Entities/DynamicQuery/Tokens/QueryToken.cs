@@ -116,7 +116,7 @@ namespace Signum.Entities.DynamicQuery
                 return DecimalProperties(this);
 
             Type cleanType = type.CleanType();
-            if (cleanType.IsIIdentifiable())
+            if (cleanType.IsIEntity())
             {
                 if (implementations.Value.IsByAll)
                     return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
@@ -214,7 +214,7 @@ namespace Signum.Entities.DynamicQuery
                          where Reflector.QueryableProperty(type, p)
                          select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p));
 
-            if (!type.IsIdentifiableEntity())
+            if (!type.IsEntity())
                 return result;
 
             var mixinProperties = from mt in MixinDeclarations.GetMixinDeclarations(type)

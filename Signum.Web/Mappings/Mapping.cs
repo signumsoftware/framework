@@ -208,14 +208,14 @@ namespace Signum.Web
             EntityListBaseKeys.List
         };
 
-        static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IIdentifiable>());
+        static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IEntity>());
         static Mapping<T> ForAutoEntity<T>() where T : class
         {
             return new AutoEntityMapping<T>().GetValue;
         }
 
-        static GenericInvoker<Func<Delegate>> giForLite = new GenericInvoker<Func<Delegate>>(() => ForLite<IIdentifiable>());
-        static Mapping<Lite<S>> ForLite<S>() where S : class, IIdentifiable
+        static GenericInvoker<Func<Delegate>> giForLite = new GenericInvoker<Func<Delegate>>(() => ForLite<IEntity>());
+        static Mapping<Lite<S>> ForLite<S>() where S : class, IEntity
         {
             return new LiteMapping<S>().GetValue;
         }
@@ -267,7 +267,7 @@ namespace Signum.Web
             if (result != null)
                 return result;
 
-            if (typeof(T).IsModifiableEntity() || typeof(T).IsIIdentifiable())
+            if (typeof(T).IsModifiableEntity() || typeof(T).IsIEntity())
                 return (Mapping<T>)giForAutoEntity.GetInvoker(typeof(T))(); ;
 
             if (typeof(T).IsLite())
@@ -413,7 +413,7 @@ namespace Signum.Web
                 {
                     RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
                         .Select(r => RuntimeInfo.FromFormValue(r))
-                        .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
+                        .OrderBy(a => !a.ToLite().RefersTo((Entity)(object)ctx.Value))
                         .FirstEx();
 
                     return runtimeInfo.Try(ri => ri.EntityType);
@@ -529,7 +529,7 @@ namespace Signum.Web
     }
 
     class MixinPropertyMapping<T, M, P> : IPropertyMapping<T, P>
-        where T : IdentifiableEntity
+        where T : Entity
         where M : MixinEntity
     {
         public PropertyMapping<M, P> PropertyMapping;
@@ -582,7 +582,7 @@ namespace Signum.Web
                     .Where(pv => !pv.PropertyInfo.IsReadOnly())
                     .Select(pv => NewProperty(pv, null)));
 
-                if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+                if (typeof(Entity).IsAssignableFrom(typeof(T)))
                 {
                     foreach (var t in MixinDeclarations.GetMixinDeclarations(typeof(T)))
                     {
@@ -664,7 +664,7 @@ namespace Signum.Web
             {
                 runtimeInfo = strRuntimeInfo.Split(',')
                     .Select(r => RuntimeInfo.FromFormValue(r))
-                    .OrderBy(a => !(a == null ? null : a.ToLite()).RefersTo((IdentifiableEntity)(object)ctx.Value))
+                    .OrderBy(a => !(a == null ? null : a.ToLite()).RefersTo((Entity)(object)ctx.Value))
                     .FirstEx();
             }
 
@@ -680,7 +680,7 @@ namespace Signum.Web
             }
             else
             {
-                IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)ctx.Value;
+                Entity identifiable = (Entity)(ModifiableEntity)ctx.Value;
 
                 var result = GetIdentifiableEntity(ctx.Controller, runtimeInfo, identifiable);
 
@@ -691,7 +691,7 @@ namespace Signum.Web
             }
         }
 
-        private static T GetIdentifiableEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
+        private static T GetIdentifiableEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, Entity identifiable)
         {
             if (runtimeInfo.IsNew)
             {
@@ -828,7 +828,7 @@ namespace Signum.Web
         bool AvoidEntityMapping { get; set; }
     }
 
-    public class LiteMapping<S>: ILiteMapping where S : class, IIdentifiable
+    public class LiteMapping<S>: ILiteMapping where S : class, IEntity
     {
         public bool AvoidEntityMapping { get; set; }
         public Mapping<S> EntityMapping { get; set; }
@@ -873,7 +873,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)new ConstructorContext(ctx.Controller).ConstructUntyped(runtimeInfo.EntityType)).ToLiteFat());
+                return TryModifyEntity(ctx, (Lite<S>)((Entity)new ConstructorContext(ctx.Controller).ConstructUntyped(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)

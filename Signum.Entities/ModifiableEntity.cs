@@ -339,7 +339,7 @@ namespace Signum.Entities
         public string FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is IdentifiableEntity));
+            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is Entity));
         }
 
         public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
@@ -439,7 +439,7 @@ namespace Signum.Entities
                 }
             }
 
-            IdentifiableEntity ident = target as IdentifiableEntity;
+            Entity ident = target as Entity;
 
             if (ident != null)
             {

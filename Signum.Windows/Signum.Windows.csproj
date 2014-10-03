@@ -346,8 +346,6 @@
     <Page Include="Widgets\LinksWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Widgets\WidgetPanel.xaml">
       <SubType>Designer</SubType>
@@ -540,6 +538,7 @@
     <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Widgets\WidgetPanel.xaml.cs">
       <DependentUpon>WidgetPanel.xaml</DependentUpon>

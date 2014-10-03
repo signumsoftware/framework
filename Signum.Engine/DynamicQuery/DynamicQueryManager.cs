@@ -124,7 +124,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
-        public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }

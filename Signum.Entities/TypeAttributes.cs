@@ -52,7 +52,7 @@ namespace Signum.Entities
         {
             return dictionary.GetOrAdd(type, t =>
             {
-                if (!t.IsIIdentifiable())
+                if (!t.IsIEntity())
                     throw new InvalidOperationException("{0} should be a non-abstrat IdentifiableEntity");
 
                 return t.SingleAttributeInherit<EntityKindAttribute>();

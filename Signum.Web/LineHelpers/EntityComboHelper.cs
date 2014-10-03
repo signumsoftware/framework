@@ -25,7 +25,7 @@ namespace Signum.Web
             if (!entityCombo.Visible || entityCombo.HideIfNull && entityCombo.UntypedValue == null)
                 return MvcHtmlString.Empty;
 
-            if (!entityCombo.Type.IsIIdentifiable() && !entityCombo.Type.IsLite())
+            if (!entityCombo.Type.IsIEntity() && !entityCombo.Type.IsLite())
                 throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
@@ -90,10 +90,10 @@ namespace Signum.Web
             List<SelectListItem> items = new List<SelectListItem>();
             items.Add(new SelectListItem() { Text = "-", Value = "" });
 
-            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+            IEnumerable<Lite<IEntity>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
 
-            var current = entityCombo.UntypedValue is IIdentifiable ? ((IIdentifiable)entityCombo.UntypedValue).ToLite() :
-                entityCombo.UntypedValue as Lite<IIdentifiable>;
+            var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue).ToLite() :
+                entityCombo.UntypedValue as Lite<IEntity>;
 
             items.AddRange(
                 data.Select(lite => new SelectListItem()
@@ -171,12 +171,12 @@ namespace Signum.Web
             return builder.ToHtml();
         }
 
-        public static SelectListItem ToSelectListItem<T>(this Lite<T> lite, Lite<T> selected) where T : class, IIdentifiable
+        public static SelectListItem ToSelectListItem<T>(this Lite<T> lite, Lite<T> selected) where T : class, IEntity
         {
             return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected.Is(lite) };
         }
 
-        public static MvcHtmlString ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
+        public static MvcHtmlString ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IEntity
         {
             List<SelectListItem> list = new List<SelectListItem>();
 

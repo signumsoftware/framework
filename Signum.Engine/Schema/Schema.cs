@@ -91,20 +91,20 @@ namespace Signum.Engine.Maps
                 throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(type.NiceName(), error));
         }
 
-        readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>();
-        public EntityEvents<IdentifiableEntity> EntityEventsGlobal
+        readonly IEntityEvents entityEventsGlobal = new EntityEvents<Entity>();
+        public EntityEvents<Entity> EntityEventsGlobal
         {
-            get { return (EntityEvents<IdentifiableEntity>)entityEventsGlobal; }
+            get { return (EntityEvents<Entity>)entityEventsGlobal; }
         }
 
         Dictionary<Type, IEntityEvents> entityEvents = new Dictionary<Type, IEntityEvents>();
         public EntityEvents<T> EntityEvents<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
         }
 
-        internal void OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
+        internal void OnPreSaving(Entity entity, ref bool graphModified)
         {
             AssertAllowed(entity.GetType());
 
@@ -116,7 +116,7 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnPreSaving(entity, ref graphModified);
         }
 
-        internal void OnSaving(IdentifiableEntity entity)
+        internal void OnSaving(Entity entity)
         {
             AssertAllowed(entity.GetType());
 
@@ -129,7 +129,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        internal void OnSaved(IdentifiableEntity entity, SavedEventArgs args)
+        internal void OnSaved(Entity entity, SavedEventArgs args)
         {
             AssertAllowed(entity.GetType());
 
@@ -141,7 +141,7 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaved(entity, args);
         }
 
-        internal void OnRetrieved(IdentifiableEntity entity)
+        internal void OnRetrieved(Entity entity)
         {
             AssertAllowed(entity.GetType());
 
@@ -153,7 +153,7 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity);
         }
 
-        internal void OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : IdentifiableEntity
+        internal void OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T));
 
@@ -163,7 +163,7 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeDelete(entityQuery);
         }
 
-        internal void OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : IdentifiableEntity
+        internal void OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T));
 
@@ -210,7 +210,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal CacheControllerBase<T> CacheController<T>() where T : IdentifiableEntity
+        internal CacheControllerBase<T> CacheController<T>() where T : Entity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
@@ -221,7 +221,7 @@ namespace Signum.Engine.Maps
         }
 
         internal FilterQueryResult<T> OnFilterQuery<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             AssertAllowed(typeof(T));
 
@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
         }
 
         FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression) 
-            where T: IdentifiableEntity
+            where T: Entity
         {
             if (result == null)
                 return expression;
@@ -254,7 +254,7 @@ namespace Signum.Engine.Maps
         }
 
         public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
-            where T: IdentifiableEntity
+            where T: Entity
         {
             using (userInterface ? ExecutionMode.UserInterface() : null)
             {
@@ -279,7 +279,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        private Func<T, bool> CombineFunc<T>(Func<T, bool> result, Func<T, bool> func) where T : IdentifiableEntity
+        private Func<T, bool> CombineFunc<T>(Func<T, bool> result, Func<T, bool> func) where T : Entity
         {
             if (result == null)
                 return func;
@@ -291,7 +291,7 @@ namespace Signum.Engine.Maps
         }
 
         public Expression<Func<T, bool>> GetInDatabaseFilter<T>()
-           where T : IdentifiableEntity
+           where T : Entity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
             if (ee == null)
@@ -309,7 +309,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        private Expression<Func<T, bool>> CombineExpr<T>(Expression<Func<T, bool>> result, Expression<Func<T, bool>> func) where T : IdentifiableEntity
+        private Expression<Func<T, bool>> CombineExpr<T>(Expression<Func<T, bool>> result, Expression<Func<T, bool>> func) where T : Entity
         {
             if (result == null)
                 return func;
@@ -425,7 +425,7 @@ namespace Signum.Engine.Maps
             get { return Connector.Current.Schema; }
         }
 
-        public Table Table<T>() where T : IdentifiableEntity
+        public Table Table<T>() where T : Entity
         {
             return Table(typeof(T));
         }
@@ -483,7 +483,7 @@ namespace Signum.Engine.Maps
 
                 return PropertyRoute.GenerateRoutes(root)
                     .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
-                    .Where(r => r.Type.CleanType().IsIIdentifiable())
+                    .Where(r => r.Type.CleanType().IsIEntity())
                     .ToDictionary(r => r, r => FindImplementations(r));
             }
             catch (Exception e)
@@ -535,7 +535,7 @@ namespace Signum.Engine.Maps
                 return Implementations.TryFromAttributes(route.Type.CleanType(), atts, route) ?? Implementations.By();
             }
 
-            throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IIdentifiable).Name));
+            throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IEntity).Name));
         }
 
         private Implementations? CalculateExpressionImplementations(PropertyRoute route)
@@ -560,7 +560,7 @@ namespace Signum.Engine.Maps
         /// Uses a lambda navigate in a strongly-typed way, you can acces field using the property and collections using Single().
         /// </summary>
         public Field Field<T, V>(Expression<Func<T, V>> lambdaToField)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
         }
@@ -616,7 +616,7 @@ namespace Signum.Engine.Maps
 
         IEnumerable<PrimaryKey> GetAllIds();
 
-        void Complete(IdentifiableEntity entity, IRetriever retriver);
+        void Complete(Entity entity, IRetriever retriver);
 
         string GetToString(PrimaryKey id);
         string TryGetToString(PrimaryKey id);
@@ -626,14 +626,14 @@ namespace Signum.Engine.Maps
     public class InvaludateEventArgs : EventArgs { }
 
     public abstract class CacheControllerBase<T> : ICacheController
-        where T : IdentifiableEntity
+        where T : Entity
     {
         public abstract bool Enabled { get; }
         public abstract void Load();
 
         public abstract IEnumerable<PrimaryKey> GetAllIds();
 
-        void ICacheController.Complete(IdentifiableEntity entity, IRetriever retriver)
+        void ICacheController.Complete(Entity entity, IRetriever retriver)
         {
             Complete((T)entity, retriver);
         }

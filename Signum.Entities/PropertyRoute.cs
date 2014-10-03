@@ -74,7 +74,7 @@ namespace Signum.Entities
             MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, this.Type.IsMList() ? new[] { typeof(int) } : new Type[0], null) ??
                             (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            if (mi == null && Type.IsIdentifiableEntity())
+            if (mi == null && Type.IsEntity())
             {
                 string name = ExtractMixin(fieldOrProperty);
 
@@ -102,7 +102,7 @@ namespace Signum.Entities
             if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
                 member = ((MethodInfo)member).GetGenericArguments()[0]; 
 
-            if (this.Type.IsIIdentifiable() && PropertyRouteType != PropertyRouteType.Root)
+            if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
             {
                 Implementations imp = GetImplementations();
 
@@ -131,7 +131,7 @@ namespace Signum.Entities
 
             this.Parent = parent;
 
-            if (parent.Type.IsIIdentifiable() && parent.PropertyRouteType != PropertyRouteType.Root)
+            if (parent.Type.IsIEntity() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 
             if (fieldOrProperty is PropertyInfo && Reflector.IsMList(parent.Type))
@@ -150,7 +150,7 @@ namespace Signum.Entities
                 PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.LiteEntity;
             }
-            else if (typeof(IdentifiableEntity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
+            else if (typeof(Entity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
             {
                 MixinDeclarations.AssertDeclared(parent.type, (Type)fieldOrProperty);
 
@@ -310,7 +310,7 @@ namespace Signum.Entities
 
         public Implementations? TryGetImplementations()
         {
-            if (this.Type.CleanType().IsIIdentifiable() && PropertyRouteType != Entities.PropertyRouteType.Root)
+            if (this.Type.CleanType().IsIEntity() && PropertyRouteType != Entities.PropertyRouteType.Root)
                 return GetImplementations();
 
             return null;

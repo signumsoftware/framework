@@ -18,13 +18,13 @@ namespace Signum.Windows
 
     public static class LinksClient
     {
-        public static Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>> EntityLinks =
-            new Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>(
+        public static Polymorphic<Func<Lite<Entity>, Control, QuickLink[]>> EntityLinks =
+            new Polymorphic<Func<Lite<Entity>, Control, QuickLink[]>>(
                 merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
-                minimumType: typeof(IdentifiableEntity));
+                minimumType: typeof(Entity));
 
         public static void RegisterEntityLinks<T>(Func<Lite<T>, Control, QuickLink[]> getQuickLinks)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var current = EntityLinks.GetDefinition(typeof(T));
 
@@ -33,7 +33,7 @@ namespace Signum.Windows
             EntityLinks.SetDefinition(typeof(T), current);
         }
 
-        public static ObservableCollection<QuickLink> GetForEntity(Lite<IdentifiableEntity> ident, Control control)
+        public static ObservableCollection<QuickLink> GetForEntity(Lite<Entity> ident, Control control)
         {
             ObservableCollection<QuickLink> links = new ObservableCollection<QuickLink>();
 
@@ -241,7 +241,7 @@ namespace Signum.Windows
     }
 
     public class QuickLinkNavigate<T> : QuickLink
-        where T : IdentifiableEntity
+        where T : Entity
     {
         public NavigateOptions NavigateOptions { get; set; }
 

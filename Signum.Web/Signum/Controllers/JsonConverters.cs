@@ -16,7 +16,7 @@ namespace Signum.Web.Controllers
     {
         public override bool CanConvert(Type objectType)
         {
-            return typeof(Lite<IdentifiableEntity>).IsAssignableFrom(objectType);
+            return typeof(Lite<Entity>).IsAssignableFrom(objectType);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -29,7 +29,7 @@ namespace Signum.Web.Controllers
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)value;
+            Lite<Entity> lite = (Lite<Entity>)value;
             writer.WriteStartObject();
 
             writer.WritePropertyName("Key");

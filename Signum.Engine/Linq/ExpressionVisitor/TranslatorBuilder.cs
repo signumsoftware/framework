@@ -183,7 +183,7 @@ namespace Signum.Engine.Linq
             static PropertyInfo piRetriever = ReflectionTools.GetPropertyInfo((IProjectionRow r) => r.Retriever);
             static MemberExpression retriever = Expression.Property(row, piRetriever); 
            
-            static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
+            static FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity i) => i.id);
 
             static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeDN>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
@@ -298,7 +298,7 @@ namespace Signum.Engine.Linq
 
                 LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), Expression.Block(bindings), e);
 
-                return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id, lambda);
+                return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id.Nullify(), lambda);
             }
 
             BlockExpression AssignMixin(ParameterExpression e, MixinEntityExpression m)
@@ -509,6 +509,15 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Constant(sce.Value, sce.Type);
             }
+
+            protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+            {
+                var val = Visit(pk.Value);
+
+                return Expression.Call(miWrap, Expression.Convert(val, typeof(IComparable)));
+            }
+
+            static readonly MethodInfo miWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Wrap(1));
         }
     }
 

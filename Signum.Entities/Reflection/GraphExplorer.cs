@@ -85,7 +85,7 @@ namespace Signum.Entities.Reflection
 
             if (withIndependentEmbeddedEntities == false)
             {
-                return (from ident in graph.OfType<IdentifiableEntity>()
+                return (from ident in graph.OfType<Entity>()
                         let error = ident.IdentifiableIntegrityCheck()
                         where error.HasText()
                         select new { ident, error })
@@ -93,9 +93,9 @@ namespace Signum.Entities.Reflection
             }
             else
             {
-                DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is IdentifiableEntity), graph.RelatedTo);
+                DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-                string errors = (from ident in identGraph.OfType<IdentifiableEntity>()
+                string errors = (from ident in identGraph.OfType<Entity>()
                                  let error = ident.IdentifiableIntegrityCheck()
                                  where error.HasText()
                                  select new { ident, error })
@@ -114,8 +114,8 @@ namespace Signum.Entities.Reflection
 
         static string CloneAttack(DirectedGraph<Modifiable> graph)
         {
-            var problems = (from m in graph.OfType<IdentifiableEntity>()
-                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).Try(ident => (object)ident.IdOrNull) ?? -m.temporalId } into g
+            var problems = (from m in graph.OfType<Entity>()
+                            group m by new { Type = m.GetType(), Id = (m as Entity).Try(ident => (object)ident.IdOrNull) ?? -m.temporalId } into g
                             where g.Count() > 1 && g.Count(m => m.Modified == ModifiedState.SelfModified) > 0
                             select g).ToList();
 
@@ -182,19 +182,19 @@ namespace Signum.Entities.Reflection
             {
                 Node = n,
 
-                Fillcolor = n is Lite<IdentifiableEntity> ? "white" : color(n.GetType()),
+                Fillcolor = n is Lite<Entity> ? "white" : color(n.GetType()),
                 Color =
-                    n is Lite<IdentifiableEntity> ? color(((Lite<IdentifiableEntity>)n).GetType()) :
+                    n is Lite<Entity> ? color(((Lite<Entity>)n).GetType()) :
                     (n.Modified == ModifiedState.SelfModified ? "red" :
                      n.Modified == ModifiedState.Modified ? "red4" :
                      n.Modified == ModifiedState.Sealed ? "gray" : "black"),
 
-                Shape = n is Lite<IdentifiableEntity> ? "ellipse" :
-                        n is IdentifiableEntity ? "ellipse" :
+                Shape = n is Lite<Entity> ? "ellipse" :
+                        n is Entity ? "ellipse" :
                         n is EmbeddedEntity ? "box" :
                         Reflector.IsMList(n.GetType()) ? "hexagon" : "plaintext",
                 Style = n is Entity ? ", style=\"diagonals,filled,bold\"" :
-                        n is Lite<IdentifiableEntity> ? "style=\"solid,bold\"" : "",
+                        n is Lite<Entity> ? "style=\"solid,bold\"" : "",
 
                 Label = n.ToString().Etc(30, "..").RemoveDiacritics()
 
@@ -207,15 +207,15 @@ namespace Signum.Entities.Reflection
             return "digraph \"Grafo\"\r\n{{\r\n    node [ style = \"filled,bold\"]\r\n\r\n{0}\r\n\r\n{1}\r\n}}".Formato(nodes, arrows);
         }
 
-        public static DirectedGraph<IdentifiableEntity> ColapseIdentifiables(DirectedGraph<Modifiable> modifiables)
+        public static DirectedGraph<Entity> ColapseIdentifiables(DirectedGraph<Modifiable> modifiables)
         {
-            DirectedGraph<IdentifiableEntity> result = new DirectedGraph<IdentifiableEntity>();
-            foreach (var item in modifiables.OfType<IdentifiableEntity>())
+            DirectedGraph<Entity> result = new DirectedGraph<Entity>();
+            foreach (var item in modifiables.OfType<Entity>())
             {
-                var toColapse = modifiables.IndirectlyRelatedTo(item, i => !(i is IdentifiableEntity));
-                var toColapseFriends = toColapse.SelectMany(i => modifiables.RelatedTo(i).OfType<IdentifiableEntity>());
+                var toColapse = modifiables.IndirectlyRelatedTo(item, i => !(i is Entity));
+                var toColapseFriends = toColapse.SelectMany(i => modifiables.RelatedTo(i).OfType<Entity>());
                 result.Add(item, toColapseFriends);
-                result.Add(item, modifiables.RelatedTo(item).OfType<IdentifiableEntity>());
+                result.Add(item, modifiables.RelatedTo(item).OfType<Entity>());
             }
             return result;
         }
@@ -223,8 +223,8 @@ namespace Signum.Entities.Reflection
         public static XDocument EntityDGML(this DirectedGraph<Modifiable> graph)
         {
             return graph.ToDGML(n =>
-                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n) :
-                n is Lite<IdentifiableEntity> ? GetAttributes((Lite<IdentifiableEntity>)n) :
+                n is Entity ? GetAttributes((Entity)n) :
+                n is Lite<Entity> ? GetAttributes((Lite<Entity>)n) :
                 n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n) :
                 n is MixinEntity ? GetAttributes((MixinEntity)n) :
                 n.GetType().IsMList() ? GetAttributes((IList)n) :
@@ -236,7 +236,7 @@ namespace Signum.Entities.Reflection
                 });
         }
 
-        private static XAttribute[] GetAttributes(IdentifiableEntity ie)
+        private static XAttribute[] GetAttributes(Entity ie)
         {
             return new[]
             {
@@ -252,7 +252,7 @@ namespace Signum.Entities.Reflection
             return "({0})".Formato(ie.Modified);
         }
 
-        private static XAttribute[] GetAttributes(Lite<IdentifiableEntity> lite)
+        private static XAttribute[] GetAttributes(Lite<Entity> lite)
         {
             return new[]
             {

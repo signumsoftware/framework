@@ -20,12 +20,16 @@ namespace Signum.Engine.Linq
 
         public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
         {
+             UnwrapPrimaryKey(ref e1, ref e2);
+
             return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
                 Expression.And(new IsNullExpression(e1), new IsNullExpression(e2)));
         }
 
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
+            UnwrapPrimaryKey(ref e1, ref e2);
+
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
                 return Expression.Equal(e1, e2);
 
@@ -34,10 +38,58 @@ namespace Signum.Engine.Linq
 
         public static Expression NotEqualNullable(Expression e1, Expression e2)
         {
+            UnwrapPrimaryKey(ref e1, ref e2);
+
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
                 return Expression.NotEqual(e1, e2);
 
             return Expression.NotEqual(e1.Nullify(), e2.Nullify());
+        }
+
+        public static void UnwrapPrimaryKey(ref Expression e1, ref Expression e2)
+        {
+            var t1 = e1.Type.UnNullify();
+            var t2 = e2.Type.UnNullify();
+
+            if (t1 == typeof(PrimaryKey) || t2 == typeof(PrimaryKey))
+            {
+                if (t1 != typeof(PrimaryKey) || t2 != typeof(PrimaryKey))
+                    throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".Formato(t1.TypeName(), t2.TypeName()));
+
+                e1 = Unwrap(e1);
+                e2 = Unwrap(e2);
+
+                if (!e1.IsNull() && !e2.IsNull() && e1.Type.UnNullify() != e2.Type.UnNullify())
+                    throw new InvalidOperationException("Imposible to compare PrimaryKeys of type {0} == {1}".Formato(e1.Type.TypeName(), e2.Type.TypeName()));
+            }
+        }
+
+
+        static Expression Unwrap(Expression exp)
+        {
+            var pk = exp as PrimaryKeyExpression;
+            if (pk != null)
+                return pk.Value;
+
+            var cons = exp as ConstantExpression;
+            if (cons != null)
+            {
+                if (cons.Value == null)
+                    return Expression.Constant(null, typeof(object));
+
+                return Expression.Constant(cons.Value);
+            }
+
+            var sqlCons = exp as SqlConstantExpression;
+            if (sqlCons != null)
+            {
+                if (sqlCons.Value == null)
+                    return new SqlConstantExpression(null, typeof(object));
+
+                return new SqlConstantExpression(sqlCons.Value);
+            }
+
+            throw new InvalidOperationException("Impossible to convert {0} to PrimaryKeyExpression");
         }
 
         public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
@@ -350,7 +402,7 @@ namespace Signum.Engine.Linq
             return SmartOr(SmartAnd(ce.Test, ifTrue), SmartAnd(SmartNot(ce.Test), ifFalse));
         }
 
-        internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
+        internal static Expression EntityIn(Expression newItem, IEnumerable<Entity> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -360,7 +412,7 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
+        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite<IEntity>> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -390,6 +442,8 @@ namespace Signum.Engine.Linq
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
         }
+
+      
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
@@ -543,9 +597,9 @@ namespace Signum.Engine.Linq
             if (c.Value == null)
                 return c;
 
-            if (c.Type.IsIIdentifiable())
+            if (c.Type.IsIEntity())
             {
-                var ei = (IdentifiableEntity)c.Value;
+                var ei = (Entity)c.Value;
 
                 return new EntityExpression(
                     ei.GetType(),
@@ -566,7 +620,7 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsLite())
             {
-                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)c.Value;
+                Lite<IEntity> lite = (Lite<IEntity>)c.Value;
 
                 Expression id = Expression.Constant(lite.IdOrNull);
 

@@ -101,7 +101,7 @@ namespace Signum.Web
 
             if (filterOption.Token.Type.IsLite())
             {
-                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)Common.Convert(filterOption.Value, filterOption.Token.Type);
+                Lite<IEntity> lite = (Lite<IEntity>)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Database.FillToString(lite);
 

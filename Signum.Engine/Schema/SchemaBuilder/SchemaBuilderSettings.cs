@@ -21,12 +21,16 @@ namespace Signum.Engine.Maps
 
         }
 
+        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "Id");
+        public int DefaultImplementedBySize = 40;
+
         public Func<Type, string> CanOverrideAttributes = null;
 
         public int MaxNumberOfParameters = 2000;
-        public int MaxNumberOfStatementsInSaveQueries = 16; 
-
-        public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
+        public int MaxNumberOfStatementsInSaveQueries = 16;
+        
+        public Dictionary<PropertyRoute, Attribute[]> OverridenFieldAttributes = new Dictionary<PropertyRoute, Attribute[]>();
+        public Dictionary<Type, Attribute[]> OverridenTypeAttributes = new Dictionary<Type, Attribute[]>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -74,18 +78,28 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public bool IsOverriden<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
+        public bool IsOverriden<T, S>(Expression<Func<T, S>> propertyRoute) where T : Entity
         {
             return IsOverriden(PropertyRoute.Construct(propertyRoute));
         }
 
         private bool IsOverriden(PropertyRoute propertyRoute)
         {
-            return OverridenAttributes.ContainsKey(propertyRoute);
+            return OverridenFieldAttributes.ContainsKey(propertyRoute);
+        }
+
+        public bool IsOverridenType<T>() where T : Entity
+        {
+            return IsOverridenType(typeof(T));
+        }
+
+        private bool IsOverridenType(Type type)
+        {
+            return OverridenTypeAttributes.ContainsKey(type);
         }
 
         public void OverrideAttributes<T, S>(Expression<Func<T, S>> propertyRoute, params Attribute[] attributes)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             OverrideAttributes(PropertyRoute.Construct(propertyRoute), attributes);
         }
@@ -99,7 +113,17 @@ namespace Signum.Engine.Maps
 
             AssertCorrect(attributes, AttributeTargets.Field);
 
-            OverridenAttributes.Add(propertyRoute, attributes);
+            OverridenFieldAttributes.Add(propertyRoute, attributes);
+        }
+
+        public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T: Entity
+        {
+            OverrideTypeAttributes(typeof(T), attributes);
+        }
+
+        public void OverrideTypeAttributes(Type type, params Attribute[] attributes)
+        {
+            OverridenTypeAttributes.Add(type, attributes);
         }
 
         private void AssertCorrect(Attribute[] attributes, AttributeTargets attributeTargets)
@@ -110,7 +134,7 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : IdentifiableEntity
+        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : Entity
         {
             var pr = PropertyRoute.Construct<T, S>(propertyRoute);
 
@@ -118,7 +142,7 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("In order to {0} you need to OverrideAttributes for {1} to remove IgnoreAttribute".Formato(errorContext, pr));
         }
 
-        public Attribute[] FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
+        public Attribute[] FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute) where T : Entity
         {
             return FieldAttributes(PropertyRoute.Construct<T, S>(propertyRoute));
         }
@@ -128,7 +152,7 @@ namespace Signum.Engine.Maps
             if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
                 throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
 
-            var overriden = OverridenAttributes.TryGetC(propertyRoute); 
+            var overriden = OverridenFieldAttributes.TryGetC(propertyRoute); 
 
             if(overriden!= null)
                 return overriden; 
@@ -146,6 +170,24 @@ namespace Signum.Engine.Maps
                 default:
                     throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
 	        }
+        }
+
+        public Attribute[] TypeAttributes(Type type)
+        {
+            if (!typeof(Entity).IsAssignableFrom(type.BaseType))
+                return new Attribute[0];
+
+            var overriden = OverridenTypeAttributes.TryGetC(type);
+
+            if (overriden != null)
+                return overriden;
+
+            var res = type.GetCustomAttributes(false).Cast<Attribute>().ToArray();
+
+            if (!res.IsEmpty())
+                return res;
+
+            return TypeAttributes(type.BaseType);
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
@@ -169,13 +211,13 @@ namespace Signum.Engine.Maps
             return FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
         }
 
-        public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
+        public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var imp = GetImplementations(propertyRoute);
             return !imp.IsByAll  && imp.Types.Contains(typeToImplement);
         }
 
-        public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
+        public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var propRoute = PropertyRoute.Construct(propertyRoute);
 
@@ -185,7 +227,7 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".Formato(propRoute, typeToImplement.Name));
         }
 
-        public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : IdentifiableEntity
+        public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : Entity
         {
             return GetImplementations(PropertyRoute.Construct(propertyRoute));
         }
@@ -193,8 +235,8 @@ namespace Signum.Engine.Maps
         public Implementations GetImplementations(PropertyRoute propertyRoute)
         {
             var cleanType = propertyRoute.Type.CleanType();  
-            if (!propertyRoute.Type.CleanType().IsIIdentifiable())
-                throw new InvalidOperationException("{0} is not a {1}".Formato(propertyRoute, typeof(IIdentifiable).Name));
+            if (!propertyRoute.Type.CleanType().IsIEntity())
+                throw new InvalidOperationException("{0} is not a {1}".Formato(propertyRoute, typeof(IEntity).Name));
 
             var fieldAtt = FieldAttributes(propertyRoute);
 
@@ -271,6 +313,8 @@ namespace Signum.Engine.Maps
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
+
+       
     }
 
     public class SqlDbTypePair

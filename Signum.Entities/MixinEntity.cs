@@ -15,7 +15,7 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.Members)]
     public abstract class MixinEntity : ModifiableEntity
     {
-        protected MixinEntity(IdentifiableEntity mainEntity, MixinEntity next)
+        protected MixinEntity(Entity mainEntity, MixinEntity next)
         {
             this.mainEntity = mainEntity;
             this.next = next;
@@ -30,9 +30,9 @@ namespace Signum.Entities
         }
 
         [Ignore]
-        readonly IdentifiableEntity mainEntity;
+        readonly Entity mainEntity;
         [HiddenProperty]
-        public IdentifiableEntity MainEntity
+        public Entity MainEntity
         {
             get { return mainEntity; }
         }
@@ -45,17 +45,17 @@ namespace Signum.Entities
 
     public static class MixinDeclarations
     {
-        public static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
+        public static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
 
         public static Dictionary<Type, HashSet<Type>> Declarations = new Dictionary<Type, HashSet<Type>>();
 
-        public static Dictionary<Type, Func<IdentifiableEntity, MixinEntity, MixinEntity>> Constructors =
-            new Dictionary<Type, Func<IdentifiableEntity, MixinEntity, MixinEntity>>();
+        public static Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>> Constructors =
+            new Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>>();
 
         public static Func<Type, string> CanAddMixins;
 
         public static void Register<T, M>()
-            where T : IdentifiableEntity
+            where T : Entity
             where M : MixinEntity
         {
             Register(typeof(T), typeof(M));
@@ -63,8 +63,8 @@ namespace Signum.Entities
 
         public static void Register(Type mainEntity, Type mixinEntity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(mainEntity))
-                throw new InvalidOperationException("{0} is not a {1}".Formato(mainEntity.Name, typeof(IdentifiableEntity).Name));
+            if (!typeof(Entity).IsAssignableFrom(mainEntity))
+                throw new InvalidOperationException("{0} is not a {1}".Formato(mainEntity.Name, typeof(Entity).Name));
 
             if (mainEntity.IsAbstract)
                 throw new InvalidOperationException("{0} is abstract".Formato(mainEntity.Name));
@@ -103,14 +103,14 @@ namespace Signum.Entities
 
                 var pi = ci.GetParameters();
 
-                if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(IdentifiableEntity) || pi[1].ParameterType != typeof(MixinEntity))
+                if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(Entity) || pi[1].ParameterType != typeof(MixinEntity))
                     throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (IdentifiableEntity mainEntity, MixinEntity next)");
 
-                return (Func<IdentifiableEntity, MixinEntity, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
+                return (Func<Entity, MixinEntity, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
             });
         }
 
-        static readonly ParameterExpression pMainEntity = ParameterExpression.Parameter(typeof(IdentifiableEntity));
+        static readonly ParameterExpression pMainEntity = ParameterExpression.Parameter(typeof(Entity));
         static readonly ParameterExpression pNext = ParameterExpression.Parameter(typeof(MixinEntity));
 
         public static HashSet<Type> GetMixinDeclarations(Type mainEntity)
@@ -141,7 +141,7 @@ namespace Signum.Entities
                 throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
-        internal static MixinEntity CreateMixins(IdentifiableEntity mainEntity)
+        internal static MixinEntity CreateMixins(Entity mainEntity)
         {
             var types = GetMixinDeclarations(mainEntity.GetType());
 
@@ -153,10 +153,10 @@ namespace Signum.Entities
         }
 
         public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-            where T : IIdentifiable
+            where T : IEntity
             where M : MixinEntity
         {
-            M mixin = ((IdentifiableEntity)(IIdentifiable)entity).Mixin<M>();
+            M mixin = ((Entity)(IEntity)entity).Mixin<M>();
 
             var pi = ReflectionTools.BasePropertyInfo(mixinProperty);
 
@@ -177,11 +177,11 @@ namespace Signum.Entities
             }
         }
 
-        public static T CopyMixinsFrom<T>(this T newEntity, IIdentifiable original, params object[] args)
-            where T: IIdentifiable
+        public static T CopyMixinsFrom<T>(this T newEntity, IEntity original, params object[] args)
+            where T: IEntity
         {
-            var list = (from nm in ((IdentifiableEntity)(IIdentifiable)newEntity).Mixins
-                        join om in ((IdentifiableEntity)(IIdentifiable)original).Mixins
+            var list = (from nm in ((Entity)(IEntity)newEntity).Mixins
+                        join om in ((Entity)(IEntity)original).Mixins
                         on nm.GetType() equals om.GetType()
                         select new { nm, om });
 

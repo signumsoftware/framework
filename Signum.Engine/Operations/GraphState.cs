@@ -24,7 +24,7 @@ namespace Signum.Engine.Operations
     }
 
     public class Graph<T, S>
-        where T : IdentifiableEntity
+        where T : Entity
         where S : struct
     {
         public interface IGraphOperation : IOperation
@@ -76,7 +76,7 @@ namespace Signum.Engine.Operations
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
             S? toState;
             public S ToState
@@ -112,7 +112,7 @@ namespace Signum.Engine.Operations
         }
 
         public class ConstructFromMany<F> : Graph<T>.ConstructFromMany<F>, IGraphToStateOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
             S? toState;
             public S ToState

@@ -26,7 +26,7 @@ namespace Signum.Engine.DynamicQuery
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) =>
               {
-                  if (e.MemberInfo.ReturningType().IsIIdentifiable())
+                  if (e.MemberInfo.ReturningType().IsIEntity())
                       throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, for Manual queries use a Lite instead".Formato(e.MemberInfo.Name));
 
                   return new ColumnDescriptionFactory(i, e.MemberInfo, null);
@@ -58,7 +58,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute(req, GetQueryDescription()).Collection.Count();
         }
 
-        public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var req = new QueryRequest
             {
@@ -71,13 +71,13 @@ namespace Signum.Engine.DynamicQuery
 
             DEnumerable<T> mr = Execute(req, GetQueryDescription());
 
-            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
+            return (Lite<Entity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
         }
 
-        static readonly Lazy<Func<object, Lite<IIdentifiable>>> entitySelector = new Lazy<Func<object, Lite<IIdentifiable>>>(() =>
+        static readonly Lazy<Func<object, Lite<IEntity>>> entitySelector = new Lazy<Func<object, Lite<IEntity>>>(() =>
         {
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
-            return  Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+            return  Expression.Lambda<Func<object, Lite<IEntity>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
 
         public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)

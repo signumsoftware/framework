@@ -22,11 +22,11 @@ namespace Signum.Web
             if (entity is EmbeddedEntity)
                 return true;
 
-            if (entity is IIdentifiable)
-                return ((IIdentifiable)entity).IsNew;
+            if (entity is IEntity)
+                return ((IEntity)entity).IsNew;
 
-            if(entity is Lite<IIdentifiable>)
-                return ((Lite<IIdentifiable>)entity).IsNew;
+            if(entity is Lite<IEntity>)
+                return ((Lite<IEntity>)entity).IsNew;
 
             return false;
         }

@@ -8,19 +8,19 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class OperationLogDN : IdentifiableEntity
+    public class OperationLogDN : Entity
     {
         [ImplementedByAll]
-        Lite<IIdentifiable> target;
-        public Lite<IIdentifiable> Target
+        Lite<IEntity> target;
+        public Lite<IEntity> Target
         {
             get { return target; }
             set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
-        Lite<IIdentifiable> origin;
-        public Lite<IIdentifiable> Origin
+        Lite<IEntity> origin;
+        public Lite<IEntity> Origin
         {
             get { return origin; }
             set { Set(ref origin, value); }
@@ -76,18 +76,18 @@ namespace Signum.Entities.Basics
             return "{0} {1} {2:d}".Formato(operation, user, start);
         }
 
-        public void SetTarget(IIdentifiable target)
+        public void SetTarget(IEntity target)
         {
             this.TemporalTarget = target;
             this.Target = target == null || target.IsNew ? null : target.ToLite();
         }
 
-        public IIdentifiable GetTarget()
+        public IEntity GetTarget()
         {
             return TemporalTarget;
         }
 
         [Ignore]
-        IIdentifiable TemporalTarget;
+        IEntity TemporalTarget;
     }
 }

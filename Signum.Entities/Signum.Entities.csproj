@@ -142,9 +142,8 @@
     <Compile Include="Basics\Type.cs" />
     <Compile Include="ModifiableEntity.cs" />
     <Compile Include="Lite.cs" />
-    <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
-    <Compile Include="IdentifiableEntity.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="MList.cs" />
     <Compile Include="Modifiable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

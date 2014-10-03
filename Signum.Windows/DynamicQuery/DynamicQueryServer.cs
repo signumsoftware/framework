@@ -115,7 +115,7 @@ namespace Signum.Windows
         #endregion
 
         #region QueryUnique
-        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)where T : class, IIdentifiable
+        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)where T : class, IEntity
         {
             return (Lite<T>)new UniqueOptions(typeof(T))
             {
@@ -128,7 +128,7 @@ namespace Signum.Windows
         }
 
         public static Lite<T> QueryUnique<T>(this UniqueOptions options)
-           where T : class, IIdentifiable
+           where T : class, IEntity
         {
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
@@ -136,27 +136,27 @@ namespace Signum.Windows
             return (Lite<T>)options.ToRequest().QueryUnique();
         }
 
-        public static Lite<IdentifiableEntity> QueryUnique(this UniqueOptions options)
+        public static Lite<Entity> QueryUnique(this UniqueOptions options)
         {
             return options.ToRequest().QueryUnique();
         }
 
-        private static Lite<IdentifiableEntity> QueryUnique(this UniqueEntityRequest request)
+        private static Lite<Entity> QueryUnique(this UniqueEntityRequest request)
         {
             Finder.Manager.AssertFindable(request.QueryName);
 
             return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
         }
 
-        public static void QueryUniqueBatch(this UniqueOptions options, Action<Lite<IdentifiableEntity>> onResult, Action @finally)
+        public static void QueryUniqueBatch(this UniqueOptions options, Action<Lite<Entity>> onResult, Action @finally)
         {
             options.ToRequest().QueryUniqueBatch(onResult, @finally);
         }
 
-        private static void QueryUniqueBatch(this UniqueEntityRequest request, Action<Lite<IdentifiableEntity>> onResult, Action @finally)
+        private static void QueryUniqueBatch(this UniqueEntityRequest request, Action<Lite<Entity>> onResult, Action @finally)
         {
             Finder.Manager.AssertFindable(request.QueryName);
-            Enqueue(request, obj => onResult((Lite<IdentifiableEntity>)obj), @finally);
+            Enqueue(request, obj => onResult((Lite<Entity>)obj), @finally);
         }
 
         public static UniqueEntityRequest ToRequest(this UniqueOptions options)

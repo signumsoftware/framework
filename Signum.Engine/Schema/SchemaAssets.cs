@@ -73,7 +73,7 @@ namespace Signum.Engine.Maps
         {
             var oldView = Schema.Current.DatabaseNames().SelectMany(db =>
             {
-                using (Administrator.OverrideDatabaseInViews(db))
+                using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     return (from v in Database.View<SysViews>()
                             join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
@@ -134,7 +134,7 @@ namespace Signum.Engine.Maps
         {
             var oldProcedures = Schema.Current.DatabaseNames().SelectMany(db =>
             {
-                using (Administrator.OverrideDatabaseInViews(db))
+                using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     return (from p in Database.View<SysObjects>()
                             join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id

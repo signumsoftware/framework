@@ -175,9 +175,9 @@ namespace Signum.Engine
             return "@" + name;
         }
 
-        public DbParameter CreateReferenceParameter(string parameterName, bool nullable, PrimaryKey? id)
+        public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
         {
-            return CreateParameter(parameterName, SqlBuilder.PrimaryKeyType, null, nullable, id);
+            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable, id == null ? (object)null : id.Value.Object);
         }
 
         public DbParameter CreateParameter(string parameterName, object value, Type type)

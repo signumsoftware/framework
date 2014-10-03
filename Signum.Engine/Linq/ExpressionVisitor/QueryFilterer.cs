@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
 
                     if (filter)
                     {
-                        if (typeof(IdentifiableEntity).IsAssignableFrom(queryType))
+                        if (typeof(Entity).IsAssignableFrom(queryType))
                         {
                             LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
 

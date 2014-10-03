@@ -22,7 +22,7 @@ namespace Signum.Engine
             HashSet<SchemaName> database = new HashSet<SchemaName>();
             foreach (var db in model.Select(a => a.Database).Distinct())
 	        {
-                using (Administrator.OverrideDatabaseInViews(db))
+                using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     database.AddRange(
                      from s in Database.View<SysSchemas>()
@@ -42,7 +42,7 @@ namespace Signum.Engine
         {
             var allConstraints = Schema.Current.DatabaseNames().Select(db =>
             {
-                using (Administrator.OverrideDatabaseInViews(db))
+                using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     var constaints = (from t in Database.View<SysTables>()
                                       join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
@@ -81,7 +81,7 @@ exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + "."
             {
                 return Schema.Current.DatabaseNames().Select(db =>
                 {
-                    using (Administrator.OverrideDatabaseInViews(db))
+                    using (Administrator.OverrideDatabaseInSysViews(db))
                     {
                         var indexes =
                             (from s in Database.View<SysSchemas>()
@@ -349,7 +349,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
             foreach (var db in databases)
             {
-                using (Administrator.OverrideDatabaseInViews(db))
+                using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     var tables =
                         (from s in Database.View<SysSchemas>()
@@ -452,11 +452,11 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                 Type enumType = EnumEntity.Extract(table.Type);
                 if (enumType != null)
                 {
-                    IEnumerable<IdentifiableEntity> should = EnumEntity.GetEntities(enumType);
-                    Dictionary<string, IdentifiableEntity> shouldByName = should.ToDictionary(a => a.ToString());
+                    IEnumerable<Entity> should = EnumEntity.GetEntities(enumType);
+                    Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
-                    List<IdentifiableEntity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                    Dictionary<string, IdentifiableEntity> currentByName = current.ToDictionary(a => a.toStr, table.Name.Name);
+                    List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
+                    Dictionary<string, Entity> currentByName = current.ToDictionary(a => a.toStr, table.Name.Name);
 
                     string key = Replacements.KeyEnumsForTable(table.Name.Name);
 
@@ -468,7 +468,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
                     HashSet<PrimaryKey> usedIds = current.Select(a => a.Id).ToHashSet();
 
-                    Dictionary<string, IdentifiableEntity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
+                    Dictionary<string, Entity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
 
                     if (middleByName.Any())
                     {
@@ -490,7 +490,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
             return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
         }
 
-        private static SqlPreCommand SyncEnums(Schema schema, Table table, Dictionary<string, IdentifiableEntity> current, Dictionary<string, IdentifiableEntity> should)
+        private static SqlPreCommand SyncEnums(Schema schema, Table table, Dictionary<string, Entity> current, Dictionary<string, Entity> should)
         {
             return Synchronizer.SynchronizeScript(
                        should,
@@ -517,9 +517,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                        }, Spacing.Double);
         }
 
-        private static IdentifiableEntity Clone(IdentifiableEntity current)
+        private static Entity Clone(Entity current)
         {
-            var instance = (IdentifiableEntity)Activator.CreateInstance(current.GetType());
+            var instance = (Entity)Activator.CreateInstance(current.GetType());
             instance.toStr = current.toStr;
             instance.id = (int)current.id.Value + 1000000;
             return instance;

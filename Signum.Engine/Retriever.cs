@@ -13,10 +13,10 @@ namespace Signum.Engine
 {
     public interface IRetriever : IDisposable
     {
-        T Complete<T>(PrimaryKey? id, Action<T> complete) where T : IdentifiableEntity;
-        T Request<T>(PrimaryKey? id) where T : IdentifiableEntity;
-        T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IIdentifiable;
-        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
+        T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
+        T Request<T>(PrimaryKey? id) where T : Entity;
+        T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity;
+        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity;
         IRetriever Parent { get; }
 
@@ -36,14 +36,14 @@ namespace Signum.Engine
         }
 
         EntityCache.RealEntityCache entityCache;
-        Dictionary<IdentityTuple, IdentifiableEntity> retrieved = new Dictionary<IdentityTuple, IdentifiableEntity>();
-        Dictionary<Type, Dictionary<PrimaryKey, IdentifiableEntity>> requests;
-        Dictionary<IdentityTuple, List<Lite<IIdentifiable>>> liteRequests;
+        Dictionary<IdentityTuple, Entity> retrieved = new Dictionary<IdentityTuple, Entity>();
+        Dictionary<Type, Dictionary<PrimaryKey, Entity>> requests;
+        Dictionary<IdentityTuple, List<Lite<IEntity>>> liteRequests;
         List<EmbeddedEntity> embeddedPostRetrieving;
 
-        bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
+        bool TryGetRequest(IdentityTuple key, out Entity value)
         {
-            Dictionary<PrimaryKey, IdentifiableEntity> dic;
+            Dictionary<PrimaryKey, Entity> dic;
             if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
                 return true;
 
@@ -51,14 +51,14 @@ namespace Signum.Engine
             return false;
         }
 
-        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : IdentifiableEntity
+        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
             if (id == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            IdentifiableEntity result;
+            Entity result;
             if (entityCache.TryGetValue(tuple, out result))
                 return (T)result;
 
@@ -82,16 +82,16 @@ namespace Signum.Engine
             return entity;
         }
 
-        static GenericInvoker<Func<RealRetriever, PrimaryKey?, IdentifiableEntity>> giRequest =
-            new GenericInvoker<Func<RealRetriever, PrimaryKey?, IdentifiableEntity>>((rr, id) => rr.Request<IdentifiableEntity>(id));
-        public T Request<T>(PrimaryKey? id) where T : IdentifiableEntity
+        static GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>> giRequest =
+            new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id));
+        public T Request<T>(PrimaryKey? id) where T : Entity
         {
             if (id == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            IdentifiableEntity ident;
+            Entity ident;
             if (entityCache.TryGetValue(tuple, out ident))
                 return (T)ident;
 
@@ -104,31 +104,31 @@ namespace Signum.Engine
 
             T entity = EntityCache.Construct<T>(id.Value);
             if (requests == null)
-                requests = new Dictionary<Type, Dictionary<PrimaryKey, IdentifiableEntity>>();
+                requests = new Dictionary<Type, Dictionary<PrimaryKey, Entity>>();
 
             requests.GetOrCreate(tuple.Type).Add(tuple.Id, entity);
 
             return entity;
         }
 
-        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IIdentifiable
+        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity
         {
             if (id == null)
                 return null;
 
             Type type = TypeLogic.IdToType[typeId.Value];
 
-            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id);
+            return (T)(IEntity)giRequest.GetInvoker(type)(this, id);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(lite.EntityType, lite.Id);
             if (liteRequests == null)
-                liteRequests = new Dictionary<IdentityTuple, List<Lite<IIdentifiable>>>();
+                liteRequests = new Dictionary<IdentityTuple, List<Lite<IEntity>>>();
             liteRequests.GetOrCreate(tuple).Add(lite);
             return lite;
         }
@@ -161,7 +161,7 @@ namespace Signum.Engine
 
                         while (dic.Count > 0)
                         {
-                            IdentifiableEntity ident = dic.Values.FirstEx();
+                            Entity ident = dic.Values.FirstEx();
 
                             cc.Complete(ident, this);
 
@@ -228,7 +228,7 @@ namespace Signum.Engine
             ModifiedState ms = ModifiedState;
             foreach (var kvp in retrieved)
             {
-                IdentifiableEntity entity = kvp.Value;
+                Entity entity = kvp.Value;
 
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
@@ -255,8 +255,8 @@ namespace Signum.Engine
             entityCache.ReleaseRetriever(this);
         }
 
-        static readonly GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>> giGetStrings = new GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>>(ids => GetStrings<IdentifiableEntity>(ids));
-        static Dictionary<PrimaryKey, string> GetStrings<T>(List<PrimaryKey> ids) where T : IdentifiableEntity
+        static readonly GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>> giGetStrings = new GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>>(ids => GetStrings<Entity>(ids));
+        static Dictionary<PrimaryKey, string> GetStrings<T>(List<PrimaryKey> ids) where T : Entity
         {
             ICacheController cc = Schema.Current.CacheController(typeof(T));
 
@@ -288,22 +288,22 @@ namespace Signum.Engine
             this.entityCache = entityCache;
         }
 
-        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : IdentifiableEntity
+        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
             return Parent.Complete<T>(id, complete);
         }
 
-        public T Request<T>(PrimaryKey? id) where T : IdentifiableEntity
+        public T Request<T>(PrimaryKey? id) where T : Entity
         {
             return Parent.Request<T>(id);
         }
 
-        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IIdentifiable
+        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity
         {
             return Parent.RequestIBA<T>(id, typeId);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
         {
             return Parent.RequestLite<T>(lite);
         }

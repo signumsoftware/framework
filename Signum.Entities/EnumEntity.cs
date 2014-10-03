@@ -8,8 +8,8 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class EnumEntity<T> : IdentifiableEntity, IEquatable<EnumEntity<T>>
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false), PrimaryKey(typeof(int))]
+    public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
         where T: struct
     {
         public EnumEntity()
@@ -27,7 +27,7 @@ namespace Signum.Entities
 
         public T ToEnum()
         {
-            return (T)Enum.ToObject(typeof(T), Id);
+            return (T)Enum.ToObject(typeof(T), (int)Id);
         }
 
         public override string ToString()
@@ -55,17 +55,17 @@ namespace Signum.Entities
 
     public static class EnumEntity
     {
-        public static IdentifiableEntity FromEnum(Enum value)
+        public static Entity FromEnum(Enum value)
         {
             if(value == null) return null; 
 
-            IdentifiableEntity ident = (IdentifiableEntity)Activator.CreateInstance(Generate(value.GetType()));
+            Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()));
             ident.Id = new PrimaryKey(Convert.ToInt32(value));
 
             return ident;
         }
 
-        public static Enum ToEnum(IdentifiableEntity ident)
+        public static Enum ToEnum(Entity ident)
         {
             if (ident == null) return null;
 
@@ -89,7 +89,7 @@ namespace Signum.Entities
             return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key); 
         }
 
-        public static IEnumerable<IdentifiableEntity> GetEntities(Type enumType)
+        public static IEnumerable<Entity> GetEntities(Type enumType)
         {
             return GetValues(enumType).Select(a => FromEnum(a));
         }

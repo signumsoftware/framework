@@ -11,7 +11,7 @@ namespace Signum.Engine.Maps
 {
     public partial class Table
     {
-        public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident, string comment = null)
+        public SqlPreCommand DeleteSqlSync(Entity ident, string comment = null)
         {
             var pre = OnPreDeleteSqlSync(ident);
             var collections = (from m in this.Fields
@@ -26,9 +26,9 @@ namespace Signum.Engine.Maps
             return SqlPreCommand.Combine(Spacing.Simple, pre, collections, main);
         }
 
-        public event Func<IdentifiableEntity, SqlPreCommand> PreDeleteSqlSync;
+        public event Func<Entity, SqlPreCommand> PreDeleteSqlSync;
 
-        SqlPreCommand OnPreDeleteSqlSync(IdentifiableEntity ident)
+        SqlPreCommand OnPreDeleteSqlSync(Entity ident)
         {
             if (PreDeleteSqlSync == null)
                 return null;

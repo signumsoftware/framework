@@ -112,8 +112,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsListEntityIBA()
         {
-            var entities = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => (IIdentifiable)a).ToArray()
-                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => (IIdentifiable)a)).ToArray();
+            var entities = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => (IEntity)a).ToArray()
+                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => (IEntity)a)).ToArray();
 
             var albums = (from a in Database.Query<NoteWithDateDN>()
                           where entities.Contains(a.Target)

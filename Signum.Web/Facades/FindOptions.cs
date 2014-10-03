@@ -386,7 +386,7 @@ namespace Signum.Web
 
             if (v.GetType().IsLite())
             {
-                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
+                Lite<Entity> lite = (Lite<Entity>)v;
                 return lite.Key();
             }
             

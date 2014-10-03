@@ -18,7 +18,7 @@ namespace Signum.Entities.DynamicQuery
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id); 
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id); 
 
         public static QueryToken IdProperty(QueryToken parent)
         {
@@ -54,8 +54,8 @@ namespace Signum.Entities.DynamicQuery
         {
             var baseExpression = Parent.BuildExpression(context);
 
-            if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
-                PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStringProperty))
+            if (PropertyInfo.Is((Entity ident) => ident.Id) ||
+                PropertyInfo.Is((Entity ident) => ident.ToStringProperty))
             {
                 var entityExpression = baseExpression.ExtractEntity(true);
 

@@ -61,7 +61,7 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                IdentifiableEntity ident = obj as IdentifiableEntity;
+                Entity ident = obj as Entity;
                 if (ident != null)
                 {
                     foreach (var mixin in ident.Mixins)
@@ -81,7 +81,7 @@ namespace Signum.Entities.Reflection
             {
                 Type t = obj.GetType().ElementType();
 
-                if (t.IsModifiable() && !t.IsIdentifiableEntity())
+                if (t.IsModifiable() && !t.IsEntity())
                 {
                     IEnumerable col = obj as IEnumerable;
                     foreach (Modifiable item in col)
@@ -95,13 +95,13 @@ namespace Signum.Entities.Reflection
                 {
                     object field = getter(obj);
 
-                    if (field == null || field is IdentifiableEntity)
+                    if (field == null || field is Entity)
                         continue;
 
                     yield return (Modifiable)field;
                 }
 
-                IdentifiableEntity ident = obj as IdentifiableEntity;
+                Entity ident = obj as Entity;
                 if (ident != null)
                 {
                     foreach (var mixin in ident.Mixins)

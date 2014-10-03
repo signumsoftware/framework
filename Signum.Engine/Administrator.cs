@@ -34,7 +34,7 @@ namespace Signum.Engine
         }
 
         public static bool ExistTable<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return ExistTable(Schema.Current.Table<T>());
         }
@@ -54,7 +54,7 @@ namespace Signum.Engine
             if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
                 return false;
 
-            using (schema.Database == null ? null : Administrator.OverrideDatabaseInViews(schema.Database))
+            using (schema.Database == null ? null : Administrator.OverrideDatabaseInSysViews(schema.Database))
             {
                 return (from t in Database.View<SysTables>()
                         join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
@@ -63,21 +63,21 @@ namespace Signum.Engine
             }
         }
 
-        internal static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
-        public static IDisposable OverrideDatabaseInViews(DatabaseName database)
+        internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
+        public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
         {
-            var old = viewDatabase.Value;
-            viewDatabase.Value = database;
-            return new Disposable(() => viewDatabase.Value = old);
+            var old = sysViewDatabase.Value;
+            sysViewDatabase.Value = database;
+            return new Disposable(() => sysViewDatabase.Value = old);
         }
 
         public static List<T> TryRetrieveAll<T>(Replacements replacements)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return TryRetrieveAll(typeof(T), replacements).Cast<T>().ToList();
         }
 
-        public static List<IdentifiableEntity> TryRetrieveAll(Type type, Replacements replacements)
+        public static List<Entity> TryRetrieveAll(Type type, Replacements replacements)
         {
             Table table = Schema.Current.Table(type);
 
@@ -86,7 +86,7 @@ namespace Signum.Engine
             {
                 if (ExistTable(table))
                     return Database.RetrieveAll(type);
-                return new List<IdentifiableEntity>();
+                return new List<Entity>();
             }
         }
 
@@ -102,7 +102,7 @@ namespace Signum.Engine
 
 
         public static T SetId<T>(this T ident, PrimaryKey? id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             ident.id = id;
             return ident;
@@ -133,7 +133,7 @@ namespace Signum.Engine
         }
 
         public static T SetNew<T>(this T ident)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             ident.IsNew = true;
             ident.SetSelfModified();
@@ -143,20 +143,20 @@ namespace Signum.Engine
         public static T SetNotModified<T>(this T ident)
             where T : Modifiable
         {
-            if (ident is IdentifiableEntity)
-                ((IdentifiableEntity)(Modifiable)ident).IsNew = false;
+            if (ident is Entity)
+                ((Entity)(Modifiable)ident).IsNew = false;
             ident.Modified = ModifiedState.Clean;
             return ident;
         }
 
         public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
             {
                 item.SetNotModified();
-                if (item is IdentifiableEntity)
-                    ((IdentifiableEntity)item).SetId(new PrimaryKey("invalidId"));
+                if (item is Entity)
+                    ((Entity)item).SetId(new PrimaryKey("invalidId"));
             }
 
             ident.SetId(id);
@@ -165,14 +165,14 @@ namespace Signum.Engine
         }
 
         public static IDisposable DisableIdentity<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             Table table = Schema.Current.Table<T>();
             return DisableIdentity(table);
         }
 
         public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
-          where T : IdentifiableEntity
+          where T : Entity
         {
             TableMList table = ((FieldMList)Schema.Current.Field(mListField)).TableMList;
             return DisableIdentity(table.Name);
@@ -201,7 +201,7 @@ namespace Signum.Engine
         }
 
         public static void SaveDisableIdentity<T>(T entities)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (Transaction tr = new Transaction())
             using (Administrator.DisableIdentity<T>())
@@ -212,7 +212,7 @@ namespace Signum.Engine
         }
 
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             using (Transaction tr = new Transaction())
             using (Administrator.DisableIdentity<T>())
@@ -223,7 +223,7 @@ namespace Signum.Engine
         }
 
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
-           where T : IdentifiableEntity
+           where T : Entity
         {
             return (from f1 in Database.Query<T>()
                     join f2 in Database.Query<T>() on key.Evaluate(f1) equals key.Evaluate(f2)
@@ -239,7 +239,7 @@ namespace Signum.Engine
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var prov = ((DbQueryProvider)query.Provider);
 
@@ -247,7 +247,7 @@ namespace Signum.Engine
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
-            where E : IdentifiableEntity
+            where E : Entity
         {
             var prov = ((DbQueryProvider)query.Provider);
 
@@ -261,12 +261,12 @@ namespace Signum.Engine
             return prov.Update(update, sql => sql, removeSelectRowCount: true);
         }
 
-        public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
+        public static void UpdateToStrings<T>() where T : Entity, new()
         {
             UpdateToStrings(Database.Query<T>());
         }
 
-        public static void UpdateToStrings<T>(IQueryable<T> query) where T : IdentifiableEntity, new()
+        public static void UpdateToStrings<T>(IQueryable<T> query) where T : Entity, new()
         {
             SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
 
@@ -287,18 +287,18 @@ namespace Signum.Engine
             });
         }
 
-        public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : Entity, new()
         {
             UpdateToStrings(Database.Query<T>(), expression);
         }
 
-        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : Entity, new()
         {
             SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
                 query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
         }
 
-        public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
+        public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : Entity
         {
             Table table = Schema.Current.Table(typeof(T));
 
@@ -379,7 +379,7 @@ namespace Signum.Engine
 
         public static List<string> GetIndixesNames(this ITable table, bool unique)
         {
-            using (OverrideDatabaseInViews(table.Name.Schema.Database))
+            using (OverrideDatabaseInSysViews(table.Name.Schema.Database))
             {
                 return (from s in Database.View<SysSchemas>()
                         where s.name == table.Name.Schema.Name
@@ -391,7 +391,7 @@ namespace Signum.Engine
             }
         }
 
-        public static void DropUniqueIndexes<T>() where T : IdentifiableEntity
+        public static void DropUniqueIndexes<T>() where T : Entity
         {
             var table = Schema.Current.Table<T>();
             var indexesNames = Administrator.GetIndixesNames(table, unique: true);
@@ -403,13 +403,13 @@ namespace Signum.Engine
 
 
         public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> oldEntity, Lite<T> newEntity)
-        where T : IdentifiableEntity
+        where T : Entity
         {
             return MoveAllForeignKeysPrivate<T>(oldEntity, newEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
         }
 
         public static void MoveAllForeignKeysConsole<T>(Lite<T> oldEntity, Lite<T> newEntity)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var tuples = MoveAllForeignKeysPrivate<T>(oldEntity, newEntity);
 
@@ -426,7 +426,7 @@ namespace Signum.Engine
         }
 
         static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> oldEntity, Lite<T> newEntity)
-        where T : IdentifiableEntity
+        where T : Entity
         {
             if (oldEntity.GetType() != newEntity.GetType())
                 throw new ArgumentException("oldEntity and newEntity should have the same type");
@@ -444,8 +444,8 @@ namespace Signum.Engine
                 ColumnTable = ct,
                 UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".Formato(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
                 {
-                    pb.CreateParameter("@oldEntity", SqlBuilder.PrimaryKeyType, null, false, oldEntity.Id),
-                    pb.CreateParameter("@newEntity", SqlBuilder.PrimaryKeyType, null, false, newEntity.Id),
+                    pb.CreateReferenceParameter("@oldEntity", oldEntity.Id, ct.Column),
+                    pb.CreateReferenceParameter("@newEntity", newEntity.Id, ct.Column),
                 })
             }).ToList();
         }

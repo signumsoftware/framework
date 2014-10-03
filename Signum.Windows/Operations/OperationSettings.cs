@@ -42,7 +42,7 @@ namespace Signum.Windows.Operations
         public abstract bool OnIsVisible(IConstructorOperationContext ctx);
 
         public abstract bool HasConstructor { get; }
-        public abstract IdentifiableEntity OnConstructor(IConstructorOperationContext ctx);
+        public abstract Entity OnConstructor(IConstructorOperationContext ctx);
 
         protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
             : base(constructOperation)
@@ -51,7 +51,7 @@ namespace Signum.Windows.Operations
         }
     }
 
-    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IIdentifiable
+    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IEntity
     {
         public Func<ConstructorOperationContext<T>, bool> IsVisible { get; set; }
         public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
@@ -70,9 +70,9 @@ namespace Signum.Windows.Operations
 
         public override bool HasConstructor { get { return Constructor != null; } }
 
-        public override IdentifiableEntity OnConstructor(IConstructorOperationContext ctx)
+        public override Entity OnConstructor(IConstructorOperationContext ctx)
         {
-            return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
+            return (Entity)(IEntity)Constructor((ConstructorOperationContext<T>)ctx);
         }
 
         public override Type OverridenType
@@ -88,7 +88,7 @@ namespace Signum.Windows.Operations
         ConstructorOperationSettingsBase Settings { get; }
     }
 
-    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IIdentifiable
+    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IEntity
     {
         public OperationInfo OperationInfo { get; private set; }
         public ConstructorContext ConstructorContext { get; private set; }
@@ -125,7 +125,7 @@ namespace Signum.Windows.Operations
         }
     }
 
-    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IIdentifiable
+    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IEntity
     {
         public Func<ContextualOperationContext<T>, string> ConfirmMessage { get; set; }
         public Action<ContextualOperationContext<T>> Click { get; set; }
@@ -170,7 +170,7 @@ namespace Signum.Windows.Operations
 
     public interface IContextualOperationContext
     {
-        IEnumerable<Lite<IIdentifiable>> Entities { get; }
+        IEnumerable<Lite<IEntity>> Entities { get; }
         SearchControl SearchControl { get; }
         OperationInfo OperationInfo { get; }
         string CanExecute { get; set; }
@@ -182,7 +182,7 @@ namespace Signum.Windows.Operations
         Type Type { get; }
     }
 
-    public class ContextualOperationContext<T> : IContextualOperationContext where T : class, IIdentifiable
+    public class ContextualOperationContext<T> : IContextualOperationContext where T : class, IEntity
     {
         public List<Lite<T>> Entities { get; private set; }
         public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
@@ -214,7 +214,7 @@ namespace Signum.Windows.Operations
             return MessageBox.Show(Window.GetWindow(SearchControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK;
         }
 
-        IEnumerable<Lite<IIdentifiable>> IContextualOperationContext.Entities
+        IEnumerable<Lite<IEntity>> IContextualOperationContext.Entities
         {
             get { return Entities; }
         }
@@ -260,7 +260,7 @@ namespace Signum.Windows.Operations
         public EntityOperationGroup Group { get; set; }
 
         public abstract bool HasClick { get; }
-        public abstract IdentifiableEntity OnClick(IEntityOperationContext ctx);
+        public abstract Entity OnClick(IEntityOperationContext ctx);
 
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IEntityOperationContext ctx);
@@ -275,7 +275,7 @@ namespace Signum.Windows.Operations
         public abstract ContextualOperationSettingsBase ContextualFromManyUntyped { get; }
     }
 
-    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IIdentifiable
+    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IEntity
     {
         public Func<EntityOperationContext<T>, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext<T>, T> Click { get; set; }
@@ -307,9 +307,9 @@ namespace Signum.Windows.Operations
             get { return this.Click != null; }
         }
 
-        public override IdentifiableEntity OnClick(IEntityOperationContext ctx)
+        public override Entity OnClick(IEntityOperationContext ctx)
         {
-            return (IdentifiableEntity)(IIdentifiable)this.Click((EntityOperationContext<T>)ctx);
+            return (Entity)(IEntity)this.Click((EntityOperationContext<T>)ctx);
         }
 
         public override bool HasIsVisible
@@ -337,14 +337,14 @@ namespace Signum.Windows.Operations
         bool ShowOperations { get; }
         string CanExecute { get; set; }
 
-        IIdentifiable Entity { get; }
+        IEntity Entity { get; }
         EntityOperationSettingsBase OperationSettings { get; }
 
         bool ConfirmMessage();
     }
 
 
-    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IIdentifiable
+    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IEntity
     {
         public EntityButtonContext Context { get; private set; }
         public FrameworkElement EntityControl { get { return Context.MainControl; } }
@@ -376,7 +376,7 @@ namespace Signum.Windows.Operations
             return MessageBox.Show(Window.GetWindow(EntityControl), message, OperationInfo.OperationSymbol.NiceToString(), MessageBoxButton.OKCancel) == MessageBoxResult.OK;
         }
 
-        IIdentifiable IEntityOperationContext.Entity
+        IEntity IEntityOperationContext.Entity
         {
             get { return Entity; }
         }

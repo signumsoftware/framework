@@ -469,5 +469,14 @@ namespace Signum.Engine.Linq
 
             return new OrderExpression(o.OrderType, e);
         }
+
+        protected internal virtual Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+        {
+            var e = Visit(pk.Value);
+            if (e == pk.Value)
+                return pk;
+
+            return new PrimaryKeyExpression(e);
+        }
     }
 }

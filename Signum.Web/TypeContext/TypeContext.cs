@@ -285,13 +285,13 @@ namespace Signum.Web
 
             Type type = this.UntypedValue.GetType();
             if (type.IsLite())
-                return new RuntimeInfo((Lite<IIdentifiable>)this.UntypedValue);
+                return new RuntimeInfo((Lite<IEntity>)this.UntypedValue);
 
             if (type.IsEmbeddedEntity())
                 return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
 
-            if (type.IsIdentifiableEntity())
-                return new RuntimeInfo((IdentifiableEntity)this.UntypedValue);
+            if (type.IsEntity())
+                return new RuntimeInfo((Entity)this.UntypedValue);
 
             throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
         }

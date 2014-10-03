@@ -93,7 +93,7 @@ namespace Signum.Windows
                 return result;
             }
 
-            if (ctx.Type.IsIdentifiableEntity() && OperationClient.Manager.HasConstructOperations(ctx.Type))
+            if (ctx.Type.IsEntity() && OperationClient.Manager.HasConstructOperations(ctx.Type))
                 return OperationClient.Manager.Construct(ctx);
 
             return (ModifiableEntity)Activator.CreateInstance(ctx.Type);

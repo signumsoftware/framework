@@ -59,7 +59,7 @@ namespace Signum.Web
 
         public PropertyRoute AddDynamic(MemberInfo mi)
         {
-            if (Value is IdentifiableEntity)
+            if (Value is Entity)
                 return PropertyRoute.Root(value.GetType()).Add(mi);
             else
                 return Route.Add(mi); 
@@ -115,7 +115,7 @@ namespace Signum.Web
 
             if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
             {
-                var lite = tce.Value as Lite<IIdentifiable>;
+                var lite = tce.Value as Lite<IEntity>;
 
                 return new TypeContextExpression(tce.Properties, me.Type,
                     tce.AddDynamic(me.Member),
@@ -151,7 +151,7 @@ namespace Signum.Web
             return base.VisitUnary(u);
         }
 
-        static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IIdentifiable> lite) => lite.Entity);
+        static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IEntity> lite) => lite.Entity);
         
         static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
 
@@ -161,7 +161,7 @@ namespace Signum.Web
             {
                 var tce = Cast(Visit(m.Arguments[0]));
 
-                Lite<IIdentifiable> lite = tce.Value as Lite<IIdentifiable>;
+                Lite<IEntity> lite = tce.Value as Lite<IEntity>;
 
                 var obj =  tce.Value == NonValue ? NonValue:
                     lite.Retrieve();
@@ -188,7 +188,7 @@ namespace Signum.Web
                 var tce = Cast(Visit(m.Object));
                 var mixinType = m.Method.GetGenericArguments().SingleEx();
 
-                var ident = tce.Value as IdentifiableEntity;
+                var ident = tce.Value as Entity;
 
                 return new TypeContextExpression(tce.Properties, mixinType, tce.Route.Add(mixinType),
                     tce.Value == NonValue ? NonValue :

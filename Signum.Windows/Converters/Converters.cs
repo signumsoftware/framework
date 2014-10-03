@@ -28,13 +28,13 @@ namespace Signum.Windows
             ConverterFactory.New((ResultRow row) => row.Entity.Key());
 
         public static readonly IValueConverter LiteKey =
-          ConverterFactory.New((object lite) => lite is Lite<IdentifiableEntity> ?  ((Lite<IdentifiableEntity>)lite).Key() : null);
+          ConverterFactory.New((object lite) => lite is Lite<Entity> ?  ((Lite<Entity>)lite).Key() : null);
 
         public static readonly IValueConverter ToLite =
-           ConverterFactory.New((IIdentifiable ei) => ei == null ? null : ei.ToLite());
+           ConverterFactory.New((IEntity ei) => ei == null ? null : ei.ToLite());
 
         public static readonly IValueConverter Retrieve =
-                   ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));
+                   ConverterFactory.New((Lite<IEntity> lite) => lite == null ? null : Server.Retrieve(lite));
 
         public static readonly IValueConverter NullableEnum =
             ConverterFactory.New((object v) => v == null ? VoidEnumMessage.Instance : v, (object v) => v.Equals(VoidEnumMessage.Instance) ? null : v);

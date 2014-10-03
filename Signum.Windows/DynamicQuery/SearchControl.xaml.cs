@@ -139,18 +139,18 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
-          DependencyProperty.Register("SelectedItem", typeof(Lite<IdentifiableEntity>), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite<IdentifiableEntity> SelectedItem
+          DependencyProperty.Register("SelectedItem", typeof(Lite<Entity>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite<Entity> SelectedItem
         {
-            get { return (Lite<IdentifiableEntity>)GetValue(SelectedItemProperty); }
+            get { return (Lite<Entity>)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(List<Lite<IdentifiableEntity>>), typeof(SearchControl), new UIPropertyMetadata(null));
-        public List<Lite<IdentifiableEntity>> SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(List<Lite<Entity>>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public List<Lite<Entity>> SelectedItems
         {
-            get { return (List<Lite<IdentifiableEntity>>)GetValue(SelectedItemsProperty); }
+            get { return (List<Lite<Entity>>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -282,9 +282,9 @@ namespace Signum.Windows
             UpdateViewSelection();
         }
 
-        public event Func<IdentifiableEntity> Creating;
-        public event Action<IdentifiableEntity> Navigating;
-        public event Action<List<Lite<IdentifiableEntity>>> Removing;
+        public event Func<Entity> Creating;
+        public event Action<Entity> Navigating;
+        public event Action<List<Lite<Entity>>> Removing;
         public event Action DoubleClick;
         public event Func<Column, bool> OrderClick;
 
@@ -855,7 +855,7 @@ namespace Signum.Windows
 
             SetDirtySelectedItem();
 
-            IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
+            Entity entity = (Entity)Server.Convert(row.Entity, EntityType);
 
             OnNavigating(entity);
         }
@@ -879,8 +879,8 @@ namespace Signum.Windows
             if (!Create)
                 return;
 
-            IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(SelectType(t => Navigator.IsCreable(t, isSearch: true)));
+            Entity result = Creating != null ? Creating() :
+                (Entity)new ConstructorContext(this).ConstructUntyped(SelectType(t => Navigator.IsCreable(t, isSearch: true)));
 
             if (result == null)
                 return;
@@ -891,7 +891,7 @@ namespace Signum.Windows
             }
         }
 
-        protected void OnNavigating(IdentifiableEntity entity)
+        protected void OnNavigating(Entity entity)
         {
             if (!Navigate)
                 return;

@@ -17,7 +17,7 @@ namespace Signum.Web
     {  
         internal static IWidget CreateWidget(WidgetContext ctx)
         {
-            var ident = ctx.Entity as IdentifiableEntity;
+            var ident = ctx.Entity as Entity;
 
             if(ident == null || ident.IsNew)
                 return null;
@@ -67,14 +67,14 @@ namespace Signum.Web
 
     public static class LinksClient
     {
-        public static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> EntityLinks =
-            new Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>(
+        public static Polymorphic<Func<Lite<Entity>, QuickLinkContext, QuickLink[]>> EntityLinks =
+            new Polymorphic<Func<Lite<Entity>, QuickLinkContext, QuickLink[]>>(
                 merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
-                minimumType: typeof(IdentifiableEntity));
+                minimumType: typeof(Entity));
 
 
         public static void RegisterEntityLinks<T>(Func<Lite<T>, QuickLinkContext, QuickLink[]> getQuickLinks)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var current = EntityLinks.GetDefinition(typeof(T));
 
@@ -84,7 +84,7 @@ namespace Signum.Web
         }
 
 
-        public static List<QuickLink> GetForEntity(Lite<IdentifiableEntity> ident, string partialViewName, string prefix)
+        public static List<QuickLink> GetForEntity(Lite<Entity> ident, string partialViewName, string prefix)
         {
             List<QuickLink> links = new List<QuickLink>();
 
@@ -221,9 +221,9 @@ namespace Signum.Web
 
     public class QuickLinkView : QuickLink
     {
-        public Lite<IdentifiableEntity> lite;
+        public Lite<Entity> lite;
 
-        public QuickLinkView(Lite<IdentifiableEntity> liteEntity)
+        public QuickLinkView(Lite<Entity> liteEntity)
         {
             lite = liteEntity;
             IsVisible = Navigator.IsNavigable(lite.EntityType, null, isSearch: false);

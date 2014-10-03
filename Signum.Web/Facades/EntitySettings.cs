@@ -37,7 +37,7 @@ namespace Signum.Web
         public bool AvoidValidateRequest { get; set; }
     }
 
-    public class EntitySettings<T> : EntitySettings where T : IdentifiableEntity
+    public class EntitySettings<T> : EntitySettings where T : Entity
     {
         public override string WebTypeName
         {

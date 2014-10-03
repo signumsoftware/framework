@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
 
                 core.EntityColumnFactory().Implementations = entityImplementations;
 
-                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a => a.Name, ", ");
+                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity()).ToString(a => a.Name, ", ");
 
                 if (errors.HasText())
                     throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
@@ -77,7 +77,7 @@ namespace Signum.Engine.DynamicQuery
 
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
-        Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
     }
 
@@ -89,7 +89,7 @@ namespace Signum.Engine.DynamicQuery
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
-        public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()

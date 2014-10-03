@@ -25,16 +25,16 @@ namespace Signum.Test.Environment
         }
 
         [ImplementedByAll]
-        IIdentifiable target;
-        public IIdentifiable Target
+        IEntity target;
+        public IEntity Target
         {
             get { return target; }
             set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
-        Lite<IIdentifiable> otherTarget;
-        public Lite<IIdentifiable> OtherTarget
+        Lite<IEntity> otherTarget;
+        public Lite<IEntity> OtherTarget
         {
             get { return otherTarget; }
             set { Set(ref otherTarget, value); }
@@ -56,7 +56,7 @@ namespace Signum.Test.Environment
     [Serializable] // Just a pattern
     public class ColaboratorsMixin : MixinEntity
     {
-        ColaboratorsMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         [NotNullable]
         MList<ArtistDN> colaborators = new MList<ArtistDN>();
@@ -74,7 +74,7 @@ namespace Signum.Test.Environment
     }
 
     [DescriptionOptions(DescriptionOptions.All)]
-    public interface IAuthorDN : IIdentifiable
+    public interface IAuthorDN : IEntity
     {
         string Name { get; }
 
@@ -133,9 +133,9 @@ namespace Signum.Test.Environment
             set { Set(ref lastAward, value); }
         }
 
-        static Expression<Func<ArtistDN, IEnumerable<Lite<IdentifiableEntity>>>> FriendsCovariantExpression =
+        static Expression<Func<ArtistDN, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
             a => a.Friends; 
-        public IEnumerable<Lite<IdentifiableEntity>> FriendsCovariant()
+        public IEnumerable<Lite<Entity>> FriendsCovariant()
         {
             return FriendsCovariantExpression.Evaluate(this);
         }

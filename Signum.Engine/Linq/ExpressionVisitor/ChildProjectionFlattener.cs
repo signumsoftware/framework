@@ -221,7 +221,7 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysTable(TableExpression table)
             {
-                yield return new ColumnExpression(typeof(int), table.Alias, SqlBuilder.PrimaryKeyName) ; 
+                yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name) ; 
             }
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)

@@ -574,7 +574,7 @@ namespace Signum.Windows
             {
                 PropertyRoute entityContext = eb.GetEntityPropertyRoute();
 
-                if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
+                if (entityContext != null && entityContext.Type.CleanType().IsIEntity())
                 {
                     eb.Implementations = entityContext.GetImplementations();
                 }
@@ -703,7 +703,7 @@ namespace Signum.Windows
             if (newValue is EmbeddedEntity)
                 return newValue.GetType().Name;
 
-            var ident = newValue as IdentifiableEntity;
+            var ident = newValue as Entity;
             if (ident != null)
             {
                 if (ident.IsNew)
@@ -712,7 +712,7 @@ namespace Signum.Windows
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite<IIdentifiable>;
+            var lite = newValue as Lite<IEntity>;
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)

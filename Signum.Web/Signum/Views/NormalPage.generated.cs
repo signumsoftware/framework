@@ -51,7 +51,7 @@ WriteLiteral("\r\n");
             #line 5 "..\..\Signum\Views\NormalPage.cshtml"
  using (Html.BeginForm())
 {
-    var ident = Model.UntypedValue as IdentifiableEntity;
+    var ident = Model.UntypedValue as Entity;
 
             
             #line default
