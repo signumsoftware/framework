@@ -100,7 +100,7 @@ namespace Signum.Windows.Omnibox
         }
 
 
-        public override Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
+        public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
         {
             if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
                 return null;
@@ -113,10 +113,10 @@ namespace Signum.Windows.Omnibox
             return DynamicQueryServer.GetQueryDescription(queryName);
         }
 
-        public override List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count)
+        public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
         {
             if (string.IsNullOrEmpty(subString))
-                return new List<Lite<IdentifiableEntity>>();
+                return new List<Lite<Entity>>();
 
             return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5));
         }

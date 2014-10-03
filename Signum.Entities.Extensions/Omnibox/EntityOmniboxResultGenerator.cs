@@ -41,7 +41,7 @@ namespace Signum.Entities.Omnibox
                     PrimaryKey id;
                     if(PrimaryKey.TryParse(tokens[1].Value, type, out id))
                     {
-                        Lite<IdentifiableEntity> lite = OmniboxParser.Manager.RetrieveLite(type, id);
+                        Lite<Entity> lite = OmniboxParser.Manager.RetrieveLite(type, id);
 
                         yield return new EntityOmniboxResult
                         {
@@ -64,7 +64,7 @@ namespace Signum.Entities.Omnibox
 
                     if (autoComplete.Any())
                     {
-                        foreach (Lite<IdentifiableEntity> lite in autoComplete)
+                        foreach (Lite<Entity> lite in autoComplete)
                         {
                             OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString() ?? "", pattern);
 
@@ -118,7 +118,7 @@ namespace Signum.Entities.Omnibox
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite<IdentifiableEntity> Lite { get; set; }
+        public Lite<Entity> Lite { get; set; }
 
         public override string ToString()
         {

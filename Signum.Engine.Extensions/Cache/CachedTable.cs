@@ -197,15 +197,15 @@ namespace Signum.Engine.Cache
 
             static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedTable =
              new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                 new CachedTable<IdentifiableEntity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
+                 new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
             static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedSemiTable =
               new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                  new CachedLiteTable<IdentifiableEntity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
+                  new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
             static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>> ciCachedTableMList =
               new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                  new CachedTableMList<IdentifiableEntity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
+                  new CachedTableMList<Entity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
             static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
 
@@ -383,10 +383,10 @@ namespace Signum.Engine.Cache
                 }
             }
 
-            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<IdentifiableEntity>(null)).GetGenericMethodDefinition();
-            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(null, null)).GetGenericMethodDefinition();
-            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(null)).GetGenericMethodDefinition();
-            static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<IdentifiableEntity>(0, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<Entity>(null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<Entity>(null, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<Entity>(null)).GetGenericMethodDefinition();
+            static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<Entity>(0, null)).GetGenericMethodDefinition();
 
             internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
             internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
@@ -422,7 +422,7 @@ namespace Signum.Engine.Cache
             }
 
 
-            static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
+            static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
             Expression GetMixin(ParameterExpression me, Type mixinType)
             {
                 return Expression.Call(me, miMixin.MakeGenericMethod(mixinType));
@@ -479,7 +479,7 @@ namespace Signum.Engine.Cache
 
 
 
-    class CachedTable<T> : CachedTableBase where T : IdentifiableEntity
+    class CachedTable<T> : CachedTableBase where T : Entity
     {
         Table table;
 
@@ -782,7 +782,7 @@ namespace Signum.Engine.Cache
         }
     }
 
-    class CachedLiteTable<T> : CachedTableBase where T : IdentifiableEntity
+    class CachedLiteTable<T> : CachedTableBase where T : Entity
     {
         Table table;
 

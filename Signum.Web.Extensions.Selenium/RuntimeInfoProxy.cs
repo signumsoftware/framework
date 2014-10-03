@@ -49,7 +49,7 @@ namespace Signum.Web.Selenium
                 );
         }
 
-        public Lite<IdentifiableEntity> ToLite()
+        public Lite<Entity> ToLite()
         {
             if (IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");

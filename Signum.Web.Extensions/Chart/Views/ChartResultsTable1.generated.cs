@@ -306,7 +306,7 @@ WriteLiteral("                </tr>\r\n");
                     else
                     {
 
-                        Lite<IdentifiableEntity> entityField = row.Entity;
+                        Lite<Entity> entityField = row.Entity;
 
             
             #line default

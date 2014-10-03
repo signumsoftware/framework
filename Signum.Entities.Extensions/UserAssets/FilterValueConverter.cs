@@ -409,13 +409,13 @@ namespace Signum.Entities.UserAssets
     {
         public string TryToString(object value, Type type, out string result)
         {
-            if (!(value is Lite<IdentifiableEntity>))
+            if (!(value is Lite<Entity>))
             {
                 result = null;
                 return FilterValueConverter.Continue;
             }
 
-            result = ((Lite<IdentifiableEntity>)value).Key();
+            result = ((Lite<Entity>)value).Key();
             return null;
         }
 
@@ -427,7 +427,7 @@ namespace Signum.Entities.UserAssets
                 return FilterValueConverter.Continue;
             }
 
-            Lite<IdentifiableEntity> lResult;
+            Lite<Entity> lResult;
             string error = Lite.TryParseLite( value, out lResult);
 
             if (error == null)
@@ -447,9 +447,9 @@ namespace Signum.Entities.UserAssets
     {
         public static string CurrentEntityKey = "[CurrentEntity]";
 
-        static readonly ThreadVariable<IdentifiableEntity> currentEntityVariable = Statics.ThreadVariable<IdentifiableEntity>("currentFilterValueEntity");
+        static readonly ThreadVariable<Entity> currentEntityVariable = Statics.ThreadVariable<Entity>("currentFilterValueEntity");
 
-        public static IDisposable SetCurrentEntity(IdentifiableEntity currentEntity)
+        public static IDisposable SetCurrentEntity(Entity currentEntity)
         {
             if (currentEntity == null)
                 throw new InvalidOperationException("currentEntity is null");
@@ -463,7 +463,7 @@ namespace Signum.Entities.UserAssets
 
         public string TryToString(object value, Type type, out string result)
         {
-            var lite = value as Lite<IdentifiableEntity>;
+            var lite = value as Lite<Entity>;
 
             if (lite != null && lite.RefersTo(currentEntityVariable.Value))
             {
@@ -501,8 +501,8 @@ namespace Signum.Entities.UserAssets
                         return null;
                 }
 
-                if (result is IdentifiableEntity)
-                    result = ((IdentifiableEntity)result).ToLite();
+                if (result is Entity)
+                    result = ((Entity)result).ToLite();
 
                 return null;
             }

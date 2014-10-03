@@ -48,7 +48,7 @@ namespace Signum.Windows.Disconnected
                 Server.Connecting += UpdateCache;
                 UpdateCache();
 
-                Navigator.Manager.IsReadOnly += (type, entity) => entity is IdentifiableEntity && !Editable((IdentifiableEntity)entity, type);
+                Navigator.Manager.IsReadOnly += (type, entity) => entity is Entity && !Editable((Entity)entity, type);
 
                 Navigator.Manager.IsCreable += type =>
                 {
@@ -75,7 +75,7 @@ namespace Signum.Windows.Disconnected
             }
         }
 
-        private static bool Editable(IdentifiableEntity entity, Type type)
+        private static bool Editable(Entity entity, Type type)
         {
             Upload upload = strategies[type].Upload;
 

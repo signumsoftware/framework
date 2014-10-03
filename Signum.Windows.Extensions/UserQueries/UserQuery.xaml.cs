@@ -61,7 +61,7 @@ namespace Signum.Windows.UserQueries
             return token.SubTokens(QueryDescription, SubTokensOptions.CanElement);
         }
 
-        IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
+        IEnumerable<Lite<Entity>> EntityType_AutoCompleting(string text)
         {
             return TypeClient.ViewableServerTypes().Where(t => t.CleanName.Contains(text, StringComparison.InvariantCultureIgnoreCase)).Select(t => t.ToLite()).Take(5);
         }

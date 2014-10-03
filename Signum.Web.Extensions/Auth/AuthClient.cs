@@ -152,10 +152,10 @@ namespace Signum.Web.Auth
 
         static bool manager_IsViewable(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type))
                 return true;
 
-            var ident = (IdentifiableEntity)entity;
+            var ident = (Entity)entity;
 
             if (ident == null || ident.IsNew)
                 return TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
@@ -165,10 +165,10 @@ namespace Signum.Web.Auth
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type))
                 return false;
 
-            var ident = (IdentifiableEntity)entity;
+            var ident = (Entity)entity;
 
             if (ident == null || ident.IsNew)
                 return TypeAuthLogic.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
@@ -178,7 +178,7 @@ namespace Signum.Web.Auth
 
         static bool manager_IsCreable(Type type)
         {
-            if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if(!typeof(Entity).IsAssignableFrom(type))
                 return true;
 
             return TypeAuthLogic.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;

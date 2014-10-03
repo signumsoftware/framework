@@ -30,7 +30,7 @@ namespace Signum.Windows.Notes
     {
         public event Action ForceShow;
 
-        public static NoteDN CreateNote(IdentifiableEntity entity)
+        public static NoteDN CreateNote(Entity entity)
         {
             if (entity.IsNew)
                 return null;
@@ -70,12 +70,12 @@ namespace Signum.Windows.Notes
             if (DataContext == null)
                 return;
 
-            NoteDN nota = CreateNote((IdentifiableEntity)DataContext);
+            NoteDN nota = CreateNote((Entity)DataContext);
 
             ViewNote(nota);
         }
 
-        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
+        public static Polymorphic<Func<Entity, FilterOption>> CustomFilter = new Polymorphic<Func<Entity, FilterOption>>();
 
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
@@ -87,7 +87,7 @@ namespace Signum.Windows.Notes
                 SearchOnLoad = true,
                 FilterOptions =
                 {
-                    func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
+                    func != null ?  func((Entity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
                 },
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
                 Closed = (_, __) => Dispatcher.Invoke(() => ReloadNotes())
@@ -112,7 +112,7 @@ namespace Signum.Windows.Notes
 
         private void ReloadNotes()
         {
-            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            Entity entity = DataContext as Entity;
             if (entity == null || entity.IsNew)
             {
                 // lvNotas.ItemsSource = null;

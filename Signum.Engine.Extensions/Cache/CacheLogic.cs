@@ -381,7 +381,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
         }
 
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
-                where T : IdentifiableEntity
+                where T : Entity
         {
             public CachedTable<T> cachedTable;
             public CachedTableBase CachedTable { get { return cachedTable; } }
@@ -598,8 +598,8 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 giCacheTable.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
-        public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
+        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<Entity>(sb));
+        public static void CacheTable<T>(SchemaBuilder sb) where T : Entity
         {
             AssertStarted(sb);
 

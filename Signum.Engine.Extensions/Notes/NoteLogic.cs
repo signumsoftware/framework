@@ -22,9 +22,9 @@ namespace Signum.Engine.Notes
 {
     public static class NoteLogic
     {
-        static Expression<Func<IdentifiableEntity, IQueryable<NoteDN>>> NotesExpression =
+        static Expression<Func<Entity, IQueryable<NoteDN>>> NotesExpression =
             ident => Database.Query<NoteDN>().Where(n => n.Target.RefersTo(ident));
-        public static IQueryable<NoteDN> Notes(this IdentifiableEntity ident)
+        public static IQueryable<NoteDN> Notes(this Entity ident)
         {
             return NotesExpression.Evaluate(ident);
         }
@@ -50,7 +50,7 @@ namespace Signum.Engine.Notes
                         n.Target
                     });
 
-                new Graph<NoteDN>.ConstructFrom<IdentifiableEntity>(NoteOperation.CreateNoteFromEntity)
+                new Graph<NoteDN>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
                 {
                     Construct = (a, _) => new NoteDN{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
                 }.Register();
@@ -83,7 +83,7 @@ namespace Signum.Engine.Notes
 
                 if (registerExpressionsFor != null)
                 {
-                    var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((IdentifiableEntity ident) => ident.Notes());
+                    var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Notes());
                     foreach (var type in registerExpressionsFor)
                         dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteDN).NicePluralName()));
                 }
@@ -101,7 +101,7 @@ namespace Signum.Engine.Notes
         }
 
 
-        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, NoteTypeDN noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, NoteTypeDN noteType,  Lite<UserDN> user = null, string title = null) where T : class, IEntity
         {
             if (started == false)
                 return null;
@@ -111,7 +111,7 @@ namespace Signum.Engine.Notes
                 CreatedBy = user ?? UserDN.Current.ToLite(),
                 Text = text,
                 Title = title,
-                Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
+                Target = (Lite<Entity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
                 NoteType = noteType
             }.Execute(NoteOperation.Save);
         }

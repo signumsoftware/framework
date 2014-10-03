@@ -116,7 +116,7 @@ namespace Signum.Web.Translation
             return null;
         }
 
-        public static SelectListItem ToTranslatedSelectListItem<T>(this Lite<T> lite, Lite<T> selected, Expression<Func<T, string>> toStringField) where T : IdentifiableEntity
+        public static SelectListItem ToTranslatedSelectListItem<T>(this Lite<T> lite, Lite<T> selected, Expression<Func<T, string>> toStringField) where T : Entity
         {
             return new SelectListItem { Text = lite.TranslatedField(toStringField, lite.ToString()), Value = lite.Id.ToString(), Selected = lite.Equals(selected) };
         }

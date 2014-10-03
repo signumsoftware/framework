@@ -11,7 +11,7 @@ namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class RuleDN<R, A> : Entity
-        where R: IdentifiableEntity
+        where R: Entity
     {
         Lite<RoleDN> role;
         [NotNullValidator]

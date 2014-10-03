@@ -84,7 +84,7 @@ namespace Signum.Windows.UIAutomation
             where C : ModifiableEntity
         {
             PropertyRoute route = property.Body.NodeType != ExpressionType.Convert ? container.GetRoute(property) :
-                 container.GetRoute(Expression.Lambda<Func<T, IIdentifiable>>(((UnaryExpression)property.Body).Operand, property.Parameters));
+                 container.GetRoute(Expression.Lambda<Func<T, IEntity>>(((UnaryExpression)property.Body).Operand, property.Parameters));
 
             string str = route.PropertyRouteType == PropertyRouteType.LiteEntity ? route.Parent.ToString() : route.ToString();
 
@@ -134,7 +134,7 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            container.EntityLine(route, scope).LiteValue = value as Lite<IIdentifiable> ?? ((IIdentifiable)value).ToLite();
+            container.EntityLine(route, scope).LiteValue = value as Lite<IEntity> ?? ((IEntity)value).ToLite();
         }
 
 
@@ -158,7 +158,7 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            container.EntityCombo(route, scope).LiteValue = value as Lite<IIdentifiable> ?? ((IIdentifiable)value).ToLite();
+            container.EntityCombo(route, scope).LiteValue = value as Lite<IEntity> ?? ((IEntity)value).ToLite();
         }
 
 

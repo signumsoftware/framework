@@ -68,7 +68,7 @@ namespace Signum.Windows.Processes
 
         static readonly GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
             new GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((sc, oi, settings) =>
-                new ContextualOperationContext<IdentifiableEntity>(sc, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
+                new ContextualOperationContext<Entity>(sc, oi, (ContextualOperationSettings<Entity>)settings));
 
         static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {

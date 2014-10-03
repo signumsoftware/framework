@@ -94,7 +94,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class LastAuthRulesImportDN : IdentifiableEntity
+    public class LastAuthRulesImportDN : Entity
     {
         [UniqueIndex, FieldWithoutProperty]
         string uniqueKey = "Unique";

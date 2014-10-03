@@ -13,7 +13,7 @@ namespace Signum.Entities.SMS
     public interface ISmsServer
     {
         [OperationContract, NetDataContract]
-        string GetPhoneNumber(IdentifiableEntity ie);
+        string GetPhoneNumber(Entity ie);
 
         [OperationContract, NetDataContract]
         List<string> GetLiteralsFromDataObjectProvider(TypeDN type);

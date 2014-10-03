@@ -44,8 +44,8 @@ namespace Signum.Windows.Omnibox
                     }
                     else
                     {
-                        if (value is Lite<IIdentifiable>)
-                            Server.FillToStr((Lite<IIdentifiable>)value);
+                        if (value is Lite<IEntity>)
+                            Server.FillToStr((Lite<IEntity>)value);
                     }
 
                     return new FilterOption

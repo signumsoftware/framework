@@ -52,8 +52,8 @@ namespace Signum.Entities.Chart
             set { Set(ref entityType, value); }
         }
 
-        Lite<IdentifiableEntity> owner;
-        public Lite<IdentifiableEntity> Owner
+        Lite<Entity> owner;
+        public Lite<Entity> Owner
         {
             get { return owner; }
             set { Set(ref owner, value); }

@@ -259,7 +259,7 @@ namespace Signum.Entities.Omnibox
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Entity)
                     {
-                        Lite<IdentifiableEntity> lite;
+                        Lite<Entity> lite;
                         var error = Lite.TryParseLite(omniboxToken.Value, out lite);
                         if(string.IsNullOrEmpty(error))
                             return new []{new ValueTuple { Value = lite }}; 
@@ -311,7 +311,7 @@ namespace Signum.Entities.Omnibox
             return new[] { new ValueTuple { Value = UnknownValue, Match = null } };
         }
 
-        Lite<IdentifiableEntity> CreateLite(Type type, string value)
+        Lite<Entity> CreateLite(Type type, string value)
         {
             PrimaryKey id;
             if (PrimaryKey.TryParse(value, type, out id))
@@ -370,7 +370,7 @@ namespace Signum.Entities.Omnibox
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";
-                case FilterType.Lite: return ((Lite<IdentifiableEntity>)p).Key();
+                case FilterType.Lite: return ((Lite<Entity>)p).Key();
                 case FilterType.Embedded: throw new InvalidOperationException("Impossible to translate not null Embedded entity to string");
                 case FilterType.Boolean: return p.ToString();
                 case FilterType.Enum: return ((Enum)p).NiceToString().SpacePascal();

@@ -30,7 +30,7 @@ namespace Signum.Web.UserAssets
             }
         }
 
-        internal static void RegisterExportAssertLink<T>() where T : IdentifiableEntity, IUserAssetEntity
+        internal static void RegisterExportAssertLink<T>() where T : Entity, IUserAssetEntity
         {
             LinksClient.RegisterEntityLinks<T>((lite, ctx) => new[]
             {

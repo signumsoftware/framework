@@ -84,7 +84,7 @@ namespace Signum.Windows.UserQueries
                     return null;
                 });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                 {
                     if (!UserQueryPermission.ViewUserQuery.IsAuthorized())
                         return null;
@@ -98,9 +98,9 @@ namespace Signum.Windows.UserQueries
         class UserQueryQuickLink : QuickLink
         {
             Lite<UserQueryDN> userQuery;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<IdentifiableEntity> entity)
+            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<Entity> entity)
             {
                 this.ToolTip = userQuery.ToString();
                 this.Label = userQuery.ToString();
@@ -201,7 +201,7 @@ namespace Signum.Windows.UserQueries
             };
         }
 
-        internal static void Explore(UserQueryDN userQuery, IdentifiableEntity currentEntity)
+        internal static void Explore(UserQueryDN userQuery, Entity currentEntity)
         {
             var query = QueryClient.GetQueryName(userQuery.Query.Key);
 

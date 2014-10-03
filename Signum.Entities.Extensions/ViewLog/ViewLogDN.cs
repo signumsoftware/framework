@@ -12,9 +12,9 @@ namespace Signum.Entities.ViewLog
     public class ViewLogDN : Entity
     {
         [NotNullable, ImplementedByAll]
-        Lite<IdentifiableEntity> target;
+        Lite<Entity> target;
         [NotNullValidator]
-        public Lite<IdentifiableEntity> Target
+        public Lite<Entity> Target
         {
             get { return target; }
             set { Set(ref target, value); }

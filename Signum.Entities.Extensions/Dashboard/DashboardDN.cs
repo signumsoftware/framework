@@ -43,8 +43,8 @@ namespace Signum.Entities.Dashboard
             set { Set(ref embeddedInEntity, value); }
         }
 
-        Lite<IdentifiableEntity> owner;
-        public Lite<IdentifiableEntity> Owner
+        Lite<Entity> owner;
+        public Lite<Entity> Owner
         {
             get { return owner; }
             set { Set(ref owner, value); }
@@ -117,7 +117,7 @@ namespace Signum.Entities.Dashboard
 
                 if (entityType != null && pi.Is(() => part.Content) && part.Content != null)
                 {
-                    var idents = GraphExplorer.FromRoot((IdentifiableEntity)part.Content).OfType<IdentifiableEntity>();
+                    var idents = GraphExplorer.FromRoot((Entity)part.Content).OfType<Entity>();
 
                     string errorsUserQuery = idents.OfType<IHasEntitytype>()
                         .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
@@ -204,7 +204,7 @@ namespace Signum.Entities.Dashboard
         {
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").Try(a => Lite.Parse<IdentifiableEntity>(a.Value));
+            Owner = element.Attribute("Owner").Try(a => Lite.Parse<Entity>(a.Value));
             DashboardPriority = element.Attribute("DashboardPriority").Try(a => int.Parse(a.Value));
             EmbeddedInEntity = element.Attribute("EmbeddedInEntity").Try(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));

@@ -21,7 +21,7 @@ namespace Signum.Web.Selenium
 
     public static class EntityButtonContainerExtensions
     {
-        public static Lite<T> GetLite<T>(this IEntityButtonContainer<T> container) where T : IdentifiableEntity
+        public static Lite<T> GetLite<T>(this IEntityButtonContainer<T> container) where T : Entity
         {
             return (Lite<T>)container.RuntimeInfo().ToLite();
         }
@@ -32,7 +32,7 @@ namespace Signum.Web.Selenium
         }
 
         public static string OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return container.ButtonLocator(symbol.Symbol.KeyWeb());
         }
@@ -50,7 +50,7 @@ namespace Signum.Web.Selenium
         }
 
         public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return container.ButtonEnabled(symbol.Symbol.KeyWeb());
         }
@@ -63,7 +63,7 @@ namespace Signum.Web.Selenium
         }
 
         public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             return container.ButtonDisabled(symbol.Symbol.KeyWeb());
         }
@@ -74,13 +74,13 @@ namespace Signum.Web.Selenium
         }
 
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             container.ButtonClick(symbol.Symbol.KeyWeb());
         }
 
         public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             container.WaitReload(() => container.OperationClick(symbol));
         }
@@ -93,14 +93,14 @@ namespace Signum.Web.Selenium
         }
 
         public static void ExecuteSubmit<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             container.OperationClick(symbol);
             container.Selenium.WaitForPageToLoad();
         }
 
         public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             container.OperationClick(symbol);
             container.Selenium.ConsumeConfirmation();
@@ -111,8 +111,8 @@ namespace Signum.Web.Selenium
         }
 
         public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
-            where T : IdentifiableEntity
-            where F : IdentifiableEntity
+            where T : Entity
+            where F : Entity
         {
             container.OperationClick(symbol);
 
@@ -122,8 +122,8 @@ namespace Signum.Web.Selenium
         }
 
         public static NormalPage<T> ConstructFromNormalPageNew<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
-            where T : IdentifiableEntity
-            where F : IdentifiableEntity
+            where T : Entity
+            where F : Entity
         {
             container.OperationClick(symbol);
 
@@ -133,7 +133,7 @@ namespace Signum.Web.Selenium
         }
 
         public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             container.ButtonClick(symbol.Symbol.KeyWeb());
 
@@ -155,8 +155,8 @@ namespace Signum.Web.Selenium
         }
 
         public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
-            where T : IdentifiableEntity
-            where F : IdentifiableEntity
+            where T : Entity
+            where F : Entity
         {
             container.OperationClick(symbol);
 

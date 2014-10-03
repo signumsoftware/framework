@@ -11,7 +11,7 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class ScheduledTaskDN : IdentifiableEntity
+    public class ScheduledTaskDN : Entity
     {
         public static readonly TimeSpan MinimumSpan = TimeSpan.FromMinutes(2);
 
@@ -82,7 +82,7 @@ namespace Signum.Entities.Scheduler
 
     public static class TaskOperation
     {
-        public static readonly ConstructSymbol<IIdentifiable>.From<ITaskDN> ExecuteSync = OperationSymbol.Construct<IIdentifiable>.From<ITaskDN>();
+        public static readonly ConstructSymbol<IEntity>.From<ITaskDN> ExecuteSync = OperationSymbol.Construct<IEntity>.From<ITaskDN>();
         public static readonly ExecuteSymbol<ITaskDN> ExecuteAsync = OperationSymbol.Execute<ITaskDN>();
     }
 
@@ -92,7 +92,7 @@ namespace Signum.Entities.Scheduler
         public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
     }
 
-    public interface ITaskDN : IIdentifiable
+    public interface ITaskDN : IEntity
     {
     }
 }

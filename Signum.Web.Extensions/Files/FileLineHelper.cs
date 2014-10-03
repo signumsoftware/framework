@@ -36,13 +36,13 @@ namespace Signum.Web.Files
         }
 
         public static MvcHtmlString FileLineLite<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, Lite<S>>> property)
-           where S : class, IFile, IIdentifiable 
+           where S : class, IFile, IEntity 
         {
             return FileLineInternal<T, Lite<S>>(helper, tc, property, null);
         }
 
         public static MvcHtmlString FileLineLite<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, Lite<S>>> property, Action<FileLine> settingsModifier)
-           where S : class, IFile, IIdentifiable 
+           where S : class, IFile, IEntity 
         {
             return FileLineInternal<T, Lite<S>>(helper, tc, property, settingsModifier);
         }
@@ -55,7 +55,7 @@ namespace Signum.Web.Files
 
             EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
 
-            fl.Download = (context.Type.IsIIdentifiable() || context.Type.IsLite()) ? DownloadBehaviour.View : DownloadBehaviour.None;
+            fl.Download = (context.Type.IsIEntity() || context.Type.IsLite()) ? DownloadBehaviour.View : DownloadBehaviour.None;
 
             Common.FireCommonTasks(fl);
 

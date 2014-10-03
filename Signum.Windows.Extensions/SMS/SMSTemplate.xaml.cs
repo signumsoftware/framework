@@ -66,7 +66,7 @@ namespace Signum.Windows.SMS
             }
         }
 
-        private IEnumerable<Lite<IIdentifiable>> EntityCombo_LoadData()
+        private IEnumerable<Lite<IEntity>> EntityCombo_LoadData()
         {
             return Server.Return((ISmsServer s) => s.GetAssociatedTypesForTemplates());
         }

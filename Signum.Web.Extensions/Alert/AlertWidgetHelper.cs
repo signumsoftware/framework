@@ -16,7 +16,7 @@ namespace Signum.Web.Alerts
 {
     public static class AlertWidgetHelper
     {
-        public static AlertDN CreateAlert(IdentifiableEntity entity)
+        public static AlertDN CreateAlert(Entity entity)
         {
             if(entity.IsNew)
                 return null;
@@ -24,7 +24,7 @@ namespace Signum.Web.Alerts
             return new AlertDN { Target = entity.ToLite() };
         }
 
-        public static int CountAlerts(Lite<IdentifiableEntity> identifiable, string filterField)
+        public static int CountAlerts(Lite<Entity> identifiable, string filterField)
         {
             return Finder.QueryCount(new CountOptions(typeof(AlertDN))
             {
@@ -38,7 +38,7 @@ namespace Signum.Web.Alerts
 
         public static Widget CreateWidget(WidgetContext ctx)
         {
-            var ident = (IdentifiableEntity)ctx.Entity;
+            var ident = (Entity)ctx.Entity;
 
             var url = RouteHelper.New().Action((AlertController ac) => ac.AlertsCount());
 
@@ -102,7 +102,7 @@ namespace Signum.Web.Alerts
             };
         }
 
-        private static FindOptions GetFindOptions(IdentifiableEntity ident, string property)
+        private static FindOptions GetFindOptions(Entity ident, string property)
         {
             return new FindOptions
             {

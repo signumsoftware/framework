@@ -56,12 +56,12 @@ namespace Signum.Windows.UIAutomation
             SearchControl.WaitSearch();
         }
 
-        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
+        public NormalWindowProxy<T> Create<T>() where T : Entity
         {
             return SearchControl.Create<T>();
         }
 
-        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
+        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : Entity
         {
             return SearchControl.ViewElementAt<T>(index);
         }
@@ -251,7 +251,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : Entity
         {
             if (NavigateButton.Current.IsOffscreen)
                 throw new InvalidOperationException("Navigate button not visible on SearchControl {0}".Formato(Element.Current.Name));
@@ -263,7 +263,7 @@ namespace Signum.Windows.UIAutomation
             return new NormalWindowProxy<T>(win);
         }
 
-        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
+        public NormalWindowProxy<T> Create<T>() where T : Entity
         {
             return CreateCapture().ToNormalWindow<T>();
         }
@@ -328,7 +328,7 @@ namespace Signum.Windows.UIAutomation
             return Results.TryChild(c => c.Current.ControlType == ControlType.DataItem) != null;
         }
 
-        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
+        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : Entity
         {
             SelectElementAt(index);
 
@@ -374,7 +374,7 @@ namespace Signum.Windows.UIAutomation
                 Element.Pattern<SelectionItemPattern>().Select();
             }
 
-            public Lite<IdentifiableEntity> Entity
+            public Lite<Entity> Entity
             {
                 get { return Lite.Parse(Element.Current.ItemStatus); }
             }
@@ -416,8 +416,8 @@ namespace Signum.Windows.UIAutomation
         }
 
         public NormalWindowProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol, int? timeOut = null)
-            where T : IdentifiableEntity
-            where F : class, IIdentifiable
+            where T : Entity
+            where F : class, IEntity
         {
             AutomationElement element = ConstructFrom(symbol.Symbol, timeOut);
 

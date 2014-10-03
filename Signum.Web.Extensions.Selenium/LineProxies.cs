@@ -263,7 +263,7 @@ namespace Signum.Web.Selenium
             return RuntimeInfoProxy.FromFormValue(Selenium.GetValue(RuntimeInfoLocatorInternal(index)));
         }
 
-        internal void AutoCompleteAndSelect(string autoCompleteLocator, Lite<IIdentifiable> lite)
+        internal void AutoCompleteAndSelect(string autoCompleteLocator, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
@@ -305,7 +305,7 @@ namespace Signum.Web.Selenium
             return Selenium.IsElementPresent(LinkLocator + ":visible");
         }
 
-        public Lite<IIdentifiable> LiteValue
+        public Lite<IEntity> LiteValue
         {
             get { return RuntimeInfo().ToLite(); }
             set
@@ -330,7 +330,7 @@ namespace Signum.Web.Selenium
             get { return "jq=#{0}_sfToStr".Formato(Prefix); }
         }
 
-        public void AutoComplete(Lite<IIdentifiable> lite)
+        public void AutoComplete(Lite<IEntity> lite)
         {
             base.AutoCompleteAndSelect(AutoCompleteLocator, lite);
         }
@@ -365,7 +365,7 @@ namespace Signum.Web.Selenium
             get { return "jq=#{0}_sfCombo".Formato(Prefix); }
         }
 
-        public Lite<IIdentifiable> LiteValue
+        public Lite<IEntity> LiteValue
         {
             get { return RuntimeInfo().ToLite(); }
             set
@@ -423,7 +423,7 @@ namespace Signum.Web.Selenium
             return Selenium.IsElementPresent(DivSelector + " *:first");
         }
 
-        public Lite<IIdentifiable> Lite
+        public Lite<IEntity> Lite
         {
             get { return RuntimeInfo().ToLite(); }
             set
@@ -780,7 +780,7 @@ namespace Signum.Web.Selenium
             get { return "jq=#{0}_sfToStr".Formato(Prefix); }
         }
 
-        public void AutoComplete(Lite<IIdentifiable> lite)
+        public void AutoComplete(Lite<IEntity> lite)
         {
             base.AutoCompleteAndSelect(AutoCompleteLocator, lite);
         }

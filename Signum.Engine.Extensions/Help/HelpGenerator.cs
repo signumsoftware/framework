@@ -28,7 +28,7 @@ namespace Signum.Engine.Help
             if (validations.HasText())
                 validations = HelpMessage.Should.NiceToString() + validations;
 
-            if (Reflector.IsIIdentifiable(pr.Type))
+            if (Reflector.IsIEntity(pr.Type))
             {
                 Implementations imp = Schema.Current.FindImplementations(pr); 
 
@@ -50,7 +50,7 @@ namespace Signum.Engine.Help
             {
                 Type elemType = pr.Type.ElementType();
 
-                if (elemType.IsIIdentifiable())
+                if (elemType.IsIEntity())
                 {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
 
@@ -216,7 +216,7 @@ namespace Signum.Engine.Help
         {
             var cleanType = kvp.Type.CleanType();
 
-            if (Reflector.IsIIdentifiable(cleanType))
+            if (Reflector.IsIEntity(cleanType))
             {
                 return kvp.Implementations.Value.TypeLinks(cleanType);
             }

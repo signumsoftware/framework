@@ -90,7 +90,7 @@ namespace Signum.Web.Files
 
         public IFile GetFileValue()
         {
-            Lite<IdentifiableEntity> lite = UntypedValue as Lite<IdentifiableEntity>;
+            Lite<Entity> lite = UntypedValue as Lite<Entity>;
 
             if (lite != null)
                 return (IFile)lite.Retrieve();

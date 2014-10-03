@@ -72,7 +72,7 @@ namespace Signum.Entities.UserAssets
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             try
             {

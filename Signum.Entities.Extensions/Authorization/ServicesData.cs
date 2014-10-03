@@ -120,7 +120,7 @@ namespace Signum.Entities.Authorization
 
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public abstract class AllowedRule<R, A> : ModelEntity
-        where R : IdentifiableEntity
+        where R : Entity
     {
         A allowedBase;
         public A AllowedBase
@@ -356,7 +356,7 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R,A>
-         where R : IdentifiableEntity
+         where R : Entity
     {
         A[] coercedValues;
         public A[] CoercedValues

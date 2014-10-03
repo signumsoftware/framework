@@ -27,7 +27,7 @@ namespace Signum.Web.DiffLog
 
                 Navigator.AddSetting(new EntitySettings<OperationLogDN> { PartialViewName = e => ViewPrefix.Formato("OperationLog") });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((ident, ctx) => new[] { new QuickLinkExplore(typeof(OperationLogDN), "Target", ident) });
+                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => new[] { new QuickLinkExplore(typeof(OperationLogDN), "Target", ident) });
             }
         }
     }

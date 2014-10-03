@@ -69,7 +69,7 @@ namespace Signum.Web.Selenium
             this.Disposing = null;
         }
 
-        public NormalPage<T> OkWaitNormalPage<T>() where T : IdentifiableEntity
+        public NormalPage<T> OkWaitNormalPage<T>() where T : Entity
         {
             Selenium.Click(OkButtonLocator);
             Selenium.WaitForPageToLoad();
@@ -77,7 +77,7 @@ namespace Signum.Web.Selenium
             return new NormalPage<T>(Selenium);
         }
 
-        public PopupControl<T> OkWaitPopupControl<T>(string prefix = null) where T : IdentifiableEntity
+        public PopupControl<T> OkWaitPopupControl<T>(string prefix = null) where T : Entity
         {
             if (prefix == null)
                 this.AvoidClose = true;

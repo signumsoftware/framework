@@ -184,7 +184,7 @@ namespace Signum.Web.Chart
                 var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
                 Type entitiesType = Lite.Extract(entityColumn.Type);
 
-                Lite<IdentifiableEntity> lite = Lite.Parse(entity);
+                Lite<Entity> lite = Lite.Parse(entity);
                 return Redirect(Navigator.NavigateRoute(lite));
             }
         }
@@ -280,7 +280,7 @@ namespace Signum.Web.Chart
             return Navigator.NormalPage(this, userChart);
         }
 
-        public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<IdentifiableEntity> currentEntity)
+        public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<Entity> currentEntity)
         {
             UserChartDN uc = UserChartLogic.RetrieveUserChart(lite);
 

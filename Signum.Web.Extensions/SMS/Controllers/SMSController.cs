@@ -60,7 +60,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public ActionResult CreateSMSMessageFromTemplate()
         {
-            var ie = this.ExtractLite<IdentifiableEntity>();
+            var ie = this.ExtractLite<Entity>();
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
             var message = ie.ConstructFromLite(SMSMessageOperation.CreateSMSWithTemplateFromEntity, template.Retrieve());
@@ -72,7 +72,7 @@ namespace Signum.Web.SMS
         {
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
-            var lites = this.ParseLiteKeys<IdentifiableEntity>();
+            var lites = this.ParseLiteKeys<Entity>();
 
             var process = OperationLogic.ConstructFromMany(lites, SMSMessageOperation.SendSMSMessagesFromTemplate, template.Retrieve());
 
@@ -92,7 +92,7 @@ namespace Signum.Web.SMS
 
             var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this, prefixModel).Value;
 
-            var lites = this.ParseLiteKeys<IdentifiableEntity>();
+            var lites = this.ParseLiteKeys<Entity>();
 
             var process = OperationLogic.ConstructFromMany(lites, SMSMessageOperation.SendSMSMessages, model);
 

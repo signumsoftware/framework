@@ -118,7 +118,7 @@ namespace Signum.Engine.Processes
             Database.Query<PackageDN>().Where(po => !usedDatas.Contains(po)).UnsafeDelete();
         }
 
-        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
+        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IEntity>> lites)
         {
             package.Save();
 
@@ -130,7 +130,7 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        public static PackageDN CreateLines(this PackageDN package, IEnumerable<IIdentifiable> entities)
+        public static PackageDN CreateLines(this PackageDN package, IEnumerable<IEntity> entities)
         {
             package.Save();
 
@@ -142,7 +142,7 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        public static PackageDN CreateLinesQuery<T>(this PackageDN package, IQueryable<T> entities) where T : IdentifiableEntity
+        public static PackageDN CreateLinesQuery<T>(this PackageDN package, IQueryable<T> entities) where T : Entity
         {
             package.Save();
 
@@ -155,10 +155,10 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>> giInsertPackageLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>>(
+        static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IEntity>>, int>> giInsertPackageLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IEntity>>, int>>(
             (package, lites) => InsertPackageLines<Entity>(package, lites));
-        static int InsertPackageLines<T>(PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
-            where T :IdentifiableEntity
+        static int InsertPackageLines<T>(PackageDN package, IEnumerable<Lite<IEntity>> lites)
+            where T :Entity
         {
             return Database.Query<T>().Where(p => lites.Contains(p.ToLite())).UnsafeInsert(p => new PackageLineDN
             {
@@ -167,7 +167,7 @@ namespace Signum.Engine.Processes
             }); 
         }
 
-        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationSymbol operation, params object[] operationArgs)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IEntity>> entities, OperationSymbol operation, params object[] operationArgs)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
@@ -227,7 +227,7 @@ namespace Signum.Engine.Processes
         }
     }
 
-    public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
+    public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEntity
     {
         public DeleteSymbol<T> DeleteSymbol { get; private set; }
 
@@ -249,7 +249,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((T)(IIdentifiable)line.Target).Delete<T, T>(DeleteSymbol, args);
+                ((T)(IEntity)line.Target).Delete<T, T>(DeleteSymbol, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
@@ -257,7 +257,7 @@ namespace Signum.Engine.Processes
         }
     }
    
-    public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
+    public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IEntity
     {
         public ExecuteSymbol<T> Symbol { get; private set; }
 
@@ -285,8 +285,8 @@ namespace Signum.Engine.Processes
     }
 
     public class PackageConstructFromAlgorithm<F, T> : IProcessAlgorithm
-        where T : class, IIdentifiable
-        where F : class, IIdentifiable
+        where T : class, IEntity
+        where F : class, IEntity
     {
         public ConstructSymbol<T>.From<F> Symbol { get; private set; }
         public Enum OperationKey { get; private set; }
@@ -308,7 +308,7 @@ namespace Signum.Engine.Processes
                 if (result.IsNew)
                     result.Save();
 
-                line.Result = ((IdentifiableEntity)(IIdentifiable)result).ToLite();
+                line.Result = ((Entity)(IEntity)result).ToLite();
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();

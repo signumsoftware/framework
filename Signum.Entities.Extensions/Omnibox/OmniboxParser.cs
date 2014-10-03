@@ -143,14 +143,14 @@ namespace Signum.Entities.Omnibox
 
         public abstract QueryDescription GetDescription(object queryName);
 
-        public abstract Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id);
+        public abstract Lite<Entity> RetrieveLite(Type type, PrimaryKey id);
 
-        public List<Lite<IdentifiableEntity>> Autocomplete(Type type, string subString, int count)
+        public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
         {
             return Autocomplete(Implementations.By(type), subString, count);
         }
 
-        public abstract List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count);
+        public abstract List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count);
 
 
         protected abstract IEnumerable<object> GetAllQueryNames();

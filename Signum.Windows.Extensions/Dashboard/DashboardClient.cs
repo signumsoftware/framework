@@ -92,7 +92,7 @@ namespace Signum.Windows.Dashboard
                     }
                 });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                 {       
                     if(!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
@@ -103,7 +103,7 @@ namespace Signum.Windows.Dashboard
 
                 Navigator.Manager.OnGetEmbeddedWigets += (e, ctx) =>
                 {
-                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(e is IdentifiableEntity))
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(e is Entity))
                         return null;
 
                     var dashboard = Server.Return((IDashboardServer s) => s.GetEmbeddedDashboard(e.GetType()));
@@ -127,9 +127,9 @@ namespace Signum.Windows.Dashboard
         class DashboardQuickLink : QuickLink
         {
             Lite<DashboardDN> dashboard;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<Entity> entity)
             {
                 this.ToolTip = dashboard.ToString(); 
                 this.Label = dashboard.ToString();
@@ -150,7 +150,7 @@ namespace Signum.Windows.Dashboard
             }
         }
 
-        public static void Navigate(Lite<DashboardDN> dashboard, IdentifiableEntity currentEntity)
+        public static void Navigate(Lite<DashboardDN> dashboard, Entity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => new DashboardWindow
             {

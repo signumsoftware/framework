@@ -32,9 +32,9 @@ namespace Signum.Engine.SMS
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Expression<Func<IdentifiableEntity, IQueryable<SMSMessageDN>>> SMSMessagesExpression =
+        public static Expression<Func<Entity, IQueryable<SMSMessageDN>>> SMSMessagesExpression =
             e => Database.Query<SMSMessageDN>().Where(m => m.Referred.RefersTo(e));
-        public static IQueryable<SMSMessageDN> SMSMessages(this IdentifiableEntity e)
+        public static IQueryable<SMSMessageDN> SMSMessages(this Entity e)
         {
             return SMSMessagesExpression.Evaluate(e);
         }
@@ -125,7 +125,7 @@ namespace Signum.Engine.SMS
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
         static Dictionary<Type, LambdaExpression> cultureProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo>> cultureExpression) where T : IdentifiableEntity
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> phoneExpression, Expression<Func<T, CultureInfo>> cultureExpression) where T : Entity
         {
             phoneNumberProviders[typeof(T)] = phoneExpression;
             cultureProviders[typeof(T)] = cultureExpression;
@@ -178,7 +178,7 @@ namespace Signum.Engine.SMS
 
 
 
-        public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
+        public static string GetPhoneNumber<T>(T entity) where T : IEntity
         {
             var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
                 .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".Formato(typeof(T).NiceName()));
@@ -186,7 +186,7 @@ namespace Signum.Engine.SMS
             return phoneFunc.Evaluate(entity);
         }
 
-        public static CultureInfo GetCulture<T>(T entity) where T : IIdentifiable
+        public static CultureInfo GetCulture<T>(T entity) where T : IEntity
         {
             var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
                 .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".Formato(typeof(T).NiceName()));
@@ -213,7 +213,7 @@ namespace Signum.Engine.SMS
                 .GetGenericArguments()[1].GetProperties().Select(p => "{{{0}}}".Formato(p.Name)).ToList();
         }
 
-        public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : IdentifiableEntity
+        public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : Entity
         {
             dataObjectProviders[typeof(T)] = func;
 

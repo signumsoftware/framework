@@ -167,7 +167,7 @@ namespace Signum.Windows.UIAutomation
             return new NormalWindowProxy<T>(element);
         }
 
-        public static Lite<IIdentifiable> ParseLiteHash(string itemStatus)
+        public static Lite<IEntity> ParseLiteHash(string itemStatus)
         {
             if (string.IsNullOrEmpty(itemStatus))
                 return null;
@@ -175,7 +175,7 @@ namespace Signum.Windows.UIAutomation
             return Signum.Entities.Lite.Parse(itemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
         }
 
-        public static Lite<T> Lite<T>(this NormalWindowProxy<T> entity) where T : IdentifiableEntity
+        public static Lite<T> Lite<T>(this NormalWindowProxy<T> entity) where T : Entity
         {
             return (Lite<T>)NormalWindowExtensions.ParseLiteHash(entity.Element.Current.ItemStatus);
         }
@@ -184,7 +184,7 @@ namespace Signum.Windows.UIAutomation
     public static class NormalWindowOperationExpressions
     {
         public static void Execute<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             var entityId = window.EntityId;
             var button = window.GetOperationButton(symbol.Symbol);
@@ -196,15 +196,15 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static AutomationElement ExecuteCapture<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return window.OperationCapture(symbol.Symbol, timeOut); 
         }
 
         public static NormalWindowProxy<T> ConstructFrom<F, FB, T>(this NormalWindowProxy<F> window, ConstructSymbol<T>.From<FB> symbol, int? timeOut = null)
-            where T : IdentifiableEntity
-            where FB : class, IIdentifiable
-            where F : IdentifiableEntity, FB
+            where T : Entity
+            where FB : class, IEntity
+            where F : Entity, FB
         {
             AutomationElement element = window.OperationCapture(symbol.Symbol, timeOut);
 
@@ -213,13 +213,13 @@ namespace Signum.Windows.UIAutomation
 
 
         public static bool IsOperationEnabled<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)
-             where T : IdentifiableEntity
+             where T : Entity
         {
             return window.ButtonBar.GetButton(operationSymbol).Current.IsEnabled;
         }
 
         public static void OperationDialog<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol, Action<AutomationElement> dialogAction, int? timeOut = null)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
             var entityId = window.EntityId;
@@ -237,7 +237,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static AutomationElement OperationCapture<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol, int? timeOut = null)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
             var entityId = window.EntityId;
@@ -250,7 +250,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static AutomationElement GetOperationButton<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)
-             where T : IdentifiableEntity
+             where T : Entity
         {
             var result = window.ButtonBar.TryGetButton(operationSymbol);
             if (result != null)
@@ -368,7 +368,7 @@ namespace Signum.Windows.UIAutomation
             return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(queryName)).ToSearchWindow(); 
         }
 
-        public static NormalWindowProxy<T> QuickLinkNavigate<T>(this LeftPanelProxy left) where T : IdentifiableEntity
+        public static NormalWindowProxy<T> QuickLinkNavigate<T>(this LeftPanelProxy left) where T : Entity
         {
             return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(typeof(T).FullName)).ToNormalWindow<T>();
         }
@@ -377,7 +377,7 @@ namespace Signum.Windows.UIAutomation
     public static class IsolationExtensions
     {
         public static Lite<IsolationDN> GetIsolation<T>(this NormalWindowProxy<T> window)
-             where T: IdentifiableEntity
+             where T: Entity
         {
             throw new NotImplementedException();
         }

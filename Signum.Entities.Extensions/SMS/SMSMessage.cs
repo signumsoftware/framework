@@ -110,8 +110,8 @@ namespace Signum.Entities.SMS
         }
 
         [ImplementedBy()]
-        Lite<IdentifiableEntity> referred;
-        public Lite<IdentifiableEntity> Referred
+        Lite<Entity> referred;
+        public Lite<Entity> Referred
         {
             get { return referred; }
             set { Set(ref referred, value); }
@@ -144,11 +144,11 @@ namespace Signum.Entities.SMS
         public static readonly ExecuteSymbol<SMSMessageDN> UpdateStatus = OperationSymbol.Execute<SMSMessageDN>();
         public static readonly ConstructSymbol<ProcessDN>.FromMany<SMSMessageDN> CreateUpdateStatusPackage = OperationSymbol.Construct<ProcessDN>.FromMany<SMSMessageDN>();
         public static readonly ConstructSymbol<SMSMessageDN>.From<SMSTemplateDN> CreateSMSFromSMSTemplate = OperationSymbol.Construct<SMSMessageDN>.From<SMSTemplateDN>();
-        public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSWithTemplateFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
-        public static readonly ConstructSymbol<SMSMessageDN>.From<IdentifiableEntity> CreateSMSFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<IdentifiableEntity>();
+        public static readonly ConstructSymbol<SMSMessageDN>.From<Entity> CreateSMSWithTemplateFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<Entity>();
+        public static readonly ConstructSymbol<SMSMessageDN>.From<Entity> CreateSMSFromEntity = OperationSymbol.Construct<SMSMessageDN>.From<Entity>();
 
-        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessages = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
-        public static readonly ConstructSymbol<ProcessDN>.FromMany<IdentifiableEntity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessDN>.FromMany<IdentifiableEntity>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<Entity> SendSMSMessages = OperationSymbol.Construct<ProcessDN>.FromMany<Entity>();
+        public static readonly ConstructSymbol<ProcessDN>.FromMany<Entity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessDN>.FromMany<Entity>();
     }
 
     [Serializable]

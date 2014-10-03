@@ -47,7 +47,7 @@ namespace Signum.Services
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer, IDiffLogServer, IIsolationServer
     {
-        public override IdentifiableEntity Retrieve(Type type, PrimaryKey id)
+        public override Entity Retrieve(Type type, PrimaryKey id)
         {
             using (ViewLogLogic.LogView(Lite.Create(type, id), "WCFRetrieve"))
                 return base.Retrieve(type, id);
@@ -95,7 +95,7 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, OperationSymbol operationSymbol, params object[] operationArgs)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IEntity>> lites, OperationSymbol operationSymbol, params object[] operationArgs)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationSymbol, operationArgs));
@@ -151,7 +151,7 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite<IEntity> lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface: true));
@@ -327,7 +327,7 @@ namespace Signum.Services
         #endregion
 
         #region SMS Members
-        public string GetPhoneNumber(IdentifiableEntity ie)
+        public string GetPhoneNumber(Entity ie)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetPhoneNumber(ie));
@@ -427,7 +427,7 @@ namespace Signum.Services
         }
 
          #region IIsolationServer
-        public Lite<IsolationDN> GetOnlyIsolation(List<Lite<IdentifiableEntity>> selectedEntities)
+        public Lite<IsolationDN> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => IsolationLogic.GetOnlyIsolation(selectedEntities));

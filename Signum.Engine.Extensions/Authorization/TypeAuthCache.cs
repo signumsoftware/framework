@@ -37,7 +37,7 @@ namespace Signum.Entities.Authorization
             runtimeRules = sb.GlobalLazy(NewCache,
                 new InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN)));
 
-            sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
             Validator.PropertyValidator((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
@@ -62,7 +62,7 @@ namespace Signum.Entities.Authorization
             return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Key));
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
         {
             TypeDN type = (TypeDN)arg;
 

@@ -79,7 +79,7 @@ namespace Signum.Windows.Chart
                     return null;
                 }); 
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                     Server.Return((IChartServer us) => us.GetUserChartsEntity(entity.EntityType))
                     .Select(cp => new UserChartQuickLink (cp, entity)).ToArray());
             }
@@ -88,9 +88,9 @@ namespace Signum.Windows.Chart
         class UserChartQuickLink : QuickLink
         {
             Lite<UserChartDN> userChart;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<IdentifiableEntity> entity)
+            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<Entity> entity)
             {
                 this.ToolTip = userChart.ToString();
                 this.Label = userChart.ToString();
@@ -135,7 +135,7 @@ namespace Signum.Windows.Chart
             return miResult;
         }
 
-        internal static void View(UserChartDN uc, IdentifiableEntity currentEntity)
+        internal static void View(UserChartDN uc, Entity currentEntity)
         {
             if (uc.EntityType != null)
             {
@@ -155,7 +155,7 @@ namespace Signum.Windows.Chart
             OpenChartRequest(new ChartRequest(query), uc, currentEntity);
         }
 
-        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc, IdentifiableEntity currentEntity)
+        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc, Entity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => 
             {

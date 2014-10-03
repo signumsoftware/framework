@@ -9,12 +9,12 @@ using Signum.Utilities;
 namespace Signum.Entities.Chart
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class ChartColorDN : IdentifiableEntity
+    public class ChartColorDN : Entity
     {
         [ImplementedByAll, UniqueIndex]
-        Lite<IdentifiableEntity> related;
+        Lite<Entity> related;
         [NotNullValidator]
-        public Lite<IdentifiableEntity> Related
+        public Lite<Entity> Related
         {
             get { return related; }
             set { SetToStr(ref related, value); }

@@ -8,7 +8,7 @@ using System.Text;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class SystemEmailDN : IdentifiableEntity
+    public class SystemEmailDN : Entity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;

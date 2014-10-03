@@ -294,7 +294,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, IdentifiableEntity copyMixinsFrom = null)
+        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, Entity copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessDN>())
             {
@@ -331,7 +331,7 @@ namespace Signum.Engine.Processes
         }
 
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
-            where T : IdentifiableEntity, IProcessLineDataDN, new()
+            where T : Entity, IProcessLineDataDN, new()
         {
             var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
 

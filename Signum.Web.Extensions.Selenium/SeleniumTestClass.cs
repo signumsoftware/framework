@@ -98,19 +98,19 @@ namespace Signum.Web.Selenium
         }
 
 
-        public NormalPage<T> NormalPage<T>(PrimaryKey id) where T : IdentifiableEntity
+        public NormalPage<T> NormalPage<T>(PrimaryKey id) where T : Entity
         {
             return NormalPage<T>(Lite.Create<T>(id));
         }
 
-        public NormalPage<T> NormalPage<T>() where T : IdentifiableEntity
+        public NormalPage<T> NormalPage<T>() where T : Entity
         {
             var url = Url(NavigateRoute(typeof(T), null));
 
             return NormalPageUrl<T>(url);
         }
 
-        public NormalPage<T> NormalPage<T>(Lite<T> lite) where T : IdentifiableEntity
+        public NormalPage<T> NormalPage<T>(Lite<T> lite) where T : Entity
         {
             if(lite != null && lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".Formato(lite.EntityType.Name));
@@ -120,7 +120,7 @@ namespace Signum.Web.Selenium
             return NormalPageUrl<T>(url);
         }
 
-        public NormalPage<T> NormalPageUrl<T>(string url) where T : IdentifiableEntity
+        public NormalPage<T> NormalPageUrl<T>(string url) where T : Entity
         {
             selenium.Open(url);
             selenium.WaitForPageToLoad();
@@ -138,7 +138,7 @@ namespace Signum.Web.Selenium
                 return "Create/{0}".Formato(typeName);
         }
 
-        protected virtual string NavigateRoute(Lite<IIdentifiable> lite)
+        protected virtual string NavigateRoute(Lite<IEntity> lite)
         {
             return NavigateRoute(lite.EntityType, lite.IdOrNull);
         }

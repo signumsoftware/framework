@@ -19,7 +19,7 @@ namespace Signum.Web.Dashboard
 {
     public class DashboardController : Controller
     {
-        public ViewResult View(Lite<DashboardDN> panel, Lite<IdentifiableEntity> currentEntity)
+        public ViewResult View(Lite<DashboardDN> panel, Lite<Entity> currentEntity)
         {
             DashboardPermission.ViewDashboard.Authorize();
 

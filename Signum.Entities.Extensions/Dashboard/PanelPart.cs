@@ -137,7 +137,7 @@ namespace Signum.Entities.Dashboard
         int Columns { get; set; }
     }
 
-    public interface IPartDN : IIdentifiable
+    public interface IPartDN : IEntity
     {
         bool RequiresTitle { get; }
         IPartDN Clone();

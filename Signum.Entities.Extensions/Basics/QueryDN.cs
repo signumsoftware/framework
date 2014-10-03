@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class QueryDN : IdentifiableEntity
+    public class QueryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;

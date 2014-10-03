@@ -15,7 +15,7 @@ namespace Signum.Web.Notes
     {
         public ContentResult NotesCount()
         {
-            var entity = Lite.Parse<IdentifiableEntity>(Request["key"]);
+            var entity = Lite.Parse<Entity>(Request["key"]);
             int count = NoteWidgetHelper.CountNotes(entity);
             return Content(count.ToString());
         }

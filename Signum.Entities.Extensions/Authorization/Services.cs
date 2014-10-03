@@ -45,7 +45,7 @@ namespace Signum.Services
         DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes();
 
         [OperationContract, NetDataContract]
-        bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed);
+        bool IsAllowedForInUserInterface(Lite<IEntity> lite, TypeAllowedBasic allowed);
     }
 
     [ServiceContract]

@@ -40,7 +40,7 @@ namespace Signum.Web.Alerts
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<IdentifiableEntity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
+                    new EntityOperationSettings<Entity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
                     new EntityOperationSettings<AlertDN>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
                     new EntityOperationSettings<AlertDN>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
@@ -49,7 +49,7 @@ namespace Signum.Web.Alerts
 
         public static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
         {
-            IdentifiableEntity ie = ctx.Entity as IdentifiableEntity;
+            Entity ie = ctx.Entity as Entity;
             if (ie == null || ie.IsNew)
                 return null;
 

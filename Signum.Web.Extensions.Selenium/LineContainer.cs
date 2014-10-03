@@ -129,7 +129,7 @@ namespace Signum.Web.Selenium
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : ModifiableEntity
         {
-            lineContainer.EntityLine(property).LiteValue = value is Lite<IIdentifiable> ? (Lite<IIdentifiable>)value : ((IIdentifiable)value).ToLite();
+            lineContainer.EntityLine(property).LiteValue = value is Lite<IEntity> ? (Lite<IEntity>)value : ((IEntity)value).ToLite();
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -152,7 +152,7 @@ namespace Signum.Web.Selenium
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : ModifiableEntity
         {
-            lineContainer.EntityCombo(property).LiteValue = value is Lite<IIdentifiable> ? (Lite<IIdentifiable>)value : ((IIdentifiable)value).ToLite();
+            lineContainer.EntityCombo(property).LiteValue = value is Lite<IEntity> ? (Lite<IEntity>)value : ((IEntity)value).ToLite();
         }
 
         public static EntityLineDetailProxy EntityLineDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -201,7 +201,7 @@ namespace Signum.Web.Selenium
         }
 
         public static EntityListDetailProxy EntityListDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-       where T : ModifiableEntity
+            where T : ModifiableEntity
         {
             string newPrefix;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out newPrefix);
@@ -211,7 +211,7 @@ namespace Signum.Web.Selenium
 
         public static bool IsImplementation(this PropertyRoute route, Type type)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type))
                 return false;
 
             var routeType = route.Type.CleanType();
@@ -325,7 +325,7 @@ namespace Signum.Web.Selenium
         public T RetrieveEntity()
         {
             var lite = this.RuntimeInfo().ToLite();
-            return (T)(IIdentifiable)lite.Retrieve();
+            return (T)(IEntity)lite.Retrieve();
         }
 
         public string EntityState()

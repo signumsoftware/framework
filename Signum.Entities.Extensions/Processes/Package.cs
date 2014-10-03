@@ -65,7 +65,7 @@ namespace Signum.Entities.Processes
 
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PackageLineDN : IdentifiableEntity, IProcessLineDataDN
+    public class PackageLineDN : Entity, IProcessLineDataDN
     {
         [NotNullable]
         Lite<PackageDN> package;
@@ -77,17 +77,17 @@ namespace Signum.Entities.Processes
         }
 
         [NotNullable, ImplementedByAll]
-        IdentifiableEntity target;
+        Entity target;
         [NotNullValidator]
-        public IdentifiableEntity Target
+        public Entity Target
         {
             get { return target; }
             set { Set(ref target, value); }
         }
 
         [ImplementedByAll]
-        Lite<IdentifiableEntity> result;
-        public Lite<IdentifiableEntity> Result //ConstructFrom only!
+        Lite<Entity> result;
+        public Lite<Entity> Result //ConstructFrom only!
         {
             get { return result; }
             set { Set(ref result, value); }

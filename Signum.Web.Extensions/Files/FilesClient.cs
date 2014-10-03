@@ -220,7 +220,7 @@ namespace Signum.Web.Files
                 return RouteHelper.New().Content(webPath);
 
             if (file is FilePathDN || file is FileDN)
-                return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo((IdentifiableEntity)file).ToString()));
+                return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo((Entity)file).ToString()));
 
             return null;
         }

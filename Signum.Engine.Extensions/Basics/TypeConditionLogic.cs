@@ -50,19 +50,19 @@ namespace Signum.Engine.Basics
         }
 
         public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             Register<T>(typeCondition, condition, null);
         }
 
         public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
-              where T : IdentifiableEntity
+              where T : Entity
         {
             Register<T>(typeCondition, condition, condition.Compile());
         }
 
         public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool> inMemoryCondition)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             if (typeCondition == null)
                 throw new ArgumentNullException("typeCondition");
@@ -74,7 +74,7 @@ namespace Signum.Engine.Basics
         }
 
         [MethodExpander(typeof(InConditionExpander))]
-        public static bool InCondition(this IdentifiableEntity entity, TypeConditionSymbol typeCondition)
+        public static bool InCondition(this Entity entity, TypeConditionSymbol typeCondition)
         {
             throw new InvalidProgramException("InCondition is meant to be used in database only");
         }
@@ -95,7 +95,7 @@ namespace Signum.Engine.Basics
 
         [MethodExpander(typeof(WhereConditionExpander))]
         public static IQueryable<T> WhereCondition<T>(this IQueryable<T> query, TypeConditionSymbol typeCondition)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             Expression<Func<T, bool>> exp = (Expression<Func<T, bool>>)GetCondition(typeof(T), typeCondition);
 
@@ -136,7 +136,7 @@ namespace Signum.Engine.Basics
         }
 
         public static Func<T, bool> GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             var pair = infos.GetOrThrow(typeof(T), "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
 

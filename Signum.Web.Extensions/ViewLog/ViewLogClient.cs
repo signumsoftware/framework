@@ -21,7 +21,7 @@ namespace Signum.Web.ViewLog
             }
         }
 
-        static IDisposable Manager_RetrievingForView(Lite<IdentifiableEntity> lite)
+        static IDisposable Manager_RetrievingForView(Lite<Entity> lite)
         {
             return ViewLogLogic.LogView(lite, "WebRetrieve");
         }

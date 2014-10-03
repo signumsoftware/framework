@@ -50,7 +50,7 @@ namespace Signum.Engine.Scheduler
             return ExecutionsSTExpression.Evaluate(e);
         }
 
-        public static Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>>();
+        public static Polymorphic<Func<ITaskDN, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IEntity>>>();
         
         public class ScheduledTaskPair
         {
@@ -159,7 +159,7 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
 
-                new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
+                new Graph<IEntity>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
                     Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())
                 }.Register();
@@ -323,7 +323,7 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
-        public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
+        public static Lite<IEntity> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
             using (Disposable.Combine(ApplySession, f => f(task)))

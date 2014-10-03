@@ -63,7 +63,7 @@ namespace Signum.Windows.Authorization
 
         static bool manager_IsViewable(Type type, ModifiableEntity entity)
         {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
+            Entity ident = entity as Entity;
 
             if (ident == null || ident.IsNew)
                 return GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
@@ -78,7 +78,7 @@ namespace Signum.Windows.Authorization
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
         {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
+            Entity ident = entity as Entity;
 
             if (ident == null || ident.IsNew)
                 return GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
@@ -86,7 +86,7 @@ namespace Signum.Windows.Authorization
                 return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
         }
 
-        public static bool IsAllowedFor(this Lite<IIdentifiable> lite, TypeAllowedBasic requested)
+        public static bool IsAllowedFor(this Lite<IEntity> lite, TypeAllowedBasic requested)
         {
             TypeAllowedAndConditions tac = GetAllowed(lite.EntityType);
 
@@ -99,7 +99,7 @@ namespace Signum.Windows.Authorization
             return Server.Return((ITypeAuthServer s) => s.IsAllowedForInUserInterface(lite, requested));
         }
 
-        public static bool IsAllowedFor(this IdentifiableEntity entity, TypeAllowedBasic requested)
+        public static bool IsAllowedFor(this Entity entity, TypeAllowedBasic requested)
         {
             TypeAllowedAndConditions tac = GetAllowed(entity.GetType());
 
@@ -114,7 +114,7 @@ namespace Signum.Windows.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type))
                 return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             TypeAllowedAndConditions tac = typeRules.GetAllowed(type);

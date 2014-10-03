@@ -187,7 +187,7 @@ namespace Signum.Engine.Mailing
 
             string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
             {
-                entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
+                entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIEntity());
 
                 if (entityToken == null)
                     entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
@@ -203,7 +203,7 @@ namespace Signum.Engine.Mailing
                 string text;
                 if (EntityToken != null)
                 {
-                    var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
+                    var entity = (Lite<Entity>)rows.DistinctSingle(p.Columns[EntityToken]);
                     var fallback = (string)rows.DistinctSingle(p.Columns[Token.QueryToken]);
 
                     text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);

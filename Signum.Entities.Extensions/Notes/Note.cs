@@ -14,7 +14,7 @@ using System.Diagnostics;
 namespace Signum.Entities.Notes
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class NoteDN : IdentifiableEntity
+    public class NoteDN : Entity
     {
         [SqlDbType(Size = 100)]
         string title;
@@ -26,9 +26,9 @@ namespace Signum.Entities.Notes
         }
 
         [ImplementedByAll]
-        Lite<IdentifiableEntity> target;
+        Lite<Entity> target;
         [NotNullValidator]
-        public Lite<IdentifiableEntity> Target
+        public Lite<Entity> Target
         {
             get { return target; }
             set { Set(ref target, value); }
@@ -73,7 +73,7 @@ namespace Signum.Entities.Notes
 
     public static class NoteOperation
     {
-        public static readonly ConstructSymbol<NoteDN>.From<IdentifiableEntity> CreateNoteFromEntity = OperationSymbol.Construct<NoteDN>.From<IdentifiableEntity>();
+        public static readonly ConstructSymbol<NoteDN>.From<Entity> CreateNoteFromEntity = OperationSymbol.Construct<NoteDN>.From<Entity>();
         public static readonly ExecuteSymbol<NoteDN> Save = OperationSymbol.Execute<NoteDN>();
     }
 

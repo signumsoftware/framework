@@ -16,9 +16,9 @@ namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
-        static Expression<Func<IdentifiableEntity, IQueryable<ViewLogDN>>> ViewLogsExpression =
+        static Expression<Func<Entity, IQueryable<ViewLogDN>>> ViewLogsExpression =
             a => Database.Query<ViewLogDN>().Where(log => log.Target.RefersTo(a));
-        public static IQueryable<ViewLogDN> ViewLogs(this IdentifiableEntity a)
+        public static IQueryable<ViewLogDN> ViewLogs(this Entity a)
         {
             return ViewLogsExpression.Evaluate(a);
         }
@@ -50,7 +50,7 @@ namespace Signum.Engine.ViewLog
 
                 Types = types;
 
-                var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((IdentifiableEntity entity)=> entity.ViewLogs());
+                var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity)=> entity.ViewLogs());
 
                 foreach (var t in types)
                 {
@@ -82,14 +82,14 @@ namespace Signum.Engine.ViewLog
             Database.Query<ViewLogDN>().Where(view => view.StartDate < limit);
         }
 
-        public static IDisposable LogView(Lite<IIdentifiable> entity, string viewAction)
+        public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
         {
             if (!Started || !Types.Contains(entity.EntityType))
                 return null;
 
             var viewLog = new ViewLogDN
             {
-                Target = (Lite<IdentifiableEntity>)entity,
+                Target = (Lite<Entity>)entity,
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
             };

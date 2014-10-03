@@ -56,7 +56,7 @@ namespace Signum.Engine.Chart
         {
             AssertFewEntities(type);
 
-            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<IdentifiableEntity>)l }).ToDictionary(a => a.Related);
+            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<Entity>)l }).ToDictionary(a => a.Related);
 
             dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
 
@@ -98,14 +98,14 @@ namespace Signum.Engine.Chart
             }
         }
 
-        static readonly GenericInvoker<Func<int>> giCount = new GenericInvoker<Func<int>>(() => Count<IdentifiableEntity>());
-        static int Count<T>() where T : IdentifiableEntity
+        static readonly GenericInvoker<Func<int>> giCount = new GenericInvoker<Func<int>>(() => Count<Entity>());
+        static int Count<T>() where T : Entity
         {
             return Database.Query<T>().Count();
         }
 
-        static readonly GenericInvoker<Func<int>> giDeleteColors = new GenericInvoker<Func<int>>(() => DeleteColors<IdentifiableEntity>());
-        static int DeleteColors<T>() where T : IdentifiableEntity
+        static readonly GenericInvoker<Func<int>> giDeleteColors = new GenericInvoker<Func<int>>(() => DeleteColors<Entity>());
+        static int DeleteColors<T>() where T : Entity
         {
             return (from t in Database.Query<T>() // To filter by type conditions
                     join cc in Database.Query<ChartColorDN>() on t.ToLite() equals cc.Related
@@ -123,7 +123,7 @@ namespace Signum.Engine.Chart
                 Type = type.ToTypeDN(),
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorDN
                 {
-                    Related = (Lite<IdentifiableEntity>)l,
+                    Related = (Lite<Entity>)l,
                     Color = dic.TryGetS(l.Id).Try(c => new ColorDN { Argb = c.ToArgb() })
                 }).ToMList()
             };
@@ -134,12 +134,12 @@ namespace Signum.Engine.Chart
             return Colors.Value.TryGetC(type).TryGetS(id);
         }
 
-        public static Color? ColorFor(Lite<IdentifiableEntity> lite)
+        public static Color? ColorFor(Lite<Entity> lite)
         {
             return ColorFor(lite.EntityType, lite.Id);
         }
 
-        public static Color? ColorFor(IdentifiableEntity ident)
+        public static Color? ColorFor(Entity ident)
         {
             return ColorFor(ident.GetType(), ident.Id);
         }

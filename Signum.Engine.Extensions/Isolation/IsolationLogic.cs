@@ -89,12 +89,12 @@ namespace Signum.Engine.Isolation
             return IsolationDN.Override(task.TryIsolation());
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, Entity entity, object[] args)
         {
             return IsolationDN.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
         }
 
-        static void EntityEventsGlobal_PreSaving(IdentifiableEntity ident, ref bool graphModified)
+        static void EntityEventsGlobal_PreSaving(Entity ident, ref bool graphModified)
         {
             if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) != IsolationStrategy.None && IsolationDN.Current != null)
             {
@@ -148,8 +148,8 @@ namespace Signum.Engine.Isolation
             return strategies[type];
         }
 
-        static readonly GenericInvoker<Action> giRegisterFilterQuery = new GenericInvoker<Action>(() => Register_FilterQuery<IdentifiableEntity>());
-        static void Register_FilterQuery<T>() where T : IdentifiableEntity
+        static readonly GenericInvoker<Action> giRegisterFilterQuery = new GenericInvoker<Action>(() => Register_FilterQuery<Entity>());
+        static void Register_FilterQuery<T>() where T : Entity
         {
             Schema.Current.EntityEvents<T>().FilterQuery += () =>
             {
@@ -178,11 +178,11 @@ namespace Signum.Engine.Isolation
             }; 
         }
 
-        static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
+        static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
         static Expression<Func<IsolationMixin, Lite<IsolationDN>>> isolationProperty = (IsolationMixin m) => m.Isolation;
 
 
-        public static void Register<T>(IsolationStrategy strategy) where T : IdentifiableEntity
+        public static void Register<T>(IsolationStrategy strategy) where T : Entity
         {
             strategies.Add(typeof(T), strategy);
 
@@ -218,7 +218,7 @@ namespace Signum.Engine.Isolation
             return collection.Where(a => a.Isolation().Is(curr));
         }
 
-        public static Lite<IsolationDN> GetOnlyIsolation(List<Lite<IdentifiableEntity>> selectedEntities)
+        public static Lite<IsolationDN> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
         {
             return selectedEntities.GroupBy(a => a.EntityType)
                 .Select(gr => strategies[gr.Key] == IsolationStrategy.None ? null : giGetOnlyIsolation.GetInvoker(gr.Key)(gr))
@@ -227,9 +227,9 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static GenericInvoker<Func<IEnumerable<Lite<IdentifiableEntity>>, Lite<IsolationDN>>> giGetOnlyIsolation = 
-            new GenericInvoker<Func<IEnumerable<Lite<IdentifiableEntity>>, Lite<IsolationDN>>>(list => GetOnlyIsolation<IdentifiableEntity>(list));
-        public static Lite<IsolationDN> GetOnlyIsolation<T>(IEnumerable<Lite<IdentifiableEntity>> selectedEntities) where T : IdentifiableEntity
+        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationDN>>> giGetOnlyIsolation = 
+            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationDN>>>(list => GetOnlyIsolation<Entity>(list));
+        public static Lite<IsolationDN> GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
         {
             return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
                 Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()

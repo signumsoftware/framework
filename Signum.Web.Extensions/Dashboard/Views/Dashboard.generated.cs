@@ -83,7 +83,7 @@ WriteLiteral("\r\n\r\n");
             
             #line 11 "..\..\Dashboard\Views\Dashboard.cshtml"
   
-    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+    var currentEntity = (Entity)ViewData["currentEntity"];
 
             
             #line default

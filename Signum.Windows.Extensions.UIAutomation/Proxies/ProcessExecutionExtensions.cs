@@ -20,7 +20,7 @@ namespace Signum.Windows.UIAutomation
                             timeout ?? DefaultTimeout);
         }
 
-        public static void ConstructProcessPlayAndWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : IdentifiableEntity
+        public static void ConstructProcessPlayAndWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : Entity
         {
             using (var pe = normalWindow.ConstructFrom(symbol))
             {
@@ -29,7 +29,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public static void ConstructProcessWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : IdentifiableEntity
+        public static void ConstructProcessWait<T>(this NormalWindowProxy<T> normalWindow, ConstructSymbol<ProcessDN>.From<T> symbol, int? timeout = null) where T : Entity
         {
             using (var pe = normalWindow.ConstructFrom(symbol))
             {

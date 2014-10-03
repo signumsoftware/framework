@@ -136,7 +136,7 @@ namespace Signum.Web.Omnibox
                 return Finder.IsFindable(queryName);
             }
 
-            public override Lite<IdentifiableEntity> RetrieveLite(Type type, PrimaryKey id)
+            public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
             {
                 if (!Database.Exists(type, id))
                     return null;
@@ -148,10 +148,10 @@ namespace Signum.Web.Omnibox
                 return DynamicQueryManager.Current.QueryDescription(queryName);
             }
 
-            public override List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count)
+            public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
             {
                 if (string.IsNullOrEmpty(subString))
-                    return new List<Lite<IdentifiableEntity>>();
+                    return new List<Lite<Entity>>();
 
                 return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
             }

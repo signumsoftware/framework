@@ -49,7 +49,7 @@ namespace Signum.Web.Dashboard
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };
 
-        static string NavigateRoute(IdentifiableEntity entity)
+        static string NavigateRoute(Entity entity)
         {
             if (!Navigator.IsNavigable(entity, null))
                 return null;
@@ -90,7 +90,7 @@ namespace Signum.Web.Dashboard
                      new QuickLinkAction(DashboardMessage.Preview, RouteHelper.New().Action<DashboardController>(cpc => cpc.View(cp, null)))
                 });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                 {
                     if (!DashboardPermission.ViewDashboard.IsAuthorized())
                         return null;
@@ -101,14 +101,14 @@ namespace Signum.Web.Dashboard
 
                 WidgetsHelper.GetEmbeddedWidget += ctx =>
                 {
-                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is IdentifiableEntity))
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is Entity))
                         return null;
 
                     var dashboard = DashboardLogic.GetEmbeddedDashboard(ctx.Entity.GetType());
                     if (dashboard == null)
                         return null;
 
-                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (IdentifiableEntity)ctx.Entity };
+                    return new DashboardEmbeddedWidget { Dashboard = dashboard, Entity = (Entity)ctx.Entity };
                 };
             }
         }
@@ -117,7 +117,7 @@ namespace Signum.Web.Dashboard
         {
             public DashboardDN Dashboard { get; set; }
 
-            public IdentifiableEntity Entity { get; set; }
+            public Entity Entity { get; set; }
 
             public MvcHtmlString ToHtml(HtmlHelper helper)
             {
@@ -139,9 +139,9 @@ namespace Signum.Web.Dashboard
         class DashboardQuickLink : QuickLink
         {
             Lite<DashboardDN> dashboard;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<IdentifiableEntity> entity)
+            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<Entity> entity)
             {
                 this.Text = dashboard.ToString();
                 this.dashboard = dashboard;

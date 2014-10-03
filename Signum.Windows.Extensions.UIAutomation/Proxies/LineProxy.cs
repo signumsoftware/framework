@@ -167,7 +167,7 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public Lite<IIdentifiable> LiteValue
+        public Lite<IEntity> LiteValue
         {
             get
             {
@@ -184,7 +184,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public void FindLite(Lite<IIdentifiable> value)
+        public void FindLite(Lite<IEntity> value)
         {
             AssertCompatibleLite(value);
 
@@ -210,7 +210,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        private void AssertCompatibleLite(Lite<IIdentifiable> value)
+        private void AssertCompatibleLite(Lite<IEntity> value)
         {
             var imps = GetImplementations();
             
@@ -223,7 +223,7 @@ namespace Signum.Windows.UIAutomation
             return PropertyRoute.GetImplementations();
         }
 
-        protected virtual bool FastSelect(Lite<IIdentifiable> value)
+        protected virtual bool FastSelect(Lite<IEntity> value)
         {
             return false;
         }
@@ -364,7 +364,7 @@ namespace Signum.Windows.UIAutomation
             lb.SelectListItemByName(toString, () => this.ToString());
         }
 
-        protected override bool FastSelect(Lite<IIdentifiable> value)
+        protected override bool FastSelect(Lite<IEntity> value)
         {
             if (!value.ToString().HasText())
                 return false;
@@ -399,7 +399,7 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public void SelectLite(Lite<IIdentifiable> lite)
+        public void SelectLite(Lite<IEntity> lite)
         {
             ComboBox.ComboSelectItem(a => a.Current.ItemStatus == lite.Key());
         }
@@ -411,7 +411,7 @@ namespace Signum.Windows.UIAutomation
             ComboBox.SelectListItemByName(toString, ()=>this.ToString());
         }
 
-        protected override bool FastSelect(Lite<IIdentifiable> lite)
+        protected override bool FastSelect(Lite<IEntity> lite)
         {
             ComboBox.Pattern<ExpandCollapsePattern>().Expand();
 

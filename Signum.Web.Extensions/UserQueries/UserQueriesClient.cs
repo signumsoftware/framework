@@ -100,7 +100,7 @@ namespace Signum.Web.UserQueries
                     }
                 });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                 {
                     if (!UserQueryPermission.ViewUserQuery.IsAuthorized())
                         return null;
@@ -114,9 +114,9 @@ namespace Signum.Web.UserQueries
         class UserQueryQuickLink : QuickLink
         {
             Lite<UserQueryDN> userQuery;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<IdentifiableEntity> entity)
+            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<Entity> entity)
             {
                 this.Text = userQuery.ToString();
                 this.userQuery = userQuery;

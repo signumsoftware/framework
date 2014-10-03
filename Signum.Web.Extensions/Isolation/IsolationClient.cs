@@ -24,7 +24,7 @@ namespace Signum.Web.Isolation
             {
                 Navigator.RegisterArea(typeof(IsolationClient));
 
-                WidgetsHelper.GetWidget += ctx => ctx.Entity is IdentifiableEntity && MixinDeclarations.IsDeclared(ctx.Entity.GetType(), typeof(IsolationMixin)) ?
+                WidgetsHelper.GetWidget += ctx => ctx.Entity is Entity && MixinDeclarations.IsDeclared(ctx.Entity.GetType(), typeof(IsolationMixin)) ?
                     IsolationWidgetHelper.CreateWidget(ctx) : null;
 
                 Navigator.AddSetting(new EntitySettings<IsolationDN>());
@@ -101,7 +101,7 @@ namespace Signum.Web.Isolation
             {
                 var model = ((ViewResult)filterContext.Result).Model;
 
-                IdentifiableEntity entity = (model as TypeContext).Try(tc => tc.UntypedValue as IdentifiableEntity) ?? model as IdentifiableEntity;
+                Entity entity = (model as TypeContext).Try(tc => tc.UntypedValue as Entity) ?? model as Entity;
 
                 if (entity != null)
                     viewData[Key] = IsolationDN.Override(entity.TryIsolation());

@@ -235,7 +235,7 @@ namespace Signum.Entities.Chart
             DisplayName = displayName;
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             if (token != null)
                 token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);

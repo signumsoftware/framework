@@ -98,7 +98,7 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 
+        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) 
         {
         }
 
@@ -118,16 +118,16 @@ namespace Signum.Entities.Isolation
 
     public static class IsolationExtensions
     {
-        static Expression<Func<IIdentifiable, Lite<IsolationDN>>> IsolationExpression =
-             entity => ((IdentifiableEntity)entity).Mixin<IsolationMixin>().Isolation;
-        public static Lite<IsolationDN> Isolation(this IIdentifiable entity)
+        static Expression<Func<IEntity, Lite<IsolationDN>>> IsolationExpression =
+             entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
+        public static Lite<IsolationDN> Isolation(this IEntity entity)
         {
             return IsolationExpression.Evaluate(entity);
         }
 
-        public static Lite<IsolationDN> TryIsolation(this IIdentifiable entity)
+        public static Lite<IsolationDN> TryIsolation(this IEntity entity)
         {
-            var mixin = ((IdentifiableEntity)entity).Mixins.OfType<IsolationMixin>().SingleOrDefaultEx();
+            var mixin = ((Entity)entity).Mixins.OfType<IsolationMixin>().SingleOrDefaultEx();
 
             if (mixin == null)
                 return null;
@@ -136,7 +136,7 @@ namespace Signum.Entities.Isolation
         }
 
         public static T SetIsolation<T>(this T entity, Lite<IsolationDN> isolation)
-            where T : IIdentifiable
+            where T : IEntity
         {
             return entity.SetMixin((IsolationMixin m) => m.Isolation, isolation);
         }

@@ -30,7 +30,7 @@ namespace Signum.Entities.Processes
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class ProcessDN : IdentifiableEntity
+    public class ProcessDN : Entity
     {
         internal ProcessDN() { }
 
@@ -211,11 +211,11 @@ namespace Signum.Entities.Processes
         }
     }
 
-    public interface IProcessDataDN : IIdentifiable
+    public interface IProcessDataDN : IEntity
     {
     }
 
-    public interface IProcessLineDataDN : IIdentifiable
+    public interface IProcessLineDataDN : IEntity
     {
 
     }
@@ -223,7 +223,7 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class UserProcessSessionMixin : MixinEntity
     {
-        UserProcessSessionMixin(IdentifiableEntity mainEntity, MixinEntity next)
+        UserProcessSessionMixin(Entity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
         }

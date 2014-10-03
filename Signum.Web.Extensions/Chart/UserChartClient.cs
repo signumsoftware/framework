@@ -84,7 +84,7 @@ namespace Signum.Web.Chart
                     ContextualFromMany = { IsVisible = a => true },
                 });
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                LinksClient.RegisterEntityLinks<Entity>((entity, ctrl) =>
                 {
                     if (!ChartPermission.ViewCharting.IsAuthorized())
                         return null;
@@ -99,9 +99,9 @@ namespace Signum.Web.Chart
         class UserChartQuickLink : QuickLink
         {
             Lite<UserChartDN> userChart;
-            Lite<IdentifiableEntity> entity;
+            Lite<Entity> entity;
 
-            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<IdentifiableEntity> entity)
+            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<Entity> entity)
             {
                 this.Text = userChart.ToString();
                 this.userChart = userChart;

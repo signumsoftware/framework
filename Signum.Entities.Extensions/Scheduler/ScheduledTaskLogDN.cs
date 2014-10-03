@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ScheduledTaskLogDN : IdentifiableEntity
+    public class ScheduledTaskLogDN : Entity
     {
         ScheduledTaskDN scheduledTask;
         public ScheduledTaskDN ScheduledTask
@@ -76,8 +76,8 @@ namespace Signum.Entities.Scheduler
         }
 
         [ImplementedByAll]
-        Lite<IIdentifiable> productEntity;
-        public Lite<IIdentifiable> ProductEntity
+        Lite<IEntity> productEntity;
+        public Lite<IEntity> ProductEntity
         {
             get { return productEntity; }
             set { Set(ref productEntity, value); }

@@ -38,7 +38,7 @@ namespace Signum.Windows.DiffLog
             var tab = ((DependencyObject)e.OriginalSource).LogicalParents().OfType<LinkTabItem>().FirstOrDefault();
             if (tab != null)
             {
-                Navigator.Navigate((IdentifiableEntity)tab.DataContext);
+                Navigator.Navigate((Entity)tab.DataContext);
                 e.Handled = true;
             }
         

@@ -94,7 +94,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static SqlPreCommand EmailTemplateLogic_PreDeleteSqlSync(IdentifiableEntity arg)
+        static SqlPreCommand EmailTemplateLogic_PreDeleteSqlSync(Entity arg)
         {
             SystemEmailDN systemEmail = (SystemEmailDN)arg;
 
@@ -182,7 +182,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
+        public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IEntity entity, ISystemEmail systemEmail = null)
         {
             EmailTemplateDN template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
 

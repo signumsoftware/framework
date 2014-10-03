@@ -15,7 +15,7 @@ namespace Signum.Web.Alerts
     {
         public JsonNetResult AlertsCount()
         {
-            var entity = Lite.Parse<IdentifiableEntity>(Request["key"]);
+            var entity = Lite.Parse<Entity>(Request["key"]);
             return this.JsonNet(new
             {
                 Alerted = AlertWidgetHelper.CountAlerts(entity, "Alerted"),

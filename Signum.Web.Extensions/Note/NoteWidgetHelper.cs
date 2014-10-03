@@ -12,7 +12,7 @@ namespace Signum.Web.Notes
 {
     public static class NoteWidgetHelper
     {
-        public static int CountNotes(Lite<IdentifiableEntity> identifiable)
+        public static int CountNotes(Lite<Entity> identifiable)
         { 
             return Finder.QueryCount(new CountOptions(typeof(NoteDN))
             {
@@ -22,7 +22,7 @@ namespace Signum.Web.Notes
 
         public static Widget CreateWidget(WidgetContext ctx)
         {
-            var ident = (IdentifiableEntity)ctx.Entity;
+            var ident = (Entity)ctx.Entity;
 
             var findOptions = new FindOptions
             {

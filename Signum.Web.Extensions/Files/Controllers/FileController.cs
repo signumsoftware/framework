@@ -60,13 +60,13 @@ namespace Signum.Web.Files
             file.BinaryFile = hpf.InputStream.ReadAllBytes();
 
             if (!isEmbedded)
-                ((IdentifiableEntity)file).Save();
+                ((Entity)file).Save();
 
             StringBuilder sb = new StringBuilder();
             //Use plain javascript not to have to add also the reference to jquery in the result iframe
             sb.AppendLine("<html><head><title>-</title></head><body>");
             sb.AppendLine("<script type='text/javascript'>");
-            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IEntity)file);
             sb.AppendLine("window.parent.$.data(window.parent.document.getElementById('{0}'), 'SF-control').onUploaded('{1}', '{2}', '{3}', '{4}')".Formato(
                 prefix,
                 file.FileName,
@@ -107,9 +107,9 @@ namespace Signum.Web.Files
             file.BinaryFile = Request.InputStream.ReadAllBytes();
 
             if (!isEmbedded)
-                ((IdentifiableEntity)file).Save();
+                ((Entity)file).Save();
 
-            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IEntity)file);
             
             return this.JsonNet(new
             {

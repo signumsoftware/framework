@@ -16,7 +16,7 @@ namespace Signum.Engine.DiffLog
 {
     public static class DiffLogLogic
     {
-        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(IdentifiableEntity)); 
+        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(Entity)); 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -26,16 +26,16 @@ namespace Signum.Engine.DiffLog
 
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
-                RegisterGraph<IdentifiableEntity>(oper => true);
+                RegisterGraph<Entity>(oper => true);
             }
         }
 
-        public static void RegisterGraph<T>(Func<IOperation, bool> func) where T : IdentifiableEntity
+        public static void RegisterGraph<T>(Func<IOperation, bool> func) where T : Entity
         {
             Types.SetDefinition(typeof(T), func);
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, Entity entity, object[] args)
         {
             var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? entity.GetType() : null;
 
@@ -64,7 +64,7 @@ namespace Signum.Engine.DiffLog
             });
         }
 
-        private static IdentifiableEntity RetrieveFresh(IdentifiableEntity entity)
+        private static Entity RetrieveFresh(Entity entity)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
                 return entity.ToLite().Retrieve();

@@ -103,7 +103,7 @@ namespace Signum.Engine.UserAssets
                         Type = entity.GetType(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
-                                 GraphExplorer.FromRoot((IdentifiableEntity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
+                                 GraphExplorer.FromRoot((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                                  EntityAction.Identical,
                     });
 
@@ -253,7 +253,7 @@ namespace Signum.Engine.UserAssets
 
         static readonly GenericInvoker<Func<Guid, IUserAssetEntity>> giRetrieveOrCreate = new GenericInvoker<Func<Guid, IUserAssetEntity>>(
             guid => RetrieveOrCreate<UserQueryDN>(guid));
-        static T RetrieveOrCreate<T>(Guid guid) where T : IdentifiableEntity, IUserAssetEntity, new()
+        static T RetrieveOrCreate<T>(Guid guid) where T : Entity, IUserAssetEntity, new()
         {
             var result = Database.Query<T>().SingleOrDefaultEx(a => a.Guid == guid);
 

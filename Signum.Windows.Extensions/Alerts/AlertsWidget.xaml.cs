@@ -30,7 +30,7 @@ namespace Signum.Windows.Alerts
 
         public event Action ForceShow;
 
-        public static AlertDN CreateAlert(IdentifiableEntity entity)
+        public static AlertDN CreateAlert(Entity entity)
         {
             if(entity.IsNew)
                 return null;
@@ -72,7 +72,7 @@ namespace Signum.Windows.Alerts
             if (DataContext == null)
                 return;
 
-            AlertDN alert = CreateAlert((IdentifiableEntity)DataContext);
+            AlertDN alert = CreateAlert((Entity)DataContext);
 
             ViewAlert(alert);
         }
@@ -87,7 +87,7 @@ namespace Signum.Windows.Alerts
 
         public void ReloadAlerts()
         {
-            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            Entity entity = DataContext as Entity;
             if (entity == null || entity.IsNew)
             {
                 //lvAlerts.ItemsSource = null;
@@ -99,9 +99,9 @@ namespace Signum.Windows.Alerts
             CountAlerts(entity);
         }
 
-        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
+        public static Polymorphic<Func<Entity, FilterOption>> CustomFilter = new Polymorphic<Func<Entity, FilterOption>>();
 
-        void CountAlerts(IdentifiableEntity entity)
+        void CountAlerts(Entity entity)
         {
             var func = CustomFilter.TryGetValue(DataContext.GetType());
 
@@ -109,7 +109,7 @@ namespace Signum.Windows.Alerts
             {
                 FilterOptions = new List<FilterOption>
                 {
-                     func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
+                     func != null ?  func((Entity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
                 },
                 ColumnOptions = new List<ColumnOption>
                 {
@@ -145,7 +145,7 @@ namespace Signum.Windows.Alerts
             if (DataContext == null)
                 return;
 
-            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            Entity entity = DataContext as Entity;
             ResultRow row = (ResultRow)((Button)sender).DataContext;
 
             AlertCurrentState state = (AlertCurrentState)row[0];

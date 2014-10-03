@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class PropertyRouteDN : IdentifiableEntity
+    public class PropertyRouteDN : Entity
     {
         public PropertyRouteDN() { }
 

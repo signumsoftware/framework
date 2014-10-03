@@ -17,7 +17,7 @@ namespace Signum.Engine.Mailing
 {
     public interface ISystemEmail
     {
-        IdentifiableEntity UntypedEntity { get; }
+        Entity UntypedEntity { get; }
         List<EmailOwnerRecipientData> GetRecipients();
 
         List<Filter> GetFilters(QueryDescription qd);
@@ -35,11 +35,11 @@ namespace Signum.Engine.Mailing
     }
 
     public abstract class SystemEmail<T> : ISystemEmail
-        where T : IdentifiableEntity
+        where T : Entity
     {
         public T Entity { get; set; }
 
-        IdentifiableEntity ISystemEmail.UntypedEntity
+        Entity ISystemEmail.UntypedEntity
         {
             get { return Entity; }
         }

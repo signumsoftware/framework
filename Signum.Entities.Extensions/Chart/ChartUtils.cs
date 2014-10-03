@@ -254,7 +254,7 @@ namespace Signum.Entities.Chart
             {
                 return r =>
                 {
-                    Lite<IdentifiableEntity> l = (Lite<IdentifiableEntity>)r[columnIndex];
+                    Lite<Entity> l = (Lite<Entity>)r[columnIndex];
                     return new
                     {
                         key = l.Try(li => li.Key()),

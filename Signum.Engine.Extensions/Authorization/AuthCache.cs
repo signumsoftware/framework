@@ -40,7 +40,7 @@ namespace Signum.Entities.Authorization
     class AuthCache<RT, AR, R, K, A>: IManualAuth<K, A> 
         where RT : RuleDN<R, A>, new()
         where AR : AllowedRule<R, A>, new()
-        where R : IdentifiableEntity
+        where R : Entity
     {
         readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
@@ -65,15 +65,15 @@ namespace Signum.Entities.Authorization
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
-            sb.Schema.Table<R>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.Table<R>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
 
-        SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<RT>();
             var f = (FieldReference)t.Fields["resource"].Field;
 
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name.SqlEscape(), param.ParameterName), new List<DbParameter> { param });
         }

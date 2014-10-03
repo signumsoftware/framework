@@ -20,7 +20,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SimpleTaskLogic
     {
-        static Dictionary<SimpleTaskSymbol, Func<Lite<IIdentifiable>>> tasks = new Dictionary<SimpleTaskSymbol, Func<Lite<IIdentifiable>>>();
+        static Dictionary<SimpleTaskSymbol, Func<Lite<IEntity>>> tasks = new Dictionary<SimpleTaskSymbol, Func<Lite<IEntity>>>();
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -30,7 +30,7 @@ namespace Signum.Engine.Scheduler
 
                 SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st) =>
                 {
-                    Func<Lite<IIdentifiable>> func = tasks.GetOrThrow(st);
+                    Func<Lite<IEntity>> func = tasks.GetOrThrow(st);
                     return func();
                 });
 
@@ -46,7 +46,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<Lite<IIdentifiable>> action)
+        public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<Lite<IEntity>> action)
         {
             if (simpleTaskSymbol == null)
                 throw new ArgumentNullException("simpleTaskSymbol");

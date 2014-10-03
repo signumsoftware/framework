@@ -82,7 +82,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedMixin : MixinEntity
     {
-        DisconnectedMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         long? lastOnlineTicks;
         public long? LastOnlineTicks

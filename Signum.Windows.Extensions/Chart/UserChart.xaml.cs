@@ -71,7 +71,7 @@ namespace Signum.Windows.Chart
             return token.SubTokens(QueryDescription, SubTokensOptions.CanElement | (cr.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
-        IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
+        IEnumerable<Lite<Entity>> EntityType_AutoCompleting(string text)
         {
             return TypeClient.ViewableServerTypes().Where(t => t.CleanName.Contains(text, StringComparison.InvariantCultureIgnoreCase)).Select(t => t.ToLite()).Take(5);
         }

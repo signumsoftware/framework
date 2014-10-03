@@ -72,7 +72,7 @@ namespace Signum.Web.Processes
 
         static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
          new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings) =>
-             new ContextualOperationContext<IdentifiableEntity>(ctx, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
+             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings));
 
 
         public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)

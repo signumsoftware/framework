@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
-    public interface IScheduleRuleDN : IIdentifiable
+    public interface IScheduleRuleDN : IEntity
     {
         DateTime Next();
     }

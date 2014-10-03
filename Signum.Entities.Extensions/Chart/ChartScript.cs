@@ -327,7 +327,6 @@ namespace Signum.Entities.Chart
             set { Set(ref isOptional, value); }
         }
      
-        [ForceForeignKeyAttribute]
         ChartColumnType columnType;
         public ChartColumnType ColumnType
         {

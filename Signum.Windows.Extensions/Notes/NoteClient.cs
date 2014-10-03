@@ -22,7 +22,7 @@ namespace Signum.Windows.Notes
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
                 {
-                    if (obj is IdentifiableEntity && types.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew && Finder.IsFindable(typeof(NoteDN)))
+                    if (obj is Entity && types.Contains(obj.GetType()) && !((Entity)obj).IsNew && Finder.IsFindable(typeof(NoteDN)))
                         return new NotesWidget();
 
                     return null;

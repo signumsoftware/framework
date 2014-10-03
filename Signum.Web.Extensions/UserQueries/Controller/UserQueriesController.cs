@@ -31,7 +31,7 @@ namespace Signum.Web.UserQueries
 {
     public class UserQueriesController : Controller
     {
-        public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<IdentifiableEntity> currentEntity)
+        public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<Entity> currentEntity)
         {
             UserQueryPermission.ViewUserQuery.Authorize();
 

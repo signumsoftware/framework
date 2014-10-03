@@ -344,7 +344,7 @@ namespace Signum.Engine.Disconnected
         void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine);
     }
 
-    public class BasicExporter<T> : ICustomExporter where T : IdentifiableEntity
+    public class BasicExporter<T> : ICustomExporter where T : Entity
     {
         public virtual void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
         {
@@ -405,7 +405,7 @@ SELECT {3}
         }
     }
 
-    public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : IdentifiableEntity
+    public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : Entity
     {
         public override void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
         {

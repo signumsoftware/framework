@@ -35,6 +35,6 @@ namespace Signum.Services
     public interface IResourcesByEntityServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> GetResourcesByEntity(Type entityType);
+        List<Lite<Entity>> GetResourcesByEntity(Type entityType);
     }
 }

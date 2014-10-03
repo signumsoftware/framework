@@ -36,8 +36,8 @@ namespace Signum.Entities.Mailing
         }
 
         [ImplementedByAll]
-        Lite<IdentifiableEntity> target;
-        public Lite<IdentifiableEntity> Target
+        Lite<Entity> target;
+        public Lite<Entity> Target
         {
             get { return target; }
             set { Set(ref target, value); }
@@ -195,7 +195,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailReceptionMixin : MixinEntity
     {
-        protected EmailReceptionMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
+        protected EmailReceptionMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 
@@ -468,7 +468,7 @@ namespace Signum.Entities.Mailing
         Received
     }
 
-    public interface IEmailOwnerDN : IIdentifiable
+    public interface IEmailOwnerDN : IEntity
     {
         EmailOwnerData EmailOwnerData { get; }
     }
@@ -533,7 +533,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
+    public class EmailPackageDN : Entity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
         string name;

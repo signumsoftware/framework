@@ -45,7 +45,7 @@ namespace Signum.Windows.Dashboard
             this.Loaded += new RoutedEventHandler(DashboardView_Loaded);
         }
 
-        IEnumerable<Lite<IIdentifiable>> cpCombo_LoadData()
+        IEnumerable<Lite<IEntity>> cpCombo_LoadData()
         {
             return Server.Return((IDashboardServer cps) => cps.GetDashboards());
         }

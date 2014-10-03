@@ -21,9 +21,9 @@ namespace Signum.Entities.Translation
         }
 
         [ImplementedByAll]
-        Lite<IdentifiableEntity> instance;
+        Lite<Entity> instance;
         [NotNullValidator]
-        public Lite<IdentifiableEntity> Instance
+        public Lite<Entity> Instance
         {
             get { return instance; }
             set { Set(ref instance, value); }

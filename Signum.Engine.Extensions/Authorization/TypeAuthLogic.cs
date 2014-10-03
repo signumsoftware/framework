@@ -115,7 +115,7 @@ namespace Signum.Engine.Authorization
         static GenericInvoker<Action<Schema>> miRegister =
             new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeDN>(s));
         static void RegisterSchemaEvent<T>(Schema sender)
-             where T : IdentifiableEntity
+             where T : Entity
         {
             sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
         }
@@ -135,7 +135,7 @@ namespace Signum.Engine.Authorization
             return null;
         }
 
-        static void Schema_Saving(IdentifiableEntity ident)
+        static void Schema_Saving(Entity ident)
         {
             if (ident.IsGraphModified && !saveDisabled.Value)
             {
@@ -156,7 +156,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
+        static void EntityEventsGlobal_Retrieved(Entity ident)
         {
             Type type = ident.GetType();
             TypeAllowedBasic access = GetAllowed(type).MaxDB();
@@ -231,7 +231,7 @@ namespace Signum.Engine.Authorization
         static readonly Variable<ImmutableStack<Tuple<Type, TypeAllowed>>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Tuple<Type, TypeAllowed>>>("temporallyAllowed");
 
         public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
-            where T : IdentifiableEntity
+            where T : Entity
         {
             tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
 

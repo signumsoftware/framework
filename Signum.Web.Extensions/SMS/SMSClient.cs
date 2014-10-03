@@ -52,21 +52,21 @@ namespace Signum.Web.SMS
 
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
-                    new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+                    new EntityOperationSettings<Entity>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
                         Click = ctx => Module["createSmsWithTemplateFromEntity"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms)=>sms.CreateSMSMessageFromTemplate()), 
                             SmsTemplateFindOptions(ctx.Entity.GetType()).ToJS(ctx.Prefix, "New"))
                     },
 
-                    new ContextualOperationSettings<IdentifiableEntity>(SMSMessageOperation.SendSMSMessagesFromTemplate)
+                    new ContextualOperationSettings<Entity>(SMSMessageOperation.SendSMSMessagesFromTemplate)
                     {
                         Click  = ctx =>  Module["sendMultipleSMSMessagesFromTemplate"](ctx.Options(), JsFunction.Event, 
                             ctx.Url.Action((SMSController sms )=>sms.SendMultipleMessagesFromTemplate()), 
                             SmsTemplateFindOptions(ctx.SingleType).ToJS(ctx.Prefix, "New"))
                     },
 
-                    new ContextualOperationSettings<IdentifiableEntity>(SMSMessageOperation.SendSMSMessages)
+                    new ContextualOperationSettings<Entity>(SMSMessageOperation.SendSMSMessages)
                     {
                         Click  = ctx => Module["sentMultipleSms"](ctx.Options(), JsFunction.Event, ctx.Prefix, 
                             ctx.Url.Action((SMSController sms)=>sms.SendMultipleSMSMessagesModel()),

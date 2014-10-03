@@ -16,7 +16,7 @@ namespace Signum.Web.Isolation
     {
         public static IWidget CreateWidget(WidgetContext ctx)
         {
-            IdentifiableEntity entity = (IdentifiableEntity)ctx.Entity;
+            Entity entity = (Entity)ctx.Entity;
 
             var iso = entity.Isolation();
 

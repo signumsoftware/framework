@@ -110,7 +110,7 @@ namespace Signum.Entities.UserAssets
         DynamicQuery.QueryDescription GetQueryDescription(QueryDN Query);
     }
 
-    public interface IUserAssetEntity : IIdentifiable
+    public interface IUserAssetEntity : IEntity
     {
         Guid Guid { get; set; }
 

@@ -25,7 +25,7 @@ namespace Signum.Web.Selenium
             this.SearchControl = new SearchControlProxy(selenium, prefix);
         }
 
-        public void SelectLite(Lite<IIdentifiable> lite)
+        public void SelectLite(Lite<IEntity> lite)
         {
             this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, lite.Id);
 
@@ -492,7 +492,7 @@ namespace Signum.Web.Selenium
             return RowsLocator + ":nth-child({0})".Formato(rowIndex + 1);
         }
 
-        public string RowLocator(Lite<IIdentifiable> lite)
+        public string RowLocator(Lite<IEntity> lite)
         {
             return "{0}[data-entity='{1}']".Formato(RowsLocator, lite.Key());
         }
@@ -525,7 +525,7 @@ namespace Signum.Web.Selenium
                 SelectRow(index);
         }
 
-        public void SelectRow(Lite<IIdentifiable> lite)
+        public void SelectRow(Lite<IEntity> lite)
         {
             Selenium.Click(RowLocator(lite) + " .sf-td-selection");
         }
@@ -610,7 +610,7 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementDisapear(headerSelector);
         }
 
-        public string EntityLinkLocator(Lite<IIdentifiable> lite, bool allowSelection = true)
+        public string EntityLinkLocator(Lite<IEntity> lite, bool allowSelection = true)
         {
             return RowLocator(lite) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
         }
@@ -620,14 +620,14 @@ namespace Signum.Web.Selenium
             return RowLocator(rowIndex) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
         }
 
-        public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : IdentifiableEntity
+        public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
         {
             Selenium.Click(EntityLinkLocator(lite, allowSelection));
             Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }
 
-        public NormalPage<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : IdentifiableEntity
+        public NormalPage<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : Entity
         {
             Selenium.Click(EntityLinkLocator(rowIndex, allowSelection));
             Selenium.WaitForPageToLoad();
@@ -665,7 +665,7 @@ namespace Signum.Web.Selenium
             return num;
         }
 
-        public Lite<IdentifiableEntity> EntityInIndex(int index)
+        public Lite<Entity> EntityInIndex(int index)
         {
             var result = Selenium.GetEval("window.$('{0}').data('entity')".Formato(RowLocator(index).RemoveStart(3)));
 
@@ -836,7 +836,7 @@ namespace Signum.Web.Selenium
         }
 
         public PopupControl<T> MenuClickPopup<T>(string itemId, string prefix = "New")
-            where T : IdentifiableEntity
+            where T : Entity
         {
             MenuClick(itemId);
             //resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
@@ -846,17 +846,17 @@ namespace Signum.Web.Selenium
         }
 
         public PopupControl<T> MenuClickPopup<T>(IOperationSymbolContainer contanier, string prefix = "New")
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return MenuClickPopup<T>(contanier.Symbol.KeyWeb(), prefix);
         }
 
-        public NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : IdentifiableEntity
+        public NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity
         {
             return MenuClickNormalPage<T>(contanier.Symbol.KeyWeb());
         }
 
-        private NormalPage<T> MenuClickNormalPage<T>(string itemId) where T : IdentifiableEntity
+        private NormalPage<T> MenuClickNormalPage<T>(string itemId) where T : Entity
         {
             MenuClick(itemId);
             resultTable.Selenium.WaitForPageToLoad();
@@ -949,10 +949,10 @@ namespace Signum.Web.Selenium
             if (value == null)
                 return; //Hack
 
-            if (value is Lite<IdentifiableEntity>)
-                EntityLine().LiteValue = (Lite<IdentifiableEntity>)value;
-            else if (value is IdentifiableEntity)
-                EntityLine().LiteValue = ((IdentifiableEntity)value).ToLite();
+            if (value is Lite<Entity>)
+                EntityLine().LiteValue = (Lite<Entity>)value;
+            else if (value is Entity)
+                EntityLine().LiteValue = ((Entity)value).ToLite();
             else
                 ValueLine().StringValue = value.ToString();
         }

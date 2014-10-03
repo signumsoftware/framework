@@ -22,7 +22,7 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable]
-    public abstract class SMSPackageDN : IdentifiableEntity, IProcessDataDN
+    public abstract class SMSPackageDN : Entity, IProcessDataDN
     {
         public SMSPackageDN()
         {

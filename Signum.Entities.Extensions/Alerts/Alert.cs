@@ -17,11 +17,11 @@ using System.Diagnostics;
 namespace Signum.Entities.Alerts
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class AlertDN : IdentifiableEntity
+    public class AlertDN : Entity
     {
         [ImplementedByAll]
-        Lite<IdentifiableEntity> target;
-        public Lite<IdentifiableEntity> Target
+        Lite<Entity> target;
+        public Lite<Entity> Target
         {
             get { return target; }
             set { Set(ref target, value); }
@@ -157,7 +157,7 @@ namespace Signum.Entities.Alerts
 
     public static class AlertOperation
     {
-        public static readonly ConstructSymbol<AlertDN>.From<IdentifiableEntity> CreateAlertFromEntity = OperationSymbol.Construct<AlertDN>.From<IdentifiableEntity>();
+        public static readonly ConstructSymbol<AlertDN>.From<Entity> CreateAlertFromEntity = OperationSymbol.Construct<AlertDN>.From<Entity>();
         public static readonly ExecuteSymbol<AlertDN> SaveNew = OperationSymbol.Execute<AlertDN>();
         public static readonly ExecuteSymbol<AlertDN> Save = OperationSymbol.Execute<AlertDN>();
         public static readonly ExecuteSymbol<AlertDN> Attend = OperationSymbol.Execute<AlertDN>();

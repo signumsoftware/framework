@@ -8,7 +8,7 @@ namespace Signum.Entities.DiffLog
     [Serializable]
     public class DiffLogMixin : MixinEntity
     {
-        protected DiffLogMixin(IdentifiableEntity mainEntity, MixinEntity next)
+        protected DiffLogMixin(Entity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
         }

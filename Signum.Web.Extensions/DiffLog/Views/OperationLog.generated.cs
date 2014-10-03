@@ -604,7 +604,7 @@ WriteLiteralTo(__razor_template_writer, " ");
                 }
                 else
                 {
-                    var entity = (Lite<IdentifiableEntity>)e.Value.Target;
+                    var entity = (Lite<Entity>)e.Value.Target;
 
                     var dump = !entity.Exists() ? null : entity.Retrieve().Dump();
 

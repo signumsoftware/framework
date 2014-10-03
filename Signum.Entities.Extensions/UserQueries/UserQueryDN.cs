@@ -43,8 +43,8 @@ namespace Signum.Entities.UserQueries
             set { Set(ref entityType, value); }
         }
 
-        Lite<IdentifiableEntity> owner;
-        public Lite<IdentifiableEntity> Owner
+        Lite<Entity> owner;
+        public Lite<Entity> Owner
         {
             get { return owner; }
             set { Set(ref owner, value); }
@@ -261,7 +261,7 @@ namespace Signum.Entities.UserQueries
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
@@ -314,7 +314,7 @@ namespace Signum.Entities.UserQueries
             DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             token.ParseData(context, description, options);
         }
@@ -372,7 +372,7 @@ namespace Signum.Entities.UserQueries
             set { SetToStr(ref valueString, value); }
         }
 
-        public void ParseData(IdentifiableEntity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             token.ParseData(context, description, options);
         }
@@ -432,7 +432,7 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryUtils
     {
-        public static Func<Lite<IdentifiableEntity>> DefaultRelated = () => UserDN.Current.ToLite();
+        public static Func<Lite<Entity>> DefaultRelated = () => UserDN.Current.ToLite();
 
         public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, Pagination defaultPagination, bool withoutFilters)
         {

@@ -12,7 +12,7 @@ using System.ComponentModel;
 namespace Signum.Entities.Excel
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class ExcelReportDN : IdentifiableEntity
+    public class ExcelReportDN : Entity
     {
         QueryDN query;
         [NotNullValidator]

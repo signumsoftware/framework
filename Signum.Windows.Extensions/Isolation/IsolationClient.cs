@@ -33,7 +33,7 @@ namespace Signum.Windows.Isolation
             {
                 Constructor.Manager.PreConstructors += Constructor_PreConstructors;
 
-                WidgetPanel.GetWidgets += (e, c) => e is IdentifiableEntity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
+                WidgetPanel.GetWidgets += (e, c) => e is Entity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
                     new IsolationWidget().Set(Common.OrderProperty, -1.0) : null;
 
                 List<Lite<IsolationDN>> isolations = null;
@@ -92,13 +92,13 @@ namespace Signum.Windows.Isolation
 
                 if (win.DataContext != null)
                 {
-                    SetIsolation(win.DataContext as IdentifiableEntity, prev);
+                    SetIsolation(win.DataContext as Entity, prev);
                 }
                 else if (win is NormalWindow)
                 {
                     ((NormalWindow)win).PreEntityLoaded += (w, args) =>
                     {
-                        SetIsolation(args.Entity as IdentifiableEntity, prev);
+                        SetIsolation(args.Entity as Entity, prev);
                         return;
                     };
                 }
@@ -109,7 +109,7 @@ namespace Signum.Windows.Isolation
             }; 
         }
 
-        private static void SetIsolation(IdentifiableEntity entity, Lite<IsolationDN> prev)
+        private static void SetIsolation(Entity entity, Lite<IsolationDN> prev)
         {
             if (entity == null)
                 IsolationDN.CurrentThreadVariable.Value = Tuple.Create(prev);
@@ -137,7 +137,7 @@ namespace Signum.Windows.Isolation
 
         public static Dictionary<Type, Func<Lite<IsolationDN>, string>> IsValid = new Dictionary<Type, Func<Lite<IsolationDN>, string>>();
 
-        public static void RegisterIsValid<T>(Func<Lite<IsolationDN>, string> isValid) where T : IdentifiableEntity
+        public static void RegisterIsValid<T>(Func<Lite<IsolationDN>, string> isValid) where T : Entity
         {
             IsValid[typeof(T)] = isValid;
         }
@@ -169,7 +169,7 @@ namespace Signum.Windows.Isolation
 
             if (result == null)
             {
-                var entity = element == null ? null : element.DataContext as IdentifiableEntity;
+                var entity = element == null ? null : element.DataContext as Entity;
                 if (entity != null)
                     result = entity.TryIsolation();
             }

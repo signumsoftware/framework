@@ -29,7 +29,7 @@ namespace Signum.Windows.Isolation
 
         void EntidadSistemaWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
+            Entity ident = e.NewValue as Entity;
 
             if (ident != null)
             {   

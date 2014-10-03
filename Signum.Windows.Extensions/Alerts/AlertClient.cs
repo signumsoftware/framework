@@ -33,13 +33,13 @@ namespace Signum.Windows.Alerts
 
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
-                    new EntityOperationSettings<IdentifiableEntity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
+                    new EntityOperationSettings<Entity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
                     new EntityOperationSettings<AlertDN>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
                     new EntityOperationSettings<AlertDN>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
-                    (obj is IdentifiableEntity && types.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew) &&
+                    (obj is Entity && types.Contains(obj.GetType()) && !((Entity)obj).IsNew) &&
                     Finder.IsFindable(typeof(AlertDN)) ? new AlertsWidget() : null;
             }
         }

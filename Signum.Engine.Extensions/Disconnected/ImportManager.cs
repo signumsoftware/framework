@@ -354,7 +354,7 @@ namespace Signum.Engine.Disconnected
     }
 
 
-    public class BasicImporter<T> : ICustomImporter where T : IdentifiableEntity
+    public class BasicImporter<T> : ICustomImporter where T : Entity
     {
         public virtual ImportResult Import(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
         {

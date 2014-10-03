@@ -19,13 +19,13 @@ namespace Signum.Engine.Mailing
     class EmailMessageBuilder
     {
         EmailTemplateDN template;
-        IIdentifiable entity;
+        IEntity entity;
         ISystemEmail systemEmail;
         object queryName;
         QueryDescription qd;
         SmtpConfigurationDN smtpConfig;
 
-        public EmailMessageBuilder(EmailTemplateDN template, IIdentifiable entity, ISystemEmail systemEmail)
+        public EmailMessageBuilder(EmailTemplateDN template, IEntity entity, ISystemEmail systemEmail)
         {
             this.template = template;
             this.entity = entity;
@@ -51,7 +51,7 @@ namespace Signum.Engine.Mailing
                 {
                     EmailMessageDN email = new EmailMessageDN
                     {
-                        Target = (Lite<IdentifiableEntity>)entity.ToLite(),
+                        Target = (Lite<Entity>)entity.ToLite(),
                         Recipients = recipients.Select(r => new EmailRecipientDN(r.OwnerData) { Kind = r.Kind }).ToMList(),
                         From = from,
                         IsBodyHtml = template.IsBodyHtml,

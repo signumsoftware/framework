@@ -220,7 +220,7 @@ namespace Signum.Engine.Mailing
     {
         class SendLine
         {
-            public IGrouping<Lite<IdentifiableEntity>, ResultRow> Rows;
+            public IGrouping<Lite<Entity>, ResultRow> Rows;
             public Lite<NewsletterDeliveryDN> NewsletterDelivery;
             public EmailOwnerData Email;
             public Exception Exception;
@@ -279,7 +279,7 @@ namespace Signum.Engine.Mailing
             var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
             var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
 
-            var lines = resultTable.Rows.GroupBy(r => (Lite<IdentifiableEntity>)r[entityColumn]).Select(g => new SendLine
+            var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]).Select(g => new SendLine
                 {
                     NewsletterDelivery = (Lite<NewsletterDeliveryDN>)g.DistinctSingle(deliveryColumn),
                     Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn),

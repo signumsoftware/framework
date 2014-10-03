@@ -40,7 +40,7 @@ namespace Signum.Windows.Dashboard
 
         void DashboardWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearch: true));
+            bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IEntity)e.NewValue, isSearch: true));
             this.tbDashboard.Cursor = canNavigate ? Cursors.Hand : Cursors.Arrow;   
  	        this.tbDashboard.Text = e.NewValue.TryToString();
         }

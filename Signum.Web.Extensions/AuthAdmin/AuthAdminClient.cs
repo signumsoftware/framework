@@ -93,7 +93,7 @@ namespace Signum.Web.AuthAdmin
         static void Register<T, AR, R, A, K>(string partialViewName, Expression<Func<AR, K>> getKey, Mapping<A> allowedMapping, bool embedded)
             where T : BaseRulePack<AR>
             where AR : AllowedRule<R, A>, new()
-            where R : IdentifiableEntity
+            where R : Entity
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
                 Navigator.AddSetting(new EntitySettings<R>());

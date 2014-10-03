@@ -33,12 +33,12 @@ namespace Signum.Windows.SMS
                     new EmbeddedEntitySettings<MultipleSMSModel> { View = e => new MultipleSMS(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+                OperationClient.AddSetting(new EntityOperationSettings<Entity>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                 {
                     Click = FindAssociatedTemplates
                 });
 
-                OperationClient.AddSetting(new ContextualOperationSettings<IdentifiableEntity>(SMSMessageOperation.SendSMSMessages)
+                OperationClient.AddSetting(new ContextualOperationSettings<Entity>(SMSMessageOperation.SendSMSMessages)
                 {
                     Click = coc =>
                     {
@@ -57,7 +57,7 @@ namespace Signum.Windows.SMS
             }
         }
 
-        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationContext<IdentifiableEntity> e)
+        public static Entity FindAssociatedTemplates(EntityOperationContext<Entity> e)
         {
             var template = Finder.Find(new FindOptions(typeof(SMSTemplateDN))
             {

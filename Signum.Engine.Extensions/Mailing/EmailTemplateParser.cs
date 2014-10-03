@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
 {
     public class GlobalVarContext
     {
-        public IIdentifiable Entity;
+        public IEntity Entity;
         public CultureInfo Culture;
         public bool IsHtml;
         public ISystemEmail SystemEmail;
@@ -91,7 +91,7 @@ namespace Signum.Engine.Mailing
             static bool IsSimple(Type t)
             {
                 return t == typeof(string) || Type.GetTypeCode(t) >= TypeCode.Boolean ||
-                    typeof(IIdentifiable).IsAssignableFrom(t) || typeof(Lite<IIdentifiable>).IsAssignableFrom(t) ||
+                    typeof(IEntity).IsAssignableFrom(t) || typeof(Lite<IEntity>).IsAssignableFrom(t) ||
                     typeof(IEquatable<>).MakeGenericType(t).IsAssignableFrom(t);
             }
         }
@@ -609,7 +609,7 @@ namespace Signum.Engine.Mailing
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
         public CultureInfo CultureInfo;
-        public IIdentifiable Entity;
+        public IEntity Entity;
         public ISystemEmail SystemEmail;
         public Dictionary<QueryToken, ResultColumn> Columns;
     }
