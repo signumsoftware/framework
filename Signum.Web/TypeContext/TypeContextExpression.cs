@@ -16,11 +16,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Web
 {
-    enum TypeContextNodeType
-    {
-        TypeContext = 1000,
-    }
-
 
     class TypeContextExpression : Expression
     {
@@ -44,7 +39,7 @@ namespace Signum.Web
 
         public override ExpressionType NodeType
         {
-            get{return (ExpressionType)TypeContextNodeType.TypeContext; }
+            get { return ExpressionType.Extension; }
         }
 
         public readonly PropertyInfo[] Properties;
@@ -95,14 +90,14 @@ namespace Signum.Web
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".Formato(p.NiceToString()));
+            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".Formato(p.ToString()));
         }
 
         static TypeContextExpression Cast(Expression expression)
         {
             var result = expression as TypeContextExpression;
             if (result == null)
-                throw new InvalidOperationException("TypeSubContext can not be created: {0}".Formato(expression == null ? null : expression.NiceToString()));
+                throw new InvalidOperationException("TypeSubContext can not be created: {0}".Formato(expression == null ? null : expression.ToString()));
             return result;
         }
 

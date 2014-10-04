@@ -27,8 +27,9 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression Nullify(this Expression expression)
         {
-            if (!expression.Type.IsByRef)
-                return Expression.Convert(expression, expression.Type.Nullify());
+            Type type = expression.Type.Nullify();
+            if (expression.Type != type)
+                return Expression.Convert(expression, type);
             return expression;
         }
 

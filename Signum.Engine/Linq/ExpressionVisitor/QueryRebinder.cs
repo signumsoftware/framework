@@ -194,7 +194,7 @@ namespace Signum.Engine.Linq
                 {
                     Expression expr = columns.SingleEx(cd => (cd.Name ?? "-") == col.Name).Expression;
 
-                    askedColumns[col] = expr.NodeType == (ExpressionType)DbExpressionType.SqlConstant? expr: col;
+                    askedColumns[col] = expr is SqlConstantExpression? expr: col;
                 }
                 else
                 {

@@ -218,7 +218,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => pi.NiceName(), pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.ToString()));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
@@ -237,7 +237,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.ToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)

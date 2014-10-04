@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
 
             if (proj.NodeType != ExpressionType.New &&  //anonymous types
                 proj.NodeType != ExpressionType.MemberInit && // not-anonymous type
-                !(proj.NodeType == (ExpressionType)MetaExpressionType.MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
+                !(proj is MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
                 return null;
 
             PropertyInfo[] props = proj.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -446,18 +446,19 @@ namespace Signum.Engine.Linq
                         return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
                     break;
-                case (ExpressionType)MetaExpressionType.MetaMListExpression:
-                    {
-                        MetaMListExpression mme = (MetaMListExpression)source;
-                        var ga = mme.Type.GetGenericArguments();
-                        if (member.Name == "Parent")
-                            return new MetaExpression(ga[0], mme.Parent);
+            }
 
-                        if (member.Name == "Element")
-                            return new MetaExpression(ga[1], mme.Element);
+            if (source is MetaMListExpression)
+            {
+                MetaMListExpression mme = (MetaMListExpression)source;
+                var ga = mme.Type.GetGenericArguments();
+                if (member.Name == "Parent")
+                    return new MetaExpression(ga[0], mme.Parent);
 
-                        throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
-                    }
+                if (member.Name == "Element")
+                    return new MetaExpression(ga[1], mme.Element);
+
+                throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
             }
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IEntity).IsAssignableFrom(source.Type))

@@ -54,14 +54,14 @@ namespace Signum.Test
         [TestMethod]
         public void ExpressionToStr()
         {
-            string str = Expression.Add(Expression.Constant(2), new MyExpression()).NiceToString();
+            string str = Expression.Add(Expression.Constant(2), new MyExpression()).ToString();
             Assert.IsTrue(str.Contains("$$"));
         }
 
         class MyExpression: Expression
         {
             public override Type Type { get{ return typeof(int);} }
-            public override ExpressionType NodeType { get{ return (ExpressionType)101;} }
+            public override ExpressionType NodeType { get { return ExpressionType.Extension; } }
 
             public override string ToString()
             {

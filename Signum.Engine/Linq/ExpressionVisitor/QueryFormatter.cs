@@ -669,7 +669,7 @@ namespace Signum.Engine.Linq
                 VisitSetOperator((SetOperatorExpression)source);
             }
             else
-                throw new InvalidOperationException("{0} not expected in SetOperatorExpression".Formato(source.NiceToString()));
+                throw new InvalidOperationException("{0} not expected in SetOperatorExpression".Formato(source.ToString()));
         }
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
@@ -907,7 +907,7 @@ namespace Signum.Engine.Linq
 
         private InvalidOperationException InvalidSqlExpression(Expression expression)
         {
-            return new InvalidOperationException("Unexepected expression on sql {0}".Formato(expression.NiceToString()));
+            return new InvalidOperationException("Unexepected expression on sql {0}".Formato(expression.ToString()));
         }
         
     }

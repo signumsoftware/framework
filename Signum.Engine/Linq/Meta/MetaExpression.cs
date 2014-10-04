@@ -20,54 +20,64 @@ namespace Signum.Engine.Linq
         MetaConstant
     }
 
-    internal class MetaProjectorExpression : Expression
+    internal abstract class MetaBaseExpression : Expression
     {
-        public readonly Expression Projector;
-
         readonly Type type;
         public override Type Type
         {
             get { return type; }
         }
 
+        readonly MetaExpressionType metaNodeType;
+        public MetaExpressionType MetaNodeType
+        {
+            get { return metaNodeType; }
+        }
+
         public override ExpressionType NodeType
         {
-            get { return (ExpressionType)MetaExpressionType.MetaProjector; }
+            get { return ExpressionType.Extension; }
         }
 
-        public MetaProjectorExpression(Type type, Expression projector)
+        protected MetaBaseExpression(MetaExpressionType nodeType, Type type)
         {
             this.type = type;
-            this.Projector = projector;
+            this.metaNodeType = nodeType;
         }
+
+        public abstract override string ToString();
     }
 
-    internal class MetaExpression : Expression
+    internal class MetaProjectorExpression : MetaBaseExpression
+    {
+        public readonly Expression Projector;
+
+        public MetaProjectorExpression(Type type, Expression projector)
+            : base(MetaExpressionType.MetaProjector, type)
+        {
+            this.Projector = projector;
+        }
+
+        public override string ToString()
+        {
+            return "MetaProjector({0})".Formato(this.Projector.ToString());
+        }  
+    }
+
+    internal class MetaExpression : MetaBaseExpression
     {
         public bool IsEntity
         {
             get { return typeof(ModifiableEntity).IsAssignableFrom(Type); }
         }
 
-        readonly Type type;
-        public override Type Type
-        {
-            get { return type; }
-        }
-
-        public override ExpressionType NodeType
-        {
-            get { return (ExpressionType)MetaExpressionType.MetaExpression; }
-        }
-
         public readonly Meta Meta;
 
-        public MetaExpression(Type type, Meta meta)
+        public MetaExpression(Type type, Meta meta):
+            base(MetaExpressionType.MetaExpression, type)
         {
-            this.type = type;
             this.Meta = meta;
         }
-
 
         public override string ToString()
         {
@@ -83,25 +93,14 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class MetaMListExpression : Expression
+    internal class MetaMListExpression : MetaBaseExpression
     {
-        readonly Type type;
-        public override Type Type
-        {
-            get { return type; }
-        }
-
-        public override ExpressionType NodeType
-        {
-            get { return (ExpressionType)MetaExpressionType.MetaMListExpression; }
-        }
-
         public readonly CleanMeta Parent;
         public readonly CleanMeta Element;
 
         public MetaMListExpression(Type type, CleanMeta parent, CleanMeta element)
+            :base(MetaExpressionType.MetaMListExpression, type)
         {
-            this.type = type;
             this.Parent = parent;
             this.Element = element;
         }

@@ -18,7 +18,10 @@ namespace Signum.Engine.Linq
             {
                 case ExpressionType.Convert: return ((UnaryExpression)e).Operand.IsNull();
                 case ExpressionType.Constant: return ((ConstantExpression)e).Value == null;
-                case (ExpressionType)DbExpressionType.SqlConstant: return ((SqlConstantExpression)e).Value == null;
+                default:
+                    if (e is SqlConstantExpression)
+                        return ((SqlConstantExpression)e).Value == null;
+                    break;
             }
 
             return false;

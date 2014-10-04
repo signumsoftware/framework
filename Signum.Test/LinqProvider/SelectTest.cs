@@ -44,6 +44,18 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectIds()
+        {
+            var first = Database.Query<BandDN>().Select(b => b.Id).ToList();
+        }
+
+        [TestMethod]
+        public void SelectFirstId()
+        {
+            var first = Database.Query<BandDN>().Select(b => b.Id).First();
+        }
+
+        [TestMethod]
         public void SelectExpansion()
         {
             var list = Database.Query<AlbumDN>().Select(a => a.Label.Name).ToList();

@@ -116,7 +116,8 @@ namespace Signum.Engine.Linq
                     return false;
             }
 
-            switch ((DbExpressionType)expression.NodeType)
+            var exp = expression as DbExpression;
+            switch (exp.DbNodeType)
             {
                 case DbExpressionType.Exists:
                 case DbExpressionType.Like:

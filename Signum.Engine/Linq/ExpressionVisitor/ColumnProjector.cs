@@ -68,7 +68,7 @@ namespace Signum.Engine.Linq
         {
             if (this.candidates.Contains(expression))
             {
-                if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
+                if (expression is ColumnExpression)
                 {
                     if (!projectTrivialColumns)
                         return expression;
@@ -131,7 +131,7 @@ namespace Signum.Engine.Linq
         {
             if (this.candidates.Contains(expression))
             {
-                if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
+                if (expression is ColumnExpression)
                 {
                     ColumnExpression column = (ColumnExpression)expression;
                     ColumnExpression mapped;

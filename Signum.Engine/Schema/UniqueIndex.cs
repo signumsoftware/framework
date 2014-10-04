@@ -144,7 +144,7 @@ namespace Signum.Engine.Maps
                 case ExpressionType.Invoke:
                 case ExpressionType.MemberInit:
                 case ExpressionType.ListInit:
-                    throw new NotSupportedException("Expression of type {0} not supported: {1}".Formato(exp.NodeType, exp.NiceToString()));
+                    throw new NotSupportedException("Expression of type {0} not supported: {1}".Formato(exp.NodeType, exp.ToString()));
                 default:
                     return base.Visit(exp);
             }
@@ -321,7 +321,7 @@ namespace Signum.Engine.Maps
                     sb.Append(Equals(field, ((ConstantExpression)b.Right).Value, b.NodeType == ExpressionType.Equal));
                 }
                 else
-                    throw new NotSupportedException("Impossible to translate {0}".Formato(b.NiceToString()));
+                    throw new NotSupportedException("Impossible to translate {0}".Formato(b.ToString()));
             }
             else
             {

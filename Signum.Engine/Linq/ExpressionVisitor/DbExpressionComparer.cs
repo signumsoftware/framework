@@ -45,6 +45,8 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+
+
         private bool ComparePrivate(Expression a, Expression b)
         {
             if (a == b)
@@ -55,7 +57,11 @@ namespace Signum.Engine.Linq
                 return false;
             if (a.Type != b.Type)
                 return false;
-            switch ((DbExpressionType)a.NodeType)
+
+            if (!(a is DbExpression))
+                return base.Compare(a, b);
+
+            switch (((DbExpression)a).DbNodeType)
             {
                 case DbExpressionType.Table:
                     return CompareTable((TableExpression)a, (TableExpression)b);
@@ -131,10 +137,14 @@ namespace Signum.Engine.Linq
                     return CompareMList((MListExpression)a, (MListExpression)b);
                 case DbExpressionType.MListElement:
                     return CompareMListElement((MListElementExpression)a, (MListElementExpression)b);
+                case DbExpressionType.PrimaryKey:
+                    return ComparePrimaryKey((PrimaryKeyExpression)a, (PrimaryKeyExpression)b);
                 default:
-                    return base.Compare(a, b);
+                    throw new InvalidOperationException("Unexpected " + ((DbExpression)a).DbNodeType);
+                 
             }
         }
+
 
         protected virtual bool CompareTable(TableExpression a, TableExpression b)
         {
@@ -511,6 +521,11 @@ namespace Signum.Engine.Linq
                 && Compare(a.Element, b.Element)
                 && Compare(a.Order, b.Order)
                 && Compare(a.Parent, b.Parent);
+        }
+
+        protected virtual bool ComparePrimaryKey(PrimaryKeyExpression a, PrimaryKeyExpression b)
+        {
+            return Compare(a.Value, b.Value);
         }
 
         public static new IEqualityComparer<E> GetComparer<E>(bool checkParameterNames) where E : Expression

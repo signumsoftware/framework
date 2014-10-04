@@ -15,6 +15,7 @@ using System.Data;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using Signum.Entities;
 
 namespace Signum.Engine.Linq
 {
@@ -69,15 +70,19 @@ namespace Signum.Engine.Linq
         public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
-                throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp))
+                throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
 
             return result;
         }
 
-        private bool IsExcluded(ExpressionType expressionType)
+        private bool IsExcluded(Expression exp)
         {
-            switch ((DbExpressionType)expressionType)
+            DbExpression expDb = exp as DbExpression;
+            if (expDb == null)
+                return false;
+
+            switch (expDb.DbNodeType)
             {
                 case DbExpressionType.Table:
                 case DbExpressionType.Select:
@@ -90,7 +95,15 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.SelectRowCount:
                     return true;
             }
-            return false; 
+            return false;
+        }
+
+        protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+        {
+            if (isFullNominate)
+                return Visit(pk.Value);
+
+            return base.VisitPrimaryKey(pk);
         }
 
         //Dictionary<ColumnExpression, ScalarExpression> replacements; 
@@ -111,7 +124,7 @@ namespace Signum.Engine.Linq
                 if (args != nex.Arguments)
                 {
                     if (nex.Members != null)
-                        // parece que para los tipos anonimos hace falt exact type matching
+                        // anonymous types require exaxt type matching
                         nex = Expression.New(nex.Constructor, args, nex.Members);
                     else
                         nex = Expression.New(nex.Constructor, args);
@@ -128,6 +141,14 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
+            if (c.Type.UnNullify() == typeof(PrimaryKey) && isFullNominate)
+            {
+                if (c.Value == null)
+                    return Add(Expression.Constant(null, typeof(object)));
+                else
+                    return Add(Expression.Constant(((PrimaryKey)c.Value).Object));
+            }
+
             if (!innerProjection && IsFullNominateOrAggresive && ( Schema.Current.Settings.IsDbType(c.Type.UnNullify()) || c.Type == typeof(object) && c.IsNull()))
             {
                 return Add(c);
@@ -173,7 +194,24 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)
+            {
+                if (sqlConstant.Type.UnNullify() == typeof(PrimaryKey))
+                {
+                    if (isFullNominate)
+                    {
+                        if (sqlConstant.Value == null)
+                            return Add(new SqlConstantExpression(null, typeof(object)));
+                        else
+                            return Add(new SqlConstantExpression(((PrimaryKey)sqlConstant.Value).Object));
+                    }
+                    else
+                    {
+                        return sqlConstant;
+                    }
+                }
+
                 return Add(sqlConstant);
+            }
             return sqlConstant;
         }
 
@@ -400,7 +438,7 @@ namespace Signum.Engine.Linq
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
-                    newB = Expression.MakeBinary(b.NodeType, left, right);
+                    newB = MakeBinaryFlexible(b.NodeType, left, right);
                     if (Has(left) && Has(right))
                         candidates.Add(newB);
 
@@ -436,8 +474,10 @@ namespace Signum.Engine.Linq
                 {
                     if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
                         b = Expression.Coalesce(left, right, conversion as LambdaExpression);
-                    else
+                    else if (left.Type == b.Left.Type && right.Type == b.Right.Type)
                         b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+                    else
+                        b = MakeBinaryFlexible(b.NodeType, left, right);
                 }
 
                 Expression result = b;
@@ -463,15 +503,50 @@ namespace Signum.Engine.Linq
             }
         }
 
+        private BinaryExpression MakeBinaryFlexible(ExpressionType nodeType, Expression left, Expression right)
+        {
+            if (left.Type == right.Type)
+            {
+                return Expression.MakeBinary(nodeType, left, right);
+            }
+            else if (left.Type.UnNullify() == right.Type.UnNullify())
+            {
+                return Expression.MakeBinary(nodeType, left.Nullify(), right.Nullify());
+            }
+            else if (left.IsNull() || right.IsNull())
+            {
+                var newLeft = left.IsNull() ? ConvertNull(left, right.Type.Nullify()) : left.Nullify();
+                var newRight = right.IsNull() ? ConvertNull(right, left.Type.Nullify()) : right.Nullify();
+
+                return Expression.MakeBinary(nodeType, newLeft, newRight);
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private Expression ConvertNull(Expression nullNode, Type type)
+        {
+            switch (nullNode.NodeType)
+            {
+                case ExpressionType.Convert: return ConvertNull(((UnaryExpression)nullNode).Operand, type);
+                case ExpressionType.Constant: return Expression.Constant(null, type);
+                default:
+                    if (nullNode is SqlConstantExpression)
+                        return new SqlConstantExpression(null, type);
+
+                    throw new InvalidOperationException("Unexpected NodeType to ConvertNull " + nullNode.NodeType);
+            }
+        }
+
         public Expression SimpleNot(Expression e)
         {
             if (e.NodeType == ExpressionType.Not)
                 return ((UnaryExpression)e).Operand;
 
-            if (e.NodeType == (ExpressionType)DbExpressionType.IsNull)
+            if (e is IsNullExpression)
                 return new IsNotNullExpression(((IsNullExpression)e).Expression);
 
-            if (e.NodeType == (ExpressionType)DbExpressionType.IsNotNull)
+            if (e is IsNotNullExpression)
                 return new IsNullExpression(((IsNotNullExpression)e).Expression);
 
             return null;
@@ -650,7 +725,7 @@ namespace Signum.Engine.Linq
 
             if (Has(test) && Has(ifTrue) && Has(ifFalse))
             {
-                if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
+                if (ifFalse is CaseExpression)
                 {
                     var oldC = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
@@ -672,6 +747,12 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitUnary(UnaryExpression u)
         {
+            if (this.isFullNominate && u.NodeType == ExpressionType.Convert &&
+                (u.Type.UnNullify() == typeof(PrimaryKey) || u.Operand.Type.UnNullify() == typeof(PrimaryKey)))
+            {
+                return base.Visit(u.Operand); //Could make sense to simulate a similar convert (nullify / unnullify)
+            }
+
             if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify() == u.Operand.Type && u.Operand.NodeType == ExpressionType.Conditional)
             {
                 ConditionalExpression ce = (ConditionalExpression)u.Operand;
@@ -837,7 +918,6 @@ namespace Signum.Engine.Linq
 
             return like;
         }
-
 
         private Expression TryLike(Expression expression, Expression pattern)
         {

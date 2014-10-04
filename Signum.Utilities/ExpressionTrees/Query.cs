@@ -77,7 +77,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (ce != null && ce.Value == this)
                 return this.GetType().TypeName().CleanIdentifiers();
             else
-                return expression.NiceToString();
+                return expression.ToString();
         }
 
         public string QueryText

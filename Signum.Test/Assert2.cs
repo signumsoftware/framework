@@ -69,7 +69,7 @@ namespace Signum.Test
             foreach (var item in collection)
             {
                 if (!func(item))
-                    Assert.Fail("'{0}' fails on '{1}'".Formato(item, predicate.NiceToString())); 
+                    Assert.Fail("'{0}' fails on '{1}'".Formato(item, predicate.ToString())); 
             }
         }
 

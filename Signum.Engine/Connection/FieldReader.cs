@@ -591,7 +591,7 @@ namespace Signum.Engine
                 if (Projector != null)
                 {
                     text += "\r\nCalling: row.Reader.Get{0}({1})".Formato(ColumnType.Name, Ordinal);
-                    text += "\r\nProjector:\r\n{0}".Formato(Projector.NiceToString().Indent(4));
+                    text += "\r\nProjector:\r\n{0}".Formato(Projector.ToString().Indent(4));
                 }
 
                 if(Command != null)

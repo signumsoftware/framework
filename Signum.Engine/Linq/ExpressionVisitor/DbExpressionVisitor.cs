@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitLiteValue(LiteValueExpression lite)
         {
             var newTypeId = Visit(lite.TypeId);
-            var newId = Visit(lite.Id);
+            var newId = (PrimaryKeyExpression)Visit(lite.Id);
             var newToStr = Visit(lite.ToStr);
             if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
                 return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
@@ -93,7 +93,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
-            var externalId = Visit(typeFie.ExternalId);
+            var externalId = (PrimaryKeyExpression)Visit(typeFie.ExternalId);
 
             if (externalId != typeFie.ExternalId)
                 return new TypeEntityExpression(externalId, typeFie.TypeValue);
@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
         {
-            var implementations = Visit(typeIb.TypeImplementations, eid => Visit(eid));
+            var implementations = Visit(typeIb.TypeImplementations, eid => (PrimaryKeyExpression)Visit(eid));
 
             if (implementations != typeIb.TypeImplementations)
                 return new TypeImplementedByExpression(implementations);
@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
         {
-            var column = Visit(typeIba.TypeColumn);
+            var column = (PrimaryKeyExpression)Visit(typeIba.TypeColumn);
 
             if (column != typeIba.TypeColumn)
                 return new TypeImplementedByAllExpression(column);
@@ -168,7 +168,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitMListElement(MListElementExpression mle)
         {
-            var rowId = Visit(mle.RowId);
+            var rowId = (PrimaryKeyExpression)Visit(mle.RowId);
             var parent = (EntityExpression)Visit(mle.Parent);
             var order = Visit(mle.Order);
             var element = Visit(mle.Element);
@@ -224,7 +224,7 @@ namespace Signum.Engine.Linq
             var bindings = Visit(ee.Bindings, VisitFieldBinding);
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
-            var id = Visit(ee.ExternalId);
+            var id = (PrimaryKeyExpression)Visit(ee.ExternalId);
 
             if (ee.Bindings != bindings || ee.ExternalId != id || ee.Mixins != mixins)
                 return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);

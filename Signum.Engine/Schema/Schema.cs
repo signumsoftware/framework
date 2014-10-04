@@ -267,7 +267,7 @@ namespace Signum.Engine.Maps
                 {
                     if(item.InMemoryFunction == null)
                         throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
-                        .Formato(item.InDatabaseExpresson.NiceToString()));
+                        .Formato(item.InDatabaseExpresson.ToString()));
 
                     result = CombineFunc(result, item.InMemoryFunction);
                 }

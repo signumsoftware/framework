@@ -542,7 +542,7 @@ namespace Signum.Entities
 
         public static ConstructorInfo LiteConstructor(Type type)
         {
-            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string), typeof(ModifiedState) }));
+            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string), typeof(ModifiedState) }));
         }
 
         public static NewExpression NewExpression(Type type, Expression id, Expression toString, Expression modified)

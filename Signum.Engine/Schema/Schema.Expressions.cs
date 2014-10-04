@@ -29,7 +29,7 @@ namespace Signum.Engine.Maps
             {
                 var bindings = this.Fields.Values.Select(ef=>new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
-                var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, QueryBinder.NullId);
+                var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, Expression.Constant(null, id.Type.Nullify()));
 
                 return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null);
             }
@@ -40,7 +40,7 @@ namespace Signum.Engine.Maps
 
                 Schema.Current.AssertAllowed(Type);
 
-                var result = new EntityExpression(this.Type, id, tableAlias, bindings, mixins, avoidExpandOnRetrieving: false);
+                var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id, tableAlias, bindings, mixins, avoidExpandOnRetrieving: false);
 
                 return result; 
             }
@@ -101,12 +101,14 @@ namespace Signum.Engine.Maps
     {
         internal PrimaryKeyExpression RowIdExpression(Alias tableAlias)
         {
-            return new PrimaryKeyExpression(new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PrimaryKey).Name));
+            var primary = (IColumn)this.PrimaryKey;
+
+            return new PrimaryKeyExpression(new ColumnExpression(primary.Type.Nullify(), tableAlias, primary.Name));
         }
 
         internal PrimaryKeyExpression BackColumnExpression(Alias tableAlias)
         {
-            return new PrimaryKeyExpression(new ColumnExpression(BackReference.Type, tableAlias, BackReference.Name));
+            return new PrimaryKeyExpression(new ColumnExpression(BackReference.Type.Nullify(), tableAlias, BackReference.Name));
         }
 
         internal ColumnExpression OrderExpression(Alias tableAlias)
@@ -162,7 +164,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
-            return new PrimaryKeyExpression(new ColumnExpression(this.Type, tableAlias, this.Name));
+            return new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, this.Name).Nullify());
         }
     }
 
@@ -180,7 +182,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanType = IsLite ? Lite.Extract(FieldType) : FieldType;
 
-            var result = new EntityExpression(cleanType, new PrimaryKeyExpression(new ColumnExpression(this.Type, tableAlias, Name)), null, null, null, AvoidExpandOnRetrieving);
+            var result = new EntityExpression(cleanType, new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, Name)), null, null, null, AvoidExpandOnRetrieving);
 
             if(this.IsLite)
                 return binder.MakeLite(result, null);
@@ -213,7 +215,10 @@ namespace Signum.Engine.Maps
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
-            Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id, QueryBinder.NullId) : new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
+            Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id,
+                id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
+                new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
+
             return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this); 
         }
     }
@@ -249,7 +254,7 @@ namespace Signum.Engine.Maps
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
             var implementations = ImplementationColumns.SelectDictionary(t => t, (t, ic) =>
-                 new EntityExpression(t, new PrimaryKeyExpression(new ColumnExpression(ic.Type, tableAlias, ic.Name)), null, null, null,  AvoidExpandOnRetrieving));
+                 new EntityExpression(t, new PrimaryKeyExpression(new ColumnExpression(ic.Type.Nullify(), tableAlias, ic.Name)), null, null, null, AvoidExpandOnRetrieving));
 
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, SplitStrategy, implementations);
 
@@ -266,7 +271,7 @@ namespace Signum.Engine.Maps
         {
             Expression result = new ImplementedByAllExpression(IsLite ? Lite.Extract(FieldType) : FieldType,
                 new ColumnExpression(Column.Type, tableAlias, Column.Name),
-                new TypeImplementedByAllExpression(new ColumnExpression(ColumnType.Type, tableAlias, ColumnType.Name)));
+                new TypeImplementedByAllExpression(new PrimaryKeyExpression(new ColumnExpression(ColumnType.Type.Nullify(), tableAlias, ColumnType.Name))));
 
             if (this.IsLite)
                 return binder.MakeLite(result, null);

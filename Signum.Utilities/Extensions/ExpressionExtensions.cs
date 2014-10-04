@@ -22,7 +22,7 @@ namespace Signum.Utilities
         {
             return (T)(object)cache.GetOrAdd(expression, exp =>
             {
-                using (HeavyProfiler.Log("CompiledAndStore", () => exp.NiceToString()))
+                using (HeavyProfiler.Log("CompiledAndStore", () => exp.ToString()))
                 {
                     var already = registeredExpressions.TryGetC(exp);
                     if (already != null && already != exp)
@@ -42,7 +42,7 @@ namespace Signum.Utilities
 Because a similar expression has already been cached: 
 {1}
 This limitation tries to avoid running out of memory caching freshly generated expressions. 
-Use this method only with constant expressions stored in static fields.".Formato(exp.NiceToString(), already.NiceToString());
+Use this method only with constant expressions stored in static fields.".Formato(exp.ToString(), already.ToString());
         }
 
         /// <summary>
@@ -98,12 +98,5 @@ Use this method only with constant expressions stored in static fields.".Formato
             return new ExpandableQueryProvider<T>(q);
         }
 
-        public static string NiceToString(this Expression expression)
-        {
-            if (expression == null)
-                return null;
-
-            return ExpressionToString.NiceToString(expression); 
-        }
     }
 }

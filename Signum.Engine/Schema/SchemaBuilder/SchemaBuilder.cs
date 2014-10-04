@@ -331,7 +331,7 @@ namespace Signum.Engine.Maps
 
             var mae = lambda.Body as MemberExpression;
             if (mae == null || mae.Expression != lambda.Parameters.Only())
-                throw new InvalidOperationException("ToStringExpression {0} on {1} should be a trivial accesor to a field".Formato(type.Name, mae.NiceToString()));
+                throw new InvalidOperationException("ToStringExpression {0} on {1} should be a trivial accesor to a field".Formato(type.Name, mae.ToString()));
 
             return mae.Member as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)mae.Member);
         }
@@ -425,6 +425,8 @@ namespace Signum.Engine.Maps
         {
             var attr = Settings.FieldAttributes(route).OfType<PrimaryKeyAttribute>().FirstOrDefault() ??
                 Settings.TypeAttributes(table.Type).OfType<PrimaryKeyAttribute>().FirstOrDefault() ?? Settings.DefaultPrimaryKeyAttribute;
+
+            PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
             return new FieldPrimaryKey(route.Type, table)
             {

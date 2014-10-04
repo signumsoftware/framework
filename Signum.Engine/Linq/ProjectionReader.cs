@@ -139,7 +139,7 @@ namespace Signum.Engine.Linq
             catch (ArgumentException e)
             {
                 if (e.Message.Contains("reducible"))
-                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.NiceToString()));
+                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.ToString()));
                 throw;
             }
         }

@@ -383,6 +383,8 @@ namespace Signum.Test.LinqProvider
             var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object)));
         }
 
+      
+
         [TestMethod]
         public void MinMax()
         {

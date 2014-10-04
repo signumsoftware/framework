@@ -711,7 +711,18 @@ namespace Signum.Utilities.Reflection
                 else if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
                 else
+                {
+                    var conv = TypeDescriptor.GetConverter(type);
+                    if(conv != null && conv.CanConvertFrom(value.GetType()))
+                        return conv.ConvertFrom(value);
+
+                    conv = TypeDescriptor.GetConverter(value.GetType());
+                    if (conv != null && conv.CanConvertTo(type))
+                        return conv.ConvertTo(value, type);
+
                     return Convert.ChangeType(value, utype);
+                }
+                  
             }
         }
 

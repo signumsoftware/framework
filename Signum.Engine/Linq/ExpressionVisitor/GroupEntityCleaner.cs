@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitEntity(EntityExpression fieldInit)
         {
-            Expression newID = Visit(fieldInit.ExternalId);
+            var newID = (PrimaryKeyExpression)Visit(fieldInit.ExternalId);
 
             return new EntityExpression(fieldInit.Type, newID, null, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
         }

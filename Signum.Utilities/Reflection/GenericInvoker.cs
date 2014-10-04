@@ -71,7 +71,7 @@ namespace Signum.Utilities.Reflection
             gpv.Visit(expression);
 
             if (gpv.parameters == null)
-                throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".Formato(expression.NiceToString()));
+                throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".Formato(expression.ToString()));
 
             return gpv.parameters.Value;
         }

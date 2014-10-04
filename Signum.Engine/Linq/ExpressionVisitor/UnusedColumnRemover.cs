@@ -79,7 +79,7 @@ namespace Signum.Engine.Linq
         private void AddSingleColumn(SubqueryExpression subQuery)
         {
             if (subQuery.Select.Columns.Count != 1)
-                throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subQuery.Select.Columns.Count, subQuery.NiceToString()));
+                throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subQuery.Select.Columns.Count, subQuery.ToString()));
             allColumnsUsed.GetOrCreate(subQuery.Select.Alias).Add(subQuery.Select.Columns[0].Name);
         }
 

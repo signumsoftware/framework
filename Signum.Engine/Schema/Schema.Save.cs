@@ -711,7 +711,7 @@ namespace Signum.Engine.Maps
 
             public override string ToString()
             {
-                return "{0} {1} {2}".Formato(SourceColumn, ParameterName, ParameterBuilder.NiceToString());
+                return "{0} {1} {2}".Formato(SourceColumn, ParameterName, ParameterBuilder.ToString());
             }
 
             static MethodInfo miConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
@@ -1123,8 +1123,10 @@ namespace Signum.Engine.Maps
 
                 var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramPostfix), this.BackReference.SqlDbType, null, false, Expression.Field(paramIdent, Table.fiId)));
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramPostfix), this.PrimaryKey.SqlDbType, null, false, paramRowId));
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramPostfix), this.BackReference.SqlDbType, null, false,
+                    Expression.Field(Expression.Property(Expression.Field(paramIdent, Table.fiId), "Value"), "Object")));
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramPostfix), this.PrimaryKey.SqlDbType, null, false,
+                    Expression.Field(paramRowId, "Object")));
 
                 var expr = Expression.Lambda<Func<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
                     Table.CreateBlock(parameters, assigments), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramPostfix);

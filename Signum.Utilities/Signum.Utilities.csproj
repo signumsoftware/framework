@@ -131,7 +131,6 @@
     <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
-    <Compile Include="ExpressionTrees\ExpressionToString.cs" />
     <Compile Include="ExpressionTrees\Query.cs" />
     <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
@@ -204,7 +203,6 @@
     <None Include="ExpressionTrees\ExpressionEvaluator.md" />
     <None Include="ExpressionTrees\ExpressionHelper.md" />
     <None Include="ExpressionTrees\ExpressionNominator.md" />
-    <None Include="ExpressionTrees\ExpressionToString.md" />
     <None Include="ExpressionTrees\LinqExtensibility.md" />
     <None Include="ExpressionTrees\Query.md" />
     <None Include="ExpressionTrees\QueryProvider.md" />

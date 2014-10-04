@@ -15,7 +15,7 @@ namespace Signum.Engine
     {
         T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
         T Request<T>(PrimaryKey? id) where T : Entity;
-        T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity;
+        T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity;
         IRetriever Parent { get; }
@@ -111,14 +111,16 @@ namespace Signum.Engine
             return entity;
         }
 
-        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity
+        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
             if (id == null)
                 return null;
 
             Type type = TypeLogic.IdToType[typeId.Value];
 
-            return (T)(IEntity)giRequest.GetInvoker(type)(this, id);
+            var parsedId = PrimaryKey.Parse(id, type);
+
+            return (T)(IEntity)giRequest.GetInvoker(type)(this, parsedId);
         }
 
         public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
@@ -298,9 +300,9 @@ namespace Signum.Engine
             return Parent.Request<T>(id);
         }
 
-        public T RequestIBA<T>(PrimaryKey? id, PrimaryKey? typeId) where T : class, IEntity
+        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
-            return Parent.RequestIBA<T>(id, typeId);
+            return Parent.RequestIBA<T>(typeId, id);
         }
 
         public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity

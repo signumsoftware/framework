@@ -125,6 +125,7 @@
     <Compile Include="DynamicQuery\QueryDescription.cs" />
     <Compile Include="Patterns\ImmutableEntity.cs" />
     <Compile Include="Patterns\LockeableEntity.cs" />
+    <Compile Include="PrimaryKey.cs" />
     <Compile Include="PropertyAttributes.cs" />
     <Compile Include="PropertyRoute.cs" />
     <Compile Include="Reflection\GraphExplorer.cs" />
