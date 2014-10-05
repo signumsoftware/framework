@@ -85,6 +85,13 @@ else
 @{ 
     var fullTree = Model.Follow(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 
+    
+    int max = fullTree.Max(a=>a.Depth);
+    while(fullTree.Count > ProfilerClient.MaxEntriesToDisplay && Model.Depth + 1 < max )
+    {
+        fullTree.RemoveAll(a=>a.Depth == max);
+        max--;
+    }
 }
 <script type="text/javascript">
     $(function() {

@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static readonly HashSet<PropertyRoute> AvoidAutomaticUpgrade = new HashSet<PropertyRoute>();
+        public readonly static HashSet<PropertyRoute> AvoidAutomaticUpgradeCollection = new HashSet<PropertyRoute>();
 
         public static void Start(SchemaBuilder sb, bool queries)
         {
@@ -44,7 +44,8 @@ namespace Signum.Engine.Authorization
                     PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString());
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), 
+                    exportAll ? TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes).ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
@@ -72,6 +73,8 @@ namespace Signum.Engine.Authorization
                         routesDicCache[type] = dic;
                     }
 
+                    var routes = Database.Query<PropertyRouteDN>().ToDictionary(a => a.ToPropertyRoute());
+
                     return cache.ImportXml(x, "Properties", "Property", roles, s =>
                     {
                         var pp = new PropertyPair(s);
@@ -85,10 +88,13 @@ namespace Signum.Engine.Authorization
                         if (route == null)
                             return null;
 
-                        var property = PropertyRouteLogic.ToPropertyRouteDN(route);
-                        if (property.IsNew)
-                            property.Save();
-                            
+                        var property = routes.GetOrCreate(route, () => new PropertyRouteDN
+                         {
+                             Route = route,
+                             RootType = TypeLogic.TypeToDN[route.RootType],
+                             Path = route.PropertyString()
+                         }.Save());
+
                         return property;
 
                     }, EnumExtensions.ToEnum<PropertyAllowed>);
@@ -151,17 +157,23 @@ namespace Signum.Engine.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
-            PropertyAllowed paProperty = cache.GetAllowed(RoleDN.Current.ToLite(), route);
-            if (paProperty < requested)
+            if (route.PropertyRouteType == PropertyRouteType.Root)
             {
                 PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
                 if (paType < requested)
                     return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), paType, RoleDN.Current);
 
-                return "Property {0} is set to {1} for {2}".Formato(route, paProperty, RoleDN.Current);
+                return null;
             }
+            else
+            {
+                PropertyAllowed paProperty = cache.GetAllowed(RoleDN.Current.ToLite(), route);
 
-            return null;
+                if (paProperty < requested)
+                    return "Property {0} is set to {1} for {2}".Formato(route, paProperty, RoleDN.Current);
+
+                return null;
+            }
         }
 
         public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
@@ -185,7 +197,7 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
 
-            if (PropertyAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+            if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
                 return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
@@ -231,7 +243,13 @@ namespace Signum.Engine.Authorization
 
         public Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role)
         {
-            return pr => GetDefault(pr, role);
+            return pr =>
+            {
+                if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(pr))
+                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Modify : PropertyAllowed.None;
+
+                return GetDefault(pr, role);
+            };
         }
     }
 

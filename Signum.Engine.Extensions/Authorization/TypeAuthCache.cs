@@ -297,7 +297,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml()
+        internal XElement ExportXml(List<Type> allTypes)
         {
             var rules = runtimeRules.Value;
 
@@ -306,10 +306,10 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
+                         from k in allTypes ?? rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
-                         where !allowed.Equals(allowedBase)
+                         where allTypes != null || !allowed.Equals(allowedBase)
                          let resource = TypeLogic.GetCleanName(k)
                          orderby resource
                          select new XElement("Type",

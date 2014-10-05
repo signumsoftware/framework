@@ -113,9 +113,9 @@ namespace Signum.Engine.Processes
         {
             var usedDatas = Database.Query<ProcessDN>().Select(a => a.Data);
 
-            Database.Query<PackageLineDN>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDelete();
-            Database.Query<PackageOperationDN>().Where(po => !usedDatas.Contains(po)).UnsafeDelete();
-            Database.Query<PackageDN>().Where(po => !usedDatas.Contains(po)).UnsafeDelete();
+            Database.Query<PackageLineDN>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDeleteChunks();
+            Database.Query<PackageOperationDN>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunks();
+            Database.Query<PackageDN>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunks();
         }
 
         public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IEntity>> lites)

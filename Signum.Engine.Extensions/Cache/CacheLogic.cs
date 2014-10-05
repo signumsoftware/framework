@@ -391,58 +391,29 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
-                ee.Saving += Saving;
-                ee.PreUnsafeDelete += PreUnsafeDelete;
-                ee.PreUnsafeUpdate += UnsafeUpdated;
-                ee.PreUnsafeInsert += UnsafeInsert;
-                ee.PreUnsafeMListDelete += PreUnsafeMListDelete;
-            }         
+                ee.Saving += ident =>
+            {
+                    if (ident.IsGraphModified)
+            {
+                        DisableAndInvalidate(withUpdates: !ident.IsNew);
+            }
+                };
+                ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false); ;
+                ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true); ;
+                ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
+                ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
+                ee.PreBulkInsert += () => DisableAndInvalidate(withUpdates: false);
+            }
 
             public void BuildCachedTable()
             {
                 cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
             }
 
-            LambdaExpression UnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery)
+            private void DisableAndInvalidate(bool withUpdates)
             {
-                DisableAllConnectedTypesInTransaction(typeof(T));
-
-                Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                Transaction.PostRealCommit += Transaction_PostRealCommit;
-
-                return constructor;
-            }
-
-            void UnsafeUpdated(IUpdateable update, IQueryable<T> entityQuery)
-            {
-                DisableAllConnectedTypesInTransaction(typeof(T));
-
-                Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                Transaction.PostRealCommit += Transaction_PostRealCommit;
-            }
-
-            void PreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
-            {
-                DisableAllConnectedTypesInTransaction(typeof(T));
-
-                Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                Transaction.PostRealCommit += Transaction_PostRealCommit;
-            }
-
-            void PreUnsafeDelete(IQueryable<T> query)
-            {
-                DisableTypeInTransaction(typeof(T));
-
-                Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                Transaction.PostRealCommit += Transaction_PostRealCommit;
-            }
-
-            void Saving(T ident)
-            {
-                if (ident.IsGraphModified)
+                if (!withUpdates)
                 {
-                    if (ident.IsNew)
-                    {
                         DisableTypeInTransaction(typeof(T));
                     }
                     else
@@ -453,7 +424,6 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                     Transaction.PostRealCommit -= Transaction_PostRealCommit;
                     Transaction.PostRealCommit += Transaction_PostRealCommit;
                 }
-            }
 
             void Transaction_PostRealCommit(Dictionary<string, object> obj)
             {

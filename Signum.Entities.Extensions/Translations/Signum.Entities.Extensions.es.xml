@@ -448,6 +448,7 @@
   <Type Name="EmailConfigurationDN" Description="Configuración de email">
     <Member Name="DefaultCulture" Description="Cultura predeterminada" />
     <Member Name="OverrideEmailAddress" Description="Reemplazar dirección email" />
+    <Member Name="ReciveEmails" Description="Recibir e-mails" />
     <Member Name="SendEmails" Description="Enviar emails" />
     <Member Name="UrlLeft" Description="Parte Izquierda URL" />
   </Type>

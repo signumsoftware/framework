@@ -165,7 +165,7 @@ namespace Signum.Engine.Processes
 
                 if (userProcessSession)
                 {
-                    PropertyAuthLogic.AvoidAutomaticUpgrade.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
+                    PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
                     MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {
@@ -194,9 +194,9 @@ namespace Signum.Engine.Processes
         {
             var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < limit);
 
-            query.SelectMany(a=>a.ExceptionLines()).UnsafeDelete();
+            query.SelectMany(a=>a.ExceptionLines()).UnsafeDeleteChunks();
 
-            query.UnsafeDelete();
+            query.UnsafeDeleteChunks();
         }
 
         public static IDisposable OnApplySession(ProcessDN process)

@@ -55,7 +55,8 @@ namespace Signum.Web.Isolation
 
         public static Lite<IsolationDN> GetIsolation(ControllerContext ctx)
         {
-            var isolation = ctx.Controller.ControllerContext.HttpContext.Request["Isolation"];
+            var isolation = ctx.Controller.ControllerContext.HttpContext.Request["Isolation"] ??
+                ctx.Controller.ControllerContext.HttpContext.Request.Headers["Isolation"];
 
             if (isolation.HasText())
                 return Lite.Parse<IsolationDN>(isolation);

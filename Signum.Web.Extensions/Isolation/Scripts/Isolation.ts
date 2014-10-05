@@ -7,14 +7,10 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 export function addIsolationPrefilter(isolationKey: string)
 {
-    $.ajaxPrefilter((options, originalOptions, jqXHR) => {
-
-        var data = originalOptions.data;
-
-        options.data = $.param($.extend({}, data, { Isolation: getCurrentIsolation(data.prefix || "") }));
+    SF.registerAjaxExtraParameters((originalParams: FormObject) => {
+        $.extend(originalParams, { Isolation: getCurrentIsolation(originalParams["prefix"] || "") });
     });
 }
-
 
 export function getIsolation(extraJsonData: FormObject, prefix: string, title: string, isolations: Navigator.ChooserOption[]): Promise<FormObject> {
 

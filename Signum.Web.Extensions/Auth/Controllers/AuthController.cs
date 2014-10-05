@@ -66,7 +66,7 @@ namespace Signum.Web.Auth
             ViewData[ViewDataKeys.Title] = AuthMessage.EnterTheNewPassword.NiceToString();
 
             var model = new SetPasswordModel { };
-            return this.PopupView(model, new PopupViewOptions(this.Prefix()));
+            return this.PopupView(model);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
