@@ -398,7 +398,7 @@ namespace Signum.Engine.Disconnected
         protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, DatabaseName newDatabaseName, Interval<int>? interval, TableMList rt)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-            var columns = rt.Columns.Values.Where(c => !c.Identity);
+            var columns = rt.Columns.Values.Where(c => !c.IdentityBehaviour);
 
             string command = @"INSERT INTO {0} ({1})
 SELECT {2}
@@ -495,7 +495,7 @@ table.Name.OnDatabase(newDatabaseName));
         protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(DisconnectedMachineDN machine, Table table, TableMList rt, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-            var columns = rt.Columns.Values.Where(c => !c.Identity);
+            var columns = rt.Columns.Values.Where(c => !c.IdentityBehaviour);
 
             var insert = new SqlPreCommandSimple(@"INSERT INTO {0} ({1})
 SELECT {2}

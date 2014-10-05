@@ -23,7 +23,7 @@ export function attachGridControl(gridRepeater: GridRepeater.GridRepeater, url: 
                     newPartType: type.name,
                 }
             }).then(html=> {
-                var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
+                var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), "", true));
                 result.loadHtml(html)
                 return result;
             });

@@ -16,7 +16,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         newPartType: type.name
                     }
                 }).then(function (html) {
-                    var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), 0, true));
+                    var result = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(gridRepeater.singleType(), "", true));
                     result.loadHtml(html);
                     return result;
                 });
