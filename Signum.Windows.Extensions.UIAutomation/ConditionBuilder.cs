@@ -119,7 +119,7 @@ namespace Signum.Windows.UIAutomation
         {
             var result = base.Visit(node);
             if (result.Type == typeof(bool) && !(result is AutomationConditionExpression || result is AutomationPropertyExpression))
-                throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".Formato(node.NiceToString()));
+                throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".Formato(node.ToString()));
 
             return result;
         }

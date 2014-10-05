@@ -7,21 +7,20 @@ using Signum.Utilities;
 using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Profiler;
+using System.Reflection;
 
 namespace Signum.Web.Profiler
 {
-    
-
     public class ProfilerFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var action = filterContext.RouteData.Values["controller"] + "." + filterContext.RouteData.Values["action"];
-
+            
             var rad = filterContext.ActionDescriptor as ReflectedActionDescriptor;
             if (rad != null)
             {
-                var attr = rad.SingleAttribute<ActionSplitterAttribute>(); 
+                var attr = rad.GetCustomAttributes(true).OfType<ActionSplitterAttribute>().FirstOrDefault(); 
                 if(attr != null)
                 {
                     var str = filterContext.HttpContext.Request[attr.RequestKey] ?? filterContext.RouteData.Values[attr.RequestKey];

@@ -63,11 +63,11 @@ namespace Signum.Engine.Translation
                     var s = Schema.Current;
 
                     var prs = (from t in s.Tables.Keys
-                             from pr in PropertyRoute.GenerateRoutes(t)
-                             where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string)
-                             && s.Settings.FieldAttributes(pr).OfType<TranslateFieldAttribute>().Any() && 
-                             !s.Settings.FieldAttributes(pr).OfType<IgnoreAttribute>().Any()
-                             select KVP.Create(pr, s.Settings.FieldAttributes(pr).OfType<TranslateFieldAttribute>().Single().TraducibleRouteType)).ToList();
+                               from pr in PropertyRoute.GenerateRoutes(t)
+                               where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
+                               s.Settings.FieldAttribute<TranslateFieldAttribute>(pr) != null &&
+                               s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
+                               select KVP.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr).TraducibleRouteType)).ToList();
 
                     foreach (var kvp in prs)
                     {

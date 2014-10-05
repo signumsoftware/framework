@@ -245,7 +245,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new TimeoutException("Element not found after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).NiceToString()));
+                    throw new TimeoutException("Element not found after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).ToString()));
             }
         }
 

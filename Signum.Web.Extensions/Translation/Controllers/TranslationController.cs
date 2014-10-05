@@ -36,7 +36,7 @@ namespace Signum.Web.Translation.Controllers
                 {
                     Assembly = a,
                     CultureInfo = ci,
-                    IsDefault = ci.Name == a.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture,
+                    IsDefault = ci.Name == a.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture,
                     FileName = LocalizedAssembly.TranslationFileName(a, ci)
                 }).ToDictionary(tf => tf.CultureInfo));
 
@@ -48,7 +48,7 @@ namespace Signum.Web.Translation.Controllers
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
             CultureInfo targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = !searchPressed ? null :
@@ -174,7 +174,7 @@ namespace Signum.Web.Translation.Controllers
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
@@ -238,7 +238,7 @@ namespace Signum.Web.Translation.Controllers
 
             var target = DescriptionManager.GetLocalizedAssembly(Assembly, CultureInfo);
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(Assembly.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(Assembly.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
             var master = DescriptionManager.GetLocalizedAssembly(Assembly, defaultCulture);
 
             var result = TranslationSynchronizer.GetMergeChanges(target, master, new List<LocalizedAssembly>());

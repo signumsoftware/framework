@@ -270,7 +270,7 @@ namespace Signum.Engine.Cache
                         }
                         else
                         {
-                            return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(field.FieldType), id, typeId);
+                            return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(field.FieldType), typeId, id);
                         }
                     }
                 }
