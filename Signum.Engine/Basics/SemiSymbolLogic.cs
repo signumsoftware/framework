@@ -64,7 +64,7 @@ namespace Signum.Engine.Extensions.Basics
 
             IEnumerable<T> should = CreateSemiSymbols();
 
-            return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple);
         }
 
         private static IEnumerable<T> CreateSemiSymbols()

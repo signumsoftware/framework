@@ -15,9 +15,9 @@ Let's start by the most controversial design decisions:
 
 Every entity has to inherit from some of the base classes in Signum.Entities, so there's no POCO (Plain Old CLR Object) support. 
 
-On he other side, Signum Entities base classes are just plain classes, with normal field and properties (no `virtual` magic) and provide some useful features out-of-the-box: 
+On the other side, Signum Entities base classes are just plain classes, with normal fields and properties (no `virtual` magic) and provide some useful features out-of-the-box: 
 
-* Embedded change tracking using `Set` method.
+* Embedded change tracking using the `Set` method.
 * Implement `INotifyPropertyChanged` so they can be used as WPF View-Models.
 * Complete solution for validation implementing `IDataErrorInfo` and using `ValidationAttributes`, `PropertyCheck`, etc...
 * Concurrency support. 
@@ -117,9 +117,9 @@ Some things to notice:
 
 * The entity is `Serializable`. This is mandatory in order to send the entities to a client application using WCF (Signum.Windows), or store new entities temporally in the view (Signum.Web).
 
-* The `EntityKind` attribute clasifies the entity as `EntityKind.Main` and `EntityData.Transactional` this allows the framework to provide better default behaviour at many levels (cache, user interface buttons, ordering results...). See more in [Entity Kind](EntityKind.md). 
+* The `EntityKind` attribute classifies the entity as `EntityKind.Main` and `EntityData.Transactional`. This allows the framework to provide better default behaviour at many levels (cache, user interface buttons, ordering results...). See more in [Entity Kind](EntityKind.md). 
 
-* The entity inherits from `Entity` class. See more about [Base Entities](BaseEntities.md). 
+* The entity inherits from the `Entity` class. See more about [Base Entities](BaseEntities.md). 
 
 * The first field, `serialNumber`, is just a plain old int field with a `UniqueIndexAttribute` over it to create an index on the database. See More about [Field Attributes](FieldAttributes.md)
 

@@ -309,7 +309,6 @@ namespace Signum.Engine.Maps
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
 
-       
     }
 
     public class SqlDbTypePair

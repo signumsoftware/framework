@@ -24,8 +24,32 @@ module SF {
         }
     }
 
-    once("setupAjaxRedirectPrefilter", () =>
-        setupAjaxRedirect());
+    var ajaxExtraParameters: {(extraArgs : FormObject) : void } [] = [];
+    export function registerAjaxExtraParameters(getExtraParams: (extraArgs : FormObject) => void) {
+        if (getExtraParams != null)
+            ajaxExtraParameters.push(getExtraParams);
+    }
+    export function addAjaxExtraParameters(originalParams : FormObject) {
+        if (ajaxExtraParameters.length > 0) {
+            ajaxExtraParameters.forEach(addExtraParametersFunc => {
+                addExtraParametersFunc(originalParams);
+            });
+        }
+    }
+
+    once("setupAjaxRedirectPrefilter", () => {
+        setupAjaxRedirect();
+        setupAjaxExtraParameters();
+    });
+
+    function setupAjaxExtraParameters() {
+
+        $.ajaxPrefilter((options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => {
+            var data = $.extend({}, originalOptions.data);
+            addAjaxExtraParameters(data);
+            options.data = $.param(data);
+        });
+    }
 
     function setupAjaxRedirect() {
 

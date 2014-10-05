@@ -18,6 +18,8 @@ namespace Signum.Web
         public string PartialViewName { get; set; }
 
         public bool ShowOperations { get; set; }
+
+        public bool WriteEntityState { get; set; }
     }
 
     public abstract class PopupOptionsBase

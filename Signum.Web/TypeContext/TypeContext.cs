@@ -323,7 +323,7 @@ namespace Signum.Web
         }
 
         public TypeContext(T value, TypeContext parent, string prefix, PropertyRoute propertyRoute)
-            : base(parent, prefix, propertyRoute)
+            : base(parent, prefix, propertyRoute ?? PropertyRoute.Root(value.GetType()))
         {
             Value = value;
         }

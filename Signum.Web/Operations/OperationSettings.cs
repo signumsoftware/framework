@@ -13,15 +13,16 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 #endregion
 
 namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(IOperationSymbolContainer symbol)
+        protected OperationSettings(OperationSymbol symbol)
         {
-            this.OperationSymbol = symbol.Symbol; 
+            this.OperationSymbol = symbol;
         }
 
         public OperationSymbol OperationSymbol { get; private set; }
@@ -48,10 +49,17 @@ namespace Signum.Web.Operations
         public abstract bool HasClientConstructor { get; }
         public abstract JsFunction OnClientConstructor(IClientConstructorOperationContext ctx);
 
-        protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ConstructorOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
 
+        }
+
+        static GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>> giCreate =
+           new GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>>(symbol => new ConstructorOperationSettings<Entity>(symbol));
+        public static ConstructorOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
     }
 
@@ -63,7 +71,12 @@ namespace Signum.Web.Operations
         public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
 
         public ConstructorOperationSettings(ConstructSymbol<T>.Simple constructOperation)
-            : base(constructOperation)
+            : base(constructOperation.Symbol)
+        {
+        }
+
+        internal ConstructorOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -87,8 +100,6 @@ namespace Signum.Web.Operations
         {
             return (Entity)(IEntity)Constructor((ConstructorOperationContext<T>)ctx);
         }
-
-     
 
         public override Type OverridenType
         {
@@ -159,22 +170,34 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IContextualOperationContext ctx);
 
-        protected ContextualOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ContextualOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
+        }
+
+        static GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>>(symbol => new ContextualOperationSettings<Entity>(symbol));
+        public static ContextualOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
     }
 
     public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IEntity
     {
         public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
         }
 
 
         internal ContextualOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
+        {
+        }
+
+        internal ContextualOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -298,9 +321,16 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IEntityOperationContext ctx);
 
-        public EntityOperationSettingsBase(IOperationSymbolContainer symbol)
+        public EntityOperationSettingsBase(OperationSymbol symbol)
             : base(symbol)
         {
+        }
+
+        static GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>>(symbol => new EntityOperationSettings<Entity>(symbol));
+        public static EntityOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
 
         public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
@@ -312,10 +342,17 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings<T> Contextual { get; private set; }
 
         public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
             this.Contextual = new ContextualOperationSettings<T>(symbolContainer);
             this.ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer); 
+        }
+
+        internal EntityOperationSettings(OperationSymbol symbol)
+            : base(symbol)
+        {
+            this.Contextual = new ContextualOperationSettings<T>(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbol);
         }
 
         static EntityOperationSettings()

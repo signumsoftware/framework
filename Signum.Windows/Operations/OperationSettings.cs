@@ -24,9 +24,9 @@ namespace Signum.Windows.Operations
 
         public abstract Type OverridenType { get; }
 
-        public OperationSettings(IOperationSymbolContainer symbol)
+        protected OperationSettings(OperationSymbol symbol)
         {
-            this.OperationSymbol = symbol.Symbol;
+            this.OperationSymbol = symbol;
         }
 
         public override string ToString()
@@ -44,10 +44,17 @@ namespace Signum.Windows.Operations
         public abstract bool HasConstructor { get; }
         public abstract Entity OnConstructor(IConstructorOperationContext ctx);
 
-        protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ConstructorOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
-            
+
+        }
+
+        static GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>> giCreate =
+           new GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>>(symbol => new ConstructorOperationSettings<Entity>(symbol));
+        public static ConstructorOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
     }
 
@@ -57,7 +64,12 @@ namespace Signum.Windows.Operations
         public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
 
         public ConstructorOperationSettings(ConstructSymbol<T>.Simple constructOperation)
-            : base(constructOperation)
+            : base(constructOperation.Symbol)
+        {
+        }
+
+        internal ConstructorOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -119,9 +131,16 @@ namespace Signum.Windows.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IContextualOperationContext ctx);
 
-        protected ContextualOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ContextualOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
+        }
+
+        static GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>>(symbol => new ContextualOperationSettings<Entity>(symbol));
+        public static ContextualOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
     }
 
@@ -132,13 +151,18 @@ namespace Signum.Windows.Operations
         public Func<ContextualOperationContext<T>, bool> IsVisible { get; set; }
 
         public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
         }
 
 
         internal ContextualOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
+        {
+        }
+
+        internal ContextualOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -265,10 +289,16 @@ namespace Signum.Windows.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IEntityOperationContext ctx);
 
-
-        protected EntityOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        public EntityOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
+        }
+
+        static GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>>(symbol => new EntityOperationSettings<Entity>(symbol));
+        public static EntityOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
         }
 
         public abstract ContextualOperationSettingsBase ContextualUntyped { get; }
@@ -286,10 +316,17 @@ namespace Signum.Windows.Operations
 
         /// <param name="symbolContainer">A ExecuteSymbol&lt;T&gt;, DeleteSymbol&lt;T&gt; or a Construct&lt;R&gt;.From&lt;T&gt;</param>
         public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
-            Contextual = new ContextualOperationSettings<T>(symbolContainer);
-            ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer);
+            this.Contextual = new ContextualOperationSettings<T>(symbolContainer);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer);
+        }
+
+        internal EntityOperationSettings(OperationSymbol symbol)
+            : base(symbol)
+        {
+            this.Contextual = new ContextualOperationSettings<T>(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbol);
         }
 
         public override ContextualOperationSettingsBase ContextualUntyped
