@@ -271,6 +271,11 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
         }
 
         public string UdtTypeName { get; set; }
+
+        public string Default { get; set; }
+
+        public const string NewId = "NEWID()";
+        public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
@@ -280,21 +285,23 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
         public string Name { get; set; }
 
+        public bool Identity { get; set; }
+
+        public bool IdentityBehaviour { get; set; }
+
         public PrimaryKeyAttribute(Type type, string name = "Id")
         {
             this.Type = type;
             this.Name = name;
             this.Identity = true;
+            this.IdentityBehaviour = true;
+
             if (type == typeof(Guid))
+            {
                 this.Default = NewSequentialId;
+                this.Identity = false;
+            }
         }
-
-        public bool Identity { get; set; }
-
-        public string Default { get; set; }
-
-        public const string NewId = "NEWID()";
-        public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]

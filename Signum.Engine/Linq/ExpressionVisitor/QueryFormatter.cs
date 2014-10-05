@@ -341,6 +341,8 @@ namespace Signum.Engine.Linq
             Visit(castExpr.Expression);
             sb.Append(" as ");
             sb.Append(castExpr.SqlDbType.ToString().ToUpperInvariant());
+            if (castExpr.SqlDbType == SqlDbType.NVarChar || castExpr.SqlDbType == SqlDbType.VarChar)
+                sb.Append("(MAX)");
             sb.Append(")");
             return castExpr;
         }

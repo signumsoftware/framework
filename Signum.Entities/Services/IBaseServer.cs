@@ -66,5 +66,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, Type> ImportPrimaryKeyDefinitions();
     }
 }

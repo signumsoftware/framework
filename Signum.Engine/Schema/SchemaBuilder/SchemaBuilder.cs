@@ -221,7 +221,7 @@ namespace Signum.Engine.Maps
         void Complete(Table table)
         {
             Type type = table.Type;
-            table.Identity = (Settings.TypeAttributes<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).Identity;
+            table.IdentityBehaviour = (Settings.TypeAttributes<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
             table.Name = GenerateTableName(type);
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
@@ -407,7 +407,7 @@ namespace Signum.Engine.Maps
             if (IsPrimaryKey(route))
                 return KindOfField.PrimaryKey;
 
-            if (Settings.GetSqlDbType(route) != null)
+            if (Settings.GetSqlDbType(Settings.FieldAttribute<SqlDbTypeAttribute>(route), route.Type) != null)
                 return KindOfField.Value;
 
             if (route.Type.UnNullify().IsEnum)
@@ -442,12 +442,15 @@ namespace Signum.Engine.Maps
                 Type = attr.Type,
                 SqlDbType = attr.HasSqlDbType ? attr.SqlDbType : Settings.TypeValues.GetOrThrow(attr.Type),
                 Default = attr.Default,
+                Identity = attr.Identity,
             }; 
         }
 
         protected virtual FieldValue GenerateFieldValue(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            SqlDbTypePair pair = Settings.GetSqlDbType(route);
+            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+
+            SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
 
             return new FieldValue(route.Type)
             {
@@ -455,8 +458,8 @@ namespace Signum.Engine.Maps
                 SqlDbType = pair.SqlDbType,
                 UdtTypeName = pair.UdtTypeName,
                 Nullable = Settings.IsNullable(route, forceNull),
-                Size = Settings.GetSqlSize(route, pair.SqlDbType),
-                Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                Size = Settings.GetSqlSize(att, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(att, pair.SqlDbType),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -565,8 +568,8 @@ namespace Signum.Engine.Maps
                     SqlDbType = pair.SqlDbType,
                     UdtTypeName = pair.UdtTypeName,
                     Nullable = false,
-                    Size = Settings.GetSqlSize(route, pair.SqlDbType),
-                    Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                    Size = Settings.GetSqlSize(orderAttr, pair.SqlDbType),
+                    Scale = Settings.GetSqlScale(orderAttr, pair.SqlDbType),
                 };
             }
 
@@ -581,6 +584,7 @@ namespace Signum.Engine.Maps
                     Type = keyAttr.Type,
                     SqlDbType = keyAttr.HasSqlDbType ? keyAttr.SqlDbType : Settings.TypeValues.GetOrThrow(keyAttr.Type),
                     Default = keyAttr.Default,
+                    Identity = keyAttr.Identity,
                 },
                 BackReference = new FieldReference(table.Type)
                 {
@@ -913,7 +917,9 @@ namespace Signum.Engine.Maps
 
         protected override Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
         {
-            SqlDbTypePair pair = Settings.GetSqlDbType(route);
+            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+
+            SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
 
             var result = new FieldValue(route.Type)
             {
@@ -922,8 +928,8 @@ namespace Signum.Engine.Maps
                 SqlDbType = pair.SqlDbType,
                 UdtTypeName = pair.UdtTypeName,
                 Nullable = Settings.IsNullable(route, false),
-                Size = Settings.GetSqlSize(route, pair.SqlDbType),
-                Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                Size = Settings.GetSqlSize(att, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(att, pair.SqlDbType),
             };
 
             return result;

@@ -374,7 +374,7 @@ export interface EntityAutocompleter {
 }
 
 export interface AutocompleteResult {
-    id: number;
+    id: string;
     text: string;
     type: string;
     link: string;

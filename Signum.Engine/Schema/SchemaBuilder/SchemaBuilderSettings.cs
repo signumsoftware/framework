@@ -238,30 +238,24 @@ namespace Signum.Engine.Maps
                 FieldAttribute<ImplementedByAllAttribute>(propertyRoute));
         }
 
-        internal SqlDbTypePair GetSqlDbType(PropertyRoute propertyRoute)
+        internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute att, Type type)
         {
-            SqlDbTypeAttribute att = FieldAttribute<SqlDbTypeAttribute>(propertyRoute);
-
             if (att != null && att.HasSqlDbType)
                 return new SqlDbTypePair(att.SqlDbType, att.UdtTypeName);
 
-            return GetSqlDbTypePair(propertyRoute.Type.UnNullify());
+            return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(PropertyRoute propertyRoute, SqlDbType sqlDbType)
+        internal int? GetSqlSize(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldAttribute<SqlDbTypeAttribute>(propertyRoute);
-
             if (att != null && att.HasSize)
                 return att.Size;
 
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(PropertyRoute propertyRoute, SqlDbType sqlDbType)
+        internal int? GetSqlScale(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldAttribute<SqlDbTypeAttribute>(propertyRoute);
-
             if (att != null && att.HasScale)
                 return att.Scale;
 

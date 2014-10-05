@@ -601,7 +601,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.getSelectedItems = function (prefix) {
             return $("input:checkbox[name^=" + prefix.child("rowSelection") + "]:checked").toArray().map(function (v) {
                 var parts = v.value.split("__");
-                return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false), parts[2], $(v).parent().next().children('a').attr('href'));
+                return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parts[0], false), parts[2], $(v).parent().next().children('a').attr('href'));
             });
         };
 

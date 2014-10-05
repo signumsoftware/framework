@@ -181,16 +181,16 @@ namespace Signum.Engine
 
         public static IDisposable DisableIdentity(Table table)
         {
-            if (!table.Identity)
+            if (!table.IdentityBehaviour)
                 throw new InvalidOperationException("Identity is false already");
 
-            table.Identity = false;
+            table.IdentityBehaviour = false;
             if (table.PrimaryKey.Default == null)
                 SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
-                table.Identity = true;
+                table.IdentityBehaviour = true;
 
                 if (table.PrimaryKey.Default == null)
                     SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
@@ -535,7 +535,7 @@ namespace Signum.Engine
         static DataTable CreateDataTable<T>(IEnumerable<T> entities, Table t) where T : Entity
         {
             DataTable dt = new DataTable();
-            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
                 dt.Columns.Add(new DataColumn(c.Name, c.Type));
 
             foreach (var e in entities)
@@ -560,7 +560,7 @@ namespace Signum.Engine
 
             DataTable dt = new DataTable();
             var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
                 dt.Columns.Add(new DataColumn(c.Name, c.Type));
 
             foreach (var e in entities)

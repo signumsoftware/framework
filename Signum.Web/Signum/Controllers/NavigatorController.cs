@@ -28,11 +28,11 @@ namespace Signum.Web.Controllers
     public class NavigatorController : Controller
     {
         [ValidateInput(false), ActionSplitter("webTypeName")]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
-        public ViewResult View(string webTypeName, PrimaryKey id)
+        public ViewResult View(string webTypeName, string id)
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            Lite<Entity> lite = Lite.Create(t, id);
+            Lite<Entity> lite = Lite.Create(t, PrimaryKey.Parse(id, t));
 
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
@@ -130,10 +130,10 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost, ActionSplitter("entityType")]
-        public PartialViewResult NormalControl(string entityType, PrimaryKey id, bool? readOnly, string partialViewName)
+        public PartialViewResult NormalControl(string entityType, string id, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-            Lite<Entity> lite = Lite.Create(type, id);
+            Lite<Entity> lite = Lite.Create(type, PrimaryKey.Parse(id, type));
             Entity entity;
             using (Navigator.Manager.OnRetrievingForView(lite))
             {

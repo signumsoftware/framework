@@ -159,6 +159,12 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                  () => SemiSymbol.GetSemiSymbolIdsAndNames(type));
         }
+
+        public Dictionary<Type, Type> ImportPrimaryKeyDefinitions()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => PrimaryKey.Export());
+        }
         #endregion
 
         #region IDynamicQueryServer

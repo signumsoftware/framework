@@ -80,7 +80,7 @@ namespace Signum.Engine
 
         public static string CreateField(IColumn c)
         {
-            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity, c.Default);
+            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
         }
 
         public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
@@ -355,6 +355,35 @@ FROM {1} as [table]".Formato(
         public static SqlPreCommandSimple EnableIndex(ObjectName tableName, string indexName)
         {
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".Formato(indexName, tableName));
+        }
+
+        public static SqlPreCommandSimple DropDefaultConstraint(ObjectName tableName, string columnName)
+        {
+            DatabaseName db = tableName.Schema.Database;
+
+            tableName = tableName.OnDatabase(null);
+
+            string varName = "Constraint_" + tableName.ToString().Replace(".", "_") + "_" + columnName;
+
+            string command = @"
+declare @sql nvarchar(max)
+select  @sql = 'ALTER TABLE [{Table}] DROP CONSTRAINT [' + dc.name  + '];' 
+from DB.sys.default_constraints dc
+join DB.sys.columns c on dc.parent_object_id = c.object_id
+where c.object_id = DB.OBJECT_ID('{Table}') and c.name = '{Column}'
+exec DB.dbo.sp_executesql @sql"
+                .Replace("DB.", db == null ? null : (db.ToString() + "."))
+                .Replace("@sql", "@" + varName)
+                .Replace("{Table}", tableName.ToString())
+                .Replace("{Column}", columnName.SqlEscape());
+
+            return new SqlPreCommandSimple(command);
+        }
+
+        public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT DF_{0}_{1} DEFAULT {2} FOR {1}"
+                .Formato(tableName, columnName, definition));
         }
 
         internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)

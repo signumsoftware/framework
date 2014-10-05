@@ -38,42 +38,6 @@ namespace Signum.Engine
                 null, Spacing.Simple);
         }
 
-        public static SqlPreCommand SynchronizeSystemDefaultConstraints(Replacements replacements)
-        {
-            var allConstraints = Schema.Current.DatabaseNames().Select(db =>
-            {
-                using (Administrator.OverrideDatabaseInSysViews(db))
-                {
-                    var constaints = (from t in Database.View<SysTables>()
-                                      join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                                      join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                                      join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
-                                      where ctr.is_system_named
-                                      select new
-                                      {
-                                          table = new ObjectName(new SchemaName(db, s.name), t.name),
-                                          column = c.name,
-                                          constraint = ctr.name,
-                                          definition = ctr.definition,
-                                      }).ToList();
-
-                    if (!constaints.Any())
-                        return null;
-
-                    return new SqlPreCommandSimple(
-                        constaints.ToString(a => "-- because default constraint " + a.constraint + " in " + a.table.ToString() + "." + a.column, "\r\n") + @"
-declare @sql nvarchar(max)
-set @sql = ''
-select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
-from {0}sys.default_constraints dc
-join {0}sys.tables t on dc.parent_object_id = t.object_id
-exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + ".")));
-                }
-            }).ToList();
-
-            return allConstraints.Combine(Spacing.Simple);
-        } 
-
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
             //Temproal HACK
@@ -205,6 +169,9 @@ exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + "."
                         (cn, tabCol, difCol) =>SqlPreCommand.Combine(Spacing.Simple,
                             difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
                             difCol.ColumnEquals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tab, tabCol),
+                            difCol.DefaultEquals(tabCol) ? null: SqlPreCommand.Combine(Spacing.Simple, 
+                                difCol.Default != null? SqlBuilder.DropDefaultConstraint(tab.Name, tabCol.Name): null,
+                                tabCol.Default != null? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default): null),
                             UpdateByFkChange(tn, difCol, tabCol, ChangeName)),
                         Spacing.Simple)),
                  Spacing.Double);
@@ -360,7 +327,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                              Name = new ObjectName(new SchemaName(db, s.name), t.name),
                              Colums = (from c in t.Columns()
                                        join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
-                                       join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
+                                       join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
                                        select new DiffColumn
                                        {
                                            Name = c.name,
@@ -371,7 +338,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                                            Precission = c.precision,
                                            Scale = c.scale,
                                            Identity = c.is_identity,
-                                           DefaultConstraintName = ctr.name,
+                                           Default = ctr.definition,
                                            PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                                            ForeingKey = (from fk in t.ForeignKeys()
                                                          where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
@@ -628,7 +595,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
 
         public DiffForeignKey ForeingKey; 
 
-        public string DefaultConstraintName;
+        public string Default;
 
         public bool ColumnEquals(IColumn other)
         {
@@ -642,6 +609,14 @@ EXEC(@{1})".Formato(databaseName, variableName));
                 && PrimaryKey == other.PrimaryKey;
 
             return result;
+        }
+
+        public bool DefaultEquals(IColumn other)
+        {
+            if (other.Default == null && this.Default == null)
+                return true;
+
+            return StringComparer.InvariantCultureIgnoreCase.Equals(this.Default, "(" + other.Default + ")");
         }
     }
 

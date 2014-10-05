@@ -73,7 +73,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("InsertMany", () => this.Type.TypeName()))
             {
-                if (Identity)
+                if (IdentityBehaviour)
                 {
                     InsertCacheIdentity ic = inserterIdentity.Value;
                     list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
@@ -88,7 +88,7 @@ namespace Signum.Engine.Maps
 
         internal object[] BulkInsertDataRow(Entity ident)
         {
-            var parameters = Identity ?
+            var parameters = IdentityBehaviour ?
                 inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
                 inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "");
 
@@ -631,7 +631,7 @@ namespace Signum.Engine.Maps
             PrepareEntitySync(ident);
             SetToStrField(ident);
 
-            SqlPreCommandSimple insert = Identity ?
+            SqlPreCommandSimple insert = IdentityBehaviour ?
                 new SqlPreCommandSimple(
                     inserterIdentity.Value.SqlInsertPattern(suffix, false),
                     inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix)).AddComment(comment) :

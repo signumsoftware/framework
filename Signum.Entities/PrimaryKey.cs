@@ -25,6 +25,21 @@ namespace Signum.Entities
             return PrimaryKeyType.GetValue(entityType);
         }
 
+        public static void SetType(Type entityType, Type primaryKeyType)
+        {
+            PrimaryKeyType.SetDefinition(entityType, primaryKeyType);
+        }
+
+        public static Dictionary<Type, Type> Export()
+        {
+            return PrimaryKeyType.ExportDefinitions();
+        }
+
+        public static void Import(Dictionary<Type, Type> dic)
+        {
+            PrimaryKeyType.ImportDefinitions(dic);
+        }
+
         public readonly IComparable Object;
 
         public PrimaryKey(IComparable obj)
@@ -183,7 +198,7 @@ namespace Signum.Entities
         public static bool TryParse(string value, Type entityType, out PrimaryKey id)
         {
             object val;
-            if (ReflectionTools.TryParse(value, PrimaryKeyType.GetValue(entityType), out  val))
+            if (ReflectionTools.TryParse(value, Type(entityType), out  val))
             {
                 id = new PrimaryKey((IComparable)val);
                 return true;
@@ -197,7 +212,7 @@ namespace Signum.Entities
 
         public static PrimaryKey Parse(string value, Type type)
         {
-            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, PrimaryKeyType.GetValue(type)));
+            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(type)));
         }
 
         public static PrimaryKey? Wrap(IComparable value)

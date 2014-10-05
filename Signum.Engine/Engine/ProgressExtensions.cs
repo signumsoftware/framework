@@ -118,10 +118,10 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table(tableType);
 
-            if (!table.Identity)
+            if (!table.IdentityBehaviour)
                 throw new InvalidOperationException("Identity is false already");
 
-            table.Identity = false;
+            table.IdentityBehaviour = false;
             try
             {
                 collection.ProgressForeach(elementID, fileName, (item, writer) =>
@@ -132,7 +132,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = true;
+                table.IdentityBehaviour = true;
                 SafeConsole.ClearSameLine();
             }
         }
@@ -143,10 +143,10 @@ namespace Signum.Engine
         {
             Table table = Schema.Current.Table(tableType);
 
-            if (!table.Identity)
+            if (!table.IdentityBehaviour)
                 throw new InvalidOperationException("Identity is false already");
 
-            table.Identity = false;
+            table.IdentityBehaviour = false;
             try
             {
                 collection.ProgressForeachParallel(elementID, fileName, (item, writer) =>
@@ -157,7 +157,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = true;
+                table.IdentityBehaviour = true;
             }
         }
 

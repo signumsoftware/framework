@@ -187,6 +187,17 @@ namespace Signum.Utilities
         {
             get { return definitions.Values; }
         }
+
+        public Dictionary<Type, T> ExportDefinitions()
+        {
+            return this.definitions;
+        }
+
+        public void ImportDefinitions(Dictionary<Type, T> dic)
+        {
+            this.definitions = dic;
+            this.ClearCache();
+        }
     }
 
     [DebuggerStepThrough]

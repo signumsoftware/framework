@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
                 Take(l)
                 .Select(o => new AutocompleteResult
                 {
-                    id = o.Id,
+                    id = o.Id.ToString(),
                     text = o.ToString(),
                     type = Navigator.ResolveWebTypeName(o.GetType())
                 }).ToList();
@@ -172,13 +172,13 @@ namespace Signum.Web.Controllers
 
         public AutocompleteResult(Lite<Entity> lite)
         {
-            id = lite.Id;
+            id = lite.Id.ToString();
             text = lite.ToString();
             type = Navigator.ResolveWebTypeName(lite.EntityType);
             link = Navigator.NavigateRoute(lite);
         }
 
-        public PrimaryKey id;
+        public string id;
         public string text;
         public string type;
         public string link;

@@ -58,7 +58,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        public bool Identity { get; set; }
+        public bool IdentityBehaviour { get; set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -341,6 +341,7 @@ namespace Signum.Engine.Maps
         Type Type { get; }
         string UdtTypeName { get; }
         bool PrimaryKey { get; }
+        bool IdentityBehaviour { get; }
         bool Identity { get; }
         string Default { get; }
         int? Size { get; }
@@ -372,7 +373,8 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get; set; }
         string IColumn.UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return true; } }
-        bool IColumn.Identity { get { return table.Identity; } }
+        public bool Identity { get; set; }
+        bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
@@ -424,6 +426,7 @@ namespace Signum.Engine.Maps
         public string UdtTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
@@ -481,6 +484,7 @@ namespace Signum.Engine.Maps
             string IColumn.UdtTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
+            bool IColumn.IdentityBehaviour { get { return false; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get { return null; } }
@@ -658,6 +662,7 @@ namespace Signum.Engine.Maps
         public string UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
@@ -869,6 +874,7 @@ namespace Signum.Engine.Maps
         string IColumn.UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
@@ -885,6 +891,7 @@ namespace Signum.Engine.Maps
         string IColumn.UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get { return null; } }
@@ -960,7 +967,8 @@ namespace Signum.Engine.Maps
             public SqlDbType SqlDbType { get; set; }
             string IColumn.UdtTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return true; } }
-            bool IColumn.Identity { get { return true; } }
+            public bool Identity { get; set; }
+            bool IColumn.IdentityBehaviour { get { return true; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             Table IColumn.ReferenceTable { get { return null; } }

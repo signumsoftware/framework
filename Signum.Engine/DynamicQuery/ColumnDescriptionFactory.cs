@@ -55,6 +55,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
+                    processedType = null;
                 }
             }
         }
@@ -157,13 +158,21 @@ namespace Signum.Engine.DynamicQuery
             return null;
         }
 
+        Type processedType;
+        Type ProcessedType
+        {
+            get 
+            {
+                return processedType ?? 
+                    (processedType = (Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
+                    Type.UnNullify() == typeof(PrimaryKey) ? propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).SingleEx().Nullify() :
+                    Type.Nullify())); 
+            }
+        }
+
         public ColumnDescription BuildColumnDescription()
         {
-            Type = Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
-                Type.UnNullify() == typeof(PrimaryKey) ? propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).SingleEx().UnNullify() :
-                Type.Nullify();
-
-            return new ColumnDescription(Name, Type)
+            return new ColumnDescription(Name, ProcessedType)
             {
                 PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,
