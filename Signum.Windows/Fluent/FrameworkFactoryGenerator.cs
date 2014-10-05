@@ -81,7 +81,7 @@ namespace Signum.Windows
                             {
                                 MemberListBinding bindings = (MemberListBinding)mb;
 
-                                DefaultMemberAttribute dma = bindings.Member.DeclaringType.SingleAttribute<DefaultMemberAttribute>();
+                                DefaultMemberAttribute dma = bindings.Member.DeclaringType.GetCustomAttribute<DefaultMemberAttribute>();
 
                                 //if(!IsDefaultMember(bindings.Member))
                                 //    throw new InvalidOperationException("Add items only work for the DefaultMember");
@@ -140,7 +140,7 @@ namespace Signum.Windows
 
         private static bool IsDefaultMember(MemberInfo mi)
         {
-            var dma = mi.DeclaringType.SingleAttribute<ContentPropertyAttribute>();
+            var dma = mi.DeclaringType.GetCustomAttribute<ContentPropertyAttribute>();
             return dma != null && dma.Name == mi.Name;
         }
 

@@ -216,41 +216,41 @@ namespace Signum.Engine.Maps
 
             internal Action<List<Entity>, DirectedGraph<Entity>> GetInserter(int numElements)
             {
-                return insertIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertIdentity() : GetInsertMultiIdentity(num));
+                return insertIdentityCache.GetOrAdd(numElements, (int num) => GetInsertMultiIdentity(num));
             }
 
-            Action<List<Entity>, DirectedGraph<Entity>> GetInsertIdentity()
-            {
-                string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
+            //Action<List<Entity>, DirectedGraph<Entity>> GetInsertIdentity()
+            //{
+            //    string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
 
-                return (list, graph) =>
-                {
-                    Entity ident = list.Single();
+            //    return (list, graph) =>
+            //    {
+            //        Entity ident = list.Single();
 
-                    AssertNoId(ident);
+            //        AssertNoId(ident);
 
-                    Entity entity = ident as Entity;
-                    if (entity != null)
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
+            //        Entity entity = ident as Entity;
+            //        if (entity != null)
+            //            entity.Ticks = TimeZoneManager.Now.Ticks;
 
-                    table.SetToStrField(ident);
+            //        table.SetToStrField(ident);
 
-                    var forbidden = new Forbidden(graph, ident);
+            //        var forbidden = new Forbidden(graph, ident);
 
-                    ident.id = new PrimaryKey((IComparable)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar());
+            //        ident.id = new PrimaryKey((IComparable)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar());
 
-                    ident.IsNew = false;
+            //        ident.IsNew = false;
 
-                    if (table.saveCollections.Value != null)
-                        table.saveCollections.Value.InsertCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
-                };
-            }
+            //        if (table.saveCollections.Value != null)
+            //            table.saveCollections.Value.InsertCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
+            //    };
+            //}
 
 
             Action<List<Entity>, DirectedGraph<Entity>> GetInsertMultiIdentity(int num)
             {
                 string sqlMulti = new StringBuilder()
-                    .AppendLine("DECLARE @MyTable TABLE (Id INT);")
+                    .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
                     .AppendLines(Enumerable.Range(0, num).Select(i => SqlInsertPattern(i.ToString(), true)))
                     .AppendLine("SELECT Id from @MyTable").ToString();
 
@@ -451,7 +451,7 @@ namespace Signum.Engine.Maps
             Action<List<Entity>, DirectedGraph<Entity>> GetUpdateMultiple(int num)
             {
                 string sqlMulti = new StringBuilder()
-                      .AppendLine("DECLARE @NotFound TABLE (Id INT);")
+                      .AppendLine("DECLARE @NotFound TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
                       .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
                       .AppendLine("SELECT Id from @NotFound").ToString();
 
@@ -745,6 +745,8 @@ namespace Signum.Engine.Maps
 
         internal class RelationalCache<T> : IRelationalCache
         {
+            internal TableMList table;
+
             internal Func<string, string> sqlDelete;
             public Func<Entity, string, DbParameter> DeleteParameter;
             public ConcurrentDictionary<int, Action<List<Entity>>> deleteCache = new ConcurrentDictionary<int, Action<List<Entity>>>();
@@ -850,48 +852,32 @@ namespace Signum.Engine.Maps
             {
                 return insertCache.GetOrAdd(numElements, num =>
                 {
-                    if (num == 1)
-                        return (List<MListInsert> list) =>
+                    string sqlMulti = new StringBuilder()
+                          .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
+                          .AppendLines(Enumerable.Range(0, num).Select(i => sqlInsert(i.ToString(), true)))
+                          .AppendLine("SELECT Id from @MyTable").ToString();
+
+                    return (List<MListInsert> list) =>
+                    {
+                        List<DbParameter> result = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
                         {
-                            var pair = list[0];
+                            var pair = list[i];
+                            result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, i.ToString()));
+                        }
 
-                            string sql = sqlInsert("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
+                        DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
 
-                            var parameters = InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, "");
+                        for (int i = 0; i < num; i++)
+                        {
+                            var pair = list[i];
 
-                            pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)new SqlPreCommandSimple(sql, parameters).ExecuteScalar()));
+                            pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)dt.Rows[i][0]));
+
                             if (this.hasOrder)
                                 pair.MList.SetOldIndex(pair.Index);
-                        };
-                    else
-                    {
-                        string sqlMulti = new StringBuilder()
-                              .AppendLine("DECLARE @MyTable TABLE (Id INT);")
-                              .AppendLines(Enumerable.Range(0, num).Select(i => sqlInsert(i.ToString(), true)))
-                              .AppendLine("SELECT Id from @MyTable").ToString();
-
-                        return (List<MListInsert> list) =>
-                        {
-                            List<DbParameter> result = new List<DbParameter>();
-                            for (int i = 0; i < num; i++)
-                            {
-                                var pair = list[i];
-                                result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, i.ToString()));
-                            }
-
-                            DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
-
-                            for (int i = 0; i < num; i++)
-                            {
-                                var pair = list[i];
-
-                                pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)dt.Rows[i][0]));
-
-                                if (this.hasOrder)
-                                    pair.MList.SetOldIndex(pair.Index);
-                            }
-                        };
-                    }
+                        }
+                    };
                 });
             }
 
@@ -1042,7 +1028,7 @@ namespace Signum.Engine.Maps
             var pb = Connector.Current.ParameterBuilder;
 
             RelationalCache<T> result = new RelationalCache<T>();
-
+            result.table = this;
             result.Getter = ident => (MList<T>)FullGetter(ident);
 
             result.sqlDelete = post => "DELETE {0} WHERE {1} = {2}".Formato(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + post));

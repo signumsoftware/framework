@@ -180,13 +180,19 @@ namespace Signum.Engine
 
         public static IDisposable DisableIdentity(Table table)
         {
+            if (!table.Identity)
+                throw new InvalidOperationException("Identity is false already");
+
             table.Identity = false;
-            SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
+            if (table.PrimaryKey.Default == null)
+                SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
                 table.Identity = true;
-                SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
+
+                if (table.PrimaryKey.Default == null)
+                    SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
             });
         }
 

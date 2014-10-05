@@ -58,7 +58,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        public bool Identity {get; set;}
+        public bool Identity { get; set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -173,7 +173,7 @@ namespace Signum.Engine.Maps
 
             if (result.OfType<UniqueIndex>().Any())
             {
-                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToUniqueIndexesAttribute>() != null)
+                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.GetCustomAttribute<AttachToUniqueIndexesAttribute>() != null)
                    .SelectMany(f => Index.GetColumnsFromFields(f.Field))
                    .ToList();
 
@@ -342,6 +342,7 @@ namespace Signum.Engine.Maps
         string UdtTypeName { get; }
         bool PrimaryKey { get; }
         bool Identity { get; }
+        string Default { get; }
         int? Size { get; }
         int? Scale { get; }
         Table ReferenceTable { get; }
@@ -377,6 +378,7 @@ namespace Signum.Engine.Maps
         Table IColumn.ReferenceTable { get { return null; } }
         public Type Type { get; set; }
         public bool AvoidForeignKey { get { return false; } }
+        public string Default { get; set; }
 
         Table table;
         public FieldPrimaryKey(Type fieldType, Table table)
@@ -426,6 +428,7 @@ namespace Signum.Engine.Maps
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
         public bool AvoidForeignKey { get { return false; } }
+        public string Default { get; set; }
 
         public FieldValue(Type fieldType)
             : base(fieldType)
@@ -463,7 +466,9 @@ namespace Signum.Engine.Maps
         }
 
 
-       
+
+
+
     }
 
     public partial class FieldEmbedded : Field, IFieldFinder
@@ -481,6 +486,7 @@ namespace Signum.Engine.Maps
             public Table ReferenceTable { get { return null; } }
             Type IColumn.Type { get { return typeof(bool); } }
             public bool AvoidForeignKey { get { return false; } }
+            public string Default { get { return null; } }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -661,6 +667,7 @@ namespace Signum.Engine.Maps
 
         public bool IsLite { get; internal set; }
         public bool AvoidExpandOnRetrieving { get; set; }
+        public string Default { get { return null; } }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -868,6 +875,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
+        public string Default { get { return null; } }
     }
 
     public partial class ImplementationStringColumn : IColumn
@@ -883,6 +891,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
         public Type Type { get { return typeof(string); } }
         public bool AvoidForeignKey { get { return false; } }
+        public string Default { get { return null; } }
     }
 
     public partial class FieldMList : Field, IFieldFinder
@@ -957,6 +966,7 @@ namespace Signum.Engine.Maps
             Table IColumn.ReferenceTable { get { return null; } }
             public Type Type { get; set; }
             public bool AvoidForeignKey { get { return false; } }
+            public string Default { get; set; }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }

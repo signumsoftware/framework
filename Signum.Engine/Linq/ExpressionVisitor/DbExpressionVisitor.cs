@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitLiteValue(LiteValueExpression lite)
         {
             var newTypeId = Visit(lite.TypeId);
-            var newId = (PrimaryKeyExpression)Visit(lite.Id);
+            var newId = Visit(lite.Id);
             var newToStr = Visit(lite.ToStr);
             if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
                 return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
@@ -477,6 +477,16 @@ namespace Signum.Engine.Linq
                 return pk;
 
             return new PrimaryKeyExpression(e);
+        }
+
+        protected internal virtual Expression VisitPrimaryKeyString(PrimaryKeyStringExpression pk)
+        {
+            var typeId = Visit(pk.TypeId);
+            var id = Visit(pk.Id);
+            if (typeId == pk && pk.Id == id)
+                return pk;
+
+            return new PrimaryKeyStringExpression(id, (TypeImplementedByAllExpression)typeId);
         }
     }
 }

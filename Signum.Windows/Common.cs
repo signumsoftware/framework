@@ -462,7 +462,7 @@ namespace Signum.Windows
             {
                 string text = context.PropertyInfo.NiceName();
 
-                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = context.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     text += " (" + ua.UnitName + ")";
 
@@ -540,7 +540,7 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = context.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }

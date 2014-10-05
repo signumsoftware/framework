@@ -527,12 +527,12 @@ namespace Signum.Engine.Maps
             var ss = Schema.Current.Settings;
             if (route.Follow(r => r.Parent)
                 .TakeWhile(t => t.PropertyRouteType != PropertyRouteType.Root)
-                .SelectMany(r => ss.FieldAttributes(r))
-                .Any(a => a is IgnoreAttribute))
+                .Any(r => ss.FieldAttribute<IgnoreAttribute>(r) != null))
             {
-                var atts = ss.FieldAttributes(route);
+                var ib = ss.FieldAttribute<ImplementedByAttribute>(route);
+                var iba = ss.FieldAttribute<ImplementedByAllAttribute>(route);
 
-                return Implementations.TryFromAttributes(route.Type.CleanType(), atts, route) ?? Implementations.By();
+                return Implementations.TryFromAttributes(route.Type.CleanType(), route, ib, iba) ?? Implementations.By();
             }
 
             throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IEntity).Name));

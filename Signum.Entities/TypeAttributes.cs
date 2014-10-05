@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -54,8 +55,8 @@ namespace Signum.Entities
             {
                 if (!t.IsIEntity())
                     throw new InvalidOperationException("{0} should be a non-abstrat IdentifiableEntity");
-
-                return t.SingleAttributeInherit<EntityKindAttribute>();
+                
+                return t.GetCustomAttribute<EntityKindAttribute>(true);
             });
         }
 

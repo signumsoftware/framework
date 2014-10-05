@@ -106,7 +106,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Unit
         {
-            get { return PropertyInfo.SingleAttribute<UnitAttribute>().Try(u => u.UnitName); }
+            get { return PropertyInfo.GetCustomAttribute<UnitAttribute>().Try(u => u.UnitName); }
         }
 
         public override string IsAllowed()

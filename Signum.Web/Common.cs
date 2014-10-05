@@ -49,7 +49,7 @@ namespace Signum.Web
             ValueLine vl = bl as ValueLine;
             if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                UnitAttribute ua = bl.PropertyRoute.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = bl.PropertyRoute.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }
@@ -120,7 +120,7 @@ namespace Signum.Web
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<StringLengthValidatorAttribute>();
+                var atribute = bl.PropertyRoute.PropertyInfo.GetCustomAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)
                 {
                     int max = atribute.Max; //-1 if not set

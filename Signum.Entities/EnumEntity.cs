@@ -8,7 +8,7 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false), PrimaryKey(typeof(int))]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false), PrimaryKey(typeof(int), Identity=false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
         where T: struct
     {

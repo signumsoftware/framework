@@ -61,11 +61,8 @@ namespace Signum.Entities
             }
         }
 
-        public static Implementations? TryFromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
         {
-            ImplementedByAttribute ib = fieldAttributes.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
-            ImplementedByAllAttribute iba = fieldAttributes.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
-
             if (ib != null && iba != null)
                 throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
 
@@ -79,9 +76,9 @@ namespace Signum.Entities
         }
 
 
-        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
         {
-            Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
+            Implementations? imp = TryFromAttributes(t, route, ib, iba);
 
             if (imp == null)
             {
@@ -234,7 +231,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
 
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class SqlDbTypeAttribute : Attribute
+    public class SqlDbTypeAttribute : Attribute
     {
         SqlDbType? sqlDbType;
         int? size;
@@ -277,29 +274,27 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
-    public sealed class PrimaryKeyAttribute : Attribute
+    public sealed class PrimaryKeyAttribute : SqlDbTypeAttribute
     {
-        public PrimaryKeyAttribute(Type type, string name = "id")
-        {
-            this.Type = type;
-            this.Name = name;
-        }
-
         public Type Type { get; set; }
 
         public string Name { get; set; }
 
-        SqlDbType? sqlDbType;
-        public SqlDbType SqlDbType
+        public PrimaryKeyAttribute(Type type, string name = "id")
         {
-            get { return sqlDbType.Value; }
-            set { sqlDbType = value; }
+            this.Type = type;
+            this.Name = name;
+            this.Identity = true;
+            if (type == typeof(Guid))
+                this.Default = NewSequentialId;
         }
 
-        public bool HasSqlDbType
-        {
-            get { return sqlDbType.HasValue; }
-        }
+        public bool Identity { get; set; }
+
+        public string Default { get; set; }
+
+        public const string NewId = "NEWID()";
+        public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]

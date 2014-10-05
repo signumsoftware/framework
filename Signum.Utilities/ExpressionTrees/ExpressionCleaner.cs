@@ -127,7 +127,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
+            MethodExpanderAttribute attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
             if (attribute != null)
             {
                 IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
@@ -220,7 +220,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         static LambdaExpression GetExpansion(MemberInfo mi)
         {
-            ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
+            ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
 
             string name = efa.Try(a => a.Name) ?? mi.Name + "Expression";
             Type type = mi.DeclaringType;

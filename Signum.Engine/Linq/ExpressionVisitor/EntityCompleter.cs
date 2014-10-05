@@ -31,7 +31,10 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var id = binder.GetId(lite.Reference);
+            var id = lite.Reference is ImplementedByAllExpression ?
+                (Expression)binder.GetIdString(lite.Reference) :
+                (Expression)binder.GetId(lite.Reference);
+
             var typeId = binder.GetEntityType(lite.Reference);
             var toStr = LiteToString(lite, typeId);
 

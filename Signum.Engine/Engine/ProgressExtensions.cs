@@ -117,12 +117,16 @@ namespace Signum.Engine
         public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
+
+            if (!table.Identity)
+                throw new InvalidOperationException("Identity is false already");
+
             table.Identity = false;
             try
             {
                 collection.ProgressForeach(elementID, fileName, (item, writer) =>
                 {
-                    using (Administrator.DisableIdentity(table.Name))
+                    using (table.PrimaryKey.Default != null ? null: Administrator.DisableIdentity(table.Name))
                         action(item, writer);
                 });
             }
@@ -138,12 +142,16 @@ namespace Signum.Engine
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
+
+            if (!table.Identity)
+                throw new InvalidOperationException("Identity is false already");
+
             table.Identity = false;
             try
             {
                 collection.ProgressForeachParallel(elementID, fileName, (item, writer) =>
                 {
-                    using (Administrator.DisableIdentity(table.Name))
+                    using (table.PrimaryKey.Default != null ? null : Administrator.DisableIdentity(table.Name))
                         action(item, writer);
                 });
             }

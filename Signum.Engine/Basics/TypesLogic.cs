@@ -51,7 +51,7 @@ namespace Signum.Engine.Basics
 
                 current.Initializing += () =>
                 {
-                    var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
+                    var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
                     var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
 

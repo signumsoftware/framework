@@ -61,7 +61,7 @@ namespace Signum.Web
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan>.Mapping = GetValue(ctx => 
             {
-                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
                 if (dateFormatAttr != null)
                     return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
                 else
@@ -93,7 +93,7 @@ namespace Signum.Web
                 if (ctx.Input.IsNullOrEmpty())
                     return (TimeSpan?)null;
 
-                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+                var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
                 if (dateFormatAttr != null)
                     return DateTime.ParseExact(ctx.Input, dateFormatAttr.Format, CultureInfo.CurrentCulture).TimeOfDay;
                 else

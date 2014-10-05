@@ -487,7 +487,7 @@ namespace Signum.Engine.Linq
 
                 var bindings = new List<MemberAssignment> 
                 {
-                    Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId)),
+                    Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId.UnNullify())),
                     Expression.Bind(type.GetProperty("Parent"), Visit(mle.Parent)),
                 };
 
@@ -527,6 +527,24 @@ namespace Signum.Engine.Linq
             }
 
             static readonly MethodInfo miWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Wrap(1));
+
+            protected internal override Expression VisitPrimaryKeyString(PrimaryKeyStringExpression pk)
+            {
+                var id = this.Visit(pk.Id);
+                var type = this.Visit(pk.TypeId);
+
+                return Expression.Call(miTryParse, type, id);
+            }
+
+            static readonly MethodInfo miTryParse = ReflectionTools.GetMethodInfo(() => TryParse(null, null));
+
+            static PrimaryKey? TryParse(Type type, string id)
+            {
+                if (type == null)
+                    return null;
+
+                return PrimaryKey.Parse(id, type);
+            }
         }
     }
 

@@ -59,7 +59,7 @@ namespace Signum.Entities.Reflection
             return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
                     from t in a.GetTypes()
                     where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
-                    let da = t.SingleAttributeInherit<DescriptionOptionsAttribute>()
+                    let da = t.GetCustomAttribute<DescriptionOptionsAttribute>(true)
                     where da == null || da.Options.IsSet(DescriptionOptions.Members)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     where DescriptionManager.OnShouldLocalizeMember(p)
@@ -317,7 +317,7 @@ namespace Signum.Entities.Reflection
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
-            QueryablePropertyAttribute spa = pi.SingleAttribute<QueryablePropertyAttribute>();
+            QueryablePropertyAttribute spa = pi.GetCustomAttribute<QueryablePropertyAttribute>();
             if (spa != null)
                 return spa.AvailableForQueries;
 
@@ -353,7 +353,7 @@ namespace Signum.Entities.Reflection
         {
             PropertyRoute simpleRoute = route.SimplifyNoRoot();
 
-            FormatAttribute format = simpleRoute.PropertyInfo.SingleAttribute<FormatAttribute>();
+            FormatAttribute format = simpleRoute.PropertyInfo.GetCustomAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 

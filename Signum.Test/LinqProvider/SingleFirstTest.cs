@@ -109,7 +109,7 @@ namespace Signum.Test.LinqProvider
                               lab.Name,
                               NumExecutions = (int?)g.Count(),
                               LastExecution = (from al2 in Database.Query<AlbumDN>()
-                                               where al2.Id == g.Max(a => (int?)a.Id)
+                                               where (int?)al2.Id == g.Max(a => (int?)a.Id)
                                                select al2.ToLite()).FirstOrDefault()
                           }).ToList();
         }

@@ -500,6 +500,19 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectIBAId()
+        {
+            var list = Database.Query<ArtistDN>().Select(a => (PrimaryKey?)a.LastAward.Id).ToList();
+        }
+
+        [TestMethod]
+        public void SelectIBAIdObject()
+        {
+            Assert2.Throws<InvalidOperationException>("translated", () =>
+                Database.Query<ArtistDN>().Select(a => ((int?)a.LastAward.Id).InSql()).ToList());
+        }
+
+        [TestMethod]
         public void SelectToStrField()
         {
             var list = Database.Query<NoteWithDateDN>().Select(a => a.ToStringProperty).ToList();

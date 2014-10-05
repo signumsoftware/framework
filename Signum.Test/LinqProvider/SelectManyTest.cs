@@ -132,7 +132,7 @@ namespace Signum.Test.LinqProvider
                                   {
                                       MaxAlbum = Database.Query<NoteWithDateDN>()
                                       .Where(n => n.Target.Is(a.LastAward))
-                                      .Max(n => (int?)n.Id)
+                                      .Max(n => (Guid?)n.Id)
                                   }).ToList();
         }
 
@@ -145,7 +145,7 @@ namespace Signum.Test.LinqProvider
                                   {
                                       MaxAlbum = Database.Query<NoteWithDateDN>()
                                       .Where(n => n.Target.Is(mle.Element.LastAward))
-                                      .Max(n => (int?)n.Id)
+                                      .Max(n => (Guid?)n.Id)
                                   }).ToList();
         }
 

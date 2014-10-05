@@ -80,19 +80,20 @@ namespace Signum.Engine
 
         public static string CreateField(IColumn c)
         {
-            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity);
+            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity, c.Default);
         }
 
-        public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
+        public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
         {
             Connector.Current.FixType(ref type, ref size, ref scale);
 
-            return "{0} {1}{2} {3}{4}{5}".Formato(
+            return "{0} {1}{2} {3}{4}{5}{6}".Formato(
                 name.SqlEscape(),
                 type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
                 GetSizeScale(size, scale),
-                identity ? "IDENTITY " : "",
+                identity && @default == null ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",
+                @default != null ? " DEFAULT " + @default : "",
                 primaryKey ? " PRIMARY KEY" : "");
         }
 

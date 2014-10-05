@@ -227,6 +227,15 @@ namespace Signum.Engine.Linq
         public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId)
             : base(DbExpressionType.ImplementedByAll, type)
         {
+            if (id == null)
+                throw new ArgumentNullException("id");
+
+            if (id.Type != typeof(string))
+                throw new ArgumentException("string");
+
+            if (typeId == null)
+                throw new ArgumentNullException("typeId");
+
             this.Id = id;
             this.TypeId = typeId;
         }
@@ -274,13 +283,19 @@ namespace Signum.Engine.Linq
     internal class LiteValueExpression : DbExpression
     {
         public readonly Expression TypeId;
-        public readonly PrimaryKeyExpression Id;
+        public readonly Expression Id;
         public readonly Expression ToStr; //Not readonly
-        
 
-        public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression toStr) :
+
+        public LiteValueExpression(Type type, Expression typeId, Expression id, Expression toStr) :
             base(DbExpressionType.LiteValue, type)
         {
+            if (typeId == null)
+                throw new ArgumentNullException("typeId");
+
+            if (id == null)
+                throw new ArgumentNullException("id");
+
             this.TypeId = typeId;
             this.Id = id;
             this.ToStr = toStr;
@@ -478,6 +493,38 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitPrimaryKey(this);
+        }
+    }
+
+    internal class PrimaryKeyStringExpression : DbExpression
+    {
+        public readonly Expression Id;
+        public readonly TypeImplementedByAllExpression TypeId;
+
+        public PrimaryKeyStringExpression(Expression id, TypeImplementedByAllExpression typeId)
+            : base(DbExpressionType.PrimaryKeyString, typeof(PrimaryKey?))
+        {
+            if (id == null)
+                throw new ArgumentNullException("id");
+
+            if(id.Type != typeof(string))
+                throw new ArgumentException("id should be a string");
+
+            if(typeId == null)
+                throw new ArgumentNullException("typeId");
+
+            this.Id = id;
+            this.TypeId = typeId;
+        }
+
+        public override string ToString()
+        {
+            return "(PrimaryKeyString?)(" + Id.ToString() + ", " + TypeId.ToString() + ")";
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitPrimaryKeyString(this);
         }
     }
 }

@@ -374,7 +374,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
                 int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
-                    .Set(a => a.Target, a => a.Id > 1 ? michael : null)
+                    .Set(a => a.Target, a => a.CreationTime > DateTime.Now ? michael : null)
                     .Execute();
                 //tr.Commit();
             }
@@ -389,7 +389,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
                 int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
-                    .Set(a => a.OtherTarget, a => a.Id > 1 ? michael.ToLite() : null)
+                    .Set(a => a.OtherTarget, a => a.CreationTime > DateTime.Today ? michael.ToLite() : null)
                     .Execute();
                 //tr.Commit();
             }

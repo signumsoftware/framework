@@ -22,6 +22,7 @@ namespace Signum.Entities
     [Serializable, DescriptionOptions(DescriptionOptions.All)]
     public abstract class Entity : ModifiableEntity, IEntity
     {
+        [Ignore]
         internal PrimaryKey? id = null; //primary key
         [Ignore]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 

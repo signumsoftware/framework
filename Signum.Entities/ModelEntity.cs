@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Signum.Utilities;
 
@@ -35,11 +36,12 @@ namespace Signum.Entities
 
             if (fieldRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 fieldRoute = fieldRoute.Parent;
-
+            
             return Implementations.FromAttributes(
                 route.Type.CleanType(),
-                fieldRoute.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray(),
-                route);
+                route,
+                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAttribute>(),
+                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAllAttribute>());
         }
 
         public void AssertIntegrityCheck()

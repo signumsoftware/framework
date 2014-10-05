@@ -353,11 +353,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DistinctWithNulls()
         {
+            var id = Database.Query<AlbumDN>().Select(a => a.Id).FirstEx();
+
             var nullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (PrimaryKey?)null)).Count();
-            var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (PrimaryKey?)1)).Count();
+            var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (PrimaryKey?)id)).Count();
 
             var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)null, alb.Id)).Count();
-            var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)1, alb.Id)).Count();
+            var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)id, alb.Id)).Count();
         }
     }
 }

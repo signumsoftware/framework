@@ -246,7 +246,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootSumSomeNull()
         {
-            Assert.IsTrue(Database.Query<ArtistDN>().Sum(a => (int)a.LastAward.Id.Object) > 0);
+            Assert.IsTrue(Database.Query<AwardNominationDN>().Sum(a => (int)a.Award.Id.Object) > 0);
         }
 
         [TestMethod]

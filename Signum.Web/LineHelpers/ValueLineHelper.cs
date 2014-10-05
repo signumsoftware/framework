@@ -10,6 +10,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities;
 using System.Globalization;
 using Signum.Entities.Basics;
+using System.Reflection;
 
 
 namespace Signum.Web
@@ -109,8 +110,8 @@ namespace Signum.Web
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
                 return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
-
-            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+            
+            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
             if (dateFormatAttr != null)
                 return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
             else

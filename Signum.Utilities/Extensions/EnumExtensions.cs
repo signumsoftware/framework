@@ -87,7 +87,7 @@ namespace Signum.Utilities
             where T: struct
         {
             return (T?)(object)EnumFieldCache.Get(typeof(T))
-                .Where(kvp => kvp.Value.SingleAttribute<CodeAttribute>().Code == code)
+                .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code == code)
                 .Select(kvp => kvp.Key)
                 .SingleOrDefaultEx();
         }

@@ -98,13 +98,13 @@ namespace Signum.Engine.Linq
             return false;
         }
 
-        protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
-        {
-            if (isFullNominate)
-                return Visit(pk.Value);
+        //protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+        //{
+        //    if (isFullNominate)
+        //        return Visit(pk.Value);
 
-            return base.VisitPrimaryKey(pk);
-        }
+        //    return base.VisitPrimaryKey(pk);
+        //}
 
         //Dictionary<ColumnExpression, ScalarExpression> replacements; 
 
@@ -231,6 +231,9 @@ namespace Signum.Engine.Linq
 
         protected Expression TrySqlToString(Type type, Expression expression)
         {
+            if (expression != null && expression.Type.UnNullify() == typeof(PrimaryKey))
+                expression = SmartEqualizer.UnwrapPrimaryKey(expression);
+
             var newExp = Visit(expression);
             if (Has(newExp) && IsFullNominateOrAggresive)
             {
@@ -434,7 +437,7 @@ namespace Signum.Engine.Linq
 
                 if (expression.NodeType == ExpressionType.Equal) //simple comparison
                 {
-                    BinaryExpression newB = expression as BinaryExpression;
+                    BinaryExpression newB = (BinaryExpression)expression;
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
@@ -467,9 +470,12 @@ namespace Signum.Engine.Linq
             }
             else
             {
+                b = SmartEqualizer.UnwrapPrimaryKeyBinary(b);
+
                 Expression left = this.Visit(b.Left);
                 Expression right = this.Visit(b.Right);
                 Expression conversion = this.Visit(b.Conversion);
+
                 if (left != b.Left || right != b.Right || conversion != b.Conversion)
                 {
                     if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
@@ -524,7 +530,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException();
         }
 
-        private Expression ConvertNull(Expression nullNode, Type type)
+        public static Expression ConvertNull(Expression nullNode, Type type)
         {
             switch (nullNode.NodeType)
             {
@@ -989,6 +995,17 @@ namespace Signum.Engine.Linq
                 case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression);
                 case "TimeSpan.TotalSeconds": return TrySqlDifference(SqlEnums.second, m.Type, m.Expression);
                 case "TimeSpan.TotalMinutes": return TrySqlDifference(SqlEnums.minute, m.Type, m.Expression);
+                case "PrimaryKey.Object":
+                    {
+                        var exp = m.Expression;
+                        if (exp is UnaryExpression)
+                            exp = ((UnaryExpression)exp).Operand;
+
+                        if (exp is PrimaryKeyStringExpression)
+                            return null;
+
+                        return Add(((PrimaryKeyExpression)exp).Value);
+                    }
                 default: return null;
             }
         }
@@ -1001,7 +1018,7 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
-            SqlMethodAttribute sma = m.Method.SingleAttribute<SqlMethodAttribute>();
+            SqlMethodAttribute sma = m.Method.GetCustomAttribute<SqlMethodAttribute>();
             if (sma != null)
                 using (ForceFullNominate())
                     return TrySqlFunction(m.Object, sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());

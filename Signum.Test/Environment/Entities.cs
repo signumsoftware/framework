@@ -12,7 +12,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
@@ -134,7 +134,7 @@ namespace Signum.Test.Environment
         }
 
         static Expression<Func<ArtistDN, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
-            a => a.Friends; 
+            a => a.Friends;
         public IEnumerable<Lite<Entity>> FriendsCovariant()
         {
             return FriendsCovariantExpression.Evaluate(this);
@@ -152,7 +152,7 @@ namespace Signum.Test.Environment
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
         public string FullName
         {
-            get{ return FullNameExpression.Evaluate(this); }
+            get { return FullNameExpression.Evaluate(this); }
         }
 
         static Expression<Func<ArtistDN, bool>> LonelyExpression =
@@ -185,7 +185,7 @@ namespace Signum.Test.Environment
     public enum Status
     {
         Single,
-        Married, 
+        Married,
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
@@ -218,7 +218,7 @@ namespace Signum.Test.Environment
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN)), NotNullable]
         MList<AwardDN> otherAwards = new MList<AwardDN>();
-        public MList<AwardDN> OtherAwards 
+        public MList<AwardDN> OtherAwards
         {
             get { return otherAwards; }
             set { Set(ref otherAwards, value); }
@@ -250,7 +250,7 @@ namespace Signum.Test.Environment
         public static readonly ExecuteSymbol<BandDN> Save = OperationSymbol.Execute<BandDN>();
     }
 
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
     public abstract class AwardDN : Entity
     {
         int year;
@@ -260,9 +260,9 @@ namespace Signum.Test.Environment
             set { Set(ref year, value); }
         }
 
-        [NotNullable, SqlDbType( Size = 100)]
+        [NotNullable, SqlDbType(Size = 100)]
         string category;
-        [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Category
         {
             get { return category; }
@@ -282,7 +282,7 @@ namespace Signum.Test.Environment
         public static readonly ExecuteSymbol<AwardDN> Save = OperationSymbol.Execute<AwardDN>();
     }
 
-    public enum AwardResult 
+    public enum AwardResult
     {
         Won,
         Nominated
@@ -442,7 +442,7 @@ namespace Signum.Test.Environment
 
     public interface ISecretContainer
     {
-        string Secret { get; set; } 
+        string Secret { get; set; }
     }
 
     public enum AlbumState
@@ -555,7 +555,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    
+
 
     public static class MinimumExtensions
     {
@@ -592,6 +592,6 @@ END");
 
     public class IntValue : IView
     {
-        public int? MinValue; 
+        public int? MinValue;
     }
 }
