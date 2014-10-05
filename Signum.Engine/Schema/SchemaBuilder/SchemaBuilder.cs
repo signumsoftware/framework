@@ -877,6 +877,8 @@ namespace Signum.Engine.Maps
 
             table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
 
+            table.GenerateColumns();
+
             return table;
         }
 
@@ -886,7 +888,7 @@ namespace Signum.Engine.Maps
             TableNameAttribute tn = type.GetCustomAttribute<TableNameAttribute>();
             if (tn != null)
             {
-                if (tn.Name == "sys")
+                if (tn.SchemaName == "sys")
                 {
                     DatabaseName db = Administrator.sysViewDatabase.Value;
 

@@ -53,8 +53,6 @@ namespace Signum.Engine.DynamicQuery
                 propertyRoutes = value;
                 if (propertyRoutes != null && propertyRoutes.Any() /*Out of IB casting*/)
                 {
-                    var cleanType = Type.CleanType();
-
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
                 }
@@ -161,7 +159,11 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescription BuildColumnDescription()
         {
-            return new ColumnDescription(Name, Reflector.IsIEntity(Type) ? Lite.Generate(Type) : Type)
+            Type = Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
+                Type.UnNullify() == typeof(PrimaryKey) ? propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).SingleEx().UnNullify() :
+                Type.Nullify();
+
+            return new ColumnDescription(Name, Type)
             {
                 PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,
@@ -171,7 +173,5 @@ namespace Signum.Engine.DynamicQuery
                 Unit = Unit,
             };
         }
-
-
     }
 }

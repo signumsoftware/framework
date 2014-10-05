@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return PropertyInfo.PropertyType.BuildLite().Nullify(); }
+            get { return PropertyInfo.PropertyType.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
         }
 
         public override string ToString()
@@ -59,7 +59,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 var entityExpression = baseExpression.ExtractEntity(true);
 
-                return Expression.Property(entityExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
+                return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
             }
             else
             {
@@ -70,7 +70,7 @@ namespace Signum.Entities.DynamicQuery
 
                 Expression result = Expression.Property(entityExpression, PropertyInfo);
 
-                return result.BuildLite().Nullify();
+                return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
             }
         }
 

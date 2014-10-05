@@ -280,7 +280,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
         public string Name { get; set; }
 
-        public PrimaryKeyAttribute(Type type, string name = "id")
+        public PrimaryKeyAttribute(Type type, string name = "Id")
         {
             this.Type = type;
             this.Name = name;

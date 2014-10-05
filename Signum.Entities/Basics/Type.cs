@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksField(false)]
     public class TypeDN : Entity
     {
         [NotNullable, UniqueIndex]

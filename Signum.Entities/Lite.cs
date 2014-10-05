@@ -306,7 +306,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public static readonly Regex ParseRegex = new Regex(@"(?<type>[^;]+);(?<id>\d+)(;(?<toStr>.+))?");
+        public static readonly Regex ParseRegex = new Regex(@"(?<type>[^;]+);(?<id>[\d\w-]+)(;(?<toStr>.+))?");
 
         public static Lite<Entity> Parse(string liteKey)
         {

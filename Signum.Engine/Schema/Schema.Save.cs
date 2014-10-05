@@ -427,7 +427,7 @@ namespace Signum.Engine.Maps
                         if (num != 1)
                             throw new ConcurrencyException(ident.GetType(), ident.Id);
 
-                       if (table.saveCollections.Value != null)
+                        if (table.saveCollections.Value != null)
                             table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
                     };
                 }

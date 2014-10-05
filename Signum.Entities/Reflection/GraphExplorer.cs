@@ -209,7 +209,7 @@ namespace Signum.Entities.Reflection
 
         public static DirectedGraph<Entity> ColapseIdentifiables(DirectedGraph<Modifiable> modifiables)
         {
-            DirectedGraph<Entity> result = new DirectedGraph<Entity>();
+            DirectedGraph<Entity> result = new DirectedGraph<Entity>(modifiables.Comparer);
             foreach (var item in modifiables.OfType<Entity>())
             {
                 var toColapse = modifiables.IndirectlyRelatedTo(item, i => !(i is Entity));

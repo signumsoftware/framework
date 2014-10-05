@@ -400,6 +400,50 @@ namespace Signum.Entities.DynamicQuery
             return expression;
         }
 
+        internal static Expression BuildLiteNulifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)
+        {
+            var buildLite = BuildLite(expression);
+
+            var primaryKey = UnwrapPrimaryKey(buildLite, routes);
+
+            var nullify = primaryKey.Nullify();
+
+            return nullify;
+        }
+
+        internal static Type BuildLiteNulifyUnwrapPrimaryKey(this Type type, PropertyRoute[] routes)
+        {
+            var buildLite = BuildLite(type);
+
+            var primaryKey = UnwrapPrimaryKey(buildLite, routes);
+
+            var nullify = primaryKey.Nullify();
+
+            return nullify;
+        }
+
+        internal static Expression UnwrapPrimaryKey(Expression expression, PropertyRoute[] routes)
+        {
+            if (expression.Type.UnNullify() == typeof(PrimaryKey))
+            {
+                return Expression.Convert(Expression.Field(expression.UnNullify(), "Object"), routes.Select(r => PrimaryKey.Type(r.RootType)).SingleEx().Nullify());
+            }
+
+            return expression;
+        }
+
+        internal static Type UnwrapPrimaryKey(Type type, PropertyRoute[] routes)
+        {
+            if (type.UnNullify() == typeof(PrimaryKey))
+            {
+                return routes.Select(r => PrimaryKey.Type(r.RootType)).SingleEx().Nullify();
+            }
+
+            return type;
+        }
+
+
+
         internal static Expression BuildLite(this Expression expression)
         {
             if (Reflector.IsIEntity(expression.Type))

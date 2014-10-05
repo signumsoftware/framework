@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
@@ -221,7 +222,11 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysTable(TableExpression table)
             {
-                yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name) ; 
+                var t = table.Table as Table;
+                if (t != null && t.IsView)
+                    yield return new ColumnExpression(typeof(int), table.Alias, t.Columns.Values.Single(a => a.PrimaryKey).Name);
+                else
+                    yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);
             }
 
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)

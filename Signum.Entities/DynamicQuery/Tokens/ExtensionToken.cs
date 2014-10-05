@@ -46,7 +46,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         Type type;
-        public override Type Type { get { return type.BuildLite().Nullify(); } }
+        public override Type Type { get { return type.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
 
         string key;
         public override string Key { get { return key; } }
@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicQuery
 
             var result = BuildExtension(Parent.Type.CleanType().UnNullify(), Key, parentExpression);
 
-            return result.BuildLite().Nullify();
+            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
         }
 
         public PropertyRoute propertyRoute;
