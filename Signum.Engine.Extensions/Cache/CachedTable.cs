@@ -18,6 +18,7 @@ using System.Threading;
 using Signum.Engine.Exceptions;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Cache
 {
@@ -166,16 +167,7 @@ namespace Signum.Engine.Cache
 
             internal Type GetColumnType(IColumn column)
             {
-                if (column is FieldValue)
-                {
-                    var type = ((Field)column).FieldType;
-                    return column.Nullable ? type.Nullify() : type.UnNullify();
-                }
-
-                if (column is FieldEmbedded.EmbeddedHasValueColumn)
-                    return typeof(bool);
-
-                return column.Nullable ? typeof(int?) : typeof(int);
+                return column.Type;
             }
 
             internal Func<FieldReader, object> GetRowReader()
@@ -191,9 +183,27 @@ namespace Signum.Engine.Cache
 
             internal Func<object, T> GetGetter<T>(IColumn column)
             {
-                return Expression.Lambda<Func<object, T>>(
-                    TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column)), originObject).Compile();
+                var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
+
+                return Expression.Lambda<Func<object, T>>(access, originObject).Compile();
             }
+
+            internal Func<object, PrimaryKey> GetPrimaryKeyGetter(IColumn column)
+            {
+                var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
+
+                var ci = NewPrimaryKey(access);
+
+                return Expression.Lambda<Func<object, PrimaryKey>>(ci, originObject).Compile();
+            }
+
+            static ConstructorInfo ciPrimaryKey = ReflectionTools.GetConstuctorInfo(() => new PrimaryKey(1));
+
+            internal static Expression NewPrimaryKey(Expression expression)
+            {
+                return Expression.New(ciPrimaryKey, Expression.Convert(expression, typeof(IComparable)));
+            }
+        
 
             static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedTable =
              new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
@@ -260,13 +270,13 @@ namespace Signum.Engine.Cache
                         if (isLite)
                         {
                             var liteCreate = Expression.Call(miLiteCreate,
-                                SchemaGetType(typeId.UnNullify()),
-                                id.UnNullify(),
+                                SchemaGetType(NewPrimaryKey(typeId.UnNullify())),
+                                NewPrimaryKey(id.UnNullify()),
                                 Expression.Constant(null, typeof(string)));
 
                             var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
 
-                            return Expression.Condition(Expression.NotEqual(id, NullId), liteRequest, nullRef);
+                            return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(id), NullId), liteRequest, nullRef);
                         }
                         else
                         {
@@ -310,7 +320,7 @@ namespace Signum.Engine.Cache
 
                     cachedTable.subTables.Add(ctb);
 
-                    return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), GetTupleProperty(idColumn), retriever);
+                    return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
                 }
 
                 throw new InvalidOperationException("Unexpected {0}".Formato(field.GetType().Name));
@@ -328,7 +338,7 @@ namespace Signum.Engine.Cache
                         case CacheType.Cached:
                             {
                                 lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                                    Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string)), peModified));
+                                    Lite.NewExpression(type, NewPrimaryKey(id.UnNullify()), Expression.Constant(null, typeof(string)), peModified));
 
                                 break;
                             }
@@ -343,7 +353,7 @@ namespace Signum.Engine.Cache
 
                                 cachedTable.subTables.Add(ctb);
 
-                                lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify(), retriever);
+                                lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), NewPrimaryKey(id.UnNullify()), retriever);
 
                                 break;
                             }
@@ -359,7 +369,7 @@ namespace Signum.Engine.Cache
                 {
                     switch (CacheLogic.GetCacheType(type))
                     {
-                        case CacheType.Cached: return Expression.Call(retriever, miRequest.MakeGenericMethod(type), id.Nullify());
+                        case CacheType.Cached: return Expression.Call(retriever, miRequest.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()));
                         case CacheType.Semi:
                             {
                                 string lastPartialJoin = CreatePartialInnerJoin(column);
@@ -376,11 +386,19 @@ namespace Signum.Engine.Cache
                                     Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
                                     entity);
 
-                                return Expression.Call(retriever, miComplete.MakeGenericMethod(type), id.Nullify(), lambda);
+                                return Expression.Call(retriever, miComplete.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()), lambda);
                             }
                         default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
                     }
                 }
+            }
+
+
+            static readonly MethodInfo miWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Wrap(1));
+
+            internal static Expression WrapPrimaryKey(Expression expression)
+            {
+                return Expression.Call(miWrap, Expression.Convert(expression, typeof(IComparable)));
             }
 
             static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<Entity>(null)).GetGenericMethodDefinition();
@@ -399,7 +417,7 @@ namespace Signum.Engine.Cache
 
             public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
 
-            public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<int, string>(1, ""));
+            public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<PrimaryKey, string>(1, ""));
 
 
             public static Action<IRetriever, Modifiable> resetModifiedAction; 
@@ -415,7 +433,7 @@ namespace Signum.Engine.Cache
             }
 
 
-            static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
+            static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(new PrimaryKey(1)));
             MethodCallExpression SchemaGetType(Expression idtype)
             {
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, idtype);
@@ -530,7 +548,7 @@ namespace Signum.Engine.Cache
 
                 completer = completerExpression.Compile();
 
-                idGetter = ctr.GetGetter<PrimaryKey>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
+                idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
                 toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
             }
 
@@ -676,12 +694,12 @@ namespace Signum.Engine.Cache
                 instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
                 instructions.Add(Expression.Assign(result, ctr.MaterializeField(table.Field)));
 
-                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(int), typeof(int?)});
+                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
 
                 var order = table.Order == null ? Expression.Constant(null, typeof(int?)) : 
                      ctr.GetTupleProperty(table.Order).Nullify();
 
-                instructions.Add(Expression.New(ci, result, ctr.GetTupleProperty(table.PrimaryKey), order));
+                instructions.Add(Expression.New(ci, result, CachedTableConstructor.NewPrimaryKey(ctr.GetTupleProperty(table.PrimaryKey)), order));
 
                 var block = Expression.Block(typeof(MList<T>.RowIdValue), new[] { ctr.origin, result }, instructions);
 
@@ -689,8 +707,8 @@ namespace Signum.Engine.Cache
 
                 activator = activatorExpression.Compile();
 
-                parentIdGetter = ctr.GetGetter<PrimaryKey>(table.BackReference);
-                rowIdGetter = ctr.GetGetter<PrimaryKey>(table.PrimaryKey);
+                parentIdGetter = ctr.GetPrimaryKeyGetter(table.BackReference);
+                rowIdGetter = ctr.GetPrimaryKeyGetter(table.PrimaryKey);
             }
 
             relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
@@ -818,7 +836,7 @@ namespace Signum.Engine.Cache
                 ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
                 var kvpConstructor = Expression.New(CachedTableConstructor.ciKVPIntString,
-                    FieldReader.GetExpression(reader, 0, typeof(PrimaryKey)),
+                    CachedTableConstructor.NewPrimaryKey(FieldReader.GetExpression(reader, 0, this.table.PrimaryKey.Type)),
                     FieldReader.GetExpression(reader, 1, typeof(string)));
 
                 rowReader = Expression.Lambda<Func<FieldReader, KeyValuePair<PrimaryKey, string>>>(kvpConstructor, reader).Compile();

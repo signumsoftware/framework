@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false)]
     public class SystemEmailDN : Entity
     {
         [NotNullable, UniqueIndex]
