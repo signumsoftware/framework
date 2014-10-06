@@ -1233,7 +1233,7 @@ namespace Signum.Engine.Linq
                                         if (pi != null)
                                         {
                                             if (pi.Name == "Id")
-                                                return GetId(liteRef.Reference).UnNullify();
+                                                return BindMemberAccess(Expression.Property(liteRef.Reference, "Id"));
                                             if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                                                 return liteRef.Reference;
                                         }
@@ -2896,11 +2896,11 @@ namespace Signum.Engine.Linq
         {
             if (colExpression is ImplementedByAllExpression)
                 return new ImplementedByAllExpression(colExpression.Type,
-                    ee.ExternalId,
+                    new SqlCastExpression(typeof(string), ee.ExternalId.Value),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(
-                        Expression.Condition(Expression.Equal(ee.ExternalId.Value.Nullify(), QueryBinder.NullId(ee.ExternalId.ValueType)),
-                        QueryBinder.NullId(PrimaryKey.Type(typeof(TypeDN)).Nullify()),
-                        QueryBinder.TypeConstant(ee.Type)))));
+                        Expression.Condition(Expression.Equal(ee.ExternalId.Value.Nullify(), new SqlConstantExpression(null, ee.ExternalId.ValueType.Nullify())),
+                        new SqlConstantExpression(null, PrimaryKey.Type(typeof(TypeDN)).Nullify()),
+                        QueryBinder.TypeConstant(ee.Type).Nullify()))));
 
             if (colExpression is ImplementedByExpression)
             {
