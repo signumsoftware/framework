@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class WindowProxy : IDisposable
+    public class WindowProxy : IDisposableException
     {
         public AutomationElement Element { get; private set; }
 
