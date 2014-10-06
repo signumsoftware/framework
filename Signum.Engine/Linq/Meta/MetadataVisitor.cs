@@ -394,18 +394,15 @@ namespace Signum.Engine.Linq
                 if (type.IsInstantiationOf(typeof(MListElement<,>)))
                 {
                     var parentType = type.GetGenericArguments()[0];
-                    PropertyRoute parent = PropertyRoute.Root(parentType);
-
+                
                     ISignumTable st = (ISignumTable)c.Value;
-                    var rt = (TableMList)st.Table;
+                    TableMList rt = (TableMList)st.Table;
 
-                    Table table = rt.BackReference.ReferenceTable;
-                    FieldInfo fieldInfo = table.Fields.Values.Single(f => f.Field is FieldMList && ((FieldMList)f.Field).TableMList == rt).FieldInfo;
 
-                    PropertyRoute element = parent.Add(fieldInfo).Add("Item");
+                    PropertyRoute element = rt.Route.Add("Item");
 
                     return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), parent), 
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.Route.RootType)), 
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }

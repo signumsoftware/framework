@@ -89,6 +89,8 @@ namespace Signum.Engine.Maps
             if (Mixins != null)
                 columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, tableName), tableName);
 
+            SetFullMListGetter();
+
             Columns = columns;
 
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
@@ -208,14 +210,25 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<TableMList> TablesMList()
         {
-            var tables = Fields.Values.SelectMany(a => a.Field.TablesMList(a.Getter)).ToList();
+            return this.AllFields().SelectMany(f => f.Field.TablesMList()); 
+        }
 
-            if (Mixins != null)
-                tables.AddRange(from m in Mixins.Values
-                                from rt in m.TablesMList(m.Getter)
-                                select rt);
+        public void SetFullMListGetter()
+        {
+            var root = PropertyRoute.Root(this.Type);
 
-            return tables; 
+            foreach (var field in this.Fields.Values)
+            {
+                field.Field.SetFullMListGetter(root.Add(field.FieldInfo), field.Getter);
+            }
+
+            if (this.Mixins != null)
+            {
+                foreach (var kvp in this.Mixins)
+                {
+                    kvp.Value.SetFullMListGetter(root.Add(kvp.Key), kvp.Value.Getter);
+                }
+            }
         }
 
         /// <summary>
@@ -246,6 +259,13 @@ namespace Signum.Engine.Maps
         IColumn ITable.PrimaryKey
         {
             get { return PrimaryKey; }
+        }
+
+        internal IEnumerable<EntityField> AllFields()
+        {
+            return this.Fields.Values.Concat(
+                this.Mixins == null ? Enumerable.Empty<EntityField>() :
+                this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
         }
     }
 
@@ -307,7 +327,8 @@ namespace Signum.Engine.Maps
 
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
-        internal abstract IEnumerable<TableMList> TablesMList(Func<Entity, object> getter); 
+        internal abstract IEnumerable<TableMList> TablesMList();
+        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter); 
     }
 
     public static class FieldExtensions
@@ -412,9 +433,13 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -458,9 +483,14 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            
         }
 
         public Type Type
@@ -564,17 +594,27 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList(obj =>
+            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList()); 
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            foreach (var item in EmbeddedFields.Values)
             {
-                var embedded = getter(obj);
+                item.Field.SetFullMListGetter(route.Add(item.FieldInfo), entity =>
+                {
+                    var embedded = getter(entity);
 
-                if (embedded == null)
-                    return null;
 
-                return e.Getter(embedded);
-            })); 
+                    if (embedded == null)
+                        return null;
+
+                    return item.Getter(embedded);
+                }); 
+            }
+
         }
     }
 
@@ -643,14 +683,23 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            return Fields.Values.SelectMany(e => e.Field.TablesMList(ident => e.Getter(getter(ident))));
+            return Fields.Values.SelectMany(e => e.Field.TablesMList());
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            foreach (var field in Fields.Values)
+            {
+                field.Field.SetFullMListGetter(route.Add(field.FieldInfo), entity => field.Getter(getter(entity)));
+            }
         }
 
         internal MixinEntity Getter(Entity ident)
         {
-            return ((Entity)ident).Mixins.Single(mo => mo.GetType() == FieldType);
+            return ((Entity)ident).GetMixin(FieldType);
         }
     }
 
@@ -723,9 +772,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -755,9 +808,13 @@ namespace Signum.Engine.Maps
             });
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -811,9 +868,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -861,9 +922,13 @@ namespace Signum.Engine.Maps
             return base.GenerateIndexes(table);
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -950,11 +1015,15 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<Entity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            TableMList.FullGetter = getter;
-
             return new[] { TableMList };
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            TableMList.Route = route;
+            TableMList.FullGetter = getter;
         }
     }
 
@@ -990,6 +1059,7 @@ namespace Signum.Engine.Maps
         public Func<IList> Constructor { get; private set; }
 
         public Func<Entity, object> FullGetter { get; internal set; }
+        public PropertyRoute Route { get; internal set; }
 
         public TableMList(Type collectionType)
         {

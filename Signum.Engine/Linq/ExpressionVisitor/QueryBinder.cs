@@ -1718,11 +1718,10 @@ namespace Signum.Engine.Linq
                 EntityExpression ee = (EntityExpression)pr.Projector;
                 Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.Name));
 
-                commands.AddRange(ee.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
+                commands.AddRange(ee.Table.TablesMList().Select(t =>
                 {
-                    Expression backId = f.TableMList.BackColumnExpression(aliasGenerator.Table(f.TableMList.Name));
-                    return new DeleteExpression(f.TableMList, pr.Select,
-                        SmartEqualizer.EqualNullable(backId, ee.ExternalId));
+                    Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.Name));
+                    return new DeleteExpression(t, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
 
                 commands.Add(new DeleteExpression(ee.Table, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId)));
