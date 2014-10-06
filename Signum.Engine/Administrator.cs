@@ -536,7 +536,7 @@ namespace Signum.Engine
         {
             DataTable dt = new DataTable();
             foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type));
+                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
             foreach (var e in entities)
             {
@@ -561,7 +561,7 @@ namespace Signum.Engine
             DataTable dt = new DataTable();
             var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
             foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type));
+                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
             foreach (var e in entities)
             {
