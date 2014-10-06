@@ -182,7 +182,7 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DateTime limite)
         {
-            Database.Query<ScheduledTaskLogDN>().Where(a => a.StartTime < limite).UnsafeDelete();
+            Database.Query<ScheduledTaskLogDN>().Where(a => a.StartTime < limite).UnsafeDeleteChunks();
         }
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
