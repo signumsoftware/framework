@@ -63,20 +63,18 @@ namespace Signum.Entities
             {
             }
 
-            public LiteImp(PrimaryKey id, string toStr)
+            public LiteImp(PrimaryKey id, string toStr) : this(id, toStr, ModifiedState.Clean)
             {
-                if (typeof(T).IsAbstract)
-                    throw new InvalidOperationException(typeof(T).Name + " is abstract");
-
-                this.id = id;
-                this.toStr = toStr;
-                this.Modified = ModifiedState.Clean;
             }
 
             public LiteImp(PrimaryKey id, string toStr, ModifiedState modified)
             {
                 if (typeof(T).IsAbstract)
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+                if (PrimaryKey.Type(typeof(T)) != id.Object.GetType())
+                    throw new InvalidOperationException(typeof(T).TypeName() + " requires ids of type "
+                        + PrimaryKey.Type(typeof(T)).TypeName() + ", not " + id.Object.GetType().TypeName());
 
                 this.id = id;
                 this.toStr = toStr;
