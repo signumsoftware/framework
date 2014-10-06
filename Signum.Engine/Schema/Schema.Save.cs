@@ -362,7 +362,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        private bool SetToStrField(IdentifiableEntity entity)
+        internal bool SetToStrField(IdentifiableEntity entity)
         {
             var toStrColumn = ToStrColumn;
             if (toStrColumn != null)

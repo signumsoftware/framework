@@ -795,7 +795,35 @@ namespace Signum.Engine
                     return tr.Commit(rows);
                 }
             }
-        } 
+        }
+
+        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000)
+         where T : IdentifiableEntity
+        {
+            int total = 0;
+            int num;
+            do
+            {
+                num = query.Take(chunkSize).UnsafeDelete();
+                total += num;
+            } while (num == chunkSize);
+
+            return num;
+        }
+
+        public static int UnsafeDeleteMListChunks<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, int chunkSize = 10000)
+            where E : IdentifiableEntity
+        {
+            int total = 0;
+            int num;
+            do
+            {
+                num = mlistQuery.Take(chunkSize).UnsafeDeleteMList();
+                total += num;
+            } while (num == chunkSize);
+
+            return num;
+        }
         #endregion
 
         #region UnsafeUpdate

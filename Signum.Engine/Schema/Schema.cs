@@ -199,6 +199,16 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
+        internal void OnPreBulkInsert(Type type)
+        {
+            AssertAllowed(type);
+
+            var ee = entityEvents.TryGetC(type);
+
+            if (ee != null)
+                ee.OnPreBulkInsert();
+        }
+
         public ICacheController CacheController(Type type)
         {
             IEntityEvents ee = entityEvents.TryGetC(type);

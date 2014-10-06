@@ -160,14 +160,14 @@ namespace Signum.Engine.Basics
                                 select new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
                                    .Formato(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
 
-                foreach (var c in commands)
+                foreach (var c in commands) 
                 {
                     c.ExecuteNonQuery();
                 }
 
                 int deletedExceptions = Database.Query<ExceptionDN>()
                     .Where(a => !a.Referenced && a.CreationDate < limitDate)
-                    .UnsafeDelete(); 
+                    .UnsafeDeleteChunks(); 
             }
         }
     }
