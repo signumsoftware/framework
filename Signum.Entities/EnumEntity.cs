@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Reflection; 
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false), PrimaryKey(typeof(int), Identity=false)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false), TicksField(false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
-        where T: struct
+        where T : struct
     {
         public EnumEntity()
         {
@@ -39,7 +40,7 @@ namespace Signum.Entities
 
         public bool Equals(EnumEntity<T> other)
         {
-            return EqualityComparer<T>.Default.Equals(ToEnum(), other.ToEnum()); 
+            return EqualityComparer<T>.Default.Equals(ToEnum(), other.ToEnum());
         }
 
         public static implicit operator EnumEntity<T>(T enumerable)
@@ -57,7 +58,7 @@ namespace Signum.Entities
     {
         public static Entity FromEnum(Enum value)
         {
-            if(value == null) return null; 
+            if (value == null) return null;
 
             Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()));
             ident.Id = new PrimaryKey(Convert.ToInt32(value));
@@ -86,7 +87,7 @@ namespace Signum.Entities
 
         public static IEnumerable<Enum> GetValues(Type enumType)
         {
-            return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key); 
+            return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key);
         }
 
         public static IEnumerable<Entity> GetEntities(Type enumType)
