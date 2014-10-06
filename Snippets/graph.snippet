@@ -39,7 +39,7 @@
 
             new Execute($entityName$Operation.Save)
             {
-                FromStates = new[] { $entityName$State.New },
+                FromStates = { $entityName$State.New },
                 ToState = $entityName$State.Saved,
                 AllowsNew = true,
                 Lite = false,
