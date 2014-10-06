@@ -64,7 +64,7 @@ namespace Signum.Entities.Processes
     }
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksField(false)]
     public class PackageLineDN : Entity, IProcessLineDataDN
     {
         [NotNullable]
