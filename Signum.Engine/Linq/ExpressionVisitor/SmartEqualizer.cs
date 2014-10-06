@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
+using System.Reflection;
 
 namespace Signum.Engine.Linq
 {
@@ -126,11 +127,58 @@ namespace Signum.Engine.Linq
                 var left = UnwrapPrimaryKey(b.Left);
                 var right = UnwrapPrimaryKey(b.Right);
 
-                return Expression.MakeBinary(b.NodeType, left.Nullify(), right.Nullify());
+
+                if (left.Type.UnNullify() == typeof(Guid))
+                {
+                    return Expression.MakeBinary(b.NodeType, left.Nullify(), right.Nullify(), true, GuidComparer.GetMethod(b.NodeType));
+                }
+                else
+                {
+                    return Expression.MakeBinary(b.NodeType, left.Nullify(), right.Nullify());
+                }
             }
 
             return b;
         }
+
+        static class GuidComparer
+        {
+            static bool GreaterThan(Guid a, Guid b)
+            {
+                return a.CompareTo(b) > 0;
+            }
+
+            static bool GreaterThanOrEqual(Guid a, Guid b)
+            {
+                return a.CompareTo(b) >= 0;
+            }
+
+            static bool LessThan(Guid a, Guid b)
+            {
+                return a.CompareTo(b) < 0;
+            }
+
+            static bool LessThanOrEqual(Guid a, Guid b)
+            {
+                return a.CompareTo(b) <= 0;
+            }
+
+            public static MethodInfo GetMethod(ExpressionType type)
+            {
+                switch (type)
+                {
+                    case ExpressionType.GreaterThan: return ReflectionTools.GetMethodInfo(() => GreaterThan(Guid.Empty, Guid.Empty));
+                    case ExpressionType.GreaterThanOrEqual: return ReflectionTools.GetMethodInfo(() => GreaterThanOrEqual(Guid.Empty, Guid.Empty));
+                    case ExpressionType.LessThan: return ReflectionTools.GetMethodInfo(() => LessThan(Guid.Empty, Guid.Empty));
+                    case ExpressionType.LessThanOrEqual: return ReflectionTools.GetMethodInfo(() => LessThanOrEqual(Guid.Empty, Guid.Empty));
+                    case ExpressionType.Equal: return null;
+                    case ExpressionType.NotEqual: return null;
+                    default: throw new InvalidOperationException("GuidComparer.GetMethod unexpected ExpressionType " + type);
+                }
+            }
+        }
+
+        
 
         public static Expression UnwrapPrimaryKey(Expression unary)
         {
