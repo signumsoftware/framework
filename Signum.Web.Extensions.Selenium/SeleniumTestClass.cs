@@ -91,7 +91,7 @@ namespace Signum.Web.Selenium
         {
             if (queryName is Type)
             {
-                return TypeLogic.TryGetCleanName((Type)queryName) ?? ((Type)queryName).Name;
+                return TypeLogic.TryGetCleanName((Type)queryName) ?? Reflector.CleanTypeName((Type)queryName);
             }
 
             return queryName.ToString();
