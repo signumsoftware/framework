@@ -165,9 +165,18 @@ namespace Signum.Engine.DynamicQuery
             {
                 return processedType ?? 
                     (processedType = (Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
-                    Type.UnNullify() == typeof(PrimaryKey) ? propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).SingleEx().Nullify() :
+                    Type.UnNullify() == typeof(PrimaryKey) ? UnwrapFromPropertRoutes().Nullify() :
                     Type.Nullify())); 
             }
+        }
+
+        private Type UnwrapFromPropertRoutes()
+        { 
+            if(propertyRoutes.IsNullOrEmpty())
+                throw new InvalidOperationException("Impossible to determine the underlying type of the PropertyKey of column {0} if PropertyRoutes is not set"
+                    .Formato(this.Name));
+
+            return propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).Distinct().SingleEx();
         }
 
         public ColumnDescription BuildColumnDescription()

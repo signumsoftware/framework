@@ -24,14 +24,7 @@ namespace Signum.Engine.DynamicQuery
             this.Execute = execute;
 
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-              .Select((e, i) =>
-              {
-                  if (e.MemberInfo.ReturningType().IsIEntity())
-                      throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, for Manual queries use a Lite instead".Formato(e.MemberInfo.Name));
-
-                  return new ColumnDescriptionFactory(i, e.MemberInfo, null);
-              })
-            .ToArray();
+              .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, null)).ToArray();
         }
 
 

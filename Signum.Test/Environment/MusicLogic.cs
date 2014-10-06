@@ -141,28 +141,30 @@ namespace Signum.Test.Environment
                         var one = (from a in Database.Query<ArtistDN>()
                                    select new
                                    {
-                                       Entity = a.ToLite<IAuthorDN>(),
+                                       Entity = (IAuthorDN)a,
                                        a.Id,
                                        Type = "Artist",
                                        a.Name,
                                        Lonely = a.Lonely(),
-                                       LastAward = a.LastAward.ToLite()
+                                       LastAward = a.LastAward
                                    }).ToDQueryable(descriptions).AllQueryOperations(request);
 
                         var two = (from a in Database.Query<BandDN>()
                                    select new
                                    {
-                                       Entity = a.ToLite<IAuthorDN>(),
+                                       Entity = (IAuthorDN)a,
                                        a.Id,
                                        Type = "Band",
                                        a.Name,
                                        Lonely = a.Lonely(),
-                                       LastAward = a.LastAward.ToLite()
+                                       LastAward = a.LastAward
                                    }).ToDQueryable(descriptions).AllQueryOperations(request);
 
                         return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
-                    }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
+                    })
+                    .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
+                    .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistDN a)=>a.Id), PropertyRoute.Construct((BandDN a)=>a.Id)),
                     entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
 
                 Validator.PropertyValidator((NoteWithDateDN n) => n.Text)

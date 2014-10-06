@@ -426,7 +426,9 @@ namespace Signum.Entities.DynamicQuery
         {
             if (expression.Type.UnNullify() == typeof(PrimaryKey))
             {
-                return Expression.Convert(Expression.Field(expression.UnNullify(), "Object"), routes.Select(r => PrimaryKey.Type(r.RootType)).SingleEx().Nullify());
+                var unwrappedType = routes.Select(r => PrimaryKey.Type(r.RootType)).Distinct().SingleEx();
+
+                return Expression.Convert(Expression.Field(expression.UnNullify(), "Object"), unwrappedType.Nullify());
             }
 
             return expression;
@@ -436,7 +438,7 @@ namespace Signum.Entities.DynamicQuery
         {
             if (type.UnNullify() == typeof(PrimaryKey))
             {
-                return routes.Select(r => PrimaryKey.Type(r.RootType)).SingleEx().Nullify();
+                return routes.Select(r => PrimaryKey.Type(r.RootType)).Distinct().SingleEx().Nullify();
             }
 
             return type;
