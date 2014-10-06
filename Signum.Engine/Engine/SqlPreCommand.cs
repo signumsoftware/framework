@@ -47,8 +47,6 @@ namespace Signum.Engine
 
         protected internal abstract void PlainSql(StringBuilder sb);
 
-        public abstract SqlPreCommandSimple ToSimple();
-
         public override string ToString()
         {
             return this.PlainSql();
@@ -78,6 +76,24 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
 
+        public static SqlPreCommandSimple ToSimple(this SqlPreCommand command)
+        {
+            if (command == null)
+                return null;
+
+            if (command is SqlPreCommandSimple)
+                return (SqlPreCommandSimple)command;
+
+
+            var c = (SqlPreCommandConcat)command;
+            StringBuilder sb = new StringBuilder();
+            c.GenerateScript(sb);
+
+            List<DbParameter> parameters = new List<DbParameter>();
+            c.GenerateParameters(parameters);
+
+            return new SqlPreCommandSimple(sb.ToString(), parameters);
+        }
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
@@ -155,11 +171,6 @@ namespace Signum.Engine
         {
             if (Parameters != null)
                 list.AddRange(Parameters);
-        }
-
-        public override SqlPreCommandSimple ToSimple()
-        {
-            return this;
         }
 
         protected internal override int NumParameters
@@ -281,17 +292,6 @@ namespace Signum.Engine
         {
             foreach (SqlPreCommand com in Commands)
                 com.GenerateParameters(list);
-        }
-
-        public override SqlPreCommandSimple ToSimple()
-        {
-            StringBuilder sb = new StringBuilder();
-            GenerateScript(sb);
-
-            List<DbParameter> parameters = new List<DbParameter>();
-            GenerateParameters(parameters);
-
-            return new SqlPreCommandSimple(sb.ToString(), parameters);
         }
 
         static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
