@@ -42,7 +42,7 @@ namespace Signum.Engine.Authorization
 
         public static void ExceptionLogic_DeleteLogs(DateTime limite)
         {
-            Database.Query<SessionLogDN>().Where(a => a.SessionStart < limite).UnsafeDelete();
+            Database.Query<SessionLogDN>().Where(a => a.SessionStart < limite).UnsafeDeleteChunks();
         }
 
         static bool RoleTracked(Lite<RoleDN> role)

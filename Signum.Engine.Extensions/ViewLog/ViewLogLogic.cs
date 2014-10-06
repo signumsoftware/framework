@@ -79,7 +79,7 @@ namespace Signum.Engine.ViewLog
 
         static void ExceptionLogic_DeleteLogs(DateTime limit)
         {
-            Database.Query<ViewLogDN>().Where(view => view.StartDate < limit);
+            Database.Query<ViewLogDN>().Where(view => view.StartDate < limit).UnsafeDeleteChunks();
         }
 
         public static IDisposable LogView(Lite<IIdentifiable> entity, string viewAction)

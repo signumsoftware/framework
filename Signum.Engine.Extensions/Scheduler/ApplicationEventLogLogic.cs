@@ -45,7 +45,7 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DateTime limite)
         {
-            Database.Query<ApplicationEventLogDN>().Where(a => a.Date < limite).UnsafeDelete();
+            Database.Query<ApplicationEventLogDN>().Where(a => a.Date < limite).UnsafeDeleteChunks();
         }
 
         public static void ApplicationStart()
