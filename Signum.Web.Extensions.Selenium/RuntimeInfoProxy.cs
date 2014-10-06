@@ -12,7 +12,7 @@ namespace Signum.Web.Selenium
     public class RuntimeInfoProxy
     {
         public bool IsNew { get; private set; }
-        public int? IdOrNull { get; private set; }
+        public PrimaryKey? IdOrNull { get; private set; }
         public Type EntityType { get; private set; }
         public long? Ticks { get; private set; }
 
@@ -24,10 +24,12 @@ namespace Signum.Web.Selenium
 
             string entityTypeString = parts[0];
 
+            Type type = string.IsNullOrEmpty(entityTypeString) ? null : TypeLogic.GetType(entityTypeString);
+
             return new RuntimeInfoProxy
             {
-                EntityType = string.IsNullOrEmpty(entityTypeString) ? null : TypeLogic.GetType(entityTypeString),
-                IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
+                EntityType = type,
+                IdOrNull = (parts[1].HasText()) ? PrimaryKey.Parse(parts[1], type) : (PrimaryKey?)null,
                 IsNew = parts[2] == "n",
                 Ticks = parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
             };
