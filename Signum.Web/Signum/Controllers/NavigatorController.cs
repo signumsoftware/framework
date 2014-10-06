@@ -46,7 +46,7 @@ namespace Signum.Web.Controllers
             Type type = Navigator.ResolveType(webTypeName);
 
             if (!type.IsEntity())
-                throw new InvalidOperationException("Only classes that inherit from IdentifiableEntity can be created using this Action"); 
+                throw new InvalidOperationException("Only classes that inherit from Entity can be created using this Action"); 
 
             var entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
 

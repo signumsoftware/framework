@@ -192,7 +192,7 @@ namespace Signum.Engine.Maps
                     throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
                 if (!Reflector.IsEntity(type))
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".Formato(type));
 
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
