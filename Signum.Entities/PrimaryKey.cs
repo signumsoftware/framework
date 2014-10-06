@@ -230,6 +230,11 @@ namespace Signum.Entities
 
             return id.Value.Object;
         }
+
+        public string ToString(string format)
+        {
+            return ((IFormattable)this.Object).ToString(format, CultureInfo.CurrentCulture);
+        }
     }
 
     class PrimaryKeyTypeConverter : TypeConverter
