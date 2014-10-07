@@ -269,10 +269,10 @@ namespace Signum.Engine.Cache
 
                         if (isLite)
                         {
-                            var liteCreate = Expression.Call(miLiteCreate,
-                                SchemaGetType(NewPrimaryKey(typeId.UnNullify())),
-                                NewPrimaryKey(id.UnNullify()),
-                                Expression.Constant(null, typeof(string)));
+                            var liteCreate = Expression.Call(miGetIBALite.MakeGenericMethod(field.FieldType.CleanType()),
+                                Expression.Constant(Schema.Current),
+                                NewPrimaryKey(typeId.UnNullify()),
+                                id.UnNullify());
 
                             var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
 
@@ -412,8 +412,14 @@ namespace Signum.Engine.Cache
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
             static MemberExpression retrieverModifiedState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
 
-                
-            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
+
+            static MethodInfo miGetIBALite = ReflectionTools.GetMethodInfo((Schema s) => GetIBALite<Entity>(null, 1, "")).GetGenericMethodDefinition();
+            public static Lite<T> GetIBALite<T>(Schema schema, PrimaryKey typeId, string id) where T : Entity
+            {
+                Type type = schema.GetType(typeId);
+
+                return (Lite<T>)Lite.Create(type, PrimaryKey.Parse(id, type));
+            }
 
             public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
 
@@ -433,12 +439,7 @@ namespace Signum.Engine.Cache
             }
 
 
-            static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(new PrimaryKey(1)));
-            MethodCallExpression SchemaGetType(Expression idtype)
-            {
-                return Expression.Call(Expression.Constant(Schema.Current), miGetType, idtype);
-            }
-
+          
 
             static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
             Expression GetMixin(ParameterExpression me, Type mixinType)

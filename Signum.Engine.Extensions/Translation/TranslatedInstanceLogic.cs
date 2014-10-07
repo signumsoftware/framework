@@ -52,11 +52,26 @@ namespace Signum.Engine.Translation
                         e.OriginalText,
                     });
 
-                LocalizationCache = sb.GlobalLazy(() => Database.Query<TranslatedInstanceDN>()
+                LocalizationCache = sb.GlobalLazy(() =>
+                    Database.Query<TranslatedInstanceDN>()
+                    .ToList()
                     .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
-                    gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance,
-                          a.RowId.HasText() ? PrimaryKey.Parse(a.RowId, a.Instance.GetType()) : (PrimaryKey?)null))),
-                    new InvalidateWith(typeof(TranslatedInstanceDN)));
+                    gr2 => gr2.GroupBy(a => a.PropertyRoute)
+                        .SelectMany(gr =>
+                        {
+                            PropertyRoute pr = gr.Key.ToPropertyRoute();
+
+                            PropertyRoute mListRoute = pr.GetMListItemsRoute();
+
+                            if (mListRoute == null)
+                                return gr.Select(ti => KVP.Create(new LocalizedInstanceKey(pr, ti.Instance, null), ti));
+
+                            Type type = ((FieldMList)Schema.Current.Field(mListRoute.Parent)).TableMList.PrimaryKey.Type;
+
+                            return gr.Select(ti => KVP.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId, type))), ti));
+
+                        }).ToDictionary())
+                        , new InvalidateWith(typeof(TranslatedInstanceDN)));
 
                 sb.Schema.Initializing += () =>
                 {

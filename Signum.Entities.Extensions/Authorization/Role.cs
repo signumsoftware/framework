@@ -93,7 +93,7 @@ namespace Signum.Entities.Authorization
         public static readonly DeleteSymbol<RoleDN> Delete = OperationSymbol.Delete<RoleDN>();
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksField(false)]
     public class LastAuthRulesImportDN : Entity
     {
         [UniqueIndex, FieldWithoutProperty]
