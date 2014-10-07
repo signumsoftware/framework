@@ -22,7 +22,7 @@ namespace Signum.Engine
     /// </summary>
     public class Transaction : IDisposable
     {
-        static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions");
+        static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions", avoidExportImport: true);
 
         bool commited;
         ICoreTransaction coreTransaction;
