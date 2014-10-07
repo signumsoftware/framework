@@ -436,7 +436,7 @@ namespace Signum.Engine.Maps
 
             PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
-            return new FieldPrimaryKey(route.Type, table)
+            return table.PrimaryKey = new FieldPrimaryKey(route.Type, table)
             {
                 Name = attr.Name,
                 Type = attr.Type,
