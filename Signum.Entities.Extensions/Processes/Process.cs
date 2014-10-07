@@ -29,7 +29,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional), TicksField(false)]
     public class ProcessDN : Entity
     {
         internal ProcessDN() { }

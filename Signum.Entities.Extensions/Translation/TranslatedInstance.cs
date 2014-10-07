@@ -37,7 +37,6 @@ namespace Signum.Entities.Translation
             get { return propertyRoute; }
             set { Set(ref propertyRoute, value); }
         }
-
         
         string rowId;
         public string RowId
