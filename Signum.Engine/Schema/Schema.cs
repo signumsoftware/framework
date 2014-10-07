@@ -67,14 +67,13 @@ namespace Signum.Engine.Maps
 
         public string IsAllowed(Type type)
         {
-            if (IsAllowedCallback != null)
-                foreach (Func<Type, string> f in IsAllowedCallback.GetInvocationList())
-                {
-                    string result = f(type);
+            foreach (var f in IsAllowedCallback.GetInvocationListTyped())
+            {
+                string result = f(type);
 
-                    if (result != null)
-                        return result;
-                }
+                if (result != null)
+                    return result;
+            }
 
             return null;
         }
@@ -129,6 +128,19 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity);
         }
 
+
+        internal void OnSaved(IdentifiableEntity entity, SavedEventArgs args)
+        {
+            AssertAllowed(entity.GetType());
+
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnSaved(entity, args);
+
+            entityEventsGlobal.OnSaved(entity, args);
+        }
+
         internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
@@ -176,14 +188,16 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeUpdate(update);
         }
 
-        internal void OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
+        internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             AssertAllowed(type);
 
             var ee = entityEvents.TryGetC(type);
 
-            if (ee != null)
-                ee.OnPreUnsafeInsert(query, constructor, entityQuery);
+            if (ee == null)
+                return constructor;
+         
+            return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
         public ICacheController CacheController(Type type)
@@ -206,25 +220,104 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
+        internal FilterQueryResult<T> OnFilterQuery<T>()
             where T : IdentifiableEntity
         {
             AssertAllowed(typeof(T));
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
             if (ee == null)
-                return query;
+                return null;
 
-            return ee.OnFilterQuery(query);
+            FilterQueryResult<T> result = null;
+            foreach (var item in ee.OnFilterQuery())
+                result = CombineFilterResult(result, item);
+
+            return result;
         }
 
-        internal bool HasQueryFilter(Type type)
+        FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression) 
+            where T: IdentifiableEntity
         {
-            IEntityEvents ee = entityEvents.TryGetC(type);
-            if (ee == null)
-                return false;
+            if (result == null)
+                return expression;
 
-            return ee.HasQueryFilter;
+            if (expression == null)
+                return result;
+
+            if (result.InMemoryFunction == null || expression.InMemoryFunction == null)
+                return new FilterQueryResult<T>(a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a), null);
+
+            return new FilterQueryResult<T>(
+                a => result.InDatabaseExpresson.Evaluate(a) && expression.InDatabaseExpresson.Evaluate(a),
+                a => result.InMemoryFunction(a) && expression.InMemoryFunction(a));
+        }
+
+        public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
+            where T: IdentifiableEntity
+        {
+            using (userInterface ? ExecutionMode.UserInterface() : null)
+            {
+                EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+                if (ee == null)
+                    return a => true;
+
+                Func<T, bool> result = null;
+                foreach (var item in ee.OnFilterQuery().NotNull())
+                {
+                    if(item.InMemoryFunction == null)
+                        throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
+                        .Formato(item.InDatabaseExpresson.NiceToString()));
+
+                    result = CombineFunc(result, item.InMemoryFunction);
+                }
+
+                if (result == null)
+                    return a => true;
+
+                return result;
+            }
+        }
+
+        private Func<T, bool> CombineFunc<T>(Func<T, bool> result, Func<T, bool> func) where T : IdentifiableEntity
+        {
+            if (result == null)
+                return func;
+
+            if (func == null)
+                return result;
+
+            return a => result(a) && func(a);
+        }
+
+        public Expression<Func<T, bool>> GetInDatabaseFilter<T>()
+           where T : IdentifiableEntity
+        {
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            if (ee == null)
+                return null;
+
+            Expression<Func<T, bool>> result = null;
+            foreach (var item in ee.OnFilterQuery().NotNull())
+            {
+                result = CombineExpr(result, item.InDatabaseExpresson);
+            }
+
+            if (result == null)
+                return null;
+
+            return result;
+        }
+
+        private Expression<Func<T, bool>> CombineExpr<T>(Expression<Func<T, bool>> result, Expression<Func<T, bool>> func) where T : IdentifiableEntity
+        {
+            if (result == null)
+                return func;
+
+            if (func == null)
+                return result;
+
+            return a => result.Evaluate(a) && func.Evaluate(a);
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
@@ -233,13 +326,12 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
                 SqlPreCommand command = Synchronizing
-                    .GetInvocationList()
-                    .Cast<Func<Replacements, SqlPreCommand>>()
+                    .GetInvocationListTyped()
                     .Select(e =>
                     {
                         try
@@ -275,100 +367,37 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
                 return Generating
-                    .GetInvocationList()
-                    .Cast<Func<SqlPreCommand>>()
+                    .GetInvocationListTyped()
                     .Select(e => e())
                     .Combine(Spacing.Triple);
             }
         }
 
-        public class InitEventDictionary
-        {
-            Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
-            InitLevel? initLevel;
-
-            public Action this[InitLevel level]
-            {
-                get { return dict.TryGetC(level); }
-                set
-                {
-                    int current = dict.TryGetC(level).Try(d => d.GetInvocationList().Length) ?? 0;
-                    int @new = value.Try(d => d.GetInvocationList().Length) ?? 0;
-
-                    if (Math.Abs(current - @new) > 1)
-                        throw new InvalidOperationException("add or remove just one event handler each time");
-
-                    dict[level] = value;
-                }
-            }
-
-            public void InitializeUntil(InitLevel topLevel)
-            {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
-                {
-                    InitializeJust(current);
-                    initLevel = current;
-                }
-            }
-
-            void InitializeJust(InitLevel currentLevel)
-            {
-                using (HeavyProfiler.Log("InitializeJuts", () => currentLevel.ToString()))
-                {
-                    Action h = dict.TryGetC(currentLevel);
-                    if (h == null)
-                        return;
-
-                    var handlers = h.GetInvocationList().Cast<Action>();
-
-                    foreach (Action handler in handlers)
-                    {
-                        using (HeavyProfiler.Log("InitAction", () => "{0}.{1}".Formato(handler.Method.DeclaringType.TypeName(), handler.Method.MethodName())))
-                        {
-                            handler();
-                        }
-                    }
-                }
-            }
-
-            public override string ToString()
-            {
-                return dict.OrderBy(a => a.Key)
-                    .ToString(a => "{0} -> \r\n{1}".Formato(
-                        a.Key,
-                        a.Value.GetInvocationList().Select(h => h.Method).ToString(mi => "\t{0}.{1}".Formato(
-                            mi.DeclaringType.TypeName(),
-                            mi.MethodName()),
-                        "\r\n")
-                    ), "\r\n\r\n");
-            }
-        }
-
-        public InitEventDictionary Initializing = new InitEventDictionary();
+        public Action Initializing;
 
         public void Initialize()
         {
-            using (ExecutionMode.Global())
-                Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
-        }
+            if (Initializing == null)
+                return;
 
-        public void InitializeUntil(InitLevel level)
-        {
             using (ExecutionMode.Global())
-                Initializing.InitializeUntil(level);
-        }
+                foreach (var item in Initializing.GetInvocationListTyped())
+                    item();
 
+            Initializing = null;
+        }
 
         #endregion
 
         static Schema()
         {
             PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+            ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
         }
 
         internal Schema(SchemaSettings settings)
@@ -376,6 +405,7 @@ namespace Signum.Engine.Maps
             this.Settings = settings;
             this.Assets = new SchemaAssets();
 
+            Generating += SchemaGenerator.SnapshotIsolation;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -384,6 +414,7 @@ namespace Signum.Engine.Maps
 
             Synchronizing += SchemaSynchronizer.SnapshotIsolation;
             Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSystemDefaultConstraints;
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
@@ -576,19 +607,7 @@ namespace Signum.Engine.Maps
         public bool IsEnum { get; set; }
     }
 
-    internal interface IEntityEvents
-    {
-        void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
-        void OnSaving(IdentifiableEntity entity);
-        void OnRetrieved(IdentifiableEntity entity);
-
-        void OnPreUnsafeUpdate(IUpdateable update);
-        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
-
-        ICacheController CacheController { get; }
-
-        bool HasQueryFilter { get; }
-    }
+  
 
     public interface ICacheController
     {
@@ -600,6 +619,7 @@ namespace Signum.Engine.Maps
         void Complete(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
+        string TryGetToString(int id);
     }
 
     public class InvalidateEventArgs : EventArgs { }
@@ -621,380 +641,10 @@ namespace Signum.Engine.Maps
         public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(int id);
+        public abstract string TryGetToString(int id);
     }
 
-    public class EntityEvents<T> : IEntityEvents
-        where T : IdentifiableEntity
-    {
-        public event PreSavingEventHandler<T> PreSaving;
-        public event SavingEventHandler<T> Saving;
+    
 
-        public event RetrievedEventHandler<T> Retrieved;
 
-        public CacheControllerBase<T> CacheController { get; set; }
-
-        public event FilterQueryEventHandler<T> FilterQuery;
-
-        public event DeleteHandler<T> PreUnsafeDelete;
-        public event DeleteMlistHandler<T> PreUnsafeMListDelete;
-
-        public event UpdateHandler<T> PreUnsafeUpdate;
-
-        public event InsertHandler<T> PreUnsafeInsert;
-
-        internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
-        {
-            if (FilterQuery != null)
-                foreach (FilterQueryEventHandler<T> filter in FilterQuery.GetInvocationList())
-                    query = filter(query);
-
-            return query;
-        }
-
-        public bool HasQueryFilter
-        {
-            get { return FilterQuery != null; }
-        }
-
-        internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
-        {
-            if (PreUnsafeDelete != null)
-                foreach (DeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
-                    action(entityQuery);
-        }
-
-        internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
-        {
-            if (PreUnsafeMListDelete != null)
-                foreach (DeleteMlistHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
-                    action(mlistQuery, entityQuery);
-        }
-
-        void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
-        {
-            if (PreUnsafeUpdate != null)
-            {
-                var query = update.EntityQuery<T>();
-                foreach (UpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
-                    action(update, query);
-            }
-        }
-
-        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
-        {
-            if (PreUnsafeInsert != null)
-                foreach (InsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
-                    action(query, constructor, (IQueryable<T>)entityQuery);
-
-        }
-
-        void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
-        {
-            if (PreSaving != null)
-                PreSaving((T)entity, ref graphModified);
-        }
-
-        void IEntityEvents.OnSaving(IdentifiableEntity entity)
-        {
-            if (Saving != null)
-                Saving((T)entity);
-
-        }
-
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
-        {
-            if (Retrieved != null)
-                Retrieved((T)entity);
-        }
-
-        ICacheController IEntityEvents.CacheController
-        {
-            get { return CacheController; }
-        }
-    }
-
-    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
-
-    public delegate void DeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate void DeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
-    public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
-
-    public class SavedEventArgs
-    {
-        public bool IsRoot { get; set; }
-        public bool WasNew { get; set; }
-        public bool WasModified { get; set; }
-    }
-
-
-    public static class TableExtensions
-    {
-        internal static string UnScapeSql(this string name)
-        {
-            return name.Trim('[', ']');
-        }
-    }
-
-    public class ServerName : IEquatable<ServerName>
-    {
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Linked Servers: http://msdn.microsoft.com/en-us/library/ms188279.aspx
-        /// Not fully supported jet
-        /// </summary>
-        /// <param name="name"></param>
-        public ServerName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-        }
-
-        public override string ToString()
-        {
-            return Name.SqlEscape();
-        }
-
-        public bool Equals(ServerName other)
-        {
-            return other.Name == Name;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as ServerName;
-            return db != null && Equals(db);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        internal static ServerName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return new ServerName(name.UnScapeSql());
-        }
-    }
-
-    public class DatabaseName : IEquatable<DatabaseName>
-    {
-        public string Name { get; private set; }
-
-        public ServerName Server { get; private set; }
-
-        public DatabaseName(ServerName server, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.Server = server;
-        }
-
-        public override string ToString()
-        {
-            var result = Name.SqlEscape();
-
-            if (Server == null)
-                return result;
-
-            return Server.ToString() + "." + result;
-        }
-
-        public bool Equals(DatabaseName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Server, other.Server);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var db = obj as DatabaseName;
-            return db != null && Equals(db);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
-        }
-
-        internal static DatabaseName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return new DatabaseName(ServerName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-    }
-
-    public class SchemaName : IEquatable<SchemaName>
-    {
-        public string Name { get; private set; }
-
-        readonly DatabaseName database;
-
-        public DatabaseName Database
-        {
-            get
-            {
-                if (database == null || ObjectName.CurrentOptions.AvoidDatabaseName)
-                    return null;
-
-                return database;
-            }
-        }
-
-        public static readonly SchemaName Default = new SchemaName(null, "dbo");
-
-        public bool IsDefault()
-        {
-            return Name == "dbo" && Database == null;
-        }
-
-        public SchemaName(DatabaseName database, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.database = database;
-        }
-
-        public override string ToString()
-        {
-            var result = Name.SqlEscape();
-
-            if (Database == null)
-                return result;
-
-            return Database.ToString() + "." + result;
-        }
-
-        public bool Equals(SchemaName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Database, other.Database);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as SchemaName;
-            return sc != null && Equals(sc);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
-        }
-
-        internal static SchemaName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return SchemaName.Default;
-
-            return new SchemaName(DatabaseName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-
-    }
-
-    public class ObjectName : IEquatable<ObjectName>
-    {
-        public string Name { get; private set; }
-
-        public SchemaName Schema { get; private set; }
-
-        public ObjectName(SchemaName schema, string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            if (schema == null)
-                throw new ArgumentNullException("schema");
-
-            this.Name = name;
-            this.Schema = schema;
-        }
-
-        public override string ToString()
-        {
-            if (Schema == null || Schema.IsDefault())
-                return Name.SqlEscape();
-
-            return Schema.ToString() + "." + Name.SqlEscape();
-        }
-
-        public string ToStringDbo()
-        {
-            if (Schema == null)
-                return Name.SqlEscape();
-
-            return Schema.ToString() + "." + Name.SqlEscape();
-        }
-
-        public bool Equals(ObjectName other)
-        {
-            return other.Name == Name &&
-                object.Equals(Schema, other.Schema);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var sc = obj as ObjectName;
-            return sc != null && Equals(sc);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ (Schema == null ? 0 : Schema.GetHashCode());
-        }
-
-        internal static ObjectName Parse(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            return new ObjectName(SchemaName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
-        }
-
-        public ObjectName OnDatabase(DatabaseName databaseName)
-        {
-            return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
-        }
-
-        public ObjectName OnSchema(SchemaName schemaName)
-        {
-            return new ObjectName(schemaName, Name);
-        }
-
-        static readonly ThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");
-        public static IDisposable OverrideOptions(ObjectNameOptions options)
-        {
-            var old = optionsVariable.Value;
-            optionsVariable.Value = options;
-            return new Disposable(() => optionsVariable.Value = old);
-        }
-
-        public static ObjectNameOptions CurrentOptions
-        {
-            get { return optionsVariable.Value; }
-        }
-    }
-
-    public struct ObjectNameOptions
-    {
-        public bool IncludeDboSchema;
-        public DatabaseName OverrideDatabaseNameOnSystemQueries;
-        public bool AvoidDatabaseName;
-    }
 }

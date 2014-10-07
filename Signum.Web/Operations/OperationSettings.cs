@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web.Operations
@@ -20,22 +21,249 @@ namespace Signum.Web.Operations
     {
         public OperationSettings(IOperationSymbolContainer symbol)
         {
-            this.OperationSymbol = symbol.Operation; 
+            this.OperationSymbol = symbol.Symbol; 
         }
 
         public OperationSymbol OperationSymbol { get; private set; }
 
+        public abstract Type OverridenType { get; }
+
         public string Text { get; set; }
+
+        public override string ToString()
+        {
+            return "{0}({1})".Formato(this.GetType().TypeName(), OperationSymbol.Key);
+        }
     }
 
-    public class ConstructorSettings : OperationSettings
+    #region ConstructorOperation
+    public abstract class ConstructorOperationSettingsBase : OperationSettings
     {
-        public ConstructorSettings(IOperationSymbolContainer symbol)
-            : base(symbol)
+        public abstract bool HasIsVisible { get; }
+        public abstract bool OnIsVisible(IClientConstructorOperationContext ctx);
+
+        public abstract bool HasConstructor { get; }
+        public abstract IdentifiableEntity OnConstructor(IConstructorOperationContext ctx);
+
+        public abstract bool HasClientConstructor { get; }
+        public abstract JsFunction OnClientConstructor(IClientConstructorOperationContext ctx);
+
+        protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
+            : base(constructOperation)
+        {
+
+        }
+    }
+
+    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IIdentifiable
+    {
+        public Func<ClientConstructorOperationContext<T>, bool> IsVisible { get; set; }
+        public Func<ClientConstructorOperationContext<T>, JsFunction> ClientConstructor { get; set; }
+
+        public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
+
+        public ConstructorOperationSettings(ConstructSymbol<T>.Simple constructOperation)
+            : base(constructOperation)
         {
         }
 
-        public Func<OperationInfo, bool> IsVisible { get; set; }
+        public override bool HasIsVisible { get { return IsVisible != null; } }
+
+        public override bool OnIsVisible(IClientConstructorOperationContext ctx)
+        {
+            return IsVisible((ClientConstructorOperationContext<T>)ctx);
+        }
+
+        public override bool HasClientConstructor { get { return ClientConstructor != null; } }
+
+        public override JsFunction OnClientConstructor(IClientConstructorOperationContext ctx)
+        {
+            return ClientConstructor((ClientConstructorOperationContext<T>)ctx);
+        }
+
+        public override bool HasConstructor { get { return Constructor != null; } }
+
+        public override IdentifiableEntity OnConstructor(IConstructorOperationContext ctx)
+        {
+            return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
+        }
+
+     
+
+        public override Type OverridenType
+        {
+            get { return typeof(T); }
+        }
+    }
+
+    public interface IClientConstructorOperationContext
+    {
+        OperationInfo OperationInfo { get; }
+        ClientConstructorContext ClientConstructorContext { get; }
+        ConstructorOperationSettingsBase Settings { get; }
+    }
+
+    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IIdentifiable
+    {
+        public OperationInfo OperationInfo { get; private set; }
+        public ClientConstructorContext ClientConstructorContext { get; private set; }
+        public ConstructorOperationSettings<T> Settings { get; private set; }
+
+        public ClientConstructorOperationContext(OperationInfo info, ClientConstructorContext clientContext, ConstructorOperationSettings<T> settings)
+        {
+            this.OperationInfo = info;
+            this.ClientConstructorContext = clientContext;
+            this.Settings = settings;
+        }
+
+        ConstructorOperationSettingsBase IClientConstructorOperationContext.Settings
+        {
+            get { return Settings; }
+        }
+    }
+
+    public interface IConstructorOperationContext
+    {
+        OperationInfo OperationInfo { get; }
+        ConstructorContext ConstructorContext { get; }
+        ConstructorOperationSettingsBase Settings { get; }
+    }
+
+    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IIdentifiable
+    {
+        public OperationInfo OperationInfo { get; private set; }
+        public ConstructorContext ConstructorContext { get; private set; }
+        public ConstructorOperationSettings<T> Settings { get; private set; }
+
+        public ConstructorOperationContext(OperationInfo info, ConstructorContext context, ConstructorOperationSettings<T> settings)
+        {
+            this.OperationInfo = info;
+            this.ConstructorContext = context;
+            this.Settings = settings;
+        }
+
+        ConstructorOperationSettingsBase IConstructorOperationContext.Settings
+        {
+            get { return Settings; }
+        }
+    }
+    #endregion
+
+    public abstract class ContextualOperationSettingsBase : OperationSettings
+    {
+        public double Order { get; set; }
+
+        public abstract bool HasClick { get; }
+        public abstract JsFunction OnClick(IContextualOperationContext ctx);
+
+        public abstract bool HasIsVisible { get; }
+        public abstract bool OnIsVisible(IContextualOperationContext ctx);
+
+        protected ContextualOperationSettingsBase(IOperationSymbolContainer constructOperation)
+            : base(constructOperation)
+        {
+        }
+    }
+
+    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IIdentifiable
+    {
+        public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
+        {
+        }
+
+
+        internal ContextualOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
+        {
+        }
+
+        public Func<ContextualOperationContext<T>, bool> IsVisible { get; set; }
+        public Func<ContextualOperationContext<T>, string> ConfirmMessage { get; set; }
+        public Func<ContextualOperationContext<T>, JsFunction> Click { get; set; }
+
+        public override bool HasIsVisible
+        {
+            get { return IsVisible != null; }
+        }
+
+        public override bool OnIsVisible(IContextualOperationContext ctx)
+        {
+            return IsVisible((ContextualOperationContext<T>)ctx);
+        }
+
+        public override bool HasClick
+        {
+            get { return Click != null; }
+        }
+
+        public override JsFunction OnClick(IContextualOperationContext ctx)
+        {
+            return Click((ContextualOperationContext<T>)ctx);
+        }
+
+        public override Type OverridenType
+        {
+            get { return typeof(T); }
+        }
+    }
+
+    public interface IContextualOperationContext
+    {
+        OperationInfo OperationInfo { get; }
+        string CanExecute { get; set; }
+        ContextualOperationSettingsBase OperationSettings { get; }
+        SelectedItemsMenuContext Context { get; }
+
+        Type Type { get; }
+
+        JsOperationOptions Options();
+    }
+
+    public class ContextualOperationContext<T> : IContextualOperationContext 
+        where T : class, IIdentifiable
+    {
+
+        public List<Lite<T>> Entities { get; private set; }
+        public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
+
+        public OperationInfo OperationInfo { get; private set; }
+        public ContextualOperationSettings<T> OperationSettings { get; set; }
+
+        public SelectedItemsMenuContext Context { get; private set; }
+        public string Prefix { get { return Context.Prefix; } }    
+        public UrlHelper Url { get { return Context.Url; } }
+        public object QueryName { get { return Context.QueryName; } }
+
+        public string CanExecute { get; set; }
+
+        public ContextualOperationContext(SelectedItemsMenuContext ctx, OperationInfo info, ContextualOperationSettings<T> settings)
+        {
+            this.Context = ctx;
+            this.OperationInfo = info;
+            this.OperationSettings = settings;
+            this.Entities = Context.Lites.Cast<Lite<T>>().ToList();
+        }
+
+        public JsOperationOptions Options()
+        {
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
+
+            result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
+
+            return result;
+        }
+
+        ContextualOperationSettingsBase IContextualOperationContext.OperationSettings
+        {
+            get { return OperationSettings; }
+        }
+
+        public Type Type
+        {
+            get { return typeof(T); }
+        }
     }
 
     public class EntityOperationGroup
@@ -55,17 +283,39 @@ namespace Signum.Web.Operations
         public double Order = 100;
     }
 
-    public class EntityOperationSettings : OperationSettings
+    public abstract class EntityOperationSettingsBase : OperationSettings
     {
-        public ContextualOperationSettings ContextualFromMany { get; private set; }
-        public ContextualOperationSettings Contextual { get; private set; }
         public double Order { get; set; }
 
-        public EntityOperationSettings(IOperationSymbolContainer symbol)
+        public abstract ContextualOperationSettingsBase ContextualUntyped { get; }
+        public abstract ContextualOperationSettingsBase ContextualFromManyUntyped { get; }
+       
+        public EntityOperationGroup Group { get; set; }
+
+        public abstract bool HasClick { get; }
+        public abstract JsFunction OnClick(IEntityOperationContext ctx);
+
+        public abstract bool HasIsVisible { get; }
+        public abstract bool OnIsVisible(IEntityOperationContext ctx);
+
+        public EntityOperationSettingsBase(IOperationSymbolContainer symbol)
             : base(symbol)
         {
-            this.Contextual = new ContextualOperationSettings(symbol);
-            this.ContextualFromMany = new ContextualOperationSettings(symbol); 
+        }
+
+        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
+    }
+
+    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IIdentifiable
+    {
+        public ContextualOperationSettings<T> ContextualFromMany { get; private set; }
+        public ContextualOperationSettings<T> Contextual { get; private set; }
+
+        public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
+            : base(symbolContainer)
+        {
+            this.Contextual = new ContextualOperationSettings<T>(symbolContainer);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer); 
         }
 
         static EntityOperationSettings()
@@ -75,53 +325,87 @@ namespace Signum.Web.Operations
                 BootstrapStyle.Default;
         }
 
-        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
+        public Func<EntityOperationContext<T>, bool> IsVisible { get; set; }
+        public Func<EntityOperationContext<T>, JsFunction> Click { get; set; }
+        public Func<EntityOperationContext<T>, string> ConfirmMessage { get; set; }
 
-        public EntityOperationGroup Group { get; set; }
-
-        public Func<EntityOperationContext, string> ConfirmMessage { get; set; }
-        public Func<EntityOperationContext, bool> IsVisible { get; set; }
-        public Func<EntityOperationContext, JsFunction> OnClick { get; set; }
-    }
-
-    public class ContextualOperationSettings : OperationSettings
-    {
-        public ContextualOperationSettings(IOperationSymbolContainer symbol)
-            : base(symbol)
+        public override bool HasIsVisible
         {
+            get { return IsVisible != null; }
         }
 
-        public double Order { get; set; }
-        public Func<ContextualOperationContext, string> ConfirmMessage { get; set; }
-        public Func<ContextualOperationContext, bool> IsVisible { get; set; }
-        public Func<ContextualOperationContext, JsFunction> OnClick { get; set; }
+        public override bool OnIsVisible(IEntityOperationContext ctx)
+        {
+            return IsVisible((EntityOperationContext<T>)ctx);
+        }
 
+        public override bool HasClick
+        {
+            get { return Click != null; }
+        }
+
+        public override JsFunction OnClick(IEntityOperationContext ctx)
+        {
+            return Click((EntityOperationContext<T>)ctx);
+        }
+
+        public override Type OverridenType
+        {
+            get { return typeof(T); }
+        }
+
+        public override ContextualOperationSettingsBase ContextualUntyped
+        {
+            get { return Contextual; }
+        }
+
+        public override ContextualOperationSettingsBase ContextualFromManyUntyped
+        {
+            get { return ContextualFromMany; }
+        }
     }
 
-    public abstract class OperationContext
+    public interface IEntityOperationContext
     {
-        public string Prefix { get; set; }
-        public OperationInfo OperationInfo { get; set; }
-        public UrlHelper Url { get; set; }
+        EntityButtonContext Context { get; }
 
-        public abstract JsOperationOptions Options();
+        OperationInfo OperationInfo { get; }
+        IIdentifiable Entity { get; }
+        EntityOperationSettingsBase OperationSettings { get; }
+        string CanExecute { get; set; }
+
+        JsOperationOptions Options();
     }
 
-    public class EntityOperationContext : OperationContext
+    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IIdentifiable
     {
-        public string PartialViewName { get; set; }
-        public IdentifiableEntity Entity { get; internal set; }
-        public EntityOperationSettings OperationSettings { get; internal set; }
-        public string CanExecute { get; internal set; }
-        public ViewMode ViewButtons { get; internal set; }
-        public bool ShowOperations { get; set; }
+        public EntityButtonContext Context { get; private set; }
+        public UrlHelper Url { get { return Context.Url; } }
+        public string PartialViewName { get { return Context.PartialViewName; } }
+        public string Prefix { get { return Context.Prefix; } }
+        public ViewMode ViewMode { get { return Context.ViewMode; } }
+        public bool ShowOperations { get { return Context.ShowOperations; } }
 
-        public override JsOperationOptions Options()
+        public OperationInfo OperationInfo { get; private set; }
+        public EntityOperationSettings<T> OperationSettings { get; private set; }
+
+        public T Entity { get; private set; }
+        public string CanExecute { get; set; }
+
+        public EntityOperationContext(T entity, OperationInfo operationInfo, EntityButtonContext context, EntityOperationSettings<T> settings)
+        {
+            Entity = entity;
+            OperationInfo = operationInfo;
+            Context = context;
+            OperationSettings = settings;
+        }
+
+        public JsOperationOptions Options()
         {
             var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
 
             return result;
         }
@@ -136,25 +420,20 @@ namespace Signum.Web.Operations
         {
             return TypeContextUtilities.Compose(this.Prefix, prefixPart); 
         }
-    }
 
-    public class ContextualOperationContext : OperationContext
-    {
-        public List<Lite<IdentifiableEntity>> Entities { get; set; }
-        public object QueryName { get; set; }
-        public ContextualOperationSettings OperationSettings { get; set; }
-        public string CanExecute { get; set; }
 
-        public override JsOperationOptions Options()
+        IIdentifiable IEntityOperationContext.Entity
         {
-            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
+            get { return this.Entity; }
+        }
 
-            result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
-
-            return result;
+        EntityOperationSettingsBase IEntityOperationContext.OperationSettings
+        {
+            get { return this.OperationSettings; }
         }
     }
+
+   
 
     public class JsOperationOptions
     {

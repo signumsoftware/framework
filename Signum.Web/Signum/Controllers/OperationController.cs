@@ -22,7 +22,7 @@ namespace Signum.Web.Controllers
 {
     public class OperationController : Controller
     {
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Execute()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -47,7 +47,7 @@ namespace Signum.Web.Controllers
            return this.DefaultExecuteResult(entity);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Delete()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -71,7 +71,7 @@ namespace Signum.Web.Controllers
             }
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFrom()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -96,7 +96,7 @@ namespace Signum.Web.Controllers
             return this.DefaultConstructResult(entity);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMany()
         {
             OperationSymbol operationKey = this.GetOperationKeyAssert();

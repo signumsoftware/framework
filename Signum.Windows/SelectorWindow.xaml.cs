@@ -61,13 +61,20 @@ namespace Signum.Windows
             Func<T, string> elementText = null,
             string title = null,
             string message = null,
+            bool autoSelectOnlyElement = true,
             Window owner = null)
         {
             if (title == null)
-                title = SearchMessage.SelectAnElement.NiceToString();
+                title = SelectorMessage.SelectAnElement.NiceToString();
 
             if (message == null)
-                message = SearchMessage.SelectAnElement.NiceToString();
+                message = SelectorMessage.PleaseSelectAnElement.NiceToString();
+
+            if (elements.Count() == 1 && autoSelectOnlyElement)
+            {
+                selectedElement = elements.SingleEx();
+                return true;
+            }
 
             if (elementIcon == null)
                 elementIcon = o => null;
@@ -101,8 +108,8 @@ namespace Signum.Windows
             InitializeComponent();
 
 			AutomationProperties.SetName(this, "SelectorWindow");
-            
-			this.Message = SearchMessage.SelectAnElement.NiceToString();
+
+            this.Message = SelectorMessage.SelectAnElement.NiceToString();
         }
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)

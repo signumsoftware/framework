@@ -291,6 +291,45 @@ namespace Signum.Engine
         {
             get { return false; }
         }
+
+        public override bool AllowsSetSnapshotIsolation
+        {
+            get { return false; }
+        }
+
+        public override void FixType(ref SqlDbType type, ref int? size, ref int? scale)
+        {  
+            if ((type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
+            {
+                type = SqlDbType.NText;
+                size = null;
+            }
+        }
+
+        public override bool AllowsIndexWithWhere(string where)
+        {
+            return false;
+        }
+
+        public override SqlPreCommand ShringDatabase(string schemaName)
+        {
+            return null;
+        }
+
+        public override bool AllowsConvertToDate
+        {
+            get { return false; }
+        }
+
+        public override bool AllowsConvertToTime
+        {
+            get { return false; }
+        }
+
+        public override bool SupportsSqlDependency
+        {
+            get { return false; }
+        }
     }
 
     public class SqlCeParameterBuilder : ParameterBuilder

@@ -10,7 +10,7 @@
     else
     {
         <h1>@("Error " + this.ViewContext.HttpContext.Response.StatusCode)</h1>
-        <h2>@("Error thrown")</h2>
+        <h2>thrown @Model.Exception.GetType().Name</h2>
     }
     <div class="error-region">
         <p>

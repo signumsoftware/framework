@@ -17,8 +17,6 @@ namespace Signum.Entities
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
-        [Description("Delete?")]
-        Delete,
         [Description("Please confirm you'd like to delete the entity from the system")]
         PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem,
         [Description("Please confirm you'd like to delete the selected entities from the system")]
@@ -43,7 +41,7 @@ namespace Signum.Entities
 
     public enum EngineMessage
     {
-        [Description("Concurrency error on the databe, Table = {0}, Id = {1}")]
+        [Description("Concurrency error on the database, Table = {0}, Id = {1}")]
         ConcurrencyErrorOnDatabaseTable0Id1,
         [Description("Entity with type {0} and Id {1} not found")]
         EntityWithType0AndId1NotFound,
@@ -53,7 +51,7 @@ namespace Signum.Entities
         TheEntity0IsNew,
         [Description("There are '{0}' that refer to this entity")]
         ThereAre0ThatReferThisEntity,
-        [Description("There are records in '{0}' refearing to this table by column '{1}'")]
+        [Description("There are records in '{0}' referring to this table by column '{1}'")]
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unautorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
@@ -74,13 +72,13 @@ namespace Signum.Entities
         ContinueWithErrors,
         [Description("Fix Errors")]
         FixErrors,
-        [Description(@"Imposisible to Save, integrity check failed:
+        [Description(@"Impossible to Save, integrity check failed:
 
 ")]
         ImpossibleToSaveIntegrityCheckFailed,
         [Description("Loading {0}...")]
         Loading0,
-        [Description(@"There are changes that hasn't been saved. 
+        [Description(@"There are changes that haven't been saved. 
 Lose changes?")]
         LoseChanges,
         NoDirectErrors,
@@ -130,12 +128,8 @@ Lose changes?")]
         [Description("Finder of {0}")]
         FinderOf0,
         Name,
-        [Description("New column")]
-        NewColumn,
         [Description("New column's Name")]
         NewColumnSName,
-        [Description("New filter")]
-        NewFilter,
         NoActionsFound,
         NoColumnSelected,
         NoFiltersSpecified,
@@ -161,7 +155,6 @@ Lose changes?")]
         CreateNew0,
         [Description("All")]
         SearchControl_Pagination_All,
-        SelectAnElement,
         [Description("There is no {0}")]
         ThereIsNo0,
         Value,
@@ -177,9 +170,9 @@ Lose changes?")]
     {
         [Description("Constructor Selector")]
         ConstructorSelector,
-        [Description("Please, choose a value to continue:")]
+        [Description("Please choose a value to continue:")]
         PleaseChooseAValueToContinue,
-        [Description("Please Select a Constructor")]
+        [Description("Please select a Constructor")]
         PleaseSelectAConstructor,
         [Description("Please select one of the following types: ")]
         PleaseSelectAType,
@@ -187,7 +180,9 @@ Lose changes?")]
         TypeSelector,
         [Description("A value must be specified for {0}")]
         ValueMustBeSpecifiedFor0,
-        ChooseAValue
+        ChooseAValue,
+        SelectAnElement,
+        PleaseSelectAnElement
     }
 
     public enum ConnectionMessage
@@ -226,6 +221,8 @@ Lose changes?")]
         chooseAValue,
         [Description("Add filter")]
         addFilter,
+        [Description("Open tab")]
+        openTab,
         [Description("Rename column")]
         renameColumn,
         [Description("Enter the new column name")]
@@ -242,15 +239,15 @@ Lose changes?")]
         noActionsFound,
         [Description("Save changes before or press cancel")]
         saveChangesBeforeOrPressCancel,
-        [Description("Loose current changes?")]
-        looseCurrentChanges,
+        [Description("Lose current changes?")]
+        loseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
         [Description("Seach for results")]
         searchForResults,
         [Description("Select only one element")]
         selectOnlyOneElement,
-        [Description("There are errors in the entity, you want to continue?")]
+        [Description("There are errors in the entity, do you want to continue?")]
         popupErrors,
         [Description("There are errors in the entity")]
         popupErrorsStop,

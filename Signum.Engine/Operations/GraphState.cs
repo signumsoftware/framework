@@ -55,11 +55,9 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override void OnEndOperation(T entity)
+            protected override void AssertEntity(T entity)
             {
                 Graph<T, S>.AssertEnterState((T)entity, this);
-
-                base.OnEndOperation(entity);
             }
 
             public override string ToString()
@@ -72,7 +70,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
 
             }
         }
@@ -92,12 +90,10 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override void OnEndOperation(T result)
+            protected override void AssertEntity(T result)
             {
                 if (result != null)
                     Graph<T, S>.AssertEnterState(result, this);
-
-                base.OnEndOperation(result);
             }
 
 
@@ -111,7 +107,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
             }
         }
 
@@ -130,11 +126,10 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override void OnEndOperation(T result)
+            protected override void AssertEntity(T result)
             {
-                Graph<T, S>.AssertEnterState(result, this);
-
-                base.OnEndOperation(result);
+                if (result != null)
+                    Graph<T, S>.AssertEnterState(result, this);
             }
 
             public override string ToString()
@@ -187,18 +182,9 @@ namespace Signum.Engine.Operations
                 return base.OnCanExecute(entity);
             }
 
-            protected override void OnBeginOperation(T entity)
-            {
-                base.OnBeginOperation(entity);
-
-                S oldState = Graph<T, S>.GetStateFunc(entity);
-            }
-
-            protected override void OnEndOperation(T entity)
+            protected override void AssertEntity(T entity)
             {
                 Graph<T, S>.AssertEnterState(entity, this);
-
-                base.OnEndOperation(entity);
             }
 
             public override void AssertIsValid()
@@ -252,7 +238,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (FromStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol.Operation));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol.Symbol));
             }
         }
 

@@ -75,5 +75,19 @@ namespace Signum.Entities.Basics
         {
             return "{0} {1} {2:d}".Formato(operation, user, start);
         }
+
+        public void SetTarget(IIdentifiable target)
+        {
+            this.TemporalTarget = target;
+            this.Target = target == null || target.IsNew ? null : target.ToLite();
+        }
+
+        public IIdentifiable GetTarget()
+        {
+            return TemporalTarget;
+        }
+
+        [Ignore]
+        IIdentifiable TemporalTarget;
     }
 }

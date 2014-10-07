@@ -37,7 +37,7 @@ namespace Signum.Web
 
         public void Tab(string id, string title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id, title, body(null)));
+            this.tabs.Add(new Tab(id, title, body));
         }
 
 
@@ -48,18 +48,18 @@ namespace Signum.Web
 
         public void Tab(string id, MvcHtmlString title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id, title, body(null)));
+            this.tabs.Add(new Tab(id, title, body));
         }
 
 
         public void Tab(string id, Func<object, HelperResult> title, MvcHtmlString body)
         {
-            this.tabs.Add(new Tab(id, title(null), body));
+            this.tabs.Add(new Tab(id, title, body));
         }
 
         public void Tab(string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
         {
-            this.tabs.Add(new Tab(id, title(null), body(null)));
+            this.tabs.Add(new Tab(id, title, body));
         }
 
 
@@ -68,24 +68,23 @@ namespace Signum.Web
             var newTabs = context.ViewOverrides == null ? tabs : 
                 context.ViewOverrides.ExpandTabs(tabs, containerId, helper, context);
 
-            if (newTabs.IsEmpty())
+            if (newTabs.IsNullOrEmpty())
                 return;
 
             TextWriter writer = helper.ViewContext.Writer;
 
-            var first = newTabs.First();
+            var first = newTabs.FirstOrDefault(a => a.Active) ?? newTabs.FirstOrDefault();
 
             using (Surround(writer, new HtmlTag("ul", context.Compose(containerId)).Class("nav nav-tabs")))
                 foreach (var t in newTabs)
-                    using (Surround(writer, new HtmlTag("li").Class(t == first ? "active" : null)))
-                    using (Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(t.Id)).Attr("data-toggle", "tab")))
-                        t.Title.WriteTo(writer);
+                    t.WriteHeader(writer, first, context);
 
             using (Surround(writer, new HtmlTag("div").Class("tab-content")))
                 foreach (var t in newTabs)
-                    using (Surround(writer, new HtmlTag("div", context.Compose(t.Id)).Class("tab-pane fade").Class(t == first ?  "in active" : null)))
-                        t.Body.WriteTo(writer);
+                    t.WriteBody(writer, first, context);
         }
+
+       
 
         public static IDisposable Surround(TextWriter writer, HtmlTag div)
         {
@@ -100,15 +99,17 @@ namespace Signum.Web
     {
         public readonly string Id;
         public HelperResult Title;
-        public HelperResult Body; 
+        public HelperResult Body;
+        public bool Active;
+        public string ToolTip;
 
         public Tab(string id, string title, MvcHtmlString body)
-            :this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), new HelperResult(writer => writer.Write(body)))
+            : this(id, new HelperResult(writer => writer.Write(HttpUtility.HtmlEncode(title))), new HelperResult(writer => writer.Write(body)))
         {
         }
 
-        public Tab(string id, string title, HelperResult body)
-            : this(id, MvcHtmlString.Create(HttpUtility.HtmlEncode(title)), body)
+        public Tab(string id, string title, Func<object, HelperResult> body)
+            : this(id, new HelperResult(writer => writer.Write(HttpUtility.HtmlEncode(title))), body(null))
         {
         }
 
@@ -118,13 +119,18 @@ namespace Signum.Web
         {
         }
 
-        public Tab(string id, MvcHtmlString title, HelperResult body)
-            : this(id, new HelperResult(writer => writer.Write(title)), body)
+        public Tab(string id, MvcHtmlString title, Func<object, HelperResult> body)
+            : this(id, new HelperResult(writer => writer.Write(title)), body(null))
         {
         }
 
-        public Tab(string id, HelperResult title, MvcHtmlString body)
-            : this(id, title, new HelperResult(writer => writer.Write(body)))
+        public Tab(string id, Func<object, HelperResult> title, MvcHtmlString body)
+            : this(id, title(null), new HelperResult(writer => writer.Write(body)))
+        {
+        }
+
+        public Tab(string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
+            : this(id, title(null), body(null))
         {
         }
 
@@ -133,6 +139,19 @@ namespace Signum.Web
             this.Id = id;
             this.Title = title;
             this.Body = body;
+        }
+
+        public virtual void WriteHeader(TextWriter writer, Tab first, TypeContext context)
+        {
+            using (TabContainer.Surround(writer, new HtmlTag("li").Class(this == first ? "active" : null)))
+            using (TabContainer.Surround(writer, new HtmlTag("a").Attr("href", "#" + context.Compose(this.Id)).Attr("data-toggle", "tab").Attr("title", this.ToolTip)))
+                this.Title.WriteTo(writer);
+        }
+
+        public virtual void WriteBody(TextWriter writer, Tab first, TypeContext context)
+        {
+            using (TabContainer.Surround(writer, new HtmlTag("div", context.Compose(this.Id)).Class("tab-pane fade").Class(this == first ? "in active" : null)))
+                this.Body.WriteTo(writer);
         }
     }
 }

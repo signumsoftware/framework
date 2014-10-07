@@ -68,7 +68,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromARGB(ColorTranslator.FromHtml(ctx.Input).ToArgb()) : null);
+            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -203,7 +203,8 @@ namespace Signum.Web
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityComboKeys.Combo,
-            EntityListBaseKeys.Indexes,
+            EntityListBaseKeys.Index,
+            EntityListBaseKeys.RowId,
             EntityListBaseKeys.List
         };
 
@@ -520,6 +521,11 @@ namespace Signum.Web
         {
             get { return null; }
         }
+
+        public override string ToString()
+        {
+            return this.PropertyValidator.PropertyInfo.PropertyName();
+        }
     }
 
     class MixinPropertyMapping<T, M, P> : IPropertyMapping<T, P>
@@ -556,6 +562,11 @@ namespace Signum.Web
         public Type MixinType
         {
             get { return typeof(M); }
+        }
+
+        public override string ToString()
+        {
+            return "[" + typeof(M).TypeName() + "] " + this.PropertyValidator.PropertyInfo.PropertyName();
         }
     }
 
@@ -663,7 +674,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity())
             {
                 if (runtimeInfo.IsNew || ctx.Value == null)
-                    return ctx.Controller.Construct<T>();
+                    return new ConstructorContext(ctx.Controller).Construct<T>();
 
                 return ctx.Value;
             }
@@ -687,7 +698,7 @@ namespace Signum.Web
                 if (identifiable != null && identifiable.IsNew)
                     return (T)(ModifiableEntity)identifiable;
                 else
-                    return controller.Construct<T>();
+                    return new ConstructorContext(controller).Construct<T>();
             }
 
             if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
@@ -812,9 +823,14 @@ namespace Signum.Web
         }
     }
 
-
-    public class LiteMapping<S> where S : class, IIdentifiable
+    public interface ILiteMapping
     {
+        bool AvoidEntityMapping { get; set; }
+    }
+
+    public class LiteMapping<S>: ILiteMapping where S : class, IIdentifiable
+    {
+        public bool AvoidEntityMapping { get; set; }
         public Mapping<S> EntityMapping { get; set; }
 
         public LiteMapping()
@@ -857,7 +873,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)ctx.Controller.Construct(runtimeInfo.EntityType)).ToLiteFat());
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)new ConstructorContext(ctx.Controller).ConstructUntyped(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)
@@ -872,7 +888,7 @@ namespace Signum.Web
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)
         {
             //commented out because of Lite<FileDN/FilePathDN>
-            if (!EntityHasChanges(ctx))
+            if (AvoidEntityMapping || !EntityHasChanges(ctx))
                 return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
@@ -923,7 +939,7 @@ namespace Signum.Web
 
             var indexPrefixes = ctx.Inputs.IndexPrefixes();
 
-            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).Try(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Index)) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.Prefix, index), null, route, ctx);
 
@@ -951,34 +967,67 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                MList<S> oldList = ctx.Value;
+                IMListPrivate<S> mlistPriv = ctx.Value;
 
-                MList<S> newList = new MList<S>();
+                var dic = mlistPriv == null ? new Dictionary<int, MList<S>.RowIdValue>() :
+                    mlistPriv.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a);
+
+                var newList = new List<MList<S>.RowIdValue>();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).Try(s => s.Split(new[] { ';' })[0]).ToInt();
+                    int? rowId = itemCtx.Inputs.TryGetC(EntityListBaseKeys.RowId).ToInt();
 
-                    if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
-                        itemCtx.Value = oldList[oldIndex.Value];
+                    if (rowId.HasValue)
+                    {
+                        var oldValue = dic.GetOrThrow(rowId.Value, "No RowID {0} found");
 
-                    itemCtx.Value = ElementMapping(itemCtx);
+                        itemCtx.Value = oldValue.Value;
+                        itemCtx.Value = ElementMapping(itemCtx);
 
-                    ctx.AddChild(itemCtx);
-                    if (itemCtx.Value != null)
-                        newList.Add(itemCtx.Value);
+                        ctx.AddChild(itemCtx);
+
+                        if (itemCtx.Value != null)
+                        {
+                            var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
+
+                            if (oldValue.Value.Equals(val))
+                                newList.Add(new MList<S>.RowIdValue(val, rowId.Value, oldValue.OldIndex));
+                            else
+                                newList.Add(new MList<S>.RowIdValue(val));
+                        }
+                    }
+                    else
+                    {
+                        itemCtx.Value = ElementMapping(itemCtx);
+                        ctx.AddChild(itemCtx);
+                        if (itemCtx.Value != null && !itemCtx.SupressChange)
+                            newList.Add(new MList<S>.RowIdValue(itemCtx.Value));
+                    }
                 }
 
-                if (AreEqual(newList, oldList))
-                    return oldList;
+                if (!AreEqual(newList, mlistPriv == null ? null : mlistPriv.InnerList))
+                {
+                    Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
 
-                return newList;
+                    if (ctx.Value == null)
+                        mlistPriv = ctx.Value = new MList<S>();
+
+                    var added = newList.Select(a=>a.Value).Except(mlistPriv.InnerList.Select(a=>a.Value)).ToList();
+                    var removed = mlistPriv.InnerList.Select(a=>a.Value).Except(newList.Select(a=>a.Value)).ToList();
+
+                    mlistPriv.InnerList.Clear();
+                    mlistPriv.InnerList.AddRange(newList);
+                    mlistPriv.InnerListModified(added, removed);
+                }
+
+                return ctx.Value;
             }
         }
 
-        private bool AreEqual(MList<S> newList, MList<S> oldList)
+        private bool AreEqual(List<MList<S>.RowIdValue> newList, List<MList<S>.RowIdValue> oldList)
         {
             if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
                 return true;
@@ -986,7 +1035,19 @@ namespace Signum.Web
             if (newList == null || oldList == null)
                 return false;
 
-            return newList.SequenceEqual(oldList);
+            if (newList.Count != oldList.Count)
+                return false;
+
+            //Ordering the elements by RowId could remove some false modifications due to database indeterminism
+            //but we can not be sure if order matters, and at the end the order from HTML should be respected
+            for (int i = 0; i < newList.Count; i++)
+            {
+                if (newList[i].RowId != oldList[i].RowId ||
+                   !object.Equals(newList[i].Value, oldList[i].Value))
+                    return false;
+            }
+
+            return true;
         }
 
     }
@@ -1022,7 +1083,8 @@ namespace Signum.Web
                     if (!itemCtx.SupressChange && !object.Equals(list[i], itemCtx.Value))
                         Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
 
-                    list[i] = itemCtx.Value;
+                    if (!list[i].Equals(itemCtx.Value))
+                        list[i] = itemCtx.Value;
 
                     i++;
                 }
@@ -1035,31 +1097,44 @@ namespace Signum.Web
     public class MListDictionaryMapping<S, K> : BaseMListMapping<S>
         where S : ModifiableEntity
     {
+        MemberInfo[] MemberList;
         Func<S, K> GetKey;
-
-        public string Route { get; set; }
+        public Mapping<K> KeyMapping { get; set; }
 
         public Func<S, bool> FilterElements;
 
-        public Mapping<K> KeyPropertyMapping { get; set; }
-
-        public MListDictionaryMapping(Func<S, K> getKey, string route)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
+            : this(getKeyExpression, Mapping.New<S>())
         {
-            this.GetKey = getKey;
-
-            this.KeyPropertyMapping = Mapping.New<K>();
-
-            this.Route = route;
+          
         }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping)
+        public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression, Mapping<S> elementMapping)
             : base(elementMapping)
         {
-            this.GetKey = getKey;
+            this.GetKey = getKeyExpression.Compile();
 
-            this.KeyPropertyMapping = Mapping.New<K>();
+            var body = RemoveToLite(getKeyExpression.Body);
 
-            this.Route = route;
+            this.MemberList = Reflector.GetMemberListBase(body);
+
+            this.KeyMapping =  Mapping.New<K>();
+
+            if (body != getKeyExpression.Body)
+                ((ILiteMapping)this.KeyMapping.Target).AvoidEntityMapping = true;
+        }
+
+        private Expression RemoveToLite(Expression body)
+        {
+            if (body.Type.IsLite() && body.NodeType == ExpressionType.Call)
+            {
+                MethodCallExpression mce = body as MethodCallExpression;
+
+                if (mce != null && mce.Method.Name.StartsWith("ToLite") & mce.Method.DeclaringType == typeof(Lite))
+                    return mce.Arguments[0];
+            }
+
+            return body;
         }
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
@@ -1073,13 +1148,17 @@ namespace Signum.Web
 
                 var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-                PropertyRoute route = ctx.PropertyRoute.Add("Item");
+                PropertyRoute route = ctx.PropertyRoute.Add("Item").Continue(MemberList);
+
+                string[] namesToAppend = MemberList.Select(MemberAccessGatherer.GetName).NotNull().ToArray();
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
-                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, Route), null, route, itemCtx);
+                    var tce = new TypeContextExpression(new PropertyInfo[0], typeof(S), itemCtx.PropertyRoute, itemCtx.Value);
 
-                    subContext.Value = KeyPropertyMapping(subContext);
+                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, namesToAppend), null, route, itemCtx);
+
+                    subContext.Value = KeyMapping(subContext);
 
                     itemCtx.Value = dic[subContext.Value];
 

@@ -11,7 +11,7 @@
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    findOptions.Pagination = findOptions.Pagination ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
+    findOptions.Pagination = findOptions.Pagination ?? (Finder.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
 
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
@@ -20,7 +20,7 @@
 <div id="@prefix" 
      class="sf-search-control SF-control-container" 
      data-prefix="@Model.Prefix" 
-     data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
+     data-find-url="@Finder.FindRoute(findOptions.QueryName)" 
      data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
      >
 
@@ -33,7 +33,7 @@
             ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
             ViewData[ViewDataKeys.FiltersVisible] = findOptions.ShowFilters;
             ViewData[ViewDataKeys.ShowAddColumn] = string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns;
-            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+            Html.RenderPartial(Finder.Manager.FilterBuilderView); 
         }
     </div>
 
@@ -49,7 +49,11 @@
                 <span class="glyphicon glyphicon glyphicon-filter"></span>
             </a>
         }
-        <button type="button" class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")" onclick="@JsFunction.SFControlThen(prefix, "search()")" >@SearchMessage.Search.NiceToString()</button>
+        <button type="button" class="sf-query-button sf-search btn btn-primary" id="@Model.Compose("qbSearch")">@SearchMessage.Search.NiceToString()</button>
+        <script type="text/javascript">
+            $("#@Model.Compose("qbSearch")").click(function(e){ $("#@Model.Compose("sfSearchControl")").SFControl().then(function(c){c.search();}) });
+            $("#@Model.Compose("tblFilterBuilder")").keyup(function(e){ if (e.which == 13) { $("#@Model.Compose("qbSearch")").click(); } });
+        </script>
 
         @if (findOptions.Create)
         {
@@ -68,7 +72,7 @@
                 <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" id="@Model.Compose("btnSelectedDropDown")">
-                    <li>hi there!</li>
+                    <li>Error: DropDown not initialized</li>
                 </ul>
             </div>
         }
@@ -130,7 +134,7 @@
     @{
         ViewData[ViewDataKeys.ShowFooter] = findOptions.ShowFooter;
         ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
-        @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+        @Html.Partial(Finder.Manager.PaginationSelectorView, Model)
     }
 </div>
 <script type="text/javascript">

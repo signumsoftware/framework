@@ -302,5 +302,14 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
+    [SqlViewName("sys", "service_queues")]
+    public class SysServiceQueues : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int object_id;
+        public string name;
+        public string activation_procedure;
+    }
+
 #pragma warning restore 649
 }

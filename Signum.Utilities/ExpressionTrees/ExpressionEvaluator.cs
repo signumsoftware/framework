@@ -13,7 +13,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// <summary>
     /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
     /// </summary>
-    public class ExpressionEvaluator : SimpleExpressionVisitor
+    public class ExpressionEvaluator : ExpressionVisitor
     {
         HashSet<Expression> candidates;
 
@@ -214,7 +214,7 @@ namespace Signum.Utilities.ExpressionTrees
             });
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if (exp == null)
             {

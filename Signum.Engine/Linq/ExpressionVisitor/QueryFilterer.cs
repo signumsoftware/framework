@@ -14,9 +14,10 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {
-    public class QueryFilterer : SimpleExpressionVisitor
+    public class QueryFilterer : ExpressionVisitor
     {
-        static GenericInvoker<Func<Schema, IQueryable, IQueryable>> miFilter = new GenericInvoker<Func<Schema, IQueryable, IQueryable>>((s,q) => s.OnFilterQuery<TypeDN>((IQueryable<TypeDN>)q));
+        static GenericInvoker<Func<Schema, LambdaExpression>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression>>(s => s.GetInDatabaseFilter<TypeDN>());
+        static MethodInfo miWhere = ReflectionTools.GetMethodInfo((IQueryable<object> q) => q.Where(a => true)).GetGenericMethodDefinition();
 
         bool filter;
 
@@ -31,14 +32,39 @@ namespace Signum.Engine.Linq
 
                 if (query.IsBase())
                 {
-                    Type identType = c.Type.GetGenericArguments().SingleEx();
+                    Type queryType = c.Type.GetGenericArguments().SingleEx();
 
-                    if (filter && Schema.Current.Tables.ContainsKey(identType))
+                    if (filter)
                     {
-                        IQueryable newQuery = miFilter.GetInvoker(identType)(Schema.Current, query);
-                        
-                        if (newQuery != query)
-                            return newQuery.Expression;
+                        if (typeof(IdentifiableEntity).IsAssignableFrom(queryType))
+                        {
+                            LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
+
+                            if (rawFilter != null)
+                            {
+                                Expression clean = ExpressionCleaner.Clean(rawFilter);
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+
+                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                            }
+                        }
+                        else if (queryType.IsInstantiationOf(typeof(MListElement<,>)))
+                        {
+                            Type entityType = queryType.GetGenericArguments()[0];
+
+                            LambdaExpression rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
+
+                            if (rawFilter != null)
+                            {
+                                var param = Expression.Parameter(queryType, "mle");
+                                var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
+
+                                Expression clean = ExpressionCleaner.Clean(lambda);
+                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean);
+
+                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                            }
+                        }
                     }
 
                     return c;
@@ -56,7 +82,6 @@ namespace Signum.Engine.Linq
         }
 
         bool disableQueryFilter = false;
-
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(LinqHints) && m.Method.Name == "DisableQueryFilter")

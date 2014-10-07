@@ -111,7 +111,7 @@ namespace Signum.Web
                 case "u": return info.UniversalSortableDateTimePattern;
                 case "U": return info.FullDateTimePattern;
                 case "y":
-                case "Y": return info.YearMonthPattern;
+                case "Y": return info.ShortDatePattern;//info.YearMonthPattern;
                 default: return format;
             }
         }
@@ -127,7 +127,7 @@ namespace Signum.Web
                 return helper.TimePicker(name, formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", name).Class("date-time")))
+            using (sb.SurroundLine(new HtmlTag("div", name).Class("date-time")))
             {
                 sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
                 sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
@@ -158,11 +158,11 @@ namespace Signum.Web
                 return AttachDatePicker(input, culture, jsFormat);
             
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(AttachDatePicker(new HtmlTag("div").Class("input-group date"), culture, jsFormat)))
+            using (sb.SurroundLine(AttachDatePicker(new HtmlTag("div").Class("input-group date"), culture, jsFormat)))
             {
                 sb.Add(input);
 
-                using (sb.Surround(new HtmlTag("span").Class("input-group-addon")))
+                using (sb.SurroundLine(new HtmlTag("span").Class("input-group-addon")))
                     sb.Add(new HtmlTag("span").Class("glyphicon glyphicon-calendar"));
             }
 
@@ -212,11 +212,11 @@ namespace Signum.Web
                 return AttachTimePiceker(input, dateFormat);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(AttachTimePiceker(new HtmlTag("div").Class("input-group time"), dateFormat)))
+            using (sb.SurroundLine(AttachTimePiceker(new HtmlTag("div").Class("input-group time"), dateFormat)))
             {
                 sb.Add(input);
 
-                using (sb.Surround(new HtmlTag("span").Class("input-group-addon")))
+                using (sb.SurroundLine(new HtmlTag("span").Class("input-group-addon")))
                     sb.Add(new HtmlTag("span").Class("glyphicon glyphicon-time"));
             }
 

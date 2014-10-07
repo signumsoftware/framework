@@ -35,7 +35,9 @@ namespace Signum.Windows
             Close(); 
         }
 
-        public static bool Show<T>(ref T value, string title, string text, string labelText, string format, string unitText, Window owner)
+        public static bool Show<T>(ref T value, string title = null, string text = null, 
+            string labelText = null, string format = null, string unitText = null, 
+            Window owner = null)
         {
             object obj = value;
             if (ShowUntyped(typeof(T), ref obj, title, text, labelText, format, unitText, owner))
@@ -46,7 +48,9 @@ namespace Signum.Windows
             return false;
         }
 
-        public static bool ShowUntyped(Type type, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
+        public static bool ShowUntyped(Type type, ref object value, string title = null, string text = null, 
+            string labelText = null, string format = null, string unitText = null, 
+            Window owner = null)
         {
             ValueLineBox vlb = new ValueLineBox();
             vlb.Title = title ?? SelectorMessage.ChooseAValue.NiceToString();

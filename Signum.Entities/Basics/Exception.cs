@@ -229,6 +229,13 @@ namespace Signum.Entities.Basics
             set { Set(ref data, value); }
         }
 
+        bool referenced;
+        public bool Referenced
+        {
+            get { return referenced; }
+            set { Set(ref referenced, value); }
+        }
+
         public override string ToString()
         {
             return "{0}: {1}".Formato(exceptionType, exceptionMessage).Etc(200);

@@ -3,8 +3,6 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
-export var doubleScroll = true;
-
 export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
@@ -200,7 +198,7 @@ export function requestDataForOpenFinder(findOptions: FindOptions, isExplore: bo
     return requestData;
 }
 
-function serializeOrders(orders: OrderOption[]) {
+export function serializeOrders(orders: OrderOption[]) {
     return orders.map(f=> (f.orderType == OrderType.Ascending ? "" : "-") + f.columnName).join(";");//A Json array like ["Id","-Name"] => Id asc, then Name desc
 }
 
@@ -219,7 +217,17 @@ export function deleteFilter(trId) {
     $tr.remove();
 }
 
-
+export function count(options: FindOptions, element: JQuery) {
+    SF.onVisible(element).then(() => {
+        SF.ajaxPost({
+            url: SF.Urls.count,
+            data: requestDataForOpenFinder(options, false)
+        }).then(data=> {
+                element.html(data);
+            element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+        });
+    }); 
+}
 
 export class SearchControl {
 
@@ -292,7 +300,8 @@ export class SearchControl {
 
         if (this.options.allowOrder) {
             $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", e => {
-                this.newSortOrder($(e.currentTarget), e.shiftKey);
+                e.preventDefault();
+                SearchControl.newSortOrder(this.options.orders, $(e.currentTarget), e.shiftKey);
                 this.search();
                 return false;
             });
@@ -338,9 +347,10 @@ export class SearchControl {
         }
 
         if (this.options.showFooter) {
-            this.element.on("click", ".sf-search-footer ul.pagination a", e=>
-                this.search(parseInt($(e.currentTarget).attr("data-page")))
-                );
+            this.element.on("click", ".sf-search-footer ul.pagination a", e=> {
+                e.preventDefault();
+                this.search(parseInt($(e.currentTarget).attr("data-page")));
+            });
 
             this.element.on("change", ".sf-search-footer .sf-pagination-size", e => {
                 if ($(e.currentTarget).find("option:selected").val() == "All") {
@@ -352,14 +362,14 @@ export class SearchControl {
             });
         }
 
+        this.prefix.child("sfFullScreen").tryGet().on("mouseup", e => {
+            e.preventDefault();
+            this.fullScreen(e);
+        });
+
         if (this.options.showContextMenu) {
             $tblResults.on("change", ".sf-td-selection", e=> {
                 this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
-            });
-
-            this.prefix.child("sfFullScreen").get().on("mousedown", e => {
-                e.preventDefault();
-                this.fullScreen(e);
             });
 
             this.prefix.child("btnSelected").get().click(e=> {
@@ -371,52 +381,28 @@ export class SearchControl {
             return false;
         });
 
-        if (doubleScroll) {
-            var div = this.prefix.child("divResults").get();
-
-            div.removeClass("table-responsive");
-            div.css("overflow-x", "auto");
-
-            var divUp = this.options.prefix.child("divResults_Up").tryGet();
-
-            if (!divUp.length) {
-                divUp = $("<div>")
-                    .attr("id", this.options.prefix.child("divResults_Up"))
-                    .css("overflow-x", "auto")
-                    .css("overflow-y", "hidden")
-                    .css("height", "15")
-                    .insertBefore(div);
-
-                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
-            }
-
-            div.scroll(() => { this.syncSize(); divUp.scrollLeft(div.scrollLeft()); });
-            divUp.scroll(() => { this.syncSize(); div.scrollLeft(divUp.scrollLeft()); });
-
-            this.syncSize();
-
-            window.onresize = () => this.syncSize();
-        }
+        //if (SF.isTouchDevice()) { //UserQuery dropdown problems
+        //    this.element.find(".sf-query-button-bar")
+        //        .css("overflow-x", "auto")
+        //        .css("white-space", "nowrap");
+        //}
 
         if (this.options.searchOnLoad) {
             this.searchOnLoad();
         }
     }
 
-    syncSize() {
-        if (!doubleScroll)
-            return;
-
-        this.prefix.child("tblResults_Up").get().width(this.prefix.child("tblResults").get().width());
-
-        this.prefix.child("divResults_Up").get().css("height",
-            this.prefix.child("tblResults_Up").get().width() > this.prefix.child("divResults_Up").get().width() ? "15" : "1");
-    }
-
     changeRowSelection($rowSelectors, select: boolean) {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("active", select);
 
+        this.updateSelectedButton();
+
+        if (this.selectionChanged)
+            this.selectionChanged(this.selectedItems());
+    }
+
+    updateSelectedButton() {
         var selected = this.element.find(".sf-td-selection:checked").length;
 
         this.prefix.child("btnSelectedSpan").get().text(selected);
@@ -425,9 +411,6 @@ export class SearchControl {
             btn.attr("disabled", "disabled");
         else
             btn.removeAttr("disabled");
-
-        if (this.selectionChanged)
-            this.selectionChanged(this.selectedItems());
     }
 
     ctxMenuInDropdown() {
@@ -467,10 +450,18 @@ export class SearchControl {
         var $td = $(e.target).closest("td");
         var $menu = SF.ContextMenu.createContextMenu(e);
 
+      
         if (this.options.showHeader && (this.options.showFilterButton || this.options.showFilters)) {
             $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(() => this.quickFilterCell($td))));
-            $menu.append($("<li class='divider'></li>"));
         }
+
+        var a = $td.find("a");
+        if (a.length && a.attr("href")) {
+            $menu.append($("<li>").append($("<a>").text(lang.signum.openTab + " " + a.text()).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+        }
+       
+        if ($menu.children().length)
+            $menu.append($("<li class='divider'></li>"));
 
         var message = this.loadingMessage();
 
@@ -481,6 +472,8 @@ export class SearchControl {
             data: this.requestDataForContextMenu()
         }).then((items) => message.replaceWith(items || this.noActionsFoundMessage()));
     }
+
+    
 
     requestDataForContextMenu() {
         return {
@@ -496,15 +489,22 @@ export class SearchControl {
 
         var $menu = SF.ContextMenu.createContextMenu(e);
 
-        $menu.html(this.loadingMessage());
+        var a = $td.find("a");
+        if (a.length && a.attr("href")) {
+            $menu.append($("<li>").append($("<a>").text(lang.signum.openTab).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+        }
+
+        if ($menu.children().length)
+            $menu.append($("<li class='divider'></li>"));
+
+        var message = this.loadingMessage();
+
+        $menu.append(message);
 
         SF.ajaxPost({
             url: SF.Urls.selectedItemsContextMenu,
             data: this.requestDataForContextMenu()
-        })
-            .then((items) => {
-                $menu.html(items || this.noActionsFoundMessage());
-            });
+        }).then((items) => message.replaceWith(items || this.noActionsFoundMessage()));
 
         return false;
     }
@@ -561,7 +561,7 @@ export class SearchControl {
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-                this.syncSize();
+            this.updateSelectedButton();
             });
     }
 
@@ -653,22 +653,26 @@ export class SearchControl {
         return SearchControl.liteKeys(this.selectedItems());
     }
 
-    newSortOrder($th: JQuery, multiCol: boolean) {
+    static newSortOrder(orders : OrderOption[], $th: JQuery, multiCol: boolean) {
 
         SF.ContextMenu.hideContextMenu();
 
         var columnName = $th.data("column-name");
 
-        var cols = this.options.orders.filter(o=> o.columnName == columnName);
+        var cols = orders.filter(o=> o.columnName == columnName);
         var col = cols.length == 0 ? null : cols[0];
 
         var oposite = col == null ? OrderType.Ascending :
             col.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
         var $sort = $th.find("span.sf-header-sort")
         if (!multiCol) {
-            this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+            $th.closest("thead").find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
             $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc");
-            this.options.orders = [{ columnName: columnName, orderType: oposite }];
+
+            while (orders.length > 0) //clear
+                orders.pop();
+
+            orders.push({ columnName: columnName, orderType: oposite });
         }
         else {
             if (col !== null) {
@@ -676,8 +680,8 @@ export class SearchControl {
                 $sort.removeClass("asc desc").addClass(oposite == OrderType.Ascending ? "asc" : "desc");
             }
             else {
-                this.options.orders.push({ columnName: columnName, orderType: oposite });
-                $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
+                orders.push({ columnName: columnName, orderType: oposite });
+                $sort.addClass(oposite == OrderType.Ascending ? "asc" : "desc").addClass("l" + (orders.length - 1 % 4));
             }
         }
     }
@@ -705,7 +709,7 @@ export class SearchControl {
             url: SF.Urls.addColumn,
             data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
             async: false,
-        }).then(html => { $tblHeaders.append(html); this.syncSize(); });
+        }).then(html => { $tblHeaders.append(html); });
     }
 
     editColumn($th: JQuery) {
@@ -720,7 +724,6 @@ export class SearchControl {
         }).then(result => {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
-                this.syncSize();
             });
     }
 
@@ -804,7 +807,6 @@ export class SearchControl {
     removeColumn($th) {
         $th.remove();
         this.clearResults();
-        this.syncSize();
     }
 
     clearResults() {
@@ -889,7 +891,7 @@ export class SearchControl {
     searchOnLoad() {
         var $button = this.options.prefix.child("qbSearch").get();
 
-        SF.onVisible($button, () => {
+        SF.onVisible($button).then(() => {
             if (!this.searchOnLoadFinished) {
                 $button.click();
                 this.searchOnLoadFinished = true;
@@ -906,7 +908,13 @@ export class FilterBuilder {
         public element: JQuery,
         public prefix: string,
         public webQueryName: string,
-        public url: string) {
+        public addFilterUrl: string) {
+
+        if (SF.isTouchDevice()) {
+            element.find(".sf-filters-body")
+                .css("overflow-x", "auto")
+                .css("white-space", "nowrap");
+        }
 
         this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
@@ -986,7 +994,7 @@ export class FilterBuilder {
 
         var self = this;
         SF.ajaxPost({
-            url: this.url,
+            url: this.addFilterUrl,
             data: data,
             async: false,
         }).then((filterHtml) => {
@@ -1052,13 +1060,13 @@ export class FilterBuilder {
 
 export module QueryTokenBuilder {
 
-    export function init(containerId: string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function init(containerId: string, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
         $("#" + containerId).on("change", "select", function () {
-            tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+            tokenChanged($(this), webQueryName, controllerUrl, options, requestExtraJsonData);
         });
     }
 
-    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+    export function tokenChanged($selectedCombo: JQuery, webQueryName: string, controllerUrl: string, options: number, requestExtraJsonData: any) {
 
         var prefix = $selectedCombo.attr("id").before("ddlTokens_");
         if (prefix.endsWith("_"))
@@ -1080,7 +1088,8 @@ export module QueryTokenBuilder {
             webQueryName: webQueryName,
             tokenName: tokenName,
             index: index,
-            prefix: prefix
+            prefix: prefix,
+            options: options
         }, requestExtraJsonData);
 
         SF.ajaxPost({

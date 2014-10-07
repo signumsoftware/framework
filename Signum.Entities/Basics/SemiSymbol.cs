@@ -109,7 +109,7 @@ namespace Signum.Entities.Basics
         public static void SetSemiSymbolIdsAndNames<S>(Dictionary<string, Tuple<int, string>> symbolIds)
             where S : SemiSymbol
         {
-            SemiSymbol.Ids.Add(typeof(S), symbolIds);
+            SemiSymbol.Ids[typeof(S)] = symbolIds;
 
             var symbols = SemiSymbol.Symbols.TryGetC(typeof(S));
 

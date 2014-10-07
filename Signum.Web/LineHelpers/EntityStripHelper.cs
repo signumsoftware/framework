@@ -25,15 +25,15 @@ namespace Signum.Web
 
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityStrip.Prefix).Class("SF-entity-strip SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityStrip.Prefix).Class("SF-entity-strip SF-control-container")))
             {
                 sb.AddLine(helper.Hidden(entityStrip.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", entityStrip.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityStrip.Compose("hidden")).Class("hide")))
                 {
                 }
 
-                using (sb.Surround(new HtmlTag("ul", entityStrip.Compose(EntityStripKeys.ItemsContainer))
+                using (sb.SurroundLine(new HtmlTag("ul", entityStrip.Compose(EntityStripKeys.ItemsContainer))
                     .Class("sf-strip").Class(entityStrip.Vertical ? "sf-strip-vertical" : "sf-strip-horizontal")))
                 {
                     if (entityStrip.UntypedValue != null)
@@ -42,7 +42,7 @@ namespace Signum.Web
                             sb.Add(InternalStripElement(helper, itemTC, entityStrip));
                     }
 
-                    using (sb.Surround(new HtmlTag("li").Class("sf-strip-input input-group")))
+                    using (sb.SurroundLine(new HtmlTag("li").Class("sf-strip-input input-group")))
                     {
                         if (entityStrip.Autocomplete)
                         {
@@ -58,7 +58,7 @@ namespace Signum.Web
                                 htmlAttr));
                         }
 
-                        using (sb.Surround(new HtmlTag("span", entityStrip.Compose("shownButton"))))
+                        using (sb.SurroundLine(new HtmlTag("span", entityStrip.Compose("shownButton"))))
                         {
                             sb.AddLine(EntityButtonHelper.Create(helper, entityStrip, btn: false));
                             sb.AddLine(EntityButtonHelper.Find(helper, entityStrip, btn: false));
@@ -68,7 +68,8 @@ namespace Signum.Web
 
                 if (entityStrip.ElementType.IsEmbeddedEntity() && entityStrip.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)helper.ViewContext.Controller.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
+                    T embeddedEntity = (T)(object)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(typeof(T));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>(embeddedEntity, (TypeContext)entityStrip.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true), null));
                 }
 
@@ -82,7 +83,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
+            using (sb.SurroundLine(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
             {
                 var lite = (itemTC.UntypedValue as Lite<IIdentifiable>) ?? (itemTC.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
 
@@ -100,15 +101,15 @@ namespace Signum.Web
                             itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
                 }
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityStrip, itemTC, itemTC.Index));
+                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityStrip));
 
-                using (sb.Surround(new HtmlTag("span")))
+                using (sb.SurroundLine(new HtmlTag("span")))
                 {
-                    if (entityStrip.Reorder)
+                    if (entityStrip.Move)
                     {
                         sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
                         sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));

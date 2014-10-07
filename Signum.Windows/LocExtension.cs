@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -35,10 +36,33 @@ namespace Signum.Windows
         }
     }
 
+
+    [MarkupExtensionReturnType(typeof(object))]
+    public class LocSymbolExtension : MarkupExtension
+    {
+        [ConstructorArgument("key")]
+        public Symbol Key { get; set; }
+
+        public LocSymbolExtension() { }
+
+        public LocSymbolExtension(Symbol key)
+        {
+            Key = key;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (Key == null)
+                return "[null]";
+
+            return Key.NiceToString();
+        }
+    }
+
     [MarkupExtensionReturnType(typeof(object))]
     public class LocTypeExtension : MarkupExtension
     {
-        [ConstructorArgument("key")]
+        [ConstructorArgument("type")]
         public Type Type { get; set; }
 
         public LocTypeExtension() { }
@@ -59,7 +83,7 @@ namespace Signum.Windows
     [MarkupExtensionReturnType(typeof(object))]
     public class LocTypePluralExtension : MarkupExtension
     {
-        [ConstructorArgument("key")]
+        [ConstructorArgument("type")]
         public Type Type { get; set; }
 
         public LocTypePluralExtension() { }

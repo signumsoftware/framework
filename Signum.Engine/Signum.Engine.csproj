@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Engine</RootNamespace>
     <AssemblyName>Signum.Engine</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -36,7 +36,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,10 +58,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
     <OutputPath>bin\Partial\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -166,8 +170,10 @@
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
+    <Compile Include="Schema\EntityEvents.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
@@ -183,7 +189,31 @@
     <Compile Include="Basics\TypesLogic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Administrator.md" />
+    <None Include="Database.Delete.md" />
+    <None Include="Database.md" />
+    <None Include="Database.Query.md" />
+    <None Include="Database.Retrieve.md" />
+    <None Include="Database.Save.md" />
+    <None Include="Database.UnsafeDelete.md" />
+    <None Include="Database.UnsafeInsert.md" />
+    <None Include="Database.UnsafeUpdate.md" />
+    <None Include="EntityCache.md" />
+    <None Include="index.mdi" />
+    <None Include="Introduction.md" />
+    <None Include="Linq\index.mdi" />
+    <None Include="Linq\Linq.Apendix.md" />
+    <None Include="Linq\Linq.ElementOperators.md" />
+    <None Include="Linq\Linq.Entity.md" />
+    <None Include="Linq\Linq.Inheritance.md" />
+    <None Include="Linq\Linq.Join.md" />
+    <None Include="Linq\Linq.Lite.md" />
+    <None Include="Linq\Linq.SelectMany.md" />
+    <None Include="Linq\Linq.SqlFunctions.md" />
+    <None Include="Linq\Linq.TypeMismatch.md" />
     <None Include="Operations\Operations.cd" />
+    <None Include="Schema\EntityEvents.md" />
+    <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +243,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Docs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

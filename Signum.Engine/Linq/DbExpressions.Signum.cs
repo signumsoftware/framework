@@ -74,6 +74,11 @@ namespace Signum.Engine.Linq
             
             return binding.Binding;
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitEntity(this);
+        }
     }
 
   
@@ -116,6 +121,11 @@ namespace Signum.Engine.Linq
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
                 constructor;
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitEmbeddedEntity(this);
+        }
     }
 
     internal class MixinEntityExpression : DbExpression
@@ -149,6 +159,11 @@ namespace Signum.Engine.Linq
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
                 constructor;
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitMixinEntity(this);
         }
     }
 
@@ -197,6 +212,11 @@ namespace Signum.Engine.Linq
                 Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
                 );
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitImplementedBy(this);
+        }
     }
 
     internal class ImplementedByAllExpression : DbExpression
@@ -214,6 +234,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "ImplementedByAll{{ ID = {0}, Type = {1} }}".Formato(Id, TypeId);
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitImplementedByAll(this);
         }
     }
 
@@ -239,6 +264,11 @@ namespace Signum.Engine.Linq
         {
             return "({0}).ToLite({1})".Formato(Reference.NiceToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.NiceToString()));
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitLiteReference(this);
+        }
     }
 
     internal class LiteValueExpression : DbExpression
@@ -259,6 +289,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "new Lite<{0}>({1},{2},{3})".Formato(Type.CleanType().TypeName(), TypeId.NiceToString(), Id.NiceToString(), ToStr.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitLiteValue(this);
         }
     }
 
@@ -284,6 +319,11 @@ namespace Signum.Engine.Linq
         {
             return "TypeFie({0};{1})".Formato(TypeValue.TypeName(), ExternalId.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitTypeFieldInit(this);
+        }
     }
 
     internal class TypeImplementedByExpression : DbExpression
@@ -302,6 +342,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "TypeIb({0})".Formato(TypeImplementations.ToString(kvp => "{0}({1})".Formato(kvp.Key.TypeName(), kvp.Value.NiceToString()), " | "));
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitTypeImplementedBy(this);
         }
     }
 
@@ -322,6 +367,11 @@ namespace Signum.Engine.Linq
         {
             return "TypeIba({0})".Formato(TypeColumn.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitTypeImplementedByAll(this);
+        }
     }
 
     internal class MListExpression : DbExpression
@@ -340,6 +390,11 @@ namespace Signum.Engine.Linq
         {
             return "new MList({0},{1})".Formato(TableMList.Name, BackID);
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitMList(this);
+        }
     }
 
     internal class MListProjectionExpression : DbExpression
@@ -349,6 +404,9 @@ namespace Signum.Engine.Linq
         public MListProjectionExpression(Type type, ProjectionExpression projection)
             : base(DbExpressionType.MListProjection, type)
         {
+            if (!projection.Type.ElementType().IsInstantiationOf(typeof(MList<>.RowIdValue)))
+                throw new ArgumentException("projector should be collation of RowIdValue");
+
             this.Projection = projection;
         }
 
@@ -356,28 +414,44 @@ namespace Signum.Engine.Linq
         {
             return "new MList({0})".Formato(Projection.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitMListProjection(this);
+        }
     }
 
     internal class MListElementExpression : DbExpression
     {
         public readonly Expression RowId;
         public readonly EntityExpression Parent;
+        public readonly Expression Order;
         public readonly Expression Element;
 
         public readonly TableMList Table;
 
-        public MListElementExpression(Expression rowId, EntityExpression parent, Expression element, TableMList table)
+        public MListElementExpression(Expression rowId, EntityExpression parent, Expression order, Expression element, TableMList table)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;
             this.Parent = parent;
+            this.Order = order;
             this.Element = element;
             this.Table = table;
         }
 
         public override string ToString()
         {
-            return "MListElement({0})\r\n{{\r\nParent={1},\r\nElement={2}}})".Formato(RowId, Parent, Element);
+            return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".Formato(
+                RowId.NiceToString(), 
+                Parent.NiceToString(), 
+                Order == null ? Order.NiceToString() : null, 
+                Element.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitMListElement(this);
         }
     }
 }

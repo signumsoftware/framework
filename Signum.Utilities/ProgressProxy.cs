@@ -7,17 +7,20 @@ namespace Signum.Utilities
 {
     public class ProgressProxy
     {
-        const int numUpdates = 10000; 
+        const int numUpdates = 10000;
+
+        private string currentTask;
 
         private int min;
         private int max;
         private int position;
-        private int step;
+
         public event EventHandler<ProgressArgs> Changed;
-        private string currentTask;      
-        
+
         public ProgressProxy()
-        { }
+        {
+        }
+
 
         public int Min
         {
@@ -37,7 +40,6 @@ namespace Signum.Utilities
                 if (min <= value && value <= max)
                 {
                     position = value;
-                    if ((step & position) == 0)
                         OnChanged(ProgressAction.Position);
                 }
             }
@@ -46,17 +48,14 @@ namespace Signum.Utilities
         public string CurrentTask
         {
             get { return currentTask; }
-            set
-            {
-                currentTask = value;
-                OnChanged(ProgressAction.Task);
-            }
         }
-
 
         public void Start(int max)
         {
-            Start(0, max, "");
+            this.min = 0;
+            this.max = max;
+            this.position = 0;
+            OnChanged(ProgressAction.Interval);
         }
 
         public void Start(string currentTask)
@@ -71,39 +70,37 @@ namespace Signum.Utilities
             Start(0, max, currentTask);
         }
 
-        public void Start(int min, int max, string currentTask)
+        public void Start(int min, int max, string currentTask, int? position = null)
         {
             if (min < 0 || max < 0)
                 throw new ArgumentException("Min and Max should be greater than 0");
 
-            if(max < min)
+            if (max < min)
                 throw new ArgumentException("Max should be greater or equal than min");
 
-            this.currentTask = currentTask; 
-            this.min = this.position = min;
+            if (position.HasValue && !(min <= position && position <= max))
+                throw new ArgumentException("position should be between min and max");
+
+            this.currentTask = currentTask;
+            this.min = min;
+            this.position = position ?? min;
             this.max = max;
 
-            if (max - min > numUpdates*2)
-                step = RoundToPowerOfTwoMinusOne((max - min) / numUpdates)-1;
-            else
-                step = 1;
-
-            OnChanged(ProgressAction.Interval| ProgressAction.Task);
+            OnChanged(ProgressAction.Interval | ProgressAction.Task);
         }
-
 
         public void NextTask(int position, string currentTask)
         {
             this.position = position;
             this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position | ProgressAction.Task);
+            OnChanged(ProgressAction.Task | ProgressAction.Position);
         }
 
         public void NextTask(string currentTask)
         {
             this.position++;
             this.currentTask = currentTask;
-            OnChanged(ProgressAction.Position | ProgressAction.Task);
+            OnChanged(ProgressAction.Task | ProgressAction.Position);
         }
 
         public void Reset()
@@ -126,9 +123,11 @@ namespace Signum.Utilities
             n |= n >> 2;
             n |= n >> 4;
             n |= n >> 8;
-            n |= n >> 16; 
+            n |= n >> 16;
             return n;
         }
+
+      
     }
 
     public enum ProgressAction

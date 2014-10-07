@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
     /// </summary>
-    public class MetaEvaluator : SimpleExpressionVisitor
+    public class MetaEvaluator : ExpressionVisitor
     {
         public static Expression Clean(Expression expression)
         {
@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
             return new MetaEvaluator { candidates = ExpressionNominator.Nominate(exp) }.Visit(exp);
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if (exp == null)
             {

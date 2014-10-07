@@ -13,6 +13,11 @@ namespace Signum.Web
 {
     public class HtmlTag : IHtmlString
     {
+        public static MvcHtmlString Encode(string text)
+        {
+            return new MvcHtmlString(HttpUtility.HtmlEncode(text));
+        }
+
         TagBuilder tagBuilder;
         public TagBuilder TagBuilder
         {
@@ -210,6 +215,23 @@ namespace Signum.Web
                 sb.AppendLine(html.ToHtmlString());
         }
 
+        public void AddLine()
+        {
+            sb.AppendLine();
+        }
+
+        public IDisposable SurroundLine(string tagName)
+        {
+            return SurroundLine(new HtmlTag(tagName));
+        }
+
+        public IDisposable SurroundLine(HtmlTag div)
+        {
+            AddLine(div.ToHtml(TagRenderMode.StartTag));
+
+            return new Disposable(() => AddLine(div.ToHtml(TagRenderMode.EndTag)));
+        }
+
         public IDisposable Surround(string tagName)
         {
             return Surround(new HtmlTag(tagName));
@@ -217,9 +239,9 @@ namespace Signum.Web
 
         public IDisposable Surround(HtmlTag div)
         {
-            AddLine(div.ToHtml(TagRenderMode.StartTag));
+            Add(div.ToHtml(TagRenderMode.StartTag));
 
-            return new Disposable(() => AddLine(div.ToHtml(TagRenderMode.EndTag)));
+            return new Disposable(() => Add(div.ToHtml(TagRenderMode.EndTag)));
         }
 
         public MvcHtmlString ToHtml()

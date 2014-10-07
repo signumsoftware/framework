@@ -21,7 +21,7 @@ namespace Signum.Engine.Linq
             return apr.Visit(proj);
         }       
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             if (proj != root)
                 return AliasReplacer.Replace(base.VisitProjection(proj), aliasGenerator);

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Entities</RootNamespace>
     <AssemblyName>Signum.Entities</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -36,7 +36,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,10 +58,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
     <OutputPath>bin\Partial\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -86,7 +90,6 @@
     <Compile Include="Basics\Operation.cs" />
     <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />
-    <Compile Include="CallerInfoAttributes.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
@@ -100,6 +103,7 @@
     <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
+    <Compile Include="EnumEntity.cs" />
     <Compile Include="EnumMessages.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -141,7 +145,6 @@
     <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
     <Compile Include="IdentifiableEntity.cs" />
-    <Compile Include="EnumProxy.cs" />
     <Compile Include="MList.cs" />
     <Compile Include="Modifiable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -190,6 +193,24 @@
     <Content Include="Translations\Signum.Entities.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BaseEntities.md" />
+    <None Include="ChangeTracking.md" />
+    <None Include="EntityKindAttribute.md" />
+    <None Include="EnumEntity.md" />
+    <None Include="FieldAttributes.md" />
+    <None Include="index.mdi" />
+    <None Include="Inheritance.md" />
+    <None Include="Introduction.md" />
+    <None Include="Lite.md" />
+    <None Include="Mixin.md" />
+    <None Include="MList.md" />
+    <None Include="PropertyAttributes.md" />
+    <None Include="PropertyRoute.md" />
+    <None Include="Services\Services.md" />
+    <None Include="Symbol.md" />
+    <None Include="Validation.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

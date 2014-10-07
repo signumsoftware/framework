@@ -25,14 +25,6 @@ namespace Signum.Windows
 {
     public partial class EntityDetail : EntityBase
     {
-        public static readonly DependencyProperty OrientationProperty =
-            DependencyProperty.Register("Orientation", typeof(Orientation), typeof(EntityDetail), new UIPropertyMetadata(Orientation.Vertical));
-        public Orientation Orientation
-        {
-            get { return (Orientation)GetValue(OrientationProperty); }
-            set { SetValue(OrientationProperty, value); }
-        }
-
         public static readonly DependencyProperty EntityControlProperty =
             DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail));
         public object EntityControl

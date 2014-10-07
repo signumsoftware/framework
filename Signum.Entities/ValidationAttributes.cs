@@ -128,7 +128,7 @@ namespace Signum.Entities
                 string result =
                     min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().Formato(min, max) :
                     min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().Formato(min) :
-                    max != -1 ? ValidationMessage.HaveMaximun0Characters.NiceToString().Formato(max) : null;
+                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().Formato(max) : null;
 
                 if (allowNulls)
                     result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
@@ -592,7 +592,7 @@ namespace Signum.Entities
                     case DateTimePrecision.Hours: return dtfi.ShortDatePattern + " " + "HH";
                     case DateTimePrecision.Minutes: return "g";
                     case DateTimePrecision.Seconds: return "G";
-                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern.Replace("ss", "ss.fff");
                     default: return "";
                 }
             }
@@ -890,8 +890,8 @@ namespace Signum.Entities
         HaveAPrecisionOf,
         [Description("have between {0} and {1} characters")]
         HaveBetween0And1Characters,
-        [Description("have maximun {0} characters")]
-        HaveMaximun0Characters,
+        [Description("have maximum {0} characters")]
+        HaveMaximum0Characters,
         [Description("have minimum {0} characters")]
         HaveMinimum0Characters,
         [Description("have no repeated elements")]
@@ -917,7 +917,18 @@ namespace Signum.Entities
         [Description("The number of elements of {{0}} has to be {0} {1}")]
         TheNumberOfElementsOf0HasToBe01,
         [Description("Type {0} not allowed")]
-        Type0NotAllowed
+        Type0NotAllowed,
+
+        [Description("{0} is mandatory when {1} is not set")]
+        _0IsMandatoryWhen1IsNotSet,
+        [Description("{0} is mandatory when {1} is set")]
+        _0IsMandatoryWhen1IsSet,
+        [Description("{0} should be null when {1} is not set")]
+        _0ShouldBeNullWhen1IsNotSet,
+        [Description("{0} should be null when {1} is set")]
+        _0ShouldBeNullWhen1IsSet,
+        [Description("{0} should be null")]
+        _0ShouldBeNull
     }
 
 

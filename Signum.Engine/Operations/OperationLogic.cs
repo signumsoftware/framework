@@ -22,7 +22,6 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-
         static Expression<Func<IdentifiableEntity, IQueryable<OperationLogDN>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogDN>().Where(a => a.Target.RefersTo(e));
         [ExpressionField("OperationLogsEntityExpression")]
@@ -135,9 +134,9 @@ namespace Signum.Engine.Operations
                     {
                         Entity = lo,
                         lo.Id,
-                        Target = lo.Target,
+                        lo.Target,
                         lo.Operation,
-                        User = lo.User,
+                        lo.User,
                         lo.Start,
                         lo.End,
                         lo.Exception
@@ -151,8 +150,15 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Operation_PreDeleteSqlSync);
                 sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += OperationLogic_Initializing;
+                sb.Schema.Initializing += OperationLogic_Initializing;
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DateTime limitDate)
+        {
+            Database.Query<OperationLogDN>().Where(o => o.Start < limitDate).UnsafeDelete();
         }
 
         static void OperationLogic_Initializing()
@@ -225,45 +231,18 @@ namespace Signum.Engine.Operations
         #region Events
 
         public static event SurroundOperationHandler SurroundOperation;
-        public static event OperationHandler BeginOperation;
-        public static event OperationHandler EndOperation;
-        public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation;
 
-        internal static IDisposable OnSuroundOperation(IOperation operation, IIdentifiable entity, object[] args)
+        internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogDN log, IIdentifiable entity, object[] args)
         {
-            if (SurroundOperation == null)
-                return null;
-
-            IDisposable result = null;
-            foreach (SurroundOperationHandler surround in SurroundOperation.GetInvocationList())
-            {
-                result = Disposable.Combine(result, surround(operation, (IdentifiableEntity)entity, args));
-            }
-
-            return result;
+            return Disposable.Combine(SurroundOperation, f => f(operation, log, (IdentifiableEntity)entity, args));
         }
 
-        internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
-        {
-            if (BeginOperation != null)
-                BeginOperation(operation, (IdentifiableEntity)entity);
-        }
-
-        internal static void OnEndOperation(IOperation operation, IIdentifiable entity)
-        {
-            if (EndOperation != null)
-                EndOperation(operation, (IdentifiableEntity)entity);
-        }
-
-        internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, object[] args, Exception ex)
+        internal static void SetExceptionData(Exception ex, IIdentifiable entity, object[] args)
         {
             ex.Data["entity"] = entity;
             if (args != null)
                 ex.Data["args"] = args;
-
-            if (ErrorOperation != null)
-                ErrorOperation(operation, (IdentifiableEntity)entity, ex);
         }
 
         public static bool OperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
@@ -286,18 +265,18 @@ namespace Signum.Engine.Operations
 
         public static void Register(this IOperation operation)
         {
-            if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.Type.Name));
+            if (!operation.OverridenType.IsIIdentifiable())
+                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.OverridenType.Name));
 
             operation.AssertIsValid();
 
-            operations.GetOrAddDefinition(operation.Type).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
+            operations.GetOrAddDefinition(operation.OverridenType).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
 
             operationsFromKey.Reset();
 
             if (IsExecuteNoLite(operation))
             {
-                SetProtectedSave(operation.Type, true);
+                SetProtectedSave(operation.OverridenType, true);
             }
         }
 
@@ -308,12 +287,12 @@ namespace Signum.Engine.Operations
 
         public static void RegisterReplace(this IOperation operation)
         {
-            if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+            if (!operation.OverridenType.IsIIdentifiable())
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.OverridenType));
 
             operation.AssertIsValid();
 
-            operations.GetOrAddDefinition(operation.Type)[operation.OperationSymbol] = operation;
+            operations.GetOrAddDefinition(operation.OverridenType)[operation.OperationSymbol] = operation;
 
             operationsFromKey.Reset(); //unnecesarry?
         }
@@ -365,6 +344,7 @@ namespace Signum.Engine.Operations
                 HasStates = (oper as IGraphHasFromStatesOperation).Try(eo => eo.HasFromStates) ?? false,
                 HasCanExecute = (oper as IEntityOperation).Try(eo => eo.HasCanExecute) ?? false,
                 AllowsNew = (oper as IEntityOperation).Try(eo => eo.AllowsNew) ?? false,
+                BaseType = (oper as IEntityOperation).Try(eo => eo.BaseType) ?? (oper as IConstructorFromManyOperation).Try(eo => eo.BaseType)
             };
         }
 
@@ -390,7 +370,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IExecuteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            var op = Find<IExecuteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Execute(entity, args);
             return (T)(IIdentifiable)entity;
         }
@@ -407,7 +387,7 @@ namespace Signum.Engine.Operations
             where B : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
-            var op = Find<IExecuteOperation>(lite.EntityType, symbol.Operation).AssertLite();
+            var op = Find<IExecuteOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             op.Execute(entity, args);
             return entity;
         }
@@ -425,7 +405,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IEntityOperation>(entity.GetType(), symbol.Operation);
+            var op = Find<IEntityOperation>(entity.GetType(), symbol.Symbol);
             return op.CanExecute(entity);
         }
 
@@ -438,12 +418,12 @@ namespace Signum.Engine.Operations
 
         #region Delete
 
-        public static void Delete<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
+        public static void DeleteLite<T, B>(this Lite<T> lite, DeleteSymbol<B> symbol, params object[] args)
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
             IIdentifiable entity = lite.RetrieveAndForget();
-            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Operation);
+            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Symbol);
             op.Delete(entity, args);
         }
 
@@ -458,7 +438,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable, B
             where B : class, IIdentifiable
         {
-            var op = Find<IDeleteOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            var op = Find<IDeleteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Delete(entity, args);
         }
 
@@ -479,7 +459,7 @@ namespace Signum.Engine.Operations
         public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object[] args)
             where T : class, IIdentifiable
         {
-            var op = Find<IConstructOperation>(typeof(T), symbol.Operation);
+            var op = Find<IConstructOperation>(typeof(T), symbol.Symbol);
             return (T)op.Construct(args);
         }
         #endregion
@@ -491,7 +471,7 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Operation).AssertEntity((IdentifiableEntity)(object)entity);
+            var op = Find<IConstructorFromOperation>(entity.GetType(), symbol.Symbol).AssertEntity((IdentifiableEntity)(object)entity);
             return (T)op.Construct(entity, args);
         }
 
@@ -506,7 +486,7 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Operation).AssertLite();
+            var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
@@ -520,7 +500,9 @@ namespace Signum.Engine.Operations
         #region ConstructFromMany
         public static IdentifiableEntity ServiceConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationSymbol, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationSymbol).Construct(lites, args);
+            var onlyType = type ?? lites.Select(a => a.EntityType).Distinct().Only();
+
+            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
         }
 
         public static T ConstructFromMany<F, FB, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<FB> symbol, params object[] args)
@@ -528,7 +510,9 @@ namespace Signum.Engine.Operations
             where FB : class, IIdentifiable
             where F : class, IIdentifiable, FB
         {
-            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), symbol.Operation).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
+            var onlyType = lites.Select(a => a.EntityType).Distinct().Only();
+
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(onlyType ?? typeof(F), symbol.Symbol).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
         }
         #endregion
 
@@ -559,33 +543,33 @@ namespace Signum.Engine.Operations
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Symbol);
         }
 
         public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol) 
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Operation);
+            return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Symbol);
         }
 
         public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbol)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Operation);
+            return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Symbol);
         }
 
         public static Graph<T>.Execute FindExecute<T>(ExecuteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Symbol);
         }
 
         public static Graph<T>.Delete FindDelete<T>(DeleteSymbol<T> symbol)
             where T : class, IIdentifiable
         {
-            return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Operation);
+            return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Symbol);
         }
 
         static T AssertLite<T>(this T result)
@@ -666,7 +650,7 @@ namespace Signum.Engine.Operations
             return FindOperation(type, operationSymbol).OperationType;
         }
 
-        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> operationSymbols)
+        public static Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lites, List<OperationSymbol> operationSymbols)
         {
             Dictionary<OperationSymbol, string> result = null;
             using (ExecutionMode.Global())
@@ -719,11 +703,10 @@ namespace Signum.Engine.Operations
     public interface IOperation
     {
         OperationSymbol OperationSymbol { get; }
-        Type Type { get; }
+        Type OverridenType { get; }
         OperationType OperationType { get; }
         bool Returns { get; }
         Type ReturnType { get; }
-
         void AssertIsValid();
     }
 
@@ -733,10 +716,11 @@ namespace Signum.Engine.Operations
         bool AllowsNew { get; }
         string CanExecute(IIdentifiable entity);
         bool HasCanExecute { get; }
+        Type BaseType { get; }
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, IdentifiableEntity entity, object[] args);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogDN log, IdentifiableEntity entity, object[] args);
     public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);
     public delegate void ErrorOperationHandler(IOperation operation, IdentifiableEntity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);

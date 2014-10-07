@@ -164,10 +164,10 @@ namespace Signum.Windows
             this.QueryName = queryName;
         }
 
-        public ExploreOptions(object queryName, string path, object value)
+        public ExploreOptions(object queryName, string columnName, object value)
         {
             this.QueryName = queryName;
-            this.FilterOptions.Add(new FilterOption(path, value));
+            this.FilterOptions.Add(new FilterOption(columnName, value));
         }
 
         public EventHandler Closed { get; set; }
@@ -228,21 +228,21 @@ namespace Signum.Windows
     {
         public FilterOption(){}
 
-        public FilterOption(string path, Func<object> value):
-            this(path, (object)value)
+        public FilterOption(string columnName, Func<object> value):
+            this(columnName, (object)value)
         {
 
         }
 
-        public FilterOption(string path, object value)
+        public FilterOption(string columnName, object value)
         {
-            this.Path = path;
+            this.ColumnName = columnName;
             this.Operation = FilterOperation.EqualTo;
             this.Value = value; 
         }
 
         public QueryToken Token { get; set; }
-        public string Path { get; set; }
+        public string ColumnName { get; set; }
         public bool Frozen { get; set; }
         public FilterOperation Operation { get; set; }
 
@@ -312,7 +312,7 @@ namespace Signum.Windows
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(Path, Operation, Value);
+            return "{0} {1} {2}".Formato(ColumnName, Operation, Value);
         }
 
         public FilterOption CloneIfNecessary()
@@ -324,9 +324,21 @@ namespace Signum.Windows
             {
                  Operation = Operation,
                  Token = Token,
-                 Path = Path,
+                 ColumnName = ColumnName,
                  Value = Dispatcher.Return(()=>Value)
             };
+        }
+
+        public static void SetFilterTokens(IEnumerable<FilterOption> filters, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var f in filters)
+            {
+                if (f.Token == null && f.ColumnName.HasText())
+                    f.Token = QueryUtils.Parse(f.ColumnName, qd, options);
+
+                f.RefreshRealValue();
+            }
         }
     }
 
@@ -336,14 +348,14 @@ namespace Signum.Windows
         { 
         }
 
-        public OrderOption (string path)
+        public OrderOption (string columnName)
         {
-            this.Path = path;
+            this.ColumnName = columnName;
         }
 
-        public OrderOption(string path, OrderType orderType)
+        public OrderOption(string columnName, OrderType orderType)
         {
-            this.Path = path;
+            this.ColumnName = columnName;
             this.OrderType = orderType;
         }
 
@@ -352,7 +364,7 @@ namespace Signum.Windows
             throw new NotImplementedException();
         }
 
-        public string Path { get; set; }
+        public string ColumnName { get; set; }
         public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
 
@@ -371,9 +383,18 @@ namespace Signum.Windows
             return new OrderOption
             {
                 Token = Token,
-                Path = Path,
+                ColumnName = ColumnName,
                 OrderType = OrderType
             };
+        }
+
+        public static void SetOrderTokens(IEnumerable<OrderOption> orders, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var o in orders)
+            {
+                o.Token = QueryUtils.Parse(o.ColumnName, qd, options);
+            }
         }
     }
 
@@ -383,9 +404,9 @@ namespace Signum.Windows
         {
         }
 
-        public ColumnOption(string path)
+        public ColumnOption(string columnName)
         {
-            this.Path = path;
+            this.ColumnName = columnName;
         }
 
         protected override Freezable CreateInstanceCore()
@@ -394,7 +415,7 @@ namespace Signum.Windows
         }
 
         //For temporaly XAML only
-        public string Path { get; set; }
+        public string ColumnName { get; set; }
         public QueryToken Token { get; set; }
         public string DisplayName { get; set; }
 
@@ -412,8 +433,33 @@ namespace Signum.Windows
             {
                 DisplayName = DisplayName,
                 Token = Token,
-                Path = Path,
+                ColumnName = ColumnName,
             };
         }
+
+        public static void SetColumnTokens(IEnumerable<ColumnOption> columns, QueryDescription qd, bool canAggregate = false)
+        {
+            var options = SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            foreach (var c in columns)
+            {
+                c.Token = QueryUtils.Parse(c.ColumnName, qd, options);
+            }
+        }
+
+        public static List<Column> MergeColumns(IEnumerable<ColumnOption> columns, ColumnOptionsMode mode, QueryDescription qd)
+        {
+            switch (mode)
+            {
+                case ColumnOptionsMode.Add:
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
+                        columns.Select(co => co.ToColumn())).ToList();
+                case ColumnOptionsMode.Remove:
+                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
+                case ColumnOptionsMode.Replace:
+                    return columns.Select(co => co.ToColumn()).ToList();
+                default:
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(mode));
+            }
+        }    
     }
 }

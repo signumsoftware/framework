@@ -20,7 +20,7 @@ namespace Signum.Web
 
     public class ToolBarButton
     {
-        public string Id { get; set; }
+        public string Id { get; private set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }
@@ -33,11 +33,13 @@ namespace Signum.Web
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
 
-        public ToolBarButton()
+        public ToolBarButton(string prefix, string idToAppend)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
+            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
         }
+
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
@@ -58,14 +60,10 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled)
-            {
-                if (OnClick != null)
-                    a.Attr("onclick", OnClick.ToString());
+            if (Href != null)
+                a.Attr("href", Href);
 
-                a.Attr("href", Href.DefaultText("javascript:void(0)"));
-            }
-            else
+            if (!Enabled)
                 a.Attr("disabled", "disabled");
 
             var result = new HtmlTag("div").Class("btn-group").InnerHtml(a);
@@ -77,14 +75,22 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            return result;
+            var html = result.ToHtml();
+
+            if (OnClick == null)
+                return html;
+
+            TypeContext.AssertId(this.Id);
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
+
+            return html.Concat(script);
         }
 
         public IMenuItem ToMenuItem()
         {
-            var result = new MenuItem
+            var result = new MenuItem(Id, "")
             {
-                Id = Id,
                 Text = Text,
                 Tooltip = Tooltip,
                 Title = Title,
@@ -109,7 +115,7 @@ namespace Signum.Web
 
     public class MenuItem : IMenuItem
     {
-        public string Id { get; set; }
+        public string Id { get; private set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }
@@ -122,10 +128,11 @@ namespace Signum.Web
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
 
-        public MenuItem()
+        public MenuItem(string prefix, string idToAppend)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
+            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
         }
 
         public MvcHtmlString ToHtml()
@@ -145,17 +152,13 @@ namespace Signum.Web
             if (Title.HasText())
                 a.Attr("title", Title);
 
-            if (Enabled)
-            {
-                if (OnClick != null)
-                    a.Attr("onclick", OnClick.ToString());
+            if (Href != null)
+                a.Attr("href", Href);
 
-                a.Attr("href", Href.DefaultText("#"));
-            }
-            else
+            if (!Enabled)
                 a.Attr("disabled", "disabled");
 
-            var result = new HtmlTag("li").InnerHtml(a);
+            var result = new HtmlTag("li").InnerHtml(a.ToHtml());
 
             if (Tooltip.HasText())
             {
@@ -164,7 +167,16 @@ namespace Signum.Web
                 result.Attr("title", Tooltip);
             }
 
-            return result;
+            var html = result.ToHtml();
+
+            if (OnClick == null)
+                return html;
+
+            TypeContext.AssertId(this.Id);
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
+
+            return html.Concat(script);
         }
     }
 }

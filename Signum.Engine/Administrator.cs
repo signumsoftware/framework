@@ -222,22 +222,6 @@ namespace Signum.Engine
             }
         }
 
-        public static void SetSnapshotIsolation(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(databaseName, value));
-        }
-
-        public static void MakeSnapshotIsolationDefault(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
-        }
-
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {
@@ -251,7 +235,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Translate(query.Expression, tr => tr.GetMainPreCommand());
+            return prov.Translate(query.Expression, tr => tr.MainCommand);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
@@ -259,7 +243,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
@@ -267,14 +251,14 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
         {
             var prov = ((DbQueryProvider)update.Query.Provider);
 
-            return prov.Update(update, cr => cr.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Update(update, sql => sql, removeSelectRowCount: true);
         }
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()

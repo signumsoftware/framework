@@ -21,11 +21,16 @@ namespace Signum.Entities
             get { return modified; }
             protected internal set
             {
-                if(modified == ModifiedState.Sealed)
+                if (modified == ModifiedState.Sealed)
                     throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
 
                 modified = value;
             }
+        }
+
+        public void SetCleanModified(bool isSealed)
+        {
+            Modified = isSealed ? ModifiedState.Sealed : ModifiedState.Clean;
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression Visit(Expression expression)
+        public override Expression Visit(Expression expression)
         {
             if (this.candidates.Contains(expression))
             {
@@ -127,7 +127,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression Visit(Expression expression)
+        public override Expression Visit(Expression expression)
         {
             if (this.candidates.Contains(expression))
             {

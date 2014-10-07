@@ -37,7 +37,7 @@ namespace Signum.Web
             bool isEmbedded = type.ElementType().IsEmbeddedEntity();
 
             Find = false;
-            Reorder = false;
+            Move = false;
             Create = isEmbedded;
             Navigate = !isEmbedded;
             View = isEmbedded;

@@ -120,11 +120,11 @@ namespace Signum.Windows
         {
             RefreshEnabled();
 
-            var entity = e.NewValue;
+            var entity = (ModifiableEntity)e.NewValue;
             if(entity == null)
                 return;
 
-            ButtonBarEventArgs ctx = new ButtonBarEventArgs
+            EntityButtonContext ctx = new EntityButtonContext
             {
                 MainControl = MainControl,
                 ViewButtons = ViewMode,
@@ -135,6 +135,16 @@ namespace Signum.Windows
             List<FrameworkElement> elements = Navigator.Manager.GetToolbarButtons(entity, ctx);
 
             ButtonBar.SetButtons(elements);
+
+            var widgets =  Navigator.Manager.GetEmbeddedWigets(entity, ctx);
+
+            spTop.Children.Clear();
+            foreach (var w in widgets.Where(w=>w.Position == EmbeddedWidgetPostion.Top).OrderBy(a=>a.Order))
+                spTop.Children.Add(w.Control);
+
+            spBottom.Children.Clear();
+            foreach (var w in widgets.Where(w => w.Position == EmbeddedWidgetPostion.Bottom).OrderBy(a => a.Order))
+                spBottom.Children.Add(w.Control); 
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -277,6 +287,27 @@ namespace Signum.Windows
             return new NormalWindowAutomationPeer(this);
         }
 
+        public static readonly RoutedEvent PreEntityLoadedEvent = EventManager.RegisterRoutedEvent(
+            "PreEntityLoaded", RoutingStrategy.Direct, typeof(EventHandler<PreEntityLoadedEventArgs>), typeof(NormalWindow));
+        public event EventHandler<PreEntityLoadedEventArgs> PreEntityLoaded
+        {
+            add { AddHandler(PreEntityLoadedEvent, value); }
+            remove { RemoveHandler(PreEntityLoadedEvent, value); }
+        }
+
+        internal void OnPreEntityLoaded(ModifiableEntity entity)
+        {
+            this.RaiseEvent(new PreEntityLoadedEventArgs(PreEntityLoadedEvent) { Entity = entity });
+        }
+    }
+
+    public class PreEntityLoadedEventArgs : RoutedEventArgs
+    {
+        public ModifiableEntity Entity;
+        public PreEntityLoadedEventArgs(RoutedEvent re)
+            : base(re)
+        {
+        }
     }
 
     public enum AllowErrors
@@ -288,10 +319,10 @@ namespace Signum.Windows
 
     public interface IHaveToolBarElements
     {
-        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
+        List<FrameworkElement> GetToolBarElements(object dataContext, EntityButtonContext ctx);
     }
 
-    public class ButtonBarEventArgs
+    public class EntityButtonContext
     {
         public Control MainControl { get; set; }
         public ViewMode ViewButtons { get; set; }

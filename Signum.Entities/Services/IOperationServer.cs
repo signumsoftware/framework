@@ -38,10 +38,11 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
+        [OperationContract, NetDataContract]
+        void DeleteLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args);
-
+        void Delete(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
         IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args);
@@ -58,9 +59,6 @@ namespace Signum.Services
         IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
-        Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<OperationSymbol> cleanKeys);
-
-       
+        Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lites, List<OperationSymbol> cleanKeys);
     }
-
 }
