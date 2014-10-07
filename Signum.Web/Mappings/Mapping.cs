@@ -682,7 +682,7 @@ namespace Signum.Web
             {
                 Entity identifiable = (Entity)(ModifiableEntity)ctx.Value;
 
-                var result = GetIdentifiableEntity(ctx.Controller, runtimeInfo, identifiable);
+                var result = GetEntity(ctx.Controller, runtimeInfo, identifiable);
 
                 if (result is Entity && runtimeInfo.Ticks != null)
                     ((Entity)(ModifiableEntity)result).ticks = runtimeInfo.Ticks.Value;
@@ -691,7 +691,7 @@ namespace Signum.Web
             }
         }
 
-        private static T GetIdentifiableEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, Entity identifiable)
+        private static T GetEntity(ControllerBase controller,  RuntimeInfo runtimeInfo, Entity identifiable)
         {
             if (runtimeInfo.IsNew)
             {

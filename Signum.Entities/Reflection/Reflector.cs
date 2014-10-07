@@ -43,7 +43,7 @@ namespace Signum.Entities.Reflection
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsQuery;
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsSymbolContainer;
-            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIEntity;
 
             DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
             DescriptionManager.Invalidate();
@@ -73,7 +73,7 @@ namespace Signum.Entities.Reflection
             return EnumsInEntities.Value.Contains(t) ? DescriptionOptions.Members | DescriptionOptions.Description : (DescriptionOptions?)null;
         }
 
-        static DescriptionOptions? DescriptionManager_IsIIdentifiable(Type t)
+        static DescriptionOptions? DescriptionManager_IsIEntity(Type t)
         {
              return t.IsInterface && typeof(IEntity).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }

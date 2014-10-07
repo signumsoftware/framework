@@ -293,7 +293,7 @@ namespace Signum.Web
             if (type.IsEntity())
                 return new RuntimeInfo((Entity)this.UntypedValue);
 
-            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
+            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, Entity or EmbeddedEntity".Formato(type));
         }
 
         internal abstract TypeContext Clone(object newValue);

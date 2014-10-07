@@ -250,11 +250,7 @@ namespace Signum.Engine.Maps
                 item.ToSchema(schemaName);
         }
 
-        FieldPrimaryKey primaryKey;
-        public FieldPrimaryKey PrimaryKey
-        {
-            get { return primaryKey ?? (primaryKey = this.Fields.Values.Select(a => a.Field).OfType<FieldPrimaryKey>().SingleEx()); }
-        }
+        public FieldPrimaryKey PrimaryKey { get; internal set; }
 
         IColumn ITable.PrimaryKey
         {

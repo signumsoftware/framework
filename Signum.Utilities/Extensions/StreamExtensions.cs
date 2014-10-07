@@ -77,17 +77,54 @@ namespace Signum.Utilities
         public static R Using<T, R>(this T disposable, Func<T, R> function)
             where T : IDisposable
         {
-            using (disposable)
+            try
+            {
                 return function(disposable);
+            }
+            catch (Exception e)
+            {
+                var de = disposable as IDisposableException;
+
+                if (de != null)
+                    de.OnException(e);
+
+                throw e;
+            }
+            finally
+            {
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
 
         [DebuggerStepThrough]
         public static void EndUsing<T>(this T disposable, Action<T> action)
             where T : IDisposable
         {
-            using (disposable)
+            try
+            {
                 action(disposable);
+            }
+            catch (Exception e)
+            {
+                var de = disposable as IDisposableException;
+
+                if (de != null)
+                    de.OnException(e);
+
+                throw e;
+            }
+            finally
+            {
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
+    }
+
+    public interface IDisposableException : IDisposable
+    {
+        void OnException(Exception ex);
     }
 
     public class ProgressStream : Stream

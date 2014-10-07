@@ -96,7 +96,7 @@ namespace Signum.Entities
                 var constructors = mixinEntity.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
                 if (constructors.Length != 1)
-                    throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (IdentifiableEntity mainEntity, MixinEntity next)"
+                    throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (Entity mainEntity, MixinEntity next)"
                         .Formato(mixinEntity.Name));
 
                 var ci = constructors.Single();
@@ -104,7 +104,7 @@ namespace Signum.Entities
                 var pi = ci.GetParameters();
 
                 if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(Entity) || pi[1].ParameterType != typeof(MixinEntity))
-                    throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (IdentifiableEntity mainEntity, MixinEntity next)");
+                    throw new InvalidOperationException("{0} does not have a non-public construtor with parameters (Entity mainEntity, MixinEntity next)");
 
                 return (Func<Entity, MixinEntity, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();
             });
