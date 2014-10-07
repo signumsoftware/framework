@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksField(false)]
     public class OperationLogDN : Entity
     {
         [ImplementedByAll]

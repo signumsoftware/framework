@@ -574,6 +574,11 @@ namespace Signum.Engine.Maps
             return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
         }
 
+        public Field Field(PropertyRoute route)
+        {
+            return FindField(Table(route.RootType), route.Members);
+        }
+
         public override string ToString()
         {
             return "Schema ( tables: {0} )".Formato(tables.Count);
