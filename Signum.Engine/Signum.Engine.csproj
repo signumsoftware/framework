@@ -99,6 +99,7 @@
     <Compile Include="Basics\ExceptionLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
+    <Compile Include="CodeGeneration\EntityCodeGenerator.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Executor.cs" />
     <Compile Include="Connection\FieldReader.cs" />

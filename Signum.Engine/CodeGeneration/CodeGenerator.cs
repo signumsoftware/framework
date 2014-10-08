@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 
 namespace Signum.Engine.CodeGeneration
 {
-    public class CodeGenerator
-    {   
+    public static class CodeGenerator
+    {
+        public static EntityCodeGenerator Entities = new EntityCodeGenerator();
+
         public static void GenerateCodeConsole()
         {
             while (true)
             {
                 var action = new ConsoleSwitch<string, Action>("What do you want to generate today?")
                 {
-                    {"E", EntitiesFromDatabaseTables, "Entities (from Database tables)"},
+                    {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", LogicFromEntites, "Logic (from entites)"},
                     {"Win", WindowsFromEntites, "Logic (from entites)"},
                     {"Web", WebFromEntites, "Logic (from entites)"}
@@ -27,23 +31,9 @@ namespace Signum.Engine.CodeGeneration
 
                 action();
 
-                if (action == EntitiesFromDatabaseTables)
+                if (action == Entities.GenerateEntitiesFromDatabaseTables)
                     return;
             }
-        }
-
-        public static void EntitiesFromDatabaseTables()
-        {
-            var dic = SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
-
-            dic.RemoveRange(Schema.Current.GetDatabaseTables().Select(a => a.Name.ToString()));
-
-            Dictionary<DiffTable, TableOptions> options = new Dictionary<DiffTable, TableOptions>(); 
-        }
-
-        public class TableOptions
-        {
-            public string MListParentColumnName;
         }
 
         public static void LogicFromEntites()
@@ -59,6 +49,17 @@ namespace Signum.Engine.CodeGeneration
         public static void WebFromEntites()
         {
 
+        }
+
+        internal static void GetSolutionInfo(out string solutionFolder, out string solutionName)
+        {
+            var m = Regex.Match(Environment.CurrentDirectory, @"(?<solutionFolder>.*)\\(?<solutionName>.*).Load\\bin\\(Debug|Release)", RegexOptions.ExplicitCapture);
+
+            if (!m.Success)
+                throw new InvalidOperationException("Unable to GetSolutionInfo from non-standart path " + Environment.CurrentDirectory + ". Override GetSolutionInfo");
+
+            solutionFolder = m.Groups["solutionFolder"].Value;
+            solutionName = m.Groups["solutionName"].Value;
         }
     }
 }
