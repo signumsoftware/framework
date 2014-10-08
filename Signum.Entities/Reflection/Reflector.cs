@@ -92,10 +92,10 @@ namespace Signum.Entities.Reflection
 
         public static string CleanTypeName(Type t)
         {
-            return t.Name.RemovePostfix("DN").RemovePostfix("Model").RemovePostfix("Symbol");
+            return t.Name.RemoveSuffix("DN").RemoveSuffix("Model").RemoveSuffix("Symbol");
         }
 
-        static string RemovePostfix(this string text, string postfix)
+        public static string RemoveSuffix(this string text, string postfix)
         {
             if (text.EndsWith(postfix) && text != postfix)
                 return text.Substring(0, text.Length - postfix.Length);
