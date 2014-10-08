@@ -310,8 +310,6 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
         public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName> databases)
         {
-            var udttypes = Schema.Current.Settings.UdtSqlName.Values.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-
             List<DiffTable> allTables = new List<DiffTable>();
 
             foreach (var db in databases)
@@ -326,13 +324,14 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                          {
                              Name = new ObjectName(new SchemaName(db, s.name), t.name),
                              Colums = (from c in t.Columns()
-                                       join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
+                                       join userType in Database.View<SysTypes>().DefaultIfEmpty() on c.user_type_id equals userType.user_type_id
+                                       join sysType in Database.View<SysTypes>().DefaultIfEmpty() on c.system_type_id equals sysType.user_type_id 
                                        join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
                                        select new DiffColumn
                                        {
                                            Name = c.name,
-                                           SqlDbType = udttypes.Contains(type.name) ? SqlDbType.Udt : ToSqlDbType(type.name),
-                                           UdtTypeName = udttypes.Contains(type.name) ? type.name : null,
+                                           SqlDbType = sysType == null ? SqlDbType.Udt : ToSqlDbType(sysType.name),
+                                           UserTypeName =  sysType == null ? userType.name : null,
                                            Nullable = c.is_nullable,
                                            Length = c.max_length,
                                            Precission = c.precision,
@@ -353,11 +352,12 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                                        }).ToDictionary(a => a.Name, "columns"),
 
                              SimpleIndices = (from i in t.Indices()
-                                              where !i.is_primary_key //&& !(i.is_unique && i.name.StartsWith("IX_"))
+                                              where !i.is_primary_key && i.type != 0  /*heap indexes*/
                                               select new DiffIndex
                                               {
                                                   IsUnique = i.is_unique,
                                                   IndexName = i.name,
+                                                  FilterDefinition = i.filter_definition,
                                                   Columns = (from ic in i.IndexColumns()
                                                              join c in t.Columns() on ic.column_id equals c.column_id
                                                              select c.name).ToList()
@@ -553,6 +553,11 @@ EXEC(@{1})".Formato(databaseName, variableName));
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
 
         public List<DiffStats> Stats = new List<DiffStats>();
+
+        public override string ToString()
+        {
+            return Name.ToString();
+        }
     }
 
     public class DiffStats
@@ -567,6 +572,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
         public bool IsUnique;
         public string IndexName;
         public string ViewName;
+        public string FilterDefinition;
 
         public List<string> Columns;
 
@@ -585,7 +591,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
     {
         public string Name;
         public SqlDbType SqlDbType;
-        public string UdtTypeName; 
+        public string UserTypeName; 
         public bool Nullable;
         public int Length; 
         public int Precission;
@@ -601,7 +607,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
         {
             var result =
                    SqlDbType == other.SqlDbType
-                && StringComparer.InvariantCultureIgnoreCase.Equals(UdtTypeName, other.UdtTypeName)
+                && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UdtTypeName)
                 && Nullable == other.Nullable
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / 2 || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
@@ -617,6 +623,24 @@ EXEC(@{1})".Formato(databaseName, variableName));
                 return true;
 
             return StringComparer.InvariantCultureIgnoreCase.Equals(this.Default, "(" + other.Default + ")");
+        }
+
+        public DiffColumn Clone()
+        {
+            return new DiffColumn
+            {
+                Name = Name,
+                ForeingKey = ForeingKey,
+                Default = Default,
+                Identity = Identity,
+                Length = Length,
+                PrimaryKey = PrimaryKey,
+                Nullable = Nullable,
+                Precission = Precission,
+                Scale = Scale,
+                SqlDbType = SqlDbType,
+                UserTypeName = UserTypeName,
+            };
         }
     }
 

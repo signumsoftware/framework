@@ -164,6 +164,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int default_object_id;
         public bool is_nullable;
         public int user_type_id;
+        public int system_type_id;
         public int max_length;
         public int precision;
         public int scale;
@@ -229,6 +230,8 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public bool is_unique;
         public bool is_primary_key;
+        public int type;
+        public string filter_definition;
 
         static Expression<Func<SysIndexes, IQueryable<SysIndexColumn>>> IndexColumnsExpression =
             ix => Database.View<SysIndexColumn>().Where(ixc => ixc.index_id == ix.index_id && ixc.object_id == ix.object_id);
