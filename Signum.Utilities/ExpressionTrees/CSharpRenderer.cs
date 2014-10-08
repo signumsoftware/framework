@@ -275,6 +275,17 @@ namespace Signum.Utilities.ExpressionTrees
             else
                 return new CodeTypeReference(type); ;
         }
+        public static HashSet<string> Keywords = @"abstract as base bool break byte case catch char checked class const continue decimal default 
+delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long
+namespace new null object operator out out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static 
+string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while".Split(' ', '\r', '\n').NotNull().ToHashSet();
 
+        public static string Escape(string p)
+        {
+            if (Keywords.Contains(p))
+                return "@" + p;
+
+            return p;
+        }
     }
 }
