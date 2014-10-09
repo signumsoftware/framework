@@ -271,7 +271,7 @@ namespace Signum.Entities
                     info.AddValue("entityOrNull", this.entityOrNull, typeof(T));
 
                 if (this.id != null)
-                    info.AddValue("id", this.id.Value, typeof(int));
+                    info.AddValue("id", this.id.Value, typeof(PrimaryKey));
 
                 if (this.toStr != null)
                     info.AddValue("toStr", this.toStr, typeof(string));

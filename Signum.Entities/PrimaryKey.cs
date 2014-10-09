@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
@@ -16,7 +17,7 @@ namespace Signum.Entities
     /// The default value represents an invalid state.  
     /// </summary>
     [Serializable, TypeConverter(typeof(PrimaryKeyTypeConverter))]
-    public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>
+    public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, ISerializable
     {
         public static Polymorphic<Type> PrimaryKeyType = new Polymorphic<Type>(minimumType: typeof(Entity));
 
@@ -40,7 +41,7 @@ namespace Signum.Entities
             PrimaryKeyType.ImportDefinitions(dic);
         }
 
-        public readonly IComparable Object;
+        public IComparable Object;
 
         public PrimaryKey(IComparable obj)
         {
@@ -234,6 +235,27 @@ namespace Signum.Entities
         public string ToString(string format)
         {
             return ((IFormattable)this.Object).ToString(format, CultureInfo.CurrentCulture);
+        }
+
+        private PrimaryKey(SerializationInfo info, StreamingContext ctxt)
+        {
+            this.Object = null;
+            foreach (SerializationEntry item in info)
+            {
+                switch (item.Name)
+                {
+                    case "Object": this.Object = (IComparable)item.Value; break;
+                }
+            }
+
+            if (this.Object == null)
+                throw new SerializationException("Object not set");
+        }
+
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Object", this.Object);
         }
     }
 
