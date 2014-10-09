@@ -339,7 +339,7 @@ namespace Signum.Entities
             return null;
         }
 
-        static PropertyInfo piId = ReflectionTools.GetPropertyInfo((IdentifiableEntity a) => a.Id);
+        static PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
         public static List<PropertyRoute> GenerateRoutes(Type type)
