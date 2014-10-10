@@ -88,7 +88,7 @@ namespace Signum.Utilities
                 if (de != null)
                     de.OnException(e);
 
-                throw e;
+                throw;
             }
             finally
             {
@@ -112,7 +112,7 @@ namespace Signum.Utilities
                 if (de != null)
                     de.OnException(e);
 
-                throw e;
+                throw;
             }
             finally
             {
