@@ -269,16 +269,23 @@ namespace Signum.Utilities
         public static T ChooseConsole<T>(this List<T> collection, Func<T, string> getString = null) where T : class
         {
             var cs = new ConsoleSwitch<int, T>();
+            cs.Load(collection, getString);
+            return cs.Choose();
+        }
+
+        public static ConsoleSwitch<int, T> Load<T>(this ConsoleSwitch<int, T> cs, List<T> collection, Func<T, string> getString = null) where T : class
+        {
             for (int i = 0; i < collection.Count; i++)
             {
-                var item = collection[i]; 
+                var item = collection[i];
                 if (getString != null)
                     cs.Add(i, item, getString(item));
                 else
                     cs.Add(i, item);
             }
 
-            return cs.Choose();
+            return cs;
         }
+
     }
 }
