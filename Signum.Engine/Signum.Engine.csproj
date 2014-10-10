@@ -82,6 +82,7 @@
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -99,6 +100,8 @@
     <Compile Include="Basics\ExceptionLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
+    <Compile Include="CodeGeneration\WebCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\LogicCodeGenerator.cs" />
     <Compile Include="CodeGeneration\EntityCodeGenerator.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Executor.cs" />

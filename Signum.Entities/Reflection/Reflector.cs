@@ -92,13 +92,30 @@ namespace Signum.Entities.Reflection
 
         public static string CleanTypeName(Type t)
         {
-            return t.Name.RemoveSuffix("DN").RemoveSuffix("Model").RemoveSuffix("Symbol");
+            if (t.Name.EndsWith("DN"))
+                return t.Name.RemoveSuffix("DN");
+
+            if (t.Name.EndsWith("Model"))
+                return t.Name.RemoveSuffix("Model");
+
+            if (t.Name.EndsWith("Symbol"))
+                return t.Name.RemoveSuffix("Symbol");
+
+            return t.Name;
         }
 
         public static string RemoveSuffix(this string text, string postfix)
         {
             if (text.EndsWith(postfix) && text != postfix)
                 return text.Substring(0, text.Length - postfix.Length);
+
+            return text;
+        }
+
+        public static string RemovePrefix(this string text, string prefix)
+        {
+            if (text.StartsWith(prefix) && text != prefix)
+                return text.Substring(prefix.Length);
 
             return text;
         }
