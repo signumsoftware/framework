@@ -48,9 +48,12 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.Name, columnName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, string @default = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), !column.Nullable ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : null));
+            if (@default == null)
+                @default = !column.Nullable && !column.Identity ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : "";
+
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), (@default.HasText() ? " " + @default : null)));
         }
 
         private static bool IsNumber(SqlDbType sqlDbType)
@@ -80,7 +83,7 @@ namespace Signum.Engine
 
         public static string CreateField(IColumn c)
         {
-            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
+            return CreateField(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
         }
 
         public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
@@ -133,11 +136,11 @@ namespace Signum.Engine
         public static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
             if (objectName.Schema.Database == null)
-
-                return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlEscape()));
+                return new SqlPreCommandSimple("DROP INDEX {0} ON {1}".Formato(indexName.SqlEscape(), objectName));
 
             else
-                return new SqlPreCommandSimple("EXEC {2}.dbo.sp_executesql N'DROP INDEX {0}.{1}'".Formato(objectName.OnDatabase(null).ToString(), indexName.SqlEscape(), objectName.Schema.Database.ToString()));
+                return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1}.{2}'"
+                    .Formato(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
         public static SqlPreCommand ReCreateFreeIndex(ITable table, DiffIndex index, string oldTable, Dictionary<string, string> tableReplacements)
@@ -206,11 +209,11 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
+        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
                 tableName,
-                constraintName.SqlEscape())) { GoAfter = true };
+                constraintName.Name.SqlEscape())) { GoAfter = true };
         }
 
         public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)
@@ -237,15 +240,15 @@ namespace Signum.Engine
             return "FK_{0}_{1}".Formato(table, fieldName).SqlEscape();
         }
 
-        public static SqlPreCommand RenameForeignKey(SchemaName schema, string oldName, string newName)
+        public static SqlPreCommand RenameForeignKey(ObjectName foreignKeyName, string newName)
         {
-            return SP_RENAME(schema, oldName, newName, "OBJECT");
+            return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).ToString(), newName, "OBJECT");
         }
 
-        internal static SqlPreCommandSimple SP_RENAME(SchemaName schema, string oldName, string newName, string objectType)
+        public static SqlPreCommandSimple SP_RENAME(DatabaseName database, string oldName, string newName, string objectType)
         {
             return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3}".Formato(
-                schema.IsDefault() ? null : schema.ToString() + ".",
+                database == null ? null: (new SchemaName(database, "dbo").ToString() + "."),
                 oldName,
                 newName,
                 objectType == null ? null : ", '{0}'".Formato(objectType)
@@ -287,7 +290,7 @@ FROM {1} as [table]".Formato(
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
-            return SP_RENAME(oldName.Schema, oldName.Name, newName, null);
+            return SP_RENAME(oldName.Schema.Database, oldName.OnDatabase(null).ToString(), newName, null);
         }
 
         public static SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
@@ -297,12 +300,12 @@ FROM {1} as [table]".Formato(
 
         public static SqlPreCommand RenameColumn(ITable table, string oldName, string newName)
         {
-            return SP_RENAME(table.Name.Schema, table.Name.Name + "." + oldName, newName, "COLUMN");
+            return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
         public static SqlPreCommand RenameIndex(ITable table, string oldName, string newName)
         {
-            return SP_RENAME(table.Name.Schema, table.Name.Name + "." + oldName, newName, "INDEX");
+            return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "INDEX");
         }
         #endregion
 
@@ -367,9 +370,9 @@ FROM {1} as [table]".Formato(
 
             string command = @"
 declare @sql nvarchar(max)
-select  @sql = 'ALTER TABLE [{Table}] DROP CONSTRAINT [' + dc.name  + '];' 
+select  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
 from DB.sys.default_constraints dc
-join DB.sys.columns c on dc.parent_object_id = c.object_id
+join DB.sys.columns c on dc.parent_object_id = c.object_id and dc.parent_column_id = c.column_id
 where c.object_id = DB.OBJECT_ID('{Table}') and c.name = '{Column}'
 exec DB.dbo.sp_executesql @sql"
                 .Replace("DB.", db == null ? null : (db.ToString() + "."))

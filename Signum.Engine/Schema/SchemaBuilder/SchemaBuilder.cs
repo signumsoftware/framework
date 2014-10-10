@@ -222,7 +222,7 @@ namespace Signum.Engine.Maps
         {
             Type type = table.Type;
             table.IdentityBehaviour = (Settings.TypeAttributes<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
-            table.Name = GenerateTableName(type);
+            table.Name = GenerateTableName(type, Settings.TypeAttributes<TableNameAttribute>(type));
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
             table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
@@ -363,7 +363,7 @@ namespace Signum.Engine.Maps
             if (route.PropertyRouteType != PropertyRouteType.MListItems)
                 name = name.Add(GenerateFieldName(route, kof));
             else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
-                name = name.Add(GenerateMListFieldName(Lite.Extract(route.Type) ?? route.Type, kof));
+                name = name.Add(GenerateMListFieldName(route, kof));
 
             switch (kof)
             {
@@ -375,11 +375,11 @@ namespace Signum.Engine.Maps
                     {
                         Implementations at = Settings.GetImplementations(route);
                         if (at.IsByAll)
-                            return GenerateFieldImplmentedByAll(route, table, name, forceNull);
+                            return GenerateFieldImplementedByAll(route, table, name, forceNull);
                         else if (at.Types.Only() == route.Type.CleanType())
                             return GenerateFieldReference(table, route, name, forceNull);
                         else
-                            return GenerateFieldImplmentedBy(table, route, name, forceNull, at.Types);
+                            return GenerateFieldImplementedBy(table, route, name, forceNull, at.Types);
                     }
                 case KindOfField.Enum:
                     return GenerateFieldEnum(table, route, name, forceNull);
@@ -436,14 +436,17 @@ namespace Signum.Engine.Maps
 
             PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
+            SqlDbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
+
             return table.PrimaryKey = new FieldPrimaryKey(route.Type, table)
             {
                 Name = attr.Name,
                 Type = attr.Type,
-                SqlDbType = attr.HasSqlDbType ? attr.SqlDbType : Settings.TypeValues.GetOrThrow(attr.Type),
+                SqlDbType = pair.SqlDbType,
+                UserDefinedTypeName = pair.UserDefinedTypeName,
                 Default = attr.Default,
                 Identity = attr.Identity,
-            }; 
+            };
         }
 
         protected virtual FieldValue GenerateFieldValue(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
@@ -456,10 +459,11 @@ namespace Signum.Engine.Maps
             {
                 Name = name.ToString(),
                 SqlDbType = pair.SqlDbType,
-                UdtTypeName = pair.UdtTypeName,
+                UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = Settings.IsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),
+                Default = att.Try(a=>a.Default),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -496,7 +500,7 @@ namespace Signum.Engine.Maps
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
-        protected virtual FieldImplementedBy GenerateFieldImplmentedBy(ITable table, PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
+        protected virtual FieldImplementedBy GenerateFieldImplementedBy(ITable table, PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
         {
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
             string errors = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
@@ -524,7 +528,7 @@ namespace Signum.Engine.Maps
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
-        protected virtual FieldImplementedByAll GenerateFieldImplmentedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
+        protected virtual FieldImplementedByAll GenerateFieldImplementedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
         {
             bool nullable = Settings.IsNullable(route, forceNull);
 
@@ -555,7 +559,7 @@ namespace Signum.Engine.Maps
             if (!table.HasTicks)
                 throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
-            var orderAttr = Settings.FieldAttribute<PreserveOrderAttribute>(route); 
+            var orderAttr = Settings.FieldAttribute<PreserveOrderAttribute>(route);
 
             FieldValue order = null;
             if (orderAttr != null)
@@ -566,7 +570,7 @@ namespace Signum.Engine.Maps
                 {
                     Name = orderAttr.Name ?? "Order",
                     SqlDbType = pair.SqlDbType,
-                    UdtTypeName = pair.UdtTypeName,
+                    UserDefinedTypeName = pair.UserDefinedTypeName,
                     Nullable = false,
                     Size = Settings.GetSqlSize(orderAttr, pair.SqlDbType),
                     Scale = Settings.GetSqlScale(orderAttr, pair.SqlDbType),
@@ -574,21 +578,28 @@ namespace Signum.Engine.Maps
             }
 
             var keyAttr = Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Settings.DefaultPrimaryKeyAttribute;
-
-            TableMList relationalTable = new TableMList(route.Type)
+            TableMList.PrimaryKeyColumn primaryKey;
             {
-                Name = GenerateTableNameCollection(table, name),
-                PrimaryKey = new TableMList.PrimaryKeyColumn
+                var pair = Settings.GetSqlDbType(keyAttr, keyAttr.Type);
+
+                primaryKey = new TableMList.PrimaryKeyColumn
                 {
                     Name = keyAttr.Name,
                     Type = keyAttr.Type,
-                    SqlDbType = keyAttr.HasSqlDbType ? keyAttr.SqlDbType : Settings.TypeValues.GetOrThrow(keyAttr.Type),
+                    SqlDbType = pair.SqlDbType,
+                    UserDefinedTypeName = pair.UserDefinedTypeName,
                     Default = keyAttr.Default,
                     Identity = keyAttr.Identity,
-                },
+                };
+            }
+
+            TableMList relationalTable = new TableMList(route.Type)
+            {
+                Name = GenerateTableNameCollection(table, name, Settings.FieldAttribute<TableNameAttribute>(route)),
+                PrimaryKey = primaryKey,
                 BackReference = new FieldReference(table.Type)
                 {
-                    Name = GenerateBackReferenceName(table.Type),
+                    Name = GenerateBackReferenceName(table.Type, Settings.FieldAttribute<BackReferenceColumnNameAttribute>(route)),
                     ReferenceTable = table,
                     AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
                 },
@@ -645,10 +656,8 @@ namespace Signum.Engine.Maps
             return type;
         }
 
-        public virtual ObjectName GenerateTableName(Type type)
+        public virtual ObjectName GenerateTableName(Type type, TableNameAttribute tn)
         {
-            TableNameAttribute tn = Settings.TypeAttributes<TableNameAttribute>(type);
-
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
             return new ObjectName(sn, tn.Try(a => a.Name) ?? CleanType(type).Name);
@@ -662,13 +671,21 @@ namespace Signum.Engine.Maps
             return schema;
         }
 
-        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name)
+        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name, TableNameAttribute tn)
         {
-            return new ObjectName(SchemaName.Default, table.Name.Name + name.ToString());
+            SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
+
+            return new ObjectName(sn, tn.Try(a => a.Name) ?? (table.Name.Name + name.ToString()));
         }
 
-        public virtual string GenerateMListFieldName(Type type, KindOfField kindOfField)
+        public virtual string GenerateMListFieldName(PropertyRoute route, KindOfField kindOfField)
         {
+            ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
+            if (vc != null && vc.Name.HasText())
+                return vc.Name;
+
+            Type type = Lite.Extract(route.Type) ?? route.Type;
+
             switch (kindOfField)
             {
                 case KindOfField.Value:
@@ -705,9 +722,9 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateBackReferenceName(Type type)
+        public virtual string GenerateBackReferenceName(Type type, BackReferenceColumnNameAttribute attribute)
         {
-            return "idParent";
+            return attribute.Try(a => a.Name) ?? "idParent";
         }
         #endregion
 
@@ -875,7 +892,7 @@ namespace Signum.Engine.Maps
         {
             Table table = new Table(type)
             {
-                Name = GenerateTableName(type),
+                Name = GenerateTableName(type, Settings.TypeAttributes<TableNameAttribute>(type)),
                 IsView = true
             };
 
@@ -887,9 +904,8 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override ObjectName GenerateTableName(Type type)
+        public override ObjectName GenerateTableName(Type type, TableNameAttribute tn)
         {
-            TableNameAttribute tn = type.GetCustomAttribute<TableNameAttribute>();
             if (tn != null)
             {
                 if (tn.SchemaName == "sys")
@@ -900,7 +916,7 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            return base.GenerateTableName(type);
+            return base.GenerateTableName(type, tn);
         }
 
      
@@ -926,7 +942,7 @@ namespace Signum.Engine.Maps
                 PrimaryKey = true,
                 Name = name.ToString(),
                 SqlDbType = pair.SqlDbType,
-                UdtTypeName = pair.UdtTypeName,
+                UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = Settings.IsNullable(route, false),
                 Size = Settings.GetSqlSize(att, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),

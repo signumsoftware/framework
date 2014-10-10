@@ -6,6 +6,9 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -51,6 +54,11 @@ namespace Signum.Entities
                     get { return symbol; }
                     internal set { this.symbol = value; }
                 }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                }
             }
 
             [Serializable]
@@ -68,6 +76,11 @@ namespace Signum.Entities
                 {
                     get { return typeof(F); }
                 }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                }
             }
 
             [Serializable]
@@ -84,6 +97,11 @@ namespace Signum.Entities
                 public Type BaseType
                 {
                     get { return typeof(F); }
+                }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
                 }
             }
         }
@@ -122,6 +140,11 @@ namespace Signum.Entities
             {
                 get { return typeof(T); }
             }
+
+            public override string ToString()
+            {
+                return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+            }
         }
 
         [Serializable]
@@ -138,6 +161,11 @@ namespace Signum.Entities
             public Type BaseType
             {
                 get { return typeof(T); }
+            }
+
+            public override string ToString()
+            {
+                return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
             }
         }
     }

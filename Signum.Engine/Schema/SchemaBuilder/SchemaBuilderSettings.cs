@@ -174,7 +174,7 @@ namespace Signum.Engine.Maps
 
         public A TypeAttributes<A>(Type type) where A : Attribute
         {
-            if (!typeof(Entity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type) && !typeof(IView).IsAssignableFrom(type))
                 return null;
 
             var overriden = OverridenTypeAttributes.TryGetC(type);
@@ -241,7 +241,7 @@ namespace Signum.Engine.Maps
         internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute att, Type type)
         {
             if (att != null && att.HasSqlDbType)
-                return new SqlDbTypePair(att.SqlDbType, att.UdtTypeName);
+                return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
 
             return GetSqlDbTypePair(type.UnNullify());
         }
@@ -308,14 +308,14 @@ namespace Signum.Engine.Maps
     public class SqlDbTypePair
     {
         public SqlDbType SqlDbType { get; private set; }
-        public string UdtTypeName { get; private set; }
+        public string UserDefinedTypeName { get; private set; }
 
         public SqlDbTypePair() { }
 
         public SqlDbTypePair(SqlDbType type, string udtTypeName)
         {
             this.SqlDbType = type;
-            this.UdtTypeName = udtTypeName;
+            this.UserDefinedTypeName = udtTypeName;
         }
     }
 

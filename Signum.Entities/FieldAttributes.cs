@@ -270,7 +270,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             get { return scale.HasValue; }
         }
 
-        public string UdtTypeName { get; set; }
+        public string UserDefinedTypeName { get; set; }
 
         public string Default { get; set; }
 
@@ -310,6 +310,17 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
         public string Name { get; set; }
 
         public ColumnNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public sealed class BackReferenceColumnNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public BackReferenceColumnNameAttribute(string name)
         {
             this.Name = name;
         }

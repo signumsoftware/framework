@@ -356,7 +356,7 @@ namespace Signum.Engine.Maps
         bool Nullable { get; }
         SqlDbType SqlDbType { get; }
         Type Type { get; }
-        string UdtTypeName { get; }
+        string UserDefinedTypeName { get; }
         bool PrimaryKey { get; }
         bool IdentityBehaviour { get; }
         bool Identity { get; }
@@ -388,7 +388,7 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         bool IColumn.Nullable { get { return false; } }
         public SqlDbType SqlDbType { get; set; }
-        string IColumn.UdtTypeName { get { return null; } }
+        public string UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
@@ -444,7 +444,7 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public bool Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
-        public string UdtTypeName { get; set; }
+        public string UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -493,11 +493,6 @@ namespace Signum.Engine.Maps
         {
             get { return this.FieldType; }
         }
-
-
-
-
-
     }
 
     public partial class FieldEmbedded : Field, IFieldFinder
@@ -507,7 +502,7 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             public bool Nullable { get { return false; } } //even on neasted embeddeds
             public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
-            string IColumn.UdtTypeName { get { return null; } }
+            string IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
             bool IColumn.IdentityBehaviour { get { return false; } }
@@ -704,7 +699,6 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public bool Nullable { get; set; }
     
-        public string UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -712,7 +706,9 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        
         public bool AvoidForeignKey { get; set; }
 
         public bool IsLite { get; internal set; }
@@ -932,7 +928,6 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        string IColumn.UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -940,6 +935,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
         public string Default { get { return null; } }
@@ -949,7 +945,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        string IColumn.UdtTypeName { get { return null; } }
+        string IColumn.UserDefinedTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -1030,7 +1026,7 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             bool IColumn.Nullable { get { return false; } }
             public SqlDbType SqlDbType { get; set; }
-            string IColumn.UdtTypeName { get { return null; } }
+            public string UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
             public bool Identity { get; set; }
             bool IColumn.IdentityBehaviour { get { return true; } }
