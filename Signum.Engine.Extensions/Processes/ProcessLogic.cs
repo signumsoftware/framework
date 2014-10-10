@@ -353,11 +353,11 @@ namespace Signum.Engine.Processes
                     {
                         try
                         {
-                            using (Transaction tr = Transaction.ForceNew())
+                            Transaction.ForceNew().EndUsing(tr =>
                             {
                                 action(pl);
                                 tr.Commit();
-                            }
+                            });
                         }
                         catch (Exception e)
                         {
@@ -366,7 +366,7 @@ namespace Signum.Engine.Processes
 
                             var exLog = e.LogException();
 
-                            using (Transaction tr = Transaction.ForceNew())
+                            Transaction.ForceNew().EndUsing(tr =>
                             {
                                 new ProcessExceptionLineDN
                                 {
@@ -376,7 +376,7 @@ namespace Signum.Engine.Processes
                                 }.Save();
 
                                 tr.Commit();
-                            }
+                            });
                         }
 
                         executingProcess.ProgressChanged(j++, totalCount);

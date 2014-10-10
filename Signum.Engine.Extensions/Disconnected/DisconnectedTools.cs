@@ -49,7 +49,7 @@ LOG ON
             Executor.ExecuteNonQuery(@"BACKUP DATABASE {0} TO DISK = '{1}'WITH FORMAT".Formato(databaseName, backupFile));
         }
 
-        public static void RestoreDatabase(DatabaseName databaseName, string backupFile, string databaseFile, string databaseLogFile)
+        public static void RestoreDatabase(DatabaseName databaseName, string backupFile, string databaseFile, string databaseLogFile, bool replace = false)
         {
             DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".Formato(backupFile));
 
@@ -60,10 +60,11 @@ LOG ON
             new SqlPreCommandSimple(
 @"RESTORE DATABASE {0}
                     from DISK = '{1}'
-WITH MOVE '{2}' TO '{3}',
-MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
+WITH
+MOVE '{2}' TO '{3}',
+MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
                     logicalDatabaseFile, databaseFile,
-                    logicalDatabaseLogFile, databaseLogFile)).ExecuteNonQuery();
+                    logicalDatabaseLogFile, databaseLogFile, replace ? ",\r\nREPLACE" : "")).ExecuteNonQuery();
         }
 
         public static void DisableForeignKeys(ITable table)
