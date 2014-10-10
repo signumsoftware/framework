@@ -37,7 +37,7 @@ namespace Signum.Engine.CodeGeneration
             this.Tables = tables.ToDictionary(a=>a.Name);
 
             Graph = DirectedGraph<DiffTable>.Generate(tables, t =>
-                t.Colums.Values.Select(a => a.ForeingKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on)));
+                t.Columns.Values.Select(a => a.ForeingKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on)));
 
             GetSolutionInfo(out SolutionFolder, out SolutionName);
 
@@ -50,11 +50,14 @@ namespace Signum.Engine.CodeGeneration
             {
                 string str = WriteFile(gr.Key, gr);
 
-                string fileName = Path.Combine(projectFolder, gr.Key);
+                if (str != null)
+                {
+                    string fileName = Path.Combine(projectFolder, gr.Key);
 
-                FileTools.CreateParentDirectory(fileName);
-                
-                File.WriteAllText(fileName, str);
+                    FileTools.CreateParentDirectory(fileName);
+
+                    File.WriteAllText(fileName, str);
+                }
             }
         }
 
@@ -89,25 +92,32 @@ namespace Signum.Engine.CodeGeneration
                 sb.AppendLine("using {0};".Formato(item));
 
             sb.AppendLine();
-            sb.AppendLine("namespace " + GetNamespace(fileName, tables));
+            sb.AppendLine("namespace " + GetNamespace(fileName));
             sb.AppendLine("{");
-
-            foreach (var t in tables.OrderByDescending(a => a.Colums.Count))
+            int length = sb.Length;
+            foreach (var t in tables.OrderByDescending(a => a.Columns.Count))
             {
-                sb.Append(WriteEntity(fileName, t).Indent(4));
+                var entity = WriteEntity(fileName, t);
+                if (entity != null)
+                {
+                    sb.Append(entity.Indent(4));
 
-                sb.AppendLine();
-                sb.AppendLine();
+                    sb.AppendLine();
+                    sb.AppendLine();
+                }
             }
+
+            if (sb.Length == length)
+                return null;
 
             sb.AppendLine("}");
 
             return sb.ToString();
         }
 
-        protected virtual IEnumerable<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)
+        protected virtual List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)
         {
-            return new List<string> 
+            var result = new List<string> 
             {
                 "System",
                 "System.Collections.Generic",
@@ -118,11 +128,31 @@ namespace Signum.Engine.CodeGeneration
                 "Signum.Entities",
                 "Signum.Utilities",
             };
+
+            var currentNamespace = GetNamespace(fileName);
+
+            result.AddRange(
+                (from t in tables
+                 from c in t.Columns.Values
+                 where c.ForeingKey != null
+                 let targetTable = Tables.GetOrThrow(c.ForeingKey.TargetTable)
+                 let tagetNamespace = GetNamespace(GetFileName(targetTable))
+                 where tagetNamespace != currentNamespace
+                 select tagetNamespace).Distinct());
+
+            return result;
         }
 
-        protected virtual string GetNamespace(string fileName, IEnumerable<DiffTable> tables)
+        protected virtual string GetNamespace(string fileName)
         {
-            return SolutionName + ".Entities";
+            var result = SolutionName + ".Entities";
+
+            string folder = fileName.TryBeforeLast('\\');
+
+            if (folder != null)
+                result += "." + folder.Replace('\\', '.');
+
+            return result;
         }
 
         protected virtual void WriteAttributeTag(StringBuilder sb, IEnumerable<string> attributes)
@@ -154,8 +184,13 @@ namespace Signum.Engine.CodeGeneration
                 sb.AppendLine();
             }
 
-            foreach (var col in table.Colums.Values)
+            var primaryKey = GetPrimaryKeyColumn(table);
+
+            foreach (var col in table.Columns.Values)
             {
+                if (col == primaryKey || mListInfo != null && col == mListInfo.BackReferenceColumn)
+                    continue;
+
                 string field = WriteField(fileName, table, col);
 
                 if (field != null)
@@ -171,7 +206,7 @@ namespace Signum.Engine.CodeGeneration
                 {
                     var mListInfo2 = GetMListInfo(relatedTable);
 
-                    if (mListInfo2 != null)
+                    if (mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeingKey.TargetTable.Equals(table.Name))
                     {
                         string field = WriteFieldMList(fileName, table, mListInfo2, relatedTable);
 
@@ -223,7 +258,7 @@ namespace Signum.Engine.CodeGeneration
             {
                 sb.AppendLine("//Add to Logic class");
                 sb.AppendLine("//sb.AddUniqueIndex<{0}>(e => new {{ {1} }}{2});".Formato(name,
-                    ix.Columns.ToString(c => "e." + GetFieldName(table, table.Colums.GetOrThrow(c)), ", "),
+                    ix.Columns.ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c)).FirstUpper(), ", "),
                     ix.FilterDefinition == null ? null : ", " + ix.FilterDefinition));
             }
 
@@ -324,7 +359,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual DiffColumn GetPrimaryKeyColumn(DiffTable table)
         {
-            return table.Colums.Values.SingleOrDefaultEx(a => a.PrimaryKey);
+            return table.Columns.Values.SingleOrDefaultEx(a => a.PrimaryKey);
         }
 
         protected virtual string GetTableNameAttribute(ObjectName objectName, MListInfo mListInfo)
@@ -370,9 +405,6 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteField(string fileName, DiffTable table, DiffColumn col)
         {
-            if (col.PrimaryKey)
-                return null;
-
             string relatedEntity = GetRelatedEntity(table, col);
 
             string type = GetFieldType(table, col, relatedEntity);
@@ -420,7 +452,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
         {
-            string name = col.Name.ToPascal(false);
+            string name = col.Name.Contains(' ') ? col.Name.ToPascal(false) : col.Name;
 
             if (this.GetRelatedEntity(table, col) != null)
             {
@@ -449,13 +481,23 @@ namespace Signum.Engine.CodeGeneration
                     attributes.Add(sqlDbType);
             }
 
-            if (col.Name != GetFieldName(table, col).FirstUpper())
+            if (col.Name != DefaultColumnName(table, col))
                 attributes.Add("ColumnName(\"" + col.Name + "\")");
 
-            if (table.Indices.Values.Any(a =>  a.FilterDefinition == null && a.Columns.Only() == col.Name))
+            if (table.Indices.Values.Any(a =>  a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.Clustered  ))
                 attributes.Add("UniqueIndex");
 
             return attributes;
+        }
+
+        protected virtual string DefaultColumnName(DiffTable table, DiffColumn col)
+        {
+            string fieldName = GetFieldName(table, col).FirstUpper();
+
+            if (col.ForeingKey == null)
+                return fieldName;
+
+            return "id" + fieldName;
         }
 
         protected virtual string GetSqlTypeAttribute(DiffTable table, DiffColumn col)
@@ -485,7 +527,19 @@ namespace Signum.Engine.CodeGeneration
             var defaultScale = CurrentSchema.Settings.GetSqlScale(null, col.SqlDbType);
             if (!(defaultScale == null || col.Scale == defaultScale))
                 parts.Add("Scale=" + col.Scale);
+
+            if (col.Default != null)
+                parts.Add("Default=\"" + CleanDefault(col.Default) + "\"");
+
             return parts;
+        }
+
+        protected virtual string CleanDefault(string def)
+        {
+            if (def.StartsWith("(") && def.EndsWith(")"))
+                return def.Substring(1, def.Length - 2);
+
+            return def;
         }
 
         protected virtual string GetFieldType(DiffTable table, DiffColumn col, string relatedEntity)
@@ -557,7 +611,7 @@ namespace Signum.Engine.CodeGeneration
             if(mListInfo.TrivialElementColumn == null )
             {
                 type = GetEntityName(relatedTable.Name);
-                fieldAttributes = new List<string>{"NotNullable"};
+                fieldAttributes = new List<string> { "NotNullable" };
             }
             else
             {
@@ -566,7 +620,6 @@ namespace Signum.Engine.CodeGeneration
 
                 fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity).ToList(); 
             }
-
        
             string primaryKey = GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
@@ -576,12 +629,16 @@ namespace Signum.Engine.CodeGeneration
             if (tableName != null)
                 fieldAttributes.Add(tableName);
 
+            string backColumn = GetBackColumnName(mListInfo.BackReferenceColumn);
+            if (backColumn != null)
+                fieldAttributes.AddRange(backColumn);
+
             StringBuilder sb = new StringBuilder();
 
-            string fieldName = GetFieldMListName(table, relatedTable);
+            string fieldName = GetFieldMListName(table, relatedTable, mListInfo);
             WriteAttributeTag(sb, fieldAttributes);
 
-            sb.AppendLine("MList<{0}> {1} = new MList<{0}>()".Formato(type, CSharpRenderer.Escape(fieldName)));
+            sb.AppendLine("MList<{0}> {1} = new MList<{0}>();".Formato(type, CSharpRenderer.Escape(fieldName)));
             sb.AppendLine("[NotNullValidator, NoRepeatValidator]");
             sb.AppendLine("public MList<{0}> {1}".Formato(type, fieldName.FirstUpper()));
             sb.AppendLine("{");
@@ -592,9 +649,19 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable)
+        protected virtual string GetBackColumnName(DiffColumn backReference)
         {
-            return NaturalLanguageTools.Pluralize(relatedTable.Name.Name).FirstLower();
+            if (backReference.Name == "idParent")
+                return null;
+
+            return "BackReferenceColumnName(\"{0}\")".Formato(backReference.Name);
+        }
+
+        protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
+        {
+            ObjectName name = mListInfo.TrivialElementColumn.Try(te => te.ForeingKey.TargetTable) ?? relatedTable.Name;
+
+            return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("DN")).FirstLower();
         }
 
         protected virtual string WriteToString(DiffTable table)
@@ -614,7 +681,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual DiffColumn GetToStringColumn(DiffTable table)
         {
-            return table.Colums.TryGetC("Name");
+            return table.Columns.TryGetC("Name");
         }
     }
 
