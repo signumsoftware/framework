@@ -130,6 +130,9 @@ namespace Signum.Engine.Cache
             });
         }
 
+
+        internal static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
+
         protected class CachedTableConstructor
         {
             public CachedTableBase cachedTable;
@@ -179,13 +182,6 @@ namespace Signum.Engine.Cache
                     );
 
                 return Expression.Lambda<Func<FieldReader, object>>(tupleConstructor, reader).Compile();
-            }
-
-            internal Func<object, T> GetGetter<T>(IColumn column)
-            {
-                var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
-
-                return Expression.Lambda<Func<object, T>>(access, originObject).Compile();
             }
 
             internal Func<object, PrimaryKey> GetPrimaryKeyGetter(IColumn column)
@@ -496,6 +492,7 @@ namespace Signum.Engine.Cache
         }
     }
 
+  
 
 
     class CachedTable<T> : CachedTableBase where T : Entity
@@ -550,7 +547,7 @@ namespace Signum.Engine.Cache
                 completer = completerExpression.Compile();
 
                 idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
-                toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
+                toStrGetter = ToStringExpressionVisitor.GetToString(ctr);
             }
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
@@ -646,6 +643,50 @@ namespace Signum.Engine.Cache
         public override ITable Table
         {
             get { return table; }
+        }
+
+        class ToStringExpressionVisitor : ExpressionVisitor
+        {
+            ParameterExpression param;
+            CachedTableConstructor constructor; 
+            public static Func<object, string> GetToString(CachedTableConstructor constructor)
+            {
+                Table table = (Table)constructor.table;
+
+                Expression result = null;
+
+                LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(table.Type, CachedTableBase.ToStringMethod);
+
+                if (lambda == null)
+                {
+                    result = constructor.GetTupleProperty(table.ToStrColumn);
+                }
+                else
+                {
+                    ToStringExpressionVisitor toStr = new ToStringExpressionVisitor
+                    {
+                        param = lambda.Parameters.SingleEx(),
+                        constructor = constructor,
+                    };
+
+                    result = toStr.Visit(lambda.Body);
+                }
+
+                List<Expression> instructions = new List<Expression>();
+                instructions.Add(Expression.Assign(constructor.origin, Expression.Convert(CachedTableConstructor.originObject, constructor.tupleType)));
+                instructions.Add(result);
+                var block = Expression.Block(new[] { constructor.origin }, instructions);
+
+                return Expression.Lambda<Func<object, string>>(block, CachedTableConstructor.originObject).Compile();
+            }
+
+            protected override Expression VisitMember(MemberExpression node)
+            {
+                if (node.Expression == param)
+                    return constructor.MaterializeField(((Table)constructor.table).GetField(node.Member));
+
+                return base.VisitMember(node);
+            }
         }
     }
 
@@ -815,30 +856,30 @@ namespace Signum.Engine.Cache
 
             Alias currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
 
-            IColumn colId = (IColumn)table.Fields["id"].Field;
-            IColumn colToStr = (IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field;
+            List<IColumn> columns = new List<IColumn> { table.PrimaryKey }; 
+
+            ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
+
+            var expression = ToStringExpressionVisitor.GetToString(table, reader, columns);  
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
-                string select = "SELECT {0}, {1}\r\nFROM {2} {3}\r\n".Formato(
-                    currentAlias.Name.SqlEscape() + "." + colId.Name.SqlEscape(),
-                    currentAlias.Name.SqlEscape() + "." + colToStr.Name.SqlEscape(),
+                string select = "SELECT {0}\r\nFROM {1} {2}\r\n".Formato(
+                    columns.ToString(c => currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ", "),
                     table.Name.ToStringDbo(),
                     currentAlias.Name.SqlEscape());
 
-                select += lastPartialJoin + currentAlias.Name.SqlEscape() + ".Id\r\n" + remainingJoins;
+                select += lastPartialJoin + currentAlias.Name.SqlEscape() + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
 
             //Reader
             {
-                ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
-
                 var kvpConstructor = Expression.New(CachedTableConstructor.ciKVPIntString,
                     CachedTableConstructor.NewPrimaryKey(FieldReader.GetExpression(reader, 0, this.table.PrimaryKey.Type)),
-                    FieldReader.GetExpression(reader, 1, typeof(string)));
+                    expression);
 
                 rowReader = Expression.Lambda<Func<FieldReader, KeyValuePair<PrimaryKey, string>>>(kvpConstructor, reader).Compile();
             }
@@ -906,6 +947,76 @@ namespace Signum.Engine.Cache
         public override ITable Table
         {
             get { return table; }
+        }
+
+        class ToStringExpressionVisitor : ExpressionVisitor
+        {
+            ParameterExpression param;
+            ParameterExpression reader;
+
+            List<IColumn> columns;
+
+            Table table;
+
+            public static Expression GetToString(Table table, ParameterExpression reader, List<IColumn> columns)
+            {
+                LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(table.Type, CachedTableBase.ToStringMethod);
+
+                if (lambda == null)
+                {
+                    columns.Add(table.ToStrColumn);
+                    
+                    return FieldReader.GetExpression(reader, columns.Count - 1, typeof(string));
+                }
+
+                ToStringExpressionVisitor toStr = new ToStringExpressionVisitor
+                {
+                    param = lambda.Parameters.SingleEx(),
+                    reader = reader,
+                    columns = columns,
+                    table = table,
+                };
+
+                var result = toStr.Visit(lambda.Body);
+
+                return result;
+            }
+
+            protected override Expression VisitUnary(UnaryExpression node)
+            {
+                if (node.NodeType == ExpressionType.Convert)
+                {
+                    var obj = Visit(node.Operand);
+
+                    return Expression.Convert(obj, node.Type);
+                }
+
+                return base.VisitUnary(node);
+            }
+
+            protected override Expression VisitMember(MemberExpression node)
+            {
+                if (node.Expression == param)
+                {
+                    var field = table.GetField(node.Member);
+
+                    var column = GetColumn(field);
+
+                    columns.Add(column);
+
+                    return FieldReader.GetExpression(reader, columns.Count - 1, column.Type);
+                }
+
+                return base.VisitMember(node);
+            }
+
+            private IColumn GetColumn(Field field)
+            {
+                if (field is FieldPrimaryKey || field is FieldValue || field is FieldTicks)
+                    return (IColumn)field;
+
+                throw new InvalidOperationException("{0} not supported".Formato(field.GetType()));
+            }
         }
     }
 }
