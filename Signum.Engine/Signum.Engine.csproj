@@ -100,6 +100,7 @@
     <Compile Include="Basics\ExceptionLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
+    <Compile Include="CodeGeneration\WindowsCodeGenerator.cs" />
     <Compile Include="CodeGeneration\WebCodeGenerator.cs" />
     <Compile Include="CodeGeneration\LogicCodeGenerator.cs" />
     <Compile Include="CodeGeneration\EntityCodeGenerator.cs" />
