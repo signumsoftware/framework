@@ -293,9 +293,9 @@ namespace Signum.Engine.Maps
                     result.Add(fiTicks.Name, new EntityField(type, fiTicks) { Field = field });
                 }
 
-                FieldInfo fiToString = GetToStringFieldInfo(type);
+                Expression exp = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
 
-                if (fiToString == fiToStr)
+                if (exp == null)
                 {
                     PropertyRoute route = root.Add(fiToStr);
 
@@ -327,19 +327,6 @@ namespace Signum.Engine.Maps
             }
 
             return result;
-        }
-
-        public static FieldInfo GetToStringFieldInfo(Type type)
-        {
-            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
-            if (lambda == null)
-                return fiToStr;
-
-            var mae = lambda.Body as MemberExpression;
-            if (mae == null || mae.Expression != lambda.Parameters.Only())
-                throw new InvalidOperationException("ToStringExpression {0} on {1} should be a trivial accesor to a field".Formato(type.Name, mae.ToString()));
-
-            return mae.Member as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)mae.Member);
         }
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity o) => o.toStr);
