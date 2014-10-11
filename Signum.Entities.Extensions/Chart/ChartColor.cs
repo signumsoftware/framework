@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksField(false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
     public class ChartColorDN : Entity
     {
         [ImplementedByAll, UniqueIndex]

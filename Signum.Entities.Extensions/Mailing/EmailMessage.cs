@@ -532,7 +532,7 @@ namespace Signum.Entities.Mailing
         Attachments
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksField(false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class EmailPackageDN : Entity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
