@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public abstract class SemiSymbol : Entity
     {
         static Dictionary<Type, Dictionary<string, SemiSymbol>> Symbols = new Dictionary<Type, Dictionary<string, SemiSymbol>>();

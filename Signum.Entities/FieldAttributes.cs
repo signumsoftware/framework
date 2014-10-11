@@ -347,11 +347,15 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
  
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public sealed class TicksFieldAttribute : Attribute
+    public sealed class TicksColumnAttribute : SqlDbTypeAttribute
     {
         public bool HasTicks { get; private set; }
 
-        public TicksFieldAttribute(bool hasTicks)
+        public string Name { get; set; }
+
+        public Type Type { get; set; }
+
+        public TicksColumnAttribute(bool hasTicks)
         {
             this.HasTicks = hasTicks;
         }

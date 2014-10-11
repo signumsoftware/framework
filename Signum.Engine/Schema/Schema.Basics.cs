@@ -54,8 +54,6 @@ namespace Signum.Engine.Maps
     {
         public Type Type { get; private set; }
 
-        public bool HasTicks { get; set; }
-
         public ObjectName Name { get; set; }
 
         public bool IdentityBehaviour { get; set; }
@@ -250,6 +248,7 @@ namespace Signum.Engine.Maps
                 item.ToSchema(schemaName);
         }
 
+        public FieldTicks Ticks { get; internal set; }
         public FieldPrimaryKey PrimaryKey { get; internal set; }
 
         IColumn ITable.PrimaryKey
@@ -489,9 +488,19 @@ namespace Signum.Engine.Maps
             
         }
 
-        public Type Type
+        public virtual Type Type
         {
             get { return this.FieldType; }
+        }
+    }
+
+    public partial class FieldTicks : FieldValue
+    {
+        public new Type Type { get; set; }
+
+        public FieldTicks(Type fieldType)
+            : base(fieldType)
+        {
         }
     }
 

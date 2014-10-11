@@ -198,10 +198,7 @@ namespace Signum.Engine.Maps
                     if (!t.IsSerializable)
                         throw new InvalidOperationException("Type {0} is not marked as serializable".Formato(t.TypeName()));
 
-                result = new Table(type)
-                {
-                    HasTicks = Settings.TypeAttributes<TicksFieldAttribute>(type).Try(a => a.HasTicks) ?? true
-                };
+                result = new Table(type);
 
                 schema.Tables.Add(type, result);
 
@@ -286,7 +283,8 @@ namespace Signum.Engine.Maps
                     result.Add(fiId.Name, new EntityField(type, fiId) { Field = field });
                 }
 
-                if (((Table)table).HasTicks)
+                TicksColumnAttribute t = type.GetCustomAttribute<TicksColumnAttribute>();
+                if (t == null || t.HasTicks)
                 {
                     PropertyRoute route = root.Add(fiTicks);
 
@@ -369,6 +367,8 @@ namespace Signum.Engine.Maps
             {
                 case KindOfField.PrimaryKey:
                     return GenerateFieldPrimaryKey((Table)table, route, name);
+                case KindOfField.Ticks:
+                    return GenerateFieldTicks((Table)table, route, name);
                 case KindOfField.Value:
                     return GenerateFieldValue(table, route, name, forceNull);
                 case KindOfField.Reference:
@@ -395,6 +395,7 @@ namespace Signum.Engine.Maps
         public enum KindOfField
         {
             PrimaryKey,
+            Ticks,
             Value,
             Reference,
             Enum,
@@ -402,10 +403,13 @@ namespace Signum.Engine.Maps
             MList,
         }
 
-        private KindOfField? GetKindOfField(PropertyRoute route)
+        protected virtual KindOfField? GetKindOfField(PropertyRoute route)
         {
-            if (IsPrimaryKey(route))
+            if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiId))
                 return KindOfField.PrimaryKey;
+
+            if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiTicks))
+                return KindOfField.Ticks;
 
             if (Settings.GetSqlDbType(Settings.FieldAttribute<SqlDbTypeAttribute>(route), route.Type) != null)
                 return KindOfField.Value;
@@ -425,11 +429,6 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        protected virtual bool IsPrimaryKey(PropertyRoute route)
-        {
-            return route.FieldInfo != null && route.FieldInfo.FieldEquals((Entity ie) => ie.id);
-        }
-
         protected virtual Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
         {
             var attr = Settings.TypeAttributes<PrimaryKeyAttribute>(table.Type) ?? Settings.DefaultPrimaryKeyAttribute;
@@ -446,6 +445,31 @@ namespace Signum.Engine.Maps
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Default = attr.Default,
                 Identity = attr.Identity,
+            };
+        }
+
+
+        protected virtual FieldValue GenerateFieldTicks(Table table, PropertyRoute route, NameSequence name)
+        {
+            var ticksAttr = Settings.TypeAttributes<TicksColumnAttribute>(table.Type);
+
+            if (ticksAttr != null && !ticksAttr.HasTicks)
+                throw new InvalidOperationException("HastTicks is false");
+
+            Type type = ticksAttr.Try(t => t.Type) ?? route.Type;
+
+            SqlDbTypePair pair = Settings.GetSqlDbType(ticksAttr, type);
+
+            return table.Ticks = new FieldTicks(route.Type)
+            {
+                Type = type,
+                Name = ticksAttr.Try(a=>a.Name) ?? name.ToString(),
+                SqlDbType = pair.SqlDbType,
+                UserDefinedTypeName = pair.UserDefinedTypeName,
+                Nullable = false,
+                Size = Settings.GetSqlSize(ticksAttr, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(ticksAttr, pair.SqlDbType),
+                Default = ticksAttr.Try(a => a.Default),
             };
         }
 
@@ -556,7 +580,7 @@ namespace Signum.Engine.Maps
         {
             Type elementType = route.Type.ElementType();
 
-            if (!table.HasTicks)
+            if (table.Ticks == null)
                 throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
             var orderAttr = Settings.FieldAttribute<PreserveOrderAttribute>(route);
@@ -710,6 +734,7 @@ namespace Signum.Engine.Maps
             switch (kindOfField)
             {
                 case KindOfField.PrimaryKey:
+                case KindOfField.Ticks:
                 case KindOfField.Value:
                 case KindOfField.Embedded:
                 case KindOfField.MList:  //se usa solo para el nombre de la tabla 
@@ -919,16 +944,18 @@ namespace Signum.Engine.Maps
             return base.GenerateTableName(type, tn);
         }
 
-     
 
-        protected override bool IsPrimaryKey(PropertyRoute route)
+        protected override FieldReference GenerateFieldReference(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            if (route.FieldInfo == null)
-                return false;
+            return base.GenerateFieldReference(table, route, name, forceNull);
+        }
 
-            var svca = route.FieldInfo.GetCustomAttribute<ViewPrimaryKeyAttribute>();
+        protected override SchemaBuilder.KindOfField? GetKindOfField(PropertyRoute route)
+        {
+            if (route.FieldInfo != null && route.FieldInfo.GetCustomAttribute<ViewPrimaryKeyAttribute>() != null)
+                return SchemaBuilder.KindOfField.PrimaryKey;
 
-            return svca != null;
+            return base.GetKindOfField(route);
         }
 
         protected override Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)

@@ -176,6 +176,22 @@ namespace Signum.Engine.Maps
         }
     }
 
+    public partial class FieldTicks
+    {
+        public static readonly PropertyInfo piDateTimeTicks = ReflectionTools.GetPropertyInfo((DateTime d) => d.Ticks);
+
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
+        {
+            if (this.Type == this.FieldType)
+               return new ColumnExpression(this.Type, tableAlias, this.Name);
+
+            if (this.Type == typeof(DateTime))
+                return Expression.Property(new ColumnExpression(this.Type, tableAlias, this.Name), piDateTimeTicks);
+
+            throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
+        }
+    }
+
     public partial class FieldReference
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)

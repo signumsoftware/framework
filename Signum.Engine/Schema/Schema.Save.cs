@@ -417,7 +417,7 @@ namespace Signum.Engine.Maps
             {
                 string sqlUpdate = SqlUpdatePattern("", false);
 
-                if (table.HasTicks)
+                if (table.Ticks != null)
                 {
                     return (uniList, graph) =>
                     {
@@ -463,7 +463,7 @@ namespace Signum.Engine.Maps
                       .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
                       .AppendLine("SELECT Id from @NotFound").ToString();
 
-                if (table.HasTicks)
+                if (table.Ticks != null)
                 {
                     return (idents, graph) =>
                     {
@@ -545,14 +545,15 @@ namespace Signum.Engine.Maps
 
                     result.SqlUpdatePattern = (suffix, output) =>
                     {
-                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
+                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3}".Formato(
                             table.Name,
                             trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
+                            table.PrimaryKey.Name.SqlEscape(),
                             idParamName + suffix);
 
 
-                        if (table.HasTicks)
-                            update += " AND ticks = {0}".Formato(oldTicksParamName + suffix);
+                        if (table.Ticks != null)
+                            update += " AND {0} = {1}".Formato(table.Ticks.Name.SqlEscape(), oldTicksParamName + suffix);
 
                         if (!output)
                             return update;
@@ -565,8 +566,10 @@ namespace Signum.Engine.Maps
                     parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.SqlDbType, null, false,
                         Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object")));
 
-                    if (table.HasTicks)
-                        parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), SqlDbType.BigInt, null, false, paramOldTicks));
+                    if (table.Ticks != null)
+                    {
+                        parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.SqlDbType, null, false, table.Ticks.ConvertTicks(paramOldTicks)));
+                    }
 
                     var expr = Expression.Lambda<Func<Entity, long, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramSuffix);
@@ -1208,6 +1211,32 @@ namespace Signum.Engine.Maps
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
             trios.Add(new Table.Trio(this, value, suffix));
+        }
+    }
+
+    public partial class FieldTicks
+    {
+        public static readonly ConstructorInfo ciDateTimeTicks = ReflectionTools.GetConstuctorInfo(() => new DateTime(0L));
+
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
+        {
+            if (this.Type == this.FieldType)
+                trios.Add(new Table.Trio(this, value, suffix));
+            else if (this.Type == typeof(DateTime))
+                trios.Add(new Table.Trio(this, Expression.New(ciDateTimeTicks, value), suffix));
+            else
+                throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
+        }
+
+        internal Expression ConvertTicks(ParameterExpression paramOldTicks)
+        {
+            if (this.Type == this.FieldType)
+                return paramOldTicks;
+
+            if (this.Type == typeof(DateTime))
+                return Expression.New(ciDateTimeTicks, paramOldTicks);
+
+            throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
         }
     }
 
