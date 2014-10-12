@@ -84,44 +84,63 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteFile(Module mod)
         {
+            var expression = mod.Types.SelectMany(t => GetExpressions(t)).ToList();
+
             StringBuilder sb = new StringBuilder();
-            foreach (var item in GetUsingNamespaces(mod))
+            foreach (var item in GetUsingNamespaces(mod, expression))
                 sb.AppendLine("using {0};".Formato(item));
 
             sb.AppendLine();
             sb.AppendLine("namespace " + GetNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteClass(mod).Indent(4));
+            sb.Append(WriteClass(mod, expression).Indent(4));
             sb.AppendLine("}");
 
             return sb.ToString();
         }
 
-        protected virtual string WriteClass(Module mod)
+        protected virtual string WriteClass(Module mod, List<ExpressionInfo> expressions)
         {
+            var allExpression = mod.Types.SelectMany(t => GetExpressions(t)).ToList(); 
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("public static class " + mod.ModuleName + "Logic");
             sb.AppendLine("{");
-            sb.Append(WriteStartMethod(mod).Indent(4));
+
+            foreach (var ei in expressions)
+            {
+                string info = WriteExpressionMethod(ei);
+                if (info != null)
+                {
+                    sb.Append(info.Indent(4));
+                    sb.AppendLine();
+                }
+            }
+
+            sb.Append(WriteStartMethod(mod, expressions).Indent(4));
             sb.AppendLine("}");
             return sb.ToString();
         }
+
+
 
         protected virtual string GetNamespace(Module mod)
         {
             return SolutionName + ".Logic." + mod.ModuleName;
         }
 
-        protected virtual List<string> GetUsingNamespaces(Module mod)
+        protected virtual List<string> GetUsingNamespaces(Module mod, List<ExpressionInfo> expressions)
         {
             var result = new List<string>()
             {
                 "System",
                 "System.Collections.Generic",
                 "System.Linq",
+                "System.Linq.Expressions",
                 "System.Text",
                 "System.Reflection",
                 "Signum.Utilities",
+                "Signum.Utilities.ExpressionTrees",
                 "Signum.Entities",
                 "Signum.Engine",
                 "Signum.Engine.Operations",
@@ -129,12 +148,12 @@ namespace Signum.Engine.CodeGeneration
                 "Signum.Engine.DynamicQuery",
             };
 
-            result.AddRange(mod.Types.Select(t => t.Namespace).Distinct());
+            result.AddRange(mod.Types.Concat(expressions.Select(e => e.FromType)).Select(t => t.Namespace).Distinct());
 
             return result;
         }
 
-        protected virtual string WriteStartMethod(Module mod)
+        protected virtual string WriteStartMethod(Module mod, List<ExpressionInfo> expressions)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
@@ -161,6 +180,18 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
+            if (expressions.Any())
+            {
+                foreach (var ei in expressions)
+                {
+                    string register = GetRegisterExpression(ei);
+                    if (register != null)
+                        sb.AppendLine(register.Indent(8));
+                }
+
+                sb.AppendLine();
+            }
+
             foreach (var item in mod.Types)
             {
                 string opers = WriteOperations(item);
@@ -177,7 +208,15 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-
+        protected virtual string GetRegisterExpression(ExpressionInfo ei)
+        {
+            return "dqm.RegisterExpression(({from} {f}) => {f}.{name}(), () => typeof({to}).{NiceName}());"
+                .Replace("{from}", ei.FromType.Name)
+                .Replace("{to}", ei.ToType.Name)
+                .Replace("{f}", GetVariableName(ei.FromType))
+                .Replace("{name}", ei.Name)
+                .Replace("{NiceName}", ei.IsUnique ? "NiceName" : "NicePluralName");
+        }
 
         protected virtual string WritetInclude(Type type)
         {
@@ -206,6 +245,96 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
+        protected internal class ExpressionInfo
+        {
+            public Type FromType;
+            public Type ToType;
+            public PropertyInfo Property;
+            public string Name;
+            public string ExpressionName;
+            public bool IsUnique;
+        }
+
+        protected virtual List<ExpressionInfo> GetExpressions(Type toType)
+        {
+            var result = (from pi in Reflector.PublicInstanceDeclaredPropertiesInOrder(toType)
+                          let fromType = pi.PropertyType.CleanType()
+                          where fromType.IsEntity() && !fromType.IsAbstract
+                          let fi = Reflector.TryFindFieldInfo(toType, pi)
+                          where fi != null
+                          let isUnique = fi.GetCustomAttribute<UniqueIndexAttribute>() != null
+                          select new ExpressionInfo
+                          {
+                              ToType = toType,
+                              FromType = fromType,
+                              Property = pi,
+                              IsUnique = isUnique,
+                              Name = isUnique ? Reflector.CleanTypeName(toType) :
+                                     NaturalLanguageTools.Pluralize(Reflector.CleanTypeName(toType).SpacePascal()).ToPascal()
+                          }).ToList();
+
+            result = result.GroupBy(ei => new { ei.FromType, ei.ToType }).Where(g => g.Count() == 1).SelectMany(g => g).ToList();
+
+            result = result.Where(ShouldWriteExpression).ToList();
+
+            var groups = result.Select(a => a.Name).GroupCount();
+
+            foreach (var ei in result)
+            {
+                if (groups[ei.Name] == 1)
+                    ei.ExpressionName = ei.Name + "Expression";
+                else
+                    ei.ExpressionName = ei.Name + Reflector.CleanTypeName(ei.Property.PropertyType.CleanType()) + "Expresion";
+            }
+
+            return result;
+        }
+
+        bool? writeExpressions;
+        protected virtual bool ShouldWriteExpression(ExpressionInfo ei)
+        {
+            return SafeConsole.Ask(ref writeExpressions, "Create extensions {0} -[{1}]-> {2}?".Formato(ei.Property.PropertyType.CleanType(), ei.Name, ei.ToType));
+        }
+
+        protected virtual string WriteExpressionMethod(ExpressionInfo info)
+        {
+            Type from = info.Property.PropertyType.CleanType();
+
+            string varFrom = GetVariableName(from);
+            string varTo = GetVariableName(info.ToType);
+
+            if (varTo == varFrom)
+                varTo += "2";
+
+            string filter = info.Property.PropertyType.IsLite() ? "{t} => {t}.{prop}.RefersTo({f})" : "{t} => {t}.{prop} == {f}";
+
+            string str =  info.IsUnique?
+@"static Expression<Func<{from}, {to}>> {MethodExpression} = 
+    {f} => Database.Query<{to}>().SingleOrDefaultEx({filter}); 
+{attr}public static {to} {Method}(this {from} e)
+{
+    return {MethodExpression}.Evaluate(e);
+}
+" :
+@"static Expression<Func<{from}, IQueryable<{to}>>> {MethodExpression} = 
+    {f} => Database.Query<{to}>().Where({filter});
+{attr}public static IQueryable<{to}> {Method}(this {from} e)
+{
+    return {MethodExpression}.Evaluate(e);
+}
+";
+
+            return str.Replace("{filter}", filter)
+                .Replace("{attr}", info.ExpressionName == info.Name + "Expression" ? null : "[ExpressionField(\"{MethodExpression}\")]\r\n")
+                .Replace("{from}", from.Name)
+                .Replace("{to}", info.ToType.Name)
+                .Replace("{t}", varTo)
+                .Replace("{f}", varFrom)
+                .Replace("{prop}", info.Property.Name)
+                .Replace("{Method}", info.Name)
+                .Replace("{MethodExpression}", info.ExpressionName);
+        }
+
         protected virtual IEnumerable<PropertyInfo> GetQueryProperties(Type type)
         {
             return (from p in Reflector.PublicInstancePropertiesInOrder(type)
@@ -215,7 +344,7 @@ namespace Signum.Engine.CodeGeneration
                     select p).Take(10);
         }
 
-        private bool IsSimpleValueType(Type type)
+        protected virtual bool IsSimpleValueType(Type type)
         {
             var t = CurrentSchema.Settings.GetSqlDbTypePair(type.UnNullify());
 
