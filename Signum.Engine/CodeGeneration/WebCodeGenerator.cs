@@ -37,6 +37,8 @@ namespace Signum.Engine.CodeGeneration
             if (!Directory.Exists(projectFolder))
                 throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
 
+            bool? overwriteFiles = null;
+
             foreach (var mod in GetModules())
             {
                 string str = WriteClientFile(mod);
@@ -44,7 +46,9 @@ namespace Signum.Engine.CodeGeneration
                 {
                     string fullFileName = Path.Combine(projectFolder, GetClientFileName(mod));
                     FileTools.CreateParentDirectory(fullFileName);
-                    File.WriteAllText(fullFileName, str);
+
+                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                        File.WriteAllText(fullFileName, str);
                 }
 
                 string tsStr = WriteTypeScriptFile(mod);
@@ -52,9 +56,9 @@ namespace Signum.Engine.CodeGeneration
                 {
                     string fullFileName = Path.Combine(projectFolder, GetTypeScriptFileName(mod));
                     FileTools.CreateParentDirectory(fullFileName);
-                    File.WriteAllText(fullFileName, tsStr);
+                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                        File.WriteAllText(fullFileName, tsStr);
                 }
-
 
                 foreach (var t in mod.Types)
                 {
@@ -63,7 +67,8 @@ namespace Signum.Engine.CodeGeneration
                     {
                         string fullFileName = Path.Combine(projectFolder, GetViewFileName(mod, t));
                         FileTools.CreateParentDirectory(fullFileName);
-                        File.WriteAllText(fullFileName, viewStr);
+                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                            File.WriteAllText(fullFileName, viewStr);
                     }
                 }
             }

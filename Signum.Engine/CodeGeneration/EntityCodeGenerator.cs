@@ -46,7 +46,9 @@ namespace Signum.Engine.CodeGeneration
             if (!Directory.Exists(projectFolder))
                 throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
 
-            foreach (var gr in Tables.Values.GroupBy(t => GetFileName(t)))
+            bool? overwriteFiles = null;
+
+            foreach (var gr in tables.GroupBy(t => GetFileName(t)))
             {
                 string str = WriteFile(gr.Key, gr);
 
@@ -56,10 +58,15 @@ namespace Signum.Engine.CodeGeneration
 
                     FileTools.CreateParentDirectory(fileName);
 
-                    File.WriteAllText(fileName, str);
+                    if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fileName)))
+                    {
+                        File.WriteAllText(fileName, str);
+                    }
                 }
             }
         }
+
+      
 
         protected virtual string GetProjectFolder()
         {
