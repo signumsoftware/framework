@@ -319,17 +319,20 @@ namespace Signum.Engine.CodeGeneration
                 if (primaryKeyAttribute != null)
                     atts.Add(primaryKeyAttribute);
 
-                if (HasTicksField(table))
-                    atts.Add("TicksField(false)");
+
+                string ticksColumnAttribute = GetTicksColumnAttribute(table);
+                if (ticksColumnAttribute != null)
+                    atts.Add(ticksColumnAttribute);
             }
 
             return atts;
         }
 
-        protected virtual bool HasTicksField(DiffTable table)
+        protected virtual string GetTicksColumnAttribute(DiffTable table)
         {
-            return false;
+            return null;
         }
+
 
         protected virtual string GetPrimaryKeyAttribute(DiffTable table)
         {
@@ -491,7 +494,7 @@ namespace Signum.Engine.CodeGeneration
             if (col.Name != DefaultColumnName(table, col))
                 attributes.Add("ColumnName(\"" + col.Name + "\")");
 
-            if (table.Indices.Values.Any(a =>  a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.Clustered  ))
+            if (table.Indices.Values.Any(a =>  a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.NonClustered  ))
                 attributes.Add("UniqueIndex");
 
             return attributes;
@@ -678,7 +681,9 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.Name;".Formato(GetEntityName(table.Name)));
+            sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".Formato(GetEntityName(table.Name),
+                toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
+                GetFieldType(table, toStringColumn, null) == "string" ? "" : ".TryToString()"));
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");
@@ -688,7 +693,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual DiffColumn GetToStringColumn(DiffTable table)
         {
-            return table.Columns.TryGetC("Name");
+            return table.Columns.TryGetC("Name") ?? table.Columns.Values.FirstOrDefault(a => a.PrimaryKey);
         }
     }
 
