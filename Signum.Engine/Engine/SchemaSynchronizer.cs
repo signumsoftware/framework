@@ -229,13 +229,8 @@ namespace Signum.Engine
             if (tabCol.Name == "Ticks")
                 return "DEFAULT(0)";
 
-            if (tabCol.Name == "ToStr" && table is Table)
-                return "DEFAULT('" + Reflector.CleanTypeName(((Table)table).Type) + "')";
-
             return null;
         }
-
-
 
         private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Index> dictionary)
         {
