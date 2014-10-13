@@ -13,7 +13,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksField(false)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public abstract class Symbol : Entity
     {
 

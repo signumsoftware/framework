@@ -186,7 +186,7 @@ namespace Signum.Engine
         {
             var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 
-            return CreateParameter(parameterName, pair.SqlDbType, pair.UdtTypeName, type == null || type.IsByRef || type.IsNullable(), value);
+            return CreateParameter(parameterName, pair.SqlDbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
         }
 
         public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string udtTypeName, bool nullable, object value);

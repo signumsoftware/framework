@@ -350,7 +350,7 @@ namespace Signum.Engine.Maps
                         }
                         catch (Exception ex)
                         {
-                            return new SqlPreCommandSimple("Exception on {0}.{1}: {2}".Formato(e.Method.DeclaringType.Name, e.Method.Name, ex.Message));
+                            return new SqlPreCommandSimple(" -- Exception on {0}.{1}: {2}".Formato(e.Method.DeclaringType.Name, e.Method.Name, ex.Message));
                         }
                     })
                     .Combine(Spacing.Triple);

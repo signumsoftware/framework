@@ -62,14 +62,8 @@ namespace Signum.Windows
         {
             InitializeComponent();
             this.AddHandler(Common.ChangeDataContextEvent, new ChangeDataContextHandler(ChangeEntity));
-            this.Loaded += new RoutedEventHandler(EntityDetail_Loaded);
         }
 
-        void EntityDetail_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (EntityControl == null)
-                EntityControl = new DataBorder { AutoChild = true };
-        }
 
         void ChangeEntity(object sender, ChangeDataContextEventArgs e)
         {
@@ -102,6 +96,9 @@ namespace Signum.Windows
                 Source = this,
                 Converter = CleanLite ? Converters.Retrieve : null
             });
+
+            if (EntityControl == null)
+                EntityControl = new DataBorder { AutoChild = true };
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Signum.Engine.Linq
 
             return new DbParameterPair
             {
-                Parameter = pb.CreateParameter(name, typePair.SqlDbType, typePair.UdtTypeName, nullable, value.Value ?? DBNull.Value),
+                Parameter = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value),
                 Name = name
             }; 
         }

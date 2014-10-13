@@ -24,17 +24,15 @@ namespace Signum.Utilities
 
         public static void CreateParentDirectory(string filePath)
         {
-            if (filePath != string.Empty)
-            {
-                string directory = Path.GetDirectoryName(filePath);
-                if (directory != string.Empty)
-                {
-                    if (!Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-                }
-            }
+            if (!filePath.HasText())
+                return;
+
+            string directory = Path.GetDirectoryName(filePath);
+            if (!directory.HasText())
+                return;
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
         }
 
         public class TemporalFile : IDisposable

@@ -1031,7 +1031,13 @@ namespace Signum.Engine.Linq
         private Expression HardCodedMethods(MethodCallExpression m)
         {
             if(m.Method.Name == "ToString")
-                return TrySqlToString(typeof(string), m.Object); 
+                return TrySqlToString(typeof(string), m.Object);
+
+            if (m.Method.Name == "TryToString")
+            {
+                var obj = m.Arguments.FirstEx();
+                return TrySqlToString(typeof(string), obj.NodeType == ExpressionType.Convert ? ((UnaryExpression)obj).Operand : obj);
+            }
 
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {

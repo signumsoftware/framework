@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
 using System.Collections.Concurrent;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Utilities.Reflection
 {
@@ -385,10 +386,28 @@ namespace Signum.Utilities.Reflection
             Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return Guid.Parse(value);
-            else
-                return Convert.ChangeType(value, utype);
+
+            if (utype.Namespace == "Microsoft.SqlServer.Types")
+                return ParseSqlServerType(utype, value); //Delay reference
+
+            return Convert.ChangeType(value, utype);
+        }
+
+        private static object ParseSqlServerType(Type type, string value)
+        {
+            if (type == typeof(SqlHierarchyId))
+                return SqlHierarchyId.Parse(value);
+
+            if (type == typeof(SqlGeography))
+                return SqlGeography.Parse(value);
+
+            if (type == typeof(SqlGeometry))
+                return SqlGeometry.Parse(value);
+
+            throw new InvalidOperationException("Unexpected {0}".Formato(type.Name));
         }
 
         public static T Parse<T>(string value, CultureInfo culture)
