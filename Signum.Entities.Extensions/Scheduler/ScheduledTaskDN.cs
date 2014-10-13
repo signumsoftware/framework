@@ -13,7 +13,7 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ScheduledTaskDN : Entity
     {
-        public static readonly TimeSpan MinimumSpan = TimeSpan.FromMinutes(2);
+        public static readonly TimeSpan MinimumSpan = TimeSpan.FromHours(2);
 
 
         [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
