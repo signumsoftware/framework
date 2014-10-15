@@ -153,7 +153,7 @@ public class ProjectDN : Entity
 
 
 [ImplementedBy(typeof(CustomerDN), typeof(DeveloperDN))]
-public interface IBugDiscoverer: IIdentifiable
+public interface IBugDiscoverer: IEntity
 {
     public string Name { get; }
 }

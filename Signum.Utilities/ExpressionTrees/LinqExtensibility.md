@@ -269,7 +269,7 @@ What we do is decorate the method with a MethodExpanderAttribute pointing to the
 ```C#
 [MethodExpander(typeof(IsExpander))]
 public static bool Is<T>(this T entity1, T entity2)
-    where T : class, IIdentifiable
+    where T : class, IEntity
 {
    (...)
 }

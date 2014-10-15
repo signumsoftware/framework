@@ -119,17 +119,17 @@ namespace Signum.Engine
                  model,
                  database,
                  null,
-                 (tn, dif) => dif.Columns.Values.Select(c => c.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, c.ForeingKey.Name) : null)
+                 (tn, dif) => dif.Columns.Values.Select(c => c.ForeignKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, c.ForeignKey.Name) : null)
                      .Concat(dif.MultiForeignKeys.Select(fk => SqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name))).Combine(Spacing.Simple),
                  (tn, tab, dif) => SqlPreCommand.Combine(Spacing.Simple,
                      Synchronizer.SynchronizeScript(
                      tab.Columns,
                      dif.Columns,
                      null,
-                     (cn, colDb) => colDb.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeingKey.Name) : null,
-                     (cn, colModel, colDb) => colDb.ForeingKey == null ? null :
-                         colModel.ReferenceTable == null || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeingKey.TargetTable)) ?
-                         SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeingKey.Name) :
+                     (cn, colDb) => colDb.ForeignKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) : null,
+                     (cn, colModel, colDb) => colDb.ForeignKey == null ? null :
+                         colModel.ReferenceTable == null || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) ?
+                         SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) :
                          null, Spacing.Simple),
                     dif.MultiForeignKeys.Select(fk => SqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple)),
                     Spacing.Double);
@@ -186,13 +186,13 @@ namespace Signum.Engine
                          if (colModel.ReferenceTable == null)
                              return null;
 
-                         if (coldb.ForeingKey == null || !colModel.ReferenceTable.Name.Equals(ChangeName(coldb.ForeingKey.TargetTable)))
+                         if (coldb.ForeignKey == null || !colModel.ReferenceTable.Name.Equals(ChangeName(coldb.ForeignKey.TargetTable)))
                              return SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable);
 
                          var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
                          return SqlPreCommand.Combine(Spacing.Simple,
-                            name != coldb.ForeingKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeingKey.Name, name) : null,
-                            (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) && !ExecutionMode.IsSynchronizeSchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name, name) : null);
+                            name != coldb.ForeignKey.Name.Name ? SqlBuilder.RenameForeignKey(coldb.ForeignKey.Name, name) : null,
+                            (coldb.ForeignKey.IsDisabled || coldb.ForeignKey.IsNotTrusted) && !ExecutionMode.IsSynchronizeSchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name, name) : null);
                      },
                      Spacing.Simple),
                  Spacing.Double);
@@ -282,10 +282,10 @@ namespace Signum.Engine
 
         private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
         {
-            if (difCol.ForeingKey == null || tabCol.ReferenceTable == null)
+            if (difCol.ForeignKey == null || tabCol.ReferenceTable == null)
                 return null;
 
-            ObjectName oldFk = changeName(difCol.ForeingKey.TargetTable);
+            ObjectName oldFk = changeName(difCol.ForeignKey.TargetTable);
 
             if (oldFk.Equals(tabCol.ReferenceTable.Name))
                 return null;
@@ -568,7 +568,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
         {
             foreach (var fk in MultiForeignKeys.Where(a => a.Columns.Count == 1).ToList())
             {
-                this.Columns[fk.Columns.SingleEx().Parent].ForeingKey = fk;
+                this.Columns[fk.Columns.SingleEx().Parent].ForeignKey = fk;
                 MultiForeignKeys.Remove(fk);
             }
         }
@@ -631,7 +631,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
         public bool Identity;
         public bool PrimaryKey;
 
-        public DiffForeignKey ForeingKey;
+        public DiffForeignKey ForeignKey;
 
         public string Default;
 
@@ -672,7 +672,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
             return new DiffColumn
             {
                 Name = Name,
-                ForeingKey = ForeingKey,
+                ForeignKey = ForeignKey,
                 Default = Default,
                 Identity = Identity,
                 Length = Length,

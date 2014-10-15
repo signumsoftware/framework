@@ -4,7 +4,7 @@
 
 ```C#
 public static int UnsafeDelete<T>(this IQueryable<T> query)
-    where T : IdentifiableEntity
+    where T : Entity
 ```
 
 `UnsafeDelete` takes an arbitrary `IQueryable<T>` of entities and returns the number of rows affected. That means that queries like this can be written: 
@@ -47,7 +47,7 @@ If you just want to `DELETE` collection elements, without affecting the owner en
 
 ```C#
 public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
-    where E : IdentifiableEntity
+    where E : Entity
 ``` 
 
 Example using also `MListElements` extension method:

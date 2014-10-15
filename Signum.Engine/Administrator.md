@@ -43,8 +43,8 @@ public static bool ExistTable(Table table)
 Retrieves all the entities in a table, if the table exists and taking potential renames into account. Useful when syncing. 
 
 ```C#
-public static List<T> TryRetrieveAll<T>(Replacements replacements) where T : IdentifiableEntity
-public static List<IdentifiableEntity> TryRetrieveAll(Type type, Replacements replacements)
+public static List<T> TryRetrieveAll<T>(Replacements replacements) where T : Entity
+public static List<Entity> TryRetrieveAll(Type type, Replacements replacements)
 ```
 
 ## SetReadonly
@@ -68,7 +68,7 @@ Forces an entity to have a particular id. Useful loading legacy data when combin
 
 ```C#
 public static T SetId<T>(this T ident, int? id)
-    where T : IdentifiableEntity
+    where T : Entity
 ```
 
 Example: 
@@ -90,7 +90,7 @@ There are also overloads to simplify using it for Entity tables and MList tables
 ```C#
 public static IDisposable DisableIdentity<T>()
 public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
-          where T : IdentifiableEntity
+          where T : Entity
 ```
 Low-level method to disables the identity mechanism in SQL Server only. 
 
@@ -103,17 +103,17 @@ public static IDisposable DisableIdentity(ObjectName tableName)
 Shortcut to save an entities (or collection of entities), creating a `Transaction` and calling `DisableIdentity`.
 
 ```C#
-public static void SaveDisableIdentity<T>(T entities) where T : IdentifiableEntity
-public static void SaveListDisableIdentity<T>(IEnumerable<T> entities) where T : IdentifiableEntity
+public static void SaveDisableIdentity<T>(T entities) where T : Entity
+public static void SaveListDisableIdentity<T>(IEnumerable<T> entities) where T : Entity
 ```
 
 ## SetNew and SetNotModified
 Allows to fake new entities as non-new, non-modified entities. Useful for saving entities without retrieving some of the parts. 
 
 ```C#
-public static T SetNew<T>(this T ident) where T : IdentifiableEntity
+public static T SetNew<T>(this T ident) where T : Entity
 public static T SetNotModified<T>(this T ident) where T : Modifiable
-public static T SetNotModifiedGraph<T>(this T ident, int id)  where T : IdentifiableEntity
+public static T SetNotModifiedGraph<T>(this T ident, int id)  where T : Entity
 ```
 
 Example: 
@@ -133,7 +133,7 @@ Shortcut to remove duplicated of an entity `T` by a `key`, removing the element 
 
 ```C#
 public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
-   where T : IdentifiableEntity
+   where T : Entity
 {
     return (from f1 in Database.Query<T>()
             join f2 in Database.Query<T>() on key.Evaluate(f1) equals key.Evaluate(f2)
@@ -150,15 +150,15 @@ If the definition of `ToString` changes in an entity, the cached `ToStr` column 
 This family of methods help you update the `ToStr` column by retrieving the entities in intervals and update the `ToStr` column using `UnsafeUpdate` one by one. 
 
 ```C#
-public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
-public static void UpdateToStrings<T>(IQueryable<T> query) where T : IdentifiableEntity, new()
+public static void UpdateToStrings<T>() where T : Entity, new()
+public static void UpdateToStrings<T>(IQueryable<T> query) where T : Entity, new()
 ```
 
 Or if an `expression` is provided to calculate the `ToStr`, do all the work in just one `UnsafeUpdate`. 
 
 ```C#
-public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
-public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : Entity, new()
+public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : Entity, new()
 ```
 
 ### PrepareTableForBatchLoadScope
@@ -169,7 +169,7 @@ Prepares a table for a batch load by `disableForeignKeys`, `disableMultipleIndex
 public static IDisposable PrepareForBatchLoadScope<T>(
 	bool disableForeignKeys = true, 
     bool disableMultipleIndexes = true, 
-    bool disableUniqueIndexes = false) where T : IdentifiableEntity
+    bool disableUniqueIndexes = false) where T : Entity
 
 
 public static IDisposable PrepareTableForBatchLoadScope(ITable table, 
@@ -194,7 +194,7 @@ using(Administrator.PrepareTableForBatchLoadScope<BugDN>()) //Disables FKs and I
 Drops all the unique indexes in a table, sometimes necessary to avoid temporal duplication. Will be restored when synchronized.  
 
 ```C#
-public static void DropUniqueIndexes<T>() where T : IdentifiableEntity
+public static void DropUniqueIndexes<T>() where T : Entity
 ```
 
 ### MoveAllForeignKeysScript
@@ -204,11 +204,11 @@ Moves all the possible foreign keys from an `oldEntity` to a `newEntity`. Useful
 ```C#
 //Just generates the script, use ExecuteLeaves to execute it
 public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> oldEntity, Lite<T> newEntity)
-   where T : IdentifiableEntity
+   where T : Entity
 
 //Executes the scripts using a SafeConsole.WaitRows indicator
 public static void MoveAllForeignKeysConsole<T>(Lite<T> oldEntity, Lite<T> newEntity)
-   where T : IdentifiableEntity
+   where T : Entity
 ```
 
 ### BulkInsert
@@ -219,7 +219,7 @@ Uses `SqlBulkCopy` to load a set of entities in the database as fast as possible
 ```C#
 public static void BulkInsert<T>(IEnumerable<T> entities, 
             SqlBulkCopyOptions options = SqlBulkCopyOptions.Default) 
-            where T : IdentifiableEntity
+            where T : Entity
 ```
 
 The operation will be embedded in the current transaction if `SqlBulkCopyOptions.UseInternalTransaction` is not set.

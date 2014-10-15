@@ -18,7 +18,7 @@ This is the simplest version, allows updating properties in the main table of an
 
 ```C#
 public static IUpdateable<E> UnsafeUpdate<E>(this IQueryable<E> query)
-	where E : IdentifiableEntity
+	where E : Entity
 
 public interface IUpdateable<T> : IUpdateable
 {
@@ -85,7 +85,7 @@ This variation let you have a wider context for your `valueExpression`. Even if 
 ```C#
 public static IUpdateablePart<A, E> UnsafeUpdatePart<A, E>(this IQueryable<A> query, 
 	Expression<Func<A, E>> partSelector)
-	where E : IdentifiableEntity
+	where E : Entity
 
 public interface IUpdateablePart<A, T> : IUpdateable
 {
@@ -138,7 +138,7 @@ Using `UnsafeUpdateMList` you can also execute `UPDATE` commands on MListTables.
 
 ```C#
 public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
-    where E : IdentifiableEntity
+    where E : Entity
 
 public interface IUpdateable<T> : IUpdateable
 {
@@ -190,7 +190,7 @@ Closing the circle, with `UnsafeUpdateMListPart` you can send `UPDATE` commands 
 ```C#
 public static IUpdateablePart<A, MListElement<E, V>> UnsafeUpdateMListPart<A, E, V>(this IQueryable<A> query, 
 	Expression<Func<A, MListElement<E, V>>> partSelector)
-    where E : IdentifiableEntity
+    where E : Entity
 
 public interface IUpdateablePart<A, T> : IUpdateable
 {

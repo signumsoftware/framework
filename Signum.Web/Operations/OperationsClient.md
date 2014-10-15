@@ -84,7 +84,7 @@ With `ClientConstructorOperationContext` and `ConstructorOperationContext` defin
 
 ```C#
 public class ClientConstructorOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public OperationInfo OperationInfo { get; private set; }
     public ClientConstructorContext ClientConstructorContext { get; private set; }
@@ -92,7 +92,7 @@ public class ClientConstructorOperationContext<T> /*Simplification*/
 }
 
 public class ConstructorOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public OperationInfo OperationInfo { get; private set; }
     public ConstructorContext ConstructorContext { get; private set; }
@@ -163,7 +163,7 @@ It has the following options.
 
 ```C#
 public class ContextualOperationSettings<T>  : OperationContext  /*Simplification*/ 
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
 
@@ -184,7 +184,7 @@ All of this events take a `ContextualOperationContext`:
 
 ```C#
 public class ContextualOperationContext<T>  /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public List<Lite<T>> Entities { get; private set; }
     public Type SingleType { get; }
@@ -277,7 +277,7 @@ public ActionResult CreateOrderFromProducts()
 
 ```C#
 public class EntityOperationSettings<T> : OperationSettings /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
 
@@ -295,7 +295,7 @@ All this method receive a `EntityOperationContext<T>` with the following propert
 
 ```C#
 public class EntityOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public EntityButtonContext Context { get; }
     public UrlHelper Url { get; }
@@ -316,7 +316,7 @@ public class EntityOperationContext<T> /*Simplification*/
 * **Url, PartialViewName, Prefix, ViewMode and ShowOperations:** Shortcut to get the similar properties in `EntityButtonContext`.       
 * **OperationInfo:** Information over the operation, like the returned type or whether is lite or not.
 * **OperationSettings:**  The registered `EntityOperationContext<T>` itself.    
-* **Entity:** The `IdentifiableEntity` (of type `T`) in the `NormalWindow` that could receive the operation invocation.
+* **Entity:** The `Entity` (of type `T`) in the `NormalWindow` that could receive the operation invocation.
 * **CanExecute:** The `string` that indicats a potential pre-condition error to execute the operation. By default this will disable the button and show the message as tooltip, but you can hide it overriding `IsVisible`.  
 
 ### Examples:
@@ -365,7 +365,7 @@ Additionally, `EntityOperationSettings` contains more properties that can be use
 
 ```C#
 public class EntityOperationSettings<T> : OperationSettings /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public double Order { get; set; }
 

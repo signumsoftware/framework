@@ -157,7 +157,7 @@ Navigator.AddSettings(new List<EntitySettings>
 You can also retrieve a `EntitySettings<T>` using the methods with the same name.
 
 ```C#
-public static EntitySettings<T> EntitySettings<T>() where T : IdentifiableEntity
+public static EntitySettings<T> EntitySettings<T>() where T : Entity
 public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>() where T : EmbeddedEntity
 public static EntitySettings EntitySettings(Type type)
 ````
@@ -217,7 +217,7 @@ public static bool IsViewable(Type type, string partialViewName)
 public static bool IsViewable(ModifiableEntity entity, string partialViewName)
 
 public static bool IsNavigable(Type type, string partialViewName, bool isSearch = false)
-public static bool IsNavigable(IIdentifiable entity, string partialViewName, bool isSearch = false)
+public static bool IsNavigable(IEntity entity, string partialViewName, bool isSearch = false)
 ``` 
 
 In order to answer this questions, `Navigator` takes into account the configuration in the `EntitySettings` (usualy inherited from the `EntityKind`) as well as the events defined in `NavigationManager`: 

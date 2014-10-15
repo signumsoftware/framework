@@ -178,7 +178,7 @@ WHERE ((bdn.idDiscoverer_Customer = s1.idWriter_Customer) OR (bdn.idDiscoverer_D
 There are more complex cases, comparing an arbitrary `ImplementedBy` reference against a `ImplementedByAll` reference would be pain in the neck if done manually, so use this feature! It saves you problems and you will write safer code. 
 
 ### `==` vs `Is`
-`IdentifiableEntity` overrides `Equals` (and `GetHashCode`) to compare by `Id` and `Type`, but does not overload `==` operator. 
+`Entity` overrides `Equals` (and `GetHashCode`) to compare by `Id` and `Type`, but does not overload `==` operator. 
 
 That means that, in memory, `==` means referential equality but `object.Equals` return true if two different instances have the same type an Id. 
 

@@ -25,9 +25,9 @@ Enums are special however, because when you move (or re-index) an `enum` value t
 
 ## EnumEntity\<T> (Advanced topic)
 
-Internally, `EnumEntity<T>` is the table that acts as a bridge between Enums and IdentifiableEntity. This class does two things: 
+Internally, `EnumEntity<T>` is the table that acts as a bridge between Enums and Entity. This class does two things: 
 
 * Stores the numeric value in the `Id` field.
 * Stores the string identifier in the `ToStr` field.
 
-Usually you don't need to know about this class, just if you want to manipulate the enum table using APIs that take a `IdentifiableEntity`
+Usually you don't need to know about this class, just if you want to manipulate the enum table using APIs that take a `Entity`

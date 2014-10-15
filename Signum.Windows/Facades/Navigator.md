@@ -17,7 +17,7 @@ There are three different overloads:
 public static T View<T>(T entity, ViewOptions options = null) where T : ModifiableEntity
  
 //Takes and returns a Lite<T> (thin or fat)
-public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) where T: class, IIdentifiable
+public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) where T: class, IEntity
 
 //A ModifiableEntity or a Lite<T> should be passed, the same type will be returned 
 public static object ViewUntyped(object entity, ViewOptions options = null)
@@ -65,14 +65,14 @@ If `NavigationManager` is instantiated with `multithreaded = true` then the `Nor
 There are also three different overloads: 
 
 ```C#
-//Takes a IIdentifiable, you can not navigate to an EmbeddedEntity or ModelEntity!
-public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IIdentifiable
+//Takes a IEntity, you can not navigate to an EmbeddedEntity or ModelEntity!
+public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IEntity
  
 //Takes a Lite<T> (thin or fat)
-public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null) where T : class, IIdentifiable
+public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null) where T : class, IEntity
 
 //A ModifiableEntity or a Lite<T> should be passed
-public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IIdentifiable
+public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IEntity
 ```
 
 All of this methods return `void` because they open independent windows.
@@ -135,7 +135,7 @@ Navigator.AddSettings(new List<EntitySettings>
 You can also retrieve a `EntitySettings<T>` using the methods with the same name.
 
 ```C#
-public static EntitySettings<T> EntitySettings<T>() where T : IdentifiableEntity
+public static EntitySettings<T> EntitySettings<T>() where T : Entity
 public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>() where T : EmbeddedEntity
 public static EntitySettings EntitySettings(Type type)
 ````
@@ -170,7 +170,7 @@ public static bool IsViewable(Type type)
 public static bool IsViewable(ModifiableEntity entity)
 
 public static bool IsNavigable(Type type, bool isSearch = false)
-public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
+public static bool IsNavigable(IEntity entity, bool isSearch = false)
 ``` 
 
 In order to answer this questions, `Navigator` takes into account the configuration in the `EntitySettings` (usualy inherited from the `EntityKind`) as well as the events defined in `NavigationManager`: 

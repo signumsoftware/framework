@@ -8,7 +8,7 @@ Still, you'll have a compile-time checked LINQ experience, with security and que
 
 ```C#
 public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
-    where E : IdentifiableEntity
+    where E : Entity
 ```
 
 `UnsafeInsert` takes an arbitrary `IQueryable<T>` and for each result creates a new entity using the `constructor` expression.
@@ -76,7 +76,7 @@ Allows you to send low-level `INSERT` statements to MListTables.
 public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, 
 	Expression<Func<E, MList<V>>> mListProperty,  
 	Expression<Func<T, MListElement<E, V>>> constructor)
-    where E : IdentifiableEntity)
+    where E : Entity)
 ```
 
 The method takes a expression to `mListProperty` to unambiguously determine the MListTable, and a `constructor` that has to create the `MListElement<E, V>`.

@@ -50,7 +50,7 @@ Not so fast, first it would be convenient to take a look and get used to the dat
 The first thing to notice is that we didn't generate any `db.Customer` property for each table, instead you have to write `Database.Query<CustomerDN>()` to get the `IQueryable<CustomerDN>` to start querying `CustomerDN` table. You can find out why in [Database page](Database.md). 
 
 ```C#
-public static IQueryable<T> Query<T>() where T : IdentifiableEntity
+public static IQueryable<T> Query<T>() where T : Entity
 ```
 
 
@@ -85,8 +85,8 @@ Databas.Query<BugDN>().Where(b => b.ToLite() == bug).Select(b => b.Comments.Coun
 The following pattern can be simplified using `InDB` method:
 
 ```C#
-public static IQueryable<E> InDB<E>(this E entity)  where E : class, IIdentifiable
-public static IQueryable<E> InDB<E>(this Lite<E> lite) where E : class, IIdentifiable
+public static IQueryable<E> InDB<E>(this E entity)  where E : class, IEntity
+public static IQueryable<E> InDB<E>(this Lite<E> lite) where E : class, IEntity
 ```
 
 This overload already does the `Database.Query` and the `Where` for you. Result:
@@ -101,9 +101,9 @@ bug.InDB().Select(b => b.Comments.Count).SingleEx();
 Even more, the pattern can be simplified further using `InDB(selector)` method!. Take a look: 
 
 ```C#
-public static R InDB<E, R>(this Lite<E> lite, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+public static R InDB<E, R>(this Lite<E> lite, Expression<Func<E, R>> selector) where E : class, IEntity
 
-public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
 ```
 
 This overload (in addition to `Database.Query` and the `Where`), already does the `Select` and `SingleEx`. Result:
@@ -169,13 +169,13 @@ Note how the `MListQuery<E, V>` takes a simple expression to the `mListProperty`
 
 ```C#
 public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
-   where E : IdentifiableEntity
+   where E : Entity
 ```
 
 And it returns a  `IQueryable<MListElement<E, V>>`, defined like: 
 
 ```C#
-public class MListElement<E, V> where E : IdentifiableEntity
+public class MListElement<E, V> where E : Entity
 {
     public int RowId { get; set; }
     public int Order { get; set; }
@@ -207,10 +207,10 @@ You can use `MListElements(mListProperty)` defined as:
 
 ```C#
 public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
-     where E : IdentifiableEntity
+     where E : Entity
 
 public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
-    where E : IdentifiableEntity
+    where E : Entity
 ```
 
 To write just: 

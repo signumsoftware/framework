@@ -157,7 +157,7 @@ In order to parse this information, we can use `Finder.ParseLiteKeys`:
 
 ```C#
 public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) 
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     return liteKeys.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Lite.Parse<T>).ToList();
 }
@@ -167,7 +167,7 @@ Since this list is usually passed in the request on the `"liteKeys"` key, a more
 
 ```C#
 public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) 
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     return ParseLiteKeys<T>(controller.ControllerContext.RequestContext.HttpContext.Request["liteKeys"]);
 }
@@ -177,7 +177,7 @@ Example:
 ```C#
 public ActionResult ProcessFromMany()
 {
-    Lite<IdentifiableEntity> lites = this.ParseLiteKeys<IdentifiableEntity>();
+    Lite<Entity> lites = this.ParseLiteKeys<Entity>();
     ....
 }
 ```

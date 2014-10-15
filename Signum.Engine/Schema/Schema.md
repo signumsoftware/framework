@@ -32,7 +32,7 @@ There are however two overloads of `Include` method:
 ```C#
 public class SchemaBuilder
 {
-    public Table Include<T>() where T : IdentifiableEntity //strongly typed
+    public Table Include<T>() where T : Entity //strongly typed
     public virtual Table Include(Type type) // weakly typed
 }
 ```
@@ -57,7 +57,7 @@ For example, `ExceptionDN`, defined in Signum.Entities, saves detailed informati
 
 ```C#
 [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-public class ExceptionDN : IdentifiableEntity
+public class ExceptionDN : Entity
 {    
     //...
     [SqlDbType(Size = 100)]
@@ -107,7 +107,7 @@ You can change whatever you want in this structure, and it will be reflected whe
 
 Internally, a `Schema` is just a `Dictionary<Type, Table>`. 
 
-`Table` is the class that maps an `IdentifiableEntity` to database table. Contains a `Type`, a `Name`, an `Identitiy` flag, and two dictionaries, one for Fields and one for Columns. 
+`Table` is the class that maps an `Entity` to database table. Contains a `Type`, a `Name`, an `Identitiy` flag, and two dictionaries, one for Fields and one for Columns. 
 
 Usually, the underlying objects of these dictionaries are the same, depending of the Field's Type:
 
