@@ -1004,7 +1004,9 @@ namespace Signum.Engine.Linq
                         if (exp is PrimaryKeyStringExpression)
                             return null;
 
-                        return Add(((PrimaryKeyExpression)exp).Value);
+                        var pk = (PrimaryKeyExpression)exp;
+
+                        return Visit(pk.Value);
                     }
                 default: return null;
             }

@@ -1438,13 +1438,41 @@ namespace Signum.Engine.Linq
                 return new TypeImplementedByAllExpression(new PrimaryKeyExpression(typeId));
             }
 
-            if (expressions.All(i => i.Value.NodeType == ExpressionType.Convert && i.Value.Type.UnNullify().IsEnum))
+            if (expressions.All(i => i.Value.NodeType == ExpressionType.Convert))
             {
-                var enumType = expressions.Select(i => i.Value.Type).Distinct().Only();
+                var convertType = expressions.Select(i => i.Value.Type).Distinct().SingleEx();
 
-                var value = CombineImplementations(strategy, expressions.SelectDictionary(exp => ((UnaryExpression)exp).Operand), typeof(int?));
+                var dic = expressions.SelectDictionary(exp => ((UnaryExpression)exp).Operand);
 
-                return Expression.Convert(value, enumType);
+                var value = CombineImplementations(strategy, dic, dic.Values.Select(t => t.Type).Distinct().SingleEx());
+
+                return Expression.Convert(value, convertType);
+            }
+
+            if (expressions.All(i => i.Value is PrimaryKeyExpression))
+            {
+                var type = expressions.Select(i => i.Value.Type).Distinct().SingleEx();
+
+                var dic = expressions.SelectDictionary(exp => ((PrimaryKeyExpression)exp).Value);
+
+                var value = CombineImplementations(strategy, dic, dic.Values.Select(t => t.Type).Distinct().SingleEx());
+
+                return new PrimaryKeyExpression(value);
+            }
+
+            if (expressions.All(i => i.Value is PrimaryKeyStringExpression))
+            {
+                var type = expressions.Select(i => i.Value.Type).Distinct().SingleEx();
+
+                var dicType = expressions.SelectDictionary(exp => (Expression)((PrimaryKeyStringExpression)exp).TypeId);
+
+                var valueType = (TypeImplementedByAllExpression)CombineImplementations(strategy, dicType, typeof(Type));
+
+                var dicId = expressions.SelectDictionary(exp => ((PrimaryKeyStringExpression)exp).Id);
+
+                var valueId = CombineImplementations(strategy, dicId, typeof(string));
+
+                return new PrimaryKeyStringExpression(valueId, valueType);
             }
 
             if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
