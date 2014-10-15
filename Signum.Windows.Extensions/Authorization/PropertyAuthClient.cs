@@ -32,8 +32,14 @@ namespace Signum.Windows.Authorization
             var overrides = Server.Return((IPropertyAuthServer s) => s.OverridenProperties());
 
             propertyRules = new DefaultDictionary<PropertyRoute, PropertyAllowed>
-                (pr => TypeAuthClient.GetAllowed(pr.RootType).MaxUI().ToPropertyAllowed(),
-                overrides);
+                (pr =>
+                {
+                    if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized())
+                        return TypeAuthClient.GetDefaultAllowed() ? PropertyAllowed.Modify : PropertyAllowed.None;
+
+                    return TypeAuthClient.GetAllowed(pr.RootType).MaxUI().ToPropertyAllowed();
+
+                }, overrides);
         }
 
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
@@ -74,6 +80,8 @@ namespace Signum.Windows.Authorization
                 switch (GetPropertyAllowed(context))
                 {
                     case PropertyAllowed.Read: Common.SetIsReadOnly(fe, true); break;
+                    case PropertyAllowed.None: Common.VoteCollapsed(fe); break;
+                    case PropertyAllowed.Modify: break;
                 }
             }
         }

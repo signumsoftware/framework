@@ -127,7 +127,7 @@ namespace Signum.Web.Selenium
         {
             container.OperationClick(symbol);
 
-            container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
+            container.Selenium.Wait(() => { try { return container.RuntimeInfo().IsNew; } catch { return false; } });
 
             return new NormalPage<T>(container.Selenium, null);
         }
@@ -137,7 +137,7 @@ namespace Signum.Web.Selenium
         {
             container.ButtonClick(symbol.Symbol.KeyWeb());
 
-            container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
+            container.Selenium.Wait(() => { try { return container.RuntimeInfo().IsNew; } catch { return false; } });
 
             return new NormalPage<T>(container.Selenium, null);
         }

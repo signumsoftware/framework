@@ -32,7 +32,7 @@ namespace Signum.Engine.Notes
         static HashSet<NoteTypeDN> SystemNoteTypes = new HashSet<NoteTypeDN>();
         static bool started = false;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
