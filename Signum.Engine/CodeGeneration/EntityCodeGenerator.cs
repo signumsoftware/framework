@@ -32,12 +32,12 @@ namespace Signum.Engine.CodeGeneration
 
             var tables = SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
 
-            CleanSchema(tables);
+            CleanDiffTables(tables);
 
             this.Tables = tables.ToDictionary(a=>a.Name);
 
             Graph = DirectedGraph<DiffTable>.Generate(tables, t =>
-                t.Columns.Values.Select(a => a.ForeingKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on)));
+                t.Columns.Values.Select(a => a.ForeignKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on)));
 
             GetSolutionInfo(out SolutionFolder, out SolutionName);
 
@@ -73,7 +73,7 @@ namespace Signum.Engine.CodeGeneration
             return Path.Combine(SolutionFolder, SolutionName + ".Entities");
         }
 
-        protected virtual void CleanSchema(List<DiffTable> tables)
+        protected virtual void CleanDiffTables(List<DiffTable> tables)
         {
             
         }
@@ -141,8 +141,8 @@ namespace Signum.Engine.CodeGeneration
             result.AddRange(
                 (from t in tables
                  from c in t.Columns.Values
-                 where c.ForeingKey != null
-                 let targetTable = Tables.GetOrThrow(c.ForeingKey.TargetTable)
+                 where c.ForeignKey != null
+                 let targetTable = Tables.GetOrThrow(c.ForeignKey.TargetTable)
                  let tagetNamespace = GetNamespace(GetFileName(targetTable))
                  where tagetNamespace != currentNamespace
                  select tagetNamespace).Distinct());
@@ -213,7 +213,7 @@ namespace Signum.Engine.CodeGeneration
                 {
                     var mListInfo2 = GetMListInfo(relatedTable);
 
-                    if (mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeingKey.TargetTable.Equals(table.Name))
+                    if (mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey.TargetTable.Equals(table.Name))
                     {
                         string field = WriteFieldMList(fileName, table, mListInfo2, relatedTable);
 
@@ -280,7 +280,7 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WriteOperations(DiffTable table)
         {
             var kind = GetEntityKind(table);
-            if (!(kind == EntityKind.Main || kind == EntityKind.Shared || kind == EntityKind.Main))
+            if (!(kind == EntityKind.Main || kind == EntityKind.Shared || kind == EntityKind.String))
                 return null;
 
             StringBuilder sb = new StringBuilder();
@@ -439,10 +439,10 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetRelatedEntity(DiffTable table, DiffColumn col)
         {
-            if (col.ForeingKey == null)
+            if (col.ForeignKey == null)
                 return null;
 
-            return GetEntityName(col.ForeingKey.TargetTable);
+            return GetEntityName(col.ForeignKey.TargetTable);
         }
 
         protected virtual bool IsReadonly(DiffTable table, DiffColumn col)
@@ -454,10 +454,20 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (!col.Nullable && (relatedEntity != null || GetValueType(col).IsClass))
+            if (HasNotNullValidator(col, relatedEntity))
                 attributes.Add("NotNullValidator");
 
             return attributes;
+        }
+
+        protected virtual bool HasNotNullValidator(DiffColumn col, string relatedEntity)
+        {
+            return HasNotNullableAttribute(col, relatedEntity);
+        }
+
+        protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
+        {
+            return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
         }
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
@@ -480,10 +490,10 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (!col.Nullable && (relatedEntity != null || GetValueType(col).IsClass))
+            if (HasNotNullableAttribute(col, relatedEntity))
                 attributes.Add("NotNullable");
 
-            if (col.ForeingKey == null)
+            if (col.ForeignKey == null)
             {
                 string sqlDbType = GetSqlTypeAttribute(table, col);
 
@@ -494,17 +504,22 @@ namespace Signum.Engine.CodeGeneration
             if (col.Name != DefaultColumnName(table, col))
                 attributes.Add("ColumnName(\"" + col.Name + "\")");
 
-            if (table.Indices.Values.Any(a =>  a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.NonClustered  ))
+            if (HasUniqueIndex(table, col))
                 attributes.Add("UniqueIndex");
 
             return attributes;
+        }
+
+        protected virtual bool HasUniqueIndex(DiffTable table, DiffColumn col)
+        {
+            return table.Indices.Values.Any(a => a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.NonClustered);
         }
 
         protected virtual string DefaultColumnName(DiffTable table, DiffColumn col)
         {
             string fieldName = GetFieldName(table, col).FirstUpper();
 
-            if (col.ForeingKey == null)
+            if (col.ForeignKey == null)
                 return fieldName;
 
             return "id" + fieldName;
@@ -639,7 +654,7 @@ namespace Signum.Engine.CodeGeneration
             if (tableName != null)
                 fieldAttributes.Add(tableName);
 
-            string backColumn = GetBackColumnName(mListInfo.BackReferenceColumn);
+            string backColumn = GetBackColumnNameAttribute(mListInfo.BackReferenceColumn);
             if (backColumn != null)
                 fieldAttributes.AddRange(backColumn);
 
@@ -659,7 +674,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual string GetBackColumnName(DiffColumn backReference)
+        protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
         {
             if (backReference.Name == "idParent")
                 return null;
@@ -669,7 +684,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
         {
-            ObjectName name = mListInfo.TrivialElementColumn.Try(te => te.ForeingKey.TargetTable) ?? relatedTable.Name;
+            ObjectName name = mListInfo.TrivialElementColumn.Try(te => te.ForeignKey.TargetTable) ?? relatedTable.Name;
 
             return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("DN")).FirstLower();
         }

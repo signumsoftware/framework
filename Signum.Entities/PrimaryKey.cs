@@ -41,7 +41,7 @@ namespace Signum.Entities
             PrimaryKeyType.ImportDefinitions(dic);
         }
 
-        public IComparable Object;
+        public readonly IComparable Object;
 
         public PrimaryKey(IComparable obj)
         {

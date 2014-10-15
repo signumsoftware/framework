@@ -66,7 +66,7 @@ namespace Signum.Engine.CodeGeneration
 
                         string codeBehind = WriteViewCodeBehindFile(t);
                         if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
-                            File.WriteAllText(fullFileName + ".cs", codeBehind);
+                            File.WriteAllText(fullFileName, codeBehind);
                     }
                 }
             }
