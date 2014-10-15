@@ -252,8 +252,7 @@ module SF {
             }
         }
 
-        var currentForm = $("form");
-        currentForm.after($form);
+        $("body").after($form);
         
         (<HTMLFormElement>$form[0]).submit();
         $form.remove();
