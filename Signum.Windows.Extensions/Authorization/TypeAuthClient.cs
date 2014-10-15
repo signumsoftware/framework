@@ -144,6 +144,11 @@ namespace Signum.Windows.Authorization
                 }
             }
         }
+
+        public static bool GetDefaultAllowed()
+        {
+            return TypeAuthClient.typeRules.DefaultAllowed(null).Max(false) == TypeAllowedBasic.Create;
+        }
     }
 
     public class VisibleIfNotContainsExtension : MarkupExtension, IValueConverter
