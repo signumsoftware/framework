@@ -472,21 +472,19 @@ WriteLiteral(" Diff</td>\r\n                <td");
 
 WriteLiteral(" class=\"monospaceCell\"");
 
-WriteLiteral(">\r\n                    <pre>\r\n");
-
-WriteLiteral("                    ");
+WriteLiteral(">\r\n                    <pre>");
 
             
-            #line 111 "..\..\Translation\Views\ViewInstance.cshtml"
-               Write(Signum.Web.Translation.TranslationClient.Diff(trans.OriginalText, trans.TranslatedText));
+            #line 110 "..\..\Translation\Views\ViewInstance.cshtml"
+                    Write(Signum.Web.Translation.TranslationClient.Diff(trans.OriginalText, trans.TranslatedText));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </pre>\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("</pre>\r\n                </td>\r\n            </tr>\r\n");
 
             
-            #line 115 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 113 "..\..\Translation\Views\ViewInstance.cshtml"
                                 
                         }
 
@@ -504,7 +502,7 @@ WriteLiteral(" class=\"leftCell\"");
 WriteLiteral(">");
 
             
-            #line 122 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 120 "..\..\Translation\Views\ViewInstance.cshtml"
                                 Write(ci.Name);
 
             
@@ -517,13 +515,13 @@ WriteLiteral(" class=\"monospaceCell\"");
 WriteLiteral(">\r\n");
 
             
-            #line 124 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 122 "..\..\Translation\Views\ViewInstance.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 124 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 122 "..\..\Translation\Views\ViewInstance.cshtml"
                      if (editCulture(ci))
                     {
                         
@@ -531,14 +529,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 126 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 124 "..\..\Translation\Views\ViewInstance.cshtml"
                    Write(Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" }));
 
             
             #line default
             #line hidden
             
-            #line 126 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 124 "..\..\Translation\Views\ViewInstance.cshtml"
                                                                                                                            
                     }
                     else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
@@ -550,7 +548,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                        <pre>");
 
             
-            #line 130 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 128 "..\..\Translation\Views\ViewInstance.cshtml"
                         Write(trans.TranslatedText);
 
             
@@ -559,7 +557,7 @@ WriteLiteral("                        <pre>");
 WriteLiteral("</pre>\r\n");
 
             
-            #line 131 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 129 "..\..\Translation\Views\ViewInstance.cshtml"
                     }
                     else
                     {
@@ -568,14 +566,14 @@ WriteLiteral("</pre>\r\n");
             #line default
             #line hidden
             
-            #line 134 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 132 "..\..\Translation\Views\ViewInstance.cshtml"
                    Write(trans.TranslatedText);
 
             
             #line default
             #line hidden
             
-            #line 134 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 132 "..\..\Translation\Views\ViewInstance.cshtml"
                                              
                     }
 
@@ -585,7 +583,7 @@ WriteLiteral("</pre>\r\n");
 WriteLiteral("                </td>\r\n            </tr>\r\n");
 
             
-            #line 138 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 136 "..\..\Translation\Views\ViewInstance.cshtml"
                         }
                     }
 
@@ -602,20 +600,20 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 5664), Tuple.Create("\"", 5711)
+WriteAttribute("value", Tuple.Create(" value=\"", 5616), Tuple.Create("\"", 5663)
             
-            #line 145 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 5672), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+            #line 143 "..\..\Translation\Views\ViewInstance.cshtml"
+, Tuple.Create(Tuple.Create("", 5624), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 5672), false)
+, 5624), false)
 );
 
 WriteLiteral(" />\r\n");
 
             
-            #line 146 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 144 "..\..\Translation\Views\ViewInstance.cshtml"
     }
 }
 
@@ -627,7 +625,7 @@ WriteLiteral("\r\n\r\n<script>\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 152 "..\..\Translation\Views\ViewInstance.cshtml"
+            #line 150 "..\..\Translation\Views\ViewInstance.cshtml"
     Write(Signum.Web.Translation.TranslationClient.Module["fixTextAreas"]());
 
             
