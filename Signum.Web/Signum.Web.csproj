@@ -67,7 +67,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.WorkflowServices" />
@@ -274,19 +274,19 @@
     <EmbeddedResource Include="Signum\Scripts\Entities.js">
       <DependentUpon>Entities.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\Finder.js" >
+    <EmbeddedResource Include="Signum\Scripts\Finder.js">
       <DependentUpon>Finder.ts</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Signum\Scripts\globals.js">
       <DependentUpon>globals.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\Lines.js" >
+    <EmbeddedResource Include="Signum\Scripts\Lines.js">
       <DependentUpon>Lines.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\Navigator.js" >
+    <EmbeddedResource Include="Signum\Scripts\Navigator.js">
       <DependentUpon>Navigator.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\Operations.js" >
+    <EmbeddedResource Include="Signum\Scripts\Operations.js">
       <DependentUpon>Operations.ts</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Signum\Scripts\Polyfills.js">
@@ -295,10 +295,10 @@
     <EmbeddedResource Include="Signum\Scripts\SF.js">
       <DependentUpon>SF.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\SF.UI.js" >
+    <EmbeddedResource Include="Signum\Scripts\SF.UI.js">
       <DependentUpon>SF.UI.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Signum\Scripts\Validator.js" >
+    <EmbeddedResource Include="Signum\Scripts\Validator.js">
       <DependentUpon>Validator.ts</DependentUpon>
     </EmbeddedResource>
     <Content Include="Signum\Views\Exception.cshtml">
