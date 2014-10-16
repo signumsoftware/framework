@@ -50,6 +50,9 @@ namespace Signum.Windows.Authorization
             if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
                 return PropertyAllowed.Modify;
 
+            if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
+                return TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed(); 
+
             var propAllowed = propertyRules.GetAllowed(route);
 
             var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
@@ -65,7 +68,7 @@ namespace Signum.Windows.Authorization
             if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
                 return null;
 
-            if (route.PropertyRouteType == PropertyRouteType.Root)
+            if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
             {
                 var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
                 if (typeAllowed < requested)
