@@ -9,7 +9,7 @@
 }
 
 @{
-    var currentEntity = (IdentifiableEntity)ViewData["currentEntity"];
+    var currentEntity = (Entity)ViewData["currentEntity"];
 }
 
 @using (Model.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
