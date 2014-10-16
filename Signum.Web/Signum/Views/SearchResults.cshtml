@@ -30,7 +30,7 @@
 
 @foreach (var row in queryResult.Rows)
 {
-    Lite<IIdentifiable> entityField = row.Entity;
+    Lite<IEntity> entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
         @if (allowSelection)
         {

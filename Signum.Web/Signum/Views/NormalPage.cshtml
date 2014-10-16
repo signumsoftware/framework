@@ -4,7 +4,7 @@
 
 @using (Html.BeginForm())
 {
-    var ident = Model.UntypedValue as IdentifiableEntity;
+    var ident = Model.UntypedValue as Entity;
     <div id="divMainPage" @Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : "") class="form-horizontal">
         @if (string.IsNullOrEmpty(ViewBag.Title))
         {
