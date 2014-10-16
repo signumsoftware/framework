@@ -537,6 +537,15 @@ namespace Signum.Entities
             return selector;
         }
 
+
+        public bool IsToStringProperty()
+        {
+            return PropertyRouteType == PropertyRouteType.FieldOrProperty &&
+                Parent.PropertyRouteType == PropertyRouteType.Root &&
+                PropertyInfo != null && ReflectionTools.PropertyEquals(PropertyInfo, piToStringProperty);
+        }
+
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IdentifiableEntity ident) => ident.ToStringProperty);
     }
 
     public interface IImplementationsFinder
