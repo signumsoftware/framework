@@ -1,8 +1,8 @@
 # PropertyRoute
 
-A `PropertyRoute` is a sequence of `PropertyInfo`, starting from a `System.Type` of an root entity (a `IdentifiableEntity` or a `ModelEntity`) that ultimately refers unambiguously to a logical database column. 
+A `PropertyRoute` is a sequence of `PropertyInfo`, starting from a `System.Type` of an root entity (a `Entity` or a `ModelEntity`) that ultimately refers unambiguously to a logical database column. 
 
-There's just one canonical representation of a `PropertyRoute` because inheritance is not supported, neither the sequence of `PropertyInfo` can travel to a different `IdentifiableEntity`. 
+There's just one canonical representation of a `PropertyRoute` because inheritance is not supported, neither the sequence of `PropertyInfo` can travel to a different `Entity`. 
 
 A `PropertyRoute` is an important concept to authorize properties, and override [FieldAttributes](FieldAttributes.md).
 

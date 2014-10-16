@@ -60,7 +60,7 @@ Let's see how to declare a new Mixin type:
 [Serializable]
 public class UserEmployeeMixin : MixinEntity
 {
-    protected UserEmployeeMixin(IdentifiableEntity mainEntity, MixinEntity next)
+    protected UserEmployeeMixin(Entity mainEntity, MixinEntity next)
         : base(mainEntity, next)
     {
     }
@@ -79,7 +79,7 @@ As you see, a `MixinEntity` looks like a normal entity, with normal properties a
 The only important difference is the constructor: 
 
 * The constructor should be `protected` to avoid client code instantiate any `MixinEntity`. An instance with Mixins is automatically instantiated with all their mixins and there's no way to get rid of them. They are effectively an expansion of the type.  
-* The constructor passes a `IdentifiableEntity mainEntity` to the base constructor, this value is stored in the `MainEntity` property in `MixinEntity` to let any Mixin have access the main entity. 
+* The constructor passes a `Entity mainEntity` to the base constructor, this value is stored in the `MainEntity` property in `MixinEntity` to let any Mixin have access the main entity. 
 * The constructor passes a `MixinEntity next` to the base constructor, the reason is that, in-memory mixins are stored as a linked list.
 
 ## Associating Types with Mixins
@@ -111,10 +111,10 @@ We have paid a lot of attention to make Mixin first-class citizens of Signum Fra
 
 ### Reading and Writing properties
 
-`IdentifiableEntity` is the base class that can contain mixins. It has the following members: 
+`Entity` is the base class that can contain mixins. It has the following members: 
 
 ```C#
-public class IdentifiableEntity
+public class Entity
 {
     public M Mixin<M>() where M : MixinEntity  // Typed variant  
     public MixinEntity GetMixin(Type mixinType) // Un-typed variant
@@ -139,7 +139,7 @@ If you're intializing an entity, you can use `SetMixin` extension method to init
 
 ```C#
 public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinProperty, V value)
-    where T : IIdentifiable
+    where T : IEntity
     where M : MixinEntity
 ```
 
@@ -234,7 +234,7 @@ Navigator.EntitySettings<UserDN>().OverrideView += usr, ctrl =>
 ```
 * Using `Child` and `After` extension methods you can find controls in the visual (or logical) tree and manipulate them. It's like jQuery for WPF!. 
 * `Common.DelayedRoutes` is necessary because the `EntityLine` is being created, then the `Route` is set, and finally added to the visual tree. If written in XAML will be the other way arround.
-* `[UserEmployeeMixin]` is a valid binding expression because takes advantage of the `IdentifiableEntity` indexer `MixinEntity this[string mixinName]`. 
+* `[UserEmployeeMixin]` is a valid binding expression because takes advantage of the `Entity` indexer `MixinEntity this[string mixinName]`. 
 
 
 ### Signum.Web

@@ -59,13 +59,13 @@ public partial class SearchControl
    public bool NavigateOnCreate;  
    public bool Remove;
 
-   public event Func<IdentifiableEntity> Creating;
-   public event Action<IdentifiableEntity> Navigating;
-   public event Action<List<Lite<IdentifiableEntity>>> Removing;
+   public event Func<Entity> Creating;
+   public event Action<Entity> Navigating;
+   public event Action<List<Lite<Entity>>> Removing;
 
 }
 ```
-* **EntityType:** The `System.Type` of the `Entity` column, should be an `IIdentifiable` but can be an abstract class or an interface with `Implementations`. 
+* **EntityType:** The `System.Type` of the `Entity` column, should be an `IEntity` but can be an abstract class or an interface with `Implementations`. 
 
 * **Implementations:** The `Implementations` structure of the `Entity` column. Indicates if the column can contain entities of different types, adjusting the possible interactions by asking the user to decide the concrete type before `Create`.  
 
@@ -86,8 +86,8 @@ Moreover, `SearchControl` contains some particular dependency properties and eve
 public partial class SearchControl
 {
    public int ItemsCount
-   public Lite<IdentifiableEntity> SelectedItem;
-   public List<Lite<IdentifiableEntity>> SelectedItems;
+   public Lite<Entity> SelectedItem;
+   public List<Lite<Entity>> SelectedItems;
 
    public bool MultiSelection;
    public bool AllowChangeColumns;
@@ -98,8 +98,8 @@ public partial class SearchControl
 ```
 
 * **ItemsCount:** The number of rows in the result. 
-* **SelectedItem:** The `Lite<IdentifiableEntity>` in the `Entity` column of the selected row.
-* **SelectedItems:** The `List<Lite<IdentifiableEntity>>` of the `Entity` column of the selected rows, if multi selection is `true`. 
+* **SelectedItem:** The `Lite<Entity>` in the `Entity` column of the selected row.
+* **SelectedItems:** The `List<Lite<Entity>>` of the `Entity` column of the selected rows, if multi selection is `true`. 
 * **MultiSelection:** Allows multiple row selection, by default is `true` even for `Navigation.Find` to enable multi-entity operations using the context menu.
 * **AllowChangeColumns:** Disables the functionality to Add, Remove, Reorder or Rename columns. By default is `true` even for embedded `SearchControl . 
 

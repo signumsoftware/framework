@@ -65,7 +65,7 @@ using (new EntityCache())
 }
 ```
 
-Using `EntityCache.AddFullGraph` instead, you can add all the `IdentifiableEntity` in the object graph.  
+Using `EntityCache.AddFullGraph` instead, you can add all the `Entity` in the object graph.  
 
 ### `EntityCache(ForceNew)`
 

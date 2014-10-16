@@ -171,7 +171,7 @@ ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idComputerState FOREIGN KEY 
 ```
 
 As you can see, the table `ComputerDN` is quite similar to the entity itself, but there are some interesting differences:
-* As any `IdentifiableEntity`, it has a auto-numeric primary key with name `Id`. 
+* As any `Entity`, it has a auto-numeric primary key with name `Id`. 
 * In this case we don't have the `ToStr` column because we used `ToStringExpression`. 
 * `Ticks` field is inherited from `Entity` to control concurrency.
 * `SerialNumber` is `NOT NULL` and has length 12, determined by the field attributes. 
@@ -195,7 +195,7 @@ ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_id
 ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_idMemoryModuleDN FOREIGN KEY (idMemoryModuleDN) REFERENCES MemoryModuleDN(Id)
 
 ```
-Notice how this table contains an auto-numeric primary key `Id`, a `idParent` referencing the computer, and a reference to `MemoryModuleDN` table because `MemoryModuleDN` inherits from `IdentifiableEntity`. 
+Notice how this table contains an auto-numeric primary key `Id`, a `idParent` referencing the computer, and a reference to `MemoryModuleDN` table because `MemoryModuleDN` inherits from `Entity`. 
 
 * Finally, look how `computerState` is also a foreign key, but is `NOT NULL` because enums are value types. The framework even creates the table and inserts the enum values, keeping the Ids in sync with the enum numeric values. 
 

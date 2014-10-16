@@ -142,7 +142,7 @@ Converters static class contains a bunch of general purposes and specific conver
 * `int` -> `Visibility` 
  * **ZeroToVisibility**: implemented as` count == 0 ? Visibility.Visible : Visibility.Collapsed`.
  * **NotZeroToVisibility**: implemented as ` count == 0 ? Visibility.Collapsed : Visibility.Visible`.
-* `IIdentifiable` -> `Lite<IIdentifiable>` 
+* `IEntity` -> `Lite<IEntity>` 
  * **ToLite**: implemented using `ToLite`.
-* `Lite<IIdentifiable>` -> `IIdentifiable`
+* `Lite<IEntity>` -> `IEntity`
  * **Retrieve**: implemented using `Retrieve`.

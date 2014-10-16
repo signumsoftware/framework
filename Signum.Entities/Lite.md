@@ -2,7 +2,7 @@
 
 Every Persistence Framework has to deal with laziness in some way. Linq to SQL and Entity Framework, for example, follow a run-time laziness approach, meaning that you can define at run-time if a relationship is lazy or not.
 
-Singum Framework, however, needs you to define that a field/property type as `Lite<T>` instead of `T` to create a lazy relationship (where `T` is some `IIdentifiable`).
+Singum Framework, however, needs you to define that a field/property type as `Lite<T>` instead of `T` to create a lazy relationship (where `T` is some `IEntity`).
 
 That means that laziness is structural (you have to define it at compile time), and also non-transparent (since you have to explicitly load a `Lite<T>` before accessing it). 
 
@@ -24,8 +24,8 @@ Given that lites are an important decision when designing your entities, hiding 
 ### Lite\<T> class
 
 ```C#
-public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>>
-    where T : class, IIdentifiable
+public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+    where T : class, IEntity
 {
     T Entity { get; }
     T EntityOrNull { get; }
@@ -34,20 +34,20 @@ public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>
     bool IsNew { get;  }
     int? IdOrNull { get; }
     Type EntityType { get; }
-    IdentifiableEntity UntypedEntityOrNull { get; }
+    Entity UntypedEntityOrNull { get; }
 }
 
 public static class Lite
 { 
-    public static Lite<T> ToLite<T>(this T entity) where T : class, IIdentifiable
-    public static Lite<T> ToLite<T>(this T entity, string toStr) where T : class, IIdentifiable
-    public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IIdentifiable
-    public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IIdentifiable
-    public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
+    public static Lite<T> ToLite<T>(this T entity) where T : class, IEntity
+    public static Lite<T> ToLite<T>(this T entity, string toStr) where T : class, IEntity
+    public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IEntity
+    public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IEntity
+    public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IEntity
 
-    public static Lite<IdentifiableEntity> Create(Type type, int id)
-    public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
-    public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr, ModifiedState state)
+    public static Lite<Entity> Create(Type type, int id)
+    public static Lite<Entity> Create(Type type, int id, string toStr)
+    public static Lite<Entity> Create(Type type, int id, string toStr, ModifiedState state)
 }
 ```
 
@@ -122,8 +122,8 @@ animalLite.Is(animal.ToLite()) // Ok
 Even in scenarios outside of the .Net Type system (like the Web or reading and writing files) is useful to keep the entity type to avoid confusing numeric ids of different entity types. That's why Lites can be serialized with `Key` method (returning `"Type;Id"`) or  `KeyLong` method (returning `"Type;Id;ToString"`)
 
 ```C#
-public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>>
-    where T : class, IIdentifiable
+public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+    where T : class, IEntity
 {
     string Key(); //Returns "Person;3"
     string KeyLong(); //Returns "Person;3;John connor"
@@ -131,10 +131,10 @@ public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>
 
 public static class Lite
 { 
-    public static Lite<IdentifiableEntity> Parse(string liteKey)
-    public static Lite<T> Parse<T>(string liteKey) where T : class, IIdentifiable
+    public static Lite<Entity> Parse(string liteKey)
+    public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
 
-    public static string TryParseLite(string liteKey, out Lite<IdentifiableEntity> result)
-    public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+    public static string TryParseLite(string liteKey, out Lite<Entity> result)
+    public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IEntity
 }
 ```

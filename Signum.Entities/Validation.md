@@ -38,7 +38,7 @@ Validators are just attributes with some parameters that you can place in your *
 
 ```C#
 [Serializable]
-public class MyEntityDN: IdentifiableEntity
+public class MyEntityDN: Entity
 {
   [StringLengthValidator(Min=3, Max=3), StringCaseValidator(Case.Uppercase)]
   public string Name
@@ -287,7 +287,7 @@ The class is defined like this:
 
 ```C#
 public class StateValidator<E, S> : IEnumerable //Just to allow collection initializer
-     where E : IdentifiableEntity
+     where E : Entity
      where S : struct
 {
    public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties);
@@ -444,7 +444,7 @@ public class ModifiableEntity
 
 Instead you can use `Modifiable.FullIntegrityCheck` method that walks along the full object graph and returns a big paragraph of all the entities wrong, with each entity and the actual errors they have.
 
-Also, you can use `IdentifiableEntity.IdentifiableIntegrityCheck`, that does the same thing but for a smaller graph, the identifiable graph (including the entities MLists and Embeddes but stopping on other `IdentifiableEntities`). 
+Also, you can use `Entity.IdentifiableIntegrityCheck`, that does the same thing but for a smaller graph, the identifiable graph (including the entities MLists and Embeddes but stopping on other `IdentifiableEntities`). 
 
 #### Notify Changes
 
@@ -499,7 +499,7 @@ Finally, some entities could have optional Corruptness support by including Corr
 [Serializable]
 public class CorruptMixin : MixinEntity
 {
-    CorruptMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+    CorruptMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
     bool corrupt;
     public bool Corrupt
@@ -528,7 +528,7 @@ public class CorruptMixin : MixinEntity
 }
 ```
 
-While `IdentifiableEntity` has hard-coded support for this mixin: 
+While `Entity` has hard-coded support for this mixin: 
 
 ```C#
 public virtual string IdentifiableIntegrityCheck()

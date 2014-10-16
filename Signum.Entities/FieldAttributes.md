@@ -4,9 +4,9 @@ We should have it clear now that in Signum Framework, entities rule. The databas
 
 There are, however, some situations where you have to enrich your entities with database-related information, like **Indexes**, specifying **Scale** and **Precision** for numbers, or use **different database types**. 
 
-We use .Net Attributes over the entity **fields** to specify this information, but there are ways to override this information for entities that are not in your control. 
+We use .Net Attributes over the entity **fields** to specify this information, but you can use [OverrideAttributes](../Signum.Engine/Schema/Schema.md) to override this information for entities that are not in your control. 
 
-Also note that if the attribute is set on a `MList<T>` field, it will be used by the MList element column instead. 
+Also note that if the attribute is set on a `MList<T>` field, it will be used by the MListTable or element column instead. 
 
 ```C#
 [NonNullable]
@@ -30,7 +30,7 @@ If you want to make a value type nullable just use `Nullable<T>` or the more con
 
 `NotNullableAttribute`, once applied over a field of a reference type, will make the related column not nullable. 
 
-**Important Note:** Signum Framework allows you to save arbitrary objects graphs. When a cycle of new object is found, it saves inconsistent objects for a while, letting some FKs to be null until we know the actual Id of the related entity. If you use `NotNullableAttribute` over an entity reference and something like this happens you will get an exception when saving. Don't use `NotNullableAttribute` on entity fields that could participate in cycles, use `NotNullValidatorAttribute` on the property instead. See more about this in Database - Save.
+**Important Note:** Signum Framework allows you to save arbitrary objects graphs. When a cycle of new object is found, it saves inconsistent objects for a while, letting some FKs to be null until we know the actual `Id` of the related entity. If you use `NotNullableAttribute` over an entity reference and something like this happens you will get an exception when saving. Don't use `NotNullableAttribute` on entity fields that could participate in cycles, use `NotNullValidatorAttribute` on the property instead. See more about this in Database - Save.
 
 
 ### SqlDbTypeAttribute
@@ -74,9 +74,12 @@ string name; // NVARCHAR(200) NULL
 decimal price; // DECIMAL(18,2) NOT NULL
 ```
 
-Sometimes you want to modify this behavior. You can do that using `[SqlDbTypeAttribute]` on any value field. It doesn't work on entity fields, embedded entities or lites. 
+Sometimes you want to modify this behavior. You can do that using `[SqlDbTypeAttribute]` on any value field. It doesn't work on entity fields, embedded entities or lites, and has the following basic properties:
 
-Notice that we trust that there's a conversion from your field type to your DbType, if you map a string to be a Bit column you will get a lot of exceptions. 
+* **SqlDbType:** The `SqlDbType` enum that determines the underlying T-SQL system type. We trust that there's a conversion from your field type to your DbType, if you map a string to be a Bit column you will get a lot of exceptions. 
+* **Size:** Used to set the `Length` (for string columns) or the Precision (for numeric columns).
+* **Scale:** Used to determine the `Scale` of numeric columns. 
+* **UserDefinedTypeName:** The name of the UDT that will be used, if any. 
 
 Also, notice that if you change the `SqlType` then the default Size/Precision and Scale for the new type will be used, unless explicitly changed: 
 
@@ -88,12 +91,64 @@ string name; // NCHAR(1) NULL
 string name; // NCHAR(100) NULL
 ```
 
-Finally, a very important note. SqlServer 2005 have deprecated `NTEXT` in favor of `NVARCHAR(MAX)`. To achieve the `MAX` behavior just use int.MaxValue as Size: 
+Also, SqlServer 2005 deprecated `NTEXT` in favor of `NVARCHAR(MAX)`. To achieve the `MAX` behavior just use `int.MaxValue` as Size: 
 
-```#
+```C#
 [SqlDbType(Size = int.MaxValue)]
 string name; // NVARCHAR(MAX) NULL
 ```
+
+Additionally, `SqlDbType` has a `Default` property to create a default constraint in the database. This constraint will be ignored by the framework when saving, but will could be used by `UnsafeInsert` or any third-party legacy application accessing the database.    
+
+### ColumnNameAttribute
+
+`ColumnNameAttribute` let's you override the default name of any database column. Example:
+
+```C#
+[ColumnName("DepartmentID")]
+Lite<DepartmentDN> department;
+```
+
+Note that when applied to a field inside an embedded entity, the name will still be concatenated to the field name of the embedded entity itself. In order to override this you'll need to manipulate the generated `Schema` object directly. 
+
+Also, when this attribute is applied to an `MList<T>` field, it will change the table name suffix (but ` TableNameAttribute` takes precedence), and the item column of the `MListTable`. 
+
+### TableNameAttribute
+
+Allows you to override the [four-part object name](http://technet.microsoft.com/en-us/library/ms187879(v=sql.105).aspx) (Name, Schema, Database and Server) of one table. Can be applied to any **type** that inherits from `Entity`, or any **field** of type `MList<T>`. 
+
+### PrimaryKeyAttribute
+
+This attribute can be applied to **types** inheriting from `Entity` or to **fields** of type `MList<T>` to customize the primary key of the table. 
+
+Signum Framework does not support multi-column primary keys, but you can easily override the column name and, since `Entity` uses `PrimaryKey` structure, it has flexibility to support primary keys with any arbitrary type, like `int`, `long` or `Guid`. 
+
+It also contains two properties to determine if the primary key is `Identity` (at the database level) or has `IdentityBehaviour` (should not be included when inserting). 
+
+The difference is necessary because Sql Server implements `Identity` in `Guid` using `DEFAULT` constraints instead of normal `Identity`. Actually there are two options, `DEFAULT(NEWID())` (for random GUIDs) or `DEFAULT(NEWSEQUENTIALID())` (for faster sequential GUIDs).
+
+Example: 
+
+```C#
+[Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
+[PrimaryKey(typeof(Guid))]
+public class NoteWithDateDN : Entity
+{
+  ...
+}
+```
+
+## BackReferenceColumnNameAttribute
+
+Only applicable on `MList<T>` fields, let's you change the name of the column that refers back to the parent entity. By default is `idParent`. 
+
+The type of this column can not be changed because it has to be the same type than the primary key of the parent entity.
+
+## TicksColumnAttribute 
+
+Allows you to remove the `Ticks` column in the database, together with the ability to detect concurrency problems when two users modify the same entity at the same time. 
+
+Additionally, this attribute allows you to change the `Name`, `SqlDbType`, `Size`, `Scale` and `Default` constraint of the Ticks column, for example, to use a `DateTime` instead of a `long`.  
 
 ### UniqueIndexAttribute
 Indexes are a very important point of database design in order to improve performance and define database constraints. Indexes can be:
@@ -101,7 +156,7 @@ Indexes are a very important point of database design in order to improve perfor
 * **Unique**: Allowing just one different value in the column. This constraint will affect your business logic. 
 * **Multiple**: Allowing different values in the column but potentially improving performance. 
 
-Signum Framework only takes care of **unique** indexes because they are an important part of your logical schema. **Multiple** indexes, on the other side, will be 'recommended' by the synchronizer for any foreign key but the last word depends on the performance characteristics of your database and the recommendations our your DBA / Microsoft SQL Profiler.
+Signum Framework only takes care of **unique** indexes because they are an important part of your logical schema. **Multiple** indexes, on the other side, will be 'recommended' by the synchronizer for any foreign key but the last word depends on the performance characteristics of your database and the recommendations of your DBA / Microsoft SQL Profiler.
 
 In order to add a Unique Index to some field just add `[UniqueIndexAttribute]` on top of it: 
 
@@ -124,12 +179,12 @@ string name;
 ```C#
 public UniqueIndex AddUniqueIndex<T>(
 	Expression<Func<T, object>> fields) 
-	where T : IdentifiableEntity
+	where T : Entity
 
 public UniqueIndex AddUniqueIndex<T>(
 	Expression<Func<T, object>> fields, 
 	Expression<Func<T, bool>> where) 
-	where T : IdentifiableEntity
+	where T : Entity
 ```
 
 And similar variants for MList tables
@@ -137,12 +192,12 @@ And similar variants for MList tables
 ```C#
 public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
 	Expression<Func<MListElement<T, V>, object>> fields)
-    where T : IdentifiableEntity
+    where T : Entity
                         
 public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
 	Expression<Func<MListElement<T, V>, object>> fields, 
 	Expression<Func<MListElement<T, V>, bool>> where)
-            where T : IdentifiableEntity
+            where T : Entity
        
 ```
 

@@ -25,7 +25,7 @@ IWeapon weapon;
 
 The actual implementation in the database is just multiple foreign keys, each one with different tables of each mapped type (`RevolverDN`, `BazookaDN`, `MachineGunDN`). Due to that, the types should be: 
 
-* A subclass of `IdentifiableEntity` (they need their own table)
+* A subclass of `Entity` (they need their own table)
 * A type assignable to the field's Type (in this case, an implementation of `IWeapon`). 
 
 ### Performance considerations 
@@ -53,7 +53,7 @@ This [FieldAttributes](FieldAttributes.md), instead of mapping a finite number o
 
 ```C#
 [ImplemetedByAll] // there are too many kinds of weapon in the world to enumerate it...
-IdentifiableEntity weapon;
+Entity weapon;
 ```
 
 The implementation in the database uses just two columns:
@@ -61,7 +61,7 @@ The implementation in the database uses just two columns:
 * One for the actual Id of the related entity. This column has no Foreign Key restriction.
 * Another for the Type Id of the Entity. Referring to the mandatory `TypeDN` table. 
 
-Think of `TypeDN` as Signum Engine's equivalent to System.Type. It's a table containing a row for each concrete `IdentifiableEntity` included in the schema. 
+Think of `TypeDN` as Signum Engine's equivalent to System.Type. It's a table containing a row for each concrete `Entity` included in the schema. 
 
 That's all you need to know about Inheritance in Signum Engine.... unless you want to know more :).
 

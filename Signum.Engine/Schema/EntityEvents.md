@@ -7,21 +7,21 @@
 ```C#
 public class Schema
 {
-   public EntityEvents<IdentifiableEntity> EntityEventsGlobal { get; }
+   public EntityEvents<Entity> EntityEventsGlobal { get; }
    
    public EntityEvents<T> EntityEvents<T>()
-       where T : IdentifiableEntity
+       where T : Entity
 }
 ```
 
-* `EntityEventsGlobal` property let's you attach/detach event for every `IdentifiableEntity`
+* `EntityEventsGlobal` property let's you attach/detach event for every `Entity`
 * `EntityEvents<T>` method let's you attach/detach event for one particular entity type `T`
 
 `EntityEvent<T>` class defines a bunch of events:  
 
 ```C#
 public class EntityEvents<T> : IEntityEvents
-            where T : IdentifiableEntity
+            where T : Entity
 {
     public event PreSavingEventHandler<T> PreSaving;
     public event SavingEventHandler<T> Saving;
@@ -43,7 +43,7 @@ public class EntityEvents<T> : IEntityEvents
 `PreSaving` is executed before saving. Allows changing the object graph but, if done, `graphModified` must be set to `true`.
 
 ```C#
-public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
+public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : Entity;
 ```
 
 Consider overriding `ModifiableEntity.PreSaving` instead if you have control of the entity and the changes do not require interacting with the `Logic` assembly.
@@ -69,7 +69,7 @@ static void Bug_PreSaving(BugDN bug, ref bool graphModified)
 `Saving` is executed after `PreSaving` is executed for all the entities in the graph. The graph is validated, and the modifications propagated. Let you test the final entity that will be saved in the database.   
 
 ```C#
-public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
+public delegate void SavingEventHandler<T>(T ident) where T : Entity;
 ```
 
 Saving is used tipically to assert for permission and throw an exception if necessary before any change is made in the database. 
@@ -79,7 +79,7 @@ Saving is used tipically to assert for permission and throw an exception if nece
 `Saved` is executed after all the objects in the graph are saved. 
 
 ```C#
-public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
+public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
 ```
 
 Use `Saved` to create related entities after some entity is saved, since you already have the Id. One good example are `MList<T>` fields with `[Ignore]` attribute that are represented as an independent `EntityKind.Relational` entity in the database.
@@ -91,7 +91,7 @@ If you want to assert for integrity, instead of `Saved`, you can use a combinati
 `Retrieved` is executed for each retrieved entity after a LINQ query is completely processes. 
 
 ```C#
-public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
+public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
 ```
 
 Consider using `ModifiableEntity.PostRetrieving` instead if you have control of the entity and the changes do not require interacting with the `Logic` assembly.
@@ -101,9 +101,9 @@ Consider using `ModifiableEntity.PostRetrieving` instead if you have control of 
 `FilterQuery` is processed at the early stages of the LINQ provider pipeline to allow you add filters to `Database.Query<T>()` and `Database.MListQuery<E, V>()` expressions. 
 
 ```C#
-public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
+public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
 
-public class FilterQueryResult<T> : IFilterQueryResult where T : IdentifiableEntity
+public class FilterQueryResult<T> : IFilterQueryResult where T : Entity
 {
     public readonly Expression<Func<T, bool>> InDatabaseExpresson;
     public readonly Func<T, bool> InMemoryFunction; //Optional

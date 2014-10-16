@@ -13,17 +13,17 @@ Internally `LinkClient` uses a [`Polymorphic`](../../Signum.Utilities/Polymorphi
 ```C#
 public static class LinksClient
 {
-    public static Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>> EntityLinks;
+    public static Polymorphic<Func<Lite<Entity>, Control, QuickLink[]>> EntityLinks;
 
     public static void RegisterEntityLinks<T>(Func<Lite<T>, Control, QuickLink[]> getQuickLinks)
-        where T : IdentifiableEntity
+        where T : Entity
 }
 ```
 
 For example, this is how `OperationClient` registers `OperationLogDN` as a `QuickLink` for any entity but `OperationLogDN` itself: 
 
 ```C#
-LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
+LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
     entity.GetType() == typeof(OperationLogDN) ? null : 
         new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
@@ -122,7 +122,7 @@ Additionally, the property `ShowResultCount` let you query for the number of res
 Example: 
 
 ```C#
-LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
+LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
     entity.GetType() == typeof(OperationLogDN) ? null : 
         new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
@@ -149,7 +149,7 @@ The reason is that we avoid retrieving the entity just to show the quick links, 
 Inherits from `QuickLink` and is specialized to open `NormalWindows` by calling `Finder.Navigate` after executing a `QueryUnique`. 
 
 ```C#
-public class QuickLinkNavigate<T> : QuickLink  where T : IdentifiableEntity
+public class QuickLinkNavigate<T> : QuickLink  where T : Entity
 {
    public NavigateOptions NavigateOptions { get; set; }
    public UniqueOptions FindUniqueOptions { get; set; }

@@ -19,14 +19,14 @@ A single call to `Retrieve` (or `Query`) does not generate cloned entities, but 
 Two simple method let you retrieve entities given the Id. 
 
 ```C#
-public static IdentifiableEntity Retrieve(Type type, int id) 
-public static T Retrieve<T>(int id) where T : IdentifiableEntity
+public static Entity Retrieve(Type type, int id) 
+public static T Retrieve<T>(int id) where T : Entity
 ```
 
 Very often you actually retrieve entities by `Lite<T>` instead:
 
 ```C#
-public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
+public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
 ```
 
 Two important considerations: 
@@ -44,7 +44,7 @@ var myLion3 = lion.Retrieve(); //myLion2 == myLion3 and no query was made!
 If you want to avoid the memorizing aspect of `Retrieve` method, use this method instead: 
 
 ```C#
-public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
+public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
 ```
 
 `RetrieveAndForget` ignores the `Lite.Entity` property before and after retrieving the entity.  
@@ -62,8 +62,8 @@ var myLion3 = lion.RetrieveAndForget(); //myLion2 != myLion3 and lite still unlo
 Retrieves a `Lite<T>` from the database (basically the `ToString`)
 
 ```C#
-public static Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
-public static Lite<T> RetrieveLite<T>(int id) where T : IdentifiableEntity
+public static Lite<Entity> RetrieveLite(Type type, int id)
+public static Lite<T> RetrieveLite<T>(int id) where T : Entity
 ```
 
 ### FillToStr
@@ -71,7 +71,7 @@ public static Lite<T> RetrieveLite<T>(int id) where T : IdentifiableEntity
 If you already have the `Lite<T>` but has no string (i.e.: from Signum.Web `LiteModelBinder`).  
 
 ```C#
-public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IIdentifiable
+public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
 ```
 
 Example
@@ -86,7 +86,7 @@ The last two methods ultimately call `GetToStr`:
 
 ```C#
 public static string GetToStr(Type type, int id)
-public static string GetToStr<T>(int id) where T : IdentifiableEntity
+public static string GetToStr<T>(int id) where T : Entity
 ```
 
 ### Exists
@@ -95,7 +95,7 @@ The previous methods will throw a `EntityNotFoundException` if the entity is not
 
 ```C#
 public static bool Exists(Type type, int id)
-public static bool Exists<T>(int id) where T : IdentifiableEntity
+public static bool Exists<T>(int id) where T : Entity
 public static bool Exists<T>(this Lite<T> lite)
 ```  
 
@@ -105,14 +105,14 @@ public static bool Exists<T>(this Lite<T> lite)
 Retrieves all the entities of a particular table. Obviously could be slow for big tables. 
 
 ```C#
-public static List<T> RetrieveAll<T>() where T : IdentifiableEntity
-public static List<IdentifiableEntity> RetrieveAll(Type type)
+public static List<T> RetrieveAll<T>() where T : Entity
+public static List<Entity> RetrieveAll(Type type)
 ```
 
 And similar one for `Lite<T>`:
 ```C#
-public static List<Lite<T>> RetrieveAllLite<T>() where T : IdentifiableEntity
-public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
+public static List<Lite<T>> RetrieveAllLite<T>() where T : Entity
+public static List<Lite<Entity>> RetrieveAllLite(Type type)
 ```
 
 If **Cache module** is activated for the table `T`, no query will be made, except if there are `FilterQuery` registered (like Isolation or TypeConditions), in this case just a simple query retrieving the IDs. 
@@ -123,15 +123,15 @@ If **Cache module** is activated for the table `T`, no query will be made, excep
 Retrieves all the entities given a list of ids, and throwing an exception if at least one is missing. 
 
 ```C#
-public static List<T> RetrieveList<T>(List<int> ids) where T : IdentifiableEntity
-public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
+public static List<T> RetrieveList<T>(List<int> ids) where T : Entity
+public static List<Entity> RetrieveList(Type type, List<int> ids)
 ```
 
 And similar one for `Lite<T>`:
 
 ```C#
-public static List<Lite<T>> RetrieveListLite<T>(List<int> ids) where T : IdentifiableEntity
-public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<int> ids)
+public static List<Lite<T>> RetrieveListLite<T>(List<int> ids) where T : Entity
+public static List<Lite<Entity>> RetrieveListLite(Type type, List<int> ids)
 ```
 
 The order of the results will be preserved. 
@@ -145,7 +145,7 @@ Additionally, if **Cache module** is activated for the table `T`, no query will 
 Retrieves all the `IEnumerable<Lite<T>>` as a `List<T>`. 
 
 ```C#
-public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites) where T : class, IIdentifiable
+public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites) where T : class, IEntity
 ```
 
 The order of the results will be preserved. 

@@ -283,7 +283,7 @@ By default, `Autocomplete` is even able to find candidate entity by `ToString` o
 public partial class EntityLine : EntityBase
 { 
     public bool Autocomplete; 
-    public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
+    public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting;
     public int AutocompleteElements = 5;
 }
 ```
@@ -295,7 +295,7 @@ Example:
 ```
 
 ```C#
-private IEnumerable<Lite<IdentifiableEntity>> EntityLine_Autocompleting(string term)
+private IEnumerable<Lite<Entity>> EntityLine_Autocompleting(string term)
 {
    return Server.Returning((ICustomServer c) => c.CustomAutocomplete(term)); 
 }
@@ -321,7 +321,7 @@ public partial class EntityCombo : EntityBase
 { 
     public LoadDataTrigger LoadDataTrigger;
     public bool SortElements;
-    public event Func<IEnumerable<Lite<IIdentifiable>>> LoadData;
+    public event Func<IEnumerable<Lite<IEntity>>> LoadData;
     public bool NullValue;
 }
 ```
@@ -342,7 +342,7 @@ public partial class EntityCombo : EntityBase
 ```
 
 ```C#
-private IEnumerable<Lite<IdentifiableEntity>> EntityCombo_LoadData(string term)
+private IEnumerable<Lite<Entity>> EntityCombo_LoadData(string term)
 {
    return new List<Lite<CountryDN>>
    {
@@ -554,7 +554,7 @@ public partial class EntityStrip : EntityListBase
 { 
     public bool Autocomplete
     public int AutocompleteElements 
-    public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting
+    public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting
 }
 ```
 

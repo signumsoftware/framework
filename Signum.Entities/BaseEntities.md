@@ -8,11 +8,10 @@ Signum Framework provides a clear hierarchy of classes that serve as base classe
   * **ModifiableEntity:**: Base class for *entities* with change tracking and validation.  
     * **EmbeddedEntity**: Base class for entities without `Id` that live inside other entities.  
 	    * **ModelEntity**: Base class for entities that won't be saved in the database (ViewModels)
-    * **IdentifiableEntity**: Base class for entities with `Id` and their own table in the database.
-		* **Entity**: Base class for entities that have `Id` and also concurrency control. 
+    * **Entity**: Base class for entities with  their own table in the database, `Id`, `ToString` and optional concurrency control 
 		* **[EnumEntity\<T>](EnumEntity.md):** Represents a `enum` table. 
 		* **[Symbol and SemiSymbol](Symbols.md):** Like `enums` but can be declared in different types. 
-	* **[MixinEntity](Mixin.md):** Entity witch properties are effectively appended to the end of another `IdentifiableEntity`. 
+	* **[MixinEntity](Mixin.md):** Type of entity witch properties are effectively appended to the end of another `Entity`. 
 
 ## Modifiable
 
@@ -58,47 +57,44 @@ Currently they inherit from `EmbeddedEntity` for simplicity, but they are not an
 `ModelEntity` also has all the powerful validation/change-notification/change-tracking features from `ModifiableEntity`-  
 
 
-## IdentifiableEntity
+## Entity
 
-This is the basic entity with Identity. It has the right to have its own table. It also:
+This is the base entity with its own table. It also has:
 
-* Defines the `Id` field of type int to be the primary key. The property throws a `InvalidOperationExeption` if the entity is null.
-* Defines the `IdOrNull` property of type `int?` witch return null if the entity is new.
+* Defines the `Id` field of type `PrimaryKey`. The property throws a `InvalidOperationExeption` if the entity is null.
+* Defines the `IdOrNull` property of type `PrimaryKey?` witch return `null` if the entity is new.
 * Defines the `IsNew` property that returns `true` when the entity is new.
 * Defines `ToStringProperty` that evaluates `ToString` bus can be invalidated. Useful for binding.
 * Generates `ToStr` column with the evaluation of `ToString` before saving if `ToStringExpression` is not defined.
 * Overrides `Equals` and `GetHashCode` to depend on the `Id` and `Type`, not in reference equality. 
 * Is the basic container of `Mixins`. 
 
-Apart from these features, it implements the `IIdentifiable` interface, which is just a marker interface in case you want to use `ImplementedBy` or `ImplmentedByAll` over interfaces. See more about [Inheritance](Inheritance.md). 
+Classes inheriting from `Entity` also need to provide and [EntityKindAttribute](EntityKind.md).
 
-This class is designed to be the base class of simple types with strong identity semantics, like [Enums](EnumEntity.md), [Symbols](Symbols.md) or your own run-time modifiable enumerated types: TypeOfCustomer, Contry, State, etc... because these classes don't have concurrency problems (they are rarely modified) and they don't have [MList\<T>](MList.md). 
+### Concurrency Support
 
-Classes inheriting from `IdentifiableEntity` also need to provide and [EntityKindAttribute](EntityKind.md).
+Additionally, `Entity` also contains optional concurrency support using `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the `Transaction` started, so it is the same value for all the entities created or modified in the same transaction. 
 
-### IIdentifiable interface
+Each time we `Save` an entity we also update the `Ticks` value.
 
-This interface is only implemented by `IdentifiableEntity` and should be inherited by any interface that will be used by Polymorphic Foreign Key. For example: 
+Also, while saving a modified entity, we test if the `Ticks` value of the entity is not the same as the one in the database. If that would happen, an exception will be thrown and the transaction will be rollbacked.
+
+When modifying a `MList<T>` only the necessary commands (INSERT/DELETE/UPDATE) are sent to the database. Applying this changes to an entity different than the one in-memory will create a corrupt state, that's why **MList\<T> fields can only be part of entities with Ticks**
+
+You can disable concurrency control by applying [`TicksAttribute(false)`](FieldAttribute.md) to the type. This is usefull for simple types created by the Synchronizer, like [Enums](EnumEntity.md), [Symbols](Symbols.md) or your own run-time modifiable enumerated types: TypeOfCustomer, Country, State, etc... 
+because these classes don't have concurrency problems (they are rarely modified) and they don't have [MList\<T>](MList.md). 
+
+### IEntity interface
+
+Apart from these features, it implements the `IEntity` interface, which is just a marker interface in case you want to use `ImplementedBy` or `ImplmentedByAll` over interfaces. See more about [Inheritance](Inheritance.md). 
+
+This interface is only implemented by `Entity` class and should be inherited by any interface that will be used by Polymorphic Foreign Key. For example: 
 
 ```C#
-public interface IProcessDataDN : IIdentifiable
+public interface IProcessDataDN : IEntity
 {
 }
 ```
 
-By using an interface inheriting from `IIdentifiable`, instead of a class inheriting from `IdentifiableEntity`, implementers are free to inherit from the class they want. 
-
-## Entity
-Finally, the Entity class is a strong `IdentifiableEntity` with concurrency control support. This entity is meant to be the base class for most of your entities (i.e. Employee, Customer, Company...)
-
-We achieve concurrency control by having a `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the `Transaction` started, so it is the same value for all the entities created or modified in the same transaction. 
-
-Each time we save an entity we also update the `Ticks` value.
-
-Also, while saving a modified entity, we test if the `Ticks` value of the entity is not the same as the one in the database. If that would happen, an exception will be thrown and the transaction will be rollbacked.
-
-Additionally, when modifying a `MList<T>` only the necessary commands (INSERT/DELETE/UPDATE) are sent to the database. Applying this changes to an entity different than the one in-memory will create a corrupt state, that's why **MList\<T> fields can only be part of entities inheriting from Entity**
-
-
-
+By using an interface inheriting from `IEntity`, instead of a class inheriting from `Entity`, implementers are free to inherit from the class they want. 
 
