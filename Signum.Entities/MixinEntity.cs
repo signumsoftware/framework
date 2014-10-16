@@ -52,7 +52,7 @@ namespace Signum.Entities
         public static Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>> Constructors =
             new Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>>();
 
-        public static Func<Type, string> CanAddMixins;
+        public static Action<Type> AssertNotIncluded = t => { throw new NotImplementedException("Call MixinDeclarations.Register in the server, after the Connector is created."); };
 
         public static void Register<T, M>()
             where T : Entity
@@ -72,9 +72,7 @@ namespace Signum.Entities
             if (!typeof(MixinEntity).IsAssignableFrom(mixinEntity))
                 throw new InvalidOperationException("{0} is not a {1}".Formato(mixinEntity.Name, typeof(MixinEntity).Name));
 
-            string error = CanAddMixins == null ? null : CanAddMixins(mainEntity); 
-            if (error != null)
-                throw new InvalidOperationException(error);
+            AssertNotIncluded(mainEntity); 
 
             GetMixinDeclarations(mainEntity).Add(mixinEntity);
 

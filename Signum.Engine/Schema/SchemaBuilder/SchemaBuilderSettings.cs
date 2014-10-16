@@ -11,6 +11,7 @@ using System.Data;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Maps
 {
@@ -24,13 +25,13 @@ namespace Signum.Engine.Maps
         public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "Id");
         public int DefaultImplementedBySize = 40;
 
-        public Func<Type, string> CanOverrideAttributes = null;
+        public Action<Type> AssertNotIncluded = null;
 
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16;
-        
-        public Dictionary<PropertyRoute, Attribute[]> OverridenFieldAttributes = new Dictionary<PropertyRoute, Attribute[]>();
-        public Dictionary<Type, Attribute[]> OverridenTypeAttributes = new Dictionary<Type, Attribute[]>();
+
+        public Dictionary<PropertyRoute, AttributeCollection> FieldAttributesCache = new Dictionary<PropertyRoute, AttributeCollection>();
+        public Dictionary<Type, AttributeCollection> TypeAttributesCache = new Dictionary<Type, AttributeCollection>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -78,61 +79,54 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public bool IsOverriden<T, S>(Expression<Func<T, S>> propertyRoute) where T : Entity
-        {
-            return IsOverriden(PropertyRoute.Construct(propertyRoute));
-        }
-
-        private bool IsOverriden(PropertyRoute propertyRoute)
-        {
-            return OverridenFieldAttributes.ContainsKey(propertyRoute);
-        }
-
-        public bool IsOverridenType<T>() where T : Entity
-        {
-            return IsOverridenType(typeof(T));
-        }
-
-        private bool IsOverridenType(Type type)
-        {
-            return OverridenTypeAttributes.ContainsKey(type);
-        }
-
-        public void OverrideAttributes<T, S>(Expression<Func<T, S>> propertyRoute, params Attribute[] attributes)
+        public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
             where T : Entity
         {
-            OverrideAttributes(PropertyRoute.Construct(propertyRoute), attributes);
+            return FieldAttributes(PropertyRoute.Construct(propertyRoute));
         }
 
-        public void OverrideAttributes(PropertyRoute propertyRoute, params Attribute[] attributes)
+        public AttributeCollection FieldAttributes(PropertyRoute propertyRoute)
         {
-            string error = CanOverrideAttributes == null ? null : CanOverrideAttributes(propertyRoute.RootType); 
-
-            if (error != null)
-                throw new InvalidOperationException(error);
-
-            AssertCorrect(attributes, AttributeTargets.Field);
-
-            OverridenFieldAttributes.Add(propertyRoute, attributes);
+            return FieldAttributesCache.GetOrCreate(propertyRoute, () =>
+            {
+                switch (propertyRoute.PropertyRouteType)
+                {
+                    case PropertyRouteType.FieldOrProperty:
+                        if (propertyRoute.FieldInfo == null)
+                            return null;
+                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
+                            () => AssertNotIncluded(propertyRoute.RootType));
+                    case PropertyRouteType.MListItems:
+                        if (propertyRoute.Parent.FieldInfo == null)
+                            return null;
+                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
+                            () => AssertNotIncluded(propertyRoute.RootType));
+                    default:
+                        throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
+                }
+            });
         }
 
-        public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T: Entity
+        public AttributeCollection TypeAttributes<T>() where T : Entity
         {
-            OverrideTypeAttributes(typeof(T), attributes);
+            return TypeAttributes(typeof(T));
         }
 
-        public void OverrideTypeAttributes(Type type, params Attribute[] attributes)
+        public AttributeCollection TypeAttributes(Type entityType)
         {
-            OverridenTypeAttributes.Add(type, attributes);
+            if (!typeof(Entity).IsAssignableFrom(entityType) && !typeof(IView).IsAssignableFrom(entityType))
+                throw new InvalidOperationException("{0} is not an Entity or View".Formato(entityType.Name));
+
+            if (entityType.IsAbstract)
+                throw new InvalidOperationException("{0} is abstract");
+
+            return TypeAttributesCache.GetOrCreate(entityType, () =>
+            {
+                return new AttributeCollection(AttributeTargets.Class, entityType.GetCustomAttributes(true).Cast<Attribute>().ToList(),
+                    () => AssertNotIncluded(entityType));
+            });
         }
 
-        private void AssertCorrect(Attribute[] attributes, AttributeTargets attributeTargets)
-        {
-            var incorrects = attributes.Where(a => a.GetType().GetCustomAttribute<AttributeUsageAttribute>().Try(au => (au.ValidOn & attributeTargets) == 0) ?? false);
-
-            if (incorrects.Count() > 0)
-                throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
-        }
 
         public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : Entity
         {
@@ -147,49 +141,12 @@ namespace Signum.Engine.Maps
             if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
                 throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
 
-            var overriden = OverridenFieldAttributes.TryGetC(propertyRoute);
-
-            if (overriden != null)
-            {
-                var res = overriden.OfType<A>().FirstOrDefault();
-
-                if (res != null)
-                    return res;
-            }
-             
-            switch (propertyRoute.PropertyRouteType)
-	        {
-                case PropertyRouteType.FieldOrProperty:
-                    if (propertyRoute.FieldInfo == null)
-                        return null;
-                    return propertyRoute.FieldInfo.GetCustomAttribute<A>(false); 
-                case PropertyRouteType.MListItems:
-                    if (propertyRoute.Parent.FieldInfo == null)
-                        return null;
-                    return propertyRoute.Parent.FieldInfo.GetCustomAttribute<A>(false);
-                default:
-                    throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
-	        }
+            return FieldAttributes(propertyRoute).OfType<A>().FirstOrDefault();
         }
 
-        public A TypeAttributes<A>(Type type) where A : Attribute
+        public A TypeAttribute<A>(Type type) where A : Attribute
         {
-            if (!typeof(Entity).IsAssignableFrom(type) && !typeof(IView).IsAssignableFrom(type))
-                return null;
-
-            var overriden = OverridenTypeAttributes.TryGetC(type);
-            if (overriden != null)
-            {
-                var r = overriden.OfType<A>().FirstOrDefault();
-                if (r != null)
-                    return r;
-            }
-
-            var res = type.GetCustomAttribute<A>(false);
-            if (res != null)
-                return res;
-
-            return TypeAttributes<A>(type.BaseType);
+            return TypeAttributes(type).OfType<A>().FirstOrDefault();
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
@@ -316,6 +273,69 @@ namespace Signum.Engine.Maps
         {
             this.SqlDbType = type;
             this.UserDefinedTypeName = udtTypeName;
+        }
+    }
+
+    public class AttributeCollection : Collection<Attribute>
+    {
+        AttributeTargets Targets;
+
+        Action assertNotIncluded; 
+
+        public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded):base(attributes)
+        {
+            this.Targets = targets; 
+            this.assertNotIncluded = assertNotIncluded;
+        }
+
+        protected override void InsertItem(int index, Attribute item)
+        {
+            assertNotIncluded();
+
+            var au = item.GetType().GetCustomAttribute<AttributeUsageAttribute>();
+            
+            if(au == null ||(au.ValidOn & Targets) == 0)
+             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".Formato(Targets, au.Try(_=>_.ValidOn)));
+
+            base.InsertItem(index, item);
+        }
+
+        public void Replace(Attribute attr)
+        {
+            if (attr is ImplementedByAttribute || attr is ImplementedByAllAttribute)
+                this.RemoveAll(a => a is ImplementedByAttribute || a is ImplementedByAllAttribute);
+            else
+                this.RemoveAll(a => a.GetType() == attr.GetType());
+
+            this.Add(attr);
+        }
+
+        public AttributeCollection Remove<A>() where A : Attribute
+        {
+            this.RemoveAll(a=>a is A);
+
+            return this;
+        }
+
+        protected override void ClearItems()
+        {
+            assertNotIncluded();
+
+            base.ClearItems();
+        }
+
+        protected override void SetItem(int index, Attribute item)
+        {
+            assertNotIncluded();
+
+            base.SetItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            assertNotIncluded();
+
+            base.RemoveItem(index);
         }
     }
 

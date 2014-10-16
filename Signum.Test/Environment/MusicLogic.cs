@@ -21,8 +21,8 @@ namespace Signum.Test.Environment
             {
                 if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
                 {
-                    sb.Settings.OverrideAttributes((AlbumDN a) => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
-                    sb.Settings.OverrideAttributes((AlbumDN a) => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.FieldAttributes((AlbumDN a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.FieldAttributes((AlbumDN a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
                 }
 
                 sb.Include<AlbumDN>();
