@@ -157,7 +157,7 @@ namespace Signum.Engine.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
-            if (route.PropertyRouteType == PropertyRouteType.Root)
+            if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
             {
                 PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
                 if (paType < requested)
