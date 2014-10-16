@@ -146,6 +146,9 @@ namespace Signum.Engine.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
+                return PropertyAllowed.Modify;
+
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);
         }
 
