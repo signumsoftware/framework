@@ -134,7 +134,9 @@ namespace Signum.Engine.Linq
 
         public readonly FieldMixin FieldMixin; //used for updates
 
-        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, FieldMixin fieldMixin)
+        public readonly Alias MainEntityAlias;
+
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias mainEntityAlias, FieldMixin fieldMixin)
             : base(DbExpressionType.MixinInit, type)
         {
             if (bindings == null)
@@ -143,6 +145,8 @@ namespace Signum.Engine.Linq
             Bindings = bindings.ToReadOnly();
 
             FieldMixin = fieldMixin;
+
+            MainEntityAlias = mainEntityAlias;
         }
 
         public Expression GetBinding(FieldInfo fi)

@@ -640,7 +640,7 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
         {
-            return new FieldMixin(route.Type)
+            return new FieldMixin(route.Type, table)
             {
                 Fields = GenerateFields(route, table, name, forceNull: false, inMList: false)
             };

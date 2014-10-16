@@ -247,7 +247,7 @@ namespace Signum.Engine.Maps
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
-            return new MixinEntityExpression(this.FieldType, bindings, this);
+            return new MixinEntityExpression(this.FieldType, bindings, tableAlias, this);
         }
 
         //internal EmbeddedEntityExpression FromMemberInitiExpression(MemberInitExpression mie, QueryBinder tools)
