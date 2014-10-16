@@ -181,7 +181,7 @@ Constructor.ClientManager.GlobalPreConstructors += ctx =>
     IsolationLogic.Isolations.Value.Select(iso => iso.ToChooserOption()));
 ```
 
-```Typescript
+```TypeScript
 //In Isolation.ts
 export function getIsolation(extraJsonData: any, prefix: string, title: string, isolations: Navigator.ChooserOption[]) : Promise<any> {
 

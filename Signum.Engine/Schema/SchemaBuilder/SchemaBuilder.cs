@@ -33,7 +33,11 @@ namespace Signum.Engine.Maps
         {
             schema = new Schema(new SchemaSettings());
             Include<TypeDN>();
-            Settings.CanOverrideAttributes = MixinDeclarations.CanAddMixins = t => schema.Tables.ContainsKey(t) ? "{0} is already included in the Schema".Formato(t.TypeName()) : null;
+            Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
+            {
+                if (schema.Tables.ContainsKey(t))
+                    throw new InvalidOperationException("{0} is already included in the Schema".Formato(t.TypeName()));
+            };
         }
 
         protected SchemaBuilder(Schema schema)
@@ -218,8 +222,8 @@ namespace Signum.Engine.Maps
         void Complete(Table table)
         {
             Type type = table.Type;
-            table.IdentityBehaviour = (Settings.TypeAttributes<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
-            table.Name = GenerateTableName(type, Settings.TypeAttributes<TableNameAttribute>(type));
+            table.IdentityBehaviour = (Settings.TypeAttribute<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
+            table.Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type));
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
             table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
@@ -418,7 +422,7 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
         {
-            var attr = Settings.TypeAttributes<PrimaryKeyAttribute>(table.Type) ?? Settings.DefaultPrimaryKeyAttribute;
+            var attr = Settings.TypeAttribute<PrimaryKeyAttribute>(table.Type) ?? Settings.DefaultPrimaryKeyAttribute;
 
             PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
@@ -438,7 +442,7 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldValue GenerateFieldTicks(Table table, PropertyRoute route, NameSequence name)
         {
-            var ticksAttr = Settings.TypeAttributes<TicksColumnAttribute>(table.Type);
+            var ticksAttr = Settings.TypeAttribute<TicksColumnAttribute>(table.Type);
 
             if (ticksAttr != null && !ticksAttr.HasTicks)
                 throw new InvalidOperationException("HastTicks is false");
@@ -904,7 +908,7 @@ namespace Signum.Engine.Maps
         {
             Table table = new Table(type)
             {
-                Name = GenerateTableName(type, Settings.TypeAttributes<TableNameAttribute>(type)),
+                Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type)),
                 IsView = true
             };
 
