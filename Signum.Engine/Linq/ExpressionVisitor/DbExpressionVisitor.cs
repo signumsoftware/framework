@@ -250,7 +250,7 @@ namespace Signum.Engine.Linq
 
             if (me.Bindings != bindings)
             {
-                return new MixinEntityExpression(me.Type, bindings, me.FieldMixin);
+                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin);
             }
             return me;
         }

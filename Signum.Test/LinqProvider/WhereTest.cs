@@ -269,6 +269,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void WhereMixinMainEntityField()
+        {
+            var list = Database.Query<NoteWithDateDN>().Where(n => n.Mixin<CorruptMixin>().MainEntity == n).ToList();
+        }
+
+        [TestMethod]
         public void WhereBindTuple()
         {
             var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Label)).Where(t => t.Item2 == null).ToList();
@@ -361,5 +367,7 @@ namespace Signum.Test.LinqProvider
             var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)null, alb.Id)).Count();
             var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)id, alb.Id)).Count();
         }
+
+
     }
 }

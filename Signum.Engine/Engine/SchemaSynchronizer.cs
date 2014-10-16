@@ -684,8 +684,6 @@ EXEC(@{1})".Formato(databaseName, variableName));
                 UserTypeName = UserTypeName,
             };
         }
-
-        public object ForeingKey { get; set; }
     }
 
     public class DiffForeignKey

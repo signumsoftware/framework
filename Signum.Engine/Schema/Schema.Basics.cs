@@ -621,10 +621,13 @@ namespace Signum.Engine.Maps
     public partial class FieldMixin : Field, IFieldFinder
     {
         public Dictionary<string, EntityField> Fields { get; set; }
-   
-        public FieldMixin(Type fieldType)
+
+        public Table MainEntityTable;
+
+        public FieldMixin(Type fieldType, Table mainEntityTable)
             : base(fieldType)
         {
+            this.MainEntityTable = mainEntityTable;
         }
 
         public override string ToString()

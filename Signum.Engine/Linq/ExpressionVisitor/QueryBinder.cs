@@ -1214,6 +1214,11 @@ namespace Signum.Engine.Linq
                                 case DbExpressionType.MixinInit:
                                     {
                                         MixinEntityExpression mee = (MixinEntityExpression)source;
+
+                                        PropertyInfo pi = m.Member as PropertyInfo;
+                                        if (pi.Name == "MainEntity")
+                                            return mee.FieldMixin.MainEntityTable.GetProjectorExpression(mee.MainEntityAlias, this); 
+
                                         FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(mee.Type, (PropertyInfo)m.Member);
 
                                         if (fi == null)
@@ -1425,7 +1430,7 @@ namespace Signum.Engine.Linq
                                 select new FieldBinding(g.Key,
                                   CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 
-                return new MixinEntityExpression(returnType, bindings, null);
+                return new MixinEntityExpression(returnType, bindings, null, null);
             }
 
             if (expressions.Any(e => e.Value is MListExpression))
