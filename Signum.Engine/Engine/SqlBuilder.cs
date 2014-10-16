@@ -139,7 +139,7 @@ namespace Signum.Engine
                 return new SqlPreCommandSimple("DROP INDEX {0} ON {1}".Formato(indexName.SqlEscape(), objectName));
 
             else
-                return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1}.{2}'"
+                return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}'"
                     .Formato(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
