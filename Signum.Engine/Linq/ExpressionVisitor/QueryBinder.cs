@@ -2214,8 +2214,9 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)expression;
 
-                var aggregate = new PrimaryKeyExpression(Coalesce(ib.Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleEx(), 
-                    ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
+                var type = ib.Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(int?);
+
+                var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
 
                 return aggregate;
             }

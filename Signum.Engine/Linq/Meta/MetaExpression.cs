@@ -9,6 +9,8 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -84,13 +86,23 @@ namespace Signum.Engine.Linq
             return "Exp({0})".Formato(Meta);
         }
 
-        internal static MetaExpression FromRoute(Type type, Implementations? implementations, PropertyRoute pr)
+        internal static MetaExpression FromToken(QueryToken token, Type sourceType)
         {
-            if (pr == null)
-                return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(implementations, new Meta[0]));
+            var pr = token.GetPropertyRoute();
 
-            return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(implementations, new[] { pr }));
+            if (pr == null)
+                return new MetaExpression(sourceType, new DirtyMeta(token.GetImplementations(), new Meta[0]));
+
+            if (sourceType.IsAssignableFrom(pr.Type ))
+                return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr }));
+
+            if (sourceType.IsAssignableFrom(pr.Type.CleanType()))
+                return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr.Add("Entity") }));
+
+            throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(pr.Type.TypeName(), sourceType.TypeName()));
         }
+
+        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
     }
 
     internal class MetaMListExpression : MetaBaseExpression

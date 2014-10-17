@@ -325,7 +325,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var info = metas.GetOrAdd(parent, qt =>
             {
-                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromRoute(qt.Type, qt.GetImplementations(), qt.GetPropertyRoute()));
+                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromToken(qt, SourceType));
 
                 MetaExpression me;
 
