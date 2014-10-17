@@ -95,17 +95,22 @@ MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
         //
         //GetId()return empty() seed: seed++; 
 
-        public static int? MaxIdInRange(ITable table, int seedMin, int seedMax)
+        public static long? MaxIdInRange(ITable table, long seedMin, long seedMax)
         {
+            Type type = table.PrimaryKey.Type;
+
             var pb = Connector.Current.ParameterBuilder;
 
-            int? max = (int?)Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".Formato(table.Name), new List<DbParameter>
+            object obj = Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".Formato(table.Name), new List<DbParameter>
             {
-                pb.CreateParameter("@min", seedMin, typeof(int)),
-                pb.CreateParameter("@max", seedMax, typeof(int))
+                pb.CreateParameter("@min", seedMin, type),
+                pb.CreateParameter("@max", seedMax, type)
             });
 
-            return max;
+            if (obj == null)
+                return null;
+
+            return Convert.ToInt64(obj);
         }
 
         public static SeedInfo GetSeedInfo(ITable table)
@@ -155,18 +160,21 @@ MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
             return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".Formato(table.Name));
         }
 
-        public static void SetNextId(ITable table, int nextId)
+        public static void SetNextId(ITable table, long nextId)
         {
             var pb = Connector.Current.ParameterBuilder;
 
             Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', RESEED, @seed)".Formato(table.Name), new List<DbParameter>
             {
-                pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1, typeof(int))
+                pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1,  table.PrimaryKey.Type)
             });
         }
 
-        public static IDisposable SaveAndRestoreNextId(Table table)
+        public static IDisposable SaveAndRestoreNextId(ITable table)
         {
+            if (!table.PrimaryKey.Identity)
+                return null;
+
             int nextId = DisconnectedTools.GetNextId(table);
 
             return new Disposable(() =>

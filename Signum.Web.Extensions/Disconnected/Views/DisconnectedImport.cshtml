@@ -10,34 +10,36 @@
     @Html.ValueLine(dc, d => d.DisableForeignKeys)
     <fieldset>
         <legend>@Html.PropertyNiceName(() => dc.Value.Copies)</legend>
-        <table>
-            <thead>
-                <tr>
-                    <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type)</td>
-                    <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable)</td>
-                    <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows)</td>
-                    <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows)</td>
-                </tr>
-            </thead>
-            @foreach (var dtc in dc.TypeElementContext(a => a.Copies))
-            {
-                dtc.FormGroupStyle = FormGroupStyle.None;
-                <tr>
-                    <td>
-                        @Html.EntityLine(dtc, d => d.Type)
-                    </td>
-                    <td>
-                        @Html.ValueLine(dtc, d => d.CopyTable)
-                    </td>
-                    <td>
-                        @Html.ValueLine(dtc, d => d.InsertedRows)
-                    </td>
-                    <td>
-                        @Html.ValueLine(dtc, d => d.UpdatedRows)
-                    </td>
-                </tr>
-            }
-        </table>
+        <div class="form-vertical">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows)</td>
+                    </tr>
+                </thead>
+                @foreach (var dtc in dc.TypeElementContext(a => a.Copies))
+                {
+                    dtc.FormGroupStyle = FormGroupStyle.SrOnly;
+                    <tr>
+                        <td>
+                            @Html.EntityLine(dtc, d => d.Type)
+                        </td>
+                        <td>
+                            @Html.ValueLine(dtc, d => d.CopyTable)
+                        </td>
+                        <td>
+                            @Html.ValueLine(dtc, d => d.InsertedRows)
+                        </td>
+                        <td>
+                            @Html.ValueLine(dtc, d => d.UpdatedRows)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
     </fieldset>
     @Html.ValueLine(dc, d => d.Unlock)
     @Html.ValueLine(dc, d => d.EnableForeignKeys)

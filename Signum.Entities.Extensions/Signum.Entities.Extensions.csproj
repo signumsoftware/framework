@@ -133,7 +133,6 @@
     <Compile Include="Dashboard\DashboardDN.cs" />
     <Compile Include="Dashboard\IDashboardServer.cs" />
     <Compile Include="Dashboard\PanelPart.cs" />
-    <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
     <Compile Include="Disconnected\DisconnectedExportDN.cs" />

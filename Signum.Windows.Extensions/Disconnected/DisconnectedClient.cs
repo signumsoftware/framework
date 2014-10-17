@@ -87,23 +87,22 @@ namespace Signum.Windows.Disconnected
                 if (entity == null)
                     return true;
 
-                if (entity.IsNew)
+                if (entity.IsNew || entity.Mixin<DisconnectedCreatedMixin>().DisconnectedCreated)
                     return true;
 
                 if (upload == Upload.Subset)
                 {
-                    var dm =  entity.Mixin<DisconnectedMixin>();
+                    var dm =  entity.Mixin<DisconnectedSubsetMixin>();
 
-                    if(dm.DisconnectedMachine != null)
-                        return dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
+                    return dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
                 }
 
-                return DisconnectedExportRanges.InModifiableRange(type, entity.Id);
+                return false;
             }
             else
             {
                 if (upload == Upload.Subset && entity != null)
-                    return entity.Mixin<DisconnectedMixin>().DisconnectedMachine == null;
+                    return entity.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine == null;
 
                 return true;
             }

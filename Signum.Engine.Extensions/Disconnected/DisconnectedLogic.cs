@@ -165,9 +165,11 @@ namespace Signum.Engine.Disconnected
 
         static void AssertDisconnectedStrategies()
         {
+            Schema s = Schema.Current;
+
             var result = EnumerableExtensions.JoinStrict(
                 strategies.Keys,
-                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntity()),
+                s.Tables.Keys.Where(a => !a.IsEnumEntity()),
                 a => a,
                 a => a,
                 (a, b) => 0);
@@ -181,6 +183,10 @@ namespace Signum.Engine.Disconnected
                 throw new InvalidOperationException("DisconnectedLogic's download strategies are not synchronized with the Schema.\r\n" +
                         (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
                         (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+
+            string errors = strategies.Where(kvp=>kvp.Value.Upload == Upload.Subset && s.Table(kvp.Key).Ticks == null).ToString(a=>a.Key.Name, "\r\n");
+            if (errors.HasText())
+                throw new InvalidOperationException("Ticks is mandatory for this Disconnected strategy. Tables: \r\n" + errors.Indent(4));
 
             ExportManager.Initialize();
             ImportManager.Initialize();
@@ -211,10 +217,11 @@ namespace Signum.Engine.Disconnected
             return Register(new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset, new UpdateImporter<T>()));
         }
 
+
         static DisconnectedStrategy<T> Register<T>(DisconnectedStrategy<T> stragety) where T : Entity
         {
             if (typeof(T).IsEnumEntity())
-                throw new InvalidOperationException("EnumProxies can not be registered on DisconnectedLogic");
+                throw new InvalidOperationException("EnumEntities can not be registered on DisconnectedLogic");
 
             strategies.AddOrThrow(typeof(T), stragety, "{0} has already been registered");
 
@@ -321,6 +328,9 @@ namespace Signum.Engine.Disconnected
             if (typeof(T) == typeof(DisconnectedExportDN) && (download != Download.None || upload != Upload.None))
                 throw new InvalidOperationException("{0} should have DownloadStrategy and UploadStratey = None".Formato(typeof(T).NiceName()));
 
+            if (upload != Upload.None)
+                MixinDeclarations.Register(typeof(T), typeof(DisconnectedCreatedMixin));
+             
             if (upload == Upload.Subset)
             {
                 if (uploadSubset == null)
@@ -329,7 +339,7 @@ namespace Signum.Engine.Disconnected
                 if (download == Download.None)
                     throw new InvalidOperationException("Upload.Subset is not compatible with Download.None, choose Upload.New instead");
 
-                MixinDeclarations.Register(typeof(T), typeof(DisconnectedMixin));
+                MixinDeclarations.Register(typeof(T), typeof(DisconnectedSubsetMixin));
             }
 
             this.Upload = upload;
@@ -346,41 +356,43 @@ namespace Signum.Engine.Disconnected
         public Upload Upload { get; private set; }
         public Expression<Func<T, bool>> UploadSubset { get; private set; }
 
-        public void Saving(Entity ident)
+        public void Saving(Entity entity)
         {
             if (DisconnectedLogic.OfflineMode)
             {
                 if (Upload == Upload.None)
-                    throw new ApplicationException(DisconnectedMessage.NotAllowedToSave0WhileOffline.NiceToString().Formato(ident.GetType().NicePluralName()));
+                    throw new ApplicationException(DisconnectedMessage.NotAllowedToSave0WhileOffline.NiceToString().Formato(entity.GetType().NicePluralName()));
 
-                if (ident.IsNew)
+                if (entity.Mixin<DisconnectedCreatedMixin>().DisconnectedCreated)
                     return;
+
+                if (entity.IsNew)
+                {
+                    entity.Mixin<DisconnectedCreatedMixin>().DisconnectedCreated = true;
+                    return;
+                }
 
                 if (Upload == Upload.Subset)
                 {
-                    var dm = ident.Mixin<DisconnectedMixin>();
+                    var dm = entity.Mixin<DisconnectedSubsetMixin>();
 
                     if (dm.DisconnectedMachine != null)
                     {
                         if (!dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
-                            throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), dm.DisconnectedMachine));
+                            throw new ApplicationException(DisconnectedMessage.NotAllowedToSave0WhileOffline.NiceToString().Formato(entity.GetType().NiceName(), entity.Id, entity.ToString(), dm.DisconnectedMachine));
                         else
                             return;
                     }
                 }
-
-                if (!DisconnectedExportRanges.InModifiableRange(ident.GetType(), ident.Id))
-                    throw new ApplicationException(AuthMessage.NotAllowedToSaveThis0WhileOffline.NiceToString().Formato(ident.GetType().NiceName()));
-
             }
             else
             {
                 if (Upload == Upload.Subset)
                 {
-                    var dm = ident.Mixin<DisconnectedMixin>();
+                    var dm = entity.Mixin<DisconnectedSubsetMixin>();
 
                     if (dm.DisconnectedMachine != null)
-                        throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), dm.DisconnectedMachine));
+                        throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(entity.GetType().NiceName(), entity.Id, entity.ToString(), dm.DisconnectedMachine));
                 }
             }
         }

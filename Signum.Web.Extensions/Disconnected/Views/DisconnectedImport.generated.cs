@@ -148,172 +148,180 @@ WriteLiteral("    <fieldset>\r\n        <legend>");
             
             #line default
             #line hidden
-WriteLiteral("</legend>\r\n        <table>\r\n            <thead>\r\n                <tr>\r\n          " +
-"          <td>");
+WriteLiteral("</legend>\r\n        <div");
 
-            
-            #line 16 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type));
+WriteLiteral(" class=\"form-vertical\"");
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</td>\r\n                    <td>");
+WriteLiteral(">\r\n            <table");
+
+WriteLiteral(" class=\"table table-condensed\"");
+
+WriteLiteral(">\r\n                <thead>\r\n                    <tr>\r\n                        <td" +
+">");
 
             
             #line 17 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type));
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                    <td>");
+WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 18 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable));
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                    <td>");
+WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 19 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows));
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                </tr>\r\n            </thead>\r\n");
+WriteLiteral("</td>\r\n                        <td>");
 
             
-            #line 22 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-            
-            
-            #line default
-            #line hidden
-            
-            #line 22 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-             foreach (var dtc in dc.TypeElementContext(a => a.Copies))
-            {
-                dtc.FormGroupStyle = FormGroupStyle.None;
+            #line 20 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows));
 
             
             #line default
             #line hidden
-WriteLiteral("                <tr>\r\n                    <td>\r\n");
-
-WriteLiteral("                        ");
+WriteLiteral("</td>\r\n                    </tr>\r\n                </thead>\r\n");
 
             
-            #line 27 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.EntityLine(dtc, d => d.Type));
+            #line 23 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 23 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                 foreach (var dtc in dc.TypeElementContext(a => a.Copies))
+                {
+                    dtc.FormGroupStyle = FormGroupStyle.SrOnly;
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
+WriteLiteral("                    <tr>\r\n                        <td>\r\n");
 
-WriteLiteral("                        ");
-
-            
-            #line 30 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.ValueLine(dtc, d => d.CopyTable));
+WriteLiteral("                            ");
 
             
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
-
-WriteLiteral("                        ");
-
-            
-            #line 33 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.ValueLine(dtc, d => d.InsertedRows));
+            #line 28 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                       Write(Html.EntityLine(dtc, d => d.Type));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
+WriteLiteral("\r\n                        </td>\r\n                        <td>\r\n");
 
-WriteLiteral("                        ");
-
-            
-            #line 36 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                   Write(Html.ValueLine(dtc, d => d.UpdatedRows));
+WriteLiteral("                            ");
 
             
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
-
-            
-            #line 39 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-            }
+            #line 31 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                       Write(Html.ValueLine(dtc, d => d.CopyTable));
 
             
             #line default
             #line hidden
-WriteLiteral("        </table>\r\n    </fieldset>\r\n");
+WriteLiteral("\r\n                        </td>\r\n                        <td>\r\n");
+
+WriteLiteral("                            ");
 
             
-            #line 42 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 34 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                       Write(Html.ValueLine(dtc, d => d.InsertedRows));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </td>\r\n                        <td>\r\n");
+
+WriteLiteral("                            ");
+
+            
+            #line 37 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                       Write(Html.ValueLine(dtc, d => d.UpdatedRows));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </td>\r\n                    </tr>\r\n");
+
+            
+            #line 40 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </table>\r\n        </div>\r\n    </fieldset>\r\n");
+
+            
+            #line 44 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 42 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 44 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
 Write(Html.ValueLine(dc, d => d.Unlock));
 
             
             #line default
             #line hidden
             
-            #line 42 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 44 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
                                       
     
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 45 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
 Write(Html.ValueLine(dc, d => d.EnableForeignKeys));
 
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 45 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
                                                  
     
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 46 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
 Write(Html.ValueLine(dc, d => d.DropDatabase));
 
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 46 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
                                             
     
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 47 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
 Write(Html.ValueLine(dc, d => d.Total));
 
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 47 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
                                      
 
     
@@ -321,14 +329,14 @@ Write(Html.ValueLine(dc, d => d.Total));
             #line default
             #line hidden
             
-            #line 47 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 49 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
 Write(Html.EntityLine(dc, d => d.Exception));
 
             
             #line default
             #line hidden
             
-            #line 47 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
+            #line 49 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
                                           
 }
 

@@ -133,11 +133,8 @@ namespace Signum.Engine.Disconnected
                                 tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
                             }
 
-                            int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
-
                             export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.RefersTo(tuple.Type.ToTypeDN())).UnsafeUpdateMList()
                             .Set(mle => mle.Element.CopyTable, mle => ms)
-                            .Set(mle => mle.Element.MaxIdInRange, mle => maxId)
                             .Execute();
                         }
 
@@ -151,7 +148,8 @@ namespace Signum.Engine.Disconnected
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.ReseedIds, s => l).Execute()))
                         {
-                            var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None);
+                            var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None)
+                                .SelectMany(t => t.TablesMList().Cast<ITable>().And(t)).Where(t => t.PrimaryKey.Identity).ToList();
 
                             var maxIdDictionary = tablesToUpload.ToDictionary(t => t, 
                                 t => DisconnectedTools.MaxIdInRange(t, machine.SeedMin, machine.SeedMax));
@@ -163,7 +161,7 @@ namespace Signum.Engine.Disconnected
                                 {
                                     token.ThrowIfCancellationRequested();
 
-                                    int? max = maxIdDictionary.GetOrThrow(table);
+                                    long? max = maxIdDictionary.GetOrThrow(table);
 
                                     DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
                                 }
@@ -248,8 +246,8 @@ namespace Signum.Engine.Disconnected
         {
             using (ExecutionMode.Global())
             {
-                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine != null).Select(a =>
-                    "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
+                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null).Select(a =>
+                    "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
                     stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.RefersTo(typeof(T).ToTypeDN())).UnsafeUpdateMList()
@@ -257,8 +255,8 @@ namespace Signum.Engine.Disconnected
                         .Execute();
 
                 return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate()
-                    .Set(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine, a => machine)
-                    .Set(a => a.Mixin<DisconnectedMixin>().LastOnlineTicks, a => a.Ticks)
+                    .Set(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine, a => machine)
+                    .Set(a => a.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks, a => a.Ticks)
                     .Execute();
             }
         }
@@ -389,10 +387,10 @@ SELECT {3}
                 }
             }
 
-            string fullCommand =
-                "SET IDENTITY_INSERT {0} ON\r\n".Formato(newTableName) +
+            string fullCommand = !table.PrimaryKey.Identity ? command :
+                ("SET IDENTITY_INSERT {0} ON\r\n".Formato(newTableName) +
                 command + "\r\n" +
-                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName);
+                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName));
 
             return Executor.ExecuteNonQuery(fullCommand, filter.Try(a => a.Parameters));
         }

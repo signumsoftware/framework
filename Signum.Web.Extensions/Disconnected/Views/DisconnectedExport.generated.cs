@@ -164,146 +164,154 @@ WriteLiteral("    <fieldset>\r\n        <legend>");
             
             #line default
             #line hidden
-WriteLiteral("</legend>\r\n        <table>\r\n            <thead>\r\n                <tr>\r\n          " +
-"          <td>");
+WriteLiteral("</legend>\r\n        <div");
 
-            
-            #line 19 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.Type));
+WriteLiteral(" class=\"form-vertical\"");
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</td>\r\n                    <td>");
+WriteLiteral(">\r\n            <table");
+
+WriteLiteral(" class=\"table table-condensed\"");
+
+WriteLiteral(">\r\n                <thead>\r\n                    <tr>\r\n                        <td" +
+">");
 
             
             #line 20 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                   Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.CopyTable));
+                       Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.Type));
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                </tr>\r\n            </thead>\r\n");
+WriteLiteral("</td>\r\n                        <td>");
 
             
-            #line 23 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-            
-            
-            #line default
-            #line hidden
-            
-            #line 23 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-             foreach (var dtc in dc.TypeElementContext(a => a.Copies))
-            {
-                dtc.FormGroupStyle = FormGroupStyle.None;
+            #line 21 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                       Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.CopyTable));
 
             
             #line default
             #line hidden
-WriteLiteral("                <tr>\r\n                    <td>\r\n");
-
-WriteLiteral("                        ");
+WriteLiteral("</td>\r\n                    </tr>\r\n                </thead>\r\n");
 
             
-            #line 28 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                   Write(Html.EntityLine(dtc, d => d.Type));
+            #line 24 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 24 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                 foreach (var dtc in dc.TypeElementContext(a => a.Copies))
+                {
+                    dtc.FormGroupStyle = FormGroupStyle.SrOnly;
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n");
+WriteLiteral("                    <tr>\r\n                        <td>\r\n");
 
-WriteLiteral("                        ");
-
-            
-            #line 31 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                   Write(Html.ValueLine(dtc, d => d.CopyTable));
+WriteLiteral("                            ");
 
             
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
-
-            
-            #line 34 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-            }
+            #line 29 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                       Write(Html.EntityLine(dtc, d => d.Type));
 
             
             #line default
             #line hidden
-WriteLiteral("        </table>\r\n    </fieldset>\r\n");
+WriteLiteral("\r\n                        </td>\r\n                        <td>\r\n");
+
+WriteLiteral("                            ");
 
             
-            #line 37 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 32 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                       Write(Html.ValueLine(dtc, d => d.CopyTable));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </td>\r\n                    </tr>\r\n");
+
+            
+            #line 35 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </table>\r\n        </div>\r\n    </fieldset>\r\n");
+
+            
+            #line 39 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 37 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 39 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
 Write(Html.ValueLine(dc, d => d.EnableForeignKeys));
 
             
             #line default
             #line hidden
             
-            #line 37 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 39 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
                                                  
     
             
             #line default
             #line hidden
             
-            #line 38 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 40 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
 Write(Html.ValueLine(dc, d => d.ReseedIds));
 
             
             #line default
             #line hidden
             
-            #line 38 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 40 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 39 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 41 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
 Write(Html.ValueLine(dc, d => d.BackupDatabase));
 
             
             #line default
             #line hidden
             
-            #line 39 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 41 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
                                               
     
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 42 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
 Write(Html.ValueLine(dc, d => d.DropDatabase));
 
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 42 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
                                             
     
             
             #line default
             #line hidden
             
-            #line 41 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 43 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
 Write(Html.EntityLine(dc, d => d.Exception));
 
             
             #line default
             #line hidden
             
-            #line 41 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
+            #line 43 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
                                           
 }
 

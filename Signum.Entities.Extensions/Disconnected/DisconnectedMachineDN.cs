@@ -80,9 +80,22 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedMixin : MixinEntity
+    public class DisconnectedCreatedMixin : MixinEntity
     {
-        DisconnectedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedCreatedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
+        bool disconnectedCreated;
+        public bool DisconnectedCreated
+        {
+            get { return disconnectedCreated; }
+            set { Set(ref disconnectedCreated, value); }
+        }
+    }
+
+    [Serializable]
+    public class DisconnectedSubsetMixin : MixinEntity
+    {
+        DisconnectedSubsetMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         long? lastOnlineTicks;
         public long? LastOnlineTicks

@@ -198,7 +198,6 @@ namespace Signum.Entities.Disconnected
                 {
                     Type = c.Type,
                     CopyTable = c.CopyTable,
-                    MaxIdInRange = c.MaxIdInRange,
                     Errors = c.Errors,
                 }).ToMList(),
                 EnableForeignKeys = EnableForeignKeys,
@@ -236,13 +235,6 @@ namespace Signum.Entities.Disconnected
         {
             get { return copyTable; }
             set { Set(ref copyTable, value); }
-        }
-
-        int? maxIdInRange;
-        public int? MaxIdInRange
-        {
-            get { return maxIdInRange; }
-            set { Set(ref maxIdInRange, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
