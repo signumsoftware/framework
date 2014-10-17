@@ -545,7 +545,7 @@ namespace Signum.Entities
                 PropertyInfo != null && ReflectionTools.PropertyEquals(PropertyInfo, piToStringProperty);
         }
 
-        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IdentifiableEntity ident) => ident.ToStringProperty);
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((Entity ident) => ident.ToStringProperty);
     }
 
     public interface IImplementationsFinder

@@ -42,7 +42,7 @@ namespace Signum.Engine
             this.ParameterBuilder = new SqlParameterBuilder();
 
             this.Version = version;
-            if (version >= SqlServerVersion.SqlServer2008)
+            if (version >= SqlServerVersion.SqlServer2008 && schema != null)
             {
                 var s = schema.Settings;
 

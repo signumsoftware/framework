@@ -229,9 +229,5 @@ namespace Signum.Utilities
             CTRL_SHUTDOWN_EVENT = 6
         }
 
-        public static bool IsConsolePresent
-        {
-            get { return Console.In.GetType().Name != "NullStreamReader"; }
-        }
     }
 }

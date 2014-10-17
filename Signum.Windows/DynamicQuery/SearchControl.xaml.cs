@@ -880,7 +880,8 @@ namespace Signum.Windows
                 return;
 
             Entity result = Creating != null ? Creating() :
-                (Entity)new ConstructorContext(this).ConstructUntyped(SelectType(t => Navigator.IsCreable(t, isSearch: true)));
+                SelectType(t => Navigator.IsCreable(t, isSearch: true))
+                .Try(type => (Entity)new ConstructorContext(this).ConstructUntyped(type));
 
             if (result == null)
                 return;
