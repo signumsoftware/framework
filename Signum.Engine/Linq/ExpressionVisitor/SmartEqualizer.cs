@@ -356,7 +356,7 @@ namespace Signum.Engine.Linq
             if (ce.IsNull())
                 return EqualsToNull(typeIba.TypeColumn);
 
-            return EqualNullable(QueryBinder.TypeConstant((Type)ce.Value), typeIba.TypeColumn);
+            return EqualNullable(QueryBinder.TypeConstant((Type)ce.Value), typeIba.TypeColumn.Value);
         }
 
         private static Expression TypeConstantConstantEquals(ConstantExpression c1, ConstantExpression c2)
