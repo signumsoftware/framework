@@ -12,9 +12,9 @@ using System.Web.Routing;
 
 namespace Signum.Web
 {
-    public abstract class BaseLine : TypeContext
+    public abstract class LineBase : TypeContext
     {
-        protected BaseLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+        protected LineBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(parent, prefix, propertyRoute)
         {
             this.type = type;

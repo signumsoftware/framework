@@ -27,7 +27,7 @@ namespace Signum.Web
         public const string Detail = "sfDetail";
     }
 
-    public abstract class EntityBase : BaseLine
+    public abstract class EntityBase : LineBase
     {
         public EntityBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)

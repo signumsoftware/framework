@@ -9,7 +9,7 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public class ValueLine : BaseLine
+    public class ValueLine : LineBase
     {
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
@@ -56,7 +56,7 @@ namespace Signum.Web
         public bool InlineCheckbox { get; set; }
     }
 
-    public class HiddenLine : BaseLine
+    public class HiddenLine : LineBase
     {
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 

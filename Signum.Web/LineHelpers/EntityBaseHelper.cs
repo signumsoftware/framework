@@ -157,7 +157,7 @@ namespace Signum.Web
                 eb.Implementations.Value.Types.Any(t => Finder.IsFindable(t));
         }
 
-        internal static MvcHtmlString ListLabel(HtmlHelper helper, BaseLine baseLine)
+        internal static MvcHtmlString ListLabel(HtmlHelper helper, LineBase baseLine)
         {
             return new HtmlTag("label").Attr("for", baseLine.Prefix).SetInnerText(baseLine.LabelText).ToHtml();
         }

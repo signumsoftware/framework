@@ -248,7 +248,7 @@
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
     <Compile Include="LineHelpers\EntityInfo.cs" />
-    <Compile Include="Lines\BaseLine.cs" />
+    <Compile Include="Lines\LineBase.cs" />
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />
     <Compile Include="Lines\EntityList.cs" />

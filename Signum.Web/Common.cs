@@ -19,7 +19,7 @@ namespace Signum.Web
 {
     public static class Common
     {
-        public static event Action<BaseLine> CommonTask;
+        public static event Action<LineBase> CommonTask;
 
         static Common()
         {
@@ -32,19 +32,19 @@ namespace Signum.Web
             CommonTask += TaskSetHtmlProperties;
         }
 
-        public static void FireCommonTasks(BaseLine eb)
+        public static void FireCommonTasks(LineBase eb)
         {
             CommonTask(eb);
         }
 
         #region Tasks
-        public static void TaskSetLabelText(BaseLine bl)
+        public static void TaskSetLabelText(LineBase bl)
         {
             if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                 bl.LabelText = bl.PropertyRoute.PropertyInfo.NiceName();
         }
 
-        static void TaskSetUnitText(BaseLine bl)
+        static void TaskSetUnitText(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
@@ -55,7 +55,7 @@ namespace Signum.Web
             }
         }
 
-        static void TaskSetFormatText(BaseLine bl)
+        static void TaskSetFormatText(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
@@ -66,7 +66,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetImplementations(BaseLine bl)
+        public static void TaskSetImplementations(LineBase bl)
         {
             EntityBase eb = bl as EntityBase;
             if (eb != null)
@@ -93,7 +93,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetMove(BaseLine bl)
+        public static void TaskSetMove(LineBase bl)
         {
             EntityListBase eb = bl as EntityListBase;
             if (eb != null)
@@ -104,7 +104,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetReadOnly(BaseLine bl)
+        public static void TaskSetReadOnly(LineBase bl)
         {
             if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
@@ -115,7 +115,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetHtmlProperties(BaseLine bl)
+        public static void TaskSetHtmlProperties(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
