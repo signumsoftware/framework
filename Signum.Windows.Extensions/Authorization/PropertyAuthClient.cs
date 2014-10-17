@@ -47,6 +47,12 @@ namespace Signum.Windows.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
+                return PropertyAllowed.Modify;
+
+            if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
+                return TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed(); 
+
             var propAllowed = propertyRules.GetAllowed(route);
 
             var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
@@ -58,6 +64,18 @@ namespace Signum.Windows.Authorization
         {
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetAllowedFor(route.Parent, requested);
+
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
+                return null;
+
+            if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
+            {
+                var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
+                if (typeAllowed < requested)
+                    return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), typeAllowed, RoleDN.Current);
+
+                return null;
+            }
 
             var propAllowed = GetPropertyAllowed(route);
             if (propAllowed < requested)
