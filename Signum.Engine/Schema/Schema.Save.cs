@@ -227,34 +227,6 @@ namespace Signum.Engine.Maps
                 return insertIdentityCache.GetOrAdd(numElements, (int num) => GetInsertMultiIdentity(num));
             }
 
-            //Action<List<Entity>, DirectedGraph<Entity>> GetInsertIdentity()
-            //{
-            //    string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
-
-            //    return (list, graph) =>
-            //    {
-            //        Entity ident = list.Single();
-
-            //        AssertNoId(ident);
-
-            //        Entity entity = ident as Entity;
-            //        if (entity != null)
-            //            entity.Ticks = TimeZoneManager.Now.Ticks;
-
-            //        table.SetToStrField(ident);
-
-            //        var forbidden = new Forbidden(graph, ident);
-
-            //        ident.id = new PrimaryKey((IComparable)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar());
-
-            //        ident.IsNew = false;
-
-            //        if (table.saveCollections.Value != null)
-            //            table.saveCollections.Value.InsertCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
-            //    };
-            //}
-
-
             Action<List<Entity>, DirectedGraph<Entity>> GetInsertMultiIdentity(int num)
             {
                 string sqlMulti = new StringBuilder()

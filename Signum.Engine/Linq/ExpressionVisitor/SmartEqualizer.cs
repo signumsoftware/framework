@@ -41,32 +41,6 @@ namespace Signum.Engine.Linq
             return Expression.NotEqual(e1.Nullify(), e2.Nullify());
         }
 
-        //public static void UnwrapPrimaryKey(ref Expression e1, ref Expression e2)
-        //{
-        //    var t1 = e1.Type.UnNullify();
-        //    var t2 = e2.Type.UnNullify();
-
-        //    if (t1 == typeof(PrimaryKey) || t2 == typeof(PrimaryKey))
-        //    {
-        //        if (t1 != typeof(PrimaryKey) || t2 != typeof(PrimaryKey))
-        //            throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".Formato(t1.TypeName(), t2.TypeName()));
-
-        //        e1 = PrimaryKeyRemover.RemovePrimaryKey(e1);
-        //        e2 = PrimaryKeyRemover.RemovePrimaryKey(e2);
-
-        //        if (e1.IsNull() != e2.IsNull() && e1.Type.UnNullify() != e2.Type.UnNullify())
-        //        {
-        //            if (e1.IsNull())
-        //                e1 = Expression.Convert(e1, e2.Type.Nullify());
-        //            else
-        //                e2 = Expression.Convert(e2, e1.Type.Nullify());
-        //        }
-
-        //        if (e1.Type.UnNullify() != e2.Type.UnNullify())
-        //            throw new InvalidOperationException("Imposible to compare PrimaryKeys of type {0} == {1}".Formato(e1.Type.TypeName(), e2.Type.TypeName()));
-        //    }
-        //}
-
         public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
         {
             if (exp1.NodeType == ExpressionType.New && exp2.NodeType == ExpressionType.New)
