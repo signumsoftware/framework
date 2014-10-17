@@ -158,7 +158,7 @@ namespace Signum.Engine.UserQueries
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
-            if (!SafeConsole.IsConsolePresent)
+            if (!replacements.Interactive)
                 return null;
 
             var list = Database.Query<UserQueryDN>().ToList();

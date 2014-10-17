@@ -47,7 +47,7 @@ namespace Signum.Windows.Authorization
             while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
+            if (!typeof(Entity).IsAssignableFrom(route.RootType))
                 return PropertyAllowed.Modify;
 
             if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
@@ -65,7 +65,7 @@ namespace Signum.Windows.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetAllowedFor(route.Parent, requested);
 
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(route.RootType))
+            if (!typeof(Entity).IsAssignableFrom(route.RootType))
                 return null;
 
             if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())

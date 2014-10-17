@@ -155,7 +155,11 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<ScheduledTaskDN>.Delete(ScheduledTaskOperation.Delete)
                 {
-                    Delete = (st, _) => { st.Executions().UnsafeDelete(); var rule = st.Rule; st.Delete(); rule.Delete(); },
+                    Delete = (st, _) =>
+                    {
+                        st.Executions().UnsafeUpdate().Set(l => l.ScheduledTask, l => null).Execute();
+                        var rule = st.Rule; st.Delete(); rule.Delete();
+                    },
                 }.Register();
 
 

@@ -221,7 +221,7 @@ namespace Signum.Web.Auth
             }
         }
 
-        static void TaskAuthorizeProperties(BaseLine bl)
+        static void TaskAuthorizeProperties(LineBase bl)
         {
             if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
