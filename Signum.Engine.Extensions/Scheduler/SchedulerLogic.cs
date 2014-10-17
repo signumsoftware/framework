@@ -219,8 +219,8 @@ namespace Signum.Engine.Scheduler
 
                 running = false;
 
-                priorityQueue.Clear();
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
+                priorityQueue.Clear();
             }
         }
 
@@ -233,11 +233,12 @@ namespace Signum.Engine.Scheduler
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {
+                    DateTime now = TimeZoneManager.Now;
                     priorityQueue.Clear();
                     priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => new ScheduledTaskPair
                     {
                         ScheduledTask = st,
-                        NextDate = st.Rule.Next(),
+                        NextDate = st.Rule.Next(now),
                     }));
 
                     SetTimer();
@@ -278,19 +279,23 @@ namespace Signum.Engine.Scheduler
                     lock (priorityQueue)
                     {
                         if (priorityQueue.Empty)
-                        {
                             throw new InvalidOperationException("Inconstency in SchedulerLogic PriorityQueue");
-                        }
 
-                        var pair = priorityQueue.Pop(); //Exceed timer change
-                        if (Math.Abs((pair.NextDate - TimeZoneManager.Now).Ticks) < ScheduledTaskDN.MinimumSpan.Ticks)
+                        DateTime now = TimeZoneManager.Now;
+
+                        while (priorityQueue.Peek().NextDate < now)
                         {
+                            var pair = priorityQueue.Pop();
+
                             ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, null);
+
+                            pair.NextDate = pair.ScheduledTask.Rule.Next(now);
+
+                            priorityQueue.Push(pair);
                         }
 
-                        pair.NextDate = pair.ScheduledTask.Rule.Next();
-                        priorityQueue.Push(pair);
                         SetTimer();
+
                         return;
                     }
             }
