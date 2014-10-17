@@ -11,17 +11,15 @@ namespace Signum.Entities.Scheduler
 {
     public interface IScheduleRuleDN : IIdentifiable
     {
-        DateTime Next();
+        DateTime Next(DateTime now);
     }
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
     {
-        public DateTime Next()
+        public DateTime Next(DateTime now)
         {
-            DateTime now = TimeZoneManager.Now;
-
             DateTime candidate = now.TrimToMinutes();
 
             candidate = candidate.AddMinutes(-(candidate.Minute % eachMinutes));
@@ -60,10 +58,8 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
     {
-        public DateTime Next()
+        public DateTime Next(DateTime now)
         {
-            DateTime now = TimeZoneManager.Now;
-
             DateTime candidate = now.TrimToHours();
 
             candidate = candidate.AddHours(-(candidate.Hour % eachHours));
@@ -112,13 +108,13 @@ namespace Signum.Entities.Scheduler
             set { Set(ref startingOn, value); }
         }
 
-        public abstract DateTime Next();
+        public abstract DateTime Next(DateTime now);
 
-        protected DateTime BaseNext()
+        protected DateTime BaseNext(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn.Date).Add(startingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now.Date, startingOn.Date).Add(startingOn.TimeOfDay);
 
-            if (result < TimeZoneManager.Now.Add(ScheduledTaskDN.MinimumSpan).Add(ScheduledTaskDN.MinimumSpan))
+            if (result < now)
                 result = result.AddDays(1);
 
             return result;
@@ -138,9 +134,9 @@ namespace Signum.Entities.Scheduler
             return SchedulerMessage.ScheduleRuleDailyDN_Everydayat.NiceToString() + base.ToString();
         }
 
-        public override DateTime Next()
+        public override DateTime Next(DateTime now)
         {
-            return BaseNext();
+            return BaseNext(now);
         }
     }
 
@@ -163,9 +159,9 @@ namespace Signum.Entities.Scheduler
         }
 
 
-        public override DateTime Next()
+        public override DateTime Next(DateTime now)
         {
-            DateTime result = BaseNext();
+            DateTime result = BaseNext(now);
 
             while (result.DayOfWeek != dayOfTheWeek)
                 result = result.AddDays(1);
@@ -241,9 +237,9 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref holiday, value); }
         }
 
-        public override DateTime Next()
+        public override DateTime Next(DateTime now)
         {
-            DateTime result = BaseNext();
+            DateTime result = BaseNext(now);
 
             while (!IsAllowed(result.Date))
                 result = result.AddDays(1);
