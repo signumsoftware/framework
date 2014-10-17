@@ -120,6 +120,7 @@
     <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
+    <Compile Include="Facades\ViewOverrides.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Facades\Constructor.cs" />
