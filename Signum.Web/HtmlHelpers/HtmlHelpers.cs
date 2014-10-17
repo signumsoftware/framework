@@ -90,9 +90,7 @@ namespace Signum.Web
 
             var attrs = context is LineBase ? ((LineBase)context).FormGroupHtmlProps : null;
 
-            var formSize = context.FormGroupSize == FormGroupSize.Normal ? "form-md" : 
-                context.FormGroupSize == FormGroupSize.Small ? "form-sm" : 
-                "form-xs";
+            var formSize = context.FormGroupSizeCss;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.SurroundLine(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(attrs)))
