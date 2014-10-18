@@ -354,8 +354,11 @@ once("ajaxError", () =>
 once("dateTimePickerSync", () => {
     $(function () {
         $(document).on("changeDate clearDate", 'div.date-time div.date', function (e : any) {
-            var time = $(this).closest("div.date-time").find("div.time")
-            time.timepicker("setTime", e.date);
+            var time = $(this).closest("div.date-time").find("div.time");
+
+            var input = time.is("input") ? time : time.find("input");
+            if (SF.isEmpty(input.val()) != SF.isEmpty(e.date))
+                time.timepicker("setTime", e.date);
         });
 
         $(document).on("show.timepicker", 'div.date-time div.time', function (e: any) {
