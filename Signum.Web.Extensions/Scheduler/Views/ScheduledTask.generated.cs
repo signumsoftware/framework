@@ -91,14 +91,14 @@ Write(Html.EntityLine(e, f => f.Task, vl=>vl.Create = false));
             #line hidden
             
             #line 8 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-Write(Html.EntityLine(e, f => f.Rule));
+Write(Html.EntityLineDetail(e, f => f.Rule));
 
             
             #line default
             #line hidden
             
             #line 8 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-                                    
+                                          
     
             
             #line default

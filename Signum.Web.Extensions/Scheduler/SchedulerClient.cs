@@ -47,10 +47,6 @@ namespace Signum.Web.Scheduler
                     new EmbeddedEntitySettings<HolidayDN> { PartialViewName = _ => ViewPrefix.Formato("Holiday") },
                 });
 
-                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingMain.AsEntityMapping().SetProperty(srd => srd.StartingOn, Mapping.DateHourMinute);
-                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
-                Navigator.EntitySettings<ScheduleRuleWeekDaysDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
-
                 if (simpleTask)
                 {
                     Navigator.AddSettings(new List<EntitySettings>
