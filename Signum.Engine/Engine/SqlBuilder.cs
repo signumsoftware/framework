@@ -364,20 +364,21 @@ FROM {1} as [table]".Formato(
         {
             DatabaseName db = tableName.Schema.Database;
 
-            tableName = tableName.OnDatabase(null);
+            var tn = tableName.OnDatabase(null);
 
-            string varName = "Constraint_" + tableName.ToString().Replace(".", "_") + "_" + columnName;
+            string varName = "Constraint_" + tn.ToString().Replace(".", "_") + "_" + columnName;
 
             string command = @"
 declare @sql nvarchar(max)
 select  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
 from DB.sys.default_constraints dc
 join DB.sys.columns c on dc.parent_object_id = c.object_id and dc.parent_column_id = c.column_id
-where c.object_id = DB.OBJECT_ID('{Table}') and c.name = '{Column}'
+where c.object_id = OBJECT_ID('{FullTable}') and c.name = '{Column}'
 exec DB.dbo.sp_executesql @sql"
                 .Replace("DB.", db == null ? null : (db.ToString() + "."))
                 .Replace("@sql", "@" + varName)
-                .Replace("{Table}", tableName.ToString())
+                .Replace("{FullTable}", tableName.ToString())
+                .Replace("{Table}", tn.ToString())
                 .Replace("{Column}", columnName.SqlEscape());
 
             return new SqlPreCommandSimple(command);
