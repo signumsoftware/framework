@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true" />
+    <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true">
+      <Parameter1 Name="StartDate" Type="Enum" ValueDefinition="Sunday | Monday" />
+    </Column>
     <Column DisplayName="Color" ColumnType="Magnitude">
       <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
       <Parameter2 Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
@@ -18,6 +20,27 @@
     week = d3.time.format("%U"),
     format = d3.time.format("%Y-%m-%d");
    
+  if(data.columns.c0.parameter1 == "Monday")
+  {
+    var oldWeek = week;
+    var oldDay = day; 
+    
+    day = function(d) {
+       var old = oldDay(d); 
+       if(old == 0)
+           return 6;
+        
+       return old - 1;
+    }
+    
+    week = function(d) 
+    {
+        if(oldDay(d) == 0)
+          return oldWeek(d) - 1;
+        return oldWeek(d);
+    } 
+  }
+  
   var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
 
   var colorQuantizer = d3.scale.quantize()
