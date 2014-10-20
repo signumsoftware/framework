@@ -42,7 +42,8 @@ namespace Signum.Engine
             this.ParameterBuilder = new SqlParameterBuilder();
 
             this.Version = version;
-            if (version >= SqlServerVersion.SqlServer2008)
+            // In disconnected scenarios schema can be null, this must be checked.
+            if (version >= SqlServerVersion.SqlServer2008 && schema != null)
             {
                 var s = schema.Settings;
 
