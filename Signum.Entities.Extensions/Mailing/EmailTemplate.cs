@@ -253,10 +253,13 @@ namespace Signum.Entities.Mailing
             if (pi.Is(() => Token))
             {
                 if (Token == null && emailAddress.IsNullOrEmpty())
-                    return "Token or Email Address must be set";
+                    return EmailTemplateMessage.TokenOrEmailAddressMustBeSet.NiceToString();
 
                 if (Token != null && !emailAddress.IsNullOrEmpty())
-                    return "Token and Email Address can not be set at the same time";
+                    return EmailTemplateMessage.TokenAndEmailAddressCanNotBeSetAtTheSameTime.NiceToString();
+
+                if (Token != null && Token.Token.Type != typeof(EmailOwnerData))
+                    return EmailTemplateMessage.TokenMustBeA0.NiceToString(typeof(EmailOwnerData).NiceName());
             }
             
             return null;
@@ -365,6 +368,10 @@ namespace Signum.Entities.Mailing
         [Description("SystemEmail should be set to access model {0}")]
         SystemEmailShouldBeSetToAccessModel0,
         NewCulture,
+        TokenOrEmailAddressMustBeSet,
+        TokenAndEmailAddressCanNotBeSetAtTheSameTime,
+        [Description("Token must be a {0}")]
+        TokenMustBeA0,
     }
 
     public enum EmailTemplateCanAddTokenMessage
