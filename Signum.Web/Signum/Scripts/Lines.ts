@@ -7,7 +7,7 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 
 export interface EntityBaseOptions {
     prefix: string;
-    partialViewName: string;
+    partialViewName?: string;
     template?: string;
     templateToString?: string;
 
@@ -384,9 +384,9 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
 
     controllerUrl: string;
 
-    getData: (term: string) => any;
+    getData: (term: string) => FormObject;
 
-    constructor(controllerUrl: string, getData: (term: string) => any) {
+    constructor(controllerUrl: string, getData: (term: string) => FormObject) {
         this.controllerUrl = controllerUrl;
         this.getData = getData;
     }
@@ -418,7 +418,7 @@ export class EntityLine extends EntityBase {
         var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
+                term => <any>({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -496,7 +496,7 @@ export class EntityCombo extends EntityBase {
     }
 }
 
-export class EntityLineDetail extends EntityBase {
+export class EntityDetail extends EntityBase {
 
     options: EntityBaseOptions;
 
@@ -516,7 +516,7 @@ export class EntityLineDetail extends EntityBase {
             return;
 
         if (!entityValue.isLoaded())
-            throw new Error("EntityLineDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
+            throw new Error("EntityDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
     }
 
     onCreating(prefix: string): Promise<Entities.EntityValue> {
@@ -1285,7 +1285,7 @@ export class EntityStrip extends EntityList {
         var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
+                term => <any>({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }

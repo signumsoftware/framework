@@ -53,7 +53,6 @@ namespace Signum.Web
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
-        public bool ReadOnlyEntity { get; set; }
 
         bool preserveViewData = false;
         /// <summary>

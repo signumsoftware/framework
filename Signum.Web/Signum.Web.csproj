@@ -253,7 +253,7 @@
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />
     <Compile Include="Lines\EntityList.cs" />
-    <Compile Include="Lines\EntityLineDetail.cs" />
+    <Compile Include="Lines\EntityDetail.cs" />
     <Compile Include="Lines\EntityCombo.cs" />
     <Compile Include="LineHelpers\EntityBaseHelper.cs" />
     <Compile Include="Lines\EntityLine.cs" />

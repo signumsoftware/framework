@@ -30,7 +30,6 @@ namespace Signum.Web
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             Find = false;
-            LabelClass = "sf-label-repeater-line";
             Move = false;
         }
     }

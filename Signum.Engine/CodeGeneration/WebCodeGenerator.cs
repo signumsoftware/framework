@@ -338,7 +338,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteEmbeddedProperty(PropertyInfo pi, string v, string vc)
         {
-            return "@Html.EntityLineDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);   
+            return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);   
         }
 
         protected virtual string WriteEntityProperty(PropertyInfo pi, string v, string vc)
@@ -351,7 +351,7 @@ namespace Signum.Engine.CodeGeneration
                 throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".Formato(type.Name));
 
             if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
-                return "@Html.EntityLineDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+                return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
 
             if (eka.IsLowPopulation)
                 return "@Html.EntityCombo({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);

@@ -25,7 +25,5 @@ namespace Signum.Web
         {
             Move = false;
         }
-
-       
     }
 }

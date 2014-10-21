@@ -88,12 +88,12 @@ namespace Signum.Web
             if (context.FormGroupStyle == FormGroupStyle.None)
                 return value;
 
-            var attrs = context is LineBase ? ((LineBase)context).FormGroupHtmlProps : null;
+            var form = context is LineBase ? ((LineBase)context).FormGroupHtmlProps : null;
 
             var formSize = context.FormGroupSizeCss;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.SurroundLine(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(attrs)))
+            using (sb.SurroundLine(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(form)))
             {
                 var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
 
@@ -101,6 +101,8 @@ namespace Signum.Web
                     lbl.Class("sr-only");
                 else if (context.FormGroupStyle == FormGroupStyle.LabelColumns)
                     lbl.Class("control-label").Class(context.LabelColumns.ToString());
+
+                lbl.Attrs(context is LineBase ? ((LineBase)context).LabelHtmlProps : null);
 
                 if (context.FormGroupStyle != FormGroupStyle.BasicDown)
                     sb.AddLine(lbl);

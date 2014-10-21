@@ -25,7 +25,6 @@ namespace Signum.Web
 
     public class EntityStrip : EntityListBase
     {
-
         public bool Autocomplete { get; set; }
         public string AutocompleteUrl { get; set; }
 

@@ -42,7 +42,7 @@ namespace Signum.Web
 
             using (valueLine.UnitText == null ? null : sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
-                sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
+                sb.AddLine(Configurator.Helper[vltype](helper, valueLine));
 
                 if (valueLine.UnitText.HasText())
                     sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "input-group-addon"));
@@ -280,7 +280,7 @@ namespace Signum.Web
             type = type.UnNullify();
 
             if (type.IsEnum)
-                return ValueLineType.Combo;
+                return ValueLineType.Enum;
             else if (type == typeof(ColorDN))
                 return ValueLineType.Color;
             else if (type == typeof(TimeSpan))
@@ -316,12 +316,12 @@ namespace Signum.Web
 
         }
 
-        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
+        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Helper = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
         {
             {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
-            {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
+            {ValueLineType.Enum, (helper, valueLine) => helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
             {ValueLineType.TimeSpan, (helper, valueLine) => helper.TimeSpanPicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},
@@ -332,7 +332,7 @@ namespace Signum.Web
     public enum ValueLineType
     {
         Boolean,
-        Combo,
+        Enum,
         DateTime,
         TimeSpan,
         TextBox,

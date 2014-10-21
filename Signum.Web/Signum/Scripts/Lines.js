@@ -458,27 +458,27 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     })(EntityBase);
     exports.EntityCombo = EntityCombo;
 
-    var EntityLineDetail = (function (_super) {
-        __extends(EntityLineDetail, _super);
-        function EntityLineDetail(element, options) {
+    var EntityDetail = (function (_super) {
+        __extends(EntityDetail, _super);
+        function EntityDetail(element, options) {
             _super.call(this, element, options);
         }
-        EntityLineDetail.prototype.containerDiv = function (itemPrefix) {
+        EntityDetail.prototype.containerDiv = function (itemPrefix) {
             return this.prefix.child("sfDetail").get();
         };
 
-        EntityLineDetail.prototype.fixInputGroup = function () {
+        EntityDetail.prototype.fixInputGroup = function () {
         };
 
-        EntityLineDetail.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
+        EntityDetail.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
             if (entityValue == null)
                 return;
 
             if (!entityValue.isLoaded())
-                throw new Error("EntityLineDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
+                throw new Error("EntityDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
         };
 
-        EntityLineDetail.prototype.onCreating = function (prefix) {
+        EntityDetail.prototype.onCreating = function (prefix) {
             var _this = this;
             if (this.creating != null)
                 return this.creating(prefix);
@@ -503,7 +503,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        EntityLineDetail.prototype.find_click = function () {
+        EntityDetail.prototype.find_click = function () {
             var _this = this;
             return this.onFinding(this.options.prefix).then(function (result) {
                 if (result == null) {
@@ -524,9 +524,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return null;
             });
         };
-        return EntityLineDetail;
+        return EntityDetail;
     })(EntityBase);
-    exports.EntityLineDetail = EntityLineDetail;
+    exports.EntityDetail = EntityDetail;
 
     var EntityListBase = (function (_super) {
         __extends(EntityListBase, _super);
