@@ -300,7 +300,14 @@ namespace Signum.Engine.Maps
             base.InsertItem(index, item);
         }
 
-        public void Replace(Attribute attr)
+        public new AttributeCollection Add(Attribute attr)
+        {
+            base.Add(attr);
+
+            return this;
+        }
+
+        public AttributeCollection Replace(Attribute attr)
         {
             if (attr is ImplementedByAttribute || attr is ImplementedByAllAttribute)
                 this.RemoveAll(a => a is ImplementedByAttribute || a is ImplementedByAllAttribute);
@@ -308,6 +315,8 @@ namespace Signum.Engine.Maps
                 this.RemoveAll(a => a.GetType() == attr.GetType());
 
             this.Add(attr);
+
+            return this;
         }
 
         public AttributeCollection Remove<A>() where A : Attribute
