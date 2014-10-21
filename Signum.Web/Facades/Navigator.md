@@ -203,7 +203,7 @@ public class ViewOverrides<T> : IViewOverrides where T : IRootEntity
 * **AfterLine**: Adds an arbitrary `MvcHtmlString` after another line, identifying it from his `PropertyRoute` or a more convinient `Expression`. 
 * **HideLine**: Hides any line, identifying it from his `PropertyRoute` or a more convinient `Expression`. 
 
-### Check features
+### Checking features
 
 Finally, `Navigator` exposes a set of methods to determine if an entity (or a particular instance) can be Navigated, Viewed, Created or should be ReadOnly. 
 

@@ -16,13 +16,12 @@ using Newtonsoft.Json.Linq;
 
 namespace Signum.Web
 {
-    public class EntityLineDetail : EntityBase
+    public class EntityDetail : EntityBase
     {
-        public EntityLineDetail(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+        public EntityDetail(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             View = false;
-            LabelClass = "sf-label-detail-line";
         }
 
         protected override void SetReadOnly()

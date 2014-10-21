@@ -85,7 +85,7 @@ namespace Signum.Web
                 (S)(object)null :
                 (S)result.Value;
 
-            return new TypeSubContext<S>(value, tc, result.Properties, result.Route);
+            return new TypeContext<S>(value, tc, result.Properties.ToString(a => a.Name, TypeContext.Separator), result.Route);
         }
 
         protected override Expression VisitParameter(ParameterExpression p)

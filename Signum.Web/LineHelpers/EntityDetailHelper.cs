@@ -15,9 +15,9 @@ using System.Configuration;
 
 namespace Signum.Web
 {
-    public static class EntityLineDetailHelper
+    public static class EntityDetailHelper
     {
-        internal static MvcHtmlString InternalEntityLineDetail(this HtmlHelper helper, EntityLineDetail entityDetail)
+        internal static MvcHtmlString InternalEntityDetail(this HtmlHelper helper, EntityDetail entityDetail)
         {
             if (!entityDetail.Visible || entityDetail.HideIfNull && entityDetail.UntypedValue == null)
                 return MvcHtmlString.Empty;
@@ -72,18 +72,18 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail), null));
                 }
 
-                sb.AddLine(entityDetail.ConstructorScript(JsModule.Lines, "EntityLineDetail"));
+                sb.AddLine(entityDetail.ConstructorScript(JsModule.Lines, "EntityDetail"));
             }
 
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString EntityLineDetail<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
+        public static MvcHtmlString EntityDetail<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
         {
-            return helper.EntityLineDetail<T, S>(tc, property, null);
+            return helper.EntityDetail<T, S>(tc, property, null);
         }
 
-        public static MvcHtmlString EntityLineDetail<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLineDetail> settingsModifier)
+        public static MvcHtmlString EntityDetail<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityDetail> settingsModifier)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
@@ -92,7 +92,7 @@ namespace Signum.Web
             if (vo != null && !vo.IsVisible(context.PropertyRoute))
                 return vo.OnSurroundLine(context.PropertyRoute, helper, tc, null);
 
-            EntityLineDetail eld = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
+            EntityDetail eld = new EntityDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
            
             EntityBaseHelper.ConfigureEntityBase(eld, eld.CleanRuntimeType ?? eld.Type.CleanType());
 
@@ -101,7 +101,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(eld);
 
-            var result = helper.InternalEntityLineDetail(eld);
+            var result = helper.InternalEntityDetail(eld);
 
             if (vo == null)
                 return result;

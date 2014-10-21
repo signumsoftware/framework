@@ -253,12 +253,12 @@
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />
     <Compile Include="Lines\EntityList.cs" />
-    <Compile Include="Lines\EntityLineDetail.cs" />
+    <Compile Include="Lines\EntityDetail.cs" />
     <Compile Include="Lines\EntityCombo.cs" />
     <Compile Include="LineHelpers\EntityBaseHelper.cs" />
     <Compile Include="Lines\EntityLine.cs" />
     <Compile Include="LineHelpers\EntityListDetailHelper.cs" />
-    <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
+    <Compile Include="LineHelpers\EntityDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
@@ -293,6 +293,7 @@
     <Content Include="Facades\JsFunction.md" />
     <Content Include="Facades\Navigator.md" />
     <Content Include="Operations\OperationsClient.md" />
+    <Content Include="LineHelpers\EntityControls.md" />
     <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
