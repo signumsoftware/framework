@@ -173,7 +173,7 @@ namespace Signum.Engine.DynamicQuery
         private Type UnwrapFromPropertRoutes()
         { 
             if(propertyRoutes.IsNullOrEmpty())
-                throw new InvalidOperationException("Impossible to determine the underlying type of the PropertyKey of column {0} if PropertyRoutes is not set"
+                throw new InvalidOperationException("Impossible to determine the underlying type of the PrimaryKey of column {0} if PropertyRoutes is not set"
                     .Formato(this.Name));
 
             return propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).Distinct().SingleEx();
