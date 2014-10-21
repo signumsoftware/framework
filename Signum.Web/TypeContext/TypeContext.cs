@@ -356,29 +356,6 @@ namespace Signum.Web
     }
     #endregion
 
-    #region TypeSubContext<T>
-    public class TypeSubContext<T> : TypeContext<T>, IDisposable
-    {
-        PropertyInfo[] properties;
-
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute propertyRoute)
-            : base(value, parent.ThrowIfNull(""), properties.ToString(a => a.Name, Separator), propertyRoute)
-        {
-            this.properties = properties;
-        }
-
-        public PropertyInfo[] Properties
-        {
-            get { return properties; }
-        }
-
-        internal override TypeContext Clone(object newValue)
-        {
-            return new TypeSubContext<T>((T)newValue, (TypeContext)Parent, Properties, PropertyRoute);
-        }
-    }
-    #endregion
-
     #region TypeElementContext<T>
     public class TypeElementContext<T> : TypeContext<T>
     {
@@ -398,6 +375,4 @@ namespace Signum.Web
         }
     }
     #endregion
-
-    
 }
