@@ -63,7 +63,7 @@ namespace Signum.Web.Extensions.Basic.Views
             #line 5 "..\..\Basic\Views\CultureInfoView.cshtml"
 Write(Html.ValueLine(tc, t => t.Name, vl => 
     { 
-        vl.ValueLineType = ValueLineType.Combo;
+        vl.ValueLineType = ValueLineType.Enum;
         vl.EnumComboItems = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures)
             .OrderBy(a=>a.Name)
             .Select(ci => new SelectListItem

@@ -243,7 +243,7 @@ namespace Signum.Web.Chart
             }
             else if (scriptParameter.Type == ChartParameterType.Enum)
             {
-                vl.ValueLineType = ValueLineType.Combo;
+                vl.ValueLineType = ValueLineType.Enum;
 
                 var token = column.Token.Try(t => t.Token);
 

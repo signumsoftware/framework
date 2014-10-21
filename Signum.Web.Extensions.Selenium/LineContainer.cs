@@ -155,13 +155,13 @@ namespace Signum.Web.Selenium
             lineContainer.EntityCombo(property).LiteValue = value is Lite<IEntity> ? (Lite<IEntity>)value : ((IEntity)value).ToLite();
         }
 
-        public static EntityLineDetailProxy EntityLineDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
           where T : ModifiableEntity
         {
             string newPrefix;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out newPrefix);
 
-            return new EntityLineDetailProxy(lineContainer.Selenium, newPrefix, newRoute);
+            return new EntityDetailProxy(lineContainer.Selenium, newPrefix, newRoute);
         }
 
         public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)

@@ -143,7 +143,7 @@ WriteLiteral("            ");
 
             
             #line 26 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityLineDetail(cc, c => c.Parameter1));
+       Write(Html.EntityDetail(cc, c => c.Parameter1));
 
             
             #line default
@@ -154,7 +154,7 @@ WriteLiteral("            ");
 
             
             #line 27 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityLineDetail(cc, c => c.Parameter2));
+       Write(Html.EntityDetail(cc, c => c.Parameter2));
 
             
             #line default
@@ -165,7 +165,7 @@ WriteLiteral("            ");
 
             
             #line 28 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityLineDetail(cc, c => c.Parameter3));
+       Write(Html.EntityDetail(cc, c => c.Parameter3));
 
             
             #line default

@@ -49,7 +49,7 @@
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
         
         <div style="clear:both"></div>
-    @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
+    @Html.EntityDetail(ec, e => e.From, el => el.PreserveViewData = true)
     <div class="repeater-inline">
         @Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true)
     </div>

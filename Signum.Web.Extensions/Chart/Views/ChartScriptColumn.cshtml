@@ -23,9 +23,9 @@
         sc.FormGroupSize = FormGroupSize.Small;
         
         <div class="chart-column-parameters">
-            @Html.EntityLineDetail(cc, c => c.Parameter1)
-            @Html.EntityLineDetail(cc, c => c.Parameter2)
-            @Html.EntityLineDetail(cc, c => c.Parameter3)
+            @Html.EntityDetail(cc, c => c.Parameter1)
+            @Html.EntityDetail(cc, c => c.Parameter2)
+            @Html.EntityDetail(cc, c => c.Parameter3)
         </div>
     }
 }

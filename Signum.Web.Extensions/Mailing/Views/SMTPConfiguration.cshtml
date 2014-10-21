@@ -10,7 +10,7 @@
 	@Html.ValueLine(sc, s => s.Username)
 	@Html.ValueLine(sc, s => s.Password, vl=>vl.ValueHtmlProps.Add("type", "password"))
 	@Html.ValueLine(sc, s => s.EnableSSL)
-	@Html.EntityLineDetail(sc, s => s.DefaultFrom)
+	@Html.EntityDetail(sc, s => s.DefaultFrom)
 	@Html.EntityRepeater(sc, s => s.AditionalRecipients)
     @Html.EntityRepeater(sc, s => s.ClientCertificationFiles)
 }

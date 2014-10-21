@@ -5,7 +5,7 @@
 {
     @Html.ValueLine(e, f => f.Suspended)
     @Html.EntityLine(e, f => f.Task, vl=>vl.Create = false)
-    @Html.EntityLineDetail(e, f => f.Rule)
+    @Html.EntityDetail(e, f => f.Rule)
     @Html.ValueLine(e, f => f.MachineName)
     @Html.ValueLine(e, f => f.ApplicationName)
 }

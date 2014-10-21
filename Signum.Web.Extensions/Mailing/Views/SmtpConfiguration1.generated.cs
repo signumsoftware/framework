@@ -64,7 +64,7 @@ Write(Html.ValueLine(sc, s => s.IsDefault));
             #line hidden
             
             #line 5 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                      
+                                         
 	
             
             #line default
@@ -78,7 +78,7 @@ Write(Html.ValueLine(sc, s => s.Name));
             #line hidden
             
             #line 6 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
+                                    
 	
             
             #line default
@@ -92,7 +92,7 @@ Write(Html.ValueLine(sc, s => s.Port));
             #line hidden
             
             #line 7 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
+                                    
 	
             
             #line default
@@ -106,7 +106,7 @@ Write(Html.ValueLine(sc, s => s.Host));
             #line hidden
             
             #line 8 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
+                                    
 	
             
             #line default
@@ -120,7 +120,7 @@ Write(Html.ValueLine(sc, s => s.UseDefaultCredentials));
             #line hidden
             
             #line 9 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                  
+                                                     
 	
             
             #line default
@@ -134,7 +134,7 @@ Write(Html.ValueLine(sc, s => s.Username));
             #line hidden
             
             #line 10 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                     
+                                        
 	
             
             #line default
@@ -148,7 +148,7 @@ Write(Html.ValueLine(sc, s => s.Password, vl=>vl.ValueHtmlProps.Add("type", "pas
             #line hidden
             
             #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                                                    
+                                                                                       
 	
             
             #line default
@@ -162,21 +162,21 @@ Write(Html.ValueLine(sc, s => s.EnableSSL));
             #line hidden
             
             #line 12 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                      
+                                         
 	
             
             #line default
             #line hidden
             
             #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityLineDetail(sc, s => s.DefaultFrom));
+Write(Html.EntityDetail(sc, s => s.DefaultFrom));
 
             
             #line default
             #line hidden
             
             #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                               
+                                              
 	
             
             #line default
@@ -190,7 +190,7 @@ Write(Html.EntityRepeater(sc, s => s.AditionalRecipients));
             #line hidden
             
             #line 14 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                     
+                                                        
     
             
             #line default

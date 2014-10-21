@@ -124,7 +124,7 @@ WriteLiteralTo(__razor_template_writer, "                    ");
 
             
             #line 26 "..\..\Mailing\Views\EmailMessage.cshtml"
-WriteTo(__razor_template_writer, Html.EntityLineDetail(e, f => f.From));
+WriteTo(__razor_template_writer, Html.EntityDetail(e, f => f.From));
 
             
             #line default
@@ -348,14 +348,14 @@ WriteLiteralTo(__razor_template_writer, "<div>\r\n");
             #line hidden
 WriteLiteralTo(__razor_template_writer, "<iframe");
 
-WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2465), Tuple.Create("\"", 2490)
+WriteAttributeTo(__razor_template_writer, "id", Tuple.Create(" id=\"", 2461), Tuple.Create("\"", 2486)
             
             #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 2470), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
+, Tuple.Create(Tuple.Create("", 2466), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
             
             #line default
             #line hidden
-, 2470), false)
+, 2466), false)
 );
 
 WriteLiteralTo(__razor_template_writer, " style=\"width:90%\"");

@@ -262,14 +262,14 @@ WriteLiteral("></div>\r\n");
             #line hidden
             
             #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
-Write(Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true));
+Write(Html.EntityDetail(ec, e => e.From, el => el.PreserveViewData = true));
 
             
             #line default
             #line hidden
             
             #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
-                                                                             
+                                                                         
 
             
             #line default

@@ -406,9 +406,9 @@ namespace Signum.Web.Selenium
         }
     }
 
-    public class EntityLineDetailProxy : EntityBaseProxy
+    public class EntityDetailProxy : EntityBaseProxy
     {
-        public EntityLineDetailProxy(ISelenium selenium, string prefix, PropertyRoute route)
+        public EntityDetailProxy(ISelenium selenium, string prefix, PropertyRoute route)
             : base(selenium, prefix, route)
         {
         }
