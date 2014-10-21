@@ -45,6 +45,9 @@ module SF {
     function setupAjaxExtraParameters() {
 
         $.ajaxPrefilter((options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => {
+            if (originalOptions.data && typeof originalOptions.data == "string")
+                return;
+
             var data = $.extend({}, originalOptions.data);
             addAjaxExtraParameters(data);
             options.data = $.param(data);
