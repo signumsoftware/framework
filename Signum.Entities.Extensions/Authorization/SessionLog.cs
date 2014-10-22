@@ -65,10 +65,10 @@ namespace Signum.Entities.Authorization
                 user.TryToString(), sessionStart.TryToString(), sessionEnd.TryToString());
         }
 
-        static Expression<Func<SessionLogDN, int?>> DurationExpression = 
-            sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).Seconds : (int?)null;
+        static Expression<Func<SessionLogDN, double?>> DurationExpression = 
+            sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).TotalSeconds : (double?)null;
         [Unit("s")]
-        public int? Duration
+        public double? Duration
         {
             get { return DurationExpression.Evaluate(this); }
         }
