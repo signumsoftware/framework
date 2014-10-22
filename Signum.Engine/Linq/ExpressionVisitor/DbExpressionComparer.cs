@@ -61,6 +61,9 @@ namespace Signum.Engine.Linq
             if (!(a is DbExpression))
                 return base.Compare(a, b);
 
+            if (((DbExpression)a).DbNodeType != ((DbExpression)b).DbNodeType)
+                return false;
+
             switch (((DbExpression)a).DbNodeType)
             {
                 case DbExpressionType.Table:
