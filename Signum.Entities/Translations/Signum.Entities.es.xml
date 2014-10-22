@@ -128,9 +128,8 @@
     <Member Name="NotStartsWith" Description="no empieza por" />
     <Member Name="StartsWith" Description="empieza por" />
   </Type>
-  <Type Name="IdentifiableEntity" Description="Entidad identificable" />
-  <Type Name="IIdentifiable">
-    <Member Name="Id" Description="ID" />
+  <Type Name="IEntity">
+    <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
     <Member Name="AllowChange" Description="Permitir cambios" />
