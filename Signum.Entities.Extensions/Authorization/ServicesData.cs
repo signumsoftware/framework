@@ -210,22 +210,27 @@ namespace Signum.Entities.Authorization
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
-        public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRule> conditions)
         {
             this.fallback = fallback;
             this.conditions = conditions;
         }
 
-        public TypeAllowedAndConditions(TypeAllowed fallback, params TypeConditionRule[] conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRule[] conditions)
         {
             this.fallback = fallback;
             this.conditions = conditions.ToReadOnly();
         }
 
-        readonly TypeAllowed fallback;
-        public TypeAllowed Fallback
+        readonly TypeAllowed? fallback;
+        public TypeAllowed? Fallback
         {
             get { return fallback; }
+        }
+
+        public TypeAllowed FallbackOrNone
+        {
+            get { return this.fallback ?? TypeAllowed.None; }
         }
 
         readonly ReadOnlyCollection<TypeConditionRule> conditions;
@@ -274,33 +279,33 @@ namespace Signum.Entities.Authorization
         public TypeAllowedBasic MinUI()
         {
             if (!conditions.Any())
-                return fallback.GetUI();
+                return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Min());
         }
 
         public TypeAllowedBasic MaxUI()
         {
             if (!conditions.Any())
-                return fallback.GetUI();
+                return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Max());
         }
 
         public TypeAllowedBasic MinDB()
         {
             if (!conditions.Any())
-                return fallback.GetDB();
+                return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Min());
         }
 
         public TypeAllowedBasic MaxDB()
         {
             if (!conditions.Any())
-                return fallback.GetDB();
+                return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Max());
         }
 
         public override string ToString()

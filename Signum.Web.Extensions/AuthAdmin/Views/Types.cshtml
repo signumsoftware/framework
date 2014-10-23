@@ -21,7 +21,7 @@
     bool operationRules = Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack));
     bool queryRules = Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack));
 }
-@using (var tc = Html.TypeContext<TypeRulePack>())
+@using (var tc = Html.TypeContext<.TypeRulePack>())
 {
     <div class="form-compact">
         @Html.EntityLine(tc, f => f.Role)
