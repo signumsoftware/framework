@@ -46,12 +46,11 @@ var SF;
 
     function setupAjaxExtraParameters() {
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
-            if (originalOptions.data && typeof originalOptions.data == "string")
-                return;
-
-            var data = $.extend({}, originalOptions.data);
-            addAjaxExtraParameters(data);
-            options.data = $.param(data);
+            if (ajaxExtraParameters.length) {
+                var data = $.extend({}, originalOptions.data);
+                addAjaxExtraParameters(data);
+                options.data = $.param(data);
+            }
         });
     }
 
