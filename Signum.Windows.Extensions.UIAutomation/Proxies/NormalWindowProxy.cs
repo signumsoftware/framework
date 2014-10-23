@@ -311,9 +311,24 @@ namespace Signum.Windows.UIAutomation
             {
                 string groupName = groupButton.Current.Name;
 
-                var window = Element.CaptureChildWindow(
-                    () => groupButton.ButtonInvoke(),
-                    actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+                AutomationElement window;
+                int count = 0;
+            retry:
+                try
+                {
+                  
+                    count++;
+                    window = Element.CaptureChildWindow(
+                        () => groupButton.ButtonInvoke(),
+                        actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+                }
+                catch
+                {
+                    if (count < 2)
+                        goto retry;
+
+                    throw;
+                }
 
                 var menuItem = window
                     .Child(a => a.Current.ControlType == ControlType.Menu)
