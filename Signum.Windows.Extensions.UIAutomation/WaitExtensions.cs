@@ -200,9 +200,11 @@ namespace Signum.Windows.UIAutomation
 
             AutomationElement newWindow = null;
 
+            List<AutomationElement> currentWindows = new List<AutomationElement>(); 
+
             element.Wait(() =>
             {
-                var currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
+                currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
                 newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.ThrowIfError(newWindow);
@@ -212,8 +214,20 @@ namespace Signum.Windows.UIAutomation
 
 
                 return false;
-            }, actionDescription, timeOut ?? CapturaWindowTimeout);
+            }, () => actionDescription() + 
+                "\r\n\tcurrentWindows: " + currentWindows.ToString(a => NiceToString(a), "\r\n\t\t") + 
+                "\r\n\tnewWindow: " + NiceToString(newWindow) + 
+                "\r\n\tprevious: " + previous.ToString(a=>a, " ")            
+            , timeOut ?? CapturaWindowTimeout);
             return newWindow;
+        }
+
+        static string NiceToString(AutomationElement ae)
+        {
+            if (ae == null)
+                return "NULL";
+
+            return "{0} [{1}] ({2})".Formato(ae.Current.Name, ae.Current.ClassName, ae.GetRuntimeId().ToString("."));
         }
 
         public static AutomationElement WaitDescendant(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
