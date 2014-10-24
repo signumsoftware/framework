@@ -828,7 +828,7 @@ namespace Signum.Web
 
 
         public event Func<Lite<Entity>, IDisposable> RetrievingForView; 
-        internal IDisposable OnRetrievingForView(Lite<Entity> lite)
+        public IDisposable OnRetrievingForView(Lite<Entity> lite)
         {
             return Disposable.Combine(RetrievingForView, f => f(lite));
         }
