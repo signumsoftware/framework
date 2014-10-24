@@ -69,7 +69,7 @@ namespace Signum.Windows.UIAutomation
                     if (childWindows != null)
                     {
                         MessageBoxProxy.ThrowIfError(childWindows);
-                        throw new InvalidOperationException("A window was open after pressing Ok on {0}. Consider using OkCapture".Formato(entityId));
+                        throw new InvalidOperationException("A window ({0})was open after pressing Ok on {1}. Consider using OkCapture".Formato(WaitExtensions.NiceToString(childWindows), entityId));
                     }
 
                     return IsClosed;
@@ -246,7 +246,7 @@ namespace Signum.Windows.UIAutomation
 
             return window.Element.CaptureWindow(
                 () => button.ButtonInvoke(),
-                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(operationSymbol.Key, entityId, time));
+                actionDescription : () => "Finding a window after {0} from {1} took more than {2} ms".Formato(operationSymbol.Key, entityId, time));
         }
 
         public static AutomationElement GetOperationButton<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)

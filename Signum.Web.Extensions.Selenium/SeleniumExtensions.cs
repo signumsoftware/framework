@@ -130,9 +130,11 @@ namespace Signum.Web.Selenium
             } while (DateTime.Now < limit);
 
 
-            throw new TimeoutException("Timeout after {0} ms waiting for {1}".Formato(
+            throw new TimeoutException("Timeout after {0} ms waiting for {1} in page {2}({3})".Formato(
                 timeout ?? AjaxTimeout,
-                actionDescription == null ? "visual condition" : actionDescription()));
+                actionDescription == null ? "visual condition" : actionDescription(),
+                selenium.GetTitle(),
+                selenium.GetLocation()));
         }
 
         public static void WaitElementPresent(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)

@@ -85,7 +85,7 @@ namespace Signum.Windows.UIAutomation
         public static int CapturaWindowTimeout = 5 * 1000;
 
 
-        public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null, Func<AutomationElement, bool> windowsCondition = null)
         {
             if (actionDescription == null)
                 actionDescription = () => "Get Windows after";
@@ -100,7 +100,8 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")) && 
+                    (windowsCondition == null || windowsCondition(a)));
                 c++;
                 MessageBoxProxy.ThrowIfError(newWindow);
 
@@ -222,7 +223,7 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        static string NiceToString(AutomationElement ae)
+        public static string NiceToString(AutomationElement ae)
         {
             if (ae == null)
                 return "NULL";
