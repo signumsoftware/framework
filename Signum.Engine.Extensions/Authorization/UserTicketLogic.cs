@@ -88,7 +88,7 @@ namespace Signum.Engine.Authorization
                 UserTicketDN userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                 {
-                    throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
+                    throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");
                 }
                 
                 UserTicketDN result = new UserTicketDN
