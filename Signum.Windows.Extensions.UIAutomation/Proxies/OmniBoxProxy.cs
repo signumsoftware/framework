@@ -29,27 +29,27 @@ namespace Signum.Windows.UIAutomation
         {
             var omniboxName = QueryUtils.GetNiceName(queryName).ToOmniboxPascal();
 
-            return new SearchWindowProxy(SelectCapture(omniboxName, "Q:" + QueryUtils.GetQueryUniqueKey(queryName))); 
+            return new SearchWindowProxy(SelectCapture(omniboxName, "Q:" + QueryUtils.GetQueryUniqueKey(queryName), className: "SearchWindow")); 
         }
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : Entity
         {
             var omniboxName = lite.EntityType.NicePluralName().ToOmniboxPascal() + " " + lite.Id;
 
-            return new NormalWindowProxy<T>(SelectCapture(omniboxName, "E:" + lite.Key())); 
+            return new NormalWindowProxy<T>(SelectCapture(omniboxName, "E:" + lite.Key(), className: "NormalWindow")); 
         }
 
         public SearchWindowProxy SelectUserQuery(Lite<UserQueryDN> userQuery)
         {
             var omniboxName = "'" + userQuery.ToString() + "'";
 
-            return new SearchWindowProxy(SelectCapture(omniboxName, "UQ:" + userQuery.Key())); 
+            return new SearchWindowProxy(SelectCapture(omniboxName, "UQ:" + userQuery.Key(), className: "SearchWindow")); 
         }
 
-        public AutomationElement SelectCapture(string autoCompleteText, string name, int? timeOut = null)
+        public AutomationElement SelectCapture(string autoCompleteText, string name, int? timeOut = null, string className = null)
         {
             return Element.CaptureWindow(
-                () =>
+                action : () =>
                 {
                     Element.Value(autoCompleteText);
 
@@ -66,7 +66,9 @@ namespace Signum.Windows.UIAutomation
 
                     listItem.Pattern<SelectionItemPattern>().Select();
                 },
-                () => "window after selecting {0} on the omnibox".Formato(name), timeOut);
+                windowsCondition: ae => className == null || ae.Current.ClassName == className,
+                actionDescription: () => "window after selecting {0} on the omnibox".Formato(name),
+                timeOut: timeOut);
         }
     }
 }

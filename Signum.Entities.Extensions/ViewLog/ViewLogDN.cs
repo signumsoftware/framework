@@ -52,10 +52,10 @@ namespace Signum.Entities.ViewLog
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<ViewLogDN, int>> DurationExpression =
-           sl => (sl.EndDate - sl.StartDate).Milliseconds;
+        static Expression<Func<ViewLogDN, double>> DurationExpression =
+           sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;
         [Unit("ms")]
-        public int Duration
+        public double Duration
         {
             get { return DurationExpression.Evaluate(this); }
         }

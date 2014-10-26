@@ -163,6 +163,9 @@ namespace Signum.Engine.Isolation
 
             Schema.Current.EntityEvents<T>().PreUnsafeInsert += (IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery) =>
             {
+                if (ExecutionMode.InGlobal || IsolationDN.Current == null)
+                    return constructor;
+
                 if (constructor.Body.Type == typeof(T)) 
                 {
                     var newBody = Expression.Call(

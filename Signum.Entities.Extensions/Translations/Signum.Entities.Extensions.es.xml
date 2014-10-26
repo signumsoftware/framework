@@ -156,6 +156,9 @@
   </Type>
   <Type Name="BasicPermission">
     <Member Name="AdminRules" Description="Reglas de admin" />
+    <Member Name="AutomaticUpgradeOfOperations" Description="Actualización automática de las operaciones" />
+    <Member Name="AutomaticUpgradeOfProperties" Description="Actualización automática de propiedades" />
+    <Member Name="AutomaticUpgradeOfQueries" Description="Actualización automática de las consultas" />
   </Type>
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Invalidar caché" />
@@ -349,6 +352,9 @@
     <Member Name="FinalState" Description="Estado final" />
     <Member Name="InitialState" Description="Estado inicial" />
   </Type>
+  <Type Name="DisconnectedCreatedMixin">
+    <Member Name="DisconnectedCreated" Description="Desconectado creado" />
+  </Type>
   <Type Name="DisconnectedExportDN" Description="Exportación desconectada">
     <Member Name="BackupDatabase" Description="Copia de seguridad de base de datos" />
     <Member Name="Copies" Description="Copias" />
@@ -373,7 +379,6 @@
   <Type Name="DisconnectedExportTableDN" Description="Tabla de exportación desconectada">
     <Member Name="CopyTable" Description="Copiar tabla" />
     <Member Name="Errors" Description="Errores" />
-    <Member Name="MaxIdInRange" Description="Máximo Id en rango" />
     <Member Name="Type" Description="Tipo" />
   </Type>
   <Type Name="DisconnectedImportDN" Description="Importación desconectada">
@@ -427,8 +432,8 @@
     <Member Name="NotAllowedToSave0WhileOffline" Description="No se puede guardar {0} en modo descaonectado" />
     <Member Name="The0WithId12IsLockedBy3" Description="El {0} con Id {1} ({2}) está bloqueado por {3}" />
   </Type>
-  <Type Name="DisconnectedMixin">
-    <Member Name="DisconnectedMachine" Description="Máquina desconectada" />
+  <Type Name="DisconnectedSubsetMixin">
+    <Member Name="DisconnectedMachine" Description="Equipo desconectado" />
     <Member Name="LastOnlineTicks" Description="Últimos ticks online" />
   </Type>
   <Type Name="EmailAddressDN" Description="Dirección email">
@@ -584,6 +589,9 @@
     <Member Name="TheTemplateIsAlreadyActive" Description="La plantilla ya está activa" />
     <Member Name="TheTemplateIsAlreadyInactive" Description="La plantilla ya está inactiva" />
     <Member Name="TheTextMustContain0IndicatingReplacementPoint" Description="El texto debe contener {0} indicando punto de reemplazamiento" />
+    <Member Name="TokenAndEmailAddressCanNotBeSetAtTheSameTime" Description="No pueden establecerse a la vez Token y correo electrónico" />
+    <Member Name="TokenMustBeA0" Description="Token debe ser un {0}" />
+    <Member Name="TokenOrEmailAddressMustBeSet" Description="Debe establecerse Token o correo electrónico" />
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} no tiene una propiedad con nombre {1}" />
   </Type>
   <Type Name="EmailTemplateMessageDN" Description="Mensaje plantilla email">
