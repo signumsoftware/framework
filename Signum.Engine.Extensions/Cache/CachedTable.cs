@@ -26,10 +26,14 @@ namespace Signum.Engine.Cache
     {
         public abstract ITable Table { get; }
 
-        List<CachedTableBase> subTables;
+        public abstract IColumn ParentColumn { get; set; }
+
+        internal List<CachedTableBase> subTables;
         public List<CachedTableBase> SubTables { get { return subTables; } }
         protected SqlPreCommandSimple query;
-        ICacheLogicController controller;
+        internal ICacheLogicController controller;
+
+        internal CachedTableConstructor Constructor;
 
         internal CachedTableBase(ICacheLogicController controller)
         {
@@ -133,363 +137,7 @@ namespace Signum.Engine.Cache
 
         internal static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
-        protected class CachedTableConstructor
-        {
-            public CachedTableBase cachedTable;
-            public ITable table;
-
-            public ParameterExpression origin;
-        
-            public AliasGenerator aliasGenerator;
-            public Alias currentAlias;
-            public Type tupleType;
-
-            public string remainingJoins;
-
-            public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator aliasGenerator)
-            {
-                this.cachedTable = cachedTable;
-                this.table = cachedTable.Table;
-                this.aliasGenerator = aliasGenerator;
-                this.currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
-
-                this.tupleType = TupleReflection.TupleChainType(table.Columns.Values.Select(GetColumnType));
-
-                this.origin = Expression.Parameter(tupleType, "origin");
-            }
-
-            public Expression GetTupleProperty(IColumn column)
-            {
-                return TupleReflection.TupleChainProperty(origin, table.Columns.Values.IndexOf(column));
-            }
-
-            internal string CreatePartialInnerJoin(IColumn column)
-            {
-                return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name.ToStringDbo(), currentAlias.Name.SqlEscape(), column.Name);
-            }
-
-            internal Type GetColumnType(IColumn column)
-            {
-                return column.Type;
-            }
-
-            internal Func<FieldReader, object> GetRowReader()
-            {
-                ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
-
-                var tupleConstructor = TupleReflection.TupleChainConstructor(
-                    table.Columns.Values.Select((c, i) => FieldReader.GetExpression(reader, i, GetColumnType(c)))
-                    );
-
-                return Expression.Lambda<Func<FieldReader, object>>(tupleConstructor, reader).Compile();
-            }
-
-            internal Func<object, PrimaryKey> GetPrimaryKeyGetter(IColumn column)
-            {
-                var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
-
-                var ci = NewPrimaryKey(access);
-
-                return Expression.Lambda<Func<object, PrimaryKey>>(ci, originObject).Compile();
-            }
-
-            static ConstructorInfo ciPrimaryKey = ReflectionTools.GetConstuctorInfo(() => new PrimaryKey(1));
-
-            internal static Expression NewPrimaryKey(Expression expression)
-            {
-                return Expression.New(ciPrimaryKey, Expression.Convert(expression, typeof(IComparable)));
-            }
-        
-
-            static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedTable =
-             new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                 new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
-
-            static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedSemiTable =
-              new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                  new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
-
-            static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>> ciCachedTableMList =
-              new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
-                  new CachedTableMList<Entity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
-
-            static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
-
-            public Expression MaterializeField(Field field)
-            {
-                if (field is FieldValue)
-                {
-                    var value = GetTupleProperty((IColumn)field);
-                    return value.Type == field.FieldType ? value : Expression.Convert(value, field.FieldType);
-                }
-
-                if (field is FieldEnum)
-                    return Expression.Convert(GetTupleProperty((IColumn)field), field.FieldType);
-
-                if (field is IFieldReference)
-                {
-                    var nullRef = Expression.Constant(null, field.FieldType);
-                    bool isLite = ((IFieldReference)field).IsLite;
-
-                    if (field is FieldReference)
-                    {
-                        IColumn column = (IColumn)field;
-
-                        return GetEntity(isLite, column, field.FieldType.CleanType());
-                    }
-
-                    if (field is FieldImplementedBy)
-                    {
-                        var ib = (FieldImplementedBy)field;
-
-                        var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
-                        {
-                            IColumn column = (IColumn)kvp.Value;
-
-                            Expression entity = GetEntity(isLite, column, kvp.Key);
-
-                            return Expression.Condition(Expression.NotEqual(GetTupleProperty(column), NullId),
-                                Expression.Convert(entity, field.FieldType),
-                                acum);
-                        });
-
-                        return call;
-                    }
-
-                    if (field is FieldImplementedByAll)
-                    {
-                        var iba = (FieldImplementedByAll)field;
-
-                        Expression id = GetTupleProperty(iba.Column);
-                        Expression typeId = GetTupleProperty(iba.ColumnType);
-
-                        if (isLite)
-                        {
-                            var liteCreate = Expression.Call(miGetIBALite.MakeGenericMethod(field.FieldType.CleanType()),
-                                Expression.Constant(Schema.Current),
-                                NewPrimaryKey(typeId.UnNullify()),
-                                id.UnNullify());
-
-                            var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
-
-                            return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(id), NullId), liteRequest, nullRef);
-                        }
-                        else
-                        {
-                            return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(field.FieldType), typeId, id);
-                        }
-                    }
-                }
-
-                if (field is FieldEmbedded)
-                {
-                    var fe = (FieldEmbedded)field;
-
-                    Expression ctor = Expression.MemberInit(Expression.New(fe.FieldType),
-                        fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, MaterializeField(f.Field)))
-                        .And(Expression.Bind(piModified, retrieverModifiedState)));
-
-                    if (fe.HasValue == null)
-                        return ctor;
-
-                    return Expression.Condition(
-                        Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)),
-                        ctor,
-                        Expression.Constant(null, field.FieldType));
-                }
-
-
-                if (field is FieldMList)
-                {
-                    var mListField = (FieldMList)field;
-
-                    var idColumn = table.Columns.Values.OfType<FieldPrimaryKey>().First();
-
-                    string lastPartialJoin = CreatePartialInnerJoin(idColumn);
-
-                    Type elementType = field.FieldType.ElementType();
-
-                    CachedTableBase ctb = ciCachedTableMList.GetInvoker(elementType)(cachedTable.controller, mListField.TableMList, aliasGenerator, lastPartialJoin, remainingJoins);
-
-                    if (cachedTable.subTables == null)
-                        cachedTable.subTables = new List<CachedTableBase>();
-
-                    cachedTable.subTables.Add(ctb);
-
-                    return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
-                }
-
-                throw new InvalidOperationException("Unexpected {0}".Formato(field.GetType().Name));
-            }
-
-            private Expression GetEntity(bool isLite, IColumn column, Type type)
-            {
-                Expression id = GetTupleProperty(column);
-
-                if (isLite)
-                {
-                    Expression lite;
-                    switch (CacheLogic.GetCacheType(type))
-                    {
-                        case CacheType.Cached:
-                            {
-                                lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                                    Lite.NewExpression(type, NewPrimaryKey(id.UnNullify()), Expression.Constant(null, typeof(string)), peModified));
-
-                                break;
-                            }
-                        case CacheType.Semi:
-                            {
-                                string lastPartialJoin = CreatePartialInnerJoin(column);
-
-                                CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
-
-                                if (cachedTable.subTables == null)
-                                    cachedTable.subTables = new List<CachedTableBase>();
-
-                                cachedTable.subTables.Add(ctb);
-
-                                lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), NewPrimaryKey(id.UnNullify()), retriever);
-
-                                break;
-                            }
-                        default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
-                    }
-
-                    if (!id.Type.IsNullable())
-                        return lite;
-
-                    return Expression.Condition(Expression.Equal(id, NullId), Expression.Constant(null, Lite.Generate(type)), lite);
-                }
-                else
-                {
-                    switch (CacheLogic.GetCacheType(type))
-                    {
-                        case CacheType.Cached: return Expression.Call(retriever, miRequest.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()));
-                        case CacheType.Semi:
-                            {
-                                string lastPartialJoin = CreatePartialInnerJoin(column);
-
-                                CachedTableBase ctb = ciCachedTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
-
-                                if (cachedTable.subTables == null)
-                                    cachedTable.subTables = new List<CachedTableBase>();
-
-                                cachedTable.subTables.Add(ctb);
-
-                                var entity = Expression.Parameter(type);
-                                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(type),
-                                    Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
-                                    entity);
-
-                                return Expression.Call(retriever, miComplete.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()), lambda);
-                            }
-                        default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
-                    }
-                }
-            }
-
-
-            static readonly MethodInfo miWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Wrap(1));
-
-            internal static Expression WrapPrimaryKey(Expression expression)
-            {
-                return Expression.Call(miWrap, Expression.Convert(expression, typeof(IComparable)));
-            }
-
-            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<Entity>(null)).GetGenericMethodDefinition();
-            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<Entity>(null, null)).GetGenericMethodDefinition();
-            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<Entity>(null)).GetGenericMethodDefinition();
-            static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<Entity>(0, null)).GetGenericMethodDefinition();
-
-            internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
-            internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
-
-            static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
-            static MemberExpression retrieverModifiedState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
-
-
-            static MethodInfo miGetIBALite = ReflectionTools.GetMethodInfo((Schema s) => GetIBALite<Entity>(null, 1, "")).GetGenericMethodDefinition();
-            public static Lite<T> GetIBALite<T>(Schema schema, PrimaryKey typeId, string id) where T : Entity
-            {
-                Type type = schema.GetType(typeId);
-
-                return (Lite<T>)Lite.Create(type, PrimaryKey.Parse(id, type));
-            }
-
-            public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
-
-            public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<PrimaryKey, string>(1, ""));
-
-
-            public static Action<IRetriever, Modifiable> resetModifiedAction; 
-
-            static CachedTableConstructor()
-            {
-                ParameterExpression modif = Expression.Parameter(typeof(Modifiable));
-
-                resetModifiedAction = Expression.Lambda<Action<IRetriever, Modifiable>>(Expression.Assign(
-                    Expression.Property(modif, ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified)), 
-                    CachedTableConstructor.peModified),
-                    CachedTableConstructor.retriever, modif).Compile();
-            }
-
-
-          
-
-            static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
-            Expression GetMixin(ParameterExpression me, Type mixinType)
-            {
-                return Expression.Call(me, miMixin.MakeGenericMethod(mixinType));
-            }
-
-            internal BlockExpression MaterializeEntity(ParameterExpression me, Table table)
-            {
-                List<Expression> instructions = new List<Expression>();
-                instructions.Add(Expression.Assign(origin, Expression.Convert(CachedTableConstructor.originObject, tupleType)));
-
-                foreach (var f in table.Fields.Values.Where(f => !(f.Field is FieldPrimaryKey)))
-                {
-                    Expression value = MaterializeField(f.Field);
-                    var assigment = Expression.Assign(Expression.Field(me, f.FieldInfo), value);
-                    instructions.Add(assigment);
-                }
-
-                if (table.Mixins != null)
-                {
-                    foreach (var mixin in table.Mixins.Values)
-                    {
-                        ParameterExpression mixParam = Expression.Parameter(mixin.FieldType);
-
-                        var mixBlock = MaterializeMixin(me, mixin, mixParam);
-
-                        instructions.Add(mixBlock);
-                    }
-                }
-
-                var block = Expression.Block(new[] { origin }, instructions);
-
-                return block;
-            }
-
-            private BlockExpression MaterializeMixin(ParameterExpression me, FieldMixin mixin, ParameterExpression mixParam)
-            {
-                List<Expression> mixBindings = new List<Expression>();
-                mixBindings.Add(Expression.Assign(mixParam, GetMixin(me, mixin.FieldType)));
-
-                foreach (var f in mixin.Fields.Values)
-                {
-                    Expression value = MaterializeField(f.Field);
-                    var assigment = Expression.Assign(Expression.Field(mixParam, f.FieldInfo), value);
-                    mixBindings.Add(assigment);
-                }
-
-                mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), retrieverModifiedState));
-
-                var mixBlock = Expression.Block(new[] { mixParam }, mixBindings);
-                return mixBlock;
-            }
-        }
+     
     }
 
   
@@ -499,20 +147,24 @@ namespace Signum.Engine.Cache
     {
         Table table;
 
+        public Dictionary<PrimaryKey, object> Rows { get { return rows.Value; } }
+
         ResetLazy<Dictionary<PrimaryKey, object>> rows;
 
         Func<FieldReader, object> rowReader;
         Action<object, IRetriever, T> completer;
         Expression<Action<object, IRetriever, T>> completerExpression;
         Func<object, PrimaryKey> idGetter;
-        Func<object, string> toStrGetter;
+        Func<PrimaryKey, string> toStrGetter;
+
+        public override IColumn ParentColumn { get; set; }
 
         public CachedTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
             : base(controller)
         {
             this.table = Schema.Current.Table(typeof(T));
 
-            CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
+            CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator);
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
@@ -547,7 +199,7 @@ namespace Signum.Engine.Cache
                 completer = completerExpression.Compile();
 
                 idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
-                toStrGetter = ToStringExpressionVisitor.GetToString(ctr);
+                toStrGetter = ToStringExpressionVisitor.GetToString<T>(ctr, s => s.ToString());
             }
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
@@ -579,7 +231,6 @@ namespace Signum.Engine.Cache
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-
         protected override void Reset()
         {
             if (CacheLogic.LogWriter != null)
@@ -595,29 +246,34 @@ namespace Signum.Engine.Cache
 
         public string GetToString(PrimaryKey id)
         {
+            return toStrGetter(id);
+        }
+
+        public object GetRow(PrimaryKey id)
+        {
             Interlocked.Increment(ref hits);
-            var origin = rows.Value.TryGetC(id);
+            var origin = Rows.TryGetC(id);
             if (origin == null)
                 throw new EntityNotFoundException(typeof(T), id);
 
-            return toStrGetter(origin);
+            return origin;
         }
 
         public string TryGetToString(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
-            var origin = rows.Value.TryGetC(id);
+            var origin = Rows.TryGetC(id);
             if (origin == null)
                 return null;
 
-            return toStrGetter(rows.Value[id]);
+            return toStrGetter(id);
         }
 
         public void Complete(T entity, IRetriever retriever)
         {
             Interlocked.Increment(ref hits);
 
-            var origin = rows.Value.TryGetC(entity.Id);
+            var origin = Rows.TryGetC(entity.Id);
             if (origin == null)
                 throw new EntityNotFoundException(typeof(T), entity.Id);
 
@@ -627,7 +283,7 @@ namespace Signum.Engine.Cache
         internal IEnumerable<PrimaryKey> GetAllIds()
         {
             Interlocked.Increment(ref hits);
-            return rows.Value.Keys;
+            return Rows.Keys;
         }
 
         public override int? Count
@@ -645,53 +301,17 @@ namespace Signum.Engine.Cache
             get { return table; }
         }
 
-        class ToStringExpressionVisitor : ExpressionVisitor
-        {
-            ParameterExpression param;
-            CachedTableConstructor constructor; 
-            public static Func<object, string> GetToString(CachedTableConstructor constructor)
-            {
-                Table table = (Table)constructor.table;
-
-                Expression result = null;
-
-                LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(table.Type, CachedTableBase.ToStringMethod);
-
-                if (lambda == null)
-                {
-                    result = constructor.GetTupleProperty(table.ToStrColumn);
-                }
-                else
-                {
-                    ToStringExpressionVisitor toStr = new ToStringExpressionVisitor
-                    {
-                        param = lambda.Parameters.SingleEx(),
-                        constructor = constructor,
-                    };
-
-                    result = toStr.Visit(lambda.Body);
-                }
-
-                List<Expression> instructions = new List<Expression>();
-                instructions.Add(Expression.Assign(constructor.origin, Expression.Convert(CachedTableConstructor.originObject, constructor.tupleType)));
-                instructions.Add(result);
-                var block = Expression.Block(new[] { constructor.origin }, instructions);
-
-                return Expression.Lambda<Func<object, string>>(block, CachedTableConstructor.originObject).Compile();
-            }
-
-            protected override Expression VisitMember(MemberExpression node)
-            {
-                if (node.Expression == param)
-                    return constructor.MaterializeField(((Table)constructor.table).GetField(node.Member));
-
-                return base.VisitMember(node);
-            }
-        }
     }
+
+
+   
+
+
 
     class CachedTableMList<T> : CachedTableBase
     {
+        public override IColumn ParentColumn { get; set; }
+
         TableMList table;
 
         ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
@@ -709,7 +329,7 @@ namespace Signum.Engine.Cache
         {
             this.table = table;
 
-            CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
+            CachedTableConstructor ctr = this.Constructor= new CachedTableConstructor(this, aliasGenerator);
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
@@ -842,8 +462,11 @@ namespace Signum.Engine.Cache
         }
     }
 
+
     class CachedLiteTable<T> : CachedTableBase where T : Entity
     {
+        public override IColumn ParentColumn { get; set; }
+
         Table table;
 
         Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader;
