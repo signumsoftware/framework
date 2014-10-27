@@ -33,7 +33,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value); }
         }
 
-        Lite<SmtpConfigurationDN> smtpConfig = DefaultSmtpConfig;
+        Lite<SmtpConfigurationDN> smtpConfig = DefaultSmtpConfig();
         public Lite<SmtpConfigurationDN> SmtpConfig
         {
             get { return smtpConfig; }
@@ -101,7 +101,7 @@ namespace Signum.Entities.Mailing
             return ToStringExpression.Evaluate(this);
         }
 
-        public static Lite<SmtpConfigurationDN> DefaultSmtpConfig;
+        public static Func<Lite<SmtpConfigurationDN>> DefaultSmtpConfig;
 
         QueryDN query;
         public QueryDN Query
