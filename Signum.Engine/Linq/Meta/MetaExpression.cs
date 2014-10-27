@@ -93,13 +93,12 @@ namespace Signum.Engine.Linq
             if (pr == null)
                 return new MetaExpression(sourceType, new DirtyMeta(token.GetImplementations(), new Meta[0]));
 
-            if (sourceType.IsAssignableFrom(pr.Type ))
-                return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr }));
-
-            if (sourceType.IsAssignableFrom(pr.Type.CleanType()))
+            if (!sourceType.IsLite()  && pr.Type.IsLite())
                 return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr.Add("Entity") }));
 
-            throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(pr.Type.TypeName(), sourceType.TypeName()));
+            return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr }));
+
+            //throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(pr.Type.TypeName(), sourceType.TypeName()));
         }
 
         static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
