@@ -172,7 +172,12 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
-            return new ColumnExpression(this.Type, tableAlias, this.Name);
+            var column = new ColumnExpression(this.Type, tableAlias, this.Name);
+
+            if(this.Type == this.FieldType)
+                return column;
+
+            return Expression.Convert(column, this.FieldType);
         }
     }
 
