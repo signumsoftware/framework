@@ -490,7 +490,7 @@ namespace Signum.Engine.Maps
 
         public virtual Type Type
         {
-            get { return this.FieldType; }
+            get { return this.Nullable ? this.FieldType.Nullify() : this.FieldType; }
         }
     }
 
@@ -731,7 +731,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2})".Formato(
+            return "{0} -> {1} {3} ({2})".Formato(
                 Name,
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",

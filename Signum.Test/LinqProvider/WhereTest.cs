@@ -368,6 +368,37 @@ namespace Signum.Test.LinqProvider
             var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((PrimaryKey?)id, alb.Id)).Count();
         }
 
+        [TestMethod]
+        public void WhereEqualsNew()
+        {
+            GrammyAwardDN award = new GrammyAwardDN();
+
+            var count = Database.Query<BandDN>().Count(a => a.LastAward == award);
+
+            Assert.AreEqual(0, count); 
+        }
+
+
+        [TestMethod]
+        public void WhereNotEqualsNew()
+        {
+            GrammyAwardDN award = new GrammyAwardDN();
+
+            var count = Database.Query<BandDN>().Count(a => a.LastAward != award);
+
+            Assert.IsTrue(count > 0);
+        }
+
+        [TestMethod]
+        public void WhereEqualsNewIBA()
+        {
+            GrammyAwardDN award = new GrammyAwardDN();
+
+            var count = Database.Query<ArtistDN>().Count(a => a.LastAward == award);
+
+            Assert.AreEqual(0, count);
+        }
+
 
     }
 }
