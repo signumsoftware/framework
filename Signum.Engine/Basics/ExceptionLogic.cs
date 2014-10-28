@@ -23,7 +23,7 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<ExceptionDN>();
 
-                dqm.RegisterQuery(typeof(ExceptionDN),()=>
+                dqm.RegisterQuery(typeof(ExceptionDN), () =>
                     from r in Database.Query<ExceptionDN>()
                     select new
                     {
@@ -35,7 +35,7 @@ namespace Signum.Engine.Basics
                         r.StackTraceHash,
                     });
 
-                dqm.RegisterQuery(typeof(ExceptionDN), ()=>
+                dqm.RegisterQuery(typeof(ExceptionDN), () =>
                      from r in Database.Query<ExceptionDN>()
                      select new
                      {
@@ -47,14 +47,14 @@ namespace Signum.Engine.Basics
                          r.StackTraceHash,
                      });
 
-                DefaultEnvironment = "Default"; 
+                DefaultEnvironment = "Default";
             }
         }
 
         public static ExceptionDN LogException(this Exception ex, Action<ExceptionDN> completeContext)
         {
             var entity = GetEntity(ex);
-            
+
             completeContext(entity);
 
             return entity.SaveForceNew();
@@ -83,10 +83,10 @@ namespace Signum.Engine.Basics
 
             entity.ExceptionType = ex.GetType().Name;
 
-            var exceptions= ex.Follow(e => e.InnerException);
+            var exceptions = ex.Follow(e => e.InnerException);
             string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
             string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
-           
+
             entity.ExceptionMessage = messages.DefaultText("- No message - ");
             entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -135,39 +135,39 @@ namespace Signum.Engine.Basics
 
         public static event Action<DeleteLogParametersDN> DeleteLogs;
 
-        public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
+        public static int DeleteLogsTimeOut = 10 * 60 * 1000;
 
         public static void DeleteLogsAndExceptions(DeleteLogParametersDN parameters)
         {
-            using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
+            using (Connector.CommandTimeoutScope(DeleteLogsTimeOut))
             {
-                if(DeleteLogs != null)
+                if (DeleteLogs != null)
                 {
                     foreach (var action in DeleteLogs.GetInvocationList().Cast<Action<DeleteLogParametersDN>>())
-	                {
+                    {
                         action(parameters);
-	                }
+                    }
                 }
 
                 int exceptions = Database.Query<ExceptionDN>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
 
                 var ex = Schema.Current.Table<ExceptionDN>();
-                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionDN e)=>e.Referenced));
+                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionDN e) => e.Referenced));
 
                 var commands = (from t in Schema.Current.GetDatabaseTables()
-                               from c in t.Columns.Values
-                               where c.ReferenceTable == ex
+                                from c in t.Columns.Values
+                                where c.ReferenceTable == ex
                                 select new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
                                    .Formato(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
 
-                foreach (var c in commands) 
+                foreach (var c in commands)
                 {
                     c.ExecuteNonQuery();
                 }
 
                 int deletedExceptions = Database.Query<ExceptionDN>()
                     .Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
-                    .UnsafeDeleteChunks(); 
+                    .UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
             }
         }
     }
