@@ -369,7 +369,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void WhereIsNew()
+        public void WhereEqualsNew()
         {
             GrammyAwardDN award = new GrammyAwardDN();
 
@@ -378,8 +378,19 @@ namespace Signum.Test.LinqProvider
             Assert.AreEqual(0, count); 
         }
 
+
         [TestMethod]
-        public void WhereIsNewIBA()
+        public void WhereNotEqualsNew()
+        {
+            GrammyAwardDN award = new GrammyAwardDN();
+
+            var count = Database.Query<BandDN>().Count(a => a.LastAward != award);
+
+            Assert.IsTrue(count > 0);
+        }
+
+        [TestMethod]
+        public void WhereEqualsNewIBA()
         {
             GrammyAwardDN award = new GrammyAwardDN();
 
