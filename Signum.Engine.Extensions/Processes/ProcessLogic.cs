@@ -184,20 +184,20 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DateTime limit)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
         {
-            Remove(ProcessState.Canceled, limit);
-            Remove(ProcessState.Finished, limit);
-            Remove(ProcessState.Error, limit);
+            Remove(ProcessState.Canceled, parameters);
+            Remove(ProcessState.Finished, parameters);
+            Remove(ProcessState.Error, parameters);
         }
 
-        private static void Remove(ProcessState processState, DateTime limit)
+        private static void Remove(ProcessState processState, DeleteLogParametersDN parameters)
         {
-            var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < limit);
+            var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < parameters.DateLimit);
 
-            query.SelectMany(a=>a.ExceptionLines()).UnsafeDeleteChunks();
+            query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
 
-            query.UnsafeDeleteChunks();
+            query.UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         public static IDisposable OnApplySession(ProcessDN process)

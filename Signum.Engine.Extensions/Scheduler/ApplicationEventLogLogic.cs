@@ -16,6 +16,7 @@ using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Engine.Exceptions;
 using Signum.Engine.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Scheduler
 {
@@ -43,9 +44,9 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DateTime limite)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
         {
-            Database.Query<ApplicationEventLogDN>().Where(a => a.Date < limite).UnsafeDeleteChunks();
+            Database.Query<ApplicationEventLogDN>().Where(a => a.Date < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         public static void ApplicationStart()
