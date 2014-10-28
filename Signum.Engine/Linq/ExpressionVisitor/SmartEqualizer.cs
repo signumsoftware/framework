@@ -19,6 +19,9 @@ namespace Signum.Engine.Linq
         public static ConstantExpression False = Expression.Constant(false);
 
 
+        static ConstantExpression NewId = Expression.Constant("NewID");
+
+
         public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
         {
             return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
@@ -27,6 +30,9 @@ namespace Signum.Engine.Linq
 
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
+            if (e1 == NewId || e2 == NewId)
+                return False;
+
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
                 return Expression.Equal(e1, e2);
 
@@ -446,6 +452,9 @@ namespace Signum.Engine.Linq
 
             var cleanElement = SmartEqualizer.UnwrapPrimaryKey(element);
 
+            if (cleanElement == NewId)
+                return False;
+
             return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement), cleanValues);
         }
 
@@ -462,7 +471,7 @@ namespace Signum.Engine.Linq
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, PrimaryKey[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => a.IdOrNull).NotNull().ToArray());
+            Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => a.Id).ToArray());
 
             return EntityIn(newItem, entityIDs);
         }
@@ -472,7 +481,7 @@ namespace Signum.Engine.Linq
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, PrimaryKey[]> entityIDs = collection.AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => a.IdOrNull).NotNull().ToArray());
+            Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => a.Id).ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 
         }
@@ -606,7 +615,7 @@ namespace Signum.Engine.Linq
         static Expression FieIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
         {
             return Expression.And(
-                EqualNullable(new SqlCastExpression(typeof(string), ee.ExternalId.Value), iba.Id),
+                ee.ExternalId.Value == NewId ? False : EqualNullable(new SqlCastExpression(typeof(string), ee.ExternalId.Value), iba.Id),
                 EqualNullable(QueryBinder.TypeConstant(ee.Type), iba.TypeId.TypeColumn.Value));
         }
 
@@ -619,8 +628,9 @@ namespace Signum.Engine.Linq
 
         static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)
         {
-            var list = ib.Implementations.Values.Select(i => Expression.And(
-                EqualNullable(iba.Id, new SqlCastExpression(typeof(string), i.ExternalId.Value)),
+            var list = ib.Implementations.Values.Select(i =>
+                Expression.And(
+                i.ExternalId.Value == NewId ? (Expression)False : EqualNullable(iba.Id, new SqlCastExpression(typeof(string), i.ExternalId.Value)),
                 EqualNullable(iba.TypeId.TypeColumn.Value, QueryBinder.TypeConstant(i.Type)))).ToList();
 
             return list.AggregateOr();
@@ -655,8 +665,7 @@ namespace Signum.Engine.Linq
             {
                 var ei = (Entity)c.Value;
 
-                var id = Expression.Constant(ei.IdOrNull.Try(a => a.Object),
-                   PrimaryKey.Type(ei.GetType()).Nullify());
+                var id = ei.IdOrNull.Try(pk => Expression.Constant(pk.Object, PrimaryKey.Type(ei.GetType()).Nullify())) ?? SmartEqualizer.NewId;
 
                 return new EntityExpression(ei.GetType(),
                     new PrimaryKeyExpression(id), null, null, null, avoidExpandOnRetrieving: true);
@@ -678,8 +687,7 @@ namespace Signum.Engine.Linq
             {
                 Lite<IEntity> lite = (Lite<IEntity>)c.Value;
 
-                var id = Expression.Constant(lite.IdOrNull.Try(a => a.Object),
-                  PrimaryKey.Type(lite.EntityType).Nullify());
+                var id = lite.IdOrNull.Try(pk => Expression.Constant(pk.Object, PrimaryKey.Type(lite.EntityType).Nullify())) ?? SmartEqualizer.NewId;
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, new PrimaryKeyExpression(id), null, null, null, false);
 
