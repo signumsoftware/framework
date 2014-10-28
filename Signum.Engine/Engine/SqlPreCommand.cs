@@ -44,6 +44,13 @@ namespace Signum.Engine
             return sb.ToString(); 
         }
 
+        public List<SqlPreCommandSimple> PlainSqlSplitGOs()
+        {
+            return this.PlainSql().Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => new SqlPreCommandSimple(s))
+                .ToList();
+        }
+
 
         protected internal abstract void PlainSql(StringBuilder sb);
 
@@ -158,13 +165,7 @@ namespace Signum.Engine
 
         protected internal override void GenerateScript(StringBuilder sb)
         {
-            if (GoBefore)
-                sb.Append("GO\r\n");
-
             sb.Append(Sql);
-
-            if (GoAfter)
-                sb.Append(";\r\nGO");
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -215,7 +216,6 @@ namespace Signum.Engine
                 sb.Append(Sql);
             else
             {
-
                 var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
 
                 sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
@@ -242,14 +242,6 @@ namespace Signum.Engine
 
             return this;
         }
-
-        public List<SqlPreCommandSimple> SplitGOs()
-        {
-            return this.Sql.Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => new SqlPreCommandSimple(s))
-                .ToList();
-        }
-
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -271,20 +263,19 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             string sep = separators[Spacing];
-            for (int i = 0; i < Commands.Length - 1; i++)
+            for (int i = 0; i < Commands.Length; i++)
             {
                 var cmd = Commands[i];
+               
                 cmd.GenerateScript(sb);
+            
+                if (i != Commands.Length - 1)
+                {
+                    if (!cmd.EndsWithGo)
+                        sb.Append(";");
 
-                if (!cmd.EndsWithGo)
-                    sb.Append(";");
-
-                sb.Append(sep);
-            }
-
-            if (Commands.Length > 0)
-            {
-                Commands[Commands.Length - 1].GenerateScript(sb);
+                    sb.Append(sep);
+                }
             }
         }
 
@@ -312,7 +303,17 @@ namespace Signum.Engine
             bool borrar = false;
             foreach (SqlPreCommand com in Commands)
             {
+                var simple = com as SqlPreCommandSimple;
+
+                if (simple != null && simple.GoBefore)
+                    sb.Append("GO\r\n");
+
                 com.PlainSql(sb);
+
+                if (simple != null && simple.GoAfter)
+                    sb.Append("\r\nGO");
+
+
                 sb.Append(sep);
                 borrar = true;
             }
