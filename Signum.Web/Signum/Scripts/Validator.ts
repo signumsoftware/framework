@@ -8,6 +8,7 @@ export interface ValidationOptions {
     requestExtraJsonData?: any;
     rootType?: any;
     propertyRoute?: any;
+    errorSummaryId?: string;
 }
 
 export interface ValidationResult {
@@ -206,7 +207,7 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
 
     getPathPrefixes(prefix).forEach(currPrefix=> {
 
-        var summary = valOptions["errorSummaryId"] ? $('#' + valOptions["errorSummaryId"]) : currPrefix.child(globalValidationSummary).tryGet();
+        var summary = valOptions.errorSummaryId && currPrefix == valOptions.prefix? valOptions.errorSummaryId.tryGet() : currPrefix.child(globalValidationSummary).tryGet();
 
         if (summary.length) {
             var ul = summary.children("ul." + validationSummary);
