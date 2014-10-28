@@ -37,12 +37,14 @@ namespace Signum.Engine.Mailing
             return DeliveriesExpression.Evaluate(n);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Lite<SmtpConfigurationDN>> defaultSmtpConfig)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NewsletterDN>();
                 sb.Include<NewsletterDeliveryDN>();
+
+                NewsletterDN.DefaultSmtpConfig = defaultSmtpConfig;
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(NewsletterProcess.SendNewsletter, new NewsletterProcessAlgorithm());

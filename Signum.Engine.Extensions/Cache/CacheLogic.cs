@@ -647,6 +647,11 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             return CacheType.Cached;
         }
 
+        public static CachedTableBase GetCachedTable(Type type)
+        {
+            return controllers.GetOrThrow(type).CachedTable;
+        }
+
         public static void ForceReset()
         {
             foreach (var controller in controllers.Values.NotNull())

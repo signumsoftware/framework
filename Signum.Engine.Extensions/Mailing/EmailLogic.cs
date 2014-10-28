@@ -50,10 +50,10 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationDN> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationDN> getConfiguration, Func<SmtpConfigurationDN> defaultSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
-				SmtpConfigurationLogic.Start(sb, dqm); 
+                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration); 
 
                 sb.Include<EmailMessageDN>();
 
@@ -395,7 +395,7 @@ namespace Signum.Engine.Mailing
 
             if (SmtpConfigurationLogic.DefaultSmtpConfiguration != null)
             {
-                var val = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
+                var val = SmtpConfigurationLogic.DefaultSmtpConfiguration();
                 if (val != null)
                     return val.GenerateSmtpClient();
             }

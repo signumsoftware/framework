@@ -201,7 +201,7 @@ namespace Signum.Engine.Mailing
                 {
                     Construct = _ => new EmailTemplateDN 
                     { 
-                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite(),
+                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration().ToLite(),
                         MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate(),
                     }
                 }.Register();

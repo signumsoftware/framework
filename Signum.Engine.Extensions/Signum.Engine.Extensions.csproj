@@ -113,8 +113,10 @@
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Cache\CachedTableConstructor.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
     <Compile Include="Cache\CachedTable.cs" />
+    <Compile Include="Cache\ToStringExpressionVisitor.cs" />
     <Compile Include="Chart\ChartColorLogic.cs" />
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
