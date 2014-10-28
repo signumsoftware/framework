@@ -133,19 +133,19 @@ namespace Signum.Engine.Basics
         }
 
 
-        public static event Action<DateTime> DeleteLogs;
+        public static event Action<DeleteLogParametersDN> DeleteLogs;
 
         public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
 
-        public static void DeleteLogsAndExceptions(DateTime limitDate)
+        public static void DeleteLogsAndExceptions(DeleteLogParametersDN parameters)
         {
             using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
             {
                 if(DeleteLogs != null)
                 {
-                    foreach (var action in DeleteLogs.GetInvocationList().Cast<Action<DateTime>>())
+                    foreach (var action in DeleteLogs.GetInvocationList().Cast<Action<DeleteLogParametersDN>>())
 	                {
-                        action(limitDate);
+                        action(parameters);
 	                }
                 }
 
@@ -166,7 +166,7 @@ namespace Signum.Engine.Basics
                 }
 
                 int deletedExceptions = Database.Query<ExceptionDN>()
-                    .Where(a => !a.Referenced && a.CreationDate < limitDate)
+                    .Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
                     .UnsafeDeleteChunks(); 
             }
         }

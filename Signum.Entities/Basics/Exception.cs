@@ -246,4 +246,36 @@ namespace Signum.Entities.Basics
             return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
         }
     }
+
+
+    [Serializable]
+    public class DeleteLogParametersDN : EmbeddedEntity
+    {
+        int deleteLogsWithMoreThan = 30 * 6;
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        public int DeleteLogsWithMoreThan
+        {
+            get { return deleteLogsWithMoreThan; }
+            set { Set(ref deleteLogsWithMoreThan, value); }
+        }
+
+        public DateTime DateLimit
+        {
+            get { return DateTime.Today.AddDays(-DeleteLogsWithMoreThan); }
+        }
+
+        int chunkSize = 1000;
+        public int ChunkSize
+        {
+            get { return chunkSize; }
+            set { Set(ref chunkSize, value); }
+        }
+
+        int maxChunks;
+        public int MaxChunks
+        {
+            get { return maxChunks; }
+            set { Set(ref maxChunks, value); }
+        }
+    }
 }

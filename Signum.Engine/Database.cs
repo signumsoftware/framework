@@ -797,32 +797,32 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000)
+        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxQueries = int.MaxValue)
          where T : IdentifiableEntity
         {
-            int total = 0;
-            int num;
-            do
+            int total = 0;            
+            for (int i = 0; i < maxQueries; i++)
             {
-                num = query.Take(chunkSize).UnsafeDelete();
+                int num = query.Take(chunkSize).UnsafeDelete();
                 total += num;
-            } while (num == chunkSize);
-
-            return num;
+                if (num < chunkSize)
+                    break;
+            }
+            return total;
         }
 
-        public static int UnsafeDeleteMListChunks<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, int chunkSize = 10000)
+        public static int UnsafeDeleteMListChunks<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, int chunkSize = 10000, int maxQueries = int.MaxValue)
             where E : IdentifiableEntity
         {
             int total = 0;
-            int num;
-            do
+            for (int i = 0; i < maxQueries; i++)
             {
-                num = mlistQuery.Take(chunkSize).UnsafeDeleteMList();
+                int num = mlistQuery.Take(chunkSize).UnsafeDeleteMList();
                 total += num;
-            } while (num == chunkSize);
-
-            return num;
+                if (num < chunkSize)
+                    break;
+            }
+            return total;
         }
         #endregion
 
