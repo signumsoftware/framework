@@ -1975,6 +1975,10 @@ namespace Signum.Engine.Linq
             {
                 return new[] { AssignColumn(colExpression, expression) };
             }
+            else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type == ((UnaryExpression)colExpression).Operand.Type.UnNullify())
+            {
+                return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
+            }
             else if (colExpression.Type.UnNullify() == typeof(PrimaryKey) && expression.Type.UnNullify() == typeof(PrimaryKey))
             {
                 return new[] { AssignColumn(SmartEqualizer.UnwrapPrimaryKey(colExpression), SmartEqualizer.UnwrapPrimaryKey(expression)) };

@@ -493,6 +493,13 @@ namespace Signum.Test.Environment
             set { Set(ref seconds, value); }
         }
 
+        int index;
+        public int Index
+        {
+            get { return index; }
+            set { Set(ref index, value); }
+        }
+
         static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
