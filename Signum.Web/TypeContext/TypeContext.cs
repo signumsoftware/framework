@@ -351,7 +351,9 @@ namespace Signum.Web
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeContext<T>((T)newValue, (TypeContext)Parent, Prefix, PropertyRoute);
+            var result = new TypeContext<T>((T)newValue, (TypeContext)Parent, null, PropertyRoute);
+            result.Prefix = this.Prefix;
+            return result;
         }
     }
     #endregion
