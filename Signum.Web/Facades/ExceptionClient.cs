@@ -24,6 +24,7 @@ namespace Signum.Web.Exceptions
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.AddSetting(new EntitySettings<ExceptionDN>() { PartialViewName = e => NavigationManager.ViewPrefix.Formato("Exception") });
+                Navigator.AddSetting(new EmbeddedEntitySettings<DeleteLogParametersDN>() { PartialViewName = e => NavigationManager.ViewPrefix.Formato("DeleteLogParameters") });
             }
         }
     }

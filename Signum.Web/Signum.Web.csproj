@@ -140,6 +140,11 @@
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
+    <Compile Include="Signum\Views\DeleteLogParameters.generated.cs">
+      <DependentUpon>DeleteLogParameters.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ValueLineBoxOptions.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
@@ -345,6 +350,11 @@
     <Content Include="Signum\Views\TypeView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>TypeView.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
+    <Content Include="Signum\Views\DeleteLogParameters.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DeleteLogParameters.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
     <None Include="Signum\Views\PaginationSelector.cshtml">

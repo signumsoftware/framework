@@ -29,7 +29,7 @@ namespace Signum.Engine
 
             SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).ToSimple();
 
-            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double).ToSimple().SplitGOs().Combine(Spacing.Double);
+            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double).PlainSqlSplitGOs().Combine(Spacing.Double);
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }

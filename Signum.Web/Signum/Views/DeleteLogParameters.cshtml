@@ -1,0 +1,7 @@
+﻿@using Signum.Entities.Basics
+@using (var e = Html.TypeContext<DeleteLogParametersDN>())
+{
+    @Html.ValueLine(e, f => f.DeleteLogsWithMoreThan)
+    @Html.ValueLine(e, f => f.ChunkSize)
+    @Html.ValueLine(e, f => f.MaxChunks)
+}
