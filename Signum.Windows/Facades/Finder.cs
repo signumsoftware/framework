@@ -254,7 +254,9 @@ namespace Signum.Windows
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
                 ShowHeader = options.ShowHeader,
-                Title = options.WindowTitle ?? SearchTitle(options.QueryName)
+                Title = options.WindowTitle ?? SearchTitle(options.QueryName),
+                QueryNameTitle = options.QueryNameTitle,
+                EntityTypeTitle = options.EntityTypeTitle,
             };
 
             if (options.InitializeSearchControl != null)

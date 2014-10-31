@@ -31,6 +31,22 @@ namespace Signum.Windows
             get { return (object)GetValue(QueryNameProperty); }
             set { SetValue(QueryNameProperty, value); }
         }
+
+        public static readonly DependencyProperty EntityTypeTitleProperty =
+           DependencyProperty.Register("EntityTypeTitle", typeof(string), typeof(SearchWindow), new PropertyMetadata(null));
+        public string EntityTypeTitle
+        {
+            get { return (string)GetValue(EntityTypeTitleProperty); }
+            set { SetValue(EntityTypeTitleProperty, value); }
+        }
+
+        public static readonly DependencyProperty QueryNameTitleProperty =
+            DependencyProperty.Register("QueryNameTitle", typeof(string), typeof(SearchWindow), new PropertyMetadata(null));
+        public string QueryNameTitle
+        {
+            get { return (string)GetValue(QueryNameTitleProperty); }
+            set { SetValue(QueryNameTitleProperty, value); }
+        }
     
         public static readonly DependencyProperty FilterOptionsProperty =
           DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
@@ -186,16 +202,16 @@ namespace Signum.Windows
 
         void searchControl_Loaded(object sender, RoutedEventArgs e)
         {
-            tbEntityType.Text = searchControl.EntityType.NicePluralName();
+            if (this.EntityTypeTitle == null)
+                this.EntityTypeTitle = searchControl.EntityType.NicePluralName();
 
-            string niceQueryName = QueryUtils.GetNiceName(QueryName);
+            if (this.QueryNameTitle == null)
+                this.QueryNameTitle = QueryUtils.GetNiceName(QueryName);
 
-            if (niceQueryName.StartsWith(tbEntityType.Text))
-                niceQueryName = niceQueryName.Substring(tbEntityType.Text.Length).Trim();
+            if (this.QueryNameTitle.StartsWith(this.EntityTypeTitle))
+                this.QueryNameTitle = this.QueryNameTitle.Substring(this.EntityTypeTitle.Length).Trim();
             else
-                niceQueryName = "- " + niceQueryName;
-
-            tbQueryName.Text = niceQueryName;
+                this.QueryNameTitle = "- " + this.QueryNameTitle;
 
             AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
         }

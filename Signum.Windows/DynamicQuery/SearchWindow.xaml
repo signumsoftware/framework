@@ -25,8 +25,8 @@
         </Grid.RowDefinitions>
         <Border BorderThickness="0,0,0,1" Padding="2" Background="{StaticResource EntityTitleBackgroundGradient}">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
-                <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
-                <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
+                <TextBox x:Name="tbEntityType" Text="{Binding EntityTypeTitle, ElementName=me}" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
+                <TextBox x:Name="tbQueryName" Text="{Binding QueryNameTitle, ElementName=me}" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
             </StackPanel>
         </Border>
         <m:SearchControl x:Name="searchControl"
