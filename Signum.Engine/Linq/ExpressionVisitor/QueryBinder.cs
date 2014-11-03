@@ -1979,6 +1979,10 @@ namespace Signum.Engine.Linq
             {
                 return new[] { AssignColumn(SmartEqualizer.UnwrapPrimaryKey(colExpression), SmartEqualizer.UnwrapPrimaryKey(expression)) };
             }
+            else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type == ((UnaryExpression)colExpression).Operand.Type.UnNullify())
+            {
+                return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
+            }
             else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type.UnNullify().IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression)
             {
                 return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
