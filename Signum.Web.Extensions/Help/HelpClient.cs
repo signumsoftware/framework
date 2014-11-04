@@ -20,6 +20,9 @@ using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Engine.WikiMarkup;
 using Signum.Entities.Basics;
+using Signum.Web.Omnibox;
+using Signum.Entities.Omnibox;
+using Signum.Entities.Help;
 #endregion
 
 namespace Signum.Web.Help
@@ -38,73 +41,61 @@ namespace Signum.Web.Help
         public static string SearchResults = ViewPrefix.Formato("Search");
 
         //controls
-        public static string Menu = ViewPrefix.Formato("Menu");
+        public static string Menu = ViewPrefix.Formato("Buttons");
+        public static string MiniMenu = ViewPrefix.Formato("MiniMenu");
         public static string ViewEntityPropertyUrl = ViewPrefix.Formato("EntityProperty");
         public static string NamespaceControlUrl = ViewPrefix.Formato("NamespaceControl");
 
-        public static void Start(string wikiUrl, string imagesFolder)
+        public static void Start(string imagesFolder)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                WikiUrl = wikiUrl;
                 ImagesFolder = imagesFolder;
 
-                Navigator.RegisterArea(typeof(HelpClient)); 
+                HelpUrls.EntityUrl = t => RouteHelper.New().Action((HelpController c) => c.ViewEntity(Navigator.ResolveWebTypeName(t)));
+                HelpUrls.NamespaceUrl = ns => RouteHelper.New().Action((HelpController c) => c.ViewNamespace(ns));
+                HelpUrls.AppendixUrl = ap => RouteHelper.New().Action((HelpController c) => c.ViewAppendix(ap));
+
+                Navigator.RegisterArea(typeof(HelpClient));
+
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<EntityHelpDN>(),
+                    new EntitySettings<QueryHelpDN>(),
+                    new EntitySettings<AppendixHelpDN>(),
+                    new EntitySettings<NamespaceHelpDN>(),
+                    new EmbeddedEntitySettings<PropertyRouteHelpDN>(),
+                    new EmbeddedEntitySettings<OperationHelpDN>(),
+                    new EmbeddedEntitySettings<QueryColumnHelpDN>(),
+                });
+                Navigator.EmbeddedEntitySettings<PropertyRouteHelpDN>().MappingDefault.AsEntityMapping()
+                    .SetProperty(a => a.Property, ctx =>
+                    {
+                        var type = ctx.FindParent<EntityHelpDN>().Value.Type.ToType();
+                        return PropertyRoute.Parse(type, ctx.Input).ToPropertyRouteDN();
+                    });
 
                 RegisterHelpRoutes();
 
                 DefaultWikiSettings = new WikiSettings(true);
                 DefaultWikiSettings.TokenParser += TokenParser;
-                DefaultWikiSettings.TokenParser += s =>
-                {
-                    try
-                    {
-                        WikiLink wl = LinkParser(s);
-                        if (wl != null) 
-                            return wl.ToHtmlString();
-                    }
-                    catch (Exception)
-                    {
-                        return new WikiLink("#", s, "unavailable").ToHtmlString();
-                    }
-                    return null;
-                };
-
+                DefaultWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.ToHtmlString());
                 DefaultWikiSettings.TokenParser += ProcessImages;
 
                 NoLinkWikiSettings = new WikiSettings(false) { LineBreaks = false };
                 NoLinkWikiSettings.TokenParser += TokenParser;
-                NoLinkWikiSettings.TokenParser += s =>
-                {
-                    try
-                    {
-                        WikiLink wl = LinkParser(s);
-                        if (wl != null) return wl.Text;
-                    }
-                    catch (Exception)
-                    {
-                        return new WikiLink("#", s, "unavailable").ToHtmlString();
-                    }
-                    return null;
-                };
+                NoLinkWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.ToHtmlString());
                 NoLinkWikiSettings.TokenParser += RemoveImages;
             }
         }
 
         private static void RegisterHelpRoutes()
         {
-            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}/Save", new { controller = "Help", action = "SaveAppendix"});
-            RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace" });
-            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix"});
+            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix" });
             RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace" });
-            RouteTable.Routes.MapRoute(null, "Help/ViewTodo", new { controller = "Help", action = "ViewTodo" });
-            RouteTable.Routes.MapRoute(null, "Help/Search", new { controller = "Help", action = "Search" });
-            RouteTable.Routes.MapRoute(null, "Help", new { controller = "Help", action = "Index", });
-            RouteTable.Routes.MapRoute(null, "Help/{entity}/Save", new { controller = "Help", action = "SaveEntity" });
-            RouteTable.Routes.MapRoute(null, "Help/{entity}", new { controller = "Help", action = "ViewEntity", });
+            RouteTable.Routes.MapRoute(null, "Help/Entity/{entity}", new { controller = "Help", action = "ViewEntity", });
         }
 
-        public static string WikiUrl;
         public static string ImagesFolder;
 
         public class WikiLink
@@ -173,7 +164,7 @@ namespace Signum.Web.Help
                     case WikiFormat.EntityLink:
                         Type t = TypeLogic.TryGetType(link);
                         return new WikiLink(
-                            HelpLogic.EntityUrl(t),
+                            HelpUrls.EntityUrl(t),
                             text.HasText() ? text : t.NiceName());
 
                     case WikiFormat.Hyperlink:
@@ -186,7 +177,7 @@ namespace Signum.Web.Help
                         if (types.Count == 1)
                         {
                             return new WikiLink(
-                                HelpLogic.OperationUrl(types[0], operation),
+                                HelpUrls.OperationUrl(types[0], operation),
                                 text.HasText() ? text : operation.NiceToString());
                         }
                         else
@@ -195,7 +186,7 @@ namespace Signum.Web.Help
                             {
                                 Links = types.Select(currentType =>
                                     new WikiLink(
-                                        HelpLogic.OperationUrl(currentType, operation),
+                                        HelpUrls.OperationUrl(currentType, operation),
                                         currentType.NiceName(), operation.NiceToString())).ToList()
                             };
                         }
@@ -204,10 +195,13 @@ namespace Signum.Web.Help
                         PropertyRoute route = PropertyRoute.Parse
                             (TypeLogic.TryGetType(link.Before('.')),
                             link.After('.'));
-                        //TODO: NiceToString de la propiedad
-                        return new WikiLink(
-                            HelpLogic.PropertyUrl(route),
-                            route.Properties.ToString(p => p.NiceName(), "-"));
+
+                        while (route.PropertyRouteType == PropertyRouteType.LiteEntity || 
+                               route.PropertyRouteType == PropertyRouteType.Mixin || 
+                               route.PropertyRouteType == PropertyRouteType.MListItems)
+                            route = route.Parent;
+
+                        return new WikiLink(HelpUrls.PropertyUrl(route), route.PropertyInfo.NiceName());
 
                     case WikiFormat.QueryLink:
                         object o = QueryLogic.TryToQueryName(link);
@@ -215,26 +209,30 @@ namespace Signum.Web.Help
                         {
                             Enum query = (Enum)o;
                             return new WikiLink(
-                                HelpLogic.QueryUrl(query),
+                                HelpUrls.QueryUrl(query),
                                 text.HasText() ? text : QueryUtils.GetNiceName(query));
                         }
                         else
                         {
                             Type query = (Type)o;
                             return new WikiLink(
-                                HelpLogic.QueryUrl(query),
+                                HelpUrls.QueryUrl(query),
                                 text.HasText() ? text : QueryUtils.GetNiceName(query));
                         }
 
-                    case WikiFormat.WikiLink:
-                        return new WikiLink(WikiUrl + link, text.HasText() ? text : link);
-
                     case WikiFormat.NamespaceLink:
-                        NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
+                        NamespaceHelp nameSpace = HelpLogic.GetNamespaceHelp(link);
                         return new WikiLink(
-                            HelpLogic.BaseUrl + "/Namespace/" + link,
+                            HelpUrls.NamespaceUrl(link),
                             text.HasText() ? text : link,
                             nameSpace != null ? "" : "unavailable");
+
+                    case WikiFormat.AppendixLink:
+                        AppendixHelp appendix = HelpLogic.GetAppendixHelp(link);
+                        return new WikiLink(
+                            HelpUrls.AppendixUrl(link),
+                            text.HasText() ? text : link,
+                            appendix != null ? "" : "unavailable");
                 }
             }
             return null;
@@ -274,6 +272,45 @@ namespace Signum.Web.Help
                 return "";
             }
             return null;
+        }
+    }
+
+
+    public class HelpOmniboxProvider : OmniboxClient.OmniboxProvider<HelpModuleOmniboxResult>
+    {
+        public override OmniboxResultGenerator<HelpModuleOmniboxResult> CreateGenerator()
+        {
+            return new HelpModuleOmniboxResultGenerator();
+        }
+
+        public override MvcHtmlString RenderHtml(HelpModuleOmniboxResult result)
+        {
+            MvcHtmlString html = result.KeywordMatch.ToHtml();
+
+            if (result.SecondMatch != null)
+                html = html.Concat(" {0}".FormatHtml(result.SecondMatch.ToHtml()));
+            else
+                html = html.Concat(this.ColoredSpan(typeof(TypeDN).NiceName() + "...", "lightgray"));
+
+            html = Icon().Concat(html);
+
+            return html;
+        }
+
+        public override string GetUrl(HelpModuleOmniboxResult result)
+        {
+            if (result.IsIndex)
+                return RouteHelper.New().Action((HelpController c) => c.Index());
+
+            if (result.Type != null)
+                return RouteHelper.New().Action((HelpController c) => c.ViewEntity(Navigator.ResolveWebTypeName(result.Type)));
+
+            return null;
+        }
+
+        public override MvcHtmlString Icon()
+        {
+            return ColoredGlyphicon("glyphicon-book", "DarkViolet");
         }
     }
 }

@@ -1,0 +1,76 @@
+﻿@using Signum.Engine.Help
+@using Signum.Entities.Help
+@using Signum.Web.Help
+
+@{
+    var ns = (string)ViewData["namespace"];
+    var type = (Type)ViewData["type"];
+    var appendix = (string)ViewData["appendix"];
+
+    var namespaces = HelpLogic.GetOrCreateNamespacesHelp();
+    var appendices = HelpLogic.GetOrCreateAppendicesHelp();
+}
+<h3><a href="@Url.Action((HelpController h) => h.Index())">@HelpMessage.Help.NiceToString()</a></h3>
+<h4>@HelpMessage.Entities.NiceToString()</h4>
+<ul>
+    @foreach (var item in namespaces.Values)
+    {
+        <li>
+            @if (item.Namespace != ns)
+            {
+                <a href="@Url.Action((HelpController h) => h.ViewNamespace(item.Namespace))">
+                    @item.Title</a>
+                if (item.Before != null)
+                {
+                <small>@HelpMessage.In0.NiceToString(item.Before)</small>
+                }
+            }
+            else
+            {
+                @item.Title
+                if (item.Before != null)
+                {
+                <small>@HelpMessage.In0.NiceToString(item.Before)</small>
+                }
+            }
+
+            @if (item.Namespace == ns || type != null && item.Namespace == type.Namespace)
+            {
+                <ul>
+                    @foreach (Type t in HelpLogic.AllTypes().Where(t => t.Namespace == item.Namespace))
+                    {
+                        if (t != type)
+                        {
+                        <li><a href="@HelpUrls.EntityUrl(t)">@t.NiceName()</a></li>
+                        }
+                        else
+                        {
+                        <li>@t.NiceName()</li>
+                        }
+                    }
+                </ul>
+            }
+        </li>
+    }
+</ul>
+<h4>@HelpMessage.Appendices.NiceToString() <a href="@Url.Action((HelpController c) => c.NewAppendix())">+</a></h4>
+<ul>
+    @foreach (var item in appendices.Values)
+    {
+        if (item.UniqueName != appendix)
+        {
+        <li><a href="@Url.Action((HelpController h) => h.ViewAppendix(item.UniqueName))">
+            @item.Title</a>
+        </li>
+        }
+        else
+        {
+        <li>
+            @item.Title
+        </li>
+        }
+    }
+</ul>
+
+
+

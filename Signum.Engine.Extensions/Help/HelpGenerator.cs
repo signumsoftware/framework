@@ -23,7 +23,7 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.TryGetPropertyValidator(pr).Validators.CommaAnd(v => v.HelpMessage);
+            string validations = Validator.TryGetPropertyValidator(pr).Try(vs => vs.Validators.CommaAnd(v => v.HelpMessage));
 
             if (validations.HasText())
                 validations = HelpMessage.Should.NiceToString() + validations;
@@ -54,23 +54,28 @@ namespace Signum.Engine.Help
                 {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
 
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
                 {   
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
                 }
                 else
                 {
                     string valueType = ValueType(pr.Add("Item"));
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), valueType) + validations;
                 }
+            }
+            else if (pr.Type.UnNullify() == typeof(PrimaryKey))
+            {
+                var vt = ValueType(PrimaryKey.Type(pr.RootType), null, null);
+                return HelpMessage._0IsThePrimaryKeyOf1OfType2.NiceToString().Formato(pr.PropertyInfo.NiceName(), pr.RootType.NiceName(), vt) + validations;
             }
             else
             {
@@ -104,7 +109,7 @@ namespace Signum.Engine.Help
             Type cleanType = Nullable.GetUnderlyingType(type) ?? type;
 
             string typeName =
-                    cleanType.IsEnum ? HelpMessage.ValueLike0.NiceToString().Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
+                    cleanType.IsEnum ? HelpMessage.ValueLike0.NiceToString(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
                     cleanType == typeof(decimal) && unit != null && unit == "€" ? HelpMessage.Amount.NiceToString() :
                     cleanType == typeof(DateTime) && format == "d" ? HelpMessage.Date.NiceToString() :
                     NaturalTypeDescription(cleanType);
@@ -179,7 +184,7 @@ namespace Signum.Engine.Help
                     operationInfo.OperationSymbol.NiceToString(),
                     operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), 
                     type.NiceName());
-                case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString().Formato(type.NiceName());
+                case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
                 case OperationType.Constructor: return
                     HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName());
                 case OperationType.ConstructorFrom: return
@@ -197,7 +202,7 @@ namespace Signum.Engine.Help
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumnFactory();
 
-            return HelpMessage.QueryOf0.NiceToString().Formato(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
+            return HelpMessage.QueryOf0.NiceToString(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -205,11 +210,11 @@ namespace Signum.Engine.Help
             string typeDesc = QueryColumnType(kvp);
 
             if (kvp.PropertyRoutes != null)
-                return HelpMessage._0IsA1AndShows2.NiceToString().Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
+                return HelpMessage._0IsA1AndShows2.NiceToString(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
                     pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
-                    HelpMessage.TheProperty0.NiceToString().Formato(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
+                    HelpMessage.TheProperty0.NiceToString(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
             else
-                return HelpMessage._0IsACalculated1.NiceToString().Formato(kvp.DisplayName(), typeDesc);
+                return HelpMessage._0IsACalculated1.NiceToString(kvp.DisplayName(), typeDesc);
         }
 
         private static string QueryColumnType(ColumnDescriptionFactory kvp)
@@ -227,6 +232,37 @@ namespace Signum.Engine.Help
             else
             {
                 return ValueType(kvp.Type, kvp.Format, kvp.Unit);
+            }
+        }
+
+        internal static string GetEntityHelp(Type type)
+        {
+            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).Formato(type.NiceName(), type.BaseType.NiceName());
+
+            string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type)));
+
+            return typeIs + ". " + kind + "."; 
+        }
+
+    
+
+        private static string GetEntityKindMessage(EntityKind entityKind, EntityData entityData)
+        {
+            var data = 
+                entityData == EntityData.Master ? HelpKindMessage.AndIsRarelyCreatedOrModified.NiceToString() : 
+                HelpKindMessage.AndAreFrequentlyCreatedOrModified.NiceToString();
+
+            switch (entityKind)
+            {
+                case EntityKind.SystemString: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + data + HelpKindMessage.AutomaticallyByTheSystem.NiceToString();
+                case EntityKind.System: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + data + HelpKindMessage.AutomaticallyByTheSystem.NiceToString();
+                case EntityKind.Relational: return HelpKindMessage.RelateOtherEntities.NiceToString() + data;
+                case EntityKind.String: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + data;
+                case EntityKind.Shared: return HelpKindMessage.StoreInformationSharedByOtherEntities.NiceToString() + data;
+                case EntityKind.Main: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + data;
+                case EntityKind.Part: return HelpKindMessage.StorePartOfTheInformationOfOtherEntity.NiceToString() + data;
+                case EntityKind.SharedPart: return HelpKindMessage.StorePartOfTheInformationOfOtherEntity.NiceToString() + data;
+                default: throw new InvalidOperationException("Unexpected {0}".Formato(entityKind));
             }
         }
     }

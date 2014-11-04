@@ -1,31 +1,27 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
 export function edit() {
-    $(".editable").each(function () {
-        var self = $(this);
-        self.bind('focus', function (event) {
-            $(this).addClass("modified");
-        });
+    $(".editable").show();
+    $(".shortcut").show();
+    $(".wiki").hide();
 
-        $("dd").addClass("editing");
-        $("#entityName").addClass("editing");
-    });
-
-    $(".shortcut").css("display", "block");
-    $("#edit-action").hide();
-    $("#syntax-action").show();
-    $("#save-action").show();
+    "edit-action".get().hide();
+    "syntax-action".get().show();
+    "save-action".get().show();
 }
 
-export function save() {
-    $("#save-action").html("Guardando...");
+function save() {
+    "save-action".get().html("save-action".get().html() + "...");
+
     $.ajax({
         url: (<HTMLFormElement>document.getElementById("form-save")).action,
         async: false,
-        data: $("form#form-save .modified").serialize(),
-        success: function (msg) {
-            location.reload(true);
-            $("#saving-error").hide();
+        data: $("form#form-save :input").serializeObject(),
+        success: function (result) {
+            if (!result) {
+                location.reload(true);
+                $("#saving-error").hide();
+            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             var msg;
@@ -43,23 +39,33 @@ export function save() {
     });
 }
 
-once("SF.Help", () =>
+function hashSelected() {
+    $(".hash-selected").removeClass("hash-selected");
+
+    if (window.location.hash) {
+        $(window.location.hash).addClass("hash-selected"); 
+    }
+
+  
+}
+
+export function init() {
     $(function () {
         //$(".shortcut").click(function () { $.copy($(this).html()); });
 
-        if (typeof window.location.hash != 'undefined' && window.location.hash != '') {
-            window.location.hash += "-editor";
+        hashSelected();
 
-            var $dd = $(window.location.hash).parents("dd").first();
+        $(window).on('hashchange', function () {
+            hashSelected();
+        });
 
-            $dd.css('background-color', '#ccffaa');
-            $dd.prev().css('background-color', '#ccffaa');
+        "save-action".get().click(save);
+        "edit-action".get().click(edit);
 
-        }
-
-        $("#syntax-action").click(function () {
+        "syntax-action".get().click(function () {
             $("#syntax-list").slideToggle("slow");
             $(this).toggleClass("active");
             return null;
         });
-    }));
+    });
+}

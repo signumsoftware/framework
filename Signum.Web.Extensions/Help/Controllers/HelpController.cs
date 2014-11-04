@@ -18,6 +18,7 @@ using Signum.Engine.WikiMarkup;
 using Signum.Engine.Basics;
 using Signum.Entities.Help;
 using Signum.Entities;
+using Signum.Engine.Operations;
 
 namespace Signum.Web.Help
 {
@@ -27,66 +28,129 @@ namespace Signum.Web.Help
         {
             return MvcHtmlString.Create(settings.WikiParse(text ?? "").Replace("\n", "<p>")); 
         }
-
-        
     }
 
     public class HelpController : Controller
     {
         public ActionResult Index()
         {
-            NamespaceModel model = new NamespaceModel("", HelpLogic.AllTypes());
-            ViewData["appendices"] = HelpLogic.GetAppendices();
-            return View(HelpClient.IndexUrl, model);
+            return View(HelpClient.IndexUrl, HelpLogic.AllTypes().OrderBy(a=>a.Namespace).GroupToDictionary(a=>a.Namespace));
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewEntity(string entity)
         {
             Type type = TypeLogic.GetType(entity);
-            List<Type> relatedTypes = (from t in HelpLogic.AllTypes()
-                                       where t.Namespace == type.Namespace
-                                       orderby t.Name
-                                       select t).ToList();
 
-            ViewData["nameSpace"] = relatedTypes;
-
-            //Buscamos en qu� fichero se encuentra
             EntityHelp eh = HelpLogic.GetEntityHelp(type);
 
             return View(HelpClient.ViewEntityUrl, eh);
         }
 
+        [HttpPost]
+        public RedirectResult SaveEntity()
+        {
+            var ctx = this.ExtractEntity<EntityHelpDN>().ApplyChanges(this);
+
+            foreach (var query in ctx.Value.Queries)
+            {
+                query.Columns.RemoveAll(a => !a.Description.HasText());
+
+                if (query.Columns.IsEmpty() && !query.Description.HasText())
+                {
+                    if (!query.IsNew)
+                        query.Delete();
+                }
+                else
+                    query.Execute(QueryHelpOperation.Save);
+            }
+
+            var entity = ctx.Value;
+            entity.Properties.RemoveAll(a => !a.Description.HasText());
+            entity.Operations.RemoveAll(a => !a.Description.HasText());
+            entity.Queries.Clear();
+
+            if (entity.Operations.IsEmpty() && entity.Properties.IsEmpty() && !entity.Description.HasText())
+            {
+                if (!entity.IsNew)
+                    entity.Delete();
+            }
+            else
+                entity.Execute(EntityHelpOperation.Save);
+
+            return null;
+        }
+
+
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewNamespace(string @namespace)
         {
-            NamespaceHelp model = HelpLogic.GetNamespace(@namespace);
-
-            List<Type> relatedTypes = (from t in HelpLogic.AllTypes()
-                                       where t.Namespace == model.Name
-                                       orderby t.Name
-                                       select t).ToList();
-
-            ViewData["nameSpace"] = relatedTypes;
+            NamespaceHelp model = HelpLogic.GetNamespaceHelp(@namespace);
 
             return View(HelpClient.ViewNamespaceUrl, model);
+        }
+
+
+        [HttpPost]
+        public ContentResult SaveNamespace()
+        {
+            var ctx = this.ExtractEntity<NamespaceHelpDN>().ApplyChanges(this);
+
+            var entity = ctx.Value;
+
+            if (!entity.Title.HasText() && !entity.Description.HasText())
+            {
+                if (!entity.IsNew)
+                    entity.Delete();
+            }
+            else
+                entity.Execute(NamespaceHelpOperation.Save);
+
+            return null;
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewAppendix(string appendix)
         {
-            AppendixHelp model = HelpLogic.GetAppendix(appendix);
-
-            var index = HelpLogic.State.Value.Appendices.Keys.IndexOf(appendix);
-            var prev = HelpLogic.State.Value.Appendices.Keys.ElementAtOrDefault(index - 1);
-            var next = HelpLogic.State.Value.Appendices.Keys.ElementAtOrDefault(index + 1);
-
-            if (prev != null)
-                ViewData["previousAppendix"] = HelpLogic.State.Value.Appendices[prev];
-            if (next != null)
-                ViewData["nextAppendix"] = HelpLogic.State.Value.Appendices[next];
+            AppendixHelp model = HelpLogic.GetAppendixHelp(appendix);
 
             return View(HelpClient.ViewAppendixUrl, model);
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult NewAppendix()
+        {
+            var culture = HelpLogic.GetCulture();
+            AppendixHelp model = new AppendixHelp(culture, new AppendixHelpDN { Culture = culture.ToCultureInfoDN() });
+
+            return View(HelpClient.ViewAppendixUrl, model);
+        }
+
+        [HttpPost]
+        public ActionResult SaveAppendix()
+        {
+            var ctx = this.ExtractEntity<AppendixHelpDN>().ApplyChanges(this);
+
+            var entity = ctx.Value;
+
+            if (!entity.Title.HasText() && !entity.Description.HasText())
+            {
+                if (!entity.IsNew)
+                    entity.Delete();
+
+                return JsonAction.RedirectAjax(RouteHelper.New().Action((HelpController a) => a.Index()));
+            }
+            else
+            {
+                var wasNew = entity.IsNew;
+
+                entity.Execute(AppendixHelpOperation.Save);
+
+
+                if (wasNew)
+                    return JsonAction.RedirectAjax(RouteHelper.New().Action((HelpController a) => a.ViewAppendix(entity.UniqueName)));
+                return null;
+            }
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -95,19 +159,19 @@ namespace Signum.Web.Help
             Stopwatch sp = new Stopwatch();
             sp.Start();
             Regex regex = new Regex(Regex.Escape(q.RemoveDiacritics()), RegexOptions.IgnoreCase);
-            List<List<SearchResult>> results = (from eh in HelpLogic.GetEntitiesHelp()
-                                                select eh.Value.Search(regex).ToList() into l
+            List<List<SearchResult>> results = (from eh in HelpLogic.GetOrCreateEntityHelp().Values
+                                                select eh.Search(regex).ToList() into l
                                                 where l.Any()
                                                 select l).ToList();
 
             //We add the appendices
-            results.AddRange(from a in HelpLogic.GetAppendices()
+            results.AddRange(from a in HelpLogic.GetOrCreateAppendicesHelp().Values
                              let result = a.Search(regex)
                              where result != null
                              select new List<SearchResult> { result });
 
             //We add the appendices
-            results.AddRange(from a in HelpLogic.GetNamespaces()
+            results.AddRange(from a in HelpLogic.GetOrCreateNamespacesHelp().Values
                              let result = a.Search(regex)
                              where result != null
                              select new List<SearchResult> { result });
@@ -118,149 +182,6 @@ namespace Signum.Web.Help
             ViewData["time"] = sp.ElapsedMilliseconds;
             ViewData[ViewDataKeys.Title] = q + " - " + HelpMessage.Buscador.NiceToString();
             return View(HelpClient.SearchResults, results);
-        }
-
-
-        [HttpPost]
-        public ContentResult SaveEntity(string entity)
-        {
-            bool entityModified = false;
-            EntityHelp eh = HelpLogic.GetEntityHelp(TypeLogic.GetType(entity));
-            Dictionary<string, QueryHelp> processedQueryHelp = new Dictionary<string, QueryHelp>();
-            foreach (string key in Request.Form.Keys)
-            {
-                string subKey = (key.StartsWith("p-") || key.StartsWith("o-") || key.StartsWith("q-") || key.StartsWith("c-")) ? key.Substring(2) : key;
-
-                if (key.StartsWith("p-"))
-                {
-                    subKey = subKey.Replace("_", "/");
-                    if (!eh.Properties.ContainsKey(subKey)) throw new ApplicationException(HelpMessage.Property0NotExistsInType1.NiceToString().Formato(subKey, entity));
-                    eh.Properties[subKey].UserDescription = Request.Form[key].ToString();
-                    entityModified = true;
-                }
-                else if (key.StartsWith("o-"))
-                {
-                    subKey = subKey.Replace("_", ".");
-                    OperationSymbol e = eh.Operations.Keys.Where(k => k.Key.Equals(subKey)).SingleEx();
-                    eh.Operations[e].UserDescription = Request.Form[key].ToString();
-                    entityModified = true;
-                }
-                else if (key.StartsWith("q-"))
-                {
-                    subKey = subKey.Replace("_", ".");
-                    QueryHelp qh = processedQueryHelp.ContainsKey(subKey) ? processedQueryHelp[subKey] : HelpLogic.GetQueryHelp(subKey);
-                    qh.UserDescription = Request.Form[key].ToString();
-                    processedQueryHelp[subKey] = qh;
-                }
-                else if (key.StartsWith("c-"))  //query-column
-                {
-                    subKey = subKey.Replace("_", ".");
-                    string query = subKey.Substring(0, subKey.LastIndexOf("."));
-                    string column = subKey.Substring(subKey.LastIndexOf(".") + 1);
-                    QueryHelp qh = processedQueryHelp.ContainsKey(query) ? processedQueryHelp[query] : HelpLogic.GetQueryHelp(query);
-                    qh.Columns.Where(c=>c.Key == column).SingleEx().Value.UserDescription = Request.Form[key].ToString();
-                    processedQueryHelp[subKey] = qh;
-                }
-                else if (key.Equals("description"))
-                {
-                    eh.Description = Request.Form[key].ToString();
-                    entityModified = true;
-                }
-                else throw new ApplicationException(HelpMessage.Key0NotFound.NiceToString().Formato(Request.Form[key].ToString()));
-            }
-
-            //Save it to file
-            if (entityModified) eh.Save();
-            foreach (var qh in processedQueryHelp.Values)
-            {
-                qh.Save();
-                HelpLogic.ReloadDocumentQuery(qh);
-            }
-
-            //Load the file again
-            if (entityModified) HelpLogic.ReloadDocumentEntity(eh);
-
-            return Content("");
-        }
-
-        [HttpPost]
-        public ContentResult SaveNamespace(string @namespace)
-        {
-            NamespaceHelp nh = HelpLogic.GetNamespace(@namespace);
-            foreach (string key in Request.Form.Keys)
-            {
-                if (key.Equals("description"))
-                    nh.Description = Request.Form[key].ToString();
-                else throw new ApplicationException(HelpMessage.Key0NotFound.NiceToString().Formato(Request.Form[key].ToString()));
-            }
-            nh.Save();            
-            HelpLogic.ReloadDocumentNamespace(nh);
-            return Content("");
-        }
-
-        [HttpPost]
-        public ContentResult SaveAppendix(string appendix)
-        {
-            AppendixHelp ah = HelpLogic.GetAppendix(appendix);
-            foreach (string key in Request.Form.Keys)
-            {
-                if (key.Equals("description"))
-                    ah.Description = Request.Form[key].ToString();
-                else if (key.Equals("title"))
-                    ah.Title = Request.Form[key].ToString();
-                else throw new ApplicationException(HelpMessage.Key0NotFound.NiceToString().Formato(Request.Form[key].ToString()));
-            }
-            ah.Save();
-            HelpLogic.ReloadDocumentAppendix(ah);
-            return Content("");
-        }
-
-        [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult ViewTodo()
-        {
-            int count = HelpLogic.GetEntitiesHelp().Count();
-
-            List<EntityHelp> ehs = (from eh in HelpLogic.GetEntitiesHelp()
-                                    where !eh.Value.Description.HasText()
-                                    orderby eh.Value.Type.Name
-                                    select eh.Value).ToList();
-
-
-         /*   Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>> unavailable = new Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>>();
-            foreach (EntityHelp eh in HelpLogic.GetEntitiesHelp().Select(d=>d.Value))
-            {
-                HashSet<WikiParserExtensions.WikiLink> wikiLinks = new HashSet<WikiParserExtensions.WikiLink>();
-                if (WikiParserExtensions.WikiLinks(eh.Description).Any(wl => wl.Class == "unavailable"))
-                    wikiLinks.AddRange(WikiParserExtensions.WikiLinks(eh.Description).Where(wl => wl.Class == "unavailable"));
-
-                if (eh.Properties!=null)
-                    foreach (var p in eh.Properties)
-                    {
-                        if (WikiParserExtensions.WikiLinks(p.Value.Info + "." + p.Value.UserDescription).Any(wl => wl.Class == "unavailable"))
-                            wikiLinks.AddRange(WikiParserExtensions.WikiLinks(p.Value.Info + "." + p.Value.UserDescription).Where(wl => wl.Class == "unavailable"));
-                    }
-
-                if (eh.Queries != null)
-                    foreach (var q in eh.Queries)
-                    {
-                        if (WikiParserExtensions.WikiLinks(q.Value.Info + "." + q.Value.UserDescription).Any(wl => wl.Class == "unavailable"))
-                            wikiLinks.AddRange(WikiParserExtensions.WikiLinks(q.Value.Info + "." + q.Value.UserDescription).Where(wl => wl.Class == "unavailable"));
-                    }
-
-                if (eh.Operations != null)
-                    foreach (var o in eh.Operations)
-                    {
-                        if (WikiParserExtensions.WikiLinks(o.Value.Info + "." + o.Value.UserDescription).Any(wl => wl.Class == "unavailable"))
-                            wikiLinks.AddRange(WikiParserExtensions.WikiLinks(o.Value.Info + "." + o.Value.UserDescription).Where(wl => wl.Class == "unavailable"));
-                    }
-
-                if (!wikiLinks.Empty())
-                    unavailable[eh] = wikiLinks;
-            }
-
-            ViewData["EntityCount"] = count;
-            ViewData["UnavailableLinks"] = unavailable;*/
-            return View(HelpClient.TodoUrl, ehs);
         }
     }
 }

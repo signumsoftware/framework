@@ -113,8 +113,10 @@
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Cache\CachedTableConstructor.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
     <Compile Include="Cache\CachedTable.cs" />
+    <Compile Include="Cache\ToStringExpressionVisitor.cs" />
     <Compile Include="Chart\ChartColorLogic.cs" />
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
@@ -130,14 +132,14 @@
     <Compile Include="Disconnected\ExportManager.cs" />
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
-    <Compile Include="Help\AppendixHelp.cs" />
-    <Compile Include="Help\QueryHelp.cs" />
+    <Compile Include="Help\HelpSearch.cs" />
+    <Compile Include="Help\HelpUrls.cs" />
+    <Compile Include="Help\HelpXml.cs" />
     <Compile Include="Help\EntityHelp.cs" />
     <Compile Include="Help\HelpGenerator.cs" />
     <Compile Include="Help\HelpLogic.cs" />
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
-    <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />

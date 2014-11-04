@@ -26,6 +26,7 @@ export function initialize(omniboxId: string, url: string) {
                 });
             });
         },
+        items: 'all',
         sorter: items => items,
         matcher: item => true,
         highlighter: item => item.label,

@@ -1,340 +1,154 @@
-﻿html, body, div, ul, ol, li, dl, dt, dd, h1, h2, h3, h4, h5, h6, pre, form, p, blockquote, fieldset, input {
-margin:0;
-padding:0;
-}
-.clearall 
+﻿ol.responsive-columns
 {
-    clear:both;
+    -webkit-column-count: 1;
+    -moz-column-count: 1;
+    column-count: 1;
+    -webkit-column-gap: 20px;
+    -moz-column-gap: 20px;
+    column-gap: 20px;
 }
-.help_left
+
+@media (min-width: 768px)
 {
-    float: left;
-    width: 75%;   
-    padding: 0 1%; 
+    ol.responsive-columns
+    {
+        -webkit-column-count: 2;
+        -moz-column-count: 2;
+        column-count: 2;
+    }
 }
-.help_right
+
+@media (min-width: 992px)
 {
-    float: right;
-    width: 23%;    
+    ol.responsive-columns
+    {
+        -webkit-column-count: 3;
+        -moz-column-count: 3;
+        column-count: 3;
+    }
 }
 
-ul li{ margin-left: 10px; list-style-type:none;}
-ul li.content{margin-left:0;}
-
-td{ vertical-align:top}
-
-html {background-color:#ECECEC}
-
-h1, h2, h3, h4, h5, h6 {
-color:#000;
-}
-
-#main h1 {
--x-system-font:none;
-font-family:"Myriad Pro","Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;
-font-size:2.2em;
-font-size-adjust:none;
-font-stretch:normal;
-font-style:normal;
-font-variant:normal;
-font-weight:normal;
-line-height:1em;
-margin-bottom:0.5em;
-}
-
-h2
+@media (min-width: 1200px)
 {
-	padding-left:20px;
-	border-top:1px solid #E5E5E5;
-	clear:both;
-	font-size:1.5em;
-	padding:15px 0 0;
-	font-weight:normal;
-	line-height:1.4;
-	margin-bottom:0.3em;		
+    ol.responsive-columns
+    {
+        -webkit-column-count: 4;
+        -moz-column-count: 4;
+        column-count: 4;
+    }
 }
 
-dl, div.def-list {width:700px;float:left; padding-left:8px;}
-dd, div.def-def { margin-bottom:1em;margin-left:1em;float:left; width:520px;position:relative;}
-
-dt, div.def-term {
-float:left;
-font-weight:bold;
-width:159px;
-clear:both;
-margin:0;
-margin-bottom:12px;
-}
-
-div.def-around
+ol.responsive-columns > li:nth-child(1) > h3
 {
-	width:520px;
-	float:left;
-	position:relative;
+    margin-top: 0px;
 }
 
-a.action {float:right; cursor:pointer; margin-left:10px;}
-.editable {border:1px solid #DDDDDD;
-color:#666666;
-cursor:text;
-margin-bottom:1em; display:none;}
-.editable.default {display:block; width:100%;}
-
-.editor {display:block;text-align:justify;color:#666;}
-
-#queries input[type=text], #operations input[type=text]
+h1.centered, h2.centered
 {
-	width:719px;
+    margin: 40px;
+    text-align: center;
 }
 
-#content .sidebar {
-border-radius: 5px;
-background-color:#eee;
-border-color:#E5E5E5;
-font-size:12px;
-padding:20px;
-}
-
-dl.embedded{border-left:2px solid #ccc;
-margin-left:1em;
-padding-left:1em;}
-
-a{text-decoration:none;}
-a:hover{text-decoration:underline;}
-
-li.type-selected{color:#888;list-style:outside}
-
-li.result, li.content
+#syntax-help
 {
-	margin-bottom:10px;
+    background: #fafafa;
+    padding: 20px;
 }
 
-li.result .entityName 
+    #syntax-help > div > div > h3
+    {
+        text-align: center;
+    }
+
+.editable, .shortcut
 {
-	font-size:1.3em;
-	margin-bottom:1px;
-	display:block;
+    display: none;
+    width: 100%;
 }
 
-li.result .area 
+.info
 {
-	color:#333;
-	background-color:#eee;
-	padding:0.1em;
+    opacity: .6;
 }
 
-li.result .typeSearchResult
+
+span.wiki
 {
-	display:none;
+    display:block;
 }
 
-#main{margin-top:10px;}
 
-.more {display:none;}
-.more li {margin-left:0px}
-.more-link{cursor:pointer;}
-hr {border:0;border-top:1px solid #E5E5E5;}
 
-.live-edit{position:absolute;cursor:pointer;
-right:1px;
-top:1px;}
-
-.sf-wiki-error
+@media (min-width: 768px)
 {
-    color:Red;
+    .dl-horizontal dt
+    {
+        width: 260px;
+    }
+
+    .dl-horizontal dd
+    {
+        margin-left: 280px;
+        margin-bottom:5px;
+    }
+
+    h2.greyTitle
+    {
+        margin-left: 280px;
+    }
 }
 
-a.unavailable
+h4.embedded
 {
-	color:Red;
+    margin-bottom: -20px;
+    margin-left: 30px;
+    background: #eee;
+    margin-right: 10px;
+    color: #999;
+    padding: 2px;
+    padding-left: 10px;
 }
-span.hover
+
+dl.embedded
 {
-	background-color:#ffffcc;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
 }
 
-.save
+dl.columns
 {
-	font-size:90%;
-	color:#fff;
-	cursor:pointer;
-	border-radius:4px;
-	padding:0 3px;
-	border:1px solid #78a752;
-	background: #78a752 repeat-x;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
 }
 
-textarea{width:100%;}
-/*
-.editor.default {display:none;}
-dd.hover .editor{display:block !important;}*/
+    dl.columns dt
+    {
+        color:gray;
+    }
 
-a.action, input[type=submit]{
-border-radius:3px;
-color:#fff;
-padding:0 4px;
-text-decoration:none !important;
-border:0;
-}
-
-#edit-action{background-color:#6290BC;}
-#edit-action:hover{background-color:#6a9dcc;}
-#save-action{background-color:#70bd62;margin-left:-4px;
-padding-left:4px;
-position:relative;
-z-index:2;}
-#save-action:hover{background-color:#79cc6a;}
-#syntax-action{background-color:#bc6462;}
-#syntax-action:hover{background-color:#cc6c6a;}
-#saving-error .text {padding-left:20px;}
-#saving-error img{position:absolute;}
-#saving-error {padding-bottom:10px; display:none;}
-input[type=submit]{background-color:#bdab62;font-family: "Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;}
-input[type=submit]:hover{background-color:#ccb86a;cursor:pointer;}
-
-#search{float:right;}
-#search input[type=submit]
+h2.greyTitle
 {
-    border-top-left-radius:0px;
-	border-bottom-left-radius:0px;
+    color: #aaa;
 }
-#search #q
+
+.btn-toolbar
 {
-	border:1px solid #999;
-	border-right:0px;
-	border-top-left-radius:3px;
-	border-bottom-left-radius:3px;
+    margin-top: 10px;
+    text-align:right;
 }
 
-#search #q:hover, #search #q:focus{border-color:#666;}
-#form-save {margin-bottom:20px;}
-
-#queries h2, #properties h2, #operations h2
+span.sf-wiki-error
 {
-background-color:#e2e8f5;
-border-top:1px solid #E5E5E5;
-clear:both;
-font-size:1.5em;
-font-weight:normal;
-line-height:1.4;
-margin:15px 0 8px;
-padding:0 5px;
-border-radius:3px;
+    color:red;
+    font-weight: bold;
 }
 
-dd input, dd textarea, #entityName textarea {display:none !important}
-dd.editing input, dd.editing textarea, #entityName.editing textarea {display:block !important}
-dd.editing .editor, #entityName.editing .editor {display:none}
-
-.editor ul li, #syntax-help ul li{ list-style-position:inside; margin-left:0px; list-style-type:disc;}
-ol li {list-style-position:inside;}
-/*.editor br,*/ .editor ul{margin-bottom:1.5em;}
-
-#syntax-list{
-display:none;
-}
-#syntax-button{cursor:pointer; font-weight:bold;}
-
-div.imageright {
-	border-radius:4px;
-	background-color:#fff;
-	float:right;
-	margin:4px 0 4px 8px;
-	padding:4px;
-}
-
-div.imageleft {
-	border-radius:4px;
-	background-color:#fff;
-	float:left;
-	margin:4px 8px 4px 0;
-	padding:4px;
-}
-
-div.imagecentre {
-	border-radius:4px;
-	background-color:#fff;
-	text-align:center;
-	margin:4px 8px 4px 0;
-	padding:4px;
-}
-
-img.image {
-border:1px solid #eee;
-}
-
-#syntax-list 
+.hash-selected
 {
-	-webkit-box-shadow: 0 2px 9px 1px #aaa;
-	padding:10px;
-	margin-bottom:10px;
-	background-color:#ffffdd;
-}
-#syntax-list td {min-width:300px}
-
-.shortcut{color:#00BB00;
-display:none;
-font-size:95%;}
-
-div.query-columns{display:none}
-
-p
-{
-	margin-top:0.5em;
-	margin-bottom:0.5em;
-}
-
-.show-on-more
-{
-    display:none;
-}
-
-#layoutHelp
-{
-    margin: 0 auto;
-    width: 984px;
-    color: #333;
-    font-size: 12px;
-    line-height: 1.5;
-    font-family: "Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;
-}
-#headerLeft
-{
-    float:left;    
-}
-#headerRight
-{
-    float:right;    
-}
-#content
-{
-	background-color:#fff;
-	border:1px solid #e0e0e0;
-	border-radius:4px;
-	-moz-border-radius:4px;
-	-webkit-border-radius:4px;
-    padding: 10px 1%;
-}
-#footer
-{
-    padding: 10px 0;
-    text-align: center;    
-}
-#footerAssembly
-{
-    float: left;    
-}
-hr 
-{
-	color:#eee;
-	margin:5px auto;
-}
-
-#nextAppendix {
-    float: right;
-    max-width: 50%;
-}
-#previousAppendix {
-    float: left;
-    max-width: 50%;
+    background-color: rgb(167, 216, 242);
 }

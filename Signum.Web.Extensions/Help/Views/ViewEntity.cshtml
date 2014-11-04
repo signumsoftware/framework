@@ -5,141 +5,196 @@
 @using Signum.Web.Extensions
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Basics
+@using Signum.Entities.Help
+@using Signum.Engine.Basics
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
 }
-@{ Html.RenderPartial(HelpClient.Menu);}
-@{ EntityHelp eh = (EntityHelp)Model;
-   ViewBag.Title = eh.Type.NiceName();
-}
-<form action="@HelpLogic.EntityUrl(eh.Type)/Save" id="form-save">
-<div id="entityName">
-    <span class='shortcut'>[e:@eh.Type.Name]</span>
-    <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
-    @Html.TextArea("description", eh.Description, 5, 80, new { @class = "editable" })
-    <span class="editor" id="description-editor">
-        @Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings)
-    </span>
-</div>
-<div id="entityContent" class="help_left">
-    @if (eh.Properties != null && eh.Properties.Count > 0)
-    {
-        <div id="properties">
-            <h2>
-                Propiedades</h2>
-            <dl>
-                @{ 
-        var a = TreeHelper.ToTreeS(eh.Properties, kvp =>
-        {
-            string s = kvp.Key.TryBeforeLast('.') ?? kvp.Key.TryBeforeLast('/');
-            if(s == null)
-                return null;
 
-            if (s.StartsWith("[")) // Mixin
-                return null;
-            
-            return new KeyValuePair<string, PropertyHelp>(s, eh.Properties[s]);
-        });
-        ViewDataDictionary vdd = new ViewDataDictionary();
-        vdd.Add("EntityName", eh.Type.Name);
-                }
-                @foreach (var node in a)
-                {
-                    Html.RenderPartial(HelpClient.ViewEntityPropertyUrl, node, vdd);
-                }
-            </dl>
-        </div>
-    }
-    @if (eh.Queries.Try(queries => queries.Count > 0) != null)
+@{ 
+    EntityHelp eh = (EntityHelp)Model;
+    ViewBag.Title = eh.Type.NiceName();
+}
+
+@helper WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpDN>>> node, string entityName)
+{
+    PropertyHelp ph = node.Value.Item1;
+    using (var ctx = node.Value.Item2)
     {
-        <div id="queries">
-            <h2>
-                Consultas</h2>
-            <dl>
-                @foreach (var mq in eh.Queries)
-                {
-                    <span class='shortcut'>[q:@QueryUtils.GetQueryUniqueKey(mq.Key)]</span>
-                    <dt>@QueryUtils.GetNiceName(mq.Key)</dt>
-                    <dd>
-                        <img src='help/Images/table.gif' title='Ver columnas' style='float: right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" />
-                        @Html.WikiParse(mq.Value.Info, HelpClient.DefaultWikiSettings)
-                        @Html.TextArea("q-" + QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_"), mq.Value.UserDescription, new { @class = "editable" })
-                        <span class="editor" id="q-@QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_")-editor">
-                            @Html.WikiParse(mq.Value.UserDescription, HelpClient.DefaultWikiSettings)
-                        </span>
-                        <div class='query-columns'>
-                            <hr />
-                            <table width="100%">
-                                @foreach (var qc in mq.Value.Columns)
+    @Html.HiddenRuntimeInfo(ctx)
+    
+    <dt id="@HelpUrls.IdProperty(ph.PropertyRoute)">@ph.PropertyInfo.NiceName() <code class='shortcut'>[p:@entityName.@(ph.PropertyRoute.PropertyString())]</code></dt>
+    <dd>
+        <span class="info">
+            @Html.WikiParse(ph.Info, HelpClient.DefaultWikiSettings)
+        </span>
+        @Html.Hidden(ctx.SubContextPrefix(a => a.Property), ctx.Value.Property.Path)
+        @Html.TextArea(ctx.SubContextPrefix(a => a.Description), ph.UserDescription, new { @class = "editable" })
+        <span class="wiki">@Html.WikiParse(ph.UserDescription, HelpClient.DefaultWikiSettings)</span>
+    </dd>
+        if (node.Children.Count > 0)
+        {
+    <h4 class="embedded">@ph.PropertyInfo.NiceName()</h4>
+    <dl class="embedded">
+        @foreach (var v in node.Children)
+        {
+            @WriteProperty(v, entityName);
+        }
+    </dl>
+        }
+    }
+}
+
+@using (TypeContext<EntityHelpDN> ec = new TypeContext<EntityHelpDN>(eh.Entity, null))
+{
+    var name = Navigator.ResolveWebTypeName(eh.Type);
+    ec.FormGroupStyle = FormGroupStyle.None;
+  
+    
+    using(Html.BeginForm((HelpController hc)=>hc.SaveEntity(), new {id = "form-save"}))
+    {
+        @Html.HiddenRuntimeInfo(ec)
+        @Html.HiddenRuntimeInfo(ec, e => e.Culture)
+        @Html.HiddenRuntimeInfo(ec, e => e.Type)
+        <div class="row">
+            <div class="col-md-9">
+                @{ Html.RenderPartial(HelpClient.Menu);}
+                <div class="edit-container">
+                    <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
+                    <code class='shortcut'>[e:@name]</code>
+                    <span class="info">
+                        @Html.WikiParse(eh.Info, HelpClient.DefaultWikiSettings)
+                    </span>
+                    @Html.TextArea(ec.SubContextPrefix(a => a.Description), eh.Description, 5, 80, new { @class = "editable" })
+                    <span class="wiki">
+                        @Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings)
+                    </span>
+                </div>
+                <div id="entityContent" class="help_left">
+                    @if (eh.Properties.Any())
+                    {
+                        <div id="properties">
+                            <h2 class="greyTitle">@Html.PropertyNiceName(() => eh.Entity.Properties)</h2>
+                            @{ 
+                        var elementContexts = ec.TypeElementContext(e => e.Properties).ToDictionary(a => a.Value.Property.Path);
+
+                        var tuplesDic = eh.Properties.Values.Select(p => Tuple.Create(p, elementContexts.GetOrThrow(p.PropertyRoute.PropertyString()))).ToDictionary(a => a.Item1.PropertyRoute);
+
+                        var roots = TreeHelper.ToTreeC(tuplesDic.Values, kvp =>
+                        {
+                            var parent = kvp.Item1.PropertyRoute.Parent;
+                            if (parent.PropertyRouteType == PropertyRouteType.Root || parent.PropertyRouteType == PropertyRouteType.Mixin)
+                                return null;
+
+                            if (parent.PropertyRouteType == PropertyRouteType.MListItems)
+                                parent = parent.Parent;
+
+                            return tuplesDic.GetOrThrow(parent);
+                        });
+
+                       
+                            }
+
+                            <dl class="dl-horizontal">
+                                @foreach (var node in roots)
                                 {
-                                    <tr>
-                                        <td>
-                                            <b>@qc.Value.Name.NiceName()</b>
-                                        </td>
-                                        <td> @Html.WikiParse(qc.Value.Info, HelpClient.DefaultWikiSettings)
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                        </td>
-                                        <td>@Html.TextArea("c-" + QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_") + "." + qc.Key, qc.Value.UserDescription, new { @class = "editable" })
-                                            <span class="editor" id="qc-@(QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_") + "." + qc.Key)">
+                                    @WriteProperty(node, name);
+                                }
+                            </dl>
+                        </div>
+                    }
+
+                    @if (eh.Operations.Any())
+                    {
+                        var operations = ec.TypeElementContext(e => e.Operations).ToDictionary(a => a.Value.Operation);
+                         
+                        <div id="operations">
+                            <h2 class="greyTitle">@Html.PropertyNiceName(() => eh.Entity.Operations)</h2>
+                            <dl class="dl-horizontal">
+                                @foreach (var op in eh.Operations)
+                                {
+                                    using (var ctx = operations.GetOrThrow(op.Key))
+                                    {
+                                    @Html.HiddenRuntimeInfo(ctx)
+                                    
+                                    <dt id="@HelpUrls.IdOperation(op.Key)">@op.Key.NiceToString()<code class='shortcut'>[o:@op.Key.Key]</code></dt>
+                                    <dd>
+                                        <span class="info">
+                                            @Html.WikiParse(op.Value.Info, HelpClient.DefaultWikiSettings)
+                                        </span>
+                                        @Html.HiddenRuntimeInfo(ctx, a => a.Operation)
+                                        @Html.TextArea(ctx.SubContextPrefix(a => a.Description), op.Value.UserDescription, new { @class = "editable" })
+                                        <span class="wiki">
+                                            @Html.WikiParse(op.Value.UserDescription, HelpClient.DefaultWikiSettings)
+                                        </span>
+                                    </dd>
+                                    }
+                                }
+                            </dl>
+                        </div>
+                    }
+                    @if (eh.Queries.Any())
+                    {
+                        var queries = ec.TypeElementContext(e => e.Queries).ToDictionary(a => a.Value.Query);
+                        
+                        <div id="queries">
+                            <h2 class="greyTitle">@typeof(QueryDN).NicePluralName()</h2>
+                            @foreach (var mq in eh.Queries)
+                            {
+                                var queryEntity = mq.Value.Entity;
+
+                                using (TypeContext<QueryHelpDN> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
+                                {
+                                    var columns = qctx.TypeElementContext(a => a.Columns).ToDictionary(a => a.Value.ColumnName); 
+                                        
+                                @Html.HiddenRuntimeInfo(qctx) 
+                                @Html.HiddenRuntimeInfo(qctx, e => e.Culture)                                   
+                                @Html.HiddenRuntimeInfo(qctx, a => a.Query)                                    
+                                <h3 id="@HelpUrls.IdQuery(mq.Key)">@QueryUtils.GetNiceName(mq.Key)</h3>
+                                <div class="queryName">
+                                    <code class='shortcut'>[q:@QueryUtils.GetQueryUniqueKey(mq.Key)]</code>
+                                    <span class="info">
+                                        @Html.WikiParse(mq.Value.Info, HelpClient.DefaultWikiSettings)
+                                    </span>
+                                    @Html.TextArea(qctx.SubContextPrefix(a => a.Description), mq.Value.UserDescription, new { @class = "editable" })
+                                    <span class="wiki">
+                                        @Html.WikiParse(mq.Value.UserDescription, HelpClient.DefaultWikiSettings)
+                                    </span>
+                                </div>
+
+                                  
+                                <dl class="dl-horizontal columns">
+                                    @foreach (var qc in mq.Value.Columns)
+                                    {
+                                        using (var ctx = columns.GetOrThrow(qc.Value.Name))
+                                        {
+                                        @Html.HiddenRuntimeInfo(ctx)     
+                                        <dt>@qc.Value.Name.NiceName()</dt>
+                                        <dd>
+                                            <span class="info">
+                                                @Html.WikiParse(qc.Value.Info, HelpClient.DefaultWikiSettings)
+                                            </span>
+                                            @Html.Hidden(ctx.SubContextPrefix(a => a.ColumnName), ctx.Value.ColumnName)
+                                            @Html.TextArea(ctx.SubContextPrefix(a => a.Description), ctx.Value.Description, new { @class = "editable" })
+                                            <span class="wiki">
                                                 @Html.WikiParse(qc.Value.UserDescription, HelpClient.DefaultWikiSettings)
                                             </span>
-                                        </td>
-                                    </tr>
+                                        </dd>
+                                        }
+                                    }
+                                </dl>
                                 }
-                            </table>
-                            <hr />
+                            }
                         </div>
-                    </dd>
-                }
-            </dl>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                @{ Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary{ { "type" , eh.Type } });}
+            </div>
         </div>
+
     }
-    @if (eh.Operations != null && eh.Operations.Count > 0)
-    {
-        <div id="operations">
-            <h2>
-                Operaciones</h2>
-            <dl>
-                @foreach (var p in eh.Operations)
-                {
-                    <span class='shortcut'>[o:@p.Key.Key]</span>
-                    <dt>@p.Key.NiceToString()</dt>
-                    <dd>
-                        @Html.WikiParse(p.Value.Info, HelpClient.DefaultWikiSettings)
-                        @Html.TextArea("o-" + p.Key.Key, p.Value.UserDescription, new { @class = "editable" })
-                        <span class="editor" id="o-@p.Key.Key.Replace(".", "_")-editor">
-                            @Html.WikiParse(p.Value.UserDescription, HelpClient.DefaultWikiSettings)
-                        </span>
-                    </dd>
-                }
-            </dl>
-        </div>
-    }
-</div>
-<div class="help_right">
-    <div class="sidebar">
-        <h3>
-            Temas relacionados</h3>
-        <ul>
-            @{ List<Type> types = (List<Type>)ViewData["nameSpace"];}
-            @foreach (Type t in types)
-            {
-                if (t != eh.Type)
-                {
-                <li><a href="@HelpLogic.EntityUrl(t)">@t.NiceName()</a></li>
-                }
-                else
-                {
-                <li class="type-selected">@t.NiceName()</li>
-                }
-            }
-        </ul>
-    </div>
-</div>
-<div class="clearall">
-</div>
-</form>
+}

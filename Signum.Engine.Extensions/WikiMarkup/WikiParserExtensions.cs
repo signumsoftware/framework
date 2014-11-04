@@ -96,7 +96,7 @@ namespace Signum.Engine.WikiMarkup
             return result;
         }
 
-        public static readonly Regex TokenRegex = new Regex(@"\[(?<content>([^\[\]]|\[\[|\]\])*)\]");
+        public static readonly Regex TokenRegex = new Regex(@"\[(?<content>([^\[\]]|\[\[|\]\])+)\]");
 
         static string ProcessTokens(string content, WikiSettings settings)
         {

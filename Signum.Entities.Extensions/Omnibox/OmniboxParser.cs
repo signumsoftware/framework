@@ -167,7 +167,7 @@ namespace Signum.Entities.Omnibox
 
         static ConcurrentDictionary<CultureInfo, Dictionary<string, Type>> types = new ConcurrentDictionary<CultureInfo, Dictionary<string, Type>>();
 
-        internal Dictionary<string, Type> Types()
+        public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
                GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionary(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));

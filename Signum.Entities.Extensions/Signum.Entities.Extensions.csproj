@@ -103,7 +103,12 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Help\AppendixHelp.cs" />
+    <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Help\EntityHelp.cs" />
     <Compile Include="Help\HelpMessage.cs" />
+    <Compile Include="Help\HelpModuleOmniboxResult.cs" />
+    <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationDN.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />

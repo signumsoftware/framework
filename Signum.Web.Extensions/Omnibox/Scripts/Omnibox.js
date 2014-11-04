@@ -24,6 +24,7 @@ define(["require", "exports"], function(require, exports) {
                     });
                 });
             },
+            items: 'all',
             sorter: function (items) {
                 return items;
             },

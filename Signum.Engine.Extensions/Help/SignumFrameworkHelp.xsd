@@ -46,7 +46,6 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute name="FullName" type="xs:string" use="required" />
-      <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
   
@@ -62,7 +61,6 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute name="Name" type="xs:string" use="required" />
-      <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
   
@@ -79,7 +77,6 @@
       </xs:sequence>
       <xs:attribute name="Title" type="xs:string" use="required" />
       <xs:attribute name="Name" type="xs:string" use="required" />
-      <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
 
@@ -112,7 +109,6 @@
       </xs:sequence>
       <xs:attribute name="Key" type="xs:string" use="required" />
       <xs:attribute name="Info" type="xs:string" use="optional" />
-      <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
 </xs:schema>

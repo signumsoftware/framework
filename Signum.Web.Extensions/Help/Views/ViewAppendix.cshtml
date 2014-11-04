@@ -1,38 +1,58 @@
 ﻿@using Signum.Web.Help
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
+@using Signum.Entities.Help
 
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
 }
 
-@{ Html.RenderPartial(HelpClient.Menu);}
-
 @{ 
     AppendixHelp ah = (AppendixHelp)Model;
     ViewBag.Title = ah.Title;
 }
 
-@using (var f = Html.BeginForm("SaveAppendix", "Help", new { appendix = ah.Name }, FormMethod.Post, new { id = "form-save" }))
+@using (TypeContext<AppendixHelpDN> ac = new TypeContext<AppendixHelpDN>(ah.Entity, null))
 {
-    <div id="entityName">
-        <h1>@ah.Title</h1>
-        @Html.TextArea("description", ah.Description, 5, 80, new { @class = "editable" })
-        <span class="editor" id="description-editor">@Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings)</span>
+    using (Html.BeginForm((HelpController hc) => hc.SaveAppendix(), new { id = "form-save" }))
+    {
+    @Html.HiddenRuntimeInfo(ac)
+    @Html.HiddenRuntimeInfo(ac, e => e.Culture)
+        
+      
+    <div class="row">
+        <div class="col-md-9" id="entityName">
+            @{ Html.RenderPartial(HelpClient.Menu);}
+            @if (ac.Value.UniqueName == null)
+            {   
+                @Html.ValueLine(ac, e => e.UniqueName)
+                <script>
+                @HelpClient.Module["edit"]()
+                 </script>
+            }
+            else
+            {
+                @Html.HiddenLine(ac, e => e.UniqueName)
+            }
+            <h1>
+                @Html.TextArea(ac.SubContextPrefix(a => a.Title), ah.Title, 1, 80, new { @class = "editable" })
+                <span class="wiki">
+                    @Model.Title
+                </span>
+            </h1>
+            @if (ac.Value.UniqueName != null)
+            {
+            <code class="shortcut">[a:@ah.UniqueName]</code>
+            }
+            @Html.TextArea(ac.SubContextPrefix(a => a.Description), ah.Description, 5, 80, new { @class = "editable" })
+            <span class="wiki">
+                @Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings)
+            </span>
+        </div>
+        <div class="col-md-3">
+            @{ Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "appendix", ah.UniqueName } });}
+        </div>
     </div>
-    <div class="clearall">
-    </div>
-    var nextAppendix = (AppendixHelp)ViewData["nextAppendix"];
-    if (nextAppendix != null)
-    {        
-        <div id="nextAppendix">@Html.ActionLink(nextAppendix.Title + " >>", "ViewAppendix", new { appendix = nextAppendix.Name })</div>
     }
-    var prevAppendix = (AppendixHelp)ViewData["previousAppendix"];
-    if (prevAppendix != null)
-    { 
-        <div id="prevAppendix">@Html.ActionLink("<< " + prevAppendix.Title, "ViewAppendix", new { appendix = prevAppendix.Name })</div>
-    }
-    <div class="clearall">
-    </div>
-} 
+}

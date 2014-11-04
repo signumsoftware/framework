@@ -103,7 +103,7 @@ namespace Signum.Engine.Basics
         }
 
 
-        const string QueriesKey = "Queries";
+        public const string QueriesKey = "Queries";
 
         static SqlPreCommand Schema_Generating()
         {

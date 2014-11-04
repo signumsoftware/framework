@@ -1,40 +1,50 @@
 ﻿@using Signum.Web.Help
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
-
+@using Signum.Entities.Help
+@model NamespaceHelp
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
 }
 
 @{ 
-    Html.RenderPartial(HelpClient.Menu);
     NamespaceHelp nh = (NamespaceHelp)Model;
-    ViewBag.Title = nh.Name;
+
+    ViewBag.Title = Model.Title + Model.Before.Try(b => " " + HelpMessage.In0.NiceToString(b));
 }
 
-@using (var f = Html.BeginForm("SaveNamespace", "Help", new { @namespace = nh.Name }, FormMethod.Post, new { id = "form-save" }))
+@using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
 {
-    <div class="help_left" id="entityName">
-        <h1>@nh.Name</h1>
-        @Html.TextArea("description", nh.Description, 5, 80, new { @class = "editable" })
-        <span class="editor" id="description-editor">
-            @Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings)
-        </span>
-    </div>
-    <div class="help_right">
-        <div class="sidebar">
-            <h3>
-                Temas relacionados</h3>
-            <ul>
-                @{ List<Type> types = (List<Type>)ViewData["nameSpace"];}
-                @foreach (Type t in types)
-                {
-                    <li><a href="@HelpLogic.EntityUrl(t)">@t.NiceName()</a></li>
-                }
-            </ul>
+    using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
+    {
+         @Html.HiddenRuntimeInfo(nc)
+         @Html.HiddenRuntimeInfo(nc, e => e.Culture)
+         @Html.HiddenLine(nc, e => e.Name)
+    
+        <div class="row">
+            <div class="col-md-9" id="entityName">
+                    @{ Html.RenderPartial(HelpClient.Menu);}
+                <h1>
+                      @Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" })
+                    <span class="wiki">
+                    @Model.Title
+                     </span>
+                       
+                    @if (Model.Before != null)
+                    {
+                        <small>@HelpMessage.In0.NiceToString(Model.Before)</small>
+                    }
+                </h1>
+                <code class="shortcut">[n:@nh.Namespace]</code>
+                 @Html.TextArea(nc.SubContextPrefix(a => a.Description), nh.Description, 5, 80, new { @class = "editable" })
+                <span class="wiki">
+                    @Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings)
+                </span>
+            </div>
+            <div class="col-md-3">
+                @{ Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "namespace", nh.Namespace } });}
+            </div>
         </div>
-    </div>
-    <div class="clearall">
-    </div>
-} 
+    }
+}

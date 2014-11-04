@@ -2,8 +2,10 @@
 @using Signum.Web.Help
 @using Signum.Entities.Help
 @using Signum.Engine.Help
+@model Dictionary<string, List<Type>>
 @{  
-    ViewBag.Title = HelpMessage.HelpDocumentation.NiceToString();
+    ViewBag.Title = HelpMessage.Help.NiceToString();
+    Dictionary<string, AppendixHelp> appendices = HelpLogic.GetOrCreateAppendicesHelp();
 }
 
 @section head
@@ -11,31 +13,38 @@
     @Html.ScriptCss("~/help/Content/help.css")
 }
 <div id="entityContent">
-    <h1>@HelpMessage.HelpDocumentation.NiceToString()</h1>
-    <table>
-        <tr>
-            @foreach (NamespaceModel item in ((NamespaceModel)Model).Namespaces)
-            {
-                <td>
-                    @{ Html.RenderPartial(HelpClient.NamespaceControlUrl, item); }
-                </td>
-            }
-        </tr>
-    </table>
-    @if (ViewData.TryGetC("appendices") != null)
-    {
-        List<AppendixHelp> appendices = (List<AppendixHelp>)ViewData["appendices"];
-        if (appendices.Count > 0)
+    <h1 class="centered">@HelpMessage.Help.NiceToString()</h1>
+
+    <ol class="responsive-columns">
+        @foreach (var ns in Model)
         {
-        <h2>@HelpMessage.Appendices.NiceToString()</h2>
-        <ul>
-            @foreach (var a in appendices)
-            {
-                <li>
-                    @Html.ActionLink(a.Title, "ViewAppendix", new { appendix = a.Name })
-                </li>
-            }
-        </ul>
+            var nh = HelpLogic.GetNamespaceHelp(ns.Key);
+            
+            <li>
+                <h3>
+                    <a href="@Url.Action((HelpController c) => c.ViewNamespace(ns.Key))">@(nh.Title)</a>
+                    @if (nh.Before != null)
+                    {
+                        <small>@HelpMessage.In0.NiceToString(nh.Before)</small>
+                    }
+                </h3>
+                <ul>
+                    @foreach (var t in ns.Value)
+                    {
+                        <li><a href="@HelpUrls.EntityUrl(t)">@t.NiceName()</a> </li>
+                    }
+                </ul>
+            </li>
         }
-    }
+    </ol>
 </div>
+
+<h2 class="centered">@HelpMessage.Appendices.NiceToString() <a href="@Url.Action((HelpController c) => c.NewAppendix())">+</a></h2>
+<ol class="responsive-columns">
+    @foreach (var a in appendices.Values)
+    {
+        <li>
+            @Html.ActionLink(a.Title, (HelpController c) => c.ViewAppendix(a.UniqueName))
+        </li>
+    }
+</ol>

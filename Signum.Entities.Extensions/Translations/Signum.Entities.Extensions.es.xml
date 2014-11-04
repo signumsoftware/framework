@@ -706,14 +706,14 @@
     <Member Name="Any" Description="algún" />
     <Member Name="Appendices" Description="Apéndices" />
     <Member Name="Buscador" Description="Buscador" />
-    <Member Name="Call0Over1OfThe2" Description="Ejecuta {0} sobre {1} del {2}" />
+    <Member Name="Call0Over1OfThe2" Description="Ejecuta {0} sobre {1} [m:del|f:de la] {2}" />
     <Member Name="Character" Description="carácter" />
     <Member Name="Check" Description="check" />
-    <Member Name="ConstructsANew0" Description="Construye un nuevo {0}" />
+    <Member Name="ConstructsANew0" Description="Construye [m:un|f:una] nuev[m:o|f:a] {0}" />
     <Member Name="Date" Description="fecha" />
     <Member Name="DateTime" Description="fecha y hora" />
     <Member Name="ExpressedIn" Description="expresado en " />
-    <Member Name="From0OfThe1" Description="desde {0} del {1} " />
+    <Member Name="From0OfThe1" Description="desde {0} [m:del|f:de la] {1}" />
     <Member Name="FromMany0" Description="desde muchos {0}" />
     <Member Name="HelpDocumentation" Description="Documentación de ayuda" />
     <Member Name="HelpNotLoaded" Description="Ayuda no cargada" />
@@ -1024,7 +1024,7 @@
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="Token" Description="Token" />
   </Type>
-  <Type Name="QueryDN" Description="Query">
+  <Type Name="QueryDN" Description="Consulta">
     <Member Name="Key" Description="Clave" />
     <Member Name="Name" Description="Nombre" />
   </Type>

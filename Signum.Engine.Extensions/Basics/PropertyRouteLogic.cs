@@ -34,7 +34,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        const string FieldsForKey = "Properties For:{0}";
+        public const string PropertiesFor = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteDN>(replacements).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyDN in the database with path"));
@@ -46,13 +46,13 @@ namespace Signum.Engine.Basics
             return Synchronizer.SynchronizeScript(should, current,
                 null,
                 null,
-                (tn, dicShould, dicCurr) =>
-                    Synchronizer.SynchronizeScriptReplacing(replacements, FieldsForKey.Formato(tn),
+                (fullName, dicShould, dicCurr) =>
+                    Synchronizer.SynchronizeScriptReplacing(replacements, PropertiesFor.Formato(fullName),
                     dicShould,
                     dicCurr,
                     null,
-                    (fn, c) => table.DeleteSqlSync(c),
-                    (fn, s, c) =>
+                    (path, c) => table.DeleteSqlSync(c),
+                    (path, s, c) =>
                     {
                         c.Path = s.Path;
                         return table.UpdateSqlSync(c);

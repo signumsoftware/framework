@@ -222,6 +222,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Help\Views\MiniMenu.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MiniMenu.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
     <Compile Include="Files\Views\FileRepository.generated.cs">
@@ -571,25 +581,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DisconnectedMachine.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Help\Views\EntityProperty.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityProperty.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Help\Views\Index.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Index.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Help\Views\Menu.generated.cs">
+    <Compile Include="Help\Views\Buttons.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Menu.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Help\Views\NamespaceControl.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NamespaceControl.cshtml</DependentUpon>
+      <DependentUpon>Buttons.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\Search.generated.cs">
       <AutoGen>True</AutoGen>
@@ -638,11 +638,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ViewNamespace.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Help\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\EmailMessage.generated.cs">
       <AutoGen>True</AutoGen>
@@ -722,7 +717,6 @@
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\Controllers\HelpController.cs" />
-    <Compile Include="Help\HelpModels.cs" />
     <Compile Include="Mailing\MailingClient.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
@@ -1128,10 +1122,6 @@
     <EmbeddedResource Include="Help\Scripts\help.js">
       <DependentUpon>help.ts</DependentUpon>
     </EmbeddedResource>
-    <Content Include="Help\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
     <EmbeddedResource Include="Isolation\Scripts\Isolation.js">
       <DependentUpon>Isolation.ts</DependentUpon>
     </EmbeddedResource>
@@ -1397,6 +1387,14 @@
     <Content Include="DiffLog\Views\Web.config" />
     <Content Include="packages.config" />
     <Content Include="Calendar\Views\Web.config" />
+    <Content Include="Help\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Help\Views\MiniMenu.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>MiniMenu.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1570,21 +1568,13 @@
     <Content Include="Help\Images\icon-warning.png" />
     <Content Include="Help\Images\table.gif" />
     <Content Include="Processes\Content\Processes.css" />
-    <None Include="Help\Views\EntityProperty.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EntityProperty.generated.cs</LastGenOutput>
-    </None>
     <None Include="Help\Views\Index.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Index.generated.cs</LastGenOutput>
     </None>
-    <None Include="Help\Views\Menu.cshtml">
+    <None Include="Help\Views\Buttons.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Menu.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Help\Views\NamespaceControl.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>NamespaceControl.generated.cs</LastGenOutput>
+      <LastGenOutput>Buttons.generated.cs</LastGenOutput>
     </None>
     <None Include="Help\Views\Search.cshtml">
       <Generator>RazorGenerator</Generator>
