@@ -49,8 +49,7 @@ namespace Signum.Windows
 
 
             XElement element = GenerateEntityStackPanel(type);
-            using (Common.DelayRoutes())
-                this.Content = XamlReader.Load(element.CreateReader());
+            this.Content = XamlReader.Load(element.CreateReader());
         }
 
 
@@ -64,7 +63,7 @@ namespace Signum.Windows
                    new XAttribute(XNamespace.Xmlns + "x", x.NamespaceName),
                    new XAttribute(XNamespace.Xmlns + "m", m.NamespaceName),
                    new XAttribute(XNamespace.Xmlns + alias, entityNamespace.NamespaceName),
-                   new XAttribute(m + "Common.TypeContext", alias + ":" + type.Name));
+                   new XAttribute(m + "Common.TypeContext", "{x:Type " + alias + ":" + type.Name + "}"));
             return sp;
         }
 

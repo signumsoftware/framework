@@ -12,169 +12,235 @@ using Signum.Entities.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
+using Signum.Web.Operations;
+using Signum.Engine.Operations;
+using Newtonsoft.Json;
 
 namespace Signum.Web
 {
     public static class Constructor
     {
-        public static ConstructorManager ConstructorManager;
+        public static ConstructorManager Manager;
+        public static ClientConstructorManager ClientManager;
 
-        public static void Start(ConstructorManager constructorManager)
+        public static void Start(ConstructorManager manager, ClientConstructorManager clientManager)
         {
-            ConstructorManager = constructorManager;
+            Manager = manager;
+            ClientManager = clientManager;
         }
 
-        public static ModifiableEntity Construct(Type type)
+        public static T Construct<T>(this ConstructorContext ctx)
+            where T : ModifiableEntity
         {
-            return ConstructorManager.Construct(type);
+            return (T)ctx.SurroundConstructUntyped(typeof(T), Manager.ConstructCore);
         }
 
-        public static T Construct<T>() where T : ModifiableEntity
+        public static ModifiableEntity ConstructUntyped(this ConstructorContext ctx, Type type)
         {
-            return (T)ConstructorManager.Construct(typeof(T));
+            return ctx.SurroundConstructUntyped(type, Manager.ConstructCore);
         }
 
-        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
+        public static T SurroundConstruct<T>(this ConstructorContext ctx, Func<ConstructorContext, T> constructor)
+            where T : ModifiableEntity
         {
-            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected);
+            ctx.Type = typeof(T);
+
+            return (T)Manager.SurroundConstruct(ctx, constructor);
         }
 
-        public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
+        public static ModifiableEntity SurroundConstructUntyped(this ConstructorContext ctx, Type type, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            ConstructorManager.Constructors.Add(typeof(T), constructor);
+            ctx.Type = type;
+
+            return Manager.SurroundConstruct(ctx, constructor);
+        }
+
+        public static void Register<T>(Func<ConstructorContext, T> constructor) where T:ModifiableEntity
+        {
+            Manager.Constructors.Add(typeof(T), constructor);
         }
     }
 
-    public class ConstructContext
+
+    public class ClientConstructorContext
     {
-        public ControllerBase Controller { get; set; }
-        public Type Type { get; set; }
-        public string Prefix { get; set; }
-        public VisualConstructStyle PreferredViewStyle { get; set; }
+        public ClientConstructorContext(Type type, string prefix)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            this.Type = type;
+            this.Prefix = prefix;
+        }
+
+        public Type Type { get; private set; }
+        public string Prefix { get; private set; }
     }
-    
+
+    public class ClientConstructorManager
+    {
+        public static object ExtraJsonParams = new object();
+
+        //JsFunction should take a ExtraJsonParams in their arguments, and return a Promise<any> with the new ExtraJsonParams
+        public event Func<ClientConstructorContext, JsFunction> GlobalPreConstructors;
+
+        public Dictionary<Type, Func<ClientConstructorContext, JsFunction>> PreConstructors = new Dictionary<Type, Func<ClientConstructorContext, JsFunction>>();
+
+        static readonly JsFunction[] Null = new JsFunction[0];
+
+        public string GetPreConstructorScript(ClientConstructorContext ctx)
+        {
+            if (!ctx.Type.IsIdentifiableEntity())
+                return Default();
+
+            List<JsFunction> list = new List<JsFunction>();
+
+            if (GlobalPreConstructors != null)
+                list.AddRange(GlobalPreConstructors.GetInvocationListTyped().Select(f => f(ctx)));
+
+            var pre = PreConstructors.TryGetC(ctx.Type);
+
+            if (pre != null)
+                list.Add(pre(ctx));
+            else
+                list.Add(OperationClient.Manager.ClientConstruct(ctx));
+
+            list.RemoveAll(a => a == null);
+
+            if (list.IsEmpty())
+                return Default();
+
+            var modules = list.Select(p => p.Module).Distinct();
+
+            var code = list.AsEnumerable().Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
+@"if(extraArgs == null) return Promise.resolve(null);
+" + InvokeFunction(js) + @"
+.then(function(extraArgs){ 
+" + acum.Indent(4) + @"
+});");
+
+            var result =
+@"function(extraArgs){ 
+    return new Promise(function(resolve){
+        require([{moduleNames}], function({moduleVars}){
+            extraArgs = extraArgs || {};
+{code}
+        });
+    });
+}".Replace("{moduleNames}", modules.ToString(m => "'" + m.Name + "'", ", "))
+  .Replace("{moduleVars}", modules.ToString(m => JsFunction.VarName(m), ", "))
+  .Replace("{code}", code.Indent(12));
+
+            return result;
+        }
+
+        private string Default()
+        {
+            return @"function(extraArgs){ return Promise.resolve(extraArgs || {}); }"; 
+        }
+
+        private string InvokeFunction(JsFunction func)
+        {
+            return JsFunction.VarName(func.Module) + "." + func.FunctionName + "(" +
+                func.Arguments.ToString(a => a == ExtraJsonParams ? "extraArgs" : JsonConvert.SerializeObject(a, func.JsonSerializerSettings), ", ") +
+                ")";
+        }
+    }
+
+    public class ConstructorContext
+    {
+        public Type Type { get; internal set; }
+        public ControllerBase Controller { get; private set; }
+        public OperationInfo OperationInfo { get; private set; }
+        public List<object> Args { get; private set; }
+
+        public ConstructorContext(ControllerBase controller = null, OperationInfo info = null, List<object> args = null)
+        {
+
+            this.Controller = controller;
+            this.OperationInfo = info;
+            this.Args = args ?? new List<object>();
+        }
+    }
+
     public class ConstructorManager
     {
-        public event Func<Type, ModifiableEntity> GeneralConstructor;
-        public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
-
-        public event Func<ConstructContext, ActionResult> VisualGeneralConstructor;
-        public Dictionary<Type, Func<ConstructContext, ActionResult>> VisualConstructors = new Dictionary<Type, Func<ConstructContext, ActionResult>>();
-
-        public virtual ModifiableEntity Construct(Type type)
+        public ConstructorManager()
         {
-            Func<ModifiableEntity> c = Constructors.TryGetC(type);
+            PostConstructors += PostConstructors_AddFilterProperties;
+        }
+
+        public event Func<ConstructorContext, IDisposable> PreConstructors;
+
+        public Dictionary<Type, Func<ConstructorContext, ModifiableEntity>> Constructors = new Dictionary<Type, Func<ConstructorContext, ModifiableEntity>>();
+
+        public event Action<ConstructorContext, ModifiableEntity> PostConstructors;
+
+        public virtual ModifiableEntity ConstructCore(ConstructorContext ctx)
+        {
+            Func<ConstructorContext, ModifiableEntity> c = Constructors.TryGetC(ctx.Type);
             if (c != null)
             {
-                ModifiableEntity result = c();
+                ModifiableEntity result = c(ctx);
                 if (result != null)
                     return result;
             }
 
-            if (GeneralConstructor != null)
-            {
-                ModifiableEntity result = GeneralConstructor(type);
-                if (result != null)
-                    return result;
-            }
+            if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
+                return OperationClient.Manager.Construct(ctx);
 
-            return DefaultContructor(type);
+            return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
         }
 
-        public static ModifiableEntity DefaultContructor(Type type)
+        public static void PostConstructors_AddFilterProperties(ConstructorContext ctx, ModifiableEntity entity)
         {
-            return (ModifiableEntity)Activator.CreateInstance(type, true);
-        }
-
-        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
-        {
-            ConstructContext ctx = new ConstructContext { Controller = controller, Type = type, Prefix = prefix, PreferredViewStyle = preferredStyle };
-            Func<ConstructContext, ActionResult> c = VisualConstructors.TryGetC(type);
-            if (c != null)
-            {
-                ActionResult result = c(ctx);
-                if (result != null)
-                    return result;
-            }
-
-            if (VisualGeneralConstructor != null)
-            {
-                ActionResult result = VisualGeneralConstructor(ctx);
-                if (result != null)
-                    return result;
-            }
-
-            if (preferredStyle == VisualConstructStyle.Navigate)
-                return JsonAction.RedirectAjax(Navigator.NavigateRoute(type, null));
-
-            ModifiableEntity entity = Constructor.Construct(type);
-            return EncapsulateView(controller, entity, prefix, preferredStyle, partialViewName, readOnly, showOperations, saveProtected); 
-        }
-
-        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName, bool? readOnly, bool showOperations, bool? saveProtected)
-        {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
-
-            if (ident == null)
-                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities");
-
-            AddFilterProperties(entity, controller);
-
-            switch (preferredStyle)
-            {
-                case VisualConstructStyle.PopupView:
-                    var viewOptions = new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
-                    { 
-                        PartialViewName = partialViewName,
-                        ReadOnly = readOnly,
-                        SaveProtected = saveProtected,
-                        ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, viewOptions);
-                case VisualConstructStyle.PopupNavigate:
-                    var navigateOptions = new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) 
-                    { 
-                        PartialViewName = partialViewName,
-                        ReadOnly = readOnly,
-                        ShowOperations = showOperations
-                    };
-                    return Navigator.PopupOpen(controller, navigateOptions);
-                case VisualConstructStyle.PartialView:
-                    return Navigator.PartialView(controller, ident, prefix, partialViewName);
-                case VisualConstructStyle.View:
-                    return Navigator.NormalPage(controller, new NavigateOptions(ident) { PartialViewName = partialViewName });
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
-
-        public static void AddFilterProperties(ModifiableEntity obj, ControllerBase controller)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("result");
-
-            HttpContextBase httpContext = controller.ControllerContext.HttpContext;
+            HttpContextBase httpContext = ctx.Controller.ControllerContext.HttpContext;
 
             if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
                 return;
 
-            Type type = obj.GetType();
+            if (!(entity is IdentifiableEntity))
+                return;
 
-            object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
+            object queryName = Finder.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
+
+            if (entity.GetType() != queryName as Type)
+                return;
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryDescription)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
-            var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            var pairs = from pi in ctx.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         join fo in filters on pi.Name equals fo.Token.Key
                         //where CanConvert(fo.Value, pi.PropertyType) && fo.Value != null
                         where fo.Value != null
                         select new { pi, fo };
 
             foreach (var p in pairs)
-                p.pi.SetValue(obj, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
+                p.pi.SetValue(entity, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
+
+            return;
+        }
+
+        public virtual ModifiableEntity SurroundConstruct(ConstructorContext ctx, Func<ConstructorContext, ModifiableEntity> constructor)
+        {
+            using (Disposable.Combine(PreConstructors, f => f(ctx)))
+            {
+                var entity = constructor(ctx);
+
+                if (entity == null)
+                    return null;
+
+                if (PostConstructors != null)
+                    foreach (var post in PostConstructors.GetInvocationListTyped())
+                    {
+                        post(ctx, entity);
+                    }
+
+                return entity;
+            }
         }
     }
 

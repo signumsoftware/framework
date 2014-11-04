@@ -24,8 +24,32 @@ module SF {
         }
     }
 
-    once("setupAjaxRedirectPrefilter", () =>
-        setupAjaxRedirect());
+    var ajaxExtraParameters: {(extraArgs : FormObject) : void } [] = [];
+    export function registerAjaxExtraParameters(getExtraParams: (extraArgs : FormObject) => void) {
+        if (getExtraParams != null)
+            ajaxExtraParameters.push(getExtraParams);
+    }
+    export function addAjaxExtraParameters(originalParams : FormObject) {
+        if (ajaxExtraParameters.length > 0) {
+            ajaxExtraParameters.forEach(addExtraParametersFunc => {
+                addExtraParametersFunc(originalParams);
+            });
+        }
+    }
+
+    once("setupAjaxRedirectPrefilter", () => {
+        setupAjaxRedirect();
+        setupAjaxExtraParameters();
+    });
+
+    function setupAjaxExtraParameters() {
+
+        $.ajaxPrefilter((options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => {
+            var data = $.extend({}, originalOptions.data);
+            addAjaxExtraParameters(data);
+            options.data = $.param(data);
+        });
+    }
 
     function setupAjaxRedirect() {
 
@@ -162,22 +186,8 @@ module SF {
         return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
     }
 
-    export function cloneWithValues(elements: JQuery): JQuery {
-        var clone = elements.clone(true);
-
-        var sourceSelect = elements.filter("select").add(elements.find("select"));
-        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
-
-        for (var i = 0, l = sourceSelect.length; i < l; i++) {
-            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
-        }
-
-        return clone;
-    }
-
-
-
     export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
+
         return new Promise<any>((resolve, reject) => {
             settings.success = resolve;
             settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
@@ -187,6 +197,7 @@ module SF {
     }
 
     export function ajaxGet(settings: JQueryAjaxSettings): Promise<any> {
+
         return new Promise<any>((resolve, reject) => {
             settings.success = resolve;
             settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
@@ -201,7 +212,7 @@ module SF {
             Promise.resolve<void>(null));
     }
 
-    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
+   export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData))
@@ -217,7 +228,7 @@ module SF {
         (<HTMLFormElement>$form.attr("action", urlController)[0]).submit();
     }
 
-    export function submitOnly(urlController: string, requestExtraJsonData: any) {
+    export function submitOnly(urlController: string, requestExtraJsonData: any, openNewWindow?: boolean) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
@@ -226,6 +237,9 @@ module SF {
                 method: 'post',
                 action: urlController
             });
+
+        if (openNewWindow)
+            $form.attr("target", "_blank");
 
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
@@ -240,11 +254,20 @@ module SF {
 
         var currentForm = $("form");
         currentForm.after($form);
-
+        
         (<HTMLFormElement>$form[0]).submit();
         $form.remove();
 
         return false;
+    }
+
+    export function isTouchDevice() {
+        try {
+            document.createEvent("TouchEvent");
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 }
 
@@ -280,6 +303,8 @@ interface Array<T> {
     groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
+    toObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T[] };
 }
 
 once("arrayExtensions", () => {
@@ -332,6 +357,33 @@ once("arrayExtensions", () => {
             return 0;
         });
         return cloned;
+    };
+
+    Array.prototype.toObject = function (keySelector: (element: any) => any): any {
+        var obj = {}; 
+
+        (<Array<any>>this).forEach(item=> {
+            var key = keySelector(item);
+
+            if (obj[key])
+                throw new Error("Repeated key {0}".format(key)); 
+
+            obj[key] = item;
+        }); 
+
+        return obj;
+    };
+
+    Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any): any {
+        var obj = {};
+
+        (<Array<any>>this).forEach(item=> {
+            var key = keySelector(item);
+
+            obj[key] = item;
+        });
+
+        return obj;
     };
 });
 
@@ -560,7 +612,7 @@ once("stringExtensions", () => {
             result = $(context).filter(selector);
 
         if (result.length > 1)
-            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this.toString()));
 
         return result;
     };
@@ -651,5 +703,25 @@ interface DataTransfer {
 
 
 
+https://github.com/spencertipping/jquery.fix.clone/blob/master/jquery.fix.clone.js
 
+(function (original) {
+    jQuery.fn.clone = function () {
+        var result = original.apply(this, arguments),
+            my_textareas = this.find('textarea').add(this.filter('textarea')),
+            result_textareas = result.find('textarea').add(result.filter('textarea')),
+            my_selects = this.find('select').add(this.filter('select')),
+            result_selects = result.find('select').add(result.filter('select'));
+
+        for (var i = 0, l = my_textareas.length; i < l; ++i) $(result_textareas[i]).val($(my_textareas[i]).val());
+        for (var i = 0, l = my_selects.length; i < l; ++i) {
+            for (var j = 0, m = my_selects[i].options.length; j < m; ++j) {
+                if (my_selects[i].options[j].selected === true) {
+                    result_selects[i].options[j].selected = true;
+                }
+            }
+        }
+        return result;
+    };
+})(jQuery.fn.clone);
 

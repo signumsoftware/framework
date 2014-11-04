@@ -79,34 +79,69 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
-        public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count)
+        public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : IdentifiableEntity
         {
-            List<Lite<T>> results = new List<Lite<T>>();
-
-            int? id = subString.ToInt();
-            if (id.HasValue)
+            using(ExecutionMode.UserInterface())
             {
-                Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
 
-                if (entity != null)
-                    results.Add(entity);
+                List<Lite<T>> results = new List<Lite<T>>();
 
-                if (results.Count >= count)
-                    return results;
+                int? id = subString.ToInt();
+                if (id.HasValue)
+                {
+                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
+
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Take(count - results.Count));
+
+                return results;
             }
+        }
 
-            if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
-                subString = subString.Trim('\'', '"');
+        public static List<Lite<T>> Autocomplete<T>(this IEnumerable<Lite<T>> query, string subString, int count)
+            where T : IdentifiableEntity
+        {
+            using (ExecutionMode.UserInterface())
+            {
+                List<Lite<T>> results = new List<Lite<T>>();
 
-            var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                int? id = subString.ToInt();
+                if (id.HasValue)
+                {
+                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
-            results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
-                .OrderBy(a => a.ToString().Length)
-                .Select(a => a.ToLite())
-                .Take(count - results.Count));
+                    if (entity != null)
+                        results.Add(entity);
 
-            return results;
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
+
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                results.AddRange(query.Where(a =>  a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Take(count - results.Count));
+
+                return results;
+            }
         }
 
         static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> miLiteById =

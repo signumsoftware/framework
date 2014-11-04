@@ -23,11 +23,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", listDetail.Prefix).Class("SF-entity-list-detail SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", listDetail.Prefix).Class("SF-entity-list-detail SF-control-container")))
             {
                 sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", listDetail.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", listDetail.Compose("hidden")).Class("hide")))
                 {
                 }
 
@@ -39,7 +39,7 @@ namespace Signum.Web
                 if (listDetail.ListHtmlProps.Any())
                     sbSelectContainer.Attrs(listDetail.ListHtmlProps);
 
-                using (sbSelect.Surround(sbSelectContainer))
+                using (sbSelect.SurroundLine(sbSelectContainer))
                 {
                     if (listDetail.UntypedValue != null)
                     {
@@ -48,11 +48,11 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", listDetail.Compose("inputGroup")).Class("input-group")))
+                using (sb.SurroundLine(new HtmlTag("div", listDetail.Compose("inputGroup")).Class("input-group")))
                 {
                     sb.Add(sbSelect.ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", listDetail.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
+                    using (sb.SurroundLine(new HtmlTag("span", listDetail.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
                     {
                         sb.AddLine(EntityButtonHelper.Create(helper, listDetail, btn: true));
                         sb.AddLine(EntityButtonHelper.Find(helper, listDetail, btn: true));
@@ -64,11 +64,12 @@ namespace Signum.Web
 
                 if (listDetail.ElementType.IsEmbeddedEntity() && listDetail.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
+                    T embedded = (T)(object)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(typeof(T));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>(embedded, (TypeContext)listDetail.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail), templateTC.Value.ToString()));
                 }
 
-                sb.AddLine(listDetail.ConstructorScript(JsFunction.LinesModule, "EntityListDetail"));
+                sb.AddLine(listDetail.ConstructorScript(JsModule.Lines, "EntityListDetail"));
             }
 
             var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelText, sb.ToHtml());
@@ -78,7 +79,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb2 = new HtmlStringBuilder();
             sb2.Add(formGroup);
-            using (sb2.Surround(new HtmlTag("fieldset")))
+            using (sb2.SurroundLine(new HtmlTag("fieldset")))
                 sb2.AddLine(helper.Div(listDetail.DetailDiv, null, "SF-entity-list-detail-detaildiv"));
 
             return sb2.ToHtml();
@@ -88,7 +89,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.WriteIndex(helper, listDetail, itemTC, itemTC.Index));
+            sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))

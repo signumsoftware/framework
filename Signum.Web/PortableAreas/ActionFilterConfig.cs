@@ -67,8 +67,7 @@ namespace Signum.Web.PortableAreas
                 var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo); 
 
                 filterInfo.AddFilters(
-                    addFilterDelegate.GetInvocationList()
-                    .Cast<Func<ConditionalFilterContext, FilterAttribute>>()
+                    addFilterDelegate.GetInvocationListTyped()
                     .Select(del => del(ctx)).NotNull());
             }
         }
@@ -161,8 +160,7 @@ namespace Signum.Web.PortableAreas
                 var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo); 
 
                 filterInfo.AddFilters(
-                    addFilterDelegate.GetInvocationList()
-                    .Cast<Func<ConditionalFilterContext, FilterAttribute>>()
+                    addFilterDelegate.GetInvocationListTyped()
                     .Select(del => del(ctx)).NotNull());
             }
 

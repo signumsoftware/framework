@@ -72,16 +72,23 @@ namespace Signum.Engine.DynamicQuery
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
 
-        T Execute<T>(string description, object queryName, Func<DynamicQueryBucket, T> executor)
+
+
+
+
+        T Execute<T>(ExecuteType executeType, object queryName, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log(description, () => QueryUtils.GetQueryUniqueKey(queryName)))
+            using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetQueryUniqueKey(queryName)))
             {
                 try
                 {
                     var qb = GetQuery(queryName);
 
-                    return executor(qb); 
+                    using (Disposable.Combine(QueryExecuted, f => f(executeType, queryName)))
+                    {
+                        return executor(qb);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -91,31 +98,42 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        public event Func<ExecuteType, object, IDisposable> QueryExecuted;
+
+        public enum ExecuteType
+        {
+            ExecuteQuery,
+            ExecuteQueryCount,
+            ExecuteGroupQuery,
+            ExecuteUniqueEntity,
+            QueryDescription
+        }
+
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Execute("ExecuteQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQuery(request));
+            return Execute(ExecuteType.ExecuteQuery, request.QueryName, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Execute("ExecuteQueryCount", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryCount(request));
+            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, dqb => dqb.Core.Value.ExecuteQueryCount(request));
         }
 
-        internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+        public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
-            return Execute("ExecuteGroupQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Execute("ExecuteUniqueEntity", request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return Execute("QueryDescription", queryName, dqb => dqb.GetDescription());
+            return Execute(ExecuteType.QueryDescription, queryName, dqb => dqb.GetDescription());
         }
-
+     
         public event Func<object, bool> AllowQuery;
 
         public bool QueryAllowed(object queryName)
@@ -246,12 +264,7 @@ namespace Signum.Engine.DynamicQuery
             return extension;
         }
 
-        public void Unregister(Type type, string text)
-        {
-            RegisteredExtensions.GetDefinition(type);
-        }
-
-        internal object[] BatchExecute(BaseQueryRequest[] requests)
+        public object[] BatchExecute(BaseQueryRequest[] requests)
         {
             return requests.Select(r =>
             {
@@ -302,7 +315,8 @@ namespace Signum.Engine.DynamicQuery
         public bool IsProjection;
         public bool Inherit = true;
 
-        public Implementations? AllImplementations;
+        public Implementations? ForceImplementations;
+        public PropertyRoute ForcePropertyRoute;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -342,11 +356,13 @@ namespace Signum.Engine.DynamicQuery
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
-                else
-                {
-                    result.Implementations = AllImplementations;
-                }
 
+                if (ForcePropertyRoute != null)
+                    result.PropertyRoute = ForcePropertyRoute;
+
+                if (ForceImplementations != null)
+                    result.Implementations = ForceImplementations;
+              
                 result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
 
                 return result;

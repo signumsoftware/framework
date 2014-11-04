@@ -85,8 +85,12 @@ namespace Signum.Web
         {
             this.QueryName = queryName;
             this.FilterOptions.Add(new FilterOption(parentColumn, parentValue) { Frozen = true });
-            this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
-            this.ColumnOptions.Add(new ColumnOption(parentColumn));
+
+            if (QueryUtils.IsColumnToken(parentColumn))
+            {
+                this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
+                this.ColumnOptions.Add(new ColumnOption(parentColumn));
+            }
             this.SearchOnLoad = true;
             this.ShowFilters = false;
         }
@@ -101,7 +105,7 @@ namespace Signum.Web
         bool? allowChangeColumns;
         public bool AllowChangeColumns
         {
-            get { return allowChangeColumns ?? Navigator.Manager.AllowChangeColumns(); }
+            get { return allowChangeColumns ?? Finder.Manager.AllowChangeColumns(); }
             set { allowChangeColumns = value; }
         }
 
@@ -183,7 +187,7 @@ namespace Signum.Web
             {
                 QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-                Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
+                FilterOption.SetFilterTokens(FilterOptions, queryDescription, canAggregate: false);
             }
 
             var elements = Pagination != null ? Pagination.GetElementsPerPage() : null;
@@ -211,9 +215,9 @@ namespace Signum.Web
             }.NotNull().ToString("&");
 
             if (options.HasText())
-                return Navigator.FindRoute(QueryName) + "?" + options;
+                return Finder.FindRoute(QueryName) + "?" + options;
             else
-                return Navigator.FindRoute(QueryName);
+                return Finder.FindRoute(QueryName);
         }
 
         public JObject ToJS(string parentPrefix, string newPart)
@@ -229,10 +233,10 @@ namespace Signum.Web
             {
                 QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-                Navigator.SetTokens(this.FilterOptions, queryDescription, false);
+                FilterOption.SetFilterTokens(this.FilterOptions, queryDescription, false);
             }
 
-            if (QueryName != null) op.Add("webQueryName", Navigator.ResolveWebQueryName(QueryName));
+            if (QueryName != null) op.Add("webQueryName", Finder.ResolveWebQueryName(QueryName));
             if (SearchOnLoad == true) op.Add("searchOnLoad", true);
             if (!Navigate) op.Add("navigate", false);
             if (!Create) op.Add("create", false);
@@ -312,7 +316,7 @@ namespace Signum.Web
      
     }
 
-    public class FindUniqueOptions
+    public class UniqueOptions
     {
         public object QueryName { get; set; }
 
@@ -330,12 +334,12 @@ namespace Signum.Web
             set { this.orderOptions = value; }
         }
 
-        public FindUniqueOptions()
+        public UniqueOptions()
         {
             UniqueType = UniqueType.Single;
         }
 
-        public FindUniqueOptions(object queryName)
+        public UniqueOptions(object queryName)
         {
             UniqueType = UniqueType.Single;
             QueryName = queryName;
@@ -395,7 +399,7 @@ namespace Signum.Web
                 return null;
 
             bool hasQuote = p.Contains("\"");
-            if (hasQuote || p.Contains(";") || p.Contains(";"))
+            if (hasQuote || p.Contains(",") || p.Contains(";"))
             {
                 if (hasQuote)
                     p = p.Replace("\"", "\"\"");
@@ -407,6 +411,12 @@ namespace Signum.Web
         public JObject ToJS()
         {
             return new JObject { { "columnName", ColumnName }, { "operation", (int)Operation }, { "value", StringValue() } };
+        }
+
+        public static void SetFilterTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
+        {
+            foreach (var f in filters)
+                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
     }
 
@@ -444,6 +454,12 @@ namespace Signum.Web
         public JObject ToJS()
         {
             return new JObject { { "columnName", ColumnName }, { "orderType", (int)OrderType } };
+        }
+
+        public static void SetOrderTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
+        {
+            foreach (var o in orders)
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
     }
 
@@ -483,6 +499,13 @@ namespace Signum.Web
         {
             return new JObject { { "columnName", ColumnName }, { "displayName", DisplayName } };
         }
+
+        public static void SetColumnTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
+        {
+            foreach (var o in columns)
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
+        }
+
     }
 
     public enum FindMode

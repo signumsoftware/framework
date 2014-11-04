@@ -31,7 +31,7 @@ namespace Signum.Web
         {
             Find = false;
             LabelClass = "sf-label-repeater-line";
-            Reorder = false;
+            Move = false;
         }
     }
 

@@ -22,13 +22,13 @@ namespace Signum.Engine.Linq
             return ap.aliases;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             this.aliases.Add(select.Alias);
             return base.VisitSelect(select);
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             this.aliases.Add(table.Alias);
             return base.VisitTable(table);
@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
             return ap.externals;
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
              externals.Add(column.Alias);
 

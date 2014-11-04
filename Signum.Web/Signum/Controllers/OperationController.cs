@@ -22,7 +22,7 @@ namespace Signum.Web.Controllers
 {
     public class OperationController : Controller
     {
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Execute()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -35,11 +35,11 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())
-                    return context.JsonErrors();
+                    return context.ToJsonModelState();
 
                 entity = OperationLogic.ServiceExecute(entity, operationSymbol);
             }
@@ -47,7 +47,7 @@ namespace Signum.Web.Controllers
            return this.DefaultExecuteResult(entity);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Delete()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -62,7 +62,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
 
                 OperationLogic.ServiceDelete(entity, operationSymbol, null);
@@ -71,7 +71,7 @@ namespace Signum.Web.Controllers
             }
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFrom()
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
@@ -84,11 +84,11 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.HasErrors())
-                    return context.JsonErrors();
+                    return context.ToJsonModelState();
 
                 entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
             }
@@ -96,7 +96,7 @@ namespace Signum.Web.Controllers
             return this.DefaultConstructResult(entity);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMany()
         {
             OperationSymbol operationKey = this.GetOperationKeyAssert();

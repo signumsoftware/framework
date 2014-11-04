@@ -25,9 +25,9 @@ namespace Signum.Web
         public abstract Delegate UntypedMappingLine { get; }
         public abstract Delegate UntypedMappingMain { get; }
 
-        internal abstract bool OnIsCreable(bool isSearchEntity);
+        internal abstract bool OnIsCreable(bool isSearch);
         internal abstract bool OnIsViewable(string partialViewName);
-        internal abstract bool OnIsNavigable(string partialViewName, bool isSearchEntity);
+        internal abstract bool OnIsNavigable(string partialViewName, bool isSearch);
         internal abstract bool OnIsReadonly();
 
         public abstract IViewOverrides GetViewOverrides();
@@ -100,9 +100,9 @@ namespace Signum.Web
                     break;
 
                 case EntityKind.String:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = false;
-                    IsNavigable = EntityWhen.IsSearchEntity;
+                    IsNavigable = EntityWhen.IsSearch;
                     MappingMain = new EntityMapping<T>(true).GetValue;
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
@@ -115,10 +115,11 @@ namespace Signum.Web
                     break;
 
                 case EntityKind.Main:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
-                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    MappingMain = new EntityMapping<T>(true).GetValue;
+                    MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
 
                 case EntityKind.Part:
@@ -140,9 +141,9 @@ namespace Signum.Web
             }
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsCreable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsViewable(string partialViewName)
@@ -153,12 +154,12 @@ namespace Signum.Web
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearch)
         {
             if (partialViewName == null && PartialViewName == null)
                 return false;
 
-            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsNavigable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsReadonly()
@@ -169,7 +170,7 @@ namespace Signum.Web
 
         ViewOverrides<T> viewOverride;
 
-        public ViewOverrides<T> CreateViewOverride()
+        public ViewOverrides<T> CreateViewOverrides()
         {
             return viewOverride ?? (viewOverride = new ViewOverrides<T>());
         }
@@ -216,10 +217,10 @@ namespace Signum.Web
             IsCreable = true;
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            if (isSearchEntity)
-                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearchEntity");
+            if (isSearch)
+                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearch");
 
             return IsCreable;
         }
@@ -232,7 +233,7 @@ namespace Signum.Web
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearch)
         {
             return false;
         }
@@ -261,7 +262,7 @@ namespace Signum.Web
     public enum EntityWhen
     {
         Always = 3,
-        IsSearchEntity = 2,
+        IsSearch = 2,
         IsLine = 1,
         Never = 0,
     }

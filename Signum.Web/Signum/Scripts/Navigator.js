@@ -12,15 +12,36 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.requestPartialView = requestPartialView;
 
-    function navigate(runtimeInfo, openNewWindow) {
+    function navigate(runtimeInfo, extraJsonArguments, openNewWindowOrEvent) {
         var url = runtimeInfo.isNew ? SF.Urls.create.replace("MyType", runtimeInfo.type) : SF.Urls.view.replace("MyType", runtimeInfo.type).replace("MyId", runtimeInfo.id);
 
-        if (openNewWindow)
-            window.open(url, "_blank");
-        else
-            window.location.href = url;
+        var openNewWindow = exports.isOpenNewWindow(openNewWindowOrEvent);
+
+        if (extraJsonArguments && !$.isEmptyObject(extraJsonArguments)) {
+            SF.submitOnly(url, extraJsonArguments, openNewWindow);
+        } else {
+            if (openNewWindow)
+                window.open(url, "_blank");
+            else
+                window.location.href = url;
+        }
     }
     exports.navigate = navigate;
+
+    function isOpenNewWindow(openNewWindowOrEvent) {
+        if (openNewWindowOrEvent == null)
+            return false;
+
+        if (typeof openNewWindowOrEvent === "boolean")
+            return openNewWindowOrEvent;
+
+        var event = openNewWindowOrEvent;
+        if (event.which === undefined)
+            throw new Error("openNewWindowOrEvent shold be a boolean or an Event");
+
+        return event.which == 2 || event.ctrlKey;
+    }
+    exports.isOpenNewWindow = isOpenNewWindow;
 
     function navigatePopup(entityHtml, viewOptions) {
         viewOptions = $.extend({
@@ -82,7 +103,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var clone = new Entities.EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr, entityHtml.link);
 
-            clone.html = SF.cloneWithValues(entityHtml.html);
+            clone.html = entityHtml.html.clone(true);
 
             return openPopupView(clone, viewOptions);
         }
@@ -141,7 +162,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                 return canClose(true);
             } else {
-                if (main.hasClass("sf-changed") && !confirm(lang.signum.looseCurrentChanges))
+                if (main.hasClass("sf-changed") && !confirm(lang.signum.loseCurrentChanges))
                     return Promise.resolve(false);
 
                 return canClose(false);
@@ -151,7 +172,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
             entityHtml.html = pair.modalDiv;
 
-            return { isOk: pair.button.id == okButtonId, entityHtml: entityHtml };
+            return { isOk: pair.button && pair.button.id == okButtonId, entityHtml: entityHtml };
         });
     }
     exports.openEntityHtmlModal = openEntityHtmlModal;
@@ -190,7 +211,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
 
             modalDiv.modal({
-                keyboard: false,
+                keyboard: true,
                 backdrop: "static"
             });
         });
@@ -324,8 +345,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (options.saveProtected != null)
             obj["saveProtected"] = options.saveProtected;
 
-        if (options.showOperations != true)
-            obj["showOperations"] = false;
+        if (options.showOperations != null)
+            obj["showOperations"] = options.showOperations;
 
         if (!SF.isEmpty(options.partialViewName))
             obj["partialViewName"] = options.partialViewName;
@@ -333,9 +354,26 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(obj, options.requestExtraJsonData);
     }
 
+    function chooseConstructor(extraJsonData, prefix, title, options) {
+        return exports.chooser(prefix, title, options).then(function (co) {
+            if (!co)
+                return null;
+
+            extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value });
+
+            if (co.operationConstructor)
+                return co.operationConstructor(extraJsonData);
+
+            return extraJsonData;
+        });
+    }
+    exports.chooseConstructor = chooseConstructor;
+
     function typeChooser(prefix, types) {
-        return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
-            return t == null ? null : t.value;
+        return exports.chooser(prefix, lang.signum.chooseAType, types, function (a) {
+            return a.niceName;
+        }, function (a) {
+            return a.name;
         });
     }
     exports.typeChooser = typeChooser;
@@ -425,8 +463,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var html = pair.entityHtml.html;
 
-            var date = html.find(options.prefix.child("Date"));
-            var time = html.find(options.prefix.child("Time"));
+            var date = html.find("#" + options.prefix.child("value").child("Date"));
+            var time = html.find("#" + options.prefix.child("value").child("Time"));
 
             if (date.length && time.length)
                 return date.val() + " " + time.val();

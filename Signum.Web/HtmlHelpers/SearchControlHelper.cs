@@ -15,24 +15,25 @@ using Signum.Utilities.Reflection;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 using Signum.Web.Controllers;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web
 {
     public class SearchControl
     {
-        public string Prefix;
+        public string Prefix { get; internal set; }
         public ToolBarButton[] ToolBarButton { get; set; }
+        public bool AvoidFullScreenButton { get; set; }
     }
 
     public class CountSearchControl
     {
         public bool Navigate { get; set; }
-        public string PopupViewPrefix { get; set; }
+        public bool View { get; set; }
         public string QueryLabelText { get; set; }
         public string Href { get; set; }
     }
-
 
     public static class SearchControlHelper
     {
@@ -49,67 +50,31 @@ namespace Signum.Web
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(findOptions.FilterOptions, description, false);
-            Navigator.SetTokens(findOptions.OrderOptions, description, false);
-            Navigator.SetTokens(findOptions.ColumnOptions, description, false);
-            Navigator.Manager.SetSearchViewableAndCreable(findOptions, description);
-            Navigator.Manager.SetDefaultOrder(findOptions, description);
+            FilterOption.SetFilterTokens(findOptions.FilterOptions, description, false);
+            OrderOption.SetOrderTokens(findOptions.OrderOptions, description, false);
+            ColumnOption.SetColumnTokens(findOptions.ColumnOptions, description, false);
+            Finder.Manager.SetSearchViewableAndCreable(findOptions, description);
+            FinderManager.SetDefaultOrder(findOptions, description);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
             viewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
-                helper.ViewData[ViewDataKeys.Title] :
-                Navigator.Manager.SearchTitle(findOptions.QueryName);
+                helper.ViewData[ViewDataKeys.Title] : QueryUtils.GetNiceName(findOptions.QueryName);
 
             if (!options.ToolBarButton.IsNullOrEmpty())
                 viewData[ViewDataKeys.ManualToolbarButtons] = options.ToolBarButton;
 
-            return helper.Partial(Navigator.Manager.SearchControlView, viewData);
+            if (options.AvoidFullScreenButton)
+                viewData[ViewDataKeys.AvoidFullScreenButton] = true;
+
+            return helper.Partial(Finder.Manager.SearchControlView, viewData);
         }
 
-       
+      
 
-        private static MvcHtmlString CountSearchControlInternal(FindOptions findOptions, Web.CountSearchControl options)
-        {
-            findOptions.SearchOnLoad = true;
-
-            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
-            {
-                FilterOptions = findOptions.FilterOptions
-            });
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            if (options.Navigate)
-            {
-                sb.Add(new HtmlTag("a")
-                    .Class("count-search").Class(count > 0 ? "count-with-results badge" : "count-no-results")
-                    .Attr("href", options.Href.HasText() ? options.Href : findOptions.ToString())
-                    .SetInnerText(count.ToString()));
-            }
-            else
-            {
-                sb.Add(new HtmlTag("span")
-                    .Class("count-search").Class(count > 0 ? "count-with-results badge" : "count-no-results")
-                    .SetInnerText(count.ToString()));
-            }
-
-            if (options.PopupViewPrefix != null)
-            {
-                sb.Add(new HtmlTag("a", options.PopupViewPrefix + "csbtnView")
-                  .Class("sf-line-button sf-view")
-                  .Attr("title", EntityControlMessage.View.NiceToString())
-                  .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", findOptions.ToJS(options.PopupViewPrefix)).ToString())
-                  .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right")));
-            }
-
-            return sb.ToHtml();
-        }
-
-
-        public static MvcHtmlString CountSearchControlSpan(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier = null)
+        public static MvcHtmlString CountSearchControlSpan(this HtmlHelper helper, FindOptions findOptions, Context context, Action<CountSearchControl> settingsModifier = null)
         {
             var options = new CountSearchControl();
             if (settingsModifier != null)
@@ -117,38 +82,76 @@ namespace Signum.Web
 
             return "{0} {1}".FormatHtml(
             options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
-            CountSearchControlInternal(findOptions, options));
+            CountSearchControlInternal(findOptions, options, context));
         }
 
-        public static MvcHtmlString CountSearchControlValue(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier)
+        public static MvcHtmlString CountSearchControlValue(this HtmlHelper helper, FindOptions findOptions, Context context, Action<CountSearchControl> settingsModifier)
         {
             var options = new CountSearchControl();
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            return CountSearchControlInternal(findOptions, options);
+            return CountSearchControlInternal(findOptions, options, context);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, Context context,  FindOptions findOptions, Action<CountSearchControl> settingsModifier)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, Context context, Action<CountSearchControl> settingsModifier)
         {
             var options = new CountSearchControl();
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            var val  = CountSearchControlInternal(findOptions, options); 
+            var val = CountSearchControlInternal(findOptions, options, context); 
 
-            return helper.FormGroup(context, null, options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
+            return helper.FormGroup(context, context.Prefix, options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName),
                    new HtmlTag("p").Class("form-control-static").InnerHtml(val));
         }
 
-        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
+        private static MvcHtmlString CountSearchControlInternal(FindOptions findOptions, Web.CountSearchControl options, Context context)
         {
-            return new QueryTokenBuilderSettings
+            findOptions.SearchOnLoad = true;
+
+          
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            if (options.Navigate)
             {
-                CanAggregate = false,
-                QueryDescription = qd,
-                Decorators = new Action<QueryToken, HtmlTag>(CanColumnDecorator) +
-                 new Action<QueryToken, HtmlTag>(CanFilterDecorator),
+                sb.Add(new HtmlTag("a").Id(context.Prefix)
+                    .Class("count-search")
+                    .Attr("href", options.Href.HasText() ? options.Href : findOptions.ToString())
+                    .SetInnerText("..."));
+            }
+            else
+            {
+                sb.Add(new HtmlTag("span").Id(context.Prefix)
+                    .Class("count-search")
+                    .SetInnerText("..."));
+            }
+
+            if (options.View)
+            {
+                sb.Add(new HtmlTag("a", context.Compose("csbtnView"))
+                  .Class("sf-line-button sf-view")
+                  .Attr("title", EntityControlMessage.View.NiceToString())
+                  .Attr("onclick", JsModule.Finder["explore"](findOptions.ToJS(context.Compose("New"))).ToString())
+                  .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right")));
+            }
+
+            var function = new JsFunction(JsModule.Finder, "count",
+                findOptions.ToJS(context.Prefix),
+                new JRaw("'" + context.Prefix + "'.get()"));
+
+            sb.Add(MvcHtmlString.Create("<script>" + function.ToHtmlString() + "</script>"));
+
+            return sb.ToHtml();
+        }
+
+
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)
+        {
+            return new QueryTokenBuilderSettings(qd, options)
+            {
+                Decorators = new Action<QueryToken, HtmlTag>(CanColumnDecorator) + new Action<QueryToken, HtmlTag>(CanFilterDecorator),
                 ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Finder"),
                 RequestExtraJSonData = null
             };
@@ -172,7 +175,7 @@ namespace Signum.Web
         public static MvcHtmlString Header(Column col, OrderType? orderType)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("th")
+            using (sb.SurroundLine(new HtmlTag("th")
                 .Attr("draggable", "true")
                 .Attr("data-column-name", col.Name)
                 .Attr("data-nice-name", col.Token.NiceName())))

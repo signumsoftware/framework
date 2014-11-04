@@ -19,7 +19,7 @@ namespace Signum.Engine.Linq
             return (CommandExpression)new CommandSimplifier { removeSelectRowCount = removeSelectRowCount, aliasGenerator = aliasGenerator }.Visit(ce);
         }
 
-        protected override Expression VisitSelectRowCount(SelectRowCountExpression src)
+        protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
         {
             if (removeSelectRowCount)
                 return null;
@@ -27,7 +27,7 @@ namespace Signum.Engine.Linq
             return base.VisitSelectRowCount(src);
         }
 
-        protected override Expression VisitDelete(DeleteExpression delete)
+        protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             var select = delete.Source as SelectExpression;
 

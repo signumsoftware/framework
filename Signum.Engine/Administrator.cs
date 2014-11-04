@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Collections.Concurrent;
 using Signum.Engine.Linq;
 using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -222,22 +223,6 @@ namespace Signum.Engine
             }
         }
 
-        public static void SetSnapshotIsolation(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(databaseName, value));
-        }
-
-        public static void MakeSnapshotIsolationDefault(bool value, string databaseName = null)
-        {
-            if (databaseName == null)
-                databaseName = Connector.Current.DatabaseName();
-
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
-        }
-
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {
@@ -251,7 +236,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Translate(query.Expression, tr => tr.GetMainPreCommand());
+            return prov.Translate(query.Expression, tr => tr.MainCommand);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
@@ -259,7 +244,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
@@ -267,14 +252,14 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
         {
             var prov = ((DbQueryProvider)update.Query.Provider);
 
-            return prov.Update(update, cr => cr.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Update(update, sql => sql, removeSelectRowCount: true);
         }
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
@@ -487,6 +472,106 @@ namespace Signum.Engine
                             Column = c,
                         }).ToList();
             });
+        }
+
+        public static void BulkInsertDisableIdentity<T>(IEnumerable<T> entities,
+          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+          where T : IdentifiableEntity
+        {
+            options |= SqlBulkCopyOptions.KeepIdentity;
+
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            var list = entities.ToList();
+
+            var t = Schema.Current.Table<T>();
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.OnPreBulkInsert(typeof(T));
+
+                using (DisableIdentity<T>())
+                {
+                    DataTable dt = CreateDataTable<T>(list, t);
+
+                    Executor.BulkCopy(dt, t.Name, options);
+
+                    foreach (var item in list)
+                        item.SetNotModified();
+
+                    tr.Commit();
+                }
+            }
+        }
+
+        public static void BulkInsert<T>(IEnumerable<T> entities,
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            where T : IdentifiableEntity
+        {
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            var t = Schema.Current.Table<T>();
+
+            DataTable dt = CreateDataTable<T>(entities, t);
+
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.OnPreBulkInsert(typeof(T));
+
+                Executor.BulkCopy(dt, t.Name, options);
+
+                if (tr != null)
+                    tr.Commit();
+            }
+        }
+
+        static DataTable CreateDataTable<T>(IEnumerable<T> entities, Table t) where T : IdentifiableEntity
+        {
+            SchemaSettings ss = Schema.Current.Settings;
+            DataTable dt = new DataTable();
+            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+                dt.Columns.Add(new DataColumn(c.Name, ss.GetType(c.SqlDbType)));
+
+            foreach (var e in entities)
+            {
+                if (!e.IsNew)
+                    throw new InvalidOperationException("Entites should be new");
+                t.SetToStrField(e);
+                dt.Rows.Add(t.BulkInsertDataRow(e));
+            }
+            return dt;
+        }
+
+
+
+        public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
+            IEnumerable<MListElement<E, V>> entities,
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            where E : Entity
+        {
+            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            SchemaSettings ss = Schema.Current.Settings;
+            DataTable dt = new DataTable();
+            var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
+            foreach (var c in t.Columns.Values.Where(c => !c.Identity))
+                dt.Columns.Add(new DataColumn(c.Name, ss.GetType(c.SqlDbType)));
+
+            foreach (var e in entities)
+            {
+                dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+            }
+
+            using (Transaction tr = options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
+            {
+                Schema.Current.OnPreBulkInsert(typeof(E));
+
+                Executor.BulkCopy(dt, t.Name, options);
+
+                tr.Commit();
+            }
         }
     }
 }

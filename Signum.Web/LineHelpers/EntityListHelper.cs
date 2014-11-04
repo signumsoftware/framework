@@ -23,11 +23,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityList.Prefix).Class("SF-entity-list SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityList.Prefix).Class("SF-entity-list SF-control-container")))
             {
                 sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
-                using (sb.Surround(new HtmlTag("div", entityList.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityList.Compose("hidden")).Class("hide")))
                 {
                 }
 
@@ -39,7 +39,7 @@ namespace Signum.Web
                 if (entityList.ListHtmlProps.Any())
                     sbSelectContainer.Attrs(entityList.ListHtmlProps);
 
-                using (sbSelect.Surround(sbSelectContainer))
+                using (sbSelect.SurroundLine(sbSelectContainer))
                 {
                     if (entityList.UntypedValue != null)
                     {
@@ -48,11 +48,11 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", entityList.Compose("inputGroup")).Class("input-group")))
+                using (sb.SurroundLine(new HtmlTag("div", entityList.Compose("inputGroup")).Class("input-group")))
                 {
                     sb.Add(sbSelect.ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityList.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
+                    using (sb.SurroundLine(new HtmlTag("span", entityList.Compose("shownButton")).Class("input-group-btn btn-group-vertical")))
                     {
                         sb.AddLine(EntityButtonHelper.Create(helper, entityList, btn: true));
                         sb.AddLine(EntityButtonHelper.Find(helper, entityList, btn: true));
@@ -65,10 +65,11 @@ namespace Signum.Web
 
                 if (entityList.ElementType.IsEmbeddedEntity() && entityList.Create)
                 {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
+                    T embedded = (T)(object)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(typeof(T));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>(embedded, (TypeContext)entityList.Parent, 0, null);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityList, isTemplate: true), null));
                 }
-                sb.AddLine(entityList.ConstructorScript(JsFunction.LinesModule, "EntityList"));
+                sb.AddLine(entityList.ConstructorScript(JsModule.Lines, "EntityList"));
             }
 
             return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelText, sb.ToHtml());
@@ -78,7 +79,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.WriteIndex(helper, entityList, itemTC, itemTC.Index));
+            sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
@@ -87,12 +88,26 @@ namespace Signum.Web
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", 
                     new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
 
-            sbOptions.Add(new HtmlTag("option")
+            var optionTag = new HtmlTag("option")
                     .Id(itemTC.Compose(EntityBaseKeys.ToStr))
                     .Class("sf-entity-list-option")
                     .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
-                    .SetInnerText(itemTC.Value.TryToString())
-                    .ToHtml(TagRenderMode.Normal));
+                    .SetInnerText(itemTC.Value.TryToString());
+
+            if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+            {
+                int? idOrNull = null;
+                Type type = itemTC.Value.GetType();
+                if (type.IsLite())
+                    idOrNull = ((Lite<IIdentifiable>)itemTC.Value).IdOrNull;
+
+                if (type.IsIdentifiableEntity())
+                    idOrNull = ((IdentifiableEntity)(object)itemTC.Value).IdOrNull;
+
+                optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
+            }
+        
+            sbOptions.Add(optionTag.ToHtml(TagRenderMode.Normal));
 
             return sb.ToHtml();
         }

@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Data.Common;
 using System.Data.SqlClient;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine
 {
@@ -97,6 +98,11 @@ namespace Signum.Engine
             {
                 simple.ExecuteNonQuery();
             }
+        }
+
+        public static void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            Connector.Current.BulkCopy(dt, destinationTable, options);
         }
     }
 }

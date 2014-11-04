@@ -27,10 +27,10 @@ namespace Signum.Web
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             DetailDiv = this.Compose(EntityBaseKeys.Detail);
-            Reorder = false;
+            Move = false;
         }
 
-        protected override JObject OptionsJSInternal()
+        protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             if (DetailDiv.HasText())

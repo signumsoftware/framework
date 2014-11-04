@@ -24,9 +24,33 @@ var SF;
     }
     SF.log = log;
 
+    var ajaxExtraParameters = [];
+    function registerAjaxExtraParameters(getExtraParams) {
+        if (getExtraParams != null)
+            ajaxExtraParameters.push(getExtraParams);
+    }
+    SF.registerAjaxExtraParameters = registerAjaxExtraParameters;
+    function addAjaxExtraParameters(originalParams) {
+        if (ajaxExtraParameters.length > 0) {
+            ajaxExtraParameters.forEach(function (addExtraParametersFunc) {
+                addExtraParametersFunc(originalParams);
+            });
+        }
+    }
+    SF.addAjaxExtraParameters = addAjaxExtraParameters;
+
     once("setupAjaxRedirectPrefilter", function () {
-        return setupAjaxRedirect();
+        setupAjaxRedirect();
+        setupAjaxExtraParameters();
     });
+
+    function setupAjaxExtraParameters() {
+        $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+            var data = $.extend({}, originalOptions.data);
+            addAjaxExtraParameters(data);
+            options.data = $.param(data);
+        });
+    }
 
     function setupAjaxRedirect() {
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
@@ -157,20 +181,6 @@ var SF;
     }
     SF.hiddenDiv = hiddenDiv;
 
-    function cloneWithValues(elements) {
-        var clone = elements.clone(true);
-
-        var sourceSelect = elements.filter("select").add(elements.find("select"));
-        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
-
-        for (var i = 0, l = sourceSelect.length; i < l; i++) {
-            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
-        }
-
-        return clone;
-    }
-    SF.cloneWithValues = cloneWithValues;
-
     function ajaxPost(settings) {
         return new Promise(function (resolve, reject) {
             settings.success = resolve;
@@ -221,7 +231,7 @@ var SF;
     }
     SF.submit = submit;
 
-    function submitOnly(urlController, requestExtraJsonData) {
+    function submitOnly(urlController, requestExtraJsonData, openNewWindow) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
@@ -229,6 +239,9 @@ var SF;
             method: 'post',
             action: urlController
         });
+
+        if (openNewWindow)
+            $form.attr("target", "_blank");
 
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
@@ -250,6 +263,16 @@ var SF;
         return false;
     }
     SF.submitOnly = submitOnly;
+
+    function isTouchDevice() {
+        try  {
+            document.createEvent("TouchEvent");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    SF.isTouchDevice = isTouchDevice;
 })(SF || (SF = {}));
 
 once("serializeObject", function () {
@@ -317,6 +340,33 @@ once("arrayExtensions", function () {
             return 0;
         });
         return cloned;
+    };
+
+    Array.prototype.toObject = function (keySelector) {
+        var obj = {};
+
+        this.forEach(function (item) {
+            var key = keySelector(item);
+
+            if (obj[key])
+                throw new Error("Repeated key {0}".format(key));
+
+            obj[key] = item;
+        });
+
+        return obj;
+    };
+
+    Array.prototype.toObjectDistinct = function (keySelector) {
+        var obj = {};
+
+        this.forEach(function (item) {
+            var key = keySelector(item);
+
+            obj[key] = item;
+        });
+
+        return obj;
     };
 });
 
@@ -512,7 +562,7 @@ once("stringExtensions", function () {
             result = $(context).filter(selector);
 
         if (result.length > 1)
-            throw new Error("{0} elements with id = '{1}' found".format(result.length, this));
+            throw new Error("{0} elements with id = '{1}' found".format(result.length, this.toString()));
 
         return result;
     };
@@ -561,4 +611,22 @@ once("dateExtensions", function () {
         return n;
     };
 });
+
+https:
+(function (original) {
+    jQuery.fn.clone = function () {
+        var result = original.apply(this, arguments), my_textareas = this.find('textarea').add(this.filter('textarea')), result_textareas = result.find('textarea').add(result.filter('textarea')), my_selects = this.find('select').add(this.filter('select')), result_selects = result.find('select').add(result.filter('select'));
+
+        for (var i = 0, l = my_textareas.length; i < l; ++i)
+            $(result_textareas[i]).val($(my_textareas[i]).val());
+        for (var i = 0, l = my_selects.length; i < l; ++i) {
+            for (var j = 0, m = my_selects[i].options.length; j < m; ++j) {
+                if (my_selects[i].options[j].selected === true) {
+                    result_selects[i].options[j].selected = true;
+                }
+            }
+        }
+        return result;
+    };
+})(jQuery.fn.clone);
 //# sourceMappingURL=SF.js.map

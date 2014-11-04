@@ -31,6 +31,11 @@ label > input[type=checkbox]
 .input-group.time
 {
     max-width: 100px;
+}
+
+.input-group.time[data-show-seconds=true]
+{
+    max-width: 120px;
 } 
 
 
@@ -152,7 +157,15 @@ ul.sf-strip-vertical>li>.form-control
 {
     list-style: none;
     padding: 0px;
+    
+    margin-bottom: 7px; /*sf-strip-horizontal*/
 }
+
+    .sf-strip.sf-strip-vertical
+    {
+        margin-top: 7px;  /*sf-strip-vertical*/
+    }
+
 
 .sf-strip-horizontal > li > *
 {
@@ -214,12 +227,17 @@ ul.nav-tabs
 .form-xs .form-control
 {
     padding: 0px 3px;
+}
+
+.form-xs .form-control:not(textarea)
+{
     height: 20px;
 }
 
 .form-xs input[type=checkbox].form-control
 {
     height: 16px;
+    padding: 0px;
 }
 
 .form-xs .input-group .btn,
@@ -229,7 +247,17 @@ ul.nav-tabs
     height: 20px;
 }
 
-.form-xs .form-group 
+.form-xs .sf-strip
+{
+    margin-bottom: 0px;
+}
+
+    .form-xs .sf-strip.sf-strip-vertical
+    {
+        margin-top: 0px;  /*sf-strip-vertical*/
+    }
+
+.form-group.form-xs 
 {
     margin-bottom: 6px;
 }
@@ -238,18 +266,6 @@ ul.nav-tabs
 .form-xs fieldset > legend {
     padding: 0px 4px 0 4px;
     font-size: 16px;
-}
-
-
-.form-horizontal.form-xs .control-label, 
-.form-horizontal.form-xs .radio, 
-.form-horizontal.form-xs .checkbox, 
-.form-horizontal.form-xs .radio-inline, 
-.form-horizontal.form-xs .checkbox-inline,
-.form-horizontal.form-xs .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
 }
 
 .form-horizontal .form-xs .control-label, 
@@ -263,28 +279,22 @@ ul.nav-tabs
     padding-top: 0px;
 }
 
-.form-xs .form-horizontal .control-label, 
-.form-xs .form-horizontal .radio, 
-.form-xs .form-horizontal .checkbox, 
-.form-xs .form-horizontal .radio-inline, 
-.form-xs .form-horizontal .checkbox-inline,
-.form-xs .form-horizontal .form-control-static  {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
-}
-
 /*form sm*/
 
 .form-sm .form-control
 {
     padding: 3px 6px;
+}
+
+.form-sm .form-control:not(textarea)
+{
     height: 30px;
 }
 
 .form-sm input[type=checkbox].form-control
 {
     height: 16px;
+    padding: 0px;
 }
 
 .form-sm .input-group .btn,
@@ -293,7 +303,17 @@ ul.nav-tabs
     padding: 4px 6px;
 }
 
-.form-sm .form-group 
+.form-sm .sf-strip
+{
+    margin-bottom: 4px;
+}
+
+    .form-sm .sf-strip.sf-strip-vertical
+    {
+        margin-top: 6px;  /*sf-strip-vertical*/
+    }
+
+.form-group.form-sm 
 {
     margin-bottom: 5px;
 }
@@ -304,34 +324,12 @@ ul.nav-tabs
     font-size: 18px;
 }
 
-.form-horizontal.form-sm .control-label, 
-.form-horizontal.form-sm .radio, 
-.form-horizontal.form-sm .checkbox, 
-.form-horizontal.form-sm .radio-inline, 
-.form-horizontal.form-sm .checkbox-inline,
-.form-horizontal.form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 5px;
-}
-
 .form-horizontal .form-sm .control-label, 
 .form-horizontal .form-sm .radio, 
 .form-horizontal .form-sm .checkbox, 
 .form-horizontal .form-sm .radio-inline, 
 .form-horizontal .form-sm .checkbox-inline,
 .form-horizontal .form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 5px;
-}
-
-.form-sm .form-horizontal .control-label, 
-.form-sm .form-horizontal .radio, 
-.form-sm .form-horizontal .checkbox, 
-.form-sm .form-horizontal .radio-inline, 
-.form-sm .form-horizontal .checkbox-inline,
-.form-sm .form-horizontal .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 5px;
@@ -363,7 +361,7 @@ ul.nav-tabs
 .form-vertical .form-control
 {
     display: block;
-    width: 100%;
+    /*width: initial;*/
     vertical-align: baseline;
 }
 
@@ -389,7 +387,7 @@ ul.dropdown-menu > li > a.disabled
 /*Override absurd width for popups on sm*/
 @media (min-width: 768px)
 {
-    .modal-dialog:not(.modal-dialog)
+    .modal-dialog:not(.modal-sm)
     {
         min-width: 730px;
     }

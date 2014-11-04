@@ -14,14 +14,6 @@ using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Maps
 {
-    public enum DBMS
-    {
-        SqlCompact,
-        SqlServer2005,
-        SqlServer2008,
-        SqlServer2012,
-    }
-
     public class SchemaSettings
     {
         public SchemaSettings()
@@ -29,24 +21,10 @@ namespace Signum.Engine.Maps
 
         }
 
-        public SchemaSettings(DBMS dbms)
-        {
-            DBMS = dbms;
-            if (dbms >= Maps.DBMS.SqlServer2008)
-            {
-                TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-
-                UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-                UdtSqlName.Add(typeof(SqlGeography), "Geography");
-                UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
-            }
-        }
-
+        public Func<Type, string> CanOverrideAttributes = null;
 
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16; 
-
-        public DBMS DBMS { get; private set; }
 
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
@@ -114,6 +92,11 @@ namespace Signum.Engine.Maps
 
         public void OverrideAttributes(PropertyRoute propertyRoute, params Attribute[] attributes)
         {
+            string error = CanOverrideAttributes == null ? null : CanOverrideAttributes(propertyRoute.RootType); 
+
+            if (error != null)
+                throw new InvalidOperationException(error);
+
             AssertCorrect(attributes, AttributeTargets.Field);
 
             OverridenAttributes.Add(propertyRoute, attributes);
@@ -181,13 +164,9 @@ namespace Signum.Engine.Maps
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
         }
 
-        internal IndexType GetIndexType(PropertyRoute propertyRoute)
+        internal UniqueIndexAttribute GetUniqueIndexAttribute(PropertyRoute propertyRoute)
         {
-            UniqueIndexAttribute at = FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
-
-            return at == null ? IndexType.None :
-                at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
-                IndexType.Unique;
+            return FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
         }
 
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
@@ -265,15 +244,6 @@ namespace Signum.Engine.Maps
             desambiguatedNames[type] = cleanName;
         }
 
-        internal void FixType(ref SqlDbType type, ref int? size, ref int? scale)
-        {
-            if (DBMS == Maps.DBMS.SqlCompact && (type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
-            {
-                type = SqlDbType.NText;
-                size = null;
-            }
-        }
-
         public SqlDbTypePair GetSqlDbTypePair(Type type)
         {
             SqlDbType result;
@@ -300,6 +270,45 @@ namespace Signum.Engine.Maps
         public bool IsDbType(Type type)
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
+        }
+
+        internal Type GetType(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.BigInt: return typeof(long);
+                case SqlDbType.Binary: return typeof(byte[]);
+                case SqlDbType.Bit: return typeof(bool);
+                case SqlDbType.Char: return typeof(char);
+                case SqlDbType.Date: return typeof(DateTime);
+                case SqlDbType.DateTime: return typeof(DateTime);
+                case SqlDbType.DateTime2: return typeof(DateTime);
+                case SqlDbType.DateTimeOffset: return typeof(DateTimeOffset);
+                case SqlDbType.Decimal: return typeof(decimal);
+                case SqlDbType.Float: return typeof(double);
+                case SqlDbType.Image: return typeof(byte[]);
+                case SqlDbType.Int: return typeof(int);
+                case SqlDbType.Money: return typeof(decimal);
+                case SqlDbType.NChar: return typeof(string);
+                case SqlDbType.NText: return typeof(string);
+                case SqlDbType.NVarChar: return typeof(string);
+                case SqlDbType.Real: return typeof(float);
+                case SqlDbType.SmallDateTime: return typeof(DateTime);
+                case SqlDbType.SmallInt: return typeof(short);
+                case SqlDbType.SmallMoney: return typeof(decimal);               
+                case SqlDbType.Text: return typeof(string);
+                case SqlDbType.Time: return typeof(TimeSpan);
+                case SqlDbType.Timestamp: return typeof(TimeSpan);
+                case SqlDbType.TinyInt: return typeof(int);               
+                case SqlDbType.UniqueIdentifier: return typeof(Guid);
+                case SqlDbType.VarBinary: return typeof(byte[]);
+                case SqlDbType.VarChar: return typeof(string);
+                case SqlDbType.Xml: return typeof(string);
+                case SqlDbType.Variant:
+                case SqlDbType.Structured:
+                case SqlDbType.Udt: 
+                default: throw new InvalidOperationException();
+            }
         }
     }
 

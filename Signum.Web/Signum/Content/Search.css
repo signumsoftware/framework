@@ -36,6 +36,19 @@ th.drag-right
     box-shadow: inset #AAA -3px 0px 0px 0px;
 }
 
+.sf-search-results > thead > tr > th
+{
+    text-align: center;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee
+}
+
+.sf-search-results > tbody > tr > td
+{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 /*Pagination*/
 
 .sf-pagination-center
@@ -68,7 +81,6 @@ div.sf-pagination-right > ul.pagination > .disabled > span
 #divSearchPage .sf-search-footer
 {
     margin-top: 10px;
-    margin-bottom: 80px;
 }
 
 
@@ -81,6 +93,10 @@ div.sf-pagination-right > ul.pagination > .disabled > span
 }
 
 
+
+.sf-search-results-container {
+    overflow-x:auto;
+}
 
 .sf-popup-fullscreen
 {
@@ -247,4 +263,9 @@ tr.sf-entity-ctxmenu-success
 .count-search
 {
     margin-right: 4px;
+}
+
+ul.sf-context-menu li a:not([disabled])
+{
+    cursor:pointer;
 }

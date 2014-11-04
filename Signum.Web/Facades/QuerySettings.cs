@@ -17,7 +17,6 @@ namespace Signum.Web
     {
         public object QueryName { get; private set; }
 
-        public Func<string> Title { get; set; }
         public Pagination Pagination { get; set; }
         public string WebQueryName { get; set; }
 
@@ -32,46 +31,51 @@ namespace Signum.Web
         public static List<FormatterRule> FormatRules { get; set; }
         public static List<EntityFormatterRule> EntityFormatRules { get; set; }
 
-        public static Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
+        public static Dictionary<PropertyRoute, CellFormatter> PropertyFormatters { get; set; }
 
-        Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> formatters;
-        public Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> Formatters
+        Dictionary<string, CellFormatter> formatters;
+        public Dictionary<string, CellFormatter> Formatters
         {
-            get { return formatters ?? (formatters = new Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>>()); }
+            get { return formatters ?? (formatters = new Dictionary<string, CellFormatter>()); }
             set { formatters = value; }
         }
 
-    
+
         static QuerySettings()
         {
             FormatRules = new List<FormatterRule>
             {
-                new FormatterRule(c=>true, c=> (h,o) =>
+                new FormatterRule("object", c=>true, c=> new CellFormatter((h,o) =>
                 {
                     return o != null ? o.ToString().EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = false },
+                }){ WriteData = false }),
 
-                new FormatterRule(c => c.Type.UnNullify().IsEnum, c => (h,o) => 
+                new FormatterRule("Enum", c => c.Type.UnNullify().IsEnum, c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((Enum)o).NiceToString().EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = true },
-                new FormatterRule(c => c.Type.UnNullify().IsLite(), c => (h,o) => 
+                })),
+
+                new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
                     return h.LightEntityLine((Lite<IIdentifiable>)o, false);
-                }),
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => (h,o) => 
+                })),
+
+                new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = false },
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(TimeSpan), c => (h,o) => 
+                }){ WriteData = false, TextAlign = "right" }),
+
+                new FormatterRule("TimeSpan",  c=>c.Type.UnNullify() == typeof(TimeSpan), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = false },
-                new FormatterRule(c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => (h,o) => 
+                }){ WriteData = false, TextAlign = "right" }),
+
+                new FormatterRule("Number", c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
                 {
                     return o != null? ((IFormattable)o).TryToString(c.Format).EncodeHtml(): MvcHtmlString.Empty;
-                }){ WriteData = false },
-                new FormatterRule(c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => (h,o) => 
+                }){ WriteData = false, TextAlign = "right" }),
+
+                new FormatterRule("Number with Unit", c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
                 {
                     if (o != null)
                     {
@@ -81,54 +85,54 @@ namespace Signum.Web
                         return s.EncodeHtml();
                     }
                     return MvcHtmlString.Empty;
-                }),
-                new FormatterRule(c=>c.Type.UnNullify() == typeof(bool), c => (h,o) => 
+                }){ TextAlign = "right"}),
+
+                new FormatterRule("bool", c=>c.Type.UnNullify() == typeof(bool), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? new HtmlTag("input")
                         .Attr("type", "checkbox")
-                        .Attr("style", "text-align:center")
                         .Attr("disabled", "disabled")
                         .Let(a => (bool)o ? a.Attr("checked", "checked") : a)
                         .ToHtml() : MvcHtmlString.Empty;
-                }),
+                }){ TextAlign = "center"}),
             };
 
             EntityFormatRules = new List<EntityFormatterRule>
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    if (Navigator.IsNavigable(l.EntityType, null, isSearchEntity: true ))
+                    if (Navigator.IsNavigable(l.EntityType, null, isSearch: true ))
                         return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(EntityControlMessage.View.NiceToString()));
                     else
                         return MvcHtmlString.Empty;
                 }),
             };
 
-            PropertyFormatters = new Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>>();
+            PropertyFormatters = new Dictionary<PropertyRoute, CellFormatter>();
         }
 
         public CellFormatter GetFormatter(Column column)
         {
-            Func<HtmlHelper, object, MvcHtmlString> cf;
+            CellFormatter cf;
             if (formatters != null && formatters.TryGetValue(column.Name, out cf))
-                return new CellFormatter { WriteData = true, Formatter = cf };
+                return cf;
 
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {
                 var formatter = QuerySettings.PropertyFormatters.TryGetC(route);
                 if (formatter != null)
-                    return new CellFormatter { WriteData = true, Formatter = formatter };
+                    return formatter;
             }
 
             var last = FormatRules.Last(cfr => cfr.IsApplyable(column));
 
-            return new CellFormatter { WriteData = last.WriteData, Formatter = last.Formatter(column) };
+            return last.Formatter(column);
         }
 
 
-        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> propertyRoute, Func<HtmlHelper, object, MvcHtmlString> formatter)
-         where T : IRootEntity
+        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> propertyRoute, CellFormatter formatter)
+            where T : IRootEntity
         {
             PropertyFormatters.Add(PropertyRoute.Construct(propertyRoute), formatter);
         }
@@ -136,14 +140,16 @@ namespace Signum.Web
 
     public class FormatterRule
     {
-        public Func<Column, Func<HtmlHelper, object, MvcHtmlString>> Formatter { get; set; }
-        public Func<Column, bool> IsApplyable { get; set; }
-        public bool WriteData = true;
+        public string Name { get; private set; }
 
-        public FormatterRule(Func<Column, bool> isApplyable, Func<Column, Func<HtmlHelper, object, MvcHtmlString>> formatter)
+        public Func<Column, CellFormatter> Formatter { get; set; }
+        public Func<Column, bool> IsApplyable { get; set; }
+
+        public FormatterRule(string name, Func<Column, bool> isApplyable, Func<Column, CellFormatter> formatter)
         {
-            Formatter = formatter;
+            Name = name;
             IsApplyable = isApplyable;
+            Formatter = formatter;
         }
     }
 
@@ -161,8 +167,14 @@ namespace Signum.Web
 
     public class CellFormatter
     {
-        public bool WriteData;
+        public bool WriteData = true;
+        public string TextAlign;
         public Func<HtmlHelper, object, MvcHtmlString> Formatter;
+
+        public CellFormatter(Func<HtmlHelper, object, MvcHtmlString> formatter)
+        {
+            this.Formatter = formatter;
+        }
 
         public MvcHtmlString WriteDataAttribute(object value)
         {
@@ -171,7 +183,7 @@ namespace Signum.Web
 
             string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
 
-            return MvcHtmlString.Create("data-value=" + key);
+            return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }
     }
 }

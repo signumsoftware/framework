@@ -103,9 +103,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     }
 
     function isModelState(result) {
-        return typeof result == "Object" && typeof result.ModelState != "undefined";
+        return typeof result == "object" && typeof result.ModelState != "undefined";
     }
     exports.isModelState = isModelState;
+
+    function assertModelStateErrors(result, prefix) {
+        if (!exports.isModelState(result))
+            return;
+
+        var modelState = result.ModelState;
+
+        exports.showErrors({ prefix: prefix }, modelState);
+
+        SF.Notify.error(lang.signum.error, 2000);
+
+        throw modelState;
+    }
+    exports.assertModelStateErrors = assertModelStateErrors;
 
     function showErrors(valOptions, modelState) {
         valOptions = $.extend({
@@ -173,7 +187,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         }).join('');
 
         exports.getPathPrefixes(prefix).forEach(function (currPrefix) {
-            var summary = currPrefix.child(exports.globalValidationSummary).tryGet();
+            var summary = valOptions["errorSummaryId"] ? $('#' + valOptions["errorSummaryId"]) : currPrefix.child(exports.globalValidationSummary).tryGet();
 
             if (summary.length) {
                 var ul = summary.children("ul." + exports.validationSummary);

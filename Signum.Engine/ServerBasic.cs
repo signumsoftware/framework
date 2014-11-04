@@ -242,6 +242,12 @@ namespace Signum.Services
                 () => OperationLogic.ServiceGetOperationInfos(entityType));
         }
 
+        public bool HasConstructOperations(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => OperationLogic.HasConstructOperations(entityType));
+        }
+
         public HashSet<Type> GetSaveProtectedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -260,10 +266,16 @@ namespace Signum.Services
                 () => (IdentifiableEntity)OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
         }
 
-        public void Delete(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
+        public void DeleteLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                () => OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
+                 () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
+        }
+
+        public void Delete(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
+        {
+            Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
+                 () => OperationLogic.ServiceDelete((IdentifiableEntity)entity, operationSymbol, args));
         }
 
         public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
@@ -290,7 +302,7 @@ namespace Signum.Services
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<OperationSymbol, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<OperationSymbol> operatonSymbols)
+        public Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lite, List<OperationSymbol> operatonSymbols)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => OperationLogic.GetContextualCanExecute(lite, operatonSymbols));
@@ -299,6 +311,8 @@ namespace Signum.Services
         #endregion
 
 
-      
+
+
+
     }
 }

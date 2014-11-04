@@ -179,7 +179,7 @@ namespace Signum.Windows
             {
                 FilterOptions.Add(new FilterOption
                 {
-                    Path = FilterColumn,
+                    ColumnName = FilterColumn,
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
@@ -187,7 +187,7 @@ namespace Signum.Windows
                 ColumnOptionsMode = ColumnOptionsMode.Remove;
             }
 
-            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+            FilterOption.SetFilterTokens(FilterOptions, qd);
 
             AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
@@ -255,7 +255,7 @@ namespace Signum.Windows
 
         public void DefaultClick()
         {
-            Navigator.Explore(new ExploreOptions(QueryName)
+            Finder.Explore(new ExploreOptions(QueryName)
             {
                 OrderOptions = OrderOptions.ToList(),
                 FilterOptions = FilterOptions.ToList(),
@@ -276,11 +276,11 @@ namespace Signum.Windows
            
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
-            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+            FilterOption.SetFilterTokens(FilterOptions, qd);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            DynamicQueryServer.SetOrderTokens(OrderOptions, qd);
+            OrderOption.SetOrderTokens(OrderOptions, qd);
         }
     }
 }

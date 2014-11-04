@@ -29,11 +29,11 @@ namespace Signum.Web
                 throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))
             {
                 sb.AddLine(helper.HiddenRuntimeInfo(entityCombo));
 
-                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("hidden")).Class("hide")))
                 {
                     if (entityCombo.UntypedValue != null)
                     {
@@ -47,14 +47,14 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
+                using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
                 {
                     if (entityCombo.ReadOnly)
                         sb.AddLine(helper.FormControlStatic(entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
                     else
                         sb.AddLine(DropDownList(helper, entityCombo));
 
-                    using (sb.Surround(new HtmlTag("span", entityCombo.Compose("shownButton")).Class("input-group-btn")))
+                    using (sb.SurroundLine(new HtmlTag("span", entityCombo.Compose("shownButton")).Class("input-group-btn")))
                     {
                         if (entityCombo.UntypedValue == null)
                         {
@@ -71,14 +71,15 @@ namespace Signum.Web
 
                 if (entityCombo.Type.IsEmbeddedEntity() && entityCombo.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone((object)Constructor.Construct(entityCombo.Type.CleanType()));
+                    EmbeddedEntity embedded = (EmbeddedEntity)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(entityCombo.Type.CleanType());
+                    TypeContext templateTC = ((TypeContext)entityCombo.Parent).Clone(embedded);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityCombo, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityCombo, isTemplate: true), null));
                 }
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityCombo.Parent, RenderPopupMode.PopupInDiv, entityCombo));
 
-                sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));
+                sb.AddLine(entityCombo.ConstructorScript(JsModule.Lines, "EntityCombo"));
             }
 
             return helper.FormGroup(entityCombo, entityCombo.Prefix, entityCombo.LabelText, sb.ToHtml());
@@ -90,7 +91,6 @@ namespace Signum.Web
             items.Add(new SelectListItem() { Text = "-", Value = "" });
 
             IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
-
 
             var current = entityCombo.UntypedValue is IIdentifiable ? ((IIdentifiable)entityCombo.UntypedValue).ToLite() :
                 entityCombo.UntypedValue as Lite<IIdentifiable>;

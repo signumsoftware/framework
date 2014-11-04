@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,12 +7,12 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{61898D02-521F-49AB-928B-F80615D55CA3}</ProjectGuid>
-    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web</RootNamespace>
     <AssemblyName>Signum.Web</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
     <FileUpgradeFlags>
@@ -22,16 +22,18 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,15 +43,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>C:/Program%20Files%20(x86)/Microsoft%20SQL%20Server/100/SDK/Assemblies/Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\Dependencies\Json.Net\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>../Dependencies/Json.Net/Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Activities" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -64,22 +72,40 @@
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.WorkflowServices" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.2\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.2\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.WorkflowServices" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
@@ -87,6 +113,8 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="ControllerAttributes\ActionSplitter.cs" />
+    <Compile Include="Facades\Finder.cs" />
     <Compile Include="Facades\JsFunction.cs" />
     <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />
@@ -107,10 +135,12 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
+    <Compile Include="Widgets\LinksClient.cs" />
+    <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
     <Compile Include="ValueLineBoxOptions.cs" />
-    <Compile Include="Operations\OperationsClient.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
@@ -230,8 +260,6 @@
     <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
-    <Compile Include="TypeContext\Widgets\LinksClient.cs" />
-    <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
@@ -257,6 +285,13 @@
     <Content Include="Signum\Headers\bootstrap\bootstrap.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.datepicker.d.ts" />
     <Content Include="Signum\Headers\bootstrap\bootstrap.timepicker.d.ts" />
+    <Content Include="packages.config" />
+    <Content Include="Introduction.md" />
+    <Content Include="Facades\Constructor.md" />
+    <Content Include="Facades\Finder.md" />
+    <Content Include="Facades\JsFunction.md" />
+    <Content Include="Facades\Navigator.md" />
+    <Content Include="Operations\OperationsClient.md" />
     <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
@@ -266,6 +301,40 @@
     <TypeScriptCompile Include="Signum\Scripts\Operations.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Polyfills.ts" />
     <TypeScriptCompile Include="Signum\Scripts\SF.UI.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Lines.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Validator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Navigator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\Entities.ts" />
+    <EmbeddedResource Include="Signum\Scripts\Entities.js">
+      <DependentUpon>Entities.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Finder.js">
+      <DependentUpon>Finder.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\globals.js">
+      <DependentUpon>globals.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Lines.js">
+      <DependentUpon>Lines.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Navigator.js">
+      <DependentUpon>Navigator.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Operations.js">
+      <DependentUpon>Operations.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Polyfills.js">
+      <DependentUpon>Polyfills.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\SF.js">
+      <DependentUpon>SF.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\SF.UI.js">
+      <DependentUpon>SF.UI.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Signum\Scripts\Validator.js">
+      <DependentUpon>Validator.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>
@@ -320,11 +389,10 @@
     <TypeScriptCompile Include="Signum\Scripts\SF.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Signum\Views\Web.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="Signum\Scripts\Entities.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Images\asc.gif" />
@@ -341,9 +409,6 @@
       <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <TypeScriptCompile Include="Signum\Scripts\Lines.ts" />
-    <TypeScriptCompile Include="Signum\Scripts\Validator.ts" />
-    <TypeScriptCompile Include="Signum\Scripts\Navigator.ts" />
     <None Include="Signum\Views\Error.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Error.generated.cs</LastGenOutput>
@@ -371,15 +436,15 @@
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js;**\*.ts;**\*.map" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map" />
     </ItemGroup>
   </Target>
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">

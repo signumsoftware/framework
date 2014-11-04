@@ -9,7 +9,7 @@ using System.Reflection;
 namespace Signum.Utilities.ExpressionTrees
 {
     //This class wouldnt be neccessayr if Expression.BuildString where 'protected internal' instead of 'internal'
-    internal class ExpressionToString: SimpleExpressionVisitor
+    internal class ExpressionToString : ExpressionVisitor
     {
         public enum Precedence
         {
@@ -155,7 +155,7 @@ namespace Signum.Utilities.ExpressionTrees
             return exp;
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if ( Enum.IsDefined(typeof(ExpressionType), exp.NodeType) && exp.NodeType <= ExpressionType.Assign)
                 return base.Visit(exp);
@@ -267,7 +267,7 @@ namespace Signum.Utilities.ExpressionTrees
             return c;
         }
 
-        protected override ElementInit VisitElementInitializer(ElementInit initializer)
+        protected override ElementInit VisitElementInit(ElementInit initializer)
         {
             builder.Append(initializer.AddMethod);
             builder.Append("(");
@@ -305,7 +305,7 @@ namespace Signum.Utilities.ExpressionTrees
             return iv;
         }
 
-        protected override Expression VisitLambda(LambdaExpression lambda)
+        protected override Expression VisitLambda<T>(Expression<T> lambda)
         {
             if (lambda.Parameters.Count == 1)
             {
@@ -344,7 +344,7 @@ namespace Signum.Utilities.ExpressionTrees
                 {
                     builder.Append(", ");
                 }
-                VisitElementInitializer(init.Initializers[num]);
+                VisitElementInit(init.Initializers[num]);
                 num++;
             }
             builder.Append("}");
@@ -359,7 +359,7 @@ namespace Signum.Utilities.ExpressionTrees
             return assignment;
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             if (m.Expression != null)
             {
@@ -398,7 +398,7 @@ namespace Signum.Utilities.ExpressionTrees
                         builder.Append(", ");
                     }
                     AppendLine();
-                    VisitBinding(binding);
+                    VisitMemberBinding(binding);
                     num++;
                 }
 
@@ -419,7 +419,7 @@ namespace Signum.Utilities.ExpressionTrees
                 {
                     builder.Append(", ");
                 }
-                VisitElementInitializer(binding.Initializers[num]);
+                VisitElementInit(binding.Initializers[num]);
                 num++;
             }
             builder.Append("}");
@@ -438,7 +438,7 @@ namespace Signum.Utilities.ExpressionTrees
                 {
                     builder.Append(", ");
                 }
-                VisitBinding(binding.Bindings[i]);
+                VisitMemberBinding(binding.Bindings[i]);
                 i++;
             }
             builder.Append("}");
@@ -521,7 +521,7 @@ namespace Signum.Utilities.ExpressionTrees
             return na;
         }
 
-        protected override NewExpression VisitNew(NewExpression nex)
+        protected override Expression VisitNew(NewExpression nex)
         {
             Type type;
             type = (nex.Constructor == null) ? (type = nex.Type) : nex.Constructor.DeclaringType;
@@ -639,7 +639,7 @@ namespace Signum.Utilities.ExpressionTrees
             return u;
         }
 
-        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
             VisitParenthesis(b.Expression, b, false);
             builder.Append(" is ");

@@ -88,7 +88,7 @@ namespace Signum.Engine
 
         public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
         {
-            Schema.Current.Settings.FixType(ref type, ref size, ref scale);
+            Connector.Current.FixType(ref type, ref size, ref scale);
 
             return "{0} {1}{2} {3}{4}{5}".Formato(
                 name.SqlEscape(),
@@ -134,7 +134,12 @@ namespace Signum.Engine
 
         public static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
-            return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlEscape()));
+            if (objectName.Schema.Database == null)
+
+                return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlEscape()));
+
+            else
+                return new SqlPreCommandSimple("EXEC {2}.dbo.sp_executesql N'DROP INDEX {0}.{1}'".Formato(objectName.OnDatabase(null).ToString(), indexName.SqlEscape(), objectName.Schema.Database.ToString()));
         }
 
         public static SqlPreCommand ReCreateFreeIndex(ITable table, DiffIndex index, string oldTable, Dictionary<string, string> tableReplacements)
@@ -186,7 +191,7 @@ namespace Signum.Engine
                     ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
                     SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                        .Formato(viewName, columns, uIndex.Table.Name.ToStringDbo(), uIndex.Where)) { AddGo = true };
+                        .Formato(viewName, columns, uIndex.Table.Name.ToStringDbo(), uIndex.Where)) { GoBefore = true, GoAfter = true };
 
                     SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                         .Formato(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ")));
@@ -207,7 +212,7 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
                 tableName,
-                constraintName.SqlEscape())) { AddGo = true };
+                constraintName.SqlEscape())) { GoAfter = true };
         }
 
         public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)

@@ -58,11 +58,13 @@ namespace Signum.Web
             if (entitySettings.ViewRoute != null)
                 return entitySettings.ViewRoute(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
 
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
+            var result = new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
                 id = id.TryToString()
             });
+
+            return result;
         }
 
         public static string NavigateRoute(IIdentifiable ie)
@@ -75,16 +77,6 @@ namespace Signum.Web
             return NavigateRoute(lite.EntityType, lite.Id);
         }
 
-        public const string FindRouteName = "sfFind";
-
-        public static string FindRoute(object queryName)
-        {
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(FindRouteName, new
-            {
-                webQueryName = ResolveWebQueryName(queryName)
-            });
-        }
-
         public static JsonNetResult JsonNet(this ControllerBase controller, object data, JsonSerializerSettings settings = null)
         {
             var result = new JsonNetResult { Data = data };
@@ -95,24 +87,14 @@ namespace Signum.Web
             return result;
         }
 
-        public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity)
+        public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity, NavigateOptions options = null)
         {
-            return Manager.NormalPage(controller, new NavigateOptions(entity));
+            return Manager.NormalPage(controller, entity, options ?? new NavigateOptions());
         }
 
-        public static ViewResult NormalPage(this ControllerBase controller, NavigateOptions options)
+        public static PartialViewResult NormalControl(this ControllerBase controller, IRootEntity entity, NavigateOptions options = null)
         {
-            return Manager.NormalPage(controller, options);
-        }
-
-        public static PartialViewResult NormalControl(this ControllerBase controller, IRootEntity entity)
-        {
-            return Manager.NormalControl(controller, new NavigateOptions(entity));
-        }
-
-        public static PartialViewResult NormalControl(this ControllerBase controller, NavigateOptions options)
-        {
-            return Manager.NormalControl(controller, options);
+            return Manager.NormalControl(controller, entity, options ?? new NavigateOptions());
         }
 
         public static string GetOrCreateTabID(ControllerBase c)
@@ -131,21 +113,16 @@ namespace Signum.Web
             return tabID;
         }
 
-        public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix = null)
-        {  
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupOpen(new PopupViewOptions(tc));
+        public static PartialViewResult PopupView(this ControllerBase controller, ModifiableEntity entity, PopupViewOptions options = null)
+        {
+            var prefix = options.Try(o => o.Prefix) ?? controller.Prefix();
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, prefix, options.Try(o => o.PropertyRoute)), options ?? new PopupViewOptions(prefix));
         }
 
-        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, string prefix = null)
+        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, PopupNavigateOptions options = null)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
-            return controller.PopupOpen(new PopupNavigateOptions(tc));
-        }
-
-        public static PartialViewResult PopupOpen(this ControllerBase controller, PopupOptionsBase viewOptions)
-        {
-            return Manager.PopupOpen(controller, viewOptions);
+            var prefix = options.Try(o => o.Prefix) ?? controller.Prefix();
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, prefix), options ?? new PopupNavigateOptions(prefix));
         }
 
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
@@ -159,60 +136,7 @@ namespace Signum.Web
             return Manager.PartialView(controller, tc, partialViewName);
         }
 
-        public static ViewResult Find(this ControllerBase controller, object queryName)
-        {
-            return Find(controller, new FindOptions(queryName));
-        }
-
-        public static ViewResult Find(this ControllerBase controller, FindOptions findOptions)
-        {
-            return Manager.Find(controller, findOptions);
-        }
-
-        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
-        {
-            return Manager.PartialFind(controller, findOptions, mode, context);
-        }
-
-        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
-        {
-            return Manager.PartialFind(controller, findOptions, mode, new Context(null, prefix));
-        }
-
-        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            return Manager.FindUnique(options);
-        }
-
-        public static int QueryCount(CountOptions options)
-        {
-            return Manager.QueryCount(options);
-        }
-
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, string prefix)
-        {
-            return Manager.Search(controller, request, allowSelection, navigate, showFooter, new Context(null, prefix));
-        }
-
-        public static string SearchTitle(object queryName)
-        {
-            return Manager.SearchTitle(queryName);
-        }
-
-        public static void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(filters, queryDescription, canAggregate);
-        }
-
-        public static void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(orders, queryDescription, canAggregate);
-        }
-
-        public static void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
-        {
-            Manager.SetTokens(columns, queryDescription, canAggregate);
-        }
+   
 
         public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefix)
         {
@@ -256,42 +180,27 @@ namespace Signum.Web
             return Manager.EntitySettings.GetOrThrow(type, "No EntitySettings for type {0} found");
         } 
 
-        public static void AddQuerySettings(List<QuerySettings> settings)
+        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerBase controller, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null)
         {
-            Navigator.Manager.QuerySettings.AddRange(settings, s => s.QueryName, s => s, "QuerySettings");
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controller, prefix, route, inputs);
         }
 
-        public static void AddQuerySetting(QuerySettings setting)
+        static GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, prefix, route, dic));
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerBase controller, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
-            Navigator.Manager.QuerySettings.AddOrThrow(setting.QueryName, setting, "QuerySettings {0} repeated");
+            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).UntypedMappingMain;
+
+            return ApplyChanges<T>(entity, controller, mapping, prefix, route, inputs);
         }
 
-        public static QuerySettings QuerySettings(object queryName)
-        {
-            return Manager.QuerySettings.GetOrThrow(queryName, "no QuerySettings for queryName {0} found");
-        }
-
-        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null)
-        {
-            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, admin, prefix, route, inputs);
-        }
-
-        static GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
-            new GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, ad, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, ad, prefix, route, dic));
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
-        {
-            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingMain : s.UntypedMappingLine);
-
-            return ApplyChanges<T>(entity, controllerContext, mapping, prefix, route, inputs);
-        }
-
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, Mapping<T> mapping, string prefix = null,  PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerBase controller, Mapping<T> mapping, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
             if (prefix == null)
-                prefix = controllerContext.Controller.Prefix();
+                prefix = controller.Prefix();
 
             if (inputs == null)
-                inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
+                inputs = controller.ControllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
             if (route == null)
             {
@@ -301,7 +210,7 @@ namespace Signum.Web
                 route = PropertyRoute.Root(typeof(T));
             }
 
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, route, inputs);
+            return Manager.ApplyChanges<T>(controller, entity, prefix, mapping, route, inputs);
         }
 
         public static string Prefix(this ControllerBase controller)
@@ -312,6 +221,15 @@ namespace Signum.Web
         public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller, string prefix = null)
         {
             return Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
+        }
+
+        public static Lite<T> TryParseLite<T>(this ControllerBase controller, string requestKey)
+            where T : class, IIdentifiable
+        {
+            var key = controller.ControllerContext.HttpContext.Request[requestKey];
+            if (key == null)
+                return null;
+            return Lite.Parse<T>(key);
         }
 
         public static Lite<T> ParseLite<T>(this ControllerBase controller, string requestKey)
@@ -345,44 +263,19 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix ?? controller.Prefix());
         }
 
-        public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) where T : class, IIdentifiable
+        public static Type ResolveType(string webTypeName)
         {
-            return ParseLiteKeys<T>(controller.ControllerContext.RequestContext.HttpContext.Request["liteKeys"]);
-        }
-
-        public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IIdentifiable
-        {
-            return liteKeys.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Lite.Parse<T>).ToList();
+            return Manager.ResolveType(webTypeName);
         }
 
         public static string ResolveWebTypeName(Type type)
         {
             return Manager.ResolveWebTypeName(type);
         }
-
-        public static Type ResolveType(string webTypeName)
+     
+        public static bool IsCreable(Type type, bool isSearch = false)
         {
-            return Manager.ResolveType(webTypeName);
-        }
-
-        public static string ResolveWebQueryName(object queryName)
-        {
-            return Manager.ResolveWebQueryName(queryName);
-        }
-
-        public static object ResolveQueryName(string webQueryName)
-        {
-            return Manager.ResolveQueryName(webQueryName);
-        }
-
-        public static bool IsFindable(object queryName)
-        {
-            return Manager.OnIsFindable(queryName);
-        }
-
-        public static bool IsCreable(Type type, bool isSearchEntity = false)
-        {
-            return Manager.OnIsCreable(type, isSearchEntity);
+            return Manager.OnIsCreable(type, isSearch);
         }
 
         public static bool IsReadOnly(Type type)
@@ -405,14 +298,14 @@ namespace Signum.Web
             return Manager.OnIsViewable(entity.GetType(), entity, partialViewName);
         }
 
-        public static bool IsNavigable(Type type, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(type, null, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, partialViewName, isSearch);
         }
 
-        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearchEntity = false)
+        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearch = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearch);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)
@@ -444,6 +337,7 @@ namespace Signum.Web
         public static void Initialize()
         {
             Manager.Initialize();
+            Finder.Manager.Initialize();
         }
 
         internal static void AssertNotReadonly(IdentifiableEntity ident)
@@ -456,25 +350,15 @@ namespace Signum.Web
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> EntitySettings {get;set;}
-        public Dictionary<object, QuerySettings> QuerySettings {get;set;}
 
         public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
-        public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
-        public string SearchPageView = ViewPrefix.Formato("SearchPage");
-        public string SearchControlView = ViewPrefix.Formato("SearchControl");
-        public string SearchResultsView = ViewPrefix.Formato("SearchResults");
-        public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
-        public string PaginationSelectorView = ViewPrefix.Formato("PaginationSelector");
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
-        protected Dictionary<string, object> WebQueryNames { get; private set; }
-
-        public Func<bool> AllowChangeColumns = () => true;
       
         public NavigationManager(string entityStateKeyToHash)
             : this(new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(entityStateKeyToHash))))
@@ -484,7 +368,6 @@ namespace Signum.Web
         public NavigationManager(byte[] entityStateKey)
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
-            QuerySettings = new Dictionary<object, QuerySettings>();
             EntityStateKey = entityStateKey;
 
             formatter = new NetDataContractSerializer();
@@ -526,19 +409,7 @@ namespace Signum.Web
                 WebTypeNames = EntitySettings.Values.Where(es => es.WebTypeName.HasText())
                     .ToDictionary(es => es.WebTypeName, es => es.StaticType, StringComparer.InvariantCultureIgnoreCase, "WebTypeNames");
 
-                if (DynamicQueryManager.Current != null)
-                {
-                    foreach (object o in DynamicQueryManager.Current.GetQueryNames())
-                    {
-                        if (!QuerySettings.ContainsKey(o))
-                            QuerySettings.Add(o, new QuerySettings(o));
-                        if (!QuerySettings[o].WebQueryName.HasText())
-                            QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
-                    }
-
-                    WebQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.WebQueryName, kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "WebQueryNames");
-                }
-
+              
                 Navigator.RegisterArea(typeof(Navigator), "Signum");
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "Signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/Signum/calendarResources/"));
@@ -564,6 +435,14 @@ namespace Signum.Web
             return loadedModules.Add(methodName);
         }
 
+        public void AssertDefined(MethodBase methodBase)
+        {
+            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+
+            if (!loadedModules.Contains(name))
+                throw new InvalidOperationException("Call {0} first".Formato(name));
+        }
+
         protected internal string GetOrCreateTabID(ControllerBase c)
         {
             if (c.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
@@ -575,9 +454,9 @@ namespace Signum.Web
             return Guid.NewGuid().ToString();
         }
 
-        protected internal virtual ViewResult NormalPage(ControllerBase controller, NavigateOptions options)
+        protected internal virtual ViewResult NormalPage(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            FillViewDataForViewing(controller, options);
+            FillViewDataForViewing(controller, rootEntity, options);
 
             return new ViewResult()
             {
@@ -588,9 +467,9 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, NavigateOptions options)
+        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            FillViewDataForViewing(controller, options);
+            FillViewDataForViewing(controller, rootEntity, options);
 
             return new PartialViewResult()
             {
@@ -600,12 +479,12 @@ namespace Signum.Web
             };
         }
 
-        private void FillViewDataForViewing(ControllerBase controller, NavigateOptions options)
+        private void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(options.Entity, "");
+            TypeContext tc = TypeContextUtilities.UntypedNew(rootEntity, "");
             controller.ViewData.Model = tc;
 
-            var entity = (ModifiableEntity)options.Entity;
+            var entity = (ModifiableEntity)rootEntity;
 
             controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
             tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
@@ -614,6 +493,8 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
 
             controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
+
+            controller.ViewData[ViewDataKeys.WriteEntityState] = options.WriteEntityState || (bool?)controller.ViewData[ViewDataKeys.WriteEntityState] == true;
 
             AssertViewableEntitySettings(entity);
 
@@ -638,28 +519,27 @@ namespace Signum.Web
             return niceName + " " + ident.Id;
         }
 
-        protected internal virtual PartialViewResult PopupOpen(ControllerBase controller, PopupOptionsBase viewOptions)
+        protected internal virtual PartialViewResult PopupControl(ControllerBase controller, TypeContext typeContext, PopupOptionsBase popupOptions)
         {
-            TypeContext typeContext = TypeContextUtilities.CleanTypeContext(viewOptions.TypeContext);
             Type cleanType = typeContext.UntypedValue.GetType();
 
             ModifiableEntity entity = (ModifiableEntity)typeContext.UntypedValue;
             AssertViewableEntitySettings(entity);
             
             controller.ViewData.Model = typeContext;
-            controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            controller.ViewData[ViewDataKeys.PartialViewName] = popupOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
             typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).GetViewOverrides();
 
-            bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
+            bool isReadOnly = popupOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
                 typeContext.ReadOnly = true;
 
-            ViewMode mode = viewOptions.ViewMode;
+            ViewMode mode = popupOptions.ViewMode;
             controller.ViewData[ViewDataKeys.ViewMode] = mode;
-            controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
+            controller.ViewData[ViewDataKeys.ShowOperations] = popupOptions.ShowOperations;
             if (mode == ViewMode.View)
             {
-                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)viewOptions).SaveProtected ??
+                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)popupOptions).SaveProtected ??
                     OperationLogic.IsSaveProtected(entity.GetType());
             }
 
@@ -694,216 +574,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
-        {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
-
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            //Navigator.SetTokens(findOptions.FilterOptions, description, canAggregate: false);
-            SetSearchViewableAndCreable(findOptions, description);
-            SetDefaultOrder(findOptions, description);
-
-            controller.ViewData.Model = new Context(null, "");
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
-
-            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-
-            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
-            
-            return new ViewResult()
-            {
-                ViewName = SearchPageView,
-                MasterName = null,
-                ViewData = controller.ViewData,
-                TempData = controller.TempData
-            };
-        }
-
-        protected internal virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
-
-            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
-            SetTokens(options.OrderOptions, queryDescription, canAggregate: false);
-
-            var request = new UniqueEntityRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
-                Orders = options.OrderOptions.Select(o => o.ToOrder()).ToList(),
-                UniqueType = options.UniqueType,
-            };
-
-            return DynamicQueryManager.Current.ExecuteUniqueEntity(request);
-        }
-
-        protected internal virtual int QueryCount(CountOptions options)
-        {
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
-
-            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
-
-            var request = new QueryCountRequest
-            { 
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
-            };
-
-            return DynamicQueryManager.Current.ExecuteQueryCount(request);
-        }
-
-        protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, canAggregate);
-        }
-
-        protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
-        }
-
-        protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
-        {
-            foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
-        }
-
-        public virtual void SetSearchViewableAndCreable(FindOptions findOptions, QueryDescription description)
-        {
-            var entityColumn = description.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations? implementations = entityColumn.Implementations;
-
-            if (findOptions.Navigate)
-            {
-                findOptions.Navigate = implementations.Value.IsByAll ? true : 
-                    implementations.Value.Types.Any(t => Navigator.IsNavigable(t, null, true));
-            }
-            if (findOptions.Create)
-            {
-                findOptions.Create = findOptions.Navigate &&
-                    (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, true)));
-            }
-        }
-
-        public virtual void SetDefaultOrder(FindOptions findOptions, QueryDescription description)
-        {
-            var entityColumn = description.Columns.SingleOrDefaultEx(cd => cd.IsEntity);
-
-            if (findOptions.OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
-            {
-                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
-
-                var column = description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
-
-                if (column != null)
-                {
-                    findOptions.OrderOptions.Add(new OrderOption{ Token = new ColumnToken(column, description.QueryName), ColumnName = column.Name, OrderType = orderType });
-                }
-            }
-        }
-        
-        protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
-        {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
-
-            var desc =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            SetSearchViewableAndCreable(findOptions, desc);
-            SetDefaultOrder(findOptions, desc);
-
-            controller.ViewData.Model = context;
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
-
-            controller.ViewData[ViewDataKeys.FindMode] = mode;
-            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = desc;
-            
-            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
-            
-            return new PartialViewResult
-            {
-                ViewName = SearchPopupControlView,
-                ViewData = controller.ViewData,
-                TempData = controller.TempData
-            };
-        }
-
-        public virtual string SearchTitle(object queryName)
-        {
-            QuerySettings qs = QuerySettings.TryGetC(queryName);
-            if (qs != null && qs.Title != null)
-                return qs.Title();
-            else
-                return QueryUtils.GetNiceName(queryName);
-        }
-
-        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, Context context)
-        {
-            if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
-
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-            
-            controller.ViewData.Model = context;
-
-            controller.ViewData[ViewDataKeys.AllowSelection] = allowSelection;
-            controller.ViewData[ViewDataKeys.Navigate] = navigate;
-            controller.ViewData[ViewDataKeys.ShowFooter] = showFooter;
-
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-            controller.ViewData[ViewDataKeys.QueryDescription] = qd;
-
-            Type entitiesType = Lite.Extract(qd.Columns.SingleEx(a => a.IsEntity).Type);
-            string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
-            if (message.HasText())
-                controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
-
-            controller.ViewData[ViewDataKeys.Results] = queryResult;
-
-            QuerySettings settings = QuerySettings[request.QueryName];
-            controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select((c, i)=>new {c,i}).ToDictionary(c=>c.i, c =>settings.GetFormatter(c.c.Column));
-
-            return new PartialViewResult
-            {
-                ViewName = SearchResultsView,
-                ViewData = controller.ViewData,
-                TempData = controller.TempData
-            };
-        }
-
-        private string GenerateWebQueryName(object queryName)
-        {
-            if (queryName is Type)
-            {
-                Type type = (Type)queryName;
-                var es = EntitySettings.TryGetC(type);
-                if (es != null)
-                    return es.WebTypeName;
-
-                return TypeLogic.TryGetCleanName(type) ?? type.Name;
-            }
-            
-            return queryName.ToString();
-        }
-
-        protected internal virtual string ResolveWebQueryName(object queryName)
-        {
-            return QuerySettings.GetOrThrow(queryName, "queryName {0} not found").WebQueryName;
-        }
-
-        protected internal virtual object ResolveQueryName(string webQueryName)
-        {
-            return WebQueryNames.GetOrThrow(webQueryName, "webQueryName {0} not found");
-        }
+       
 
         protected internal virtual Type ResolveType(string webTypeName)
         {
@@ -927,14 +598,14 @@ namespace Signum.Web
                 (type.IsIdentifiableEntity() ? " or the Schema" : null));
         }
 
-        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
+        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerBase controller, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
         {
             using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
             using (new EntityCache(EntityCacheType.Normal))
             {
                 EntityCache.AddFullGraph((ModifiableEntity)entity);
 
-                RootContext<T> ctx = new RootContext<T>(prefix, inputs, route, controllerContext) { Value = entity };
+                RootContext<T> ctx = new RootContext<T>(prefix, inputs, route, controller) { Value = entity };
                 mapping(ctx);
                 return ctx;
             }
@@ -960,7 +631,7 @@ namespace Signum.Web
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(runtimeInfo.EntityType);
+                return new ConstructorContext(controller).ConstructUntyped(runtimeInfo.EntityType);
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)
@@ -977,18 +648,18 @@ namespace Signum.Web
 
         public event Func<Type, bool> IsCreable;
 
-        internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
+        internal protected virtual bool OnIsCreable(Type type, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            if (!es.OnIsCreable(isSearchEntity))
+            if (!es.OnIsCreable(isSearch))
                 return false;
 
 
             if (IsCreable != null)
-                foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
+                foreach (var isCreable in IsCreable.GetInvocationListTyped())
                 {
                     if (!isCreable(type))
                         return false;
@@ -1009,7 +680,7 @@ namespace Signum.Web
             }
 
             if (IsReadOnly != null)
-                foreach (Func<Type, ModifiableEntity, bool> isReadOnly in IsReadOnly.GetInvocationList())
+                foreach (var isReadOnly in IsReadOnly.GetInvocationListTyped())
                 {
                     if (isReadOnly(type, entity))
                         return true;
@@ -1024,7 +695,7 @@ namespace Signum.Web
         {
             if (IsViewable != null)
             {
-                foreach (Func<Type, ModifiableEntity, bool> isViewable in IsViewable.GetInvocationList())
+                foreach (var isViewable in IsViewable.GetInvocationListTyped())
                 {
                     if (!isViewable(type, entity))
                         return false;
@@ -1049,13 +720,13 @@ namespace Signum.Web
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
             return es != null &&
                 IsViewableBase(type, entity) &&
-                es.OnIsNavigable(partialViewName, isSearchEntity);
+                es.OnIsNavigable(partialViewName, isSearch);
         }
 
         internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity, string partialViewName)
@@ -1067,23 +738,7 @@ namespace Signum.Web
                 es.OnIsViewable(partialViewName);
         }
 
-        public event Func<object, bool> IsFindable;
-
-        internal protected virtual bool OnIsFindable(object queryName)
-        {
-            QuerySettings es = QuerySettings.TryGetC(queryName);
-            if (es == null || !es.IsFindable)
-                return false;
-
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(queryName))
-                        return false;
-                }
-
-            return true;
-        }
+      
 
         public byte[] EntityStateKey;
 
@@ -1172,6 +827,11 @@ namespace Signum.Web
         }
 
 
+        public event Func<Lite<IdentifiableEntity>, IDisposable> RetrievingForView; 
+        internal IDisposable OnRetrievingForView(Lite<IdentifiableEntity> lite)
+        {
+            return Disposable.Combine(RetrievingForView, f => f(lite));
+        }
     }
 
     public enum JsonResultType
@@ -1200,6 +860,29 @@ namespace Signum.Web
                     url = url
                 }
             };
+        }
+
+        public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary)
+        {
+            return ToJsonModelState(dictionary, null, null);
+        }
+
+        public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary, string newToString, string newToStringLink)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>
+            {
+                {"result", JsonResultType.ModelState.ToString()},
+                {"ModelState", dictionary.ToDictionary(kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray())
+                }
+            };
+
+            if (newToString != null)
+                result.Add(EntityBaseKeys.ToStr, newToString);
+            if (newToStringLink != null)
+                result.Add(EntityBaseKeys.Link, newToStringLink);
+
+            return new JsonNetResult { Data = result };
         }
 
     }

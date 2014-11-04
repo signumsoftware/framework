@@ -16,8 +16,6 @@ namespace Signum.Web
 {
     public static class ValueLineHelper
     {
-        public static string StaticValue = "sfStaticValue";
-
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
@@ -41,7 +39,7 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            using (valueLine.UnitText == null ? null : sb.Surround(new HtmlTag("div").Class("input-group")))
+            using (valueLine.UnitText == null ? null : sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
                 sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
 
@@ -134,9 +132,9 @@ namespace Signum.Web
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
 
                 if (valueLine.UnitText.HasText())
-                    return new HtmlTag("p").Id(valueLine.Compose(StaticValue)).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
+                    return new HtmlTag("p").Id(valueLine.Prefix).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
                 else
-                    return result.Concat(helper.FormControlStatic(valueLine.Compose(StaticValue), value, valueLine.ValueHtmlProps));
+                    return result.Concat(helper.FormControlStatic(valueLine.Prefix, value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -167,17 +165,21 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("input-group")))
+            using (sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
-                sb.AddLine(helper.TextboxInLine(valueLine));
+                valueLine.ValueHtmlProps.AddCssClass("form-control");
+
+                ColorDN color = (ColorDN)valueLine.UntypedValue;
+
+                sb.AddLine(helper.TextBox(valueLine.Prefix, color == null ? "" : color.RGBHex(), valueLine.ValueHtmlProps));
 
                 sb.AddLine(new HtmlTag("span").Class("input-group-addon").InnerHtml(new HtmlTag("i")));
             }
 
             sb.AddLine(new HtmlTag("script").InnerHtml(MvcHtmlString.Create(
 @" $(function(){
-        $('#" + valueLine.Prefix + @"').parent().colorpicker();
-    });")));
+        $('#" + valueLine.Prefix + @"').parent().colorpicker()" + (valueLine.ReadOnly ? ".colorpicker('disable')" : null) + @";
+   });")));
 
             return sb.ToHtml();
         }
@@ -238,6 +240,33 @@ namespace Signum.Web
                 return result;
 
             return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
+        }
+
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            return helper.HiddenLine(tc, property, null);
+        }
+
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HiddenLine> settingsModifier)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            HiddenLine hl = new HiddenLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Common.FireCommonTasks(hl);
+
+            if (settingsModifier != null)
+                settingsModifier(hl);
+
+            return Hidden(helper, hl);
+        }
+
+        public static MvcHtmlString Hidden(this HtmlHelper helper, HiddenLine hiddenLine)
+        {
+            if (hiddenLine.ReadOnly)
+                return helper.Span(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", "form-control");
+
+            return helper.Hidden(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", hiddenLine.ValueHtmlProps);
         }
     }
 

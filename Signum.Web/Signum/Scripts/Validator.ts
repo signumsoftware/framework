@@ -128,7 +128,20 @@ function cleanFormInputs(form: JQuery): JQuery {
 }
 
 export function isModelState(result: any): boolean {
-    return typeof result == "Object" && typeof result.ModelState != "undefined";
+    return typeof result == "object" && typeof result.ModelState != "undefined";
+}
+
+export function assertModelStateErrors(result: any, prefix: string) {
+    if (!isModelState(result))
+        return;
+
+    var modelState = result.ModelState;
+
+    showErrors({ prefix: prefix }, modelState);
+
+    SF.Notify.error(lang.signum.error, 2000);
+
+    throw modelState;
 }
 
 export function showErrors(valOptions: ValidationOptions, modelState: ModelState): boolean {
@@ -193,7 +206,7 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, errorsArra
 
     getPathPrefixes(prefix).forEach(currPrefix=> {
 
-        var summary = currPrefix.child(globalValidationSummary).tryGet()
+        var summary = valOptions["errorSummaryId"] ? $('#' + valOptions["errorSummaryId"]) : currPrefix.child(globalValidationSummary).tryGet();
 
         if (summary.length) {
             var ul = summary.children("ul." + validationSummary);

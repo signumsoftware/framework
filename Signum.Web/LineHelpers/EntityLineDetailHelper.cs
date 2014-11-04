@@ -23,11 +23,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("fieldset", entityDetail.Prefix).Class("SF-entity-line-details SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("fieldset", entityDetail.Prefix).Class("SF-entity-line-details SF-control-container")))
             {
                 sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));
 
-                using (sb.Surround(new HtmlTag("div", entityDetail.Compose("hidden")).Class("hide")))
+                using (sb.SurroundLine(new HtmlTag("div", entityDetail.Compose("hidden")).Class("hide")))
                 {
                     if (entityDetail.UntypedValue != null)
                     {
@@ -40,12 +40,12 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("legend")))
-                using (sb.Surround(new HtmlTag("div", entityDetail.Compose("header"))))
+                using (sb.SurroundLine(new HtmlTag("legend")))
+                using (sb.SurroundLine(new HtmlTag("div", entityDetail.Compose("header"))))
                 {
                     sb.AddLine(new HtmlTag("span").SetInnerText(entityDetail.LabelText).ToHtml());
 
-                    using (sb.Surround(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("pull-right")))
+                    using (sb.SurroundLine(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("pull-right")))
                     {
                         if (entityDetail.UntypedValue == null)
                         {
@@ -59,7 +59,7 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", entityDetail.Compose(EntityBaseKeys.Detail))))
+                using (sb.SurroundLine(new HtmlTag("div", entityDetail.Compose(EntityBaseKeys.Detail))))
                 {
                     if (entityDetail.UntypedValue != null)
                         sb.AddLine(EntityBaseHelper.RenderContent(helper, (TypeContext)entityDetail.Parent, RenderContentMode.Content, entityDetail));
@@ -67,11 +67,12 @@ namespace Signum.Web
 
                 if (entityDetail.Type.IsEmbeddedEntity() && entityDetail.Create)
                 {
-                    TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
+                    EmbeddedEntity embedded = (EmbeddedEntity)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(entityDetail.Type.CleanType());
+                    TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone(embedded);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail), null));
                 }
 
-                sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "EntityLineDetail"));
+                sb.AddLine(entityDetail.ConstructorScript(JsModule.Lines, "EntityLineDetail"));
             }
 
             return sb.ToHtml();

@@ -49,7 +49,7 @@ namespace Signum.Engine.Basics
             {
                 Schema current = Schema.Current;
 
-                current.Initializing[InitLevel.Level0SyncEntities] += () =>
+                current.Initializing += () =>
                 {
                     var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
 
@@ -128,8 +128,10 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<TypeDN>();
 
-            return (from ei in GenerateSchemaTypes()
-                    select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
+            return GenerateSchemaTypes()
+                .Select((e, i) => table.InsertSqlSync(e, suffix: i.ToString()))
+                .Combine(Spacing.Simple)
+                .ToSimple();
         }
 
         internal static List<TypeDN> GenerateSchemaTypes()

@@ -43,7 +43,7 @@ namespace Signum.Web.PortableAreas
 
         byte[] CreateFile(CultureInfo ci)
         {
-            using(Sync.ChangeBothCultures(ci))
+            using(CultureInfoUtils.ChangeBothCultures(ci))
             using (MemoryStream ms = new MemoryStream())
             {
                 using (StreamWriter sw = new StreamWriter(ms, Encoding.UTF8))

@@ -24,20 +24,15 @@ namespace Signum.Engine.Linq
             return new Disposable(() => aliasMap = saved);
         }
 
-        protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope)
-            : base(parameterScope)
+        protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope, bool checkParameterNames)
+            : base(parameterScope, checkParameterNames)
         {
             this.aliasMap = aliasScope;
         }
 
-        public new static bool AreEqual(Expression a, Expression b)
+        public static bool AreEqual(Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope = null, ScopedDictionary<Alias, Alias> aliasScope = null, bool checkParameterNames = false)
         {
-            return AreEqual(null, null, a, b);
-        }
-
-        public static bool AreEqual(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope, Expression a, Expression b)
-        {
-            return new DbExpressionComparer(parameterScope, aliasScope).Compare(a, b);
+            return new DbExpressionComparer(parameterScope, aliasScope, checkParameterNames ).Compare(a, b);
         }
 
         protected override bool Compare(Expression a, Expression b)
@@ -514,19 +509,26 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && Compare(a.RowId, b.RowId)
                 && Compare(a.Element, b.Element)
+                && Compare(a.Order, b.Order)
                 && Compare(a.Parent, b.Parent);
         }
 
-        public static new  IEqualityComparer<E> GetComparer<E>() where E : Expression
+        public static new IEqualityComparer<E> GetComparer<E>(bool checkParameterNames) where E : Expression
         {
-            return new DbExpressionsComparer<E>();
+            return new DbExpressionsEqualityComparer<E>(checkParameterNames);
         }
 
-        class DbExpressionsComparer<E> : IEqualityComparer<E> where E : Expression
+        class DbExpressionsEqualityComparer<E> : IEqualityComparer<E> where E : Expression
         {
+            bool checkParameterNames;
+            public DbExpressionsEqualityComparer(bool checkParameterNames)
+            {
+                this.checkParameterNames = checkParameterNames;
+            }
+
             public bool Equals(E x, E y)
             {
-                return DbExpressionComparer.AreEqual(x, y);
+                return DbExpressionComparer.AreEqual(x, y, checkParameterNames: this.checkParameterNames);
             }
 
             public int GetHashCode(E obj)

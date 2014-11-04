@@ -147,10 +147,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(Lite<IdentifiableEntity>[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite<IdentifiableEntity>[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(List<Lite<IdentifiableEntity>>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public List<Lite<IdentifiableEntity>> SelectedItems
         {
-            get { return (Lite<IdentifiableEntity>[])GetValue(SelectedItemsProperty); }
+            get { return (List<Lite<IdentifiableEntity>>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -228,6 +228,11 @@ namespace Signum.Windows
             set { SetValue(FilterRouteProperty, value); }
         }
 
+        public bool CanAddFilters
+        {
+            get { return this.ShowHeader && (this.ShowFilters || this.ShowFilterButton); }
+        }
+
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
             if (IsLoaded)
@@ -293,14 +298,6 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
-        public static readonly DependencyProperty HideIfNotFindableProperty =
-            DependencyProperty.Register("HideIfNotFindable", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool HideIfNotFindable
-        {
-            get { return (bool)GetValue(HideIfNotFindableProperty); }
-            set { SetValue(HideIfNotFindableProperty, value); }
-        }
-
         private void QueryNameChanged(DependencyPropertyChangedEventArgs s)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || s.NewValue == null)
@@ -308,7 +305,7 @@ namespace Signum.Windows
                 return;
             }
 
-            if (!Navigator.IsFindable(s.NewValue))
+            if (!Finder.IsFindable(s.NewValue))
             {
                 Common.VoteCollapsed(this);
                 return;
@@ -317,7 +314,7 @@ namespace Signum.Windows
             Common.VoteVisible(this);
 
 
-            Settings = Navigator.GetQuerySettings(s.NewValue);
+            Settings = Finder.GetQuerySettings(s.NewValue);
 
             Description = DynamicQueryServer.GetQueryDescription(s.NewValue);
 
@@ -354,7 +351,7 @@ namespace Signum.Windows
         {
             this.Loaded -= SearchControl_Loaded;
 
-            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Navigator.IsFindable(QueryName))
+            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Finder.IsFindable(QueryName))
             {
                 tokenBuilder.Token = null;
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
@@ -379,13 +376,17 @@ namespace Signum.Windows
             {
                 FilterOptions.Add(new FilterOption
                 {
-                    Path = FilterColumn,
+                    ColumnName = FilterColumn,
                     Operation = FilterOperation.EqualTo,
                     Frozen = true,
                 }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
-                ColumnOptions.Add(new ColumnOption(FilterColumn));
-                ColumnOptionsMode = ColumnOptionsMode.Remove;
-                if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
+
+                if (QueryUtils.IsColumnToken(FilterColumn))
+                {
+                    ColumnOptions.Add(new ColumnOption(FilterColumn));
+                    ColumnOptionsMode = ColumnOptionsMode.Remove;
+                }
+                if (this.NotSet(SearchOnLoadProperty))
                     SearchOnLoad = true;
             }
 
@@ -401,26 +402,45 @@ namespace Signum.Windows
                 }
             }
 
-            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString(entityColumn.Implementations.Value.IsByAll ? "[All]" : entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString()
+                .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
+                .Formato(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
-                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
+                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearch: true));
 
             if (this.NotSet(EntityBase.CreateProperty) && Create)
                 Create = Implementations.IsByAll ? false :
-                         Implementations.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: true));
+                         Implementations.Types.Any(t => Navigator.IsCreable(t, isSearch: true));
 
-            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+            ColumnOption.SetColumnTokens(ColumnOptions, Description);
+
+            if (this.CanAddFilters || this.AllowChangeColumns)
+            {
+                headerContextMenu = new ContextMenu();
+
+                if (this.CanAddFilters)
+                    headerContextMenu.Items.Add(new MenuItem { Header = SearchMessage.AddFilter.NiceToString() }.Handle(MenuItem.ClickEvent, filterHeader_Click));
+
+                if (this.CanAddFilters && this.AllowChangeColumns)
+                    headerContextMenu.Items.Add(new Separator());
+
+                if (this.AllowChangeColumns)
+                {
+                    headerContextMenu.Items.Add(new MenuItem { Header = SearchMessage.Rename.NiceToString() }.Handle(MenuItem.ClickEvent, renameMenu_Click));
+                    headerContextMenu.Items.Add(new MenuItem { Header = EntityControlMessage.Remove.NiceToString() }.Handle(MenuItem.ClickEvent, removeMenu_Click));
+                }
+            }
 
             GenerateListViewColumns();
 
-            DynamicQueryServer.SetFilterTokens(FilterOptions, Description);
+            FilterOption.SetFilterTokens(FilterOptions, Description);
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
-            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
+            OrderOption.SetOrderTokens(OrderOptions, Description);
 
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
@@ -444,6 +464,7 @@ namespace Signum.Windows
             }
         }
 
+        ContextMenu headerContextMenu = null;
        
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -461,7 +482,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return arg.SubTokens(Description, canAggregate: false);
+            return arg.SubTokens(Description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -497,7 +518,7 @@ namespace Signum.Windows
         {
             if (GetMenuItems != null)
             {
-                List<MenuItem> items = GetMenuItems.GetInvocationList().Cast<Func<SearchControl, MenuItem>>().Select(d => d(this)).NotNull().ToList();
+                List<MenuItem> items = GetMenuItems.GetInvocationListTyped().Select(d => d(this)).NotNull().ToList();
                 menu.Items.Clear();
                 foreach (MenuItem mi in items)
                     menu.Items.Add(mi);
@@ -511,11 +532,16 @@ namespace Signum.Windows
 
         private void FillContextMenuItems()
         {
+            contextMenu.Items.Clear();
+
+            if (this.CanAddFilters && GetCellColumnHeader(contextMenu) != null)
+            {
+                contextMenu.Items.Add(new MenuItem { Header = SearchMessage.AddFilter.NiceToString() }.Handle(MenuItem.ClickEvent, filterCell_Click));
+            } 
+
             if (GetContextMenuItems != null)
             {
-                contextMenu.Items.Clear();
-
-                foreach (var fun in GetContextMenuItems.GetInvocationList().Cast<Func<SearchControl, IEnumerable<MenuItem>>>())
+                foreach (var fun in GetContextMenuItems.GetInvocationListTyped())
                 {
                     var items = fun(this).Try(a => a.ToList());
 
@@ -541,7 +567,7 @@ namespace Signum.Windows
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).Try(r => r.Entity);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
             else
                 SelectedItems = null;
         }
@@ -571,7 +597,7 @@ namespace Signum.Windows
                 return;
             }
 
-            List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
+            List<Column> columns = ColumnOption.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 
             gvResults.Columns.Clear();
 
@@ -588,7 +614,7 @@ namespace Signum.Windows
                 Header = new SortGridViewColumnHeader
                 {
                     Content = col.DisplayName,
-                    ContextMenu = (ContextMenu)FindResource("contextMenu"),
+                    ContextMenu = headerContextMenu,
                     RequestColumn = col,
                 },
             };
@@ -706,7 +732,7 @@ namespace Signum.Windows
                 FilterOptions.Clear();
                 var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
 
-                DynamicQueryServer.SetFilterTokens(newFilters, Description);
+                FilterOption.SetFilterTokens(newFilters, Description);
                 FilterOptions.AddRange(newFilters);
             }
         }
@@ -854,7 +880,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), this);
+                (IdentifiableEntity)new ConstructorContext(this).ConstructUntyped(SelectType(t => Navigator.IsCreable(t, isSearch: true)));
 
             if (result == null)
                 return;
@@ -927,31 +953,7 @@ namespace Signum.Windows
             Search(resetPage: true);
         }
 
-        FilterOption CreateFilter(SortGridViewColumnHeader header)
-        {
-            if (resultTable != null)
-            {
-                ResultRow row = (ResultRow)lvResult.SelectedItem;
-                if (row != null)
-                {
-                    object value = row[header.ResultColumn];
-
-                    return new FilterOption
-                    {
-                        Token = header.RequestColumn.Token,
-                        Operation = FilterOperation.EqualTo,
-                        Value = value is EmbeddedEntity ? null : value
-                    };
-                }
-            }
-
-            return new FilterOption
-            {
-                Token = header.RequestColumn.Token,
-                Operation = FilterOperation.EqualTo,
-                Value = FilterOption.DefaultValue(header.RequestColumn.Type),
-            };
-        }
+      
 
         private void btCreateColumn_Click(object sender, RoutedEventArgs e)
         {
@@ -981,7 +983,7 @@ namespace Signum.Windows
             if (!AllowChangeColumns)
                 return;
 
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
             string result = gvch.RequestColumn.DisplayName;
             if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
@@ -991,28 +993,72 @@ namespace Signum.Windows
             }
         }
 
+        private static SortGridViewColumnHeader GetHeaderColumnHeader(object sender)
+        {
+            var context = (ContextMenu)((MenuItem)sender).Parent;
+
+            return (SortGridViewColumnHeader)context.PlacementTarget;
+        }
+
         private void removeMenu_Click(object sender, RoutedEventArgs e)
         {
             if (!AllowChangeColumns)
                 return;
 
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
             gvResults.Columns.Remove(gvch.Column);
 
             UpdateMultiplyMessage(true); 
         }
 
-        private void filter_Click(object sender, RoutedEventArgs e)
+        private void filterHeader_Click(object sender, RoutedEventArgs e)
         {
-            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetHeaderColumnHeader(sender);
 
-            FilterOptions.Add(CreateFilter(gvch)); 
+            FilterOptions.Add(new FilterOption
+            {
+                Token = gvch.RequestColumn.Token,
+                Operation = FilterOperation.EqualTo,
+                Value = FilterOption.DefaultValue(gvch.RequestColumn.Type),
+            }); 
         }
 
-        private static SortGridViewColumnHeader GetMenuItemHeader(object sender)
+        private void filterCell_Click(object sender, RoutedEventArgs e)
         {
-            return (SortGridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            ContextMenu context = (ContextMenu)((MenuItem)sender).Parent;
+
+            SortGridViewColumnHeader gvch = GetCellColumnHeader(context);
+
+            if (gvch == null)
+                return;
+
+            ResultRow row = (ResultRow)lvResult.SelectedItem;
+            object value = row[gvch.ResultColumn];
+
+            FilterOptions.Add(new FilterOption
+            {
+                Token = gvch.RequestColumn.Token,
+                Operation =  FilterOperation.EqualTo,
+                Value = value is EmbeddedEntity ? null : value
+            });
+        }
+
+        private SortGridViewColumnHeader GetCellColumnHeader(ContextMenu context)
+        {
+            Point point = context.PointToScreen(new Point(0, 0));
+
+            Point newPoint = lvResult.PointFromScreen(point);
+
+            Point headerPoint = new Point(newPoint.X, 4);
+
+            HitTestResult hitResult = VisualTreeHelper.HitTest(lvResult, headerPoint);
+
+            if (hitResult == null)
+                return null;
+
+            SortGridViewColumnHeader gvch = hitResult.VisualHit.VisualParents().OfType<SortGridViewColumnHeader>().FirstOrDefault();
+            return gvch;
         }
 
         public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders, Pagination pagination)
@@ -1023,7 +1069,7 @@ namespace Signum.Windows
 
                 ColumnOptions.Clear();
                 ColumnOptions.AddRange(columns);
-                DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+                ColumnOption.SetColumnTokens(ColumnOptions, Description);
                 ColumnOptionsMode = columnOptionsMode;
                 GenerateListViewColumns();
 
@@ -1033,13 +1079,13 @@ namespace Signum.Windows
                         SimpleFilterBuilder = null;
 
                     FilterOptions.Clear();
-                    DynamicQueryServer.SetFilterTokens(filters, Description);
+                    FilterOption.SetFilterTokens(filters, Description);
                     FilterOptions.AddRange(filters);
                 }
 
                 OrderOptions.Clear();
                 OrderOptions.AddRange(orders);
-                DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
+                OrderOption.SetOrderTokens(OrderOptions, Description);
                 SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
                 UpdateMultiplyMessage(true);

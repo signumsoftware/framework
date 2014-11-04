@@ -98,6 +98,7 @@ namespace Signum.Engine
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
         protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options);
 
         public abstract string DatabaseName();
 
@@ -125,17 +126,17 @@ namespace Signum.Engine
         public abstract bool SupportsScalarSubqueryInAggregates { get; }
 
 
-        public static string TryExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
+        public static string TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
         {
             string toFind = "+" + catalogPostfix;
 
-            int index = connectionString.IndexOf(toFind);
-            if (index == -1)
+            string result = connectionString.TryBefore("+" + catalogPostfix).TryAfterLast("=");
+            if (result == null)
                 return null;
 
-            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
+            connectionString = connectionString.Replace("+" + catalogPostfix, ""); // Remove toFind 
 
-            return catalogPostfix;
+            return result + catalogPostfix;
         }
 
         public static string ExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
@@ -150,6 +151,21 @@ namespace Signum.Engine
 
             return catalogPostfix;
         }
+
+        public abstract bool AllowsSetSnapshotIsolation { get; }
+
+        public abstract void FixType(ref SqlDbType type, ref int? size, ref int? scale);
+
+        public abstract bool AllowsIndexWithWhere(string where);
+
+        public abstract SqlPreCommand ShringDatabase(string schemaName);
+
+        public abstract bool AllowsConvertToDate { get; }
+
+        public abstract bool AllowsConvertToTime { get; }
+
+        public abstract bool SupportsSqlDependency { get; }
+     
     }
 
   

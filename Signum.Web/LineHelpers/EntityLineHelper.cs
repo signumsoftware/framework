@@ -26,11 +26,11 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div", entityLine.Prefix).Class("SF-entity-line SF-control-container")))
+            using (sb.SurroundLine(new HtmlTag("div", entityLine.Prefix).Class("SF-entity-line SF-control-container")))
             {
                  sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
 
-                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("hidden")).Class("hide")))
+                 using (sb.SurroundLine(new HtmlTag("div", entityLine.Compose("hidden")).Class("hide")))
                  {
                      if (entityLine.UntypedValue != null)
                      {
@@ -46,14 +46,14 @@ namespace Signum.Web
                      }
                  }
 
-                 using (sb.Surround(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
+                 using (sb.SurroundLine(new HtmlTag("div", entityLine.Compose("inputGroup")).Class("input-group")))
                  {
                      if (entityLine.UntypedValue == null)
                          sb.AddLine(AutocompleteTextBox(helper, entityLine));
                      else
                          sb.AddLine(LinkOrSpan(helper, entityLine));
 
-                     using (sb.Surround(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
+                     using (sb.SurroundLine(new HtmlTag("span", entityLine.Compose("shownButton")).Class("input-group-btn")))
                      {
                          if (entityLine.UntypedValue == null)
                          {
@@ -69,16 +69,17 @@ namespace Signum.Web
                  }
 
                  if (entityLine.Type.IsEmbeddedEntity() && entityLine.Create)
-                {
-                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
-                }
+                 {
+                     EmbeddedEntity embedded = (EmbeddedEntity)new ConstructorContext(helper.ViewContext.Controller).ConstructUntyped(entityLine.Type.CleanType());
+                     TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone(embedded);
+                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true), null));
+                 }
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityLine.UntypedValue))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));
 
 
-                sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
+                sb.AddLine(entityLine.ConstructorScript(JsModule.Lines, "EntityLine"));
             }
 
             return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());

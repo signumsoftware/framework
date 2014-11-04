@@ -51,9 +51,9 @@ namespace Signum.Entities.DynamicQuery
             return result.BuildLite();
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return SubTokensBase(entityType, GetImplementations());
+            return SubTokensBase(entityType, options, GetImplementations());
         }
 
         public override string Format

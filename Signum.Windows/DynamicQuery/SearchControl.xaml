@@ -13,12 +13,6 @@
                 <m:DesignTimeResourceDictionary Source="..\Resources.xaml"/>
                 <m:DesignTimeResourceDictionary Source="..\BlueMenu.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <ContextMenu x:Key="contextMenu">
-                <MenuItem Header="{m:Loc {x:Static d:SearchMessage.NewFilter}}"  Click="filter_Click"/>
-                <Separator/>
-                <MenuItem Header="{m:Loc {x:Static d:SearchMessage.Rename}}" Click="renameMenu_Click"/>
-                <MenuItem Header="{m:Loc {x:Static d:EntityControlMessage.Remove}}" Click="removeMenu_Click"/>
-            </ContextMenu>
             <Geometry x:Key="RightArrow">M 0,0 L 4,3.5 L 0,7 Z</Geometry>
             <Geometry x:Key="UpArrow">M 0,4 L 3.5,0 L 7,4 Z</Geometry>
             <Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
@@ -107,8 +101,8 @@
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="newFilter">
                 <m:QueryTokenBuilder x:Name="tokenBuilder" />
-                <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc {x:Static d:SearchMessage.NewFilter}}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
-                <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc {x:Static d:SearchMessage.NewColumn}}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click" ToolTipService.ShowOnDisabled="True"
+                <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc {x:Static d:SearchMessage.AddFilter}}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
+                <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc {x:Static d:SearchMessage.AddColumn}}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click" ToolTipService.ShowOnDisabled="True"
                                    Visibility="{Binding AllowChangeColumns, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" />
             </StackPanel>
             <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>

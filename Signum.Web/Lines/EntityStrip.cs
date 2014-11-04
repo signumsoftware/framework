@@ -37,7 +37,7 @@ namespace Signum.Web
             bool isEmbedded = type.ElementType().IsEmbeddedEntity();
 
             Find = false;
-            Reorder = false;
+            Move = false;
             Create = isEmbedded;
             Navigate = !isEmbedded;
             View = isEmbedded;
@@ -51,7 +51,7 @@ namespace Signum.Web
             Autocomplete = false;
         }
 
-        protected override JObject OptionsJSInternal()
+        protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
 

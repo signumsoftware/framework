@@ -82,25 +82,22 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                
                 if (AggregateFunction == AggregateFunction.Count)
                     return typeof(int);
 
-                var pType = Parent.Type;
-                var pTypeUn = Parent.Type.UnNullify();
+                var pu = Parent.Type.UnNullify();
 
-                if (AggregateFunction == AggregateFunction.Average &&
-                    (pTypeUn == typeof(int) || pTypeUn == typeof(long) || pTypeUn == typeof(bool)))
-                {
-                    return pType.IsNullable() ? typeof(double?) : typeof(double);
-                }
+                if (AggregateFunction == AggregateFunction.Average && (pu != typeof(float) || pu != typeof(double) || pu == typeof(decimal)))
+                    return Parent.Type.IsNullable() ? typeof(double?) : typeof(double);
 
-                if (pTypeUn == typeof(bool))
-                {
-                    return pType.IsNullable() ? typeof(int?) : typeof(int);
-                }
+                if (pu == typeof(bool) ||
+                    pu == typeof(byte) || pu == typeof(sbyte) ||
+                    pu == typeof(short) || pu == typeof(ushort) ||
+                    pu == typeof(uint) ||
+                    pu == typeof(ulong))
+                    return Parent.Type.IsNullable() ? typeof(int?) : typeof(int);
 
-                return pType;
+                return Parent.Type;
             }
         }
 
@@ -109,7 +106,7 @@ namespace Signum.Entities.DynamicQuery
             get { return AggregateFunction.ToString(); }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }
@@ -148,21 +145,7 @@ namespace Signum.Entities.DynamicQuery
                 return new AggregateToken(AggregateFunction, Parent.Clone());
         }
 
-        internal Type ConvertTo()
-        {
-            if (AggregateFunction == AggregateFunction.Count)
-                return null;
-
-            var pu = Parent.Type.UnNullify();
-
-            if (AggregateFunction == AggregateFunction.Average && (pu == typeof(int) || pu == typeof(long) || pu == typeof(bool)))
-                return Parent.Type.IsNullable() ? typeof(double?) : typeof(double);
-
-            if (pu == typeof(bool))
-                return Parent.Type.IsNullable() ? typeof(int?) : typeof(int);
-
-            return null;
-        }
+      
 
         public override string TypeColor
         {

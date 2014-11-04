@@ -8,9 +8,8 @@ namespace Signum.Web
 {
     public class NavigateOptions
     {
-        public NavigateOptions(IRootEntity entity)
+        public NavigateOptions()
         {
-            Entity = entity;
             ShowOperations = true;
         }
 
@@ -18,37 +17,39 @@ namespace Signum.Web
 
         public string PartialViewName { get; set; }
 
-        public IRootEntity Entity { get; set; }
-
         public bool ShowOperations { get; set; }
+
+        public bool WriteEntityState { get; set; }
     }
 
     public abstract class PopupOptionsBase
     {
-        public PopupOptionsBase()
+        public PopupOptionsBase(string prefix)
         {
+            this.Prefix = prefix;
             ShowOperations = true;
         }
+
+        public string Prefix { get; set; }
 
         public bool? ReadOnly { get; set; }
 
         public string PartialViewName { get; set; }
-    
-        public TypeContext TypeContext { get; set; }
-
-        public abstract ViewMode ViewMode { get; }
 
         public bool ShowOperations { get; set; }
+
+        public abstract ViewMode ViewMode { get; }
     }
 
     public class PopupViewOptions : PopupOptionsBase
     {
-        public PopupViewOptions(TypeContext tc)
-        {
-            TypeContext = tc;
-        }
+        public PopupViewOptions(string prefix)
+            : base(prefix)
+        { }
 
         public bool? SaveProtected { get; set; }
+
+        public PropertyRoute PropertyRoute { get; set; }
 
         public override ViewMode ViewMode 
         {
@@ -58,10 +59,9 @@ namespace Signum.Web
 
     public class PopupNavigateOptions : PopupOptionsBase
     {
-        public PopupNavigateOptions(TypeContext tc)
-        {
-            TypeContext = tc;
-        }
+        public PopupNavigateOptions(string prefix)
+            : base(prefix)
+        { }
 
         public override ViewMode ViewMode
         {

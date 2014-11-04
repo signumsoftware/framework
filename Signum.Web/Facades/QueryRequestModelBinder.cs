@@ -39,7 +39,7 @@ namespace Signum.Web
             if (!webQueryName.HasText())
                 throw new InvalidOperationException("webQueryName not provided");
 
-            qr.QueryName = Navigator.ResolveQueryName(webQueryName);
+            qr.QueryName = Finder.ResolveQueryName(webQueryName);
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(qr.QueryName);
 
@@ -86,7 +86,7 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, queryDescription, canAggregate);
+                var token = QueryUtils.Parse(name, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
                 return new Signum.Entities.DynamicQuery.Filter(token,
                     EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
                     FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(m.Groups["value"].Value), token.Type));
@@ -112,7 +112,7 @@ namespace Signum.Web
                 OrderType orderType = tokenCapture.StartsWith("-") ? OrderType.Descending : OrderType.Ascending;
                 string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
 
-                return new Order(QueryUtils.Parse(token, description, canAggregate), orderType);
+                return new Order(QueryUtils.Parse(token, description, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
             }).ToList();
         }
 
@@ -133,7 +133,7 @@ namespace Signum.Web
                 var colName = m.Groups["token"].Value;
                 string displayName = m.Groups["name"].Success ? FindOptionsModelBinder.DecodeValue(m.Groups["name"].Value) : null;
 
-                var token = QueryUtils.Parse(colName, description, canAggregate);
+                var token = QueryUtils.Parse(colName, description, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
 
                 return new Column(token, displayName ?? token.NiceName());
             }).ToList();

@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
             return new OrderByRewriter().Visit(expression);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
+        protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             using (Scope())
             {
@@ -66,7 +66,7 @@ namespace Signum.Engine.Linq
 
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             bool isOuterMost = select == outerMostSelect;
 
@@ -129,7 +129,7 @@ namespace Signum.Engine.Linq
                     o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending,
                     o.Expression)).ToReadOnly();  
 
-            if (select.OrderBy != null && select.OrderBy.Count > 0)
+            if (select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
             ReadOnlyCollection<OrderExpression> orderings = null;
@@ -149,7 +149,7 @@ namespace Signum.Engine.Linq
                 select.From, select.Where, orderings, select.GroupBy, select.SelectOptions & ~SelectOptions.Reverse);
         }
 
-        protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
             AppendKeys();
 
@@ -157,7 +157,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             if (!scalar.Select.IsForXmlPathEmpty)
             {
@@ -179,13 +179,13 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitExists(ExistsExpression exists)
+        protected internal override Expression VisitExists(ExistsExpression exists)
         {
             using (Scope())
                 return base.VisitExists(exists);
         }
 
-        protected override Expression VisitIn(InExpression @in)
+        protected internal override Expression VisitIn(InExpression @in)
         {
             if (@in.Values != null)
                 return base.VisitIn(@in);
@@ -235,7 +235,7 @@ namespace Signum.Engine.Linq
                 aggExp.AggregateFunction == AggregateFunction.Average;
         }
 
-        protected override Expression VisitJoin(JoinExpression join)
+        protected internal override Expression VisitJoin(JoinExpression join)
         {
             SourceExpression left = this.VisitSource(join.Left);
 
@@ -255,13 +255,13 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
         {
             using (Scope())
                 return base.VisitSetOperator(set);
         }
 
-        protected override Expression VisitTable(TableExpression table)
+        protected internal override Expression VisitTable(TableExpression table)
         {
             if (gatheredKeys != null)
                 gatheredKeys.Add(table.GetIdExpression());

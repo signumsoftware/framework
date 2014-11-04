@@ -23,7 +23,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad();
+            MusicStarter.StartAndLoad();
         }
 
 
@@ -451,7 +451,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
 
         [TestMethod]
-        public void UpdateWith()
+        public void UnsafeUpdatePart()
         {
             using (Transaction tr = new Transaction())
             {
@@ -531,6 +531,30 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
                 var list = Database.MListQuery((AlbumDN a) => a.Songs);
                 //tr.Commit();
+            }
+        }
+
+        [TestMethod]
+        public void UpdateExplicitInterfaceImplementedField()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                 Database.Query<AlbumDN>()
+                     .UnsafeUpdate()
+                     .Set(a=>((ISecretContainer)a).Secret, a=>"Hi")
+                     .Execute();
+            }
+        }
+
+        [TestMethod]
+        public void UnsafeUpdatePartExpand()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Database.Query<LabelDN>()
+                    .UnsafeUpdatePart(lb => lb.Owner.Entity.Country)
+                    .Set(ctr => ctr.Name, lb => lb.Name)
+                    .Execute();
             }
         }
     }

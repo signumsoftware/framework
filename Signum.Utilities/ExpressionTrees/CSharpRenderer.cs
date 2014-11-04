@@ -107,11 +107,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string MemberName(this MemberInfo mi)
         {
-            return new Switch<MemberInfo, string>(mi)
-                .Case<PropertyInfo>(p => p.PropertyName())
-                .Case<FieldInfo>(p => p.FieldName())
-                .Case<MethodInfo>(p => p.MethodName())
-                .Default("??"); 
+            return mi is PropertyInfo ? ((PropertyInfo)mi).PropertyName() :
+             mi is FieldInfo ? ((FieldInfo)mi).FieldName() :
+             mi is MethodInfo ? ((MethodInfo)mi).MethodName() :
+             new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo").Throw<string>();
         }
 
         public static string TypeName(this Type type)

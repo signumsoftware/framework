@@ -68,6 +68,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return result;
         };
 
+        EntityBase.prototype.getOrRequestEntityHtml = function () {
+            var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
+
+            if (runtimeInfo == null)
+                return Promise.resolve(null);
+
+            var div = this.containerDiv();
+
+            var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo, this.getToString(), this.getLink());
+
+            result.html = div.children();
+
+            if (result.isLoaded())
+                return Promise.resolve(result);
+
+            return Navigator.requestPartialView(result, this.defaultViewOptions(null));
+        };
+
         EntityBase.prototype.getLink = function (itemPrefix) {
             return null;
         };
@@ -138,18 +156,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        EntityBase.prototype.typeChooser = function () {
-            var _this = this;
-            return Navigator.typeChooser(this.options.prefix, this.options.types.map(function (t, i) {
-                return ({ value: t, toStr: _this.options.typeNiceNames[i] });
-            }));
+        EntityBase.prototype.typeChooser = function (filter) {
+            return Navigator.typeChooser(this.options.prefix, this.options.types.filter(filter));
         };
 
         EntityBase.prototype.singleType = function () {
             if (this.options.types.length != 1)
                 throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
 
-            return this.options.types[0];
+            return this.options.types[0].name;
         };
 
         EntityBase.prototype.onCreating = function (prefix) {
@@ -157,13 +172,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 return this.creating(prefix);
 
-            return this.typeChooser().then(function (type) {
-                if (type == null)
+            return this.typeChooser(function (ti) {
+                return ti.creable;
+            }).then(function (type) {
+                if (!type)
                     return null;
 
-                var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                return type.preConstruct().then(function (extra) {
+                    if (!extra)
+                        return null;
 
-                return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
+                    var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.viewPopup(newEntity, _this.defaultViewOptions(extra));
+                });
             });
         };
 
@@ -197,7 +219,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.viewing != null)
                 return this.viewing(entityHtml);
 
-            return Navigator.viewPopup(entityHtml, this.defaultViewOptions());
+            return Navigator.viewPopup(entityHtml, this.defaultViewOptions(null));
         };
 
         EntityBase.prototype.find_click = function () {
@@ -217,25 +239,28 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.finding != null)
                 return this.finding(prefix);
 
-            return this.typeChooser().then(function (type) {
-                if (type == null)
+            return this.typeChooser(function (ti) {
+                return ti.findable;
+            }).then(function (type) {
+                if (!type)
                     return null;
 
                 return Finder.find({
-                    webQueryName: type,
+                    webQueryName: type.name,
                     prefix: prefix
                 });
             });
         };
 
-        EntityBase.prototype.defaultViewOptions = function () {
+        EntityBase.prototype.defaultViewOptions = function (extraJsonData) {
             return {
                 readOnly: this.options.isReadonly,
                 partialViewName: this.options.partialViewName,
                 validationOptions: {
                     rootType: this.options.rootType,
                     propertyRoute: this.options.propertyRoute
-                }
+                },
+                requestExtraJsonData: extraJsonData
             };
         };
 
@@ -295,6 +320,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.onAutocompleteSelected = function (entityValue) {
             throw new Error("onAutocompleteSelected is abstract");
         };
+
+        EntityBase.prototype.getNiceName = function (typeName) {
+            var t = this.options.types.filter(function (a) {
+                return a.name == typeName;
+            });
+
+            return t.length ? t[0].niceName : typeName;
+        };
         EntityBase.key_entity = "sfEntity";
         return EntityBase;
     })();
@@ -338,7 +371,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
             if ($txt.length) {
                 this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.options.types.join(","), l: 5, q: term });
+                    return ({ types: _this.options.types.map(function (t) {
+                            return t.name;
+                        }).join(","), l: 5, q: term });
                 });
 
                 this.setupAutocomplete($txt);
@@ -361,7 +396,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.prefix.child(Entities.Keys.toStr).get().val('');
 
             this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
-            this.visible(this.prefix.get().filter("ul.typeahead.dropdown-menu"), entityValue == null);
+            this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
             this.visible(this.prefix.child(Entities.Keys.toStr).tryGet(), entityValue == null);
         };
 
@@ -451,13 +486,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
-                if (type == null)
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
+                if (!type)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                return type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
 
@@ -472,7 +514,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (result.isLoaded())
                     return Promise.resolve(result);
 
-                return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, result.runtimeInfo), _this.defaultViewOptions());
+                return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, result.runtimeInfo), _this.defaultViewOptions(null));
             }).then(function (result) {
                 if (result) {
                     _this.setEntity(result);
@@ -672,7 +714,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityListBase.prototype.getNextPosIndex = function () {
-            return ";" + (this.getLastPosIndex() + 1).toString();
+            return (this.getLastPosIndex() + 1).toString();
         };
 
         EntityListBase.prototype.canAddItems = function () {
@@ -714,12 +756,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.findingMany != null)
                 return this.findingMany(prefix);
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.findable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
                 return Finder.findMany({
-                    webQueryName: type,
+                    webQueryName: type.name,
                     prefix: prefix
                 });
             });
@@ -766,14 +810,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityListBase.prototype.getPosIndex = function (itemPrefix) {
-            return parseInt(itemPrefix.child(EntityListBase.key_indexes).get().val().after(";"));
+            return parseInt(itemPrefix.child(EntityListBase.key_index).get().val());
         };
 
         EntityListBase.prototype.setPosIndex = function (itemPrefix, newIndex) {
-            var $indexes = itemPrefix.child(EntityListBase.key_indexes).get();
-            $indexes.val($indexes.val().before(";") + ";" + newIndex.toString());
+            var $indexes = itemPrefix.child(EntityListBase.key_index).get().val(newIndex.toString());
         };
-        EntityListBase.key_indexes = "sfIndexes";
+        EntityListBase.key_index = "sfIndex";
+        EntityListBase.key_rowId = "sfRowId";
         return EntityListBase;
     })(EntityBase);
     exports.EntityListBase = EntityListBase;
@@ -791,8 +835,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return _this.selection_Changed();
             });
 
-            if (list.height() < this.shownButton.height())
-                list.css("min-height", this.shownButton.height());
+            SF.onVisible(list).then(function () {
+                if (list.height() < _this.shownButton.height())
+                    list.css("min-height", _this.shownButton.height());
+            });
 
             this.selection_Changed();
         };
@@ -863,14 +909,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityList.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_indexes), this.getNextPosIndex()));
+            this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_index), this.getNextPosIndex()));
+            this.inputGroup.before(SF.hiddenInput(itemPrefix.child(EntityList.key_rowId), ""));
             this.inputGroup.before(SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), entityValue.runtimeInfo.toString()));
             this.inputGroup.before(SF.hiddenDiv(itemPrefix.child(EntityList.key_entity), ""));
 
             var select = this.prefix.child(EntityList.key_list).get();
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
 
-            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).appendTo(select);
+            var ri = entityValue.runtimeInfo;
+
+            $("<option/>").attr("id", itemPrefix.child(Entities.Keys.toStr)).attr("value", "").attr('selected', true).text(entityValue.toStr).attr('title', this.options.isEmbedded ? null : (this.getNiceName(ri.type) + (ri.id ? " " + ri.id : null))).appendTo(select);
         };
 
         EntityList.prototype.remove_click = function () {
@@ -898,7 +947,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             itemPrefix.child(Entities.Keys.runtimeInfo).get().remove();
             itemPrefix.child(Entities.Keys.toStr).get().remove();
             itemPrefix.child(EntityList.key_entity).tryGet().remove();
-            itemPrefix.child(EntityList.key_indexes).tryGet().remove();
+            itemPrefix.child(EntityList.key_index).tryGet().remove();
+            itemPrefix.child(EntityList.key_rowId).tryGet().remove();
         };
 
         EntityList.prototype.moveUp_click = function () {
@@ -997,13 +1047,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                return type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
         return EntityListDetail;
@@ -1031,7 +1088,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var fieldSet = $("<fieldset id='" + itemPrefix.child(EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend><div class='item-group'>" + (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") + "</div></legend>" + SF.hiddenInput(itemPrefix.child(EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + "<div id='" + itemPrefix.child(EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
+            var fieldSet = $("<fieldset id='" + itemPrefix.child(EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend><div class='item-group'>" + (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") + "</div></legend>" + SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + "<div id='" + itemPrefix.child(EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
             this.options.prefix.child(EntityRepeater.key_itemsContainer).get().append(fieldSet);
         };
@@ -1063,13 +1120,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return this.typeChooser().then(function (type) {
+            return this.typeChooser(function (t) {
+                return t.creable;
+            }).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true), lang.signum.newEntity);
+                return type.preConstruct().then(function (args) {
+                    if (!args)
+                        return null;
 
-                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
+                    var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
+
+                    return Navigator.requestPartialView(newEntity, _this.defaultViewOptions(args));
+                });
             });
         };
 
@@ -1084,7 +1148,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return Promise.all(result.map(function (e) {
                     var itemPrefix = _this.reserveNextPrefix();
 
-                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions());
+                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions(null));
 
                     return promise.then(function (ev) {
                         _this.addEntity(ev, itemPrefix);
@@ -1142,7 +1206,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityTabRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var header = $("<li id='" + itemPrefix.child(EntityTabRepeater.key_repeaterItem) + "' class='" + EntityTabRepeater.key_repeaterItemClass + "'>" + "<a data-toggle='tab' href='#" + itemPrefix.child(EntityBase.key_entity) + "' >" + "<span>" + entityValue.toStr + "</span>" + SF.hiddenInput(itemPrefix.child(EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + (this.options.reorder ? ("<span id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") + (this.options.reorder ? ("<span id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") + (this.options.remove ? ("<span id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' ><span class='glyphicon glyphicon-remove'></span></span>") : "") + "</a>" + "</li>");
+            var header = $("<li id='" + itemPrefix.child(EntityTabRepeater.key_repeaterItem) + "' class='" + EntityTabRepeater.key_repeaterItemClass + "'>" + "<a data-toggle='tab' href='#" + itemPrefix.child(EntityBase.key_entity) + "' >" + "<span>" + entityValue.toStr + "</span>" + SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + (this.options.reorder ? ("<span id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") + (this.options.reorder ? ("<span id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") + (this.options.remove ? ("<span id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' ><span class='glyphicon glyphicon-remove'></span></span>") : "") + "</a>" + "</li>");
 
             this.prefix.child(EntityTabRepeater.key_itemsContainer).get().append(header);
 
@@ -1171,10 +1235,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityStrip.prototype._create = function () {
             var _this = this;
-            var $txt = this.prefix.child(Entities.Keys.toStr).get().filter(".sf-entity-autocomplete");
+            var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
             if ($txt.length) {
                 this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.options.types.join(","), l: 5, q: term });
+                    return ({ types: _this.options.types.map(function (t) {
+                            return t.name;
+                        }).join(","), l: 5, q: term });
                 });
 
                 this.setupAutocomplete($txt);
@@ -1209,9 +1275,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityStrip.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var li = $("<li id='" + itemPrefix.child(EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) + SF.hiddenInput(itemPrefix.child(EntityStrip.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + "<div id='" + itemPrefix.child(EntityStrip.key_entity) + "' style='display:none'></div>" + "<span>" + ((this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "up" : "left") + "'></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "down" : "right") + "'></span></a>") : "") + (this.options.view ? ("<a id='" + itemPrefix.child("btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") + (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) + "</span>" + "</li>");
+            var li = $("<li id='" + itemPrefix.child(EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + " input-group'>" + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) + SF.hiddenInput(itemPrefix.child(EntityStrip.key_index), this.getNextPosIndex()) + SF.hiddenInput(itemPrefix.child(EntityStrip.key_rowId), "") + SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) + "<div id='" + itemPrefix.child(EntityStrip.key_entity) + "' style='display:none'></div>" + "<span>" + ((this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "up" : "left") + "'></span></a>") : "") + (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "down" : "right") + "'></span></a>") : "") + (this.options.view ? ("<a id='" + itemPrefix.child("btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") + (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) + "</span>" + "</li>");
 
-            this.prefix.child(EntityStrip.key_itemsContainer).get().find(" ." + EntityStrip.key_input).before(li);
+            this.prefix.child(EntityStrip.key_itemsContainer).get().children(" ." + EntityStrip.key_input).before(li);
         };
 
         EntityStrip.prototype.getRepeaterCall = function () {

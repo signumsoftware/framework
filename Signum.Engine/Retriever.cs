@@ -17,7 +17,7 @@ namespace Signum.Engine
         T Request<T>(int? id) where T : IdentifiableEntity;
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
-        T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
+        T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity;
         IRetriever Parent { get; }
 
         ModifiedState ModifiedState { get; }
@@ -42,7 +42,7 @@ namespace Signum.Engine
         List<EmbeddedEntity> embeddedPostRetrieving;
 
         bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
-        {   
+        {
             Dictionary<int, IdentifiableEntity> dic;
             if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
                 return true;
@@ -78,7 +78,7 @@ namespace Signum.Engine
 
             retrieved.Add(tuple, entity);
             complete(entity);
-        
+
             return entity;
         }
 
@@ -104,7 +104,7 @@ namespace Signum.Engine
 
             T entity = EntityCache.Construct<T>(id.Value);
             if (requests == null)
-                requests = new Dictionary<Type,Dictionary<int,IdentifiableEntity>>();
+                requests = new Dictionary<Type, Dictionary<int, IdentifiableEntity>>();
 
             requests.GetOrCreate(tuple.Type).Add(tuple.Id, entity);
 
@@ -118,7 +118,7 @@ namespace Signum.Engine
 
             Type type = TypeLogic.IdToType[typeId.Value];
 
-            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
+            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id);
         }
 
         public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
@@ -142,9 +142,10 @@ namespace Signum.Engine
 
             return entity;
         }
-        
+
         public void Dispose()
         {
+            retry:
             if (requests != null)
             {
                 while (requests.Count > 0)
@@ -237,11 +238,19 @@ namespace Signum.Engine
                 entityCache.Add(entity);
             }
 
-            if(embeddedPostRetrieving != null)
+            if (embeddedPostRetrieving != null)
                 foreach (var embedded in embeddedPostRetrieving)
                 {
-                    embedded.PostRetrieving(); 
+                    embedded.PostRetrieving();
                 }
+
+            if (liteRequests != null && liteRequests.Count > 0 ||
+                requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
+            {
+                retrieved.Clear();
+                if (embeddedPostRetrieving != null) embeddedPostRetrieving.Clear();
+                goto retry;
+            }
 
             entityCache.ReleaseRetriever(this);
         }
@@ -254,7 +263,7 @@ namespace Signum.Engine
             if (cc != null && cc.Enabled)
             {
                 cc.Load();
-                return ids.ToDictionary(a => a, a => cc.GetToString(a));
+                return ids.ToDictionary(a => a, a => cc.TryGetToString(a));
             }
             else
                 return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)

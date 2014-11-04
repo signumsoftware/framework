@@ -19,16 +19,46 @@ using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine
 {
+    public enum SqlServerVersion
+    {
+        SqlServer2005,
+        SqlServer2008,
+        SqlServer2012,
+        SqlServer2014,
+        AzureSQL,
+    }
+
     public class SqlConnector : Connector
     {
         int? commandTimeout = null;
         string connectionString;
 
-        public SqlConnector(string connectionString, Schema schema, DynamicQueryManager dqm)
+        public SqlServerVersion Version { get; set; }
+
+        public SqlConnector(string connectionString, Schema schema, DynamicQueryManager dqm, SqlServerVersion version)
             : base(schema, dqm)
         {
             this.connectionString = connectionString;
             this.ParameterBuilder = new SqlParameterBuilder();
+
+            this.Version = version;
+            // In disconnected scenarios schema can be null, this must be checked.
+            if (version >= SqlServerVersion.SqlServer2008 && schema != null)
+            {
+                var s = schema.Settings;
+
+                if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
+                    schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
+                    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
+                    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
+            }
         }
 
         public int? CommandTimeout
@@ -305,6 +335,23 @@ namespace Signum.Engine
 
         }
 
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            using (SqlConnection con = EnsureConnection())
+            using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection,
+                options,
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
+            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            {
+                foreach (DataColumn c in dt.Columns)
+                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+
+                bulkCopy.DestinationTableName = destinationTable.ToString();
+                bulkCopy.WriteToServer(dt);
+            }
+        }
+
         public override string DatabaseName()
         {
             return new SqlConnection(connectionString).Database;
@@ -359,7 +406,7 @@ namespace Signum.Engine
             if (database == null)
                 return this;
 
-            return new SqlConnector(Replace(connectionString, database), this.Schema, this.DynamicQueryManager);
+            return new SqlConnector(Replace(connectionString, database), this.Schema, this.DynamicQueryManager, this.Version);
         }
 
         private static string Replace(string connectionString, DatabaseName item)
@@ -367,6 +414,57 @@ namespace Signum.Engine
             var csb = new SqlConnectionStringBuilder(connectionString);
             csb.InitialCatalog = item.ToString();
             return csb.ToString();
+        }
+
+        public override bool AllowsSetSnapshotIsolation
+        {
+            get { return this.Version == SqlServerVersion.SqlServer2008; }
+        }
+
+        public override void FixType(ref SqlDbType type, ref int? size, ref int? scale)
+        {
+        }
+
+        public override bool AllowsIndexWithWhere(string Where)
+        {
+            return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);
+        }
+
+        public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
+
+        public override SqlPreCommand ShringDatabase(string schemaName)
+        {
+            return new[]
+            {
+                this.Version == SqlServerVersion.SqlServer2005 ?  
+                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
+                    new []
+                    {
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
+                        new[]{
+                            new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
+                            new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
+                            new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
+                        }.Combine(Spacing.Simple).ToSimple(),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
+                    }.Combine(Spacing.Simple),
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+            }.Combine(Spacing.Simple);
+        }
+
+        public override bool AllowsConvertToDate
+        {
+            get { return Version >= SqlServerVersion.SqlServer2008; }
+        }
+
+        public override bool AllowsConvertToTime
+        {
+            get { return Version >= SqlServerVersion.SqlServer2008; }
+        }
+
+        public override bool SupportsSqlDependency
+        {
+            get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
         }
     }
 
@@ -511,22 +609,7 @@ deallocate cur";
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)
         {
-            return
-                new[]{
-                    Schema.Current.Settings.DBMS == DBMS.SqlServer2005 ?  
-                        new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
-                        new []
-                        {
-                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
-                            new[]{
-                                new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
-                                new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
-                                new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                            }.Combine(Spacing.Simple).ToSimple(),
-                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
-                        }.Combine(Spacing.Simple),
-                    new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
-                }.Combine(Spacing.Simple);
+            return Connector.Current.ShringDatabase(schemaName);
 
         }
     }

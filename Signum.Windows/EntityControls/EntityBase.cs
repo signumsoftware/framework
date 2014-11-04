@@ -79,14 +79,6 @@ namespace Signum.Windows
             set { SetValue(ViewProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewButtonsProperty =
-            DependencyProperty.Register("ViewButtons", typeof(ViewMode?), typeof(EntityBase), new UIPropertyMetadata(null));
-        public ViewMode? ViewButtons
-        {
-            get { return (ViewMode?)GetValue(ViewButtonsProperty); }
-            set { SetValue(ViewButtonsProperty, value); }
-        }
-
         public static readonly DependencyProperty NavigateProperty =
             DependencyProperty.Register("Navigate", typeof(bool), typeof(EntityBase), new UIPropertyMetadata(true));
         public bool Navigate
@@ -141,6 +133,10 @@ namespace Signum.Windows
                 new UIPropertyMetadata((d, e) => ((EntityBase)d).SetType((Type)e.NewValue)));
 
             Common.ValuePropertySelector.SetDefinition(typeof(EntityBase), EntityProperty);
+
+            Common.IsReadOnlyProperty.OverrideMetadata(typeof(EntityBase),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits, 
+                    (d, e) => ((EntityBase)d).UpdateVisibility()));
         }
 
         public EntityBase()
@@ -149,26 +145,6 @@ namespace Signum.Windows
             this.CommandBindings.Add(new CommandBinding(FindCommand, btFind_Click));
             this.CommandBindings.Add(new CommandBinding(RemoveCommand, btRemove_Click));
             this.CommandBindings.Add(new CommandBinding(ViewCommand, btView_Click));
-        }
-
-        public bool dynamicReadOnly;
-        public bool DynamicReadOnly
-        {
-            get { return dynamicReadOnly; }
-            set
-            {
-                if (value != dynamicReadOnly)
-                {
-                    DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(Common.IsReadOnlyProperty, typeof(EntityBase));
-
-                    if (value)
-                        dpd.AddValueChanged(this, IsReadOnlyChanged);
-                    else
-                        dpd.RemoveValueChanged(this, IsReadOnlyChanged);
-
-                    dynamicReadOnly = true;
-                }
-            }
         }
 
         void IsReadOnlyChanged(object sender, EventArgs e)
@@ -233,7 +209,7 @@ namespace Signum.Windows
                 Create =
                     CleanType.IsEmbeddedEntity() ? Navigator.IsCreable(CleanType ) : 
                     Implementations.Value.IsByAll ? false:
-                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearch: false));
 
             if (this.NotSet(EntityBase.ViewProperty) && View)
                 View = CleanType.IsEmbeddedEntity() ? Navigator.IsViewable(CleanType) :
@@ -245,15 +221,15 @@ namespace Signum.Windows
                 if (View)
                     Navigate = false;
                 else
-                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearchEntity: false) :
+                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearch: false) :
                         Implementations.Value.IsByAll ? true :
-                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
+                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearch: false));
             }
 
             if (this.NotSet(EntityBase.FindProperty) && Find)
                 Find = CleanType.IsEmbeddedEntity() ? false:
                     Implementations.Value.IsByAll ? false :
-                    Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
+                    Implementations.Value.Types.Any(t => Finder.IsFindable(t));
 
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;
@@ -306,7 +282,7 @@ namespace Signum.Windows
             {
                 Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsNavigable(entityType, isSearchEntity: false);
+                return Navigator.IsNavigable(entityType, isSearch: false);
             }
             else
                 return Navigate;
@@ -387,11 +363,11 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearch: false));
                 if (type == null)
                     return null;
 
-                object entity = Constructor.Construct(type, this);
+                object entity = new ConstructorContext(this).ConstructUntyped(type);
 
                 value = entity;
             }
@@ -417,11 +393,11 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(Finder.IsFindable);
                 if (type == null)
                     return null;
 
-                value = Navigator.Find(new FindOptions { QueryName = type });
+                value = Finder.Find(new FindOptions { QueryName = type });
             }
             else
                 value = Finding();

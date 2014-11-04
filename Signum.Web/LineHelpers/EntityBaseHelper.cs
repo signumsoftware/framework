@@ -92,16 +92,11 @@ namespace Signum.Web
 
         private static ViewDataDictionary GetViewData(HtmlHelper helper, EntityBase line, TypeContext tc)
         {
-            ViewDataDictionary vdd;
+            ViewDataDictionary vdd = new ViewDataDictionary(tc);
+            
             if (line.PreserveViewData)
-            {
-                vdd = helper.ViewData;
-                vdd.Model = tc;
-            }
-            else
-            {
-                vdd = new ViewDataDictionary(tc);
-            }
+                vdd.AddRange(helper.ViewData);
+            
             return vdd;
         }
 
@@ -116,11 +111,10 @@ namespace Signum.Web
 
     
 
-        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        public static MvcHtmlString WriteIndex<T>(HtmlHelper helper, TypeElementContext<T> itemTC)
         {
-            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
-                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "",
-                itemIndex.ToString()));
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index).Concat(
+                   helper.Hidden(itemTC.Compose(EntityListBaseKeys.RowId), itemTC.RowId));
         }
 
         static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
@@ -143,9 +137,9 @@ namespace Signum.Web
         public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
            eb.Create &= 
-                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearchEntity: false) :
+                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearch: false) :
                 eb.Implementations.Value.IsByAll ? false :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearch: false));
                 
             eb.View &=
                 cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType, eb.PartialViewName) :
@@ -153,14 +147,14 @@ namespace Signum.Web
                 eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t, eb.PartialViewName));
 
             eb.Navigate &=
-              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, eb.PartialViewName, isSearchEntity: false) :
+              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, eb.PartialViewName, isSearch: false) :
               eb.Implementations.Value.IsByAll ? true :
-              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, eb.PartialViewName, isSearchEntity: false));
+              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, eb.PartialViewName, isSearch: false));
 
             eb.Find &=
                 cleanType.IsEmbeddedEntity() ? false :
                 eb.Implementations.Value.IsByAll ? false :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
+                eb.Implementations.Value.Types.Any(t => Finder.IsFindable(t));
         }
 
         internal static MvcHtmlString ListLabel(HtmlHelper helper, BaseLine baseLine)
@@ -279,7 +273,7 @@ namespace Signum.Web
 
         public static MvcHtmlString MoveUp(HtmlHelper helper, EntityListBase listBase, bool btn)
         {
-            if (!listBase.Reorder)
+            if (!listBase.Move)
                 return MvcHtmlString.Empty;
 
             return new HtmlTag("a", listBase.Compose("btnUp"))
@@ -304,7 +298,7 @@ namespace Signum.Web
 
         public static MvcHtmlString MoveDown(HtmlHelper helper, EntityListBase listBase, bool btn)
         {
-            if (!listBase.Reorder)
+            if (!listBase.Move)
                 return MvcHtmlString.Empty;
 
             return new HtmlTag("a", listBase.Compose("btnDown"))

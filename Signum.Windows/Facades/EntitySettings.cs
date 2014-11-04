@@ -22,6 +22,7 @@ namespace Signum.Windows
         public abstract Type StaticType { get; }
 
         public abstract Control CreateView(ModifiableEntity entity, PropertyRoute typeContext);
+        public abstract Control OnOverrideView(ModifiableEntity entity, Control control);
 
         public DataTemplate DataTemplate { get; set; }
         public ImageSource Icon { get; set; }
@@ -44,6 +45,7 @@ namespace Signum.Windows
         }
 
         public Func<T, Control> View { get; set; }
+        public event Func<T, Control, Control> OverrideView;
 
         public EntityWhen IsCreable { get; set; }
         public bool IsViewable { get; set; }
@@ -76,9 +78,9 @@ namespace Signum.Windows
                     break;
 
                 case EntityKind.String:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = false;
-                    IsNavigable = EntityWhen.IsSearchEntity;
+                    IsNavigable = EntityWhen.IsSearch;
                     break;
                 case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
@@ -86,7 +88,7 @@ namespace Signum.Windows
                     IsNavigable = EntityWhen.Always;
                     break;
                 case EntityKind.Main:
-                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsCreable = EntityWhen.IsSearch;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
@@ -115,17 +117,13 @@ namespace Signum.Windows
             return View((T)entity);
         }
 
-        public void OverrideView(Func<T, Control, Control> overrideView)
+        public override Control OnOverrideView(ModifiableEntity e, Control control)
         {
-            var view = View;
-            View = e =>
+            foreach (var f in OverrideView.GetInvocationListTyped())
             {
-                var ctrl = view(e);
-
-                ctrl = overrideView(e, ctrl);
-
-                return ctrl;
-            };
+                control = f((T)e, control);
+            }
+            return control;
         }
 
         public override Implementations FindImplementations(PropertyRoute route)
@@ -133,9 +131,9 @@ namespace Signum.Windows
             throw new InvalidOperationException("Call Server.FindImplementations for IdentifiableEntities");
         }
 
-        internal override bool OnIsCreable(bool isSearchEntity)
+        internal override bool OnIsCreable(bool isSearch)
         {
-            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsCreable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsViewable()
@@ -143,9 +141,9 @@ namespace Signum.Windows
             return IsViewable;
         }
 
-        internal override bool OnIsNavigable(bool isSearchEntity)
+        internal override bool OnIsNavigable(bool isSearch)
         {
-            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            return IsNavigable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
         }
 
         internal override bool OnIsReadonly()
@@ -166,7 +164,8 @@ namespace Signum.Windows
             get { return typeof(T); }
         }
 
-        public Func<T, PropertyRoute, Control> View { get; set; }
+        public Func<T, Control> View { get; set; }
+        public event Func<T, Control, Control> OverrideView;
 
         public bool IsCreable { get; set; }
         public bool IsViewable { get; set; }
@@ -186,13 +185,20 @@ namespace Signum.Windows
             if (typeContext == null && !(entity is IRootEntity))
                 throw new ArgumentException("An EmbeddedEntity neeed TypeContext");
 
-            return View((T)entity, typeContext ?? PropertyRoute.Root(entity.GetType()));
+            Control control = View((T)entity);
+
+            Common.SetPropertyRoute(control, typeContext ?? PropertyRoute.Root(entity.GetType()));
+
+            return control;
         }
 
-        public void OverrideView(Func<EmbeddedEntity, PropertyRoute, Control, Control> overrideView)
+        public override Control OnOverrideView(ModifiableEntity entity, Control control)
         {
-            var viewEmbedded = View;
-            View = (e, tc) => overrideView(e, tc, viewEmbedded(e, tc));
+            foreach (var f in OverrideView.GetInvocationListTyped())
+            {
+                control = f((T)entity, control);
+            }
+            return control;
         }
 
         internal override bool OnIsCreable(bool isSearchEntity)
@@ -237,7 +243,7 @@ namespace Signum.Windows
     public enum EntityWhen
     {
         Always = 3,
-        IsSearchEntity = 2,
+        IsSearch = 2,
         IsLine = 1,
         Never = 0,
     }

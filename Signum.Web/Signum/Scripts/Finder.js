@@ -1,7 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
-    exports.doubleScroll = true;
-
     (function (FilterOperation) {
         FilterOperation[FilterOperation["EqualTo"] = 0] = "EqualTo";
         FilterOperation[FilterOperation["DistinctTo"] = 1] = "DistinctTo";
@@ -158,7 +156,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).join(";"); //List of filter names "token1,operation1,value1;token2,operation2,value2"
         }
         if (findOptions.orders != null) {
-            requestData["orders"] = serializeOrders(findOptions.orders);
+            requestData["orders"] = exports.serializeOrders(findOptions.orders);
         }
         if (findOptions.columns != null) {
             requestData["columns"] = findOptions.columns.map(function (c) {
@@ -180,6 +178,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return (f.orderType == 0 /* Ascending */ ? "" : "-") + f.columnName;
         }).join(";");
     }
+    exports.serializeOrders = serializeOrders;
 
     function deleteFilter(trId) {
         var $tr = $("tr#" + trId);
@@ -197,8 +196,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.deleteFilter = deleteFilter;
 
+    function count(options, element) {
+        SF.onVisible(element).then(function () {
+            SF.ajaxPost({
+                url: SF.Urls.count,
+                data: exports.requestDataForOpenFinder(options, false)
+            }).then(function (data) {
+                element.html(data);
+                element.addClass(data == "0" ? "count-no-results" : "count-with-results badge");
+            });
+        });
+    }
+    exports.count = count;
+
     var SearchControl = (function () {
-        function SearchControl(element, _options) {
+        function SearchControl(element, _options, types) {
             this.keys = {
                 elems: "sfElems",
                 page: "sfPage",
@@ -208,6 +220,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             element.data("SF-control", this);
 
             this.element = element;
+            this.types = types;
 
             this.options = $.extend({
                 allowChangeColumns: true,
@@ -253,7 +266,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.allowOrder) {
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    _this.newSortOrder($(e.currentTarget), e.shiftKey);
+                    e.preventDefault();
+                    SearchControl.newSortOrder(_this.options.orders, $(e.currentTarget), e.shiftKey);
                     _this.search();
                     return false;
                 });
@@ -296,7 +310,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (this.options.showFooter) {
                 this.element.on("click", ".sf-search-footer ul.pagination a", function (e) {
-                    return _this.search(parseInt($(e.currentTarget).attr("data-page")));
+                    e.preventDefault();
+                    _this.search(parseInt($(e.currentTarget).attr("data-page")));
                 });
 
                 this.element.on("change", ".sf-search-footer .sf-pagination-size", function (e) {
@@ -308,14 +323,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 });
             }
 
+            this.prefix.child("sfFullScreen").tryGet().on("mouseup", function (e) {
+                e.preventDefault();
+                _this.fullScreen(e);
+            });
+
             if (this.options.showContextMenu) {
                 $tblResults.on("change", ".sf-td-selection", function (e) {
                     _this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
-                });
-
-                this.prefix.child("sfFullScreen").get().on("mousedown", function (e) {
-                    e.preventDefault();
-                    _this.fullScreen(e);
                 });
 
                 this.prefix.child("btnSelected").get().click(function (e) {
@@ -327,50 +342,27 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return false;
             });
 
-            if (exports.doubleScroll) {
-                var div = this.prefix.child("divResults").get();
-
-                div.removeClass("table-responsive");
-                div.css("overflow-x", "auto");
-
-                var divUp = $("<div>").attr("id", this.options.prefix.child("divResults_Up")).css("overflow-x", "auto").css("overflow-y", "hidden").css("height", "15").insertBefore(div);
-
-                var resultUp = $("<div>").attr("id", this.options.prefix.child("tblResults_Up")).css("height", "1").appendTo(divUp);
-
-                div.scroll(function () {
-                    _this.syncSize();
-                    divUp.scrollLeft(div.scrollLeft());
-                });
-                divUp.scroll(function () {
-                    _this.syncSize();
-                    div.scrollLeft(divUp.scrollLeft());
-                });
-
-                this.syncSize();
-
-                window.onresize = function () {
-                    return _this.syncSize();
-                };
-            }
-
+            //if (SF.isTouchDevice()) { //UserQuery dropdown problems
+            //    this.element.find(".sf-query-button-bar")
+            //        .css("overflow-x", "auto")
+            //        .css("white-space", "nowrap");
+            //}
             if (this.options.searchOnLoad) {
                 this.searchOnLoad();
             }
-        };
-
-        SearchControl.prototype.syncSize = function () {
-            if (!exports.doubleScroll)
-                return;
-
-            this.prefix.child("tblResults_Up").get().width(this.prefix.child("tblResults").get().width());
-
-            this.prefix.child("divResults_Up").get().css("height", this.prefix.child("tblResults_Up").get().width() > this.prefix.child("divResults_Up").get().width() ? "15" : "1");
         };
 
         SearchControl.prototype.changeRowSelection = function ($rowSelectors, select) {
             $rowSelectors.prop("checked", select);
             $rowSelectors.closest("tr").toggleClass("active", select);
 
+            this.updateSelectedButton();
+
+            if (this.selectionChanged)
+                this.selectionChanged(this.selectedItems());
+        };
+
+        SearchControl.prototype.updateSelectedButton = function () {
             var selected = this.element.find(".sf-td-selection:checked").length;
 
             this.prefix.child("btnSelectedSpan").get().text(selected);
@@ -379,9 +371,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 btn.attr("disabled", "disabled");
             else
                 btn.removeAttr("disabled");
-
-            if (this.selectionChanged)
-                this.selectionChanged(this.selectedItems());
         };
 
         SearchControl.prototype.ctxMenuInDropdown = function () {
@@ -429,8 +418,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 $menu.append($("<li>").append($("<a>").text(lang.signum.addFilter).addClass("sf-quickfilter").click(function () {
                     return _this.quickFilterCell($td);
                 })));
-                $menu.append($("<li class='divider'></li>"));
             }
+
+            var a = $td.find("a");
+            if (a.length && a.attr("href")) {
+                $menu.append($("<li>").append($("<a>").text(lang.signum.openTab + " " + a.text()).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+            }
+
+            if ($menu.children().length)
+                $menu.append($("<li class='divider'></li>"));
 
             var message = this.loadingMessage();
 
@@ -451,7 +447,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }).toArray().join(","),
                 webQueryName: this.options.webQueryName,
                 prefix: this.options.prefix,
-                implementationsKey: this.prefix.child(Entities.Keys.entityTypeNames).get().val()
+                implementationsKey: this.types.map(function (a) {
+                    return a.name;
+                }).join(",")
             };
         };
 
@@ -461,13 +459,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var $menu = SF.ContextMenu.createContextMenu(e);
 
-            $menu.html(this.loadingMessage());
+            var a = $td.find("a");
+            if (a.length && a.attr("href")) {
+                $menu.append($("<li>").append($("<a>").text(lang.signum.openTab).addClass("sf-new-tab").attr("href", a.attr("href")).attr("target", "_blank")));
+            }
+
+            if ($menu.children().length)
+                $menu.append($("<li class='divider'></li>"));
+
+            var message = this.loadingMessage();
+
+            $menu.append(message);
 
             SF.ajaxPost({
                 url: SF.Urls.selectedItemsContextMenu,
                 data: this.requestDataForContextMenu()
             }).then(function (items) {
-                $menu.html(items || _this.noActionsFoundMessage());
+                return message.replaceWith(items || _this.noActionsFoundMessage());
             });
 
             return false;
@@ -524,12 +532,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }
                 $searchButton.removeClass("sf-searching");
                 $searchButton.attr("data-searchCount", count + 1);
-                _this.syncSize();
+                _this.updateSelectedButton();
             });
         };
 
         SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var page = this.prefix.child(this.keys.page).get().val() || 1;
+            var page = this.prefix.child(this.keys.page).tryGet().val() || 1;
             var form = this.requestDataForSearch(2 /* FullScreen */, page);
 
             return $.param(form);
@@ -573,7 +581,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.serializeOrders = function () {
-            return serializeOrders(this.options.orders);
+            return exports.serializeOrders(this.options.orders);
         };
 
         SearchControl.prototype.serializeColumns = function () {
@@ -611,18 +619,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return SearchControl.liteKeys(this.selectedItems());
         };
 
-        SearchControl.prototype.selectedKeys = function () {
-            return this.selectedItems().map(function (item) {
-                return item.runtimeInfo.key();
-            }).join(',');
-        };
-
-        SearchControl.prototype.newSortOrder = function ($th, multiCol) {
+        SearchControl.newSortOrder = function (orders, $th, multiCol) {
             SF.ContextMenu.hideContextMenu();
 
             var columnName = $th.data("column-name");
 
-            var cols = this.options.orders.filter(function (o) {
+            var cols = orders.filter(function (o) {
                 return o.columnName == columnName;
             });
             var col = cols.length == 0 ? null : cols[0];
@@ -630,22 +632,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var oposite = col == null ? 0 /* Ascending */ : col.orderType == 0 /* Ascending */ ? 1 /* Descending */ : 0 /* Ascending */;
             var $sort = $th.find("span.sf-header-sort");
             if (!multiCol) {
-                this.element.find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
+                $th.closest("thead").find("span.sf-header-sort").removeClass("asc desc l0 l1 l2 l3");
                 $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
-                this.options.orders = [{ columnName: columnName, orderType: oposite }];
+
+                while (orders.length > 0)
+                    orders.pop();
+
+                orders.push({ columnName: columnName, orderType: oposite });
             } else {
                 if (col !== null) {
                     col.orderType = oposite;
                     $sort.removeClass("asc desc").addClass(oposite == 0 /* Ascending */ ? "asc" : "desc");
                 } else {
-                    this.options.orders.push({ columnName: columnName, orderType: oposite });
-                    $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc").addClass("l" + (this.options.orders.length - 1 % 4));
+                    orders.push({ columnName: columnName, orderType: oposite });
+                    $sort.addClass(oposite == 0 /* Ascending */ ? "asc" : "desc").addClass("l" + (orders.length - 1 % 4));
                 }
             }
         };
 
         SearchControl.prototype.addColumn = function () {
-            var _this = this;
             if (!this.options.allowChangeColumns || this.prefix.child("tblFilters").get().find("tbody").length == 0) {
                 throw "Adding columns is not allowed";
             }
@@ -670,12 +675,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 async: false
             }).then(function (html) {
                 $tblHeaders.append(html);
-                _this.syncSize();
             });
         };
 
         SearchControl.prototype.editColumn = function ($th) {
-            var _this = this;
             var colName = $th.find("span").text().trim();
 
             Navigator.valueLineBox({
@@ -687,7 +690,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).then(function (result) {
                 if (result)
                     $th.find("span:not(.sf-header-sort)").text(result);
-                _this.syncSize();
             });
         };
 
@@ -768,7 +770,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.removeColumn = function ($th) {
             $th.remove();
             this.clearResults();
-            this.syncSize();
         };
 
         SearchControl.prototype.clearResults = function () {
@@ -807,38 +808,31 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             if (this.creating != null)
                 this.creating();
-            else
-                this.getEntityType().then(function (type) {
-                    if (type == null)
+            else {
+                this.typeChooseCreate().then(function (type) {
+                    if (!type)
                         return;
 
-                    var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
-                    if (SF.isEmpty(_this.options.prefix))
-                        Navigator.navigate(runtimeInfo, false);
-                    else {
-                        var requestData = _this.requestDataForSearchPopupCreate();
+                    type.preConstruct().then(function (args) {
+                        if (!args)
+                            return;
 
-                        Navigator.navigatePopup(new Entities.EntityHtml(_this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: requestData });
-                    }
+                        args = $.extend(args, _this.requestDataForSearchPopupCreate());
+
+                        var runtimeInfo = new Entities.RuntimeInfo(type.name, null, true);
+                        if (SF.isEmpty(_this.options.prefix)) {
+                            Navigator.navigate(runtimeInfo, args, false);
+                        } else
+                            return Navigator.navigatePopup(new Entities.EntityHtml(_this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: args });
+                    });
                 });
+            }
         };
 
-        SearchControl.prototype.getEntityType = function () {
-            var names = this.prefix.child(Entities.Keys.entityTypeNames).get().val().split(",");
-            var niceNames = this.prefix.child(Entities.Keys.entityTypeNiceNames).get().val().split(",");
-
-            var options = names.map(function (p, i) {
-                return ({
-                    type: p,
-                    toStr: niceNames[i]
-                });
-            });
-            if (options.length == 1) {
-                return Promise.resolve(options[0].type);
-            }
-            return Navigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(function (o) {
-                return o == null ? null : o.type;
-            });
+        SearchControl.prototype.typeChooseCreate = function () {
+            return Navigator.typeChooser(this.options.prefix, this.types.filter(function (t) {
+                return t.creable;
+            }));
         };
 
         SearchControl.prototype.requestDataForSearchPopupCreate = function () {
@@ -856,7 +850,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var $button = this.options.prefix.child("qbSearch").get();
 
-            SF.onVisible($button, function () {
+            SF.onVisible($button).then(function () {
                 if (!_this.searchOnLoadFinished) {
                     $button.click();
                     _this.searchOnLoadFinished = true;
@@ -868,12 +862,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.SearchControl = SearchControl;
 
     var FilterBuilder = (function () {
-        function FilterBuilder(element, prefix, webQueryName, url) {
+        function FilterBuilder(element, prefix, webQueryName, addFilterUrl) {
             var _this = this;
             this.element = element;
             this.prefix = prefix;
             this.webQueryName = webQueryName;
-            this.url = url;
+            this.addFilterUrl = addFilterUrl;
+            if (SF.isTouchDevice()) {
+                element.find(".sf-filters-body").css("overflow-x", "auto").css("white-space", "nowrap");
+            }
+
             this.newSubTokensComboAdded(this.element.find("#" + prefix.child("tokenBuilder") + " select:first"));
 
             this.element.on("sf-new-subtokens-combo", function (event) {
@@ -963,7 +961,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var self = this;
             SF.ajaxPost({
-                url: this.url,
+                url: this.addFilterUrl,
                 data: data,
                 async: false
             }).then(function (filterHtml) {
@@ -1029,14 +1027,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.FilterBuilder = FilterBuilder;
 
     (function (QueryTokenBuilder) {
-        function init(containerId, webQueryName, controllerUrl, requestExtraJsonData) {
+        function init(containerId, webQueryName, controllerUrl, options, requestExtraJsonData) {
             $("#" + containerId).on("change", "select", function () {
-                tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+                tokenChanged($(this), webQueryName, controllerUrl, options, requestExtraJsonData);
             });
         }
         QueryTokenBuilder.init = init;
 
-        function tokenChanged($selectedCombo, webQueryName, controllerUrl, requestExtraJsonData) {
+        function tokenChanged($selectedCombo, webQueryName, controllerUrl, options, requestExtraJsonData) {
             var prefix = $selectedCombo.attr("id").before("ddlTokens_");
             if (prefix.endsWith("_"))
                 prefix = prefix.substr(0, prefix.length - 1);
@@ -1057,7 +1055,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 webQueryName: webQueryName,
                 tokenName: tokenName,
                 index: index,
-                prefix: prefix
+                prefix: prefix,
+                options: options
             }, requestExtraJsonData);
 
             SF.ajaxPost({

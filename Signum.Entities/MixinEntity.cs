@@ -52,6 +52,8 @@ namespace Signum.Entities
         public static Dictionary<Type, Func<IdentifiableEntity, MixinEntity, MixinEntity>> Constructors =
             new Dictionary<Type, Func<IdentifiableEntity, MixinEntity, MixinEntity>>();
 
+        public static Func<Type, string> CanAddMixins;
+
         public static void Register<T, M>()
             where T : IdentifiableEntity
             where M : MixinEntity
@@ -69,6 +71,10 @@ namespace Signum.Entities
 
             if (!typeof(MixinEntity).IsAssignableFrom(mixinEntity))
                 throw new InvalidOperationException("{0} is not a {1}".Formato(mixinEntity.Name, typeof(MixinEntity).Name));
+
+            string error = CanAddMixins == null ? null : CanAddMixins(mainEntity); 
+            if (error != null)
+                throw new InvalidOperationException(error);
 
             GetMixinDeclarations(mainEntity).Add(mixinEntity);
 
@@ -132,7 +138,7 @@ namespace Signum.Entities
         public static void AssertDeclared(Type mainEntity, Type mixinType)
         {
             if (!IsDeclared(mainEntity, mixinType))
-                throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
+                throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
         internal static MixinEntity CreateMixins(IdentifiableEntity mainEntity)
@@ -186,8 +192,6 @@ namespace Signum.Entities
 
             return newEntity;
         }
-
-       
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]

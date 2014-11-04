@@ -32,11 +32,5 @@ namespace Signum.Web
             Create = false;
             Remove = false;
         }
-
-        protected override JObject OptionsJSInternal()
-        {
-            var result = base.OptionsJSInternal();
-            return result;
-        }
     }
 }

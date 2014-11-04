@@ -25,7 +25,18 @@ namespace Signum.Entities
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
-        internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        static Func<bool> isRetrievingFunc = null;
+        static public bool IsRetrieving
+        {
+            get { return isRetrievingFunc != null && isRetrievingFunc(); }
+        }
+
+        internal static void SetIsRetrievingFunc(Func<bool> isRetrievingFunc)
+        {
+            ModifiableEntity.isRetrievingFunc = isRetrievingFunc;
+        }
+
+        protected internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
@@ -36,6 +47,9 @@ namespace Signum.Entities
 
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
+
+            if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
+                throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
 
             INotifyCollectionChanged col = field as INotifyCollectionChanged;
             if (col != null)

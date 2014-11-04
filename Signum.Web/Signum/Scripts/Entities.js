@@ -9,8 +9,6 @@ define(["require", "exports"], function(require, exports) {
     exports.Keys = {
         tabId: "sfTabId",
         antiForgeryToken: "__RequestVerificationToken",
-        entityTypeNames: "sfEntityTypeNames",
-        entityTypeNiceNames: "sfEntityTypeNiceNames",
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
@@ -82,11 +80,34 @@ define(["require", "exports"], function(require, exports) {
             this.link = link;
         }
         EntityValue.prototype.assertPrefixAndType = function (prefix, types) {
-            if (types.length == 0 && types[0] == "[All]")
+            var _this = this;
+            if (types == null)
                 return;
 
-            if (types.indexOf(this.runtimeInfo.type) == -1)
+            if (!types.some(function (ti) {
+                return ti.name == _this.runtimeInfo.type;
+            }))
                 throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
+        };
+
+        EntityValue.prototype.key = function () {
+            return this.runtimeInfo.key() + ";" + this.toStr;
+        };
+
+        EntityValue.fromKey = function (key) {
+            if (SF.isEmpty(key))
+                return null;
+
+            var index = key.indexOf(";");
+            if (index == -1)
+                throw Error("{0} not found".format(";"));
+
+            index = key.indexOf(";");
+
+            if (index == -1)
+                return new EntityValue(RuntimeInfo.parse(key));
+
+            return new EntityValue(RuntimeInfo.parse(key.substr(0, index)), key.substr(index + 1));
         };
 
         EntityValue.prototype.isLoaded = function () {

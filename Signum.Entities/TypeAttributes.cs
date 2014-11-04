@@ -93,7 +93,7 @@ namespace Signum.Entities
         /// <summary>
         /// Doesn't make sense to view it from other entity, since there's not to much to see. Not editable. 
         /// Not SaveProtected
-        /// ie: MultiEnumDN
+        /// ie: PermissionSymbol
         /// </summary>
         SystemString,
 
@@ -105,7 +105,7 @@ namespace Signum.Entities
         System,
 
         /// <summary>
-        /// An entity that connects to entity to implement a N to N relationship in a symetric way (no MLists)
+        /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
         /// Not SaveProtected, not vieable, not creable (override on SearchControl) 
         /// ie: DiscountProductDN
         /// </summary>
@@ -152,7 +152,7 @@ namespace Signum.Entities
     {
         /// <summary>
         /// Entity created for business definition
-        /// By defautlt ordered by id Ascending
+        /// By default ordered by id Ascending
         /// ie: ProductDN, OperationDN, PermissionDN, CountryDN...  
         /// </summary>
         Master,

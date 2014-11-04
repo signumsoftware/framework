@@ -217,12 +217,12 @@ namespace Signum.Utilities.Reflection
 
         public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
         {
-            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
         public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
         {
-            return ci.DeclaringType.MakeGenericType(types).GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.MakeGenericType(types).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
 
@@ -279,7 +279,6 @@ namespace Signum.Utilities.Reflection
             return (Action<T, P>)exp.Compile();
         }
 
-        //Replace when C# 4.0 is available
         public static Action<T, object> CreateSetter<T>(MemberInfo m)
         {
             if ((m as PropertyInfo).Try(a => !a.CanWrite) ?? false)
@@ -294,7 +293,6 @@ namespace Signum.Utilities.Reflection
 
         static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
 
-        //Replace when C# 4.0 is available
         public static Action<object, object> CreateSetterUntyped(Type type, MemberInfo m)
         {
             if ((m as PropertyInfo).Try(a => !a.CanWrite) ?? false)
@@ -430,7 +428,22 @@ namespace Signum.Utilities.Reflection
         public static bool TryParse<T>(string value, out T result)
         {
             object objResult;
-            if (TryParse(value, typeof(T), out objResult))
+            if (TryParse(value, typeof(T), CultureInfo.CurrentCulture, out objResult))
+            {
+                result = (T)objResult;
+                return true;
+            }
+            else
+            {
+                result = default(T);
+                return false;
+            }
+        }
+
+        public static bool TryParse<T>(string value,  CultureInfo ci, out T result)
+        {
+            object objResult;
+            if (TryParse(value, typeof(T), ci, out objResult))
             {
                 result = (T)objResult;
                 return true;

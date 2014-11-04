@@ -22,12 +22,15 @@ namespace Signum.Windows
         public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
             var disp = Dispatcher.CurrentDispatcher;
-           
+
+            var context = Statics.ExportThreadContext();
             Action action = () =>
             {
                 try
                 {
-                    backgroundThread();
+                    using (Statics.ImportThreadContext(context))
+                        backgroundThread();
+
                     if (endAction != null)
                         disp.Invoke(DispatcherPriority.Normal, endAction);
                 }
@@ -67,12 +70,17 @@ namespace Signum.Windows
             return dispatcher.BeginInvoke(action);
         }
 
+        public static event Func<Action<Window>> OnShowInAnotherThread;  //Dispose method will be run in another thread!
+
         public static void ShowInAnotherThread<W>(Func<W> windowConstructor,
             Action<W> afterShown = null, EventHandler closed = null, bool avoidSpawnThread = false) where W : Window
         {
             if (avoidSpawnThread)
             {
                 W win = windowConstructor();
+
+                if (win == null)
+                    return;
 
                 if (closed != null)
                     win.Closed += (sender, args) => closed(sender, args);
@@ -84,6 +92,11 @@ namespace Signum.Windows
             }
             else
             {
+                Action<Window> onWindowsReady = OnShowInAnotherThread == null ? null :
+                    OnShowInAnotherThread.GetInvocationListTyped()
+                    .Select(a => a())
+                    .Aggregate((a, b) => w => { a(w); b(w); });
+
                 Dispatcher prevDispatcher = Dispatcher.CurrentDispatcher;
 
                 var parent = Thread.CurrentThread;
@@ -104,6 +117,9 @@ namespace Signum.Windows
 
                         W win = windowConstructor();
 
+                        if (win == null)
+                            return;
+
                         threadWindows.TryAdd(Thread.CurrentThread, win);
 
                         win.Closed += (sender, args) =>
@@ -117,6 +133,9 @@ namespace Signum.Windows
                         };
 
                         win.Show();
+
+                        if (onWindowsReady != null)
+                            onWindowsReady(win);
 
                         if (afterShown != null)
                             afterShown(win);
@@ -157,6 +176,16 @@ namespace Signum.Windows
             }
 
             return threadWindows.Any();
+        }
+
+        internal static System.Windows.Controls.Control GetCurrentWindow()
+        {
+            var win = threadWindows.TryGetC(Thread.CurrentThread);
+
+            if (win == null)
+                return null;
+            
+            return win;
         }
     }
 }

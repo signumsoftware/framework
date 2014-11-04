@@ -34,7 +34,7 @@ namespace Signum.Engine.Extensions.Basics
             {
                 sb.Include<T>();
 
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () => lazy.Load();
+                sb.Schema.Initializing += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
 
@@ -64,14 +64,14 @@ namespace Signum.Engine.Extensions.Basics
 
             IEnumerable<T> should = CreateSemiSymbols();
 
-            return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple);
         }
 
         private static IEnumerable<T> CreateSemiSymbols()
         {
             IEnumerable<T> should = getSemiSymbols().ToList();
 
-            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
+            using (CultureInfoUtils.ChangeCulture(Schema.Current.ForceCultureInfo))
                 foreach (var item in should)
                     item.Name = item.NiceToString();
 

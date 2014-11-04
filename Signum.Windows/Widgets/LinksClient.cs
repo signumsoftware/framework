@@ -15,46 +15,10 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-    public static class QuickLinkContextualMenu
-    {
-        internal static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
-        {
-            if (sc.SelectedItems == null || sc.SelectedItems.Length != 1)
-                return null;
-
-            return from ql in LinksClient.GetForEntity(sc.SelectedItem.Clone(), sc).NotNull()
-                   where ql.IsVisible
-                   select GetMenuItem(ql);
-        }
-
-        static MenuItem GetMenuItem(QuickLink ql)
-        {
-            var mi = new MenuItem
-            {
-                DataContext = ql,
-                Header = ql.Label,
-                Icon = ql.Icon.ToSmallImage(),
-            }
-            .Bind(MenuItem.HeaderProperty, "Label");
-
-            AutomationProperties.SetName(mi, ql.Name);
-
-            if (ql.ToolTip.HasText())
-            {
-                mi.ToolTip = ql.ToolTip;
-                ToolTipService.SetShowOnDisabled(mi, true);
-                AutomationProperties.SetHelpText(mi, ql.ToolTip);
-            }
-
-            mi.Click += (sender, args) => ql.Execute();
-
-            return mi;
-        }
-    }
 
     public static class LinksClient
     {
-        static Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>> entityLinks =
+        public static Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>> EntityLinks =
             new Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>(
                 merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
                 minimumType: typeof(IdentifiableEntity));
@@ -62,21 +26,21 @@ namespace Signum.Windows
         public static void RegisterEntityLinks<T>(Func<Lite<T>, Control, QuickLink[]> getQuickLinks)
             where T : IdentifiableEntity
         {
-            var current = entityLinks.GetDefinition(typeof(T));
+            var current = EntityLinks.GetDefinition(typeof(T));
 
             current += (t, p0) => getQuickLinks((Lite<T>)t, p0);
 
-            entityLinks.SetDefinition(typeof(T), current);
+            EntityLinks.SetDefinition(typeof(T), current);
         }
 
         public static ObservableCollection<QuickLink> GetForEntity(Lite<IdentifiableEntity> ident, Control control)
         {
             ObservableCollection<QuickLink> links = new ObservableCollection<QuickLink>();
 
-            var func = entityLinks.TryGetValue(ident.EntityType);
+            var func = EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
-                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>())
+                foreach (var item in func.GetInvocationListTyped())
                 {
                     var array = item(ident, control);
                     if (array != null)
@@ -95,8 +59,41 @@ namespace Signum.Windows
                     WidgetPanel.GetWidgets += (obj, mainControl) => new LinksWidget() { Control = mainControl };
 
                 if (contextualMenu)
-                    SearchControl.GetContextMenuItems += QuickLinkContextualMenu.SearchControl_GetContextMenuItems;
+                    SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
             }
+        }
+
+        internal static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
+        {
+            if (sc.SelectedItems == null || sc.SelectedItems.Count != 1)
+                return null;
+
+            return from ql in LinksClient.GetForEntity(sc.SelectedItem.Clone(), sc).NotNull()
+                   where ql.IsVisible
+                   select GetMenuItem(ql);
+        }
+
+        static MenuItem GetMenuItem(QuickLink ql)
+        {
+            var mi = new MenuItem
+            {
+                DataContext = ql,
+                Header = ql.Label,
+                Icon = ql.Icon.ToSmallImage(),
+            }
+            .Set(AutomationProperties.NameProperty, ql.Name)
+            .Bind(MenuItem.HeaderProperty, "Label");
+
+            if (ql.ToolTip.HasText())
+            {
+                mi.ToolTip = ql.ToolTip;
+                ToolTipService.SetShowOnDisabled(mi, true);
+                AutomationProperties.SetHelpText(mi, ql.ToolTip);
+            }
+
+            mi.Click += (sender, args) => ql.Execute();
+
+            return mi;
         }
     }
 
@@ -182,34 +179,30 @@ namespace Signum.Windows
         public ExploreOptions Options { get; set; }
         public bool ShowResultCount { get; set; }
 
-        public QuickLinkExplore(object queryName, string columnName, Func<object> valueFactory, bool hideColumn, bool showCount = false) :
-            this(queryName, columnName, (object)valueFactory, hideColumn, showCount)
+        public QuickLinkExplore(object queryName, string columnName, Func<object> valueFactory) :
+            this(queryName, columnName, (object)valueFactory)
         {
         }
 
-        public QuickLinkExplore(object queryName, string columnName, object value, bool hideColumn, bool showCount = false) :
+        public QuickLinkExplore(object queryName, string columnName, object value) :
             this(new ExploreOptions(queryName)
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove : ColumnOptionsMode.Add,
-                ColumnOptions = hideColumn ? new List<ColumnOption> { new ColumnOption(columnName) } : new List<ColumnOption>(),
+                ColumnOptionsMode = ColumnOptionsMode.Remove ,
+                ColumnOptions = { new ColumnOption(columnName) } ,
 
-                FilterOptions = new List<FilterOption>
-                {
-                    new FilterOption(columnName, value),
-                }
-            }, showCount)
+                FilterOptions = { new FilterOption(columnName, value) }
+            })
         {
         }
 
-        public QuickLinkExplore(ExploreOptions options, bool showCount = false)
+        public QuickLinkExplore(ExploreOptions options)
         {
             Options = options;
             Label = QueryUtils.GetNiceName(Options.QueryName);
             //Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
-            IsVisible = Navigator.IsFindable(Options.QueryName);
-            ShowResultCount = showCount;
+            IsVisible = Finder.IsFindable(Options.QueryName);
 
             if (ShowResultCount && IsVisible)
             {
@@ -229,7 +222,7 @@ namespace Signum.Windows
         {
             EvaluateFunValues();
 
-            Navigator.Explore(Options);
+            Finder.Explore(Options);
         }
 
         private void EvaluateFunValues()
@@ -277,7 +270,7 @@ namespace Signum.Windows
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
             //Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
+            IsVisible = Finder.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearch: true);
         }
 
         public override void Execute()
@@ -312,4 +305,8 @@ namespace Signum.Windows
             get { return typeof(T).FullName; }
         }
     }
+
+    
+    
+
 }
