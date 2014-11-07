@@ -514,7 +514,7 @@ namespace Signum.Web
 
             if (ident.IsNew)
             {
-                return LiteMessage.New.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName;
+                return LiteMessage.New_G.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName;
             }
             return niceName + " " + ident.Id;
         }

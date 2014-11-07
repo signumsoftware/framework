@@ -554,7 +554,8 @@ namespace Signum.Entities
         IdNotValid,
         [Description("Invalid Format")]
         InvalidFormat,
-        New,
+        [Description("New")]
+        New_G,
         [Description("Type {0} not found")]
         Type0NotFound,
         [Description("Text")]

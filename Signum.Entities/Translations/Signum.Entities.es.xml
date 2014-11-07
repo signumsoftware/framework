@@ -62,7 +62,7 @@
     <Member Name="TheEntity0IsNew" Description="La entidad {0} es nueva" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Hay '{0}' que refieren a esta entidad" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2" Description="Ya hay [m:un|f:una] {0} con {1} igual a '{2}'" />
+    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Ya hay [m:un|f:una] {0} con {1} igual a '{2}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
   </Type>
   <Type Name="Entity" Description="Entidad" />
@@ -73,7 +73,6 @@
     <Member Name="MoveDown" Description="Mover abajo" />
     <Member Name="MoveUp" Description="Mover arriba" />
     <Member Name="Navigate" Description="Navegar" />
-    <Member Name="New" Description="Nuevo" />
     <Member Name="No" Description="no" />
     <Member Name="NullValueNotAllowed" Description="No se admite un valor nulo" />
     <Member Name="Remove" Description="Quitar" />
@@ -128,8 +127,7 @@
     <Member Name="NotStartsWith" Description="no empieza por" />
     <Member Name="StartsWith" Description="empieza por" />
   </Type>
-  <Type Name="IdentifiableEntity" Description="Entidad identificable" />
-  <Type Name="IIdentifiable">
+  <Type Name="IEntity">
     <Member Name="Id" Description="ID" />
   </Type>
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
@@ -177,7 +175,7 @@
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
     <Member Name="InvalidFormat" Description="Formato inválido" />
-    <Member Name="New" Description="Nuevo" />
+    <Member Name="New_G" Description="Nuev[m:o|f:a]" />
     <Member Name="ToStr" Description="Texto" />
     <Member Name="Type0NotFound" Description="Tipo {0} no encontrado" />
   </Type>
@@ -188,7 +186,6 @@
   <Type Name="ModelEntity" Description="Entidad modelo" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" />
   <Type Name="NormalControlMessage">
-    <Member Name="New" Description="Nuevo" />
     <Member Name="Save" Description="Guardar" />
     <Member Name="ViewForType0IsNotAllowed" Description="View para el tipo {0} no está permitido" />
   </Type>
@@ -279,19 +276,19 @@
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
   <Type Name="SearchMessage">
-    <Member Name="_01of2Results" Description="{0} - {1} de {2} resultado[s]." />
-    <Member Name="_0Results" Description="{0} resultado[s]." />
+    <Member Name="_01of2Results_N" Description="{0} - {1} de {2} resultado[s]." />
+    <Member Name="_0Results_N" Description="{0} resultado[s]." />
     <Member Name="AddColumn" Description="Añadir columna" />
     <Member Name="AddFilter" Description="Añadir filtro" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
     <Member Name="Create" Description="Crear" />
-    <Member Name="CreateNew0" Description="Crear nuev[m:o|f:a] {0}" />
+    <Member Name="CreateNew0_G" Description="Crear nuev[m:o|f:a] {0}" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
     <Member Name="Field" Description="Campo" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
-    <Member Name="First0Results" Description="primer[os] {0} resultado[s]." />
+    <Member Name="First0Results_N" Description="primer[os] {0} resultado[s]." />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
     <Member Name="NoActionsFound" Description="No se encontraron acciones" />
@@ -358,7 +355,7 @@
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} es obligatorio si se establece {1}" />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
-    <Member Name="_0IsNotA1" Description="{0} no es [m:un|f:una] {1}" />
+    <Member Name="_0IsNotA1_G" Description="{0} no es [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
@@ -366,7 +363,7 @@
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
     <Member Name="Be" Description="ser " />
-    <Member Name="BeA0" Description="ser [m:un|f:una] {0}" />
+    <Member Name="BeA0_G" Description="ser [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeNotNull" Description="ser no nulo" />
     <Member Name="FileName" Description="Nombre de archivo" />

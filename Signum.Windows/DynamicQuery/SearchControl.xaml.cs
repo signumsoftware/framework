@@ -402,7 +402,7 @@ namespace Signum.Windows
                 }
             }
 
-            btCreate.ToolTip = SearchMessage.CreateNew0.NiceToString()
+            btCreate.ToolTip = SearchMessage.CreateNew0_G.NiceToString()
                 .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
                 .Formato(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 

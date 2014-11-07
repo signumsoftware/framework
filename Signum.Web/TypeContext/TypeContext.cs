@@ -344,6 +344,11 @@ namespace Signum.Web
             return Common.WalkExpression(this, property);
         }
 
+        public string SubContextPrefix<S>(Expression<Func<T, S>> property)
+        {
+            return SubContext(property).Prefix;
+        }
+
         public IEnumerable<TypeElementContext<S>> TypeElementContext<S>(Expression<Func<T, MList<S>>> property)
         {
             return TypeContextUtilities.TypeElementContext(Common.WalkExpression(this, property));

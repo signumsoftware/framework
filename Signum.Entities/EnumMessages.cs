@@ -56,7 +56,7 @@ namespace Signum.Entities
         [Description("Unautorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
         [Description("There's already a {0} with {1} equals to '{2}'")]
-        TheresAlreadyA0With1EqualsTo2
+        TheresAlreadyA0With1EqualsTo2_G
     }
 
     public enum NormalWindowMessage
@@ -103,7 +103,6 @@ Lose changes?")]
         MoveDown,
         MoveUp,
         Navigate,
-        New,
         [Description("no")]
         No,
         NullValueNotAllowed,
@@ -144,15 +143,15 @@ Lose changes?")]
         Query0NotRegistered,
         Rename,
         [Description("{0} result[s].")]
-        _0Results,
+        _0Results_N,
         [Description("first {0} result[s].")]
-        First0Results,
+        First0Results_N,
         [Description("{0} - {1} of {2} result[s].")]
-        _01of2Results,
+        _01of2Results_N,
         Search,
         Create,
         [Description("Create new {0}")]
-        CreateNew0,
+        CreateNew0_G,
         [Description("All")]
         SearchControl_Pagination_All,
         [Description("There is no {0}")]
@@ -163,7 +162,7 @@ Lose changes?")]
         ViewSelected,
         Operations,
         Processes,
-        NoResultsFound
+        NoResultsFound,
     }
 
     public enum SelectorMessage
@@ -200,7 +199,6 @@ Lose changes?")]
 
     public enum NormalControlMessage
     {
-        New,
         Save,
         [Description("View for type {0} is not allowed")]
         ViewForType0IsNotAllowed

@@ -725,7 +725,7 @@ namespace Signum.Entities
             var t = (TypeDN)value;
             if (!Type.IsAssignableFrom(t.ToType()))
             {
-                return ValidationMessage._0IsNotA1.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(t.ToType().NiceName(), Type.NiceName());
+                return ValidationMessage._0IsNotA1_G.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(t.ToType().NiceName(), Type.NiceName());
             }
 
             return null;
@@ -733,7 +733,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.BeA0.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(Type.NiceName()); }
+            get { return ValidationMessage.BeA0_G.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(Type.NiceName()); }
         }
     }
 
@@ -871,9 +871,9 @@ namespace Signum.Entities
         [Description("{0} is not set")]
         _0IsNotSet,
         [Description("{0} is not a {1}")]
-        _0IsNotA1,
+        _0IsNotA1_G,
         [Description("be a {0}")]
-        BeA0,
+        BeA0_G,
         [Description("be ")]
         Be,
         [Description("be between {0} and {1}")]

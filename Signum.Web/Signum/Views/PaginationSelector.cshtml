@@ -16,7 +16,7 @@
         {
             if (pagination is Pagination.All)
             {
-            <span>@SearchMessage._0Results.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
+            <span>@SearchMessage._0Results_N.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
                        new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.TotalElements.ToString()))
             </span>
                     
@@ -25,14 +25,14 @@
             {
                 var first = (Pagination.Firsts)pagination;
                     
-            <span>@SearchMessage.First0Results.NiceToString().ForGenderAndNumber(number: resultTable.Rows.Length).FormatHtml(
+            <span>@SearchMessage.First0Results_N.NiceToString().ForGenderAndNumber(number: resultTable.Rows.Length).FormatHtml(
                     new HtmlTag("span").Class("sf-pagination-strong").Class(resultTable.Rows.Length == first.TopElements ? "sf-pagination-overflow" : null).SetInnerText(resultTable.Rows.Length.ToString()))
             </span>
             }
             else if (pagination is Pagination.Paginate)
             {
             <span>
-                @SearchMessage._01of2Results.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
+                @SearchMessage._01of2Results_N.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
                         new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.StartElementIndex.ToString()),
                         new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.EndElementIndex.ToString()),
                         new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.TotalElements.ToString())

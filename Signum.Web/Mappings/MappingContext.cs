@@ -174,6 +174,30 @@ namespace Signum.Web
             return new JsonNetResult { Data = result };
         }
 
+        public MappingContext<T> TryFindParent<T>()
+        {
+            MappingContext mapping = this;
+            while (mapping != null)
+            {
+                if (mapping is MappingContext<T>)
+                    return (MappingContext<T>)mapping;
+
+                mapping = mapping.Parent;
+            }
+
+            return null;
+        }
+
+        public MappingContext<T> FindParent<T>()
+        {
+            var result = TryFindParent<T>();
+
+            if (result == null)
+                throw new InvalidOperationException("{0} not found in the chain of parents".Formato(typeof(MappingContext<T>).TypeName()));
+
+            return result;
+        }
+
     }
 
     public abstract class MappingContext<T> : MappingContext

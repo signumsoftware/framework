@@ -183,6 +183,7 @@
     </Content>
     <Content Include="Translations\Signum.Entities.es.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Translations\Signum.Entities.fr.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

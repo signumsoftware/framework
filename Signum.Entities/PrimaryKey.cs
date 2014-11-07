@@ -211,9 +211,9 @@ namespace Signum.Entities
             }
         }
 
-        public static PrimaryKey Parse(string value, Type type)
+        public static PrimaryKey Parse(string value, Type entityType)
         {
-            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(type)));
+            return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(entityType)));
         }
 
         public static PrimaryKey? Wrap(IComparable value)

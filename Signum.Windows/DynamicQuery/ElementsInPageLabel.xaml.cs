@@ -34,7 +34,7 @@ namespace Signum.Windows
             switch (rt.Pagination.GetMode())
             {
                 case PaginationMode.All:
-                    tb.Inlines.Add(SearchMessage._0Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
+                    tb.Inlines.Add(SearchMessage._0Results_N.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
                         new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold }));
                     break;
                 case PaginationMode.Firsts:
@@ -43,10 +43,10 @@ namespace Signum.Windows
                     if(rt.Rows.Length == top.TopElements)
                         run.Foreground = Brushes.Red;
 
-                    tb.Inlines.Add(SearchMessage.First0Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(run));
+                    tb.Inlines.Add(SearchMessage.First0Results_N.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(run));
                     break;
                 case PaginationMode.Paginate:
-                    tb.Inlines.Add(SearchMessage._01of2Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
+                    tb.Inlines.Add(SearchMessage._01of2Results_N.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
                         new Run(rt.StartElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold },
                         new Run(rt.EndElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold },
                         new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold }));

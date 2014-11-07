@@ -83,7 +83,7 @@ namespace Signum.Entities
 
         public string BaseToString()
         {
-            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : LiteMessage.New.NiceToString());
+            return "{0} ({1})".Formato(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
         }
 
         public override bool Equals(object obj)
