@@ -43,7 +43,7 @@ ol.responsive-columns > li:nth-child(1) > h3
     margin-top: 0px;
 }
 
-h1.centered, h2.centered
+.centered
 {
     margin: 40px;
     text-align: center;
@@ -75,6 +75,11 @@ h1.centered, h2.centered
 span.wiki
 {
     display:block;
+}
+
+h1 span.wiki
+{
+    display:initial;
 }
 
 
@@ -140,6 +145,16 @@ h2.greyTitle
 {
     margin-top: 10px;
     text-align:right;
+}
+
+#form-search
+{
+    margin-top: 10px;
+}
+
+#form-search-big
+{
+    margin: 40px;
 }
 
 span.sf-wiki-error

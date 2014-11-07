@@ -239,18 +239,18 @@ namespace Signum.Engine.Help
         {
             string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).Formato(type.NiceName(), type.BaseType.NiceName());
 
-            string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type)));
+            string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 
             return typeIs + ". " + kind + "."; 
         }
 
     
 
-        private static string GetEntityKindMessage(EntityKind entityKind, EntityData entityData)
+        private static string GetEntityKindMessage(EntityKind entityKind, EntityData entityData, char? gender)
         {
             var data = 
-                entityData == EntityData.Master ? HelpKindMessage.AndIsRarelyCreatedOrModified.NiceToString() : 
-                HelpKindMessage.AndAreFrequentlyCreatedOrModified.NiceToString();
+                entityData == EntityData.Master ? HelpKindMessage.AndIsRarelyCreatedOrModified.NiceToString().ForGenderAndNumber(gender) :
+                HelpKindMessage.AndAreFrequentlyCreatedOrModified.NiceToString().ForGenderAndNumber(gender);
 
             switch (entityKind)
             {
@@ -260,8 +260,8 @@ namespace Signum.Engine.Help
                 case EntityKind.String: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + data;
                 case EntityKind.Shared: return HelpKindMessage.StoreInformationSharedByOtherEntities.NiceToString() + data;
                 case EntityKind.Main: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + data;
-                case EntityKind.Part: return HelpKindMessage.StorePartOfTheInformationOfOtherEntity.NiceToString() + data;
-                case EntityKind.SharedPart: return HelpKindMessage.StorePartOfTheInformationOfOtherEntity.NiceToString() + data;
+                case EntityKind.Part: return HelpKindMessage.StorePartOfTheInformationOfAnotherEntity.NiceToString() + data;
+                case EntityKind.SharedPart: return HelpKindMessage.StorePartsOfInformationSharedByDifferentEntities.NiceToString() + data;
                 default: throw new InvalidOperationException("Unexpected {0}".Formato(entityKind));
             }
         }

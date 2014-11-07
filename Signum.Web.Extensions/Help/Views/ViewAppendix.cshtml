@@ -13,46 +13,50 @@
     ViewBag.Title = ah.Title;
 }
 
-@using (TypeContext<AppendixHelpDN> ac = new TypeContext<AppendixHelpDN>(ah.Entity, null))
-{
-    using (Html.BeginForm((HelpController hc) => hc.SaveAppendix(), new { id = "form-save" }))
-    {
-    @Html.HiddenRuntimeInfo(ac)
-    @Html.HiddenRuntimeInfo(ac, e => e.Culture)
-        
-      
-    <div class="row">
-        <div class="col-md-9" id="entityName">
-            @{ Html.RenderPartial(HelpClient.Menu);}
-            @if (ac.Value.UniqueName == null)
-            {   
-                @Html.ValueLine(ac, e => e.UniqueName)
-                <script>
-                @HelpClient.Module["edit"]()
-                 </script>
-            }
-            else
+
+
+
+
+<div class="row">
+    <div class="col-md-9" id="entityName">
+        @using (TypeContext<AppendixHelpDN> ac = new TypeContext<AppendixHelpDN>(ah.Entity, null))
+        {
+            using (Html.BeginForm((HelpController hc) => hc.SaveAppendix(), new { id = "form-save" }))
             {
-                @Html.HiddenLine(ac, e => e.UniqueName)
-            }
+            @Html.HiddenRuntimeInfo(ac)
+            @Html.HiddenRuntimeInfo(ac, e => e.Culture)
+                Html.RenderPartial(HelpClient.Menu);
+                if (ac.Value.UniqueName == null)
+                {
+                    <br />
+            @Html.ValueLine(ac, e => e.UniqueName)
+            <br />
+            <script>
+                @HelpClient.Module["edit"]()
+            </script>
+                }
+                else
+                {
+            @Html.HiddenLine(ac, e => e.UniqueName)
+                }
             <h1>
                 @Html.TextArea(ac.SubContextPrefix(a => a.Title), ah.Title, 1, 80, new { @class = "editable" })
                 <span class="wiki">
                     @Model.Title
                 </span>
             </h1>
-            @if (ac.Value.UniqueName != null)
-            {
+                if (ac.Value.UniqueName != null)
+                {
             <code class="shortcut">[a:@ah.UniqueName]</code>
-            }
+                }
             @Html.TextArea(ac.SubContextPrefix(a => a.Description), ah.Description, 5, 80, new { @class = "editable" })
             <span class="wiki">
                 @Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings)
             </span>
-        </div>
-        <div class="col-md-3">
-            @{ Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "appendix", ah.UniqueName } });}
-        </div>
+            }
+        }
     </div>
-    }
-}
+    <div class="col-md-3">
+        @{ Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "appendix", ah.UniqueName } });}
+    </div>
+</div>

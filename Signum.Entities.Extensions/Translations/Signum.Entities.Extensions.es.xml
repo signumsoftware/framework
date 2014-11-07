@@ -50,6 +50,15 @@
   <Type Name="AlertTypeOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
+  <Type Name="AppendixHelpDN" Description="Ayuda apéndice ">
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="Title" Description="Título" />
+    <Member Name="UniqueName" Description="Nombre único" />
+  </Type>
+  <Type Name="AppendixHelpOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
   <Type Name="ApplicationEventLogDN" Description="Registro eventos aplicación">
     <Member Name="Date" Description="Fecha" />
     <Member Name="GlobalEvent" Description="Evento mundial" />
@@ -625,6 +634,18 @@
     <Member Name="Identical" Description="Idénticas" />
     <Member Name="New" Description="Nueva" />
   </Type>
+  <Type Name="EntityHelpDN" Description="Ayuda entidad">
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="IsEmpty" Description="Está vacía" />
+    <Member Name="Operations" Description="Operaciones de" />
+    <Member Name="Properties" Description="Propiedades" />
+    <Member Name="Queries" Description="Consultas" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="EntityHelpOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
   <Type Name="ExcelMessage">
     <Member Name="Administer" Description="Administrar" />
     <Member Name="CreateNew" Description="Crear nuevo" />
@@ -697,11 +718,24 @@
     <Member Name="Never" Description="Nunca" />
     <Member Name="Optional" Description="Opcional" />
   </Type>
+  <Type Name="HelpKindMessage">
+    <Member Name="AndAreFrequentlyCreatedOrModified" Description=" y frecuentemente creados o modificados" />
+    <Member Name="AndIsRarelyCreatedOrModified" Description=" y rerely creados o modificados" />
+    <Member Name="AutomaticallyByTheSystem" Description=" automáticamente por el sistema" />
+    <Member Name="ClassifyOtherEntities" Description="clasificar a otras entidades" />
+    <Member Name="HisMainFunctionIsTo0" Description="Su principal función es {0}" />
+    <Member Name="RelateOtherEntities" Description="relacionar a otras entidades" />
+    <Member Name="StoreInformationOnItsOwn" Description="almacenar información en su misma" />
+    <Member Name="StoreInformationSharedByOtherEntities" Description="almacenar información compartida por otras entidades" />
+    <Member Name="StorePartOfTheInformationOfOtherEntity" Description="alacenar parte de la información de otra entidad" />
+    <Member Name="StorePartsOfInformationSharedByDifferentEntities" Description="alamacenar una parte de información compartida por las distintas entidades" />
+  </Type>
   <Type Name="HelpMessage">
     <Member Name="_0IsA1" Description="{0} es un {1}" />
     <Member Name="_0IsA1AndShows2" Description="{0} es un {1} y muestra {2}" />
     <Member Name="_0IsACalculated1" Description="{0} es un {1} calculado" />
     <Member Name="_0IsACollectionOfElements1" Description="{0} es una colección de elementos {1}" />
+    <Member Name="_0IsThePrimaryKeyOf1OfType2" Description="{0} es la clave principal de {1}, de tipo {2}" />
     <Member Name="Amount" Description="importe" />
     <Member Name="Any" Description="algún" />
     <Member Name="Appendices" Description="Apéndices" />
@@ -712,11 +746,14 @@
     <Member Name="ConstructsANew0" Description="Construye [m:un|f:una] nuev[m:o|f:a] {0}" />
     <Member Name="Date" Description="fecha" />
     <Member Name="DateTime" Description="fecha y hora" />
+    <Member Name="Entities" Description="Entidades" />
     <Member Name="ExpressedIn" Description="expresado en " />
     <Member Name="From0OfThe1" Description="desde {0} [m:del|f:de la] {1}" />
     <Member Name="FromMany0" Description="desde muchos {0}" />
-    <Member Name="HelpDocumentation" Description="Documentación de ayuda" />
+    <Member Name="Help" Description="Ayuda" />
     <Member Name="HelpNotLoaded" Description="Ayuda no cargada" />
+    <Member Name="In0" Description="(en {0})" />
+    <Member Name="Index" Description="Índice" />
     <Member Name="Integer" Description="entero" />
     <Member Name="Key0NotFound" Description="Clave {0} no encontrada" />
     <Member Name="OfThe0" Description="del {0}" />
@@ -724,6 +761,7 @@
     <Member Name="Property0NotExistsInType1" Description="La propiedad {0} no existe en el tipo {1}" />
     <Member Name="QueryOf0" Description="Consulta de {0}" />
     <Member Name="RemovesThe0FromTheDatabase" Description="Elimina {0} de la base de datos" />
+    <Member Name="SearchText" Description="Texto a buscar" />
     <Member Name="Should" Description=". Debe  " />
     <Member Name="String" Description="cadena de texto" />
     <Member Name="The0" Description="El {0}" />
@@ -732,6 +770,42 @@
     <Member Name="Value" Description="valor" />
     <Member Name="ValueLike0" Description="valor entre {0}" />
     <Member Name="YourVersion" Description="tu versión" />
+  </Type>
+  <Type Name="HelpPermissions">
+    <Member Name="ViewHelp" Description="Ver ayuda" />
+  </Type>
+  <Type Name="HelpSearchMessage">
+    <Member Name="_0ResultsFor1In2" Description="{0} resultado[s] para {1} (en {2} ms)" />
+    <Member Name="Results" Description="Resultados" />
+    <Member Name="Search" Description="Buscar" />
+  </Type>
+  <Type Name="HelpSyntaxMessage">
+    <Member Name="BoldText" Description="Texto en negrita" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="Example" Description="Ejemplo" />
+    <Member Name="ExernalLink" Description="Vínculo externo" />
+    <Member Name="Images" Description="Imágenes" />
+    <Member Name="InsertImage" Description="Insertar imagen" />
+    <Member Name="ItalicText" Description="Texto en cursiva" />
+    <Member Name="Links" Description="Enlaces" />
+    <Member Name="LinksAllowAnExtraParameterForTheText" Description="Los enlaces permiten un parámetro adicional para el texto" />
+    <Member Name="LinkToEntity" Description="Vincular a la entidad" />
+    <Member Name="LinkToNamespace" Description="Enlace al espacio de nombres" />
+    <Member Name="LinkToOperation" Description="Enlace a la operación" />
+    <Member Name="LinkToProperty" Description="Enlazar a la propiedad" />
+    <Member Name="LinkToQuery" Description="Enlace a consulta" />
+    <Member Name="Lists" Description="Listas" />
+    <Member Name="Options" Description="Opciones" />
+    <Member Name="OrderedListItem" Description="Orden de la lista" />
+    <Member Name="OtherItem" Description="Otro elemento" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="StriketroughText" Description="Striketrough texto" />
+    <Member Name="Syntax" Description="Sintaxis" />
+    <Member Name="Texts" Description="Textos" />
+    <Member Name="Title" Description="Título" />
+    <Member Name="TitleLevel" Description="Nivel de título" />
+    <Member Name="UnderlineText" Description="Subrayar texto" />
+    <Member Name="UnorderedListItem" Description="Elemento de lista desordenada" />
   </Type>
   <Type Name="HolidayCalendarDN" Description="Calendario de fiestas">
     <Member Name="Holidays" Description="Vacaciones" />
@@ -796,6 +870,15 @@
     <Member Name="Certified" Description="Certificado" />
     <Member Name="From" Description="De" />
     <Member Name="Message" Description="Mensaje" />
+  </Type>
+  <Type Name="NamespaceHelpDN" Description="Ayuda espacio de nombres">
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Title" Description="Título" />
+  </Type>
+  <Type Name="NamespaceHelpOperation">
+    <Member Name="Save" Description="Salvar" />
   </Type>
   <Type Name="NewsletterDeliveryDN" Description="Entrega de Newsletter">
     <Member Name="Newsletter" Description="Newsletter" />
@@ -869,7 +952,7 @@
     <Member Name="Omnibox_UserChart" Description="Gráfico de usuario" />
     <Member Name="Omnibox_UserQuery" Description="Consulta de usuario" />
     <Member Name="Omnibox_Value" Description="Valor" />
-    <Member Name="Search" Description="Búsqueda de..." />
+    <Member Name="Search" Description="Buscar..." />
     <Member Name="Unknown" Description="Desconocido" />
     <Member Name="Yes" Description="sí" />
   </Type>
@@ -877,6 +960,10 @@
     <Member Name="Allow" Description="Permitir" />
     <Member Name="DBOnly" Description="Sólo BBDD" />
     <Member Name="None" Description="Ninguno" />
+  </Type>
+  <Type Name="OperationHelpDN" Description="Ayuda operación">
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="Operation" Description="Operación" />
   </Type>
   <Type Name="OperationRulePack" Description="Paquete de reglas de operación" />
   <Type Name="PackageDN" Description="Paquete">
@@ -1019,10 +1106,18 @@
     <Member Name="RootType" Description="Tipo raíz" />
     <Member Name="Route" Description="Ruta" />
   </Type>
+  <Type Name="PropertyRouteHelpDN" Description="Ayuda ruta propiedad">
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="Property" Description="Propiedad" />
+  </Type>
   <Type Name="PropertyRulePack" Description="Paquete de reglas de propiedades" />
   <Type Name="QueryColumnDN" Description="Columna de consulta">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryColumnHelpDN" Description="Consulta columna ayuda">
+    <Member Name="ColumnName" Description="Nombre de columna" />
+    <Member Name="Description" Description="Descripción" />
   </Type>
   <Type Name="QueryDN" Description="Consulta">
     <Member Name="Key" Description="Clave" />
@@ -1032,6 +1127,16 @@
     <Member Name="Operation" Description="Operación" />
     <Member Name="Token" Description="Token" />
     <Member Name="ValueString" Description="Valor cadena" />
+  </Type>
+  <Type Name="QueryHelpDN" Description="Ayuda consulta ">
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="IsEmpty" Description="Está vacía" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="QueryHelpOperation">
+    <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="QueryOrderDN" Description="Orden de consulta">
     <Member Name="OrderType" Description="Tipo de orden" />
@@ -1371,6 +1476,14 @@
     <Member Name="Stop" Description="Parada" />
   </Type>
   <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
+  <Type Name="TypeSearchResult">
+    <Member Name="Appendix" Description="Apéndice" />
+    <Member Name="Namespace" Description="Espacio de nombres" />
+    <Member Name="Operation" Description="Operación" />
+    <Member Name="Property" Description="Propiedad" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="Exportar a xml" />
     <Member Name="ImportPreview" Description="Previsualizar importación" />

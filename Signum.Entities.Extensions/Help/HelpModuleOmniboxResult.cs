@@ -15,12 +15,14 @@ namespace Signum.Entities.Help
     {
         public Func<string> NiceName = () => OmniboxMessage.Omnibox_Help.NiceToString();
 
+        static readonly Regex regex = new Regex("^I[IS]?$");
+
         public override IEnumerable<HelpModuleOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
             if (!OmniboxParser.Manager.AllowedPermission(HelpPermissions.ViewHelp))
                 yield break;
 
-            if (tokens.Count == 0 || !tokens.All(a=>a.Type == OmniboxTokenType.Identifier))
+            if (tokens.Count == 0 || !regex.IsMatch(tokenPattern))
                 yield break;
 
             string key = tokens[0].Value;
@@ -32,18 +34,20 @@ namespace Signum.Entities.Help
 
             if (tokenPattern == "I" && rawQuery.EndsWith(" "))
             {
-                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, IsIndex = false, SecondMatch = null };
+                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SecondMatch = null };
                 yield break;
             }
 
             if(tokens.Count != 2)
                 yield break;
 
-            string pattern = tokens[1].Value;
+            if (tokens[1].Type == OmniboxTokenType.String)
+            {
+                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SearchString = tokens[1].Value.Trim('\'', '"') };
+                yield break;
+            }
 
-            var indexMatch = OmniboxUtils.Contains(HelpMessage.Index.NiceToString(), HelpMessage.Index.NiceToString(), pattern);
-            if (indexMatch != null)
-                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + indexMatch.Distance, KeywordMatch = keyMatch, IsIndex = true, SecondMatch = indexMatch };
+            string pattern = tokens[1].Value;
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
@@ -64,12 +68,12 @@ namespace Signum.Entities.Help
             {
                 new HelpOmniboxResult 
                 { 
-                    Text =  NiceName() + " " + HelpMessage.Index.ToString(), 
-                    OmniboxResultType = resultType,
+                    Text =  NiceName() + " " + typeof(TypeDN).NiceName(), 
+                    OmniboxResultType = resultType 
                 },
                 new HelpOmniboxResult 
                 { 
-                    Text =  NiceName() + " " + typeof(TypeDN).NiceName(), 
+                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'", 
                     OmniboxResultType = resultType 
                 },
             };
@@ -80,18 +84,18 @@ namespace Signum.Entities.Help
     {
         public OmniboxMatch KeywordMatch { get; set; }
 
-        public bool IsIndex { get; set; }
         public Type Type { get; set; }
+        public string SearchString { get; set; }
         public OmniboxMatch SecondMatch { get; set; }
 
         public override string ToString()
         {
-            if (Type == null && !IsIndex)
-                return KeywordMatch.Value.ToString();
+            if (Type == null && !SearchString.HasText())
+                return KeywordMatch.Value.ToString() + " ";
 
             return "{0} {1}".Formato(KeywordMatch.Value,
-                IsIndex ? HelpMessage.Index.ToString() :
-                Type.NiceName().ToOmniboxPascal());
+                Type != null ? Type.NiceName().ToOmniboxPascal() :
+                ("'" + SearchString + "'"));
         }
     }
 

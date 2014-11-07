@@ -159,10 +159,11 @@ namespace Signum.Web.Help
             Stopwatch sp = new Stopwatch();
             sp.Start();
             Regex regex = new Regex(Regex.Escape(q.RemoveDiacritics()), RegexOptions.IgnoreCase);
-            List<List<SearchResult>> results = (from eh in HelpLogic.GetOrCreateEntityHelp().Values
-                                                select eh.Search(regex).ToList() into l
-                                                where l.Any()
-                                                select l).ToList();
+            List<List<SearchResult>> results = new List<List<SearchResult>>();
+            results.AddRange(from eh in HelpLogic.GetOrCreateEntityHelp().Values
+                             select eh.Search(regex).ToList() into l
+                             where l.Any()
+                             select l);
 
             //We add the appendices
             results.AddRange(from a in HelpLogic.GetOrCreateAppendicesHelp().Values
@@ -176,7 +177,7 @@ namespace Signum.Web.Help
                              where result != null
                              select new List<SearchResult> { result });
 
-            results.Sort(a => a.First());
+            results = results.OrderBy(a => a.First().IsDescription).ThenBy(a => a.First().MatchType).ThenBy(a => a.First().TypeSearchResult).ToList();
 
             sp.Stop();
             ViewData["time"] = sp.ElapsedMilliseconds;

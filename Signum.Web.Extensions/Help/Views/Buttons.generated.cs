@@ -251,7 +251,7 @@ WriteLiteral("        ");
 
             
             #line 51 "..\..\Help\Views\Buttons.cshtml"
-   Write(HelpSyntaxMessage.LinksAllowAnExpreaParameterForTheText.NiceToString());
+   Write(HelpSyntaxMessage.LinksAllowAnExtraParameterForTheText.NiceToString());
 
             
             #line default

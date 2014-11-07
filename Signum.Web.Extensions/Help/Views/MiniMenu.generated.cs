@@ -72,22 +72,77 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n<h3><a");
+WriteLiteral("\r\n\r\n");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 354), Tuple.Create("\"", 405)
             
-            #line 13 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 361), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.Index())
+            #line 14 "..\..\Help\Views\MiniMenu.cshtml"
+ using (Html.BeginForm("Search", "Help", FormMethod.Get, new { id="form-search" }))
+{
+
             
             #line default
             #line hidden
-, 361), false)
+WriteLiteral("<div");
+
+WriteLiteral(" class=\"input-group\"");
+
+WriteLiteral(">\r\n    <input");
+
+WriteLiteral(" type=\"text\"");
+
+WriteLiteral(" class=\"form-control\"");
+
+WriteAttribute("placeholder", Tuple.Create(" placeholder=\"", 508), Tuple.Create("\"", 562)
+            
+            #line 17 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 522), Tuple.Create<System.Object, System.Int32>(HelpSearchMessage.Search.NiceToString()
+            
+            #line default
+            #line hidden
+, 522), false)
+);
+
+WriteLiteral(" name=\"q\"");
+
+WriteLiteral(">\r\n    <div");
+
+WriteLiteral(" class=\"input-group-btn\"");
+
+WriteLiteral(">\r\n        <button");
+
+WriteLiteral(" class=\"btn btn-default\"");
+
+WriteLiteral(" type=\"submit\"");
+
+WriteLiteral("><i");
+
+WriteLiteral(" class=\"glyphicon glyphicon-search\"");
+
+WriteLiteral("></i></button>\r\n    </div>\r\n</div>\r\n");
+
+            
+            #line 22 "..\..\Help\Views\MiniMenu.cshtml"
+}
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n<h3><a");
+
+WriteAttribute("href", Tuple.Create(" href=\"", 748), Tuple.Create("\"", 799)
+            
+            #line 24 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 755), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.Index())
+            
+            #line default
+            #line hidden
+, 755), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 13 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 24 "..\..\Help\Views\MiniMenu.cshtml"
                                                       Write(HelpMessage.Help.NiceToString());
 
             
@@ -96,7 +151,7 @@ WriteLiteral(">");
 WriteLiteral("</a></h3>\r\n<h4>");
 
             
-            #line 14 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 25 "..\..\Help\Views\MiniMenu.cshtml"
 Write(HelpMessage.Entities.NiceToString());
 
             
@@ -105,14 +160,14 @@ Write(HelpMessage.Entities.NiceToString());
 WriteLiteral("</h4>\r\n<ul>\r\n");
 
             
-            #line 16 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 27 "..\..\Help\Views\MiniMenu.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 16 "..\..\Help\Views\MiniMenu.cshtml"
-     foreach (var item in namespaces.Values)
+            #line 27 "..\..\Help\Views\MiniMenu.cshtml"
+     foreach (var item in namespaces.Values.OrderBy(a=>a.Namespace))
     {
 
             
@@ -121,13 +176,13 @@ WriteLiteral("</h4>\r\n<ul>\r\n");
 WriteLiteral("        <li>\r\n");
 
             
-            #line 19 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 30 "..\..\Help\Views\MiniMenu.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 30 "..\..\Help\Views\MiniMenu.cshtml"
              if (item.Namespace != ns)
             {
 
@@ -136,14 +191,14 @@ WriteLiteral("        <li>\r\n");
             #line hidden
 WriteLiteral("                <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 643), Tuple.Create("\"", 716)
+WriteAttribute("href", Tuple.Create(" href=\"", 1061), Tuple.Create("\"", 1134)
             
-            #line 21 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 650), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewNamespace(item.Namespace))
+            #line 32 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 1068), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewNamespace(item.Namespace))
             
             #line default
             #line hidden
-, 650), false)
+, 1068), false)
 );
 
 WriteLiteral(">\r\n");
@@ -151,7 +206,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 22 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 33 "..\..\Help\Views\MiniMenu.cshtml"
                Write(item.Title);
 
             
@@ -160,7 +215,7 @@ WriteLiteral("                    ");
 WriteLiteral("</a>\r\n");
 
             
-            #line 23 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 34 "..\..\Help\Views\MiniMenu.cshtml"
                 if (item.Before != null)
                 {
 
@@ -170,7 +225,7 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("                <small>");
 
             
-            #line 25 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 36 "..\..\Help\Views\MiniMenu.cshtml"
                   Write(HelpMessage.In0.NiceToString(item.Before));
 
             
@@ -179,7 +234,7 @@ WriteLiteral("                <small>");
 WriteLiteral("</small>\r\n");
 
             
-            #line 26 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 37 "..\..\Help\Views\MiniMenu.cshtml"
                 }
             }
             else
@@ -189,14 +244,14 @@ WriteLiteral("</small>\r\n");
             #line default
             #line hidden
             
-            #line 30 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 41 "..\..\Help\Views\MiniMenu.cshtml"
            Write(item.Title);
 
             
             #line default
             #line hidden
             
-            #line 30 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 41 "..\..\Help\Views\MiniMenu.cshtml"
                            
                 if (item.Before != null)
                 {
@@ -207,7 +262,7 @@ WriteLiteral("</small>\r\n");
 WriteLiteral("                <small>");
 
             
-            #line 33 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 44 "..\..\Help\Views\MiniMenu.cshtml"
                   Write(HelpMessage.In0.NiceToString(item.Before));
 
             
@@ -216,7 +271,7 @@ WriteLiteral("                <small>");
 WriteLiteral("</small>\r\n");
 
             
-            #line 34 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 45 "..\..\Help\Views\MiniMenu.cshtml"
                 }
             }
 
@@ -226,13 +281,13 @@ WriteLiteral("</small>\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 37 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 48 "..\..\Help\Views\MiniMenu.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 37 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 48 "..\..\Help\Views\MiniMenu.cshtml"
              if (item.Namespace == ns || type != null && item.Namespace == type.Namespace)
             {
 
@@ -242,13 +297,13 @@ WriteLiteral("\r\n");
 WriteLiteral("                <ul>\r\n");
 
             
-            #line 40 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 51 "..\..\Help\Views\MiniMenu.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 51 "..\..\Help\Views\MiniMenu.cshtml"
                      foreach (Type t in HelpLogic.AllTypes().Where(t => t.Namespace == item.Namespace))
                     {
                         if (t != type)
@@ -259,20 +314,20 @@ WriteLiteral("                <ul>\r\n");
             #line hidden
 WriteLiteral("                        <li><a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1515), Tuple.Create("\"", 1544)
+WriteAttribute("href", Tuple.Create(" href=\"", 1933), Tuple.Create("\"", 1962)
             
-            #line 44 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 1522), Tuple.Create<System.Object, System.Int32>(HelpUrls.EntityUrl(t)
+            #line 55 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 1940), Tuple.Create<System.Object, System.Int32>(HelpUrls.EntityUrl(t)
             
             #line default
             #line hidden
-, 1522), false)
+, 1940), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 44 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 55 "..\..\Help\Views\MiniMenu.cshtml"
                                                         Write(t.NiceName());
 
             
@@ -281,7 +336,7 @@ WriteLiteral(">");
 WriteLiteral("</a></li>\r\n");
 
             
-            #line 45 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 56 "..\..\Help\Views\MiniMenu.cshtml"
                         }
                         else
                         {
@@ -292,7 +347,7 @@ WriteLiteral("</a></li>\r\n");
 WriteLiteral("                        <li>");
 
             
-            #line 48 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 59 "..\..\Help\Views\MiniMenu.cshtml"
                        Write(t.NiceName());
 
             
@@ -301,7 +356,7 @@ WriteLiteral("                        <li>");
 WriteLiteral("</li>\r\n");
 
             
-            #line 49 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 60 "..\..\Help\Views\MiniMenu.cshtml"
                         }
                     }
 
@@ -311,7 +366,7 @@ WriteLiteral("</li>\r\n");
 WriteLiteral("                </ul>\r\n");
 
             
-            #line 52 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 63 "..\..\Help\Views\MiniMenu.cshtml"
             }
 
             
@@ -320,7 +375,7 @@ WriteLiteral("                </ul>\r\n");
 WriteLiteral("        </li>\r\n");
 
             
-            #line 54 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 65 "..\..\Help\Views\MiniMenu.cshtml"
     }
 
             
@@ -329,7 +384,7 @@ WriteLiteral("        </li>\r\n");
 WriteLiteral("</ul>\r\n<h4>");
 
             
-            #line 56 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 67 "..\..\Help\Views\MiniMenu.cshtml"
 Write(HelpMessage.Appendices.NiceToString());
 
             
@@ -337,26 +392,26 @@ Write(HelpMessage.Appendices.NiceToString());
             #line hidden
 WriteLiteral(" <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1864), Tuple.Create("\"", 1921)
+WriteAttribute("href", Tuple.Create(" href=\"", 2282), Tuple.Create("\"", 2339)
             
-            #line 56 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 1871), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.NewAppendix())
+            #line 67 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 2289), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.NewAppendix())
             
             #line default
             #line hidden
-, 1871), false)
+, 2289), false)
 );
 
 WriteLiteral(">+</a></h4>\r\n<ul>\r\n");
 
             
-            #line 58 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 69 "..\..\Help\Views\MiniMenu.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 58 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 69 "..\..\Help\Views\MiniMenu.cshtml"
      foreach (var item in appendices.Values)
     {
         if (item.UniqueName != appendix)
@@ -367,14 +422,14 @@ WriteLiteral(">+</a></h4>\r\n<ul>\r\n");
             #line hidden
 WriteLiteral("        <li><a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 2061), Tuple.Create("\"", 2134)
+WriteAttribute("href", Tuple.Create(" href=\"", 2479), Tuple.Create("\"", 2552)
             
-            #line 62 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 2068), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewAppendix(item.UniqueName))
+            #line 73 "..\..\Help\Views\MiniMenu.cshtml"
+, Tuple.Create(Tuple.Create("", 2486), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewAppendix(item.UniqueName))
             
             #line default
             #line hidden
-, 2068), false)
+, 2486), false)
 );
 
 WriteLiteral(">\r\n");
@@ -382,7 +437,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 63 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 74 "..\..\Help\Views\MiniMenu.cshtml"
        Write(item.Title);
 
             
@@ -391,7 +446,7 @@ WriteLiteral("            ");
 WriteLiteral("</a>\r\n        </li>\r\n");
 
             
-            #line 65 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 76 "..\..\Help\Views\MiniMenu.cshtml"
         }
         else
         {
@@ -404,7 +459,7 @@ WriteLiteral("        <li>\r\n");
 WriteLiteral("            ");
 
             
-            #line 69 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 80 "..\..\Help\Views\MiniMenu.cshtml"
        Write(item.Title);
 
             
@@ -413,7 +468,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </li>\r\n");
 
             
-            #line 71 "..\..\Help\Views\MiniMenu.cshtml"
+            #line 82 "..\..\Help\Views\MiniMenu.cshtml"
         }
     }
 

@@ -33,12 +33,6 @@ namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static string EntitiesDirectory = "Entity";
-        public static string QueriesDirectory = "Query";
-        public static string NamespacesDirectory = "Namespace";
-        public static string AppendicesDirectory = "Appendix";
-        public static string HelpDirectory = "HelpXml";
-
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>> Types;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>> Appendices;
@@ -433,11 +427,7 @@ namespace Signum.Engine.Help
             return schemas;
         });
 
-        static List<string> FileNames(string subdirectory)
-        {
-            return Directory.GetFiles(Path.Combine(HelpDirectory, subdirectory), "*.help").ToList();
-        }
-
+ 
         internal static XDocument LoadAndValidate(string fileName)
         {
             var document = XDocument.Load(fileName); 

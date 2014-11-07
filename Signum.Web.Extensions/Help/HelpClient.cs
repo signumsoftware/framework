@@ -84,7 +84,7 @@ namespace Signum.Web.Help
 
                 NoLinkWikiSettings = new WikiSettings(false) { LineBreaks = false };
                 NoLinkWikiSettings.TokenParser += TokenParser;
-                NoLinkWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.ToHtmlString());
+                NoLinkWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.Text);
                 NoLinkWikiSettings.TokenParser += RemoveImages;
             }
         }
@@ -289,6 +289,8 @@ namespace Signum.Web.Help
 
             if (result.SecondMatch != null)
                 html = html.Concat(" {0}".FormatHtml(result.SecondMatch.ToHtml()));
+            else if(result.SearchString.HasText())
+                html = html.Concat(" \"{0}\"".FormatHtml(result.SearchString));
             else
                 html = html.Concat(this.ColoredSpan(typeof(TypeDN).NiceName() + "...", "lightgray"));
 
@@ -299,13 +301,13 @@ namespace Signum.Web.Help
 
         public override string GetUrl(HelpModuleOmniboxResult result)
         {
-            if (result.IsIndex)
-                return RouteHelper.New().Action((HelpController c) => c.Index());
-
             if (result.Type != null)
                 return RouteHelper.New().Action((HelpController c) => c.ViewEntity(Navigator.ResolveWebTypeName(result.Type)));
 
-            return null;
+            if (result.SearchString != null)
+                return RouteHelper.New().Action((HelpController c) => c.Search(result.SearchString));
+
+            return RouteHelper.New().Action((HelpController c) => c.Index());
         }
 
         public override MvcHtmlString Icon()

@@ -37,9 +37,9 @@ namespace Signum.Engine.Help
             return "p-" + route.PropertyString().Replace('.', '_').Replace('/', '_').Replace('[', '_').Replace(']', '_');
         }
 
-        public static string QueryUrl(object queryName)
+        public static string QueryUrl(object queryName, Type type = null)
         {
-            return EntityUrl(GetQueryType(queryName)) + "#" + IdQuery(queryName);
+            return EntityUrl(type ?? GetQueryType(queryName)) + "#" + IdQuery(queryName);
         }
 
         public static string IdQuery(object queryName)

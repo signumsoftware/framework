@@ -45,8 +45,6 @@ function hashSelected() {
     if (window.location.hash) {
         $(window.location.hash).addClass("hash-selected"); 
     }
-
-  
 }
 
 export function init() {

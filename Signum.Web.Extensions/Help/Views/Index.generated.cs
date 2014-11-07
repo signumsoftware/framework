@@ -108,20 +108,81 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</h1>\r\n\r\n    <ol");
+WriteLiteral("</h1>\r\n");
+
+            
+            #line 17 "..\..\Help\Views\Index.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 17 "..\..\Help\Views\Index.cshtml"
+     using (Html.BeginForm("Search", "Help", FormMethod.Get, new { id = "form-search-big" }))
+{
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <div");
+
+WriteLiteral(" class=\"input-group\"");
+
+WriteLiteral(">\r\n        <input");
+
+WriteLiteral(" type=\"text\"");
+
+WriteLiteral(" class=\"form-control\"");
+
+WriteAttribute("placeholder", Tuple.Create(" placeholder=\"", 639), Tuple.Create("\"", 693)
+            
+            #line 20 "..\..\Help\Views\Index.cshtml"
+, Tuple.Create(Tuple.Create("", 653), Tuple.Create<System.Object, System.Int32>(HelpSearchMessage.Search.NiceToString()
+            
+            #line default
+            #line hidden
+, 653), false)
+);
+
+WriteLiteral(" name=\"q\"");
+
+WriteLiteral(" />\r\n        <div");
+
+WriteLiteral(" class=\"input-group-btn\"");
+
+WriteLiteral(">\r\n            <button");
+
+WriteLiteral(" class=\"btn btn-default\"");
+
+WriteLiteral(" type=\"submit\"");
+
+WriteLiteral("><i");
+
+WriteLiteral(" class=\"glyphicon glyphicon-search\"");
+
+WriteLiteral("></i></button>\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 25 "..\..\Help\Views\Index.cshtml"
+}
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <ol");
 
 WriteLiteral(" class=\"responsive-columns\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 19 "..\..\Help\Views\Index.cshtml"
+            #line 27 "..\..\Help\Views\Index.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Help\Views\Index.cshtml"
+            #line 27 "..\..\Help\Views\Index.cshtml"
          foreach (var ns in Model)
         {
             var nh = HelpLogic.GetNamespaceHelp(ns.Key);
@@ -132,20 +193,20 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <li>\r\n                <h3>\r\n                    <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 683), Tuple.Create("\"", 748)
+WriteAttribute("href", Tuple.Create(" href=\"", 1107), Tuple.Create("\"", 1172)
             
-            #line 25 "..\..\Help\Views\Index.cshtml"
-, Tuple.Create(Tuple.Create("", 690), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.ViewNamespace(ns.Key))
+            #line 33 "..\..\Help\Views\Index.cshtml"
+, Tuple.Create(Tuple.Create("", 1114), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.ViewNamespace(ns.Key))
             
             #line default
             #line hidden
-, 690), false)
+, 1114), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 25 "..\..\Help\Views\Index.cshtml"
+            #line 33 "..\..\Help\Views\Index.cshtml"
                                                                                      Write(nh.Title);
 
             
@@ -154,13 +215,13 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n");
 
             
-            #line 26 "..\..\Help\Views\Index.cshtml"
+            #line 34 "..\..\Help\Views\Index.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Help\Views\Index.cshtml"
+            #line 34 "..\..\Help\Views\Index.cshtml"
                      if (nh.Before != null)
                     {
 
@@ -170,7 +231,7 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("                        <small>");
 
             
-            #line 28 "..\..\Help\Views\Index.cshtml"
+            #line 36 "..\..\Help\Views\Index.cshtml"
                           Write(HelpMessage.In0.NiceToString(nh.Before));
 
             
@@ -179,7 +240,7 @@ WriteLiteral("                        <small>");
 WriteLiteral("</small>\r\n");
 
             
-            #line 29 "..\..\Help\Views\Index.cshtml"
+            #line 37 "..\..\Help\Views\Index.cshtml"
                     }
 
             
@@ -188,13 +249,13 @@ WriteLiteral("</small>\r\n");
 WriteLiteral("                </h3>\r\n                <ul>\r\n");
 
             
-            #line 32 "..\..\Help\Views\Index.cshtml"
+            #line 40 "..\..\Help\Views\Index.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 32 "..\..\Help\Views\Index.cshtml"
+            #line 40 "..\..\Help\Views\Index.cshtml"
                      foreach (var t in ns.Value)
                     {
 
@@ -203,20 +264,20 @@ WriteLiteral("                </h3>\r\n                <ul>\r\n");
             #line hidden
 WriteLiteral("                        <li><a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1087), Tuple.Create("\"", 1116)
+WriteAttribute("href", Tuple.Create(" href=\"", 1511), Tuple.Create("\"", 1540)
             
-            #line 34 "..\..\Help\Views\Index.cshtml"
-, Tuple.Create(Tuple.Create("", 1094), Tuple.Create<System.Object, System.Int32>(HelpUrls.EntityUrl(t)
+            #line 42 "..\..\Help\Views\Index.cshtml"
+, Tuple.Create(Tuple.Create("", 1518), Tuple.Create<System.Object, System.Int32>(HelpUrls.EntityUrl(t)
             
             #line default
             #line hidden
-, 1094), false)
+, 1518), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 34 "..\..\Help\Views\Index.cshtml"
+            #line 42 "..\..\Help\Views\Index.cshtml"
                                                         Write(t.NiceName());
 
             
@@ -225,7 +286,7 @@ WriteLiteral(">");
 WriteLiteral("</a> </li>\r\n");
 
             
-            #line 35 "..\..\Help\Views\Index.cshtml"
+            #line 43 "..\..\Help\Views\Index.cshtml"
                     }
 
             
@@ -234,20 +295,20 @@ WriteLiteral("</a> </li>\r\n");
 WriteLiteral("                </ul>\r\n            </li>\r\n");
 
             
-            #line 38 "..\..\Help\Views\Index.cshtml"
+            #line 46 "..\..\Help\Views\Index.cshtml"
         }
 
             
             #line default
             #line hidden
-WriteLiteral("    </ol>\r\n</div>\r\n\r\n<h2");
+WriteLiteral("    </ol>\r\n</div>\r\n\r\n<h3");
 
 WriteLiteral(" class=\"centered\"");
 
 WriteLiteral(">");
 
             
-            #line 42 "..\..\Help\Views\Index.cshtml"
+            #line 50 "..\..\Help\Views\Index.cshtml"
                 Write(HelpMessage.Appendices.NiceToString());
 
             
@@ -255,30 +316,30 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral(" <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1302), Tuple.Create("\"", 1359)
+WriteAttribute("href", Tuple.Create(" href=\"", 1726), Tuple.Create("\"", 1783)
             
-            #line 42 "..\..\Help\Views\Index.cshtml"
-, Tuple.Create(Tuple.Create("", 1309), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.NewAppendix())
+            #line 50 "..\..\Help\Views\Index.cshtml"
+, Tuple.Create(Tuple.Create("", 1733), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController c) => c.NewAppendix())
             
             #line default
             #line hidden
-, 1309), false)
+, 1733), false)
 );
 
-WriteLiteral(">+</a></h2>\r\n<ol");
+WriteLiteral(">+</a></h3>\r\n<ol");
 
 WriteLiteral(" class=\"responsive-columns\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 44 "..\..\Help\Views\Index.cshtml"
+            #line 52 "..\..\Help\Views\Index.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Help\Views\Index.cshtml"
+            #line 52 "..\..\Help\Views\Index.cshtml"
      foreach (var a in appendices.Values)
     {
 
@@ -290,7 +351,7 @@ WriteLiteral("        <li>\r\n");
 WriteLiteral("            ");
 
             
-            #line 47 "..\..\Help\Views\Index.cshtml"
+            #line 55 "..\..\Help\Views\Index.cshtml"
        Write(Html.ActionLink(a.Title, (HelpController c) => c.ViewAppendix(a.UniqueName)));
 
             
@@ -299,7 +360,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </li>\r\n");
 
             
-            #line 49 "..\..\Help\Views\Index.cshtml"
+            #line 57 "..\..\Help\Views\Index.cshtml"
     }
 
             

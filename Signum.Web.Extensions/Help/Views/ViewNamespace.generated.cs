@@ -92,66 +92,11 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
-
-            
-            #line 17 "..\..\Help\Views\ViewNamespace.cshtml"
- using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
-{
-    using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
-    {
-         
-            
-            #line default
-            #line hidden
-            
-            #line 21 "..\..\Help\Views\ViewNamespace.cshtml"
-    Write(Html.HiddenRuntimeInfo(nc));
-
-            
-            #line default
-            #line hidden
-            
-            #line 21 "..\..\Help\Views\ViewNamespace.cshtml"
-                                    
-         
-            
-            #line default
-            #line hidden
-            
-            #line 22 "..\..\Help\Views\ViewNamespace.cshtml"
-    Write(Html.HiddenRuntimeInfo(nc, e => e.Culture));
-
-            
-            #line default
-            #line hidden
-            
-            #line 22 "..\..\Help\Views\ViewNamespace.cshtml"
-                                                    
-         
-            
-            #line default
-            #line hidden
-            
-            #line 23 "..\..\Help\Views\ViewNamespace.cshtml"
-    Write(Html.HiddenLine(nc, e => e.Name));
-
-            
-            #line default
-            #line hidden
-            
-            #line 23 "..\..\Help\Views\ViewNamespace.cshtml"
-                                          
-    
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <div");
+WriteLiteral("\r\n\r\n\r\n\r\n<div");
 
 WriteLiteral(" class=\"row\"");
 
-WriteLiteral(">\r\n            <div");
+WriteLiteral(">\r\n    <div");
 
 WriteLiteral(" class=\"col-md-9\"");
 
@@ -160,97 +105,72 @@ WriteLiteral(" id=\"entityName\"");
 WriteLiteral(">\r\n");
 
             
-            #line 27 "..\..\Help\Views\ViewNamespace.cshtml"
-                    
+            #line 21 "..\..\Help\Views\ViewNamespace.cshtml"
+        
+            
+            #line default
+            #line hidden
+            
+            #line 21 "..\..\Help\Views\ViewNamespace.cshtml"
+         using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
+        {
+            using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
+            {
+            
+            
+            #line default
+            #line hidden
+            
+            #line 25 "..\..\Help\Views\ViewNamespace.cshtml"
+       Write(Html.HiddenRuntimeInfo(nc));
+
+            
+            #line default
+            #line hidden
+            
+            #line 25 "..\..\Help\Views\ViewNamespace.cshtml"
+                                       
+            
+            
+            #line default
+            #line hidden
+            
+            #line 26 "..\..\Help\Views\ViewNamespace.cshtml"
+       Write(Html.HiddenRuntimeInfo(nc, e => e.Culture));
+
+            
+            #line default
+            #line hidden
+            
+            #line 26 "..\..\Help\Views\ViewNamespace.cshtml"
+                                                       
+            
             
             #line default
             #line hidden
             
             #line 27 "..\..\Help\Views\ViewNamespace.cshtml"
-                       Html.RenderPartial(HelpClient.Menu);
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                <h1>\r\n");
-
-WriteLiteral("                      ");
-
-            
-            #line 29 "..\..\Help\Views\ViewNamespace.cshtml"
-                 Write(Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" }));
+       Write(Html.HiddenLine(nc, e => e.Name));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    <span");
+            
+            #line 27 "..\..\Help\Views\ViewNamespace.cshtml"
+                                             
 
-WriteLiteral(" class=\"wiki\"");
+            Html.RenderPartial(HelpClient.Menu);
 
-WriteLiteral(">\r\n");
+            
+            #line default
+            #line hidden
+WriteLiteral("            <h1>\r\n");
 
-WriteLiteral("                    ");
+WriteLiteral("                ");
 
             
             #line 31 "..\..\Help\Views\ViewNamespace.cshtml"
-               Write(Model.Title);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                     </span>\r\n                       \r\n");
-
-            
-            #line 34 "..\..\Help\Views\ViewNamespace.cshtml"
-                    
-            
-            #line default
-            #line hidden
-            
-            #line 34 "..\..\Help\Views\ViewNamespace.cshtml"
-                     if (Model.Before != null)
-                    {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                        <small>");
-
-            
-            #line 36 "..\..\Help\Views\ViewNamespace.cshtml"
-                          Write(HelpMessage.In0.NiceToString(Model.Before));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</small>\r\n");
-
-            
-            #line 37 "..\..\Help\Views\ViewNamespace.cshtml"
-                    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                </h1>\r\n                <code");
-
-WriteLiteral(" class=\"shortcut\"");
-
-WriteLiteral(">[n:");
-
-            
-            #line 39 "..\..\Help\Views\ViewNamespace.cshtml"
-                                     Write(nh.Namespace);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("]</code>\r\n");
-
-WriteLiteral("                 ");
-
-            
-            #line 40 "..\..\Help\Views\ViewNamespace.cshtml"
-            Write(Html.TextArea(nc.SubContextPrefix(a => a.Description), nh.Description, 5, 80, new { @class = "editable" }));
+           Write(Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" }));
 
             
             #line default
@@ -264,39 +184,128 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 42 "..\..\Help\Views\ViewNamespace.cshtml"
-               Write(Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings));
+            #line 33 "..\..\Help\Views\ViewNamespace.cshtml"
+               Write(Model.Title);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </span>\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n                </span>\r\n\r\n");
+
+            
+            #line 36 "..\..\Help\Views\ViewNamespace.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 36 "..\..\Help\Views\ViewNamespace.cshtml"
+                 if (Model.Before != null)
+                {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    <small>");
+
+            
+            #line 38 "..\..\Help\Views\ViewNamespace.cshtml"
+                      Write(HelpMessage.In0.NiceToString(Model.Before));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</small>\r\n");
+
+            
+            #line 39 "..\..\Help\Views\ViewNamespace.cshtml"
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </h1>\r\n");
+
+WriteLiteral("            <code");
+
+WriteLiteral(" class=\"shortcut\"");
+
+WriteLiteral(">[n:");
+
+            
+            #line 41 "..\..\Help\Views\ViewNamespace.cshtml"
+                                 Write(nh.Namespace);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("]</code>\r\n");
+
+            
+            #line 42 "..\..\Help\Views\ViewNamespace.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 42 "..\..\Help\Views\ViewNamespace.cshtml"
+       Write(Html.TextArea(nc.SubContextPrefix(a => a.Description), nh.Description, 5, 80, new { @class = "editable" }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 42 "..\..\Help\Views\ViewNamespace.cshtml"
+                                                                                                                       
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            <span");
+
+WriteLiteral(" class=\"wiki\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                ");
+
+            
+            #line 44 "..\..\Help\Views\ViewNamespace.cshtml"
+           Write(Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </span>\r\n");
+
+            
+            #line 46 "..\..\Help\Views\ViewNamespace.cshtml"
+            }
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    </div>\r\n    <div");
 
 WriteLiteral(" class=\"col-md-3\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 46 "..\..\Help\Views\ViewNamespace.cshtml"
-                
+            #line 50 "..\..\Help\Views\ViewNamespace.cshtml"
+        
             
             #line default
             #line hidden
             
-            #line 46 "..\..\Help\Views\ViewNamespace.cshtml"
-                   Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "namespace", nh.Namespace } });
+            #line 50 "..\..\Help\Views\ViewNamespace.cshtml"
+           Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "namespace", nh.Namespace } });
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n        </div>\r\n");
+WriteLiteral("\r\n    </div>\r\n</div>\r\n");
 
-            
-            #line 49 "..\..\Help\Views\ViewNamespace.cshtml"
-    }
-}
-            
-            #line default
-            #line hidden
         }
     }
 }

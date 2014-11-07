@@ -183,6 +183,11 @@ namespace Signum.Entities.Omnibox
     {
         public string Text { get; set; }
         public Type OmniboxResultType { get; set; }
+
+        public override string ToString()
+        {
+            return "";
+        }
     }
 
     public interface IOmniboxResultGenerator
