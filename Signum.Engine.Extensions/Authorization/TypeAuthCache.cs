@@ -371,7 +371,7 @@ namespace Signum.Entities.Authorization
                         Role = role,
                         Allowed = kvp.Value.Allowed,
                         Conditions =  kvp.Value.Condition
-                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
+                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed)).ToSimple()).Combine(Spacing.Simple);
 
                     return restSql;
                 },
@@ -391,7 +391,7 @@ namespace Signum.Entities.Authorization
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr, replacements);
 
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a));
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a)).ToSimple();
                         }, 
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
                         (r, xr, pr) =>
@@ -403,7 +403,7 @@ namespace Signum.Entities.Authorization
                             if (!pr.Conditions.SequenceEqual(conditions))
                                 pr.Conditions = conditions;
 
-                            return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed));
+                            return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed)).ToSimple();
                         }, 
                         Spacing.Simple);
 

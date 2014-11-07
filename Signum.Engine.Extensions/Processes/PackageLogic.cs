@@ -109,7 +109,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DateTime limit)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
         {
             var usedDatas = Database.Query<ProcessDN>().Select(a => a.Data);
 

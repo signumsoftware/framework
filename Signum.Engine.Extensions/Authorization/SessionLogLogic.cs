@@ -9,6 +9,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Authorization
 {
@@ -40,9 +41,9 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DateTime limite)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
         {
-            Database.Query<SessionLogDN>().Where(a => a.SessionStart < limite).UnsafeDeleteChunks();
+            Database.Query<SessionLogDN>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         static bool RoleTracked(Lite<RoleDN> role)

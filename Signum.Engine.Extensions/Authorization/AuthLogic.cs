@@ -455,13 +455,11 @@ namespace Signum.Engine.Authorization
             if (result == null && dbOnlyWarnings == null)
                 return null;
 
-            var declareParent = result.Leaves().Any(l => l.Sql.StartsWith("SET @idParent")) ? new SqlPreCommandSimple("DECLARE @idParent INT") : null;
-
+       
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
                 dbOnlyWarnings,
-                declareParent,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }
