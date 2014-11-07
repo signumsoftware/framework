@@ -1095,6 +1095,9 @@ namespace Signum.Engine.Linq
             }
         }
 
+        static readonly PropertyInfo piIdClass = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
+        static readonly PropertyInfo piIdInterface = ReflectionTools.GetPropertyInfo((IEntity e) => e.Id);
+
         public Expression BindMemberAccess(MemberExpression m)
         {
             Expression source = m.Expression;
@@ -1238,7 +1241,7 @@ namespace Signum.Engine.Linq
                                         if (pi != null)
                                         {
                                             if (pi.Name == "Id")
-                                                return BindMemberAccess(Expression.Property(liteRef.Reference, "Id"));
+                                                return BindMemberAccess(Expression.Property(liteRef.Reference, liteRef.Reference.Type.IsInterface ? piIdInterface : piIdClass));
                                             if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                                                 return liteRef.Reference;
                                         }
@@ -1975,6 +1978,10 @@ namespace Signum.Engine.Linq
             else if (colExpression.Type.UnNullify() == typeof(PrimaryKey) && expression.Type.UnNullify() == typeof(PrimaryKey))
             {
                 return new[] { AssignColumn(SmartEqualizer.UnwrapPrimaryKey(colExpression), SmartEqualizer.UnwrapPrimaryKey(expression)) };
+            }
+            else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type == ((UnaryExpression)colExpression).Operand.Type.UnNullify())
+            {
+                return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
             }
             else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type.UnNullify().IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression)
             {

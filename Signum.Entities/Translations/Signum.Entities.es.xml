@@ -128,7 +128,7 @@
     <Member Name="StartsWith" Description="empieza por" />
   </Type>
   <Type Name="IEntity">
-    <Member Name="Id" Description="ID" />
+    <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
     <Member Name="AllowChange" Description="Permitir cambios" />

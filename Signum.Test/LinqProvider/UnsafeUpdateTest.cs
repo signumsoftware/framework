@@ -557,5 +557,18 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Execute();
             }
         }
+
+
+        [TestMethod]
+        public void UnsafeUpdateNullableEmbeddedValue()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Database.Query<AlbumDN>()
+                    .UnsafeUpdate()
+                    .Set(ctr => ctr.BonusTrack.Index, lb => 2)
+                    .Execute();
+            }
+        }
     }
 }

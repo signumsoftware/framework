@@ -559,7 +559,7 @@ namespace Signum.Engine.Maps
    
         class CollectionsCache
         {
-            public Func<Entity, SqlPreCommand> InsertCollectionsSync;
+            public Func<Entity, string, SqlPreCommand> InsertCollectionsSync;
 
             public Action<List<EntityForbidden>> InsertCollections;
             public Action<List<EntityForbidden>> UpdateCollections;
@@ -590,8 +590,8 @@ namespace Signum.Engine.Maps
                                     rc.RelationalUpdates(entities);
                             },
 
-                            InsertCollectionsSync = ident =>
-                                caches.Select(rc => rc.RelationalUpdateSync(ident)).Combine(Spacing.Double)
+                            InsertCollectionsSync = (ident, suffix) =>
+                                caches.Select((rc, i) => rc.RelationalUpdateSync(ident, suffix + "_" + i.ToString())).Combine(Spacing.Double)
                         };
                     }
                 }
@@ -621,17 +621,19 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return insert;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix);
 
             if (collections == null)
                 return insert;
 
+            SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @idParent INT") { GoBefore = true };
+            
             SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity");
 
-            return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections);
+            return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections).ToSimple();
         }
 
-        public SqlPreCommand UpdateSqlSync(Entity ident, bool includeCollections = true, string comment = null)
+        public SqlPreCommand UpdateSqlSync(Entity ident, bool includeCollections = true, string comment = null, string suffix = "")
         {
             PrepareEntitySync(ident);
             
@@ -642,8 +644,8 @@ namespace Signum.Engine.Maps
                 return null;
 
             var uc = updater.Value;
-            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern("", false),
-                uc.UpdateParameters(ident, (ident as Entity).Try(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
+            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern(suffix, false),
+                uc.UpdateParameters(ident, (ident as Entity).Try(a => a.Ticks) ?? -1, new Forbidden(), suffix)).AddComment(comment);
 
             if (!includeCollections)
                 return update;
@@ -652,7 +654,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix);
 
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
@@ -718,7 +720,7 @@ namespace Signum.Engine.Maps
     {
         internal interface IMListCache
         {
-            SqlPreCommand RelationalUpdateSync(Entity parent);
+            SqlPreCommand RelationalUpdateSync(Entity parent, string suffix);
             void RelationalInserts(List<EntityForbidden> entities);
             void RelationalUpdates(List<EntityForbidden> entities);
 
@@ -974,7 +976,7 @@ namespace Signum.Engine.Maps
                 toInsert.SplitStatements(listPairs => GetInsert(listPairs.Count)(listPairs));
             }
 
-            public SqlPreCommand RelationalUpdateSync(Entity parent)
+            public SqlPreCommand RelationalUpdateSync(Entity parent, string suffix)
             {
                 MList<T> collection = Getter(parent);
 
@@ -983,28 +985,30 @@ namespace Signum.Engine.Maps
                     if (parent.IsNew)
                         return null;
 
-                    return new SqlPreCommandSimple(sqlDelete(""), new List<DbParameter> { DeleteParameter(parent, "") });
+                    return new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) });
                 }
 
                 if (collection.Modified == ModifiedState.Clean)
                     return null;
 
-                var sqlIns = sqlInsert("", false);
-
                 if (parent.IsNew)
                 {
                     return collection.Select((e, i) =>
                     {
-                        var parameters = InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), "");
-                        parameters.RemoveAt(0); // wont be replaced, generating @idParent
-                        return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
+                        var parameters = InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i);
+                        var idParent = parameters.First(); // wont be replaced, generating @idParent
+                        parameters.RemoveAt(0);
+                        string script = sqlInsert(suffix + "_" + i, false);
+                        script = script.Replace(idParent.ParameterName, "@idParent");
+                        return new SqlPreCommandSimple(script, parameters).AddComment(e.ToString());
                     }).Combine(Spacing.Simple);
                 }
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
-                        new SqlPreCommandSimple(sqlDelete(""), new List<DbParameter> { DeleteParameter(parent, "") }),
-                        collection.Select((e, i) => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, i, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
+                        new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }),
+                        collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(suffix + "_" + i, false), 
+                            InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i)).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
 

@@ -115,6 +115,8 @@ namespace Signum.Windows
         public bool ShowFooter { get; set; }
 
         public string WindowTitle { get; set; }
+        public string EntityTypeTitle { get; set; }
+        public string QueryNameTitle { get; set; }
 
         internal abstract SearchMode GetSearchMode();
 
