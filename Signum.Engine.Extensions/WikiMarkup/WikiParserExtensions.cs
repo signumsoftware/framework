@@ -40,6 +40,7 @@ namespace Signum.Engine.WikiMarkup
         public static string WikiParse(this WikiSettings settings, string content)
         {
             using (HeavyProfiler.Log("Wiki"))
+            using (var t = HeavyProfiler.LogNoStackTrace("SaveCodeRegions"))
             {
                 string result = content;
 
@@ -48,19 +49,23 @@ namespace Signum.Engine.WikiMarkup
 
                 if (settings.EncodeHtml)
                 {
+                    t.Switch("HtmlEncode");
                     //1: Replace token delimiters which are different from their encoded string so that they are not encoded
                     result = Regex.Replace(result, "'{2,}", m => "####" + m.Length + "####");
 
+                   
                     //2: Encode all text
                     result = HttpUtility.HtmlEncode(result);
 
                     //3: Replace encrypted tokens to original tokens 
                     result = Regex.Replace(result, "####(?<count>\\d+)####", m => new string('\'', int.Parse(m.Groups["count"].Value)));
                 }
-
+                t.Switch("ProcessTokens");
                 result = ProcessTokens(result, settings);
+                t.Switch("ProcessFormat");
 
                 result = ProcessFormat(result, settings);
+                t.Switch("WriteCodeRegions");
 
                 result = WriteCodeRegions(result, codeRegions, settings);
 
@@ -119,93 +124,55 @@ namespace Signum.Engine.WikiMarkup
             });
         }
 
+
+        static Regex RegexBoldItalics = new Regex(@"(?<begin>''''')(?<content>.+?)(?<end>''''')", RegexOptions.Singleline);
+        static Regex RegexBold = new Regex(@"(?<begin>''')(?<content>.+?)(?<end>''')", RegexOptions.Singleline);
+        static Regex RegexItalics = new Regex(@"(?<begin>'')(?<content>.+?)(?<end>'')", RegexOptions.Singleline);
+        static Regex RegexUnderline = new Regex(@"(?<begin>__)(?<content>.+?)(?<end>__)", RegexOptions.Singleline);
+        static Regex RegexStrike = new Regex(@"(?<begin>\-\-)(?<content>.+?)(?<end>\-\-)", RegexOptions.Singleline);
+        
+        static Regex RegexLI = new Regex(@"^\s*(?<begin>\*{1}[ ]?)(?<content>.+)(?<end>[^*]?)[\n]*", RegexOptions.Singleline);
+        static Regex RegexOLI = new Regex(@"^\s*(?<begin>\#{1}[ ]?)(?<content>.+)(?<end>[^#]?)[\n]*", RegexOptions.Singleline);
+        static Regex RegexUL = new Regex(@"(?<content>\<li\>{1}.+\<\/li\>)", RegexOptions.Singleline);
+        static Regex RegexOL = new Regex(@"(?<content>\<oli\>{1}.+\<\/oli\>)", RegexOptions.Singleline);
+        static Regex RegexLIFin = new Regex(@"(?<content>oli\>{1})", RegexOptions.Singleline);
+
+        static Regex RegexTitles = new Regex(@"(?<begin>={2,})(?<content>[^\n]+?)(?<end>={2,})[\n]*", RegexOptions.Singleline);
+
+        static Regex RegexMaxTwoLineBreaks = new Regex(@"(?<begin>={2,})(?<content>[^\n]+?)(?<end>={2,})[\n]*");
+
+        static Regex RegexNewLine = new Regex(@"(?<content>\n)");
+        static Regex RegexCarrageReturn = new Regex(@"(?<content>\r)");
+
+
         static string ProcessFormat(string content, WikiSettings settings)
         {
-            // Replacing both
-            content = Regex.Replace(content,
-            @"(?<begin>''''')(?<content>.+?)(?<end>''''')",
-            (settings.Strong && settings.Em) ? "<strong><em>${content}</em></strong>" : "${content}",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+            content = RegexBoldItalics.Replace(content,(settings.Strong && settings.Em) ? "<strong><em>${content}</em></strong>" : "${content}");
+            content = RegexBold.Replace(content, settings.Strong ? "<strong>${content}</strong>" : "${content}");
+            content = RegexItalics.Replace(content, settings.Em ? "<em>${content}</em>" : "${content}");
+            content = RegexUnderline.Replace(content, settings.Underlined ? "<u>${content}</u>" : "${content}");
+            content = RegexStrike.Replace(content, settings.Strike ? "<s>${content}</s>" : "${content}");
+            
+            content = RegexLI.Replace(content, settings.Lists ? "<li>${content}</li>" : "${content} ");
+            content = RegexOLI.Replace(content, settings.Lists ? "<oli>${content}</oli>" : "${content} ");
+            content = RegexUL.Replace(content, settings.Lists ? "<ul>${content}</ul>" : "${content} ");
+            content = RegexOL.Replace(content, settings.Lists ? "<ol>${content}</ol>" : "${content} ");
+            content = RegexLIFin.Replace(content, "li>");
 
-            // Replacing bolds
-            content = Regex.Replace(content,
-            @"(?<begin>''')(?<content>.+?)(?<end>''')",
-            settings.Strong ? "<strong>${content}</strong>" : "${content}",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
-            // Replacing italics
-            content = Regex.Replace(content,
-            @"(?<begin>'')(?<content>.+?)(?<end>'')",
-            settings.Em ? "<em>${content}</em>" : "${content}",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
-            // Replacing underlined
-            content = Regex.Replace(content,
-            @"(?<begin>__)(?<content>.+?)(?<end>__)",
-            settings.Underlined ? "<u>${content}</u>" : "${content}",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
-            // Replacing strike
-            content = Regex.Replace(content,
-            @"(?<begin>\-\-)(?<content>.+?)(?<end>\-\-)",
-            settings.Strike ? "<s>${content}</s>" : "${content}",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
-            // Replacing lists
-            content = Regex.Replace(content,
-             @"^\s*(?<begin>\*{1}[ ]?)(?<content>.+)(?<end>[^*]?)[\n]*",
-             settings.Lists ? "<li>${content}</li>" : "${content} ",
-             RegexOptions.Compiled | RegexOptions.Multiline);
-
-            content = Regex.Replace(content,
-             @"^\s*(?<begin>\#{1}[ ]?)(?<content>.+)(?<end>[^#]?)[\n]*",
-             settings.Lists ? "<oli>${content}</oli>" : "${content} ",
-             RegexOptions.Compiled | RegexOptions.Multiline);
-
-            content = Regex.Replace(content,
-            @"(?<content>\<li\>{1}.+\<\/li\>)",
-            settings.Lists ? "<ul>${content}</ul>" : "${content} ",
-            RegexOptions.Compiled);
-
-            content = Regex.Replace(content,
-            @"(?<content>\<oli\>{1}.+\<\/oli\>)",
-            settings.Lists ? "<ol>${content}</ol>" : "${content} ",
-            RegexOptions.Compiled);
-
-            content = Regex.Replace(content,
-            @"(?<content>oli\>{1})", "li>",
-            RegexOptions.Compiled);
-
-
-            // Replacing titles
-            if (settings.Titles)
-                content = Regex.Replace(content,
-                @"(?<begin>={2,})(?<content>[^\n]+?)(?<end>={2,})[\n]*",
-                m => "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString().Trim() + "</h" + m.Groups["end"].Length + ">",
-                RegexOptions.Compiled);
-            else
-                content = Regex.Replace(content,
-                @"(?<begin>={2,})(?<content>[^\n]+?)(?<end>={2,})[\n]*",
-                "${content}. ",
-                RegexOptions.Compiled);
+            content = RegexTitles.Replace(content, m =>  
+                settings.Titles ? ("<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString().Trim() + "</h" + m.Groups["end"].Length + ">") :
+                m.Groups["content"].Value);
 
             //Remove multiple breakline  
             if (settings.MaxTwoLineBreaks)
             {
-                content = Regex.Replace(content,
-                    @"(?<content>(\r?\n){3,})", "\n\n",
-                    RegexOptions.Compiled);
+                content = RegexMaxTwoLineBreaks.Replace(content, "\n\n");
             }
 
             if (settings.LineBreaks)
             {
-                content = Regex.Replace(content,
-                    @"(?<content>\n)", settings.LineBreaks ? "<br/>" : ". ",
-                    RegexOptions.Compiled);
-
-                content = Regex.Replace(content,
-                    @"(?<content>\r)", "",
-                    RegexOptions.Compiled);
+                content = RegexNewLine.Replace(content, "<br/>");
+                content = RegexCarrageReturn.Replace(content, "");
             }
 
             return content;

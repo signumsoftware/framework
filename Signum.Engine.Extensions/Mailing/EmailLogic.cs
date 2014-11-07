@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
-                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration); 
+                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration ?? (Func<SmtpConfigurationDN>)(() => null)); 
 
                 sb.Include<EmailMessageDN>();
 

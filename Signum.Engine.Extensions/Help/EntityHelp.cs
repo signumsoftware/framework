@@ -74,7 +74,7 @@ namespace Signum.Engine.Help
         public readonly Type Type;
         public readonly CultureInfo Culture;
 
-        public readonly EntityHelpDN Entity;
+        public readonly Lazy<EntityHelpDN> Entity;
 
         public readonly string Info;
         public readonly string Description;
@@ -104,8 +104,6 @@ namespace Signum.Engine.Help
 
             if (entity != null)
             {
-                Entity = entity;
-
                 Description = entity.Description;
 
                 foreach (var tranProp in entity.Properties)
@@ -118,34 +116,39 @@ namespace Signum.Engine.Help
                     Operations.GetOrThrow(transOper.Operation).UserDescription = transOper.Description;
                 }
             }
-            else
+
+
+            Entity = new Lazy<EntityHelpDN>(() =>
             {
-                Entity = new EntityHelpDN
-                {
-                    Culture = this.Culture.ToCultureInfoDN(),
-                    Type = this.Type.ToTypeDN(),
-                };
-            }
+                if (entity == null)
+                    entity = new EntityHelpDN
+                    {
+                        Culture = this.Culture.ToCultureInfoDN(),
+                        Type = this.Type.ToTypeDN(),
+                    };
 
-            Entity.Properties.AddRange(
-               PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeDN())
-               .Except(Entity.Properties.Select(a => a.Property))
-               .Select(pr => new PropertyRouteHelpDN
-               {
-                   Property = pr,
-                   Description = null,
-               }));
+                entity.Properties.AddRange(
+                   PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeDN())
+                   .Except(entity.Properties.Select(a => a.Property))
+                   .Select(pr => new PropertyRouteHelpDN
+                   {
+                       Property = pr,
+                       Description = null,
+                   }));
 
-            Entity.Operations.AddRange(
-                Operations.Keys
-                .Except(Entity.Operations.Select(a => a.Operation))
-                .Select(oper => new OperationHelpDN
-                {
-                    Operation = oper,
-                    Description = null,
-                }));
+                entity.Operations.AddRange(
+                    Operations.Keys
+                    .Except(entity.Operations.Select(a => a.Operation))
+                    .Select(oper => new OperationHelpDN
+                    {
+                        Operation = oper,
+                        Description = null,
+                    }));
 
-            Entity.Queries.AddRange(this.Queries.Values.Select(a => a.Entity).ToList());
+                entity.Queries.AddRange(this.Queries.Values.Select(a => a.Entity).ToList());
+
+                return entity;
+            });
         }
 
         public static IEnumerable<OperationInfo> GetOperations(Type type)
