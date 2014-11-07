@@ -13,7 +13,7 @@ namespace Signum.Windows
     public class EntityListBase : EntityBase
     {
         public static readonly DependencyProperty EntitiesProperty =
-          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).EntitiesChanged(e)));
+          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).OnEntitiesChanged(e)));
         public IList Entities
         {
             get { return (IList)GetValue(EntitiesProperty); }
@@ -100,16 +100,30 @@ namespace Signum.Windows
             return tc.Add("Item");
         }
 
+        bool isListUserInteraction = true;
+
         public IList EnsureEntities()
         {
-            if (Entities == null)
-                Entities = (IList)Activator.CreateInstance(EntitiesType);
-            return Entities;
+            try
+            {
+                this.isListUserInteraction = false;
+                if (Entities == null)
+                    Entities = (IList)Activator.CreateInstance(EntitiesType);
+                return Entities;
+            }
+            finally
+            {
+                this.isListUserInteraction = true;
+            }
         }
 
-        public virtual void EntitiesChanged(DependencyPropertyChangedEventArgs e)
-        {
 
+        public event EntityChangedEventHandler EntitiesChanged;
+
+        public virtual void OnEntitiesChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (EntitiesChanged != null)
+                EntitiesChanged(this, isListUserInteraction, e.OldValue, e.NewValue);
         }
     }
 }
