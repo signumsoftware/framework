@@ -370,12 +370,12 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value.Allowed,
-                        Conditions =  kvp.Value.Condition
-                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed)).ToSimple()).Combine(Spacing.Simple);
+                        Conditions = kvp.Value.Condition
+                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true);
 
                     return restSql;
                 },
-                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true),
                 (role, x, list) =>
                 {
                     var dic = (from xr in  x.Elements("Type")
@@ -384,16 +384,16 @@ namespace Signum.Entities.Authorization
                                select KVP.Create(t, xr)).ToDictionary("Type rules for {0}".Formato(role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        dic, 
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
+                        dic,
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                         (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr, replacements);
 
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a)).ToSimple();
-                        }, 
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a));
+                        },
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
                         (r, xr, pr) =>
                         {
                             var oldA = pr.Allowed;
@@ -403,9 +403,9 @@ namespace Signum.Entities.Authorization
                             if (!pr.Conditions.SequenceEqual(conditions))
                                 pr.Conditions = conditions;
 
-                            return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed)).ToSimple();
-                        }, 
-                        Spacing.Simple);
+                            return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed));
+                        },
+                        Spacing.Simple).TryDo(p => p.GoBefore = true);
 
                     return restSql;
                 }, Spacing.Double);

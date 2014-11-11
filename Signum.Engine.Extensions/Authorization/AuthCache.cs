@@ -346,11 +346,11 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value
-                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
+                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true);
 
                     return restSql;
-                }, 
-                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+                },
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true),
                 (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
@@ -375,7 +375,7 @@ namespace Signum.Entities.Authorization
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
-                        }, Spacing.Simple);
+                        }, Spacing.Simple).TryDo(p => p.GoBefore = true);
 
                     return restSql;
                 }, 
