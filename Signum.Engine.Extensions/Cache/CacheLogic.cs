@@ -61,7 +61,7 @@ namespace Signum.Engine.Cache
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Synchronizing += Synchronize;
-                sb.Schema.Generating += () => Synchronize(null).Try(s => s.ToSimple());
+                sb.Schema.Generating += () => Synchronize(null).Try(s => s.PlainSqlCommand());
 
                 if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
                     throw new InvalidOperationException("Sql Dependency is not supported by the current connection");

@@ -111,7 +111,7 @@ namespace Signum.Engine.Basics
 
             var should = GenerateQueries();
 
-            return should.Select((q, i) => table.InsertSqlSync(q, suffix: i.ToString())).Combine(Spacing.Simple).ToSimple();
+            return should.Select((q, i) => table.InsertSqlSync(q, suffix: i.ToString())).Combine(Spacing.Simple).PlainSqlCommand();
 
         }
 
