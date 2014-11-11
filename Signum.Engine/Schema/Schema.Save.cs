@@ -630,7 +630,7 @@ namespace Signum.Engine.Maps
             
             SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity");
 
-            return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections).ToSimple();
+            return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
         }
 
         public SqlPreCommand UpdateSqlSync(Entity ident, bool includeCollections = true, string comment = null, string suffix = "")

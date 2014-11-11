@@ -444,7 +444,7 @@ namespace Signum.Engine
                             new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                        }.Combine(Spacing.Simple).ToSimple(),
+                        }.Combine(Spacing.Simple).PlainSqlCommand(),
                         new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
                     }.Combine(Spacing.Simple),
                 new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))

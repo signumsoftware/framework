@@ -24,13 +24,12 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
-        protected internal abstract bool EndsWithGo { get; }
-
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
-        protected internal abstract void GenerateScript(StringBuilder sb);
+        public abstract SqlPreCommand Clone();
 
-        protected internal abstract void GenerateParameters(List<DbParameter> list);
+        public abstract bool GoBefore { get; set; }
+        public abstract bool GoAfter { get; set; }
 
         protected internal abstract int NumParameters { get; }
 
@@ -44,12 +43,7 @@ namespace Signum.Engine
             return sb.ToString(); 
         }
 
-        public List<SqlPreCommandSimple> PlainSqlSplitGOs()
-        {
-            return this.PlainSql().Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => new SqlPreCommandSimple(s))
-                .ToList();
-        }
+        
 
 
         protected internal abstract void PlainSql(StringBuilder sb);
@@ -73,7 +67,7 @@ namespace Signum.Engine
             return new SqlPreCommandConcat(spacing, sentences);
         }
 
-        public abstract SqlPreCommand Clone(); 
+
     }
 
     public static class SqlPreCommandExtensions
@@ -83,23 +77,14 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
 
-        public static SqlPreCommandSimple ToSimple(this SqlPreCommand command)
+        public static SqlPreCommand PlainSqlCommand(this SqlPreCommand command)
         {
             if (command == null)
                 return null;
 
-            if (command is SqlPreCommandSimple)
-                return (SqlPreCommandSimple)command;
-
-
-            var c = (SqlPreCommandConcat)command;
-            StringBuilder sb = new StringBuilder();
-            c.GenerateScript(sb);
-
-            List<DbParameter> parameters = new List<DbParameter>();
-            c.GenerateParameters(parameters);
-
-            return new SqlPreCommandSimple(sb.ToString(), parameters);
+            return command.PlainSql().Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => new SqlPreCommandSimple(s))
+                .Combine(Spacing.Simple);
         }
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
@@ -136,13 +121,8 @@ namespace Signum.Engine
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
-        protected internal override bool EndsWithGo
-        {
-            get { return GoAfter; }
-        }
-
-        public bool GoBefore { get; set; }
-        public bool GoAfter { get; set; }
+        public override bool GoBefore { get; set; }
+        public override bool GoAfter { get; set; }
 
         public string Sql { get; private set; }
         public List<DbParameter> Parameters { get; private set; }
@@ -161,17 +141,6 @@ namespace Signum.Engine
         public override IEnumerable<SqlPreCommandSimple> Leaves()
         {
             yield return this;
-        }
-
-        protected internal override void GenerateScript(StringBuilder sb)
-        {
-            sb.Append(Sql);
-        }
-
-        protected internal override void GenerateParameters(List<DbParameter> list)
-        {
-            if (Parameters != null)
-                list.AddRange(Parameters);
         }
 
         protected internal override int NumParameters
@@ -249,6 +218,9 @@ namespace Signum.Engine
         public Spacing Spacing { get; private set; }
         public SqlPreCommand[] Commands { get; private set; }
 
+        public override bool GoBefore { get { return this.Commands.First().GoBefore; } set { this.Commands.First().GoBefore = true; } }
+        public override bool GoAfter { get { return this.Commands.Last().GoAfter; } set { this.Commands.Last().GoAfter = true; } }
+
         internal SqlPreCommandConcat(Spacing spacing, SqlPreCommand[] commands)
         {
             this.Spacing = spacing;
@@ -258,31 +230,6 @@ namespace Signum.Engine
         public override IEnumerable<SqlPreCommandSimple> Leaves()
         {
             return Commands.SelectMany(c => c.Leaves());
-        }
-
-        protected internal override void GenerateScript(StringBuilder sb)
-        {
-            string sep = separators[Spacing];
-            for (int i = 0; i < Commands.Length; i++)
-            {
-                var cmd = Commands[i];
-               
-                cmd.GenerateScript(sb);
-            
-                if (i != Commands.Length - 1)
-                {
-                    if (!cmd.EndsWithGo)
-                        sb.Append(";");
-
-                    sb.Append(sep);
-                }
-            }
-        }
-
-        protected internal override void GenerateParameters(List<DbParameter> list)
-        {
-            foreach (SqlPreCommand com in Commands)
-                com.GenerateParameters(list);
         }
 
         static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
@@ -324,11 +271,6 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
-        }
-
-        protected internal override bool EndsWithGo
-        {
-            get { return Commands.Any() && Commands.Last().EndsWithGo; }
         }
     }
 

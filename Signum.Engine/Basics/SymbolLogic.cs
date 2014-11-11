@@ -64,7 +64,7 @@ namespace Signum.Engine
 
             IEnumerable<T> should = getSymbols();
 
-            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple).ToSimple();
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple).PlainSqlCommand();
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)

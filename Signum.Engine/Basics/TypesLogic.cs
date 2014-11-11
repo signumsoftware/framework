@@ -131,7 +131,7 @@ namespace Signum.Engine.Basics
             return GenerateSchemaTypes()
                 .Select((e, i) => table.InsertSqlSync(e, suffix: i.ToString()))
                 .Combine(Spacing.Simple)
-                .ToSimple();
+                .PlainSqlCommand();
         }
 
         internal static List<TypeDN> GenerateSchemaTypes()
