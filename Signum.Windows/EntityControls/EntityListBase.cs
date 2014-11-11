@@ -13,7 +13,7 @@ namespace Signum.Windows
     public class EntityListBase : EntityBase
     {
         public static readonly DependencyProperty EntitiesProperty =
-          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).EntitiesChanged(e)));
+          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).OnEntitiesChanged(e)));
         public IList Entities
         {
             get { return (IList)GetValue(EntitiesProperty); }
@@ -38,7 +38,7 @@ namespace Signum.Windows
 
         private void EntitiesTypeChanged(Type type)
         {
- 	        Type = type.ElementType().ThrowIfNull("EntitiesType must be a collection type");
+            Type = type.ElementType().ThrowIfNull("EntitiesType must be a collection type");
         }
 
         public new event Func<object> Finding;
@@ -107,9 +107,12 @@ namespace Signum.Windows
             return Entities;
         }
 
-        public virtual void EntitiesChanged(DependencyPropertyChangedEventArgs e)
-        {
+        public event EntityChangedEventHandler EntitiesChanged;
 
+        public virtual void OnEntitiesChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (EntitiesChanged != null)
+                EntitiesChanged(this, false, e.OldValue, e.NewValue);
         }
     }
 }
