@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using Signum.Entities.Help;
 using Signum.Entities.Translation;
+using Signum.Engine.Authorization;
 
 
 namespace Signum.Engine.Help
@@ -254,6 +255,7 @@ namespace Signum.Engine.Help
                 sb.Schema.Table<QueryDN>().PreDeleteSqlSync += query =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpDN>().Where(e => e.Query == (QueryDN)query));
 
+                PermissionAuthLogic.RegisterPermissions(HelpPermissions.ViewHelp);
             }
         }
 
