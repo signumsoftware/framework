@@ -1050,7 +1050,7 @@ export class EntityListDetail extends EntityList {
             var selContainer = this.containerDiv(selPrefix);
 
             var promise = selContainer.children().length ? Promise.resolve<void>(null) :
-                Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null))
+                Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null), this.defaultViewOptions(null))
                     .then<void>(e=> selContainer.html(e.html));
 
             promise.then(() =>
