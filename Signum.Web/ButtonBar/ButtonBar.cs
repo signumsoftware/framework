@@ -45,7 +45,7 @@ namespace Signum.Web
             if (list != null)
                 links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(ctx, entity)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
-            return links;
+            return links.OrderBy(a => a.Order).ToList();
         }
     }
 
