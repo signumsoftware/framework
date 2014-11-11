@@ -133,7 +133,7 @@ namespace Signum.Engine.Cache
 
                         Expression entity = GetEntity(isLite, column, kvp.Key);
 
-                        return Expression.Condition(Expression.NotEqual(GetTupleProperty(column), NullId),
+                        return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(GetTupleProperty(column)), NullId),
                             Expression.Convert(entity, field.FieldType),
                             acum);
                     });
