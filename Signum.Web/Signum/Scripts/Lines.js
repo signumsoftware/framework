@@ -1019,7 +1019,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (selPrefix) {
                 var selContainer = this.containerDiv(selPrefix);
 
-                var promise = selContainer.children().length ? Promise.resolve(null) : Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null)).then(function (e) {
+                var promise = selContainer.children().length ? Promise.resolve(null) : Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null), this.defaultViewOptions(null)).then(function (e) {
                     return selContainer.html(e.html);
                 });
 
