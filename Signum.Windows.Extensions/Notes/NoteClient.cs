@@ -32,10 +32,7 @@ namespace Signum.Windows.Notes
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<NoteDN>(NoteOperation.CreateNoteFromEntity) 
-                    { 
-                        IsVisible  = _ => false
-                    }
+                    new EntityOperationSettings<Entity>(NoteOperation.CreateNoteFromEntity)  { IsVisible  = _ => false }
                 });
 
                 Navigator.AddSetting(new EntitySettings<NoteTypeDN> { View = e => new NoteType() });
