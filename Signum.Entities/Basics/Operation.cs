@@ -210,20 +210,15 @@ namespace Signum.Entities
         }
     }
 
-
-
     public interface ExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
         where T : class, IEntity
     {
-       
     }
 
     public interface DeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
         where T : class, IEntity
     {
     }
-
-
 
     [Serializable]
     public class OperationInfo

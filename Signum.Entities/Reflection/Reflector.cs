@@ -368,7 +368,7 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            PropertyRoute simpleRoute = route.SimplifyNoRoot();
+            PropertyRoute simpleRoute = route.SimplifyToProperty();
 
             FormatAttribute format = simpleRoute.PropertyInfo.GetCustomAttribute<FormatAttribute>();
             if (format != null)

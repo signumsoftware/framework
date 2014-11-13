@@ -436,16 +436,29 @@ namespace Signum.Entities
             return Equals(other);
         }
 
-        internal PropertyRoute SimplifyNoRoot()
+        public PropertyRoute SimplifyToProperty()
         {
             switch (PropertyRouteType)
             {
                 case PropertyRouteType.FieldOrProperty: return this;
-                case PropertyRouteType.LiteEntity: return this.Parent;
-                case PropertyRouteType.MListItems: return this.Parent;
-
+                case PropertyRouteType.LiteEntity:
+                case PropertyRouteType.MListItems: return this.Parent.SimplifyToProperty();
                 default:
-                    throw new InvalidOperationException("PropertyRoute of type Root not expected");
+                    throw new InvalidOperationException("PropertyRoute of type {0} not expected".Formato(PropertyRouteType));
+            }
+        }
+
+        public PropertyRoute SimplifyToPropertyOrRoot()
+        {
+            switch (PropertyRouteType)
+            {
+                case PropertyRouteType.Root:
+                case PropertyRouteType.FieldOrProperty: return this;
+                case PropertyRouteType.LiteEntity: 
+                case PropertyRouteType.MListItems:
+                case PropertyRouteType.Mixin: return this.Parent.SimplifyToPropertyOrRoot();
+                default:
+                    throw new InvalidOperationException("PropertyRoute of type {0} not expected".Formato(PropertyRouteType));
             }
         }
 
