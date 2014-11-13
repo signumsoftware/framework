@@ -107,12 +107,8 @@ namespace Signum.Windows.Disconnected
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
-            var parent = Thread.CurrentThread;
-
             Task.Factory.StartNew(() =>
             {
-                Thread.CurrentThread.AssignCultures(parent);
-
                 using (var ps = new ProgressStream(file.Stream))
                 {
                     ps.ProgressChanged += (s, args) => Dispatcher.Invoke(() => pbDownloading.Value = ps.Position);
