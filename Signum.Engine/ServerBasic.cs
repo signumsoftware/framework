@@ -14,6 +14,7 @@ using Signum.Utilities;
 using Signum.Engine.Linq;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
+using System.ServiceModel.Channels;
 
 namespace Signum.Services
 {
@@ -30,6 +31,7 @@ namespace Signum.Services
         {
             try
             {
+                using (CultureFromOperationContext())
                 using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionMode.Global())
                 {
@@ -60,6 +62,19 @@ namespace Signum.Services
         protected void Execute(MethodBase mi, string description, Action action)
         {
             Return(mi, description, () => { action(); return true; });
+        }
+
+        public static IDisposable CultureFromOperationContext()
+        {
+            MessageHeaders headers = OperationContext.Current.IncomingMessageHeaders;
+
+            int culture = headers.FindHeader("CurrentCulture", "http://www.signumsoftware.com/Culture");
+            int cultureUI = headers.FindHeader("CurrentUICulture", "http://www.signumsoftware.com/Culture");
+
+            var changeCulture = culture == -1 ? null : CultureInfoUtils.ChangeCulture(headers.GetHeader<string>(culture));
+            var changeUICulture = cultureUI == -1 ? null : CultureInfoUtils.ChangeCulture(headers.GetHeader<string>(cultureUI));
+
+            return Disposable.Combine(changeCulture, changeUICulture);
         }
 
         #region IBaseServer

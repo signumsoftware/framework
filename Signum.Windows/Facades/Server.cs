@@ -14,6 +14,8 @@ using System.ServiceModel.Security;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Basics;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Signum.Windows
 {
@@ -115,6 +117,12 @@ namespace Signum.Windows
 
             ((IDisposable)co).Dispose();
         }
+
+        public static Task ExecuteAsync<S>(Action<S> action)
+            where S : class
+        {
+            return Task.Factory.StartNew(() => Execute(action));
+        }
        
         public static void Execute<S>(Action<S> action)
             where S : class
@@ -140,6 +148,12 @@ namespace Signum.Windows
                 current = null;
                 goto retry;
             }
+        }
+
+        public static Task<R> ReturnAsync<S, R>(Func<S, R> function)
+            where S : class
+        {
+            return Task.Factory.StartNew(() => Return(function));
         }
 
         public static R Return<S, R>(Func<S, R> function)
@@ -380,8 +394,16 @@ namespace Signum.Windows
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
-        
+        public static void OnOperation_SaveCurrentCulture(OperationContext ctx)
+        {
+            ctx.OutgoingMessageHeaders.Add(
+                new MessageHeader<string>(CultureInfo.CurrentCulture.Name)
+                .GetUntypedHeader("CurrentCulture", "http://www.signumsoftware.com/Culture"));
 
+            ctx.OutgoingMessageHeaders.Add(
+                new MessageHeader<string>(CultureInfo.CurrentUICulture.Name)
+                .GetUntypedHeader("CurrentUICulture", "http://www.signumsoftware.com/Culture"));
+        }
     }
 
     [Serializable]
