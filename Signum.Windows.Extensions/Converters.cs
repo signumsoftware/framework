@@ -14,6 +14,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
+using System.Windows;
 
 namespace Signum.Windows.Extensions
 {
@@ -58,5 +59,9 @@ namespace Signum.Windows.Extensions
         public static readonly IValueConverter TokenToDN = ConverterFactory.New(
             (QueryTokenDN qt) => qt.Try(t => t.TryToken),
             (QueryToken t) => new QueryTokenDN(t));
+
+
+        public static readonly IValueConverter ThicknessToBool = ConverterFactory.New(
+            (Thickness tk) => Math.Max(Math.Max(tk.Left, tk.Right), Math.Max(tk.Bottom, tk.Top)));
     }
 }

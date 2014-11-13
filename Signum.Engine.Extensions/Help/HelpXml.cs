@@ -156,11 +156,11 @@ namespace Signum.Engine.Help
                 XElement element = document.Element(_Query);
                 var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
                 var queryName = SelectInteractive(element.Attribute(_Key).Value, QueryLogic.QueryNames, "queries");
-                
-                if(queryName== null)
+
+                if (queryName == null)
                     return ImportAction.Skipped;
 
-                var query =  QueryLogic.GetQuery(queryName);
+                var query = QueryLogic.GetQuery(queryName);
 
                 var entity = Database.Query<QueryHelpDN>().SingleOrDefaultEx(a => a.Culture == ci && a.Query == query) ??
                     new QueryHelpDN
@@ -171,21 +171,21 @@ namespace Signum.Engine.Help
 
                 entity.Description = element.Element(_Description).Try(d => d.Value);
 
-                var cols = element.Element(_Columns); 
-                if(cols != null)
+                var cols = element.Element(_Columns);
+                if (cols != null)
                 {
                     var queryColumns = DynamicQueryManager.Current.GetQuery(query).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
 
                     foreach (var item in cols.Elements(_Column))
-	                {
+                    {
                         string name = item.Attribute(_Name).Value;
                         name = SelectInteractive(name, queryColumns, "columns of {0}".Formato(queryName));
 
                         if (name == null)
                             continue;
 
-                        var col = entity.Columns.SingleOrDefaultEx(c=>c.ColumnName == name);
-                        if(col != null)
+                        var col = entity.Columns.SingleOrDefaultEx(c => c.ColumnName == name);
+                        if (col != null)
                         {
                             col.Description = item.Value;
                         }
@@ -193,12 +193,56 @@ namespace Signum.Engine.Help
                         {
                             entity.Columns.Add(new QueryColumnHelpDN
                             {
-                                 ColumnName = name,
-                                 Description = item.Value
-                            }); 
+                                ColumnName = name,
+                                Description = item.Value
+                            });
                         }
-	                }
+                    }
                 }
+
+                return Save(entity);
+            }
+        }
+
+        public static class OperationXml
+        {
+            static readonly XName _Name = "Name";
+            static readonly XName _Key = "Key";
+            static readonly XName _Description = "Description";
+            static readonly XName _Culture = "Culture";
+            public static readonly XName _Operation = "Operation";
+
+            public static XDocument ToXDocument(OperationHelpDN entity)
+            {
+                return new XDocument(
+                    new XDeclaration("1.0", "utf-8", "yes"),
+                       new XElement(_Operation,
+                           new XAttribute(_Key, entity.Operation.Key),
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
+                           )
+                       );
+            }
+
+
+            public static ImportAction Load(XDocument document)
+            {
+                XElement element = document.Element(_Operation);
+                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
+                var queryName = SelectInteractive(element.Attribute(_Key).Value, QueryLogic.QueryNames, "queries");
+
+                if (queryName == null)
+                    return ImportAction.Skipped;
+
+                var query = QueryLogic.GetQuery(queryName);
+
+                var entity = Database.Query<QueryHelpDN>().SingleOrDefaultEx(a => a.Culture == ci && a.Query == query) ??
+                    new QueryHelpDN
+                    {
+                        Culture = ci,
+                        Query = query,
+                    };
+
+                entity.Description = element.Element(_Description).Try(d => d.Value);
 
                 return Save(entity);
             }
@@ -262,42 +306,12 @@ namespace Signum.Engine.Help
 
                 entity.Description = element.Element(_Description).Try(d => d.Value);
 
-                var cols = element.Element(_Operations);
-                if (cols != null)
-                {
-                    var operations = EntityHelp.GetOperations(type).Select(a => a.OperationSymbol).ToDictionary(a => a.Key);
-
-                    foreach (var item in cols.Elements(_Operation))
-                    {
-                        string name = item.Attribute(_Key).Value;
-
-                        var operation = SelectInteractive(name, operations, "operations for {0}".Formato(type.Name));
-
-                        if (name == null)
-                            continue;
-
-                        var col = entity.Operations.SingleOrDefaultEx(c => c.Operation == operation);
-                        if (col != null)
-                        {
-                            col.Description = item.Value;
-                        }
-                        else
-                        {
-                            entity.Operations.Add(new OperationHelpDN
-                            {
-                                Operation = operation,
-                                Description = item.Value
-                            });
-                        }
-                    }
-                }
-
                 var props = element.Element(_Properties);
                 if (props != null)
                 {
                     var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeDN).ToDictionary(a => a.Path);
 
-                    foreach (var item in cols.Elements(_Property))
+                    foreach (var item in props.Elements(_Property))
                     {
                         string name = item.Attribute(_Name).Value;
 
@@ -421,6 +435,14 @@ namespace Signum.Engine.Help
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     QueryXml.ToXDocument(qh).Save(path);
             }
+
+            foreach (var qh in Database.Query<OperationHelpDN>())
+            {
+                string path = Path.Combine(directoryName, qh.Culture.Name, QueriesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(qh.Operation.Key), qh.Culture.Name));
+
+                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
+                    OperationXml.ToXDocument(qh).Save(path);
+            }
         }
 
         public static void ImportAll(string directoryName = "../../Help")
@@ -439,7 +461,8 @@ namespace Signum.Engine.Help
                         doc.Root.Name == AppendixXml._Appendix ? AppendixXml.Load(doc):
                         doc.Root.Name == NamespaceXml._Namespace ? NamespaceXml.Load(doc, namespaces):
                         doc.Root.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
-                        doc.Root.Name == QueryXml._Query ? QueryXml.Load(doc):
+                        doc.Root.Name == QueryXml._Query ? QueryXml.Load(doc) :
+                        doc.Root.Name == OperationXml._Operation ? OperationXml.Load(doc) :
                         new InvalidOperationException("Unknown Xml root: " + doc.Root.Name).Throw<ImportAction>();
 
                     ConsoleColor color =

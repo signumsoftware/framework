@@ -55,9 +55,9 @@
                          sr.TypeSearchResult == TypeSearchResult.Property ||
                          sr.TypeSearchResult == TypeSearchResult.Query))
                     {
-                        <a href="@sr.Link">@Html.WikiParse(sr.ObjectName, HelpClient.NoLinkWikiSettings)</a>
+                        <a href="@sr.Link">@Html.WikiParse(sr.ObjectName, HelpWiki.NoLinkWikiSettings)</a>
                     }
-                    @Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings)
+                    @Html.WikiParse(sr.Description, HelpWiki.NoLinkWikiSettings)
                 </li>
             }
         </ul>

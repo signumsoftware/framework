@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="Signum.Windows.Help.HelpToolTip"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sw="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+             mc:Ignorable="d">
+    <StackPanel>
+        <TextBlock TextBlock.FontWeight="Bold" Foreground="Purple" Text="{Binding Title}"></TextBlock>
+        <TextBlock Foreground="Gray" Text="{Binding Info}"/>
+        <TextBlock Text="{Binding Description}" Visibility="{Binding Description, Converter={x:Static sw:Converters.NullToVisibility}}"/>
+    </StackPanel>
+</UserControl>

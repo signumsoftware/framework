@@ -295,7 +295,7 @@ WriteLiteral("                ");
 
             
             #line 54 "..\..\Help\Views\ViewAppendix.cshtml"
-           Write(Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings));
+           Write(Html.WikiParse(ah.Description, HelpWiki.DefaultWikiSettings));
 
             
             #line default

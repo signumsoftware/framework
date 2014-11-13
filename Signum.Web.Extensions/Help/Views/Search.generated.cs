@@ -335,7 +335,7 @@ WriteLiteral(">");
 
             
             #line 58 "..\..\Help\Views\Search.cshtml"
-                                      Write(Html.WikiParse(sr.ObjectName, HelpClient.NoLinkWikiSettings));
+                                      Write(Html.WikiParse(sr.ObjectName, HelpWiki.NoLinkWikiSettings));
 
             
             #line default
@@ -353,7 +353,7 @@ WriteLiteral("                    ");
 
             
             #line 60 "..\..\Help\Views\Search.cshtml"
-               Write(Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings));
+               Write(Html.WikiParse(sr.Description, HelpWiki.NoLinkWikiSettings));
 
             
             #line default

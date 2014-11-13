@@ -41,7 +41,7 @@
             <code class="shortcut">[n:@nh.Namespace]</code>
             @Html.TextArea(nc.SubContextPrefix(a => a.Description), nh.Description, 5, 80, new { @class = "editable" })
             <span class="wiki">
-                @Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings)
+                @Html.WikiParse(nh.Description, HelpWiki.DefaultWikiSettings)
             </span>
             }
         }

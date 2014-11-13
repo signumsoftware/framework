@@ -74,17 +74,15 @@ namespace Signum.Engine.Help
         public readonly Type Type;
         public readonly CultureInfo Culture;
 
+        public readonly bool HasEntity; 
         public readonly Lazy<EntityHelpDN> Entity;
 
         public readonly string Info;
         public readonly string Description;
 
-        public readonly Dictionary<string, PropertyHelp> Properties;
+        public readonly Dictionary<PropertyRoute, PropertyHelp> Properties;
         public readonly Dictionary<OperationSymbol, OperationHelp> Operations;
-        public Dictionary<object, QueryHelp> Queries
-        {
-            get { return HelpLogic.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key); }
-        }
+        public readonly Dictionary<object, QueryHelp> Queries;
 
         public EntityHelp(Type type, CultureInfo culture, EntityHelpDN entity)
         {
@@ -94,21 +92,22 @@ namespace Signum.Engine.Help
             
             Properties = PropertyRoute.GenerateRoutes(type)
                         .ToDictionary(
-                            pp => pp.PropertyString(),
+                            pp => pp,
                             pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(pp)));
 
-            Operations = GetOperations(type)
-                        .ToDictionary(
-                            oi => oi.OperationSymbol,
-                            oi => new OperationHelp(oi.OperationSymbol, HelpGenerator.GetOperationHelp(type, oi)));
+            Operations = HelpLogic.GetOperationHelps(this.Type).ToDictionary(a=>a.OperationSymbol);
+
+            Queries = HelpLogic.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key);
 
             if (entity != null)
             {
+                HasEntity = true;
+
                 Description = entity.Description;
 
                 foreach (var tranProp in entity.Properties)
                 {
-                    Properties.GetOrThrow(tranProp.Property.Path).UserDescription = tranProp.Description;
+                    Properties.GetOrThrow(tranProp.Property.ToPropertyRoute()).UserDescription = tranProp.Description;
                 }
 
                 foreach (var transOper in entity.Operations)
@@ -116,7 +115,6 @@ namespace Signum.Engine.Help
                     Operations.GetOrThrow(transOper.Operation).UserDescription = transOper.Description;
                 }
             }
-
 
             Entity = new Lazy<EntityHelpDN>(() =>
             {
@@ -136,25 +134,12 @@ namespace Signum.Engine.Help
                        Description = null,
                    }));
 
-                entity.Operations.AddRange(
-                    Operations.Keys
-                    .Except(entity.Operations.Select(a => a.Operation))
-                    .Select(oper => new OperationHelpDN
-                    {
-                        Operation = oper,
-                        Description = null,
-                    }));
+                entity.Operations.AddRange(this.Operations.Values.Select(o => o.Entity.Value).ToList());
 
-                entity.Queries.AddRange(this.Queries.Values.Select(a => a.Entity).ToList());
+                entity.Queries.AddRange(this.Queries.Values.Select(a => a.Entity.Value).ToList());
 
                 return entity;
             });
-        }
-
-        public static IEnumerable<OperationInfo> GetOperations(Type type)
-        {
-            return OperationLogic.GetAllOperationInfos(type)
-                                    .Where(oi => OperationLogic.FindTypes(oi.OperationSymbol).Any(TypeLogic.TypeToDN.ContainsKey));
         }
 
        
@@ -184,13 +169,38 @@ namespace Signum.Engine.Help
 
     public class OperationHelp
     {
-        public OperationHelp(OperationSymbol operationSymbol, string info)
+        public OperationHelp(OperationSymbol operationSymbol, CultureInfo ci, OperationHelpDN entity)
         {
             this.OperationSymbol = operationSymbol;
-            this.Info = info;
+            this.Culture = ci;
+
+            this.Info = HelpGenerator.GetOperationHelp(operationSymbol);
+
+            if (entity != null)
+            {
+                HasEntity = true;
+
+                UserDescription = entity.Description;
+            }
+
+            Entity = new Lazy<OperationHelpDN>(() =>
+            {
+                if (entity == null)
+                    entity = new OperationHelpDN
+                    {
+                        Culture = this.Culture.ToCultureInfoDN(),
+                        Operation = this.OperationSymbol,
+                    };
+
+                return entity;
+            });
+
         }
 
+        public readonly CultureInfo Culture;
         public readonly OperationSymbol OperationSymbol;
+        public readonly bool HasEntity;
+        public readonly Lazy<OperationHelpDN> Entity;
         public readonly string Info;
         public string UserDescription;
 
@@ -205,11 +215,11 @@ namespace Signum.Engine.Help
         public readonly object Key;
         public readonly CultureInfo Culture;
 
-        public readonly QueryHelpDN Entity;
+        public readonly bool HasEntity;
+        public readonly Lazy<QueryHelpDN> Entity;
         public readonly string UserDescription;
         public readonly string Info;
         public readonly Dictionary<string, QueryColumnHelp> Columns;
-        
 
         public QueryHelp(object key, CultureInfo ci, QueryHelpDN entity)
         {
@@ -218,12 +228,11 @@ namespace Signum.Engine.Help
             Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(key).Core.Value);
             Columns = DynamicQueryManager.Current.GetQuery(key).Core.Value.StaticColumns.ToDictionary(
                             kvp => kvp.Name,
-                            kvp => new QueryColumnHelp(kvp.Name, HelpGenerator.GetQueryColumnHelp(kvp)));
-
+                            kvp => new QueryColumnHelp(kvp.Name, kvp.DisplayName(), HelpGenerator.GetQueryColumnHelp(kvp)));
 
             if (entity != null)
             {
-                Entity = entity;
+                HasEntity = true;
 
                 UserDescription = entity.Description;
 
@@ -232,34 +241,40 @@ namespace Signum.Engine.Help
                     Columns.GetOrThrow(tranColumn.ColumnName).UserDescription = tranColumn.Description;
                 }
             }
-            else
-            {
-                Entity = new QueryHelpDN
-                {
-                    Culture = this.Culture.ToCultureInfoDN(),
-                    Query = QueryLogic.GetQuery(this.Key),
-                };
-            }
 
-            Entity.Columns.AddRange(
-               DynamicQueryManager.Current.GetQuery(this.Key).Core.Value.StaticColumns.Select(a => a.Name)
-               .Except(Entity.Columns.Select(a => a.ColumnName))
-               .Select(pr => new QueryColumnHelpDN
-               {
-                   ColumnName = pr,
-                   Description = null,
-               }));
+            Entity = new Lazy<QueryHelpDN>(() =>
+            {
+                if (entity == null)
+                    entity = new QueryHelpDN
+                    {
+                        Culture = this.Culture.ToCultureInfoDN(),
+                        Query = QueryLogic.GetQuery(this.Key),
+                    };
+
+                entity.Columns.AddRange(
+                     DynamicQueryManager.Current.GetQuery(this.Key).Core.Value.StaticColumns.Select(a => a.Name)
+                     .Except(entity.Columns.Select(a => a.ColumnName))
+                     .Select(pr => new QueryColumnHelpDN
+                     {
+                         ColumnName = pr,
+                         Description = null,
+                     }));
+
+                return entity;
+            });
         }
     }
 
     public class QueryColumnHelp
     {
         public string Name;
+        public string NiceName; 
         public string Info;
         public string UserDescription;
 
-        public QueryColumnHelp(string name, string info)
+        public QueryColumnHelp(string name, string niceName, string info)
         {
+            this.NiceName = niceName;
             this.Name = name;
             this.Info = info;
         }

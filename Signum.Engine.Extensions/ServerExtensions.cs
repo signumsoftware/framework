@@ -39,13 +39,14 @@ using Signum.Engine.ViewLog;
 using Signum.Engine.DiffLog;
 using Signum.Entities.Isolation;
 using Signum.Engine.Isolation;
+using Signum.Engine.Help;
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IDashboardServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
-        IProfilerServer, IDiffLogServer, IIsolationServer
+        IProfilerServer, IDiffLogServer, IIsolationServer, IHelpServer
     {
         public override Entity Retrieve(Type type, PrimaryKey id)
         {
@@ -420,18 +421,50 @@ namespace Signum.Services
         #endregion
 
 
-       public MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
+        public MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => DiffLogLogic.OperationLogNextPrev(log));
         }
 
-         #region IIsolationServer
+        #region IIsolationServer
         public Lite<IsolationDN> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => IsolationLogic.GetOnlyIsolation(selectedEntities));
+                () => IsolationLogic.GetOnlyIsolation(selectedEntities));
         }
+        #endregion
+
+        #region IHelpServer
+        public EntityHelpService GetEntityHelpService(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+               () => HelpLogic.GetEntityHelpService(type));
+        }
+
+        public bool HasEntityHelpService(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => HelpLogic.GetEntityHelp(type).HasEntity);
+        }
+
+        public QueryHelpService GetQueryHelpService(object queryName)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => HelpLogic.GetQueryHelpService(queryName));
+        }
+
+        public bool HasQueryHelpService(object queryName)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => HelpLogic.GetQueryHelp(queryName).HasEntity);
+        }
+
+        public Dictionary<PropertyRoute, HelpToolTipInfo> GetPropertyRoutesService(List<PropertyRoute> routes)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => HelpLogic.GetPropertyRoutesService(routes));
+        } 
         #endregion
     }
 }

@@ -271,7 +271,7 @@ WriteLiteral("                ");
 
             
             #line 44 "..\..\Help\Views\ViewNamespace.cshtml"
-           Write(Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings));
+           Write(Html.WikiParse(nh.Description, HelpWiki.DefaultWikiSettings));
 
             
             #line default

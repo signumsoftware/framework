@@ -13,9 +13,13 @@ namespace Signum.Engine.Help
 {
     public class HelpUrls
     {
-        public static Func<Type, string> EntityUrl;
-        public static Func<string, string> NamespaceUrl;
-        public static Func<string, string> AppendixUrl;
+        public static string BaseUrl;
+
+        public static string ImagesFolder = "Images";
+
+        public static Func<Type, string> EntityUrl = t => BaseUrl + "Help/Entity/" + TypeLogic.GetCleanName(t);
+        public static Func<string, string> NamespaceUrl = ns => BaseUrl + "Help/Namespace/" + ns;
+        public static Func<string, string> AppendixUrl = a => BaseUrl + "Help/Appendix/" + a;
 
         public static string OperationUrl(Type entityType, OperationSymbol operation)
         {

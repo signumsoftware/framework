@@ -65,6 +65,17 @@ namespace Signum.Web.Help
                     query.Execute(QueryHelpOperation.Save);
             }
 
+            foreach (var oper in ctx.Value.Operations)
+            {
+                if (!oper.Description.HasText())
+                {
+                    if (!oper.IsNew)
+                        oper.Delete();
+                }
+                else
+                    oper.Execute(OperationHelpOperation.Save);
+            }
+
             var entity = ctx.Value;
             entity.Properties.RemoveAll(a => !a.Description.HasText());
             entity.Operations.RemoveAll(a => !a.Description.HasText());

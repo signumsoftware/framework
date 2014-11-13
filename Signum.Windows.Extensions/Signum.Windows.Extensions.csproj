@@ -269,6 +269,14 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
+    <Compile Include="Help\HelpAdorner.cs" />
+    <Compile Include="Help\HelpButton.xaml.cs">
+      <DependentUpon>HelpButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\HelpClient.cs" />
+    <Compile Include="Help\HelpToolTip.xaml.cs">
+      <DependentUpon>HelpToolTip.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidget.xaml.cs">
       <DependentUpon>IsolationWidget.xaml</DependentUpon>
@@ -675,6 +683,14 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Help\HelpButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Help\HelpToolTip.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Isolation\IsolationWidget.xaml">
       <Generator>MSBuild:Compile</Generator>

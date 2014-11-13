@@ -16,6 +16,7 @@ using System.IO;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.Help;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Help
 {
@@ -176,8 +177,12 @@ namespace Signum.Engine.Help
             return type.Name;
         }
 
-        public static string GetOperationHelp(Type type, OperationInfo operationInfo)
+        public static string GetOperationHelp(OperationSymbol symbol)
         {
+            var type = OperationLogic.FindTypes(symbol).First();
+
+            var operationInfo = OperationLogic.GetOperationInfo(type, symbol);
+
             switch (operationInfo.OperationType)
             {
                 case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(

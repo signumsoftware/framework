@@ -638,7 +638,7 @@
     <Member Name="Culture" Description="Cultura" />
     <Member Name="Description" Description="Descripción" />
     <Member Name="IsEmpty" Description="Está vacía" />
-    <Member Name="Operations" Description="Operaciones de" />
+    <Member Name="Operations" Description="Operaciones" />
     <Member Name="Properties" Description="Propiedades" />
     <Member Name="Queries" Description="Consultas" />
     <Member Name="Type" Description="Tipo" />

@@ -27,11 +27,11 @@
     <dt id="@HelpUrls.IdProperty(ph.PropertyRoute)">@ph.PropertyInfo.NiceName() <code class='shortcut'>[p:@entityName.@(ph.PropertyRoute.PropertyString())]</code></dt>
     <dd>
         <span class="info">
-            @Html.WikiParse(ph.Info, HelpClient.DefaultWikiSettings)
+            @Html.WikiParse(ph.Info, HelpWiki.DefaultWikiSettings)
         </span>
         @Html.Hidden(ctx.SubContextPrefix(a => a.Property), ctx.Value.Property.Path)
         @Html.TextArea(ctx.SubContextPrefix(a => a.Description), ph.UserDescription, new { @class = "editable" })
-        <span class="wiki">@Html.WikiParse(ph.UserDescription, HelpClient.DefaultWikiSettings)</span>
+        <span class="wiki">@Html.WikiParse(ph.UserDescription, HelpWiki.DefaultWikiSettings)</span>
     </dd>
         if (node.Children.Count > 0)
         {
@@ -66,11 +66,11 @@
                 <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
                 <code class='shortcut'>[e:@name]</code>
                 <span class="info">
-                    @Html.WikiParse(eh.Info, HelpClient.DefaultWikiSettings)
+                    @Html.WikiParse(eh.Info, HelpWiki.DefaultWikiSettings)
                 </span>
                 @Html.TextArea(ec.SubContextPrefix(a => a.Description), eh.Description, 5, 80, new { @class = "editable" })
                 <span class="wiki">
-                    @Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings)
+                    @Html.WikiParse(eh.Description, HelpWiki.DefaultWikiSettings)
                 </span>
             </div>
             <div id="entityContent" class="help_left">
@@ -116,19 +116,19 @@
                         <dl class="dl-horizontal">
                             @foreach (var op in eh.Operations)
                             {
-                                using (var ctx = operations.GetOrThrow(op.Key))
+                                using (TypeElementContext<OperationHelpDN> ctx = operations.GetOrThrow(op.Key))
                                 {
-                                @Html.HiddenRuntimeInfo(ctx)
-                                    
                                 <dt id="@HelpUrls.IdOperation(op.Key)">@op.Key.NiceToString()<code class='shortcut'>[o:@op.Key.Key]</code></dt>
                                 <dd>
                                     <span class="info">
-                                        @Html.WikiParse(op.Value.Info, HelpClient.DefaultWikiSettings)
+                                        @Html.WikiParse(op.Value.Info, HelpWiki.DefaultWikiSettings)
                                     </span>
+                                    @Html.HiddenRuntimeInfo(ctx) 
+                                    @Html.HiddenRuntimeInfo(ctx, e => e.Culture)    
                                     @Html.HiddenRuntimeInfo(ctx, a => a.Operation)
                                     @Html.TextArea(ctx.SubContextPrefix(a => a.Description), op.Value.UserDescription, new { @class = "editable" })
                                     <span class="wiki">
-                                        @Html.WikiParse(op.Value.UserDescription, HelpClient.DefaultWikiSettings)
+                                        @Html.WikiParse(op.Value.UserDescription, HelpWiki.DefaultWikiSettings)
                                     </span>
                                 </dd>
                                 }
@@ -146,7 +146,7 @@
                         {
                             var queryEntity = mq.Value.Entity;
 
-                            using (TypeContext<QueryHelpDN> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
+                            using (TypeElementContext<QueryHelpDN> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
                             {
                                 var columns = qctx.TypeElementContext(a => a.Columns).ToDictionary(a => a.Value.ColumnName); 
                                         
@@ -157,11 +157,11 @@
                             <div class="queryName">
                                 <code class='shortcut'>[q:@QueryUtils.GetQueryUniqueKey(mq.Key)]</code>
                                 <span class="info">
-                                    @Html.WikiParse(mq.Value.Info, HelpClient.DefaultWikiSettings)
+                                    @Html.WikiParse(mq.Value.Info, HelpWiki.DefaultWikiSettings)
                                 </span>
                                 @Html.TextArea(qctx.SubContextPrefix(a => a.Description), mq.Value.UserDescription, new { @class = "editable" })
                                 <span class="wiki">
-                                    @Html.WikiParse(mq.Value.UserDescription, HelpClient.DefaultWikiSettings)
+                                    @Html.WikiParse(mq.Value.UserDescription, HelpWiki.DefaultWikiSettings)
                                 </span>
                             </div>
 
@@ -175,12 +175,12 @@
                                     <dt>@qc.Value.Name.NiceName()</dt>
                                     <dd>
                                         <span class="info">
-                                            @Html.WikiParse(qc.Value.Info, HelpClient.DefaultWikiSettings)
+                                            @Html.WikiParse(qc.Value.Info, HelpWiki.DefaultWikiSettings)
                                         </span>
                                         @Html.Hidden(ctx.SubContextPrefix(a => a.ColumnName), ctx.Value.ColumnName)
                                         @Html.TextArea(ctx.SubContextPrefix(a => a.Description), ctx.Value.Description, new { @class = "editable" })
                                         <span class="wiki">
-                                            @Html.WikiParse(qc.Value.UserDescription, HelpClient.DefaultWikiSettings)
+                                            @Html.WikiParse(qc.Value.UserDescription, HelpWiki.DefaultWikiSettings)
                                         </span>
                                     </dd>
                                     }

@@ -51,7 +51,7 @@
                 }
             @Html.TextArea(ac.SubContextPrefix(a => a.Description), ah.Description, 5, 80, new { @class = "editable" })
             <span class="wiki">
-                @Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings)
+                @Html.WikiParse(ah.Description, HelpWiki.DefaultWikiSettings)
             </span>
             }
         }

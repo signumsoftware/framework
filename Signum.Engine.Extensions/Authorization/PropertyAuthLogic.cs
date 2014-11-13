@@ -143,8 +143,7 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return PropertyAllowed.Modify;
 
-            while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                route = route.Parent;
+            route = route.SimplifyToPropertyOrRoot();
 
             if (!typeof(Entity).IsAssignableFrom(route.RootType))
                 return PropertyAllowed.Modify;
@@ -157,8 +156,7 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return null;
 
-            while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                route = route.Parent;
+            route = route.SimplifyToPropertyOrRoot();
 
             if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
             {

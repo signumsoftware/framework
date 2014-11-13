@@ -48,9 +48,8 @@ namespace Signum.Entities.Help
             set { Set(ref properties, value); }
         }
 
-        [NotNullable]
+        [Ignore]
         MList<OperationHelpDN> operations = new MList<OperationHelpDN>();
-        [NotNullValidator, NoRepeatValidator]
         public MList<OperationHelpDN> Operations
         {
             get { return operations; }
@@ -116,29 +115,5 @@ namespace Signum.Entities.Help
         }
     }
 
-    [Serializable]
-    public class OperationHelpDN : EmbeddedEntity
-    {
-        [NotNullable]
-        OperationSymbol operation;
-        [NotNullValidator]
-        public OperationSymbol Operation
-        {
-            get { return operation; }
-            set { Set(ref operation, value); }
-        }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string description;
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
-
-        public override string ToString()
-        {
-            return this.Operation.TryToString();
-        }
-    }
 }
