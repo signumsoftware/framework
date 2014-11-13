@@ -29,6 +29,7 @@ using Signum.Entities.Help;
 using Signum.Entities.Translation;
 using Signum.Services;
 using Signum.Engine.WikiMarkup;
+using Signum.Engine.Authorization;
 
 
 namespace Signum.Engine.Help
@@ -303,6 +304,7 @@ namespace Signum.Engine.Help
                 sb.Schema.Table<QueryDN>().PreDeleteSqlSync += query =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpDN>().Where(e => e.Query == (QueryDN)query));
 
+                PermissionAuthLogic.RegisterPermissions(HelpPermissions.ViewHelp);
             }
         }
 
