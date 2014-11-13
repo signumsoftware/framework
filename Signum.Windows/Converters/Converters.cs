@@ -164,6 +164,11 @@ namespace Signum.Windows
 
         }
 
+        public static Color Alpha(this Color color, float alpha)
+        {
+            return Color.FromScRgb(alpha, color.ScR, color.ScG, color.ScB);
+        }
+
         public static Color Lerp(Color a, float coef, Color b, float alpha)
         {
             return Color.FromScRgb(
