@@ -100,7 +100,7 @@ namespace Signum.Engine.Files
         }
 
 
-        static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
+        public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();
 
@@ -142,7 +142,7 @@ namespace Signum.Engine.Files
             };
         }
 
-        static void FilePath_PreSaving(FilePathDN fp, ref bool graphModified)
+        public static void FilePath_PreSaving(FilePathDN fp, ref bool graphModified)
         {
             if (fp.IsNew && !unsafeMode.Value)
             {
