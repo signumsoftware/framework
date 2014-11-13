@@ -73,7 +73,7 @@ Classes inheriting from `Entity` also need to provide and [EntityKindAttribute](
 
 ### Concurrency Support
 
-Additionally, `Entity` also contains optional concurrency support using `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the `Transaction` started, so it is the same value for all the entities created or modified in the same transaction. 
+Additionally, `Entity` also contains optional concurrency support using `Ticks` field that stores the current version of the entity. The actual value is just `DateTime.Now.Ticks` of the moment the entity is saved. 
 
 Each time we `Save` an entity we also update the `Ticks` value.
 

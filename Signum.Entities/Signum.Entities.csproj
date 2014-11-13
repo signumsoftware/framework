@@ -207,6 +207,7 @@
     <None Include="Lite.md" />
     <None Include="Mixin.md" />
     <None Include="MList.md" />
+    <None Include="PrimaryKey.md" />
     <None Include="PropertyAttributes.md" />
     <None Include="PropertyRoute.md" />
     <None Include="Services\Services.md" />

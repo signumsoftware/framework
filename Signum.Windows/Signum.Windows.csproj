@@ -641,6 +641,8 @@
     <None Include="Introduction.md" />
     <None Include="LocExtension.md" />
     <None Include="NormalWindow.md" />
+    <None Include="Operations\OperationClient.md" />
+    <None Include="Operations\OperationServer.md" />
     <None Include="Widgets\LinksClient.md" />
     <None Include="Widgets\WidgetPanel.md" />
   </ItemGroup>
