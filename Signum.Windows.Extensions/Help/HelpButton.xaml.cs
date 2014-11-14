@@ -47,6 +47,11 @@ namespace Signum.Windows.Help
             set { SetValue(IsActiveProperty, value); }
         }
 
+        public bool? IsChecked
+        {
+            get { return this.button.IsChecked; }
+        }
+
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(HelpButton), new PropertyMetadata(null));
         public Control MainControl

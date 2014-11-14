@@ -29,6 +29,7 @@ namespace Signum.Windows.Processes
             {
                 Header = coc.OperationSettings.Try(s => s.Text) ?? coc.OperationInfo.OperationSymbol.NiceToString(),
                 Icon = coc.OperationSettings.Try(s => s.Icon.ToSmallImage()),
+                Tag = coc,
             };
 
             if (coc.CanExecute != null)

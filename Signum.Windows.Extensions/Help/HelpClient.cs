@@ -13,6 +13,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Windows.DynamicQuery;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows.Help
 {
@@ -203,7 +204,31 @@ namespace Signum.Windows.Help
                 }
             };
 
+            sc.ContextMenuOpened += async cm =>
+            {
+                if (helpButton.IsChecked == true && !sc.Implementations.IsByAll)
+                {
+                    var pairs = (from mi in cm.Items.OfType<MenuItem>()
+                                 where mi.Tag is IContextualOperationContext
+                                 select new { mi, coc = (IContextualOperationContext)mi.Tag })
+                                 .ToList();
+
+                    var operations = pairs.Select(p=>p.coc.OperationInfo.OperationSymbol).Distinct().ToList();
+                    if(operations.Any())
+                    {
+                        var types = await Task.WhenAll(sc.Implementations.Types.Select(t=> Server.ReturnAsync((IHelpServer s) => s.GetEntityHelpService(t))));
+            
+                        foreach (var p in pairs)
+                        {
+                            SetHelpInfo(p.mi, types.Select(t => t.Operations.TryGetC(p.coc.OperationInfo.OperationSymbol)).NotNull().FirstOrDefault());
+                        }
+                    }
+                }
+            };
+
             helpButton.IsEnabled = true;
         }
+
+      
     }
 }
