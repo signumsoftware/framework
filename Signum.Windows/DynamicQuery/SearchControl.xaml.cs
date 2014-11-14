@@ -558,7 +558,12 @@ namespace Signum.Windows
                 if (contextMenu.Items.Count == 0)
                     contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(SearchMessage.NoActionsFound.NiceToString()))), IsEnabled = false });
             }
+
+            if (ContextMenuOpened != null)
+                ContextMenuOpened(contextMenu);
         }
+
+        public event Action<ContextMenu> ContextMenuOpened;
         
         void UpdateViewSelection()
         {
