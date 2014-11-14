@@ -19,6 +19,8 @@ using Signum.Engine.Basics;
 using Signum.Entities.Help;
 using Signum.Entities;
 using Signum.Engine.Operations;
+using Signum.Engine.Maps;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Help
 {
@@ -34,12 +36,16 @@ namespace Signum.Web.Help
     {
         public ActionResult Index()
         {
-            return View(HelpClient.IndexUrl, HelpLogic.AllTypes().OrderBy(a=>a.Namespace).GroupToDictionary(a=>a.Namespace));
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
+            return View(HelpClient.IndexUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewEntity(string entity)
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             Type type = TypeLogic.GetType(entity);
 
             EntityHelp eh = HelpLogic.GetEntityHelp(type);
@@ -50,7 +56,13 @@ namespace Signum.Web.Help
         [HttpPost]
         public RedirectResult SaveEntity()
         {
-            var ctx = this.ExtractEntity<EntityHelpDN>().ApplyChanges(this);
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
+            var entity = this.ExtractEntity<EntityHelpDN>();
+
+            var oldProperties = entity.Properties.ToList();
+
+            var ctx = entity.ApplyChanges(this);
 
             foreach (var query in ctx.Value.Queries)
             {
@@ -76,12 +88,12 @@ namespace Signum.Web.Help
                     oper.Execute(OperationHelpOperation.Save);
             }
 
-            var entity = ctx.Value;
-            entity.Properties.RemoveAll(a => !a.Description.HasText());
-            entity.Operations.RemoveAll(a => !a.Description.HasText());
-            entity.Queries.Clear();
+            var currentProperties = entity.Properties.Select(p => p.Property).ToHashSet();
 
-            if (entity.Operations.IsEmpty() && entity.Properties.IsEmpty() && !entity.Description.HasText())
+            entity.Properties.AddRange(oldProperties.Where(p => !currentProperties.Contains(p.Property))); //Hidden properties due to permissions
+            entity.Properties.RemoveAll(a => !a.Description.HasText());
+
+            if (entity.Properties.IsEmpty() && !entity.Description.HasText())
             {
                 if (!entity.IsNew)
                     entity.Delete();
@@ -96,6 +108,8 @@ namespace Signum.Web.Help
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewNamespace(string @namespace)
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             NamespaceHelp model = HelpLogic.GetNamespaceHelp(@namespace);
 
             return View(HelpClient.ViewNamespaceUrl, model);
@@ -105,6 +119,8 @@ namespace Signum.Web.Help
         [HttpPost]
         public ContentResult SaveNamespace()
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             var ctx = this.ExtractEntity<NamespaceHelpDN>().ApplyChanges(this);
 
             var entity = ctx.Value;
@@ -123,6 +139,8 @@ namespace Signum.Web.Help
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewAppendix(string appendix)
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             AppendixHelp model = HelpLogic.GetAppendixHelp(appendix);
 
             return View(HelpClient.ViewAppendixUrl, model);
@@ -131,6 +149,8 @@ namespace Signum.Web.Help
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult NewAppendix()
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             var culture = HelpLogic.GetCulture();
             AppendixHelp model = new AppendixHelp(culture, new AppendixHelpDN { Culture = culture.ToCultureInfoDN() });
 
@@ -140,6 +160,8 @@ namespace Signum.Web.Help
         [HttpPost]
         public ActionResult SaveAppendix()
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             var ctx = this.ExtractEntity<AppendixHelpDN>().ApplyChanges(this);
 
             var entity = ctx.Value;
@@ -167,23 +189,25 @@ namespace Signum.Web.Help
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Search(string q)
         {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
             Stopwatch sp = new Stopwatch();
             sp.Start();
             Regex regex = new Regex(Regex.Escape(q.RemoveDiacritics()), RegexOptions.IgnoreCase);
             List<List<SearchResult>> results = new List<List<SearchResult>>();
-            results.AddRange(from eh in HelpLogic.GetOrCreateEntityHelp().Values
+            results.AddRange(from eh in HelpLogic.GetEntityHelps()
                              select eh.Search(regex).ToList() into l
                              where l.Any()
                              select l);
 
             //We add the appendices
-            results.AddRange(from a in HelpLogic.GetOrCreateAppendicesHelp().Values
+            results.AddRange(from a in HelpLogic.GetAppendixHelps()
                              let result = a.Search(regex)
                              where result != null
                              select new List<SearchResult> { result });
 
-            //We add the appendices
-            results.AddRange(from a in HelpLogic.GetOrCreateNamespacesHelp().Values
+            //We add the namespaces
+            results.AddRange(from a in HelpLogic.GetNamespaceHelps()
                              let result = a.Search(regex)
                              where result != null
                              select new List<SearchResult> { result });

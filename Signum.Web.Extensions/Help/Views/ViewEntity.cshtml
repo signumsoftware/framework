@@ -60,8 +60,10 @@
             @Html.HiddenRuntimeInfo(ec)
             @Html.HiddenRuntimeInfo(ec, e => e.Culture)
             @Html.HiddenRuntimeInfo(ec, e => e.Type)
-
-                Html.RenderPartial(HelpClient.Menu);
+                if (!Navigator.IsReadOnly(typeof(EntityHelpDN)))
+                {
+                    Html.RenderPartial(HelpClient.Buttons);
+                }
             <div class="edit-container">
                 <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
                 <code class='shortcut'>[e:@name]</code>
@@ -74,14 +76,18 @@
                 </span>
             </div>
             <div id="entityContent" class="help_left">
-                @if (eh.Properties.Any())
+                @{
+                var allowedProps = eh.Properties.Where(a => a.Value.IsAllowed() == null).ToDictionary();
+                }
+
+                @if (allowedProps.Any())
                 {
                     <div id="properties">
                         <h2 class="greyTitle">@Html.PropertyNiceName(() => eh.Entity.Value.Properties)</h2>
                         @{ 
                     var elementContexts = ec.TypeElementContext(e => e.Properties).ToDictionary(a => a.Value.Property.Path);
 
-                    var tuplesDic = eh.Properties.Values.Select(p => Tuple.Create(p, elementContexts.GetOrThrow(p.PropertyRoute.PropertyString()))).ToDictionary(a => a.Item1.PropertyRoute);
+                    var tuplesDic = allowedProps.Values.Select(p => Tuple.Create(p, elementContexts.GetOrThrow(p.PropertyRoute.PropertyString()))).ToDictionary(a => a.Item1.PropertyRoute);
 
                     var roots = TreeHelper.ToTreeC(tuplesDic.Values, kvp =>
                     {
@@ -94,8 +100,6 @@
 
                         return tuplesDic.GetOrThrow(parent);
                     });
-
-                       
                         }
 
                         <dl class="dl-horizontal">
@@ -107,14 +111,18 @@
                     </div>
                 }
 
-                @if (eh.Operations.Any())
+                @{
+                var allowedOperations = eh.Operations.Where(a => a.Value.IsAllowed() == null).ToDictionary();
+                }
+
+                @if (allowedOperations.Any())
                 {
                     var operations = ec.TypeElementContext(e => e.Operations).ToDictionary(a => a.Value.Operation);
                          
                     <div id="operations">
                         <h2 class="greyTitle">@Html.PropertyNiceName(() => eh.Entity.Value.Operations)</h2>
                         <dl class="dl-horizontal">
-                            @foreach (var op in eh.Operations)
+                            @foreach (var op in allowedOperations)
                             {
                                 using (TypeElementContext<OperationHelpDN> ctx = operations.GetOrThrow(op.Key))
                                 {
@@ -123,8 +131,8 @@
                                     <span class="info">
                                         @Html.WikiParse(op.Value.Info, HelpWiki.DefaultWikiSettings)
                                     </span>
-                                    @Html.HiddenRuntimeInfo(ctx) 
-                                    @Html.HiddenRuntimeInfo(ctx, e => e.Culture)    
+                                    @Html.HiddenRuntimeInfo(ctx)
+                                    @Html.HiddenRuntimeInfo(ctx, e => e.Culture)
                                     @Html.HiddenRuntimeInfo(ctx, a => a.Operation)
                                     @Html.TextArea(ctx.SubContextPrefix(a => a.Description), op.Value.UserDescription, new { @class = "editable" })
                                     <span class="wiki">
@@ -136,19 +144,21 @@
                         </dl>
                     </div>
                 }
-                @if (eh.Queries.Any())
+
+                @{
+                var allowedQueries = eh.Queries.Where(a => a.Value.IsAllowed() == null).ToDictionary();
+                }
+
+                @if (allowedQueries.Any())
                 {
                     var queries = ec.TypeElementContext(e => e.Queries).ToDictionary(a => a.Value.Query);
                         
                     <div id="queries">
                         <h2 class="greyTitle">@typeof(QueryDN).NicePluralName()</h2>
-                        @foreach (var mq in eh.Queries)
+                        @foreach (var mq in allowedQueries)
                         {
-                            var queryEntity = mq.Value.Entity;
-
                             using (TypeElementContext<QueryHelpDN> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
                             {
-                                var columns = qctx.TypeElementContext(a => a.Columns).ToDictionary(a => a.Value.ColumnName); 
                                         
                             @Html.HiddenRuntimeInfo(qctx) 
                             @Html.HiddenRuntimeInfo(qctx, e => e.Culture)                                   
@@ -165,14 +175,18 @@
                                 </span>
                             </div>
 
-                                  
-                            <dl class="dl-horizontal columns">
-                                @foreach (var qc in mq.Value.Columns)
+                                var allowedColumn = mq.Value.Columns.Where(a => a.Value.IsAllowed() == null);                               
+                                if (allowedColumn.Any())
                                 {
-                                    using (var ctx = columns.GetOrThrow(qc.Value.Name))
+                                    var columns = qctx.TypeElementContext(a => a.Columns).ToDictionary(a => a.Value.ColumnName);
+                                    
+                            <dl class="dl-horizontal columns">
+                                @foreach (var qc in allowedColumn)
+                                {
+                                    using (var ctx = columns.GetOrThrow(qc.Value.Column.Name))
                                     {
                                     @Html.HiddenRuntimeInfo(ctx)     
-                                    <dt>@qc.Value.Name.NiceName()</dt>
+                                    <dt>@qc.Value.NiceName</dt>
                                     <dd>
                                         <span class="info">
                                             @Html.WikiParse(qc.Value.Info, HelpWiki.DefaultWikiSettings)
@@ -186,7 +200,9 @@
                                     }
                                 }
                             </dl>
+                                }
                             }
+
                         }
                     </div>
                 }

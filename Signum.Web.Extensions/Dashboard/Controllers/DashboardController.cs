@@ -21,7 +21,7 @@ namespace Signum.Web.Dashboard
     {
         public ViewResult View(Lite<DashboardDN> panel, Lite<Entity> currentEntity)
         {
-            DashboardPermission.ViewDashboard.Authorize();
+            DashboardPermission.ViewDashboard.AssertAuthorized();
 
             var cp = DashboardLogic.RetrieveDashboard(panel);
 

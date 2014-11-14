@@ -25,8 +25,10 @@
             @Html.HiddenRuntimeInfo(nc)
             @Html.HiddenRuntimeInfo(nc, e => e.Culture)
             @Html.HiddenLine(nc, e => e.Name)
-
-            Html.RenderPartial(HelpClient.Menu);
+                if (!Navigator.IsReadOnly(typeof(NamespaceHelpDN)))
+                {
+                    Html.RenderPartial(HelpClient.Buttons);
+                }
             <h1>
                 @Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" })
                 <span class="wiki">

@@ -33,7 +33,7 @@ namespace Signum.Web.Scheduler
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Start()
         {
-            SchedulerPermission.ViewSchedulerPanel.Authorize();
+            SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
 
             SchedulerLogic.StartScheduledTasks();
 
@@ -45,7 +45,7 @@ namespace Signum.Web.Scheduler
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Stop()
         {
-            SchedulerPermission.ViewSchedulerPanel.Authorize();
+            SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
 
             SchedulerLogic.StopScheduledTasks();
 

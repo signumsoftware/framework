@@ -28,7 +28,7 @@ namespace Signum.Web.Chart
         #region chart
         public ActionResult Index(FindOptions findOptions)
         {
-            ChartPermission.ViewCharting.Authorize();
+            ChartPermission.ViewCharting.AssertAuthorized();
 
             if (!Finder.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));

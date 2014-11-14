@@ -25,7 +25,11 @@
             {
             @Html.HiddenRuntimeInfo(ac)
             @Html.HiddenRuntimeInfo(ac, e => e.Culture)
-                Html.RenderPartial(HelpClient.Menu);
+
+            if(!Navigator.IsReadOnly(typeof(AppendixHelpDN)))
+            {
+                Html.RenderPartial(HelpClient.Buttons);
+            }
                 if (ac.Value.UniqueName == null)
                 {
                     <br />

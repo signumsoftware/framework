@@ -21,7 +21,22 @@ using Signum.Engine.Basics;
 
 namespace Signum.Engine.Help
 {
-    public class AppendixHelp
+
+    public abstract class BaseHelp
+    {
+        public abstract string IsAllowed();
+
+        public void AssertAllowed()
+        {
+            string error = IsAllowed();
+            if (error != null)
+                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(this.GetType(), error));
+        }
+
+        public abstract override string ToString();
+    }
+
+    public class AppendixHelp : BaseHelp
     {
         public readonly string UniqueName;
         public readonly string Title;
@@ -37,9 +52,19 @@ namespace Signum.Engine.Help
             Description = entity.Description;
             Entity = entity;
         }
+
+        public override string IsAllowed()
+        {
+            return null;
+        }
+
+        public override string ToString()
+        {
+            return "Appendix " + UniqueName;
+        }
     }
 
-    public class NamespaceHelp
+    public class NamespaceHelp : BaseHelp
     {
         public readonly string Namespace;
         public readonly string Before;
@@ -47,11 +72,14 @@ namespace Signum.Engine.Help
         public readonly string Description;
         public readonly CultureInfo Culture;
         public readonly NamespaceHelpDN Entity;
+        public readonly Type[] Types;
 
-        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpDN entity)
+        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpDN entity, Type[] types)
         {
             Culture = culture;
             Namespace = @namespace;
+
+            Types = types;
 
             var clean = @namespace.Replace(".Entities", "");
 
@@ -67,9 +95,24 @@ namespace Signum.Engine.Help
             };
         }
 
+
+        public override string IsAllowed()
+        {
+            Schema s = Schema.Current;
+
+            if (Types.Any(t => s.IsAllowed(t, inUserInterface: true) == null))
+                return null;
+
+            return "all the types in the nemespace are not allowed";
+        }
+
+        public override string ToString()
+        {
+            return "Namespace " + Namespace;
+        }
     }
 
-    public class EntityHelp
+    public class EntityHelp : BaseHelp
     {
         public readonly Type Type;
         public readonly CultureInfo Culture;
@@ -95,9 +138,14 @@ namespace Signum.Engine.Help
                             pp => pp,
                             pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(pp)));
 
-            Operations = HelpLogic.GetOperationHelps(this.Type).ToDictionary(a=>a.OperationSymbol);
 
-            Queries = HelpLogic.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key);
+            var allOperations = HelpLogic.CachedOperationsHelp();
+
+            Operations = OperationLogic.GetAllOperationInfos(type).Select(oi=>allOperations.GetOrThrow(oi.OperationSymbol)).ToDictionary(a=>a.OperationSymbol);
+
+            var allQueries = HelpLogic.CachedQueriesHelp();
+
+            Queries =  HelpLogic.TypeToQuery.Value.TryGetC(this.Type).EmptyIfNull().Select(a=>allQueries.GetOrThrow(a)).ToDictionary(qh => qh.QueryName);
 
             if (entity != null)
             {
@@ -116,7 +164,7 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Entity = new Lazy<EntityHelpDN>(() =>
+            Entity = new Lazy<EntityHelpDN>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
                     entity = new EntityHelpDN
@@ -139,13 +187,22 @@ namespace Signum.Engine.Help
                 entity.Queries.AddRange(this.Queries.Values.Select(a => a.Entity.Value).ToList());
 
                 return entity;
-            });
+            }));
         }
 
+        public override string IsAllowed()
+        {
+            return Schema.Current.IsAllowed(Type, inUserInterface: true);
+        }
+
+        public override string ToString()
+        {
+            return "Type " + TypeLogic.GetCleanName(Type); 
+        }
        
     }
 
-    public class PropertyHelp
+    public class PropertyHelp : BaseHelp
     {
         public PropertyHelp(PropertyRoute propertyRoute, string info)
         {
@@ -161,13 +218,18 @@ namespace Signum.Engine.Help
         public readonly PropertyRoute PropertyRoute;
         public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo; } }
 
+        public override string IsAllowed()
+        {
+            return PropertyRoute.IsAllowed();
+        }
+
         public override string ToString()
         {
-            return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
+            return "Property " + this.PropertyRoute.ToString();
         }
     }
 
-    public class OperationHelp
+    public class OperationHelp : BaseHelp
     {
         public OperationHelp(OperationSymbol operationSymbol, CultureInfo ci, OperationHelpDN entity)
         {
@@ -183,7 +245,7 @@ namespace Signum.Engine.Help
                 UserDescription = entity.Description;
             }
 
-            Entity = new Lazy<OperationHelpDN>(() =>
+            Entity = new Lazy<OperationHelpDN>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
                     entity = new OperationHelpDN
@@ -193,7 +255,7 @@ namespace Signum.Engine.Help
                     };
 
                 return entity;
-            });
+            }));
 
         }
 
@@ -204,15 +266,21 @@ namespace Signum.Engine.Help
         public readonly string Info;
         public string UserDescription;
 
+        public override string IsAllowed()
+        {
+            return OperationLogic.OperationAllowed(OperationSymbol, inUserInterface: true) ? null :
+                OperationMessage.Operation01IsNotAuthorized.NiceToString(this.OperationSymbol.NiceToString(), this.OperationSymbol.Key);
+        }
+
         public override string ToString()
         {
-            return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
+            return "Operation " + this.OperationSymbol.Key;
         }
     }
 
-    public class QueryHelp
+    public class QueryHelp : BaseHelp
     {
-        public readonly object Key;
+        public readonly object QueryName;
         public readonly CultureInfo Culture;
 
         public readonly bool HasEntity;
@@ -221,14 +289,14 @@ namespace Signum.Engine.Help
         public readonly string Info;
         public readonly Dictionary<string, QueryColumnHelp> Columns;
 
-        public QueryHelp(object key, CultureInfo ci, QueryHelpDN entity)
+        public QueryHelp(object queryName, CultureInfo ci, QueryHelpDN entity)
         {
-            Key = key;
+            QueryName = queryName;
             Culture = ci;
-            Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(key).Core.Value);
-            Columns = DynamicQueryManager.Current.GetQuery(key).Core.Value.StaticColumns.ToDictionary(
-                            kvp => kvp.Name,
-                            kvp => new QueryColumnHelp(kvp.Name, kvp.DisplayName(), HelpGenerator.GetQueryColumnHelp(kvp)));
+            Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(queryName).Core.Value);
+            Columns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns.ToDictionary(
+                            cf => cf.Name,
+                            cf => new QueryColumnHelp(cf, cf.DisplayName(), HelpGenerator.GetQueryColumnHelp(cf)));
 
             if (entity != null)
             {
@@ -242,17 +310,17 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Entity = new Lazy<QueryHelpDN>(() =>
+            Entity = new Lazy<QueryHelpDN>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
                     entity = new QueryHelpDN
                     {
                         Culture = this.Culture.ToCultureInfoDN(),
-                        Query = QueryLogic.GetQuery(this.Key),
+                        Query = QueryLogic.GetQuery(this.QueryName),
                     };
 
                 entity.Columns.AddRange(
-                     DynamicQueryManager.Current.GetQuery(this.Key).Core.Value.StaticColumns.Select(a => a.Name)
+                     DynamicQueryManager.Current.GetQuery(this.QueryName).Core.Value.StaticColumns.Select(a => a.Name)
                      .Except(entity.Columns.Select(a => a.ColumnName))
                      .Select(pr => new QueryColumnHelpDN
                      {
@@ -261,22 +329,43 @@ namespace Signum.Engine.Help
                      }));
 
                 return entity;
-            });
+            }));
+        }
+
+        public override string ToString()
+        {
+            return "Query " + QueryUtils.GetQueryUniqueKey(this.QueryName);
+        }
+
+        public override string IsAllowed()
+        {
+            return DynamicQueryManager.Current.QueryAllowed(this.QueryName) ? null :
+                "Access to query {0} not allowed".Formato(QueryUtils.GetQueryUniqueKey(this.QueryName)); 
         }
     }
 
-    public class QueryColumnHelp
+    public class QueryColumnHelp : BaseHelp
     {
-        public string Name;
+        public ColumnDescriptionFactory Column;
         public string NiceName; 
         public string Info;
         public string UserDescription;
 
-        public QueryColumnHelp(string name, string niceName, string info)
+        public QueryColumnHelp(ColumnDescriptionFactory column, string niceName, string info)
         {
+            this.Column = column;
             this.NiceName = niceName;
-            this.Name = name;
             this.Info = info;
+        }
+
+        public override string IsAllowed()
+        {
+            return Column.IsAllowed();
+        }
+
+        public override string ToString()
+        {
+            return "Column " + Column.Name;
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Signum.Web.Help
         public static string SearchResults = ViewPrefix.Formato("Search");
 
         //controls
-        public static string Menu = ViewPrefix.Formato("Buttons");
+        public static string Buttons = ViewPrefix.Formato("Buttons");
         public static string MiniMenu = ViewPrefix.Formato("MiniMenu");
         public static string ViewEntityPropertyUrl = ViewPrefix.Formato("EntityProperty");
         public static string NamespaceControlUrl = ViewPrefix.Formato("NamespaceControl");

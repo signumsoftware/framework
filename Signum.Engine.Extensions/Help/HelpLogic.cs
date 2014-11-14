@@ -55,89 +55,107 @@ namespace Signum.Engine.Help
 
         });
 
-        public static List<QueryHelp> GetQueryHelps(Type type)
+        public static Dictionary<string, NamespaceHelp> CachedNamespacesHelp()
         {
-            return TypeToQuery.Value.TryGetC(type).EmptyIfNull().Select(o => GetQueryHelp(o)).ToList();
-        }
-
-        public static List<OperationHelp> GetOperationHelps(Type type)
-        {
-            return OperationLogic.GetAllOperationInfos(type).Select(oi => GetOperationHelp(oi.OperationSymbol)).ToList();
-        }
-
-        public static Dictionary<string, NamespaceHelp> GetOrCreateNamespacesHelp()
-        {
-            return Namespaces.Value.GetOrAdd(GetCulture(), ci =>
+            return Namespaces.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
-                var namespaces = AllTypes().Select(type => type.Namespace).ToHashSet();
+                var namespaces = AllTypes().GroupBy(type => type.Namespace);
 
                 var dic = Database.Query<NamespaceHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.Name);
 
-                return namespaces.ToDictionary(ns => ns, ns => new NamespaceHelp(ns, ci, dic.TryGetC(ns)));
-            }); 
+                return namespaces.ToDictionary(gr => gr.Key, gr => new NamespaceHelp(gr.Key, ci, dic.TryGetC(gr.Key), gr.ToArray()));
+            })); 
         }
       
         public static NamespaceHelp GetNamespaceHelp(string @namespace)
         {
-            return GetOrCreateNamespacesHelp().GetOrThrow(@namespace);
+            return CachedNamespacesHelp().GetOrThrow(@namespace).Do(a => a.AssertAllowed());
         }
 
-        public static Dictionary<string, AppendixHelp> GetOrCreateAppendicesHelp()
+        public static IEnumerable<NamespaceHelp> GetNamespaceHelps()
         {
-            return Appendices.Value.GetOrAdd(GetCulture(), ci =>
-            {
-                return Database.Query<AppendixHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.UniqueName, a => new AppendixHelp(ci, a));
-            });
+            return CachedNamespacesHelp().Values.Where(a => a.IsAllowed() == null);
+        }
+
+
+
+        public static Dictionary<string, AppendixHelp> CachedAppendicesHelp()
+        {
+            return Appendices.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
+                Database.Query<AppendixHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.UniqueName, a => new AppendixHelp(ci, a))));
         }
 
         public static AppendixHelp GetAppendixHelp(string name)
         {
-            return GetOrCreateAppendicesHelp().GetOrThrow(name);
+            return CachedAppendicesHelp().GetOrThrow(name);
         }
 
-        public static Dictionary<Type, EntityHelp> GetOrCreateEntityHelp()
+        public static IEnumerable<AppendixHelp> GetAppendixHelps()
         {
-            return Types.Value.GetOrAdd(GetCulture(), ci =>
-            {
-                var dic = Database.Query<EntityHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.Type.ToType());
+            return CachedAppendicesHelp().Values.Where(a => a.IsAllowed() == null);
+        }
 
-                return AllTypes().ToDictionary(t => t, t => new EntityHelp(t, ci, dic.TryGetC(t)));
-            });
+
+
+        public static Dictionary<Type, EntityHelp> CachedEntityHelp()
+        {
+            return Types.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
+            {
+                using (ExecutionMode.Global())
+                {
+                    var dic = Database.Query<EntityHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.Type.ToType());
+
+                    return AllTypes().ToDictionary(t => t, t => new EntityHelp(t, ci, dic.TryGetC(t)));
+                }
+            }));
         }
 
         public static EntityHelp GetEntityHelp(Type type)
         {
-            return GetOrCreateEntityHelp().GetOrThrow(type);
+            return CachedEntityHelp().GetOrThrow(type).Do(a => a.AssertAllowed());
         }
 
-        public static Dictionary<object, QueryHelp> GetOrCreateQueryHelp()
+        public static IEnumerable<EntityHelp> GetEntityHelps()
         {
-            return Queries.Value.GetOrAdd(GetCulture(), ci =>
+            return CachedEntityHelp().Values.Where(a => a.IsAllowed() == null);
+        }
+
+
+
+        public static Dictionary<object, QueryHelp> CachedQueriesHelp()
+        {
+            return Queries.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
                 var dic = Database.Query<QueryHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.Query.ToQueryName());
 
                 return AllQueries().ToDictionary(t => t, t => new QueryHelp(t, ci, dic.TryGetC(t)));
-            });
+            }));
         }
 
         public static QueryHelp GetQueryHelp(object queryName)
         {
-            return GetOrCreateQueryHelp().GetOrThrow(queryName);
+            return CachedQueriesHelp().GetOrThrow(queryName).Do(a => a.AssertAllowed());
         }
 
-        public static Dictionary<OperationSymbol, OperationHelp> GetOrCreateOperationSymbol()
+
+        public static Dictionary<OperationSymbol, OperationHelp> CachedOperationsHelp()
         {
             return Operations.Value.GetOrAdd(GetCulture(), ci =>
             {
                 var dic = Database.Query<OperationHelpDN>().Where(n => n.Culture == ci.ToCultureInfoDN()).ToDictionary(a => a.Operation);
 
                 return OperationLogic.AllSymbols().ToDictionary(o => o, o => new OperationHelp(o, ci, dic.TryGetC(o)));
-            });
+            }).Where(a => OperationLogic.OperationAllowed(a.Key, inUserInterface: true)).ToDictionary();
         }
 
-        public static OperationHelp GetOperationHelp(OperationSymbol operation)
+        public static T GlobalContext<T>(Func<T> customFunc)
         {
-            return GetOrCreateOperationSymbol().GetOrThrow(operation);
+            using (var tr = Transaction.ForceNew())
+            using (ExecutionMode.Global())
+            using (new EntityCache(EntityCacheType.ForceNew))
+            {
+                return tr.Commit(customFunc());
+            }
         }
 
         public static CultureInfo GetCulture()
@@ -494,7 +512,6 @@ namespace Signum.Engine.Help
             return schemas;
         });
 
- 
         internal static XDocument LoadAndValidate(string fileName)
         {
             var document = XDocument.Load(fileName); 
@@ -509,7 +526,6 @@ namespace Signum.Engine.Help
 
             return document;
         }
-
         
         public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
 
@@ -615,13 +631,13 @@ namespace Signum.Engine.Help
 
             return new EntityHelpService
             {
-                Info = GetHelpToolTipInfo(type.NiceName(), entity.Info, entity.Description, HelpUrls.EntityUrl(type)), 
+                Info = GetHelpToolTipInfo(type.NiceName(), entity.Info, entity.Description, HelpUrls.EntityUrl(type)),
 
-                Operations = entity.Operations.SelectDictionary(o=>o, 
-                    oh => GetHelpToolTipInfo(oh.OperationSymbol.NiceToString(), oh.Info, oh.UserDescription, HelpUrls.OperationUrl(type, oh.OperationSymbol))),
+                Operations = entity.Operations.Where(o => o.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key,
+                    kvp => GetHelpToolTipInfo(kvp.Value.OperationSymbol.NiceToString(), kvp.Value.Info, kvp.Value.UserDescription, HelpUrls.OperationUrl(type, kvp.Value.OperationSymbol))),
 
-                Properties = entity.Properties.SelectDictionary(p => p,                 
-                    ph => GetHelpToolTipInfo(ph.PropertyInfo.NiceName(), ph.Info, ph.UserDescription, HelpUrls.PropertyUrl(ph.PropertyRoute))),
+                Properties = entity.Properties.Where(o => o.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key,
+                    kvp => GetHelpToolTipInfo(kvp.Value.PropertyInfo.NiceName(), kvp.Value.Info, kvp.Value.UserDescription, HelpUrls.PropertyUrl(kvp.Value.PropertyRoute))),
             }; 
         }
 
@@ -637,17 +653,18 @@ namespace Signum.Engine.Help
 
                 Info = GetHelpToolTipInfo(QueryUtils.GetNiceName(queryName), entity.Info, entity.UserDescription, url),
 
-                Columns = entity.Columns.SelectDictionary(o => o, oh => GetHelpToolTipInfo(oh.NiceName, oh.Info, oh.UserDescription, url)),
+                Columns = entity.Columns.Where(a=>a.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key, kvp => 
+                    GetHelpToolTipInfo(kvp.Value.NiceName, kvp.Value.Info, kvp.Value.UserDescription, url)),
             }; 
         }
 
         internal static Dictionary<PropertyRoute, HelpToolTipInfo> GetPropertyRoutesService(List<PropertyRoute> routes)
         {
-            return routes.GroupBy(a => a.RootType).SelectMany(r =>
+            return routes.Where(p => p.IsAllowed() == null).GroupBy(a => a.RootType).SelectMany(r =>
             {
                 var entity = GetEntityHelp(r.Key);
 
-                return r.Select(pr =>  
+                return r.Select(pr =>
                 {
                     var simp = pr.SimplifyToPropertyOrRoot();
 

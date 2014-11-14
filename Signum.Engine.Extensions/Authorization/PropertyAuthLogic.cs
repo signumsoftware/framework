@@ -25,7 +25,7 @@ namespace Signum.Engine.Authorization
 
         public readonly static HashSet<PropertyRoute> AvoidAutomaticUpgradeCollection = new HashSet<PropertyRoute>();
 
-        public static void Start(SchemaBuilder sb, bool queries)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -39,11 +39,8 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes : true,
                     coercer: PropertyCoercer.Instance);
 
-                if (queries)
-                {
-                    PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
-                }
-
+                PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
+                
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), 
                     exportAll ? TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes).ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>

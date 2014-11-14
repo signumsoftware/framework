@@ -91,7 +91,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void Authorize(this PermissionSymbol permissionSymbol)
+        public static void AssertAuthorized(this PermissionSymbol permissionSymbol)
         {
             if (!IsAuthorized(permissionSymbol))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionSymbol));

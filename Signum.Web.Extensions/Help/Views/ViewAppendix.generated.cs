@@ -145,7 +145,11 @@ WriteLiteral(">\r\n");
             
             #line 27 "..\..\Help\Views\ViewAppendix.cshtml"
                                                        
-                Html.RenderPartial(HelpClient.Menu);
+
+            if(!Navigator.IsReadOnly(typeof(AppendixHelpDN)))
+            {
+                Html.RenderPartial(HelpClient.Buttons);
+            }
                 if (ac.Value.UniqueName == null)
                 {
 
@@ -155,20 +159,20 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    <br />\r\n");
 
             
-            #line 32 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 36 "..\..\Help\Views\ViewAppendix.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 32 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 36 "..\..\Help\Views\ViewAppendix.cshtml"
        Write(Html.ValueLine(ac, e => e.UniqueName));
 
             
             #line default
             #line hidden
             
-            #line 32 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 36 "..\..\Help\Views\ViewAppendix.cshtml"
                                                   
 
             
@@ -181,7 +185,7 @@ WriteLiteral("            <script>\r\n");
 WriteLiteral("                ");
 
             
-            #line 35 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 39 "..\..\Help\Views\ViewAppendix.cshtml"
            Write(HelpClient.Module["edit"]());
 
             
@@ -190,7 +194,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            </script>\r\n");
 
             
-            #line 37 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 41 "..\..\Help\Views\ViewAppendix.cshtml"
                 }
                 else
                 {
@@ -199,14 +203,14 @@ WriteLiteral("\r\n            </script>\r\n");
             #line default
             #line hidden
             
-            #line 40 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 44 "..\..\Help\Views\ViewAppendix.cshtml"
        Write(Html.HiddenLine(ac, e => e.UniqueName));
 
             
             #line default
             #line hidden
             
-            #line 40 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 44 "..\..\Help\Views\ViewAppendix.cshtml"
                                                    
                 }
 
@@ -218,7 +222,7 @@ WriteLiteral("            <h1>\r\n");
 WriteLiteral("                ");
 
             
-            #line 43 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 47 "..\..\Help\Views\ViewAppendix.cshtml"
            Write(Html.TextArea(ac.SubContextPrefix(a => a.Title), ah.Title, 1, 80, new { @class = "editable" }));
 
             
@@ -233,7 +237,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 45 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 49 "..\..\Help\Views\ViewAppendix.cshtml"
                Write(Model.Title);
 
             
@@ -242,7 +246,7 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </span>\r\n            </h1>\r\n");
 
             
-            #line 48 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 52 "..\..\Help\Views\ViewAppendix.cshtml"
                 if (ac.Value.UniqueName != null)
                 {
 
@@ -256,7 +260,7 @@ WriteLiteral(" class=\"shortcut\"");
 WriteLiteral(">[a:");
 
             
-            #line 50 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 54 "..\..\Help\Views\ViewAppendix.cshtml"
                                  Write(ah.UniqueName);
 
             
@@ -265,21 +269,21 @@ WriteLiteral(">[a:");
 WriteLiteral("]</code>\r\n");
 
             
-            #line 51 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 55 "..\..\Help\Views\ViewAppendix.cshtml"
                 }
             
             
             #line default
             #line hidden
             
-            #line 52 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 56 "..\..\Help\Views\ViewAppendix.cshtml"
        Write(Html.TextArea(ac.SubContextPrefix(a => a.Description), ah.Description, 5, 80, new { @class = "editable" }));
 
             
             #line default
             #line hidden
             
-            #line 52 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 56 "..\..\Help\Views\ViewAppendix.cshtml"
                                                                                                                        
 
             
@@ -294,7 +298,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 54 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 58 "..\..\Help\Views\ViewAppendix.cshtml"
            Write(Html.WikiParse(ah.Description, HelpWiki.DefaultWikiSettings));
 
             
@@ -303,7 +307,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            </span>\r\n");
 
             
-            #line 56 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 60 "..\..\Help\Views\ViewAppendix.cshtml"
             }
         }
 
@@ -317,13 +321,13 @@ WriteLiteral(" class=\"col-md-3\"");
 WriteLiteral(">\r\n");
 
             
-            #line 60 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 64 "..\..\Help\Views\ViewAppendix.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 60 "..\..\Help\Views\ViewAppendix.cshtml"
+            #line 64 "..\..\Help\Views\ViewAppendix.cshtml"
            Html.RenderPartial(HelpClient.MiniMenu, new ViewDataDictionary { { "appendix", ah.UniqueName } });
             
             #line default

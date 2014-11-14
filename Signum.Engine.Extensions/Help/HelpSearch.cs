@@ -116,18 +116,18 @@ namespace Signum.Engine.Help
             //Queries (key)
             foreach (var p in entity.Queries.Values)
             {
-                m = regex.Match(QueryUtils.GetNiceName(p.Key).RemoveDiacritics());
+                m = regex.Match(QueryUtils.GetNiceName(p.QueryName).RemoveDiacritics());
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.Key), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m,
-                        HelpUrls.QueryUrl(p.Key, type));
+                    yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.DefaultText(p.Info).Etc(etcLength), type, m,
+                        HelpUrls.QueryUrl(p.QueryName, type));
                 }
                 else if (p.UserDescription.HasText())
                 {
                     m = regex.Match(p.UserDescription.ToString().RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.Key), p.UserDescription.Extract(m), type, m,
-                            HelpUrls.QueryUrl(p.Key, type), isDescription: true);
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.QueryName), p.UserDescription.Extract(m), type, m,
+                            HelpUrls.QueryUrl(p.QueryName, type), isDescription: true);
                 }
             }
 

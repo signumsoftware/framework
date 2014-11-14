@@ -125,11 +125,11 @@ namespace Signum.Engine.Authorization
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
         }
 
-        static string Schema_IsAllowedCallback(Type type)
+        static string Schema_IsAllowedCallback(Type type, bool inUserInterface)
         {
             var allowed = GetAllowed(type);
 
-            if (allowed.MaxDB() == TypeAllowedBasic.None)
+            if (allowed.Max(inUserInterface) == TypeAllowedBasic.None)
                 return "Type '{0}' is set to None".Formato(type.NiceName());
 
             return null;
