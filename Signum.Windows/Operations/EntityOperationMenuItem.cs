@@ -27,6 +27,7 @@ namespace Signum.Windows.Operations
             {
                 Header = coc.OperationSettings.Try(f => f.Text) ?? coc.OperationInfo.OperationSymbol.NiceToString(),
                 Icon = coc.OperationSettings.Try(f => f.Icon.ToSmallImage()),
+                Tag = coc,
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)

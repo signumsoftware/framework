@@ -27,6 +27,7 @@ namespace Signum.Windows.Operations
             {
                 Header = OperationClient.GetText(coc.Type, coc.OperationInfo.OperationSymbol),
                 Icon = OperationClient.GetImage(coc.Type, coc.OperationInfo.OperationSymbol).ToSmallImage(),
+                Tag = coc,
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
