@@ -63,13 +63,13 @@ namespace Signum.Engine.Maps
 
         #region Events
 
-        public event Func<Type, string> IsAllowedCallback;
+        public event Func<Type, bool, string> IsAllowedCallback;
 
-        public string IsAllowed(Type type)
+        public string IsAllowed(Type type, bool inUserInterface)
         {
             foreach (var f in IsAllowedCallback.GetInvocationListTyped())
             {
-                string result = f(type);
+                string result = f(type, inUserInterface);
 
                 if (result != null)
                     return result;
@@ -83,9 +83,9 @@ namespace Signum.Engine.Maps
 
         internal ResetLazy<TypeCaches> typeCachesLazy;
 
-        public void AssertAllowed(Type type)
+        public void AssertAllowed(Type type, bool inUserInterface)
         {
-            string error = IsAllowed(type);
+            string error = IsAllowed(type, inUserInterface);
 
             if (error != null)
                 throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(type.NiceName(), error));
@@ -106,7 +106,7 @@ namespace Signum.Engine.Maps
 
         internal void OnPreSaving(Entity entity, ref bool graphModified)
         {
-            AssertAllowed(entity.GetType());
+            AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
@@ -118,7 +118,7 @@ namespace Signum.Engine.Maps
 
         internal void OnSaving(Entity entity)
         {
-            AssertAllowed(entity.GetType());
+            AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
@@ -131,7 +131,7 @@ namespace Signum.Engine.Maps
 
         internal void OnSaved(Entity entity, SavedEventArgs args)
         {
-            AssertAllowed(entity.GetType());
+            AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
@@ -143,7 +143,7 @@ namespace Signum.Engine.Maps
 
         internal void OnRetrieved(Entity entity)
         {
-            AssertAllowed(entity.GetType());
+            AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
@@ -155,7 +155,7 @@ namespace Signum.Engine.Maps
 
         internal void OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
         {
-            AssertAllowed(typeof(T));
+            AssertAllowed(typeof(T), inUserInterface: false);
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
@@ -165,7 +165,7 @@ namespace Signum.Engine.Maps
 
         internal void OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
         {
-            AssertAllowed(typeof(T));
+            AssertAllowed(typeof(T), inUserInterface: false);
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
@@ -180,7 +180,7 @@ namespace Signum.Engine.Maps
             if (type.IsInstantiationOf(typeof(MListElement<,>)))
                 type = type.GetGenericArguments().First();
 
-            AssertAllowed(type);
+            AssertAllowed(type, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(type);
 
@@ -190,7 +190,7 @@ namespace Signum.Engine.Maps
 
         internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
-            AssertAllowed(type);
+            AssertAllowed(type, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(type);
 
@@ -202,7 +202,7 @@ namespace Signum.Engine.Maps
 
         internal void OnPreBulkInsert(Type type)
         {
-            AssertAllowed(type);
+            AssertAllowed(type, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(type);
 
@@ -233,7 +233,7 @@ namespace Signum.Engine.Maps
         internal FilterQueryResult<T> OnFilterQuery<T>()
             where T : Entity
         {
-            AssertAllowed(typeof(T));
+            AssertAllowed(typeof(T), inUserInterface: false);
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
             if (ee == null)

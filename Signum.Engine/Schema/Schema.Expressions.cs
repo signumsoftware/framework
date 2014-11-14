@@ -38,7 +38,7 @@ namespace Signum.Engine.Maps
                 var bindings = GenerateBindings(tableAlias, binder, id); 
                 var mixins = GenerateMixins(tableAlias, binder, id);
 
-                Schema.Current.AssertAllowed(Type);
+                Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
                 var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id, tableAlias, bindings, mixins, avoidExpandOnRetrieving: false);
 
@@ -136,7 +136,7 @@ namespace Signum.Engine.Maps
 
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
         {
-            Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type);
+            Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type, inUserInterface: false);
 
             Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 
