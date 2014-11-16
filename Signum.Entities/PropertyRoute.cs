@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {
@@ -250,7 +251,7 @@ namespace Signum.Entities
             switch (PropertyRouteType)
             {
                 case PropertyRouteType.Root:
-                    return "({0})".Formato(type.Name);
+                    return "({0})".Formato(TypeDN.GetCleanName(type));
                 case PropertyRouteType.FieldOrProperty:
                     return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                 case PropertyRouteType.Mixin:
@@ -276,7 +277,7 @@ namespace Signum.Entities
                         case PropertyRouteType.FieldOrProperty: 
                         case PropertyRouteType.Mixin:
                             return Parent.PropertyString() + "." + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
-                        case PropertyRouteType.MListItems: return Parent.PropertyString() + PropertyInfo.Name;
+                        case PropertyRouteType.MListItems: return Parent.PropertyString() + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                         default: throw new InvalidOperationException();
                     }
 
@@ -288,6 +289,22 @@ namespace Signum.Entities
             throw new InvalidOperationException();
         }
 
+        public static PropertyRoute Parse(string fullToString)
+        {
+            var typeParentheses = fullToString.Before('.');
+
+            if (!typeParentheses.StartsWith("(") || !typeParentheses.EndsWith(")"))
+                throw new FormatException("fullToString should start with the type between parentheses");
+
+            var cleanType = typeParentheses.Trim('(', ')');
+
+            var type = TypeDN.TryGetType(cleanType);
+
+            if (type == null)
+                throw new FormatException("Type {0} is not recognized".Formato(typeParentheses));
+
+            return Parse(type, fullToString.After('.'));
+        }
 
         public static PropertyRoute Parse(Type rootType, string propertyString)
         {
@@ -423,7 +440,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            return this.ToString().GetHashCode();
+            return this.RootType.GetHashCode() ^ (this.PropertyRouteType == Entities.PropertyRouteType.Root ? 0 : this.PropertyString().GetHashCode());
         }
 
         public override bool Equals(object obj)

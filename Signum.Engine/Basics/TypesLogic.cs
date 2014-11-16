@@ -72,9 +72,7 @@ namespace Signum.Engine.Basics
                         t.FullClassName,
                     });
 
-                TypeDN.SetTypeNameAndResolveType(
-                    TypeLogic.GetCleanName, 
-                    TypeLogic.TryGetType,
+                TypeDN.SetTypeDNCallbacks(
                     t => TypeToDN.GetOrThrow(t),
                     t => DnToType.GetOrThrow(t));
             }

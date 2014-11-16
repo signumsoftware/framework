@@ -178,11 +178,15 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
 
             if (!Server.OfflineMode)
-                TypeDN.SetTypeNameAndResolveType(
+            {
+                TypeDN.SetTypeNameCallbacks(
                     t => Server.ServerTypes.GetOrThrow(t).CleanName,
-                    Server.TryGetType,
+                    Server.TryGetType);
+
+                TypeDN.SetTypeDNCallbacks(
                     t => Server.ServerTypes.GetOrThrow(t),
                     tdn => Server.GetType(tdn.CleanName));
+            }
         }
         
         public event Action Initializing;

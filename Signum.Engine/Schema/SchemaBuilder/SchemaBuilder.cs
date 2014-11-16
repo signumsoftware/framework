@@ -32,6 +32,11 @@ namespace Signum.Engine.Maps
         public SchemaBuilder()
         {
             schema = new Schema(new SchemaSettings());
+
+            TypeDN.SetTypeNameCallbacks(
+                t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
+                cleanName => schema.NameToType.TryGetC(cleanName));
+
             Include<TypeDN>();
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {
@@ -342,7 +347,7 @@ namespace Signum.Engine.Maps
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
 
-            KindOfField kof = GetKindOfField(route).ThrowIfNull("Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
+            KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
 
             if(kof == KindOfField.MList && inMList)
                 throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".Formato(route, route.Type.TypeName(), kof));

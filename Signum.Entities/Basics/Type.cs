@@ -63,10 +63,14 @@ namespace Signum.Entities.Basics
         public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
         public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
 
-        public static void SetTypeNameAndResolveType(Func<Type, string> getCleanName, Func<string, Type> tryGetType, Func<Type, TypeDN> toTypeDN, Func<TypeDN, Type> toType)
+        public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type> tryGetType)
         {
             TypeDN.GetCleanName = getCleanName;
             TypeDN.TryGetType = tryGetType;
+        }
+
+        public static void SetTypeDNCallbacks(Func<Type, TypeDN> toTypeDN, Func<TypeDN, Type> toType)
+        {
             TypeDN.ToTypeDNFunc = toTypeDN;
             TypeDN.ToTypeFunc = toType;
         }
