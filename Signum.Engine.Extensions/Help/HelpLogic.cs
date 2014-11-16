@@ -625,12 +625,14 @@ namespace Signum.Engine.Help
                 return "[{0}:{1}]".Formato(letter, link); 
         }
 
-        internal static EntityHelpService GetEntityHelpService(Type type)
+        public static EntityHelpService GetEntityHelpService(Type type)
         {
             var entity = GetEntityHelp(type);
 
             return new EntityHelpService
             {
+                Type = type,
+
                 Info = GetHelpToolTipInfo(type.NiceName(), entity.Info, entity.Description, HelpUrls.EntityUrl(type)),
 
                 Operations = entity.Operations.Where(o => o.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key,
@@ -641,7 +643,7 @@ namespace Signum.Engine.Help
             }; 
         }
 
-        internal static QueryHelpService GetQueryHelpService(object queryName)
+        public static QueryHelpService GetQueryHelpService(object queryName)
         {
             var entity = GetQueryHelp(queryName);
 
@@ -658,7 +660,7 @@ namespace Signum.Engine.Help
             }; 
         }
 
-        internal static Dictionary<PropertyRoute, HelpToolTipInfo> GetPropertyRoutesService(List<PropertyRoute> routes)
+        public static Dictionary<PropertyRoute, HelpToolTipInfo> GetPropertyRoutesService(List<PropertyRoute> routes)
         {
             return routes.Where(p => p.IsAllowed() == null).GroupBy(a => a.RootType).SelectMany(r =>
             {

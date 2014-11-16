@@ -433,7 +433,7 @@ WriteLiteral(">+</a> \r\n");
             
             #line default
             #line hidden
-WriteLiteral("></h4>\r\n<ul>\r\n");
+WriteLiteral("</h4>\r\n<ul>\r\n");
 
             
             #line 76 "..\..\Help\Views\MiniMenu.cshtml"
@@ -453,14 +453,14 @@ WriteLiteral("></h4>\r\n<ul>\r\n");
             #line hidden
 WriteLiteral("        <li><a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 2651), Tuple.Create("\"", 2724)
+WriteAttribute("href", Tuple.Create(" href=\"", 2650), Tuple.Create("\"", 2723)
             
             #line 80 "..\..\Help\Views\MiniMenu.cshtml"
-, Tuple.Create(Tuple.Create("", 2658), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewAppendix(item.UniqueName))
+, Tuple.Create(Tuple.Create("", 2657), Tuple.Create<System.Object, System.Int32>(Url.Action((HelpController h) => h.ViewAppendix(item.UniqueName))
             
             #line default
             #line hidden
-, 2658), false)
+, 2657), false)
 );
 
 WriteLiteral(">\r\n");

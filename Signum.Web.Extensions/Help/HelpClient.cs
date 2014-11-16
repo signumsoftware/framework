@@ -30,7 +30,8 @@ namespace Signum.Web.Help
     public static class HelpClient
     {
         public static string ViewPrefix = "~/Help/Views/{0}.cshtml";
-        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Help/Scripts/help"); 
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Help/Scripts/help");
+        public static JsModule WidgetModule = new JsModule("Extensions/Signum.Web.Extensions/Help/Scripts/helpWidget"); 
 
         //pages        
         public static string IndexUrl =  ViewPrefix.Formato("Index");
@@ -74,8 +75,64 @@ namespace Signum.Web.Help
                     });
 
                 RegisterHelpRoutes();
+
+                Common.CommonTask += Common_CommonTask;
+
+                WidgetsHelper.GetWidget += WidgetsHelper_GetWidget;
             }
         }
+
+        static void Common_CommonTask(LineBase line)
+        {
+            if (line.PropertyRoute != null)
+                line.FormGroupHtmlProps["data-route"] = line.PropertyRoute.ToString();
+        }
+
+        static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
+        {
+            return new HelpButton { Prefix = ctx.Prefix, RootType = ctx.TypeContext.PropertyRoute.RootType };
+        }
+
+        class HelpButton : IWidget
+        {
+            public string Prefix;
+            public Type RootType; 
+
+            public MvcHtmlString ToHtml(HtmlHelper helper)
+            {
+                HtmlStringBuilder sb = new HtmlStringBuilder();
+                using (sb.SurroundLine("li"))
+                {
+                    sb.Add(helper.ScriptCss("~/Help/Content/helpWidget.css"));
+
+                    var id = TypeContextUtilities.Compose(Prefix, "helpButton");
+
+                    sb.Add(new HtmlTag("button").Id(id)
+                        .Class("btn btn-xs btn-help")
+                        .Class(HelpLogic.GetEntityHelp(RootType).HasEntity ? "hasItems": null)
+                        .Attr("type", "button")
+                        .SetInnerText("?"));
+
+                    var type = HelpLogic.GetEntityHelpService(this.RootType);
+
+                    var jsType = new
+                    {
+                        Type = TypeLogic.GetCleanName(type.Type),
+                        Info = type.Info,
+                        Operations = type.Operations.ToDictionary(a => a.Key.Key, a => a.Value),
+                        Properties = type.Properties.ToDictionary(a => a.Key.ToString(), a => a.Value),
+                    };
+
+                    sb.Add(MvcHtmlString.Create("<script>$('#" + id + "').on('mouseup', function(event){ if(event.which == 3) return; " +
+                        HelpClient.WidgetModule["entityClick"](JsFunction.This, this.Prefix, jsType, helper.UrlHelper().Action((HelpController c)=>c.PropertyRoutes())).ToString() + 
+                        " })</script>"));
+                }
+
+                return sb.ToHtml();
+            }
+        }
+
+
 
         private static void RegisterHelpRoutes()
         {

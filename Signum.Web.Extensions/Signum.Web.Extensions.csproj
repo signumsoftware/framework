@@ -1122,9 +1122,14 @@
     <EmbeddedResource Include="Help\Scripts\help.js">
       <DependentUpon>help.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Help\Scripts\helpWidget.js">
+      <DependentUpon>helpWidget.ts</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Isolation\Scripts\Isolation.js">
       <DependentUpon>Isolation.ts</DependentUpon>
     </EmbeddedResource>
+    <TypeScriptCompile Include="Help\Scripts\helpWidget.ts" />
+    <Content Include="Help\Content\helpWidget.css" />
     <Content Include="Mailing\Content\Mailing.css" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\ckeditor.d.ts" />

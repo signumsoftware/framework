@@ -21,6 +21,8 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Signum.Web.Help
 {
@@ -184,6 +186,15 @@ namespace Signum.Web.Help
                     return JsonAction.RedirectAjax(RouteHelper.New().Action((HelpController a) => a.ViewAppendix(entity.UniqueName)));
                 return null;
             }
+        }
+
+        public ActionResult PropertyRoutes()
+        {
+            string[] array = JsonConvert.DeserializeObject<string[]>(this.Request["routes"]);
+
+            var parsed = array.Select(r => PropertyRoute.Parse(r)).Distinct().ToList();
+
+            return this.JsonNet(HelpLogic.GetPropertyRoutesService(parsed).ToDictionary(a=>a.Key.ToString(), a=>a.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
