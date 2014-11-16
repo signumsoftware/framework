@@ -327,6 +327,7 @@ namespace Signum.Web.Operations
 
                 Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
+                HtmlProps = {{ "data-operation", ctx.OperationInfo.OperationSymbol.Key }}
             };
         }
 
