@@ -79,6 +79,8 @@ namespace Signum.Web.Help
                 Common.CommonTask += Common_CommonTask;
 
                 WidgetsHelper.GetWidget += WidgetsHelper_GetWidget;
+
+                ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_RegisterGlobalButtons);
             }
         }
 
@@ -86,6 +88,56 @@ namespace Signum.Web.Help
         {
             if (line.PropertyRoute != null)
                 line.FormGroupHtmlProps["data-route"] = line.PropertyRoute.ToString();
+        }
+
+        static ToolBarButton[] ButtonBarQueryHelper_RegisterGlobalButtons(QueryButtonContext ctx)
+        {
+            HeloToolBarButton btn = new HeloToolBarButton(ctx.Prefix, "helpButton")
+            {
+                QueryName = ctx.QueryName,
+                Order = 1000,
+            };
+
+            return new ToolBarButton[] { btn }; 
+        }
+
+        public class HeloToolBarButton : ToolBarButton
+        {
+            public object QueryName;
+            public string Prefix; 
+
+            public HeloToolBarButton(string prefix, string idToAppend) : base(prefix, idToAppend)
+            {
+                this.Prefix = prefix;
+            }
+
+            public override MvcHtmlString ToHtml(HtmlHelper helper)
+            {
+                var a = new HtmlTag("button").Id(this.Id)
+                    .Class("btn btn-default btn-help")
+                    .Class(HelpLogic.GetQueryHelp(QueryName).HasEntity ? "hasItems" : null)
+                    .Attr("type", "button")
+                    .SetInnerText("?");
+
+                var query = HelpLogic.GetQueryHelpService(this.QueryName);
+
+                var jsType = new
+                {
+                    QueryName = QueryUtils.GetQueryUniqueKey(query.QueryName),
+                    Info = query.Info,
+                    Columns = query.Columns,
+                };
+
+                var result = new HtmlTag("div").Class("btn-group").InnerHtml(a).ToHtml();
+
+                result = result.Concat(helper.ScriptCss("~/Help/Content/helpWidget.css"));
+                result = result.Concat(MvcHtmlString.Create("<script>$('#" + this.Id + "').on('mouseup', function(event){ if(event.which == 3) return; " +
+                        HelpClient.WidgetModule["searchClick"](JsFunction.This, this.Prefix, jsType, helper.UrlHelper().Action((HelpController c) => c.ComplexColumns())).ToString() +
+                        " })</script>"));
+
+                return result;
+            }
+            
         }
 
         static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
@@ -108,7 +160,7 @@ namespace Signum.Web.Help
                     var id = TypeContextUtilities.Compose(Prefix, "helpButton");
 
                     sb.Add(new HtmlTag("button").Id(id)
-                        .Class("btn btn-xs btn-help")
+                        .Class("btn btn-xs btn-help btn-help-widget")
                         .Class(HelpLogic.GetEntityHelp(RootType).HasEntity ? "hasItems": null)
                         .Attr("type", "button")
                         .SetInnerText("?"));

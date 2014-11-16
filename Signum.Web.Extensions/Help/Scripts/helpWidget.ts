@@ -14,7 +14,15 @@ export interface EntityHelpService {
     Properties: { [property: string]: HelpToolTipInfo };
 }
 
+export interface QueryHelpService {
+    QueryName: string;
+    Info: HelpToolTipInfo;
+    Columns: { [column: string]: HelpToolTipInfo };
+}
+
 var drawLayer: () => void;
+
+var lastRequest: { [value: string]: HelpToolTipInfo } = null; //important for resize
 
 export function entityClick(button: HTMLElement, prefix: string, entityHelp: EntityHelpService, propertyRoutesUrl: string) {
     click(button, (helpLayer) => {
@@ -26,7 +34,7 @@ export function entityClick(button: HTMLElement, prefix: string, entityHelp: Ent
         $("[data-route]").each((i, e) => {
             var element = $(e);
             var route = element.attr("data-route");
-            var info = entityHelp.Properties[route];
+            var info = entityHelp.Properties[route] || (lastRequest ? lastRequest[route] : null);
 
             if (info)
                 addAdorner(element, helpLayer, info);
@@ -36,8 +44,8 @@ export function entityClick(button: HTMLElement, prefix: string, entityHelp: Ent
 
         if (array.length) {
             SF.ajaxPost({ url: propertyRoutesUrl, data: { routes: JSON.stringify(array.map(p=> p.route)) } })
-                .then((res: { [route: string]: HelpToolTipInfo }) =>
-                {
+                .then((res: { [route: string]: HelpToolTipInfo }) => {
+                    lastRequest = res;
                     array.forEach(p=> addAdorner(p.element, helpLayer, res[p.route]));
                 });
         }
@@ -52,6 +60,35 @@ export function entityClick(button: HTMLElement, prefix: string, entityHelp: Ent
         });
     });
 }
+
+export function searchClick(button: HTMLElement, prefix: string, queryHelp: QueryHelpService, propertyRoutesUrl: string) {
+    click(button, (helpLayer) => {
+        addAdorner(prefix.child("qbSearch").tryGet(), helpLayer, queryHelp.Info);
+
+        var array: { element: JQuery; column: string }[] = [];
+
+        prefix.child("tblResults").get().find("th[data-column-name]").each((i, e) => {
+            var element = $(e);
+            var column = element.attr("data-column-name");
+            var info = queryHelp.Columns[column] || (lastRequest ? lastRequest[column] : null);
+
+            if (info)
+                addAdorner(element, helpLayer, info);
+            else
+                array.push({ element: element, column: column });
+
+        });
+
+        if (array.length) {
+            SF.ajaxPost({ url: propertyRoutesUrl, data: { queryName: queryHelp.QueryName, columns: JSON.stringify(array.map(p=> p.column)) } })
+                .then((res: { [route: string]: HelpToolTipInfo }) => {
+                    lastRequest = res;
+                    array.forEach(p=> addAdorner(p.element, helpLayer, res[p.column]));
+                });
+        }
+    });
+}
+
 
 function click(button: HTMLElement, addAdorners: (helpLayer: JQuery) => void) {
     var btn = $(button);
@@ -86,7 +123,7 @@ function click(button: HTMLElement, addAdorners: (helpLayer: JQuery) => void) {
 
 function addAdorner(element: JQuery, helpLayer: JQuery, info: HelpToolTipInfo) {
 
-    if (!element.is(":visible"))
+    if (!element.is(":visible") || info == null)
         return;
 
     var part = $("<a/>").addClass("help-tooltip")

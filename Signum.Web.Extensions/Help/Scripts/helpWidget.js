@@ -4,6 +4,8 @@ define(["require", "exports"], function(require, exports) {
 
     var drawLayer;
 
+    var lastRequest = null;
+
     function entityClick(button, prefix, entityHelp, propertyRoutesUrl) {
         click(button, function (helpLayer) {
             addAdorner($("#divMainPage > h3 > .sf-entity-title"), helpLayer, entityHelp.Info);
@@ -14,7 +16,7 @@ define(["require", "exports"], function(require, exports) {
             $("[data-route]").each(function (i, e) {
                 var element = $(e);
                 var route = element.attr("data-route");
-                var info = entityHelp.Properties[route];
+                var info = entityHelp.Properties[route] || (lastRequest ? lastRequest[route] : null);
 
                 if (info)
                     addAdorner(element, helpLayer, info);
@@ -26,6 +28,7 @@ define(["require", "exports"], function(require, exports) {
                 SF.ajaxPost({ url: propertyRoutesUrl, data: { routes: JSON.stringify(array.map(function (p) {
                             return p.route;
                         })) } }).then(function (res) {
+                    lastRequest = res;
                     array.forEach(function (p) {
                         return addAdorner(p.element, helpLayer, res[p.route]);
                     });
@@ -43,6 +46,37 @@ define(["require", "exports"], function(require, exports) {
         });
     }
     exports.entityClick = entityClick;
+
+    function searchClick(button, prefix, queryHelp, propertyRoutesUrl) {
+        click(button, function (helpLayer) {
+            addAdorner(prefix.child("qbSearch").tryGet(), helpLayer, queryHelp.Info);
+
+            var array = [];
+
+            prefix.child("tblResults").get().find("th[data-column-name]").each(function (i, e) {
+                var element = $(e);
+                var column = element.attr("data-column-name");
+                var info = queryHelp.Columns[column] || (lastRequest ? lastRequest[column] : null);
+
+                if (info)
+                    addAdorner(element, helpLayer, info);
+                else
+                    array.push({ element: element, column: column });
+            });
+
+            if (array.length) {
+                SF.ajaxPost({ url: propertyRoutesUrl, data: { queryName: queryHelp.QueryName, columns: JSON.stringify(array.map(function (p) {
+                            return p.column;
+                        })) } }).then(function (res) {
+                    lastRequest = res;
+                    array.forEach(function (p) {
+                        return addAdorner(p.element, helpLayer, res[p.column]);
+                    });
+                });
+            }
+        });
+    }
+    exports.searchClick = searchClick;
 
     function click(button, addAdorners) {
         var btn = $(button);
@@ -71,7 +105,7 @@ define(["require", "exports"], function(require, exports) {
     }
 
     function addAdorner(element, helpLayer, info) {
-        if (!element.is(":visible"))
+        if (!element.is(":visible") || info == null)
             return;
 
         var part = $("<a/>").addClass("help-tooltip").addClass(SF.isEmpty(info.Description) ? null : "description").css({
