@@ -246,7 +246,8 @@ ul.nav-tabs
 .form-xs input[type=checkbox].form-control
 {
     height: 16px;
-    padding: 0px;
+    margin-top: 9px;
+    padding: 2px;
 }
 
 .form-xs .input-group .btn,
@@ -304,6 +305,7 @@ ul.nav-tabs
 {
     height: 16px;
     padding: 0px;
+    margin-top: 4px;
 }
 
 .form-sm .input-group .btn,
