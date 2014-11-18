@@ -302,7 +302,7 @@ namespace Signum.Engine.Processes
 
             var args = package.OperationArgs;
 
-            executingProcess.ForEachLine(package.Lines(), line =>
+            executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 var result = ((F)(object)line.Target).ConstructFrom(Symbol, args);
                 if (result.IsNew)
