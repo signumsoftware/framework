@@ -9,7 +9,7 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type d:LinkElementDN}">
                 <TextBlock Margin="4,2">
-                    <Hyperlink NavigateUri="{Binding Link}" Click="Hyperlink_Click_1">
+                    <Hyperlink NavigateUri="{Binding Link}" Click="Hyperlink_Click_1" Focusable="False">
                         <TextBlock Text="{Binding Label}"/>
                     </Hyperlink>
                 </TextBlock>

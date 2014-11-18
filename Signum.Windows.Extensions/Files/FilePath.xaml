@@ -18,7 +18,7 @@
 		                    MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=grFWP, Mode=OneWay}"
 		                    Visibility="{Binding ElementName=grFWP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
             <TextBlock Margin="1" Grid.Column="1">
-                <Hyperlink x:Name="hypFullWebPath" Click="hypFullWebPath_Click">
+                <Hyperlink x:Name="hypFullWebPath" Click="hypFullWebPath_Click" Focusable="False">
                     <TextBlock  Text="{Binding FullWebPath}" m:Common.IsReadOnly="True"/>
                 </Hyperlink>
             </TextBlock>
@@ -35,7 +35,7 @@
 		                    MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=grFPP, Mode=OneWay}"
 		                    Visibility="{Binding ElementName=grFPP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
                         <TextBlock Margin="1" Grid.Column="1">
-                            <Hyperlink x:Name="hypFullPhysicalPath" Click="hypFullPhysicalPath_Click">
+                            <Hyperlink x:Name="hypFullPhysicalPath" Click="hypFullPhysicalPath_Click" Focusable="False">
                                 <TextBlock  Text="{Binding FullPhysicalPath}" m:Common.IsReadOnly="True"/>
                             </Hyperlink>
                         </TextBlock>
