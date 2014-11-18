@@ -1107,6 +1107,16 @@ namespace Signum.Windows
         {
             Keyboard.Focus(btSearch);
         }
+
+        private void GridSearchControl_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                Search(true);
+                e.Handled = true;
+            }
+            base.OnPreviewKeyDown(e);
+        }
     }
 
     public delegate void ResultChangedEventHandler(object sender, ResultChangedEventArgs e);

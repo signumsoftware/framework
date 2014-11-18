@@ -76,7 +76,7 @@
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
+    <Grid x:Name="GridSearchControl" PreviewKeyDown="GridSearchControl_PreviewKeyDown">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" x:Name="rowFilters"/>
