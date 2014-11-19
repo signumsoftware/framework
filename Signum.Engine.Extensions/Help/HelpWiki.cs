@@ -17,17 +17,14 @@ namespace Signum.Engine.Help
     {
         public static WikiSettings DefaultWikiSettings;
         public static WikiSettings NoLinkWikiSettings;
-        public static Func<string, string> TokenParser;
 
         static HelpWiki()
         {
             DefaultWikiSettings = new WikiSettings(true);
-            DefaultWikiSettings.TokenParser += TokenParser;
             DefaultWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.ToHtmlString());
             DefaultWikiSettings.TokenParser += ProcessImages;
 
             NoLinkWikiSettings = new WikiSettings(false) { LineBreaks = false };
-            NoLinkWikiSettings.TokenParser += TokenParser;
             NoLinkWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.Text);
             NoLinkWikiSettings.TokenParser += RemoveImages;
         }
@@ -93,9 +90,7 @@ namespace Signum.Engine.Help
                         }
 
                     case WikiFormat.PropertyLink:
-                        PropertyRoute route = PropertyRoute.Parse
-                            (TypeLogic.TryGetType(link.Before('.')),
-                            link.After('.'));
+                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.TryGetType(link.Before('.')), link.After('.'));
 
                         while (route.PropertyRouteType == PropertyRouteType.LiteEntity ||
                                route.PropertyRouteType == PropertyRouteType.Mixin ||

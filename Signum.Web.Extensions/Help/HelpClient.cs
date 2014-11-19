@@ -47,11 +47,11 @@ namespace Signum.Web.Help
         public static string ViewEntityPropertyUrl = ViewPrefix.Formato("EntityProperty");
         public static string NamespaceControlUrl = ViewPrefix.Formato("NamespaceControl");
 
-        public static void Start(string baseUrl, string imageFolder)
+        public static void Start( string imageFolder)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                HelpUrls.BaseUrl = baseUrl;
+                HelpUrls.BaseUrl = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetVirtualPath()+"/";
                 HelpUrls.ImagesFolder = imageFolder;
 
                 Navigator.RegisterArea(typeof(HelpClient));
@@ -142,7 +142,9 @@ namespace Signum.Web.Help
 
         static IWidget WidgetsHelper_GetWidget(WidgetContext ctx)
         {
-            return new HelpButton { Prefix = ctx.Prefix, RootType = ctx.TypeContext.PropertyRoute.RootType };
+            if (ctx.Entity is Entity)
+                return new HelpButton { Prefix = ctx.Prefix, RootType = ctx.TypeContext.PropertyRoute.RootType };
+            return null;
         }
 
         class HelpButton : IWidget
