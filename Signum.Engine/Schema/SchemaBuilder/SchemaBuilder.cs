@@ -227,6 +227,7 @@ namespace Signum.Engine.Maps
         void Complete(Table table)
         {
             Type type = table.Type;
+
             table.IdentityBehaviour = (Settings.TypeAttribute<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
             table.Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type));
             table.CleanTypeName = GenerateCleanTypeName(type);

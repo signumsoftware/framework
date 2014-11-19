@@ -106,22 +106,7 @@ namespace Signum.Engine.Linq
                 return Accept(dbVisitor);
 
             return base.Accept(visitor);
-
-            //if (visitor.GetType().Name == "ExpressionStringBuilder")
-            //{
-            //    miOut = miOut ?? visitor.GetType().GetMethod("Out", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string) }, null);
-
-            //    miOut.Invoke(visitor, new[] { this.ToString() });
-
-            //    return this;
-            //}
-
-           
         }
-
-        static MethodInfo miOut; 
-
-        
     }
 
     internal abstract class SourceExpression : DbExpression

@@ -132,20 +132,29 @@ namespace Signum.Engine.CodeGeneration
                 "System.Linq",
                 "System.Linq.Expressions",
                 "System.Text",
+                "System.ComponentModel",
                 "Signum.Entities",
                 "Signum.Utilities",
             };
 
             var currentNamespace = GetNamespace(fileName);
 
-            result.AddRange(
+            var fkNamespaces = 
                 (from t in tables
                  from c in t.Columns.Values
                  where c.ForeignKey != null
                  let targetTable = Tables.GetOrThrow(c.ForeignKey.TargetTable)
-                 let tagetNamespace = GetNamespace(GetFileName(targetTable))
-                 where tagetNamespace != currentNamespace
-                 select tagetNamespace).Distinct());
+                 select GetNamespace(GetFileName(targetTable)));
+
+            
+            var mListNamespaces = 
+                (from t in tables
+                 from kvp in GetMListFields(t)
+                 let tec = kvp.Value.TrivialElementColumn
+                 let targetTable = tec != null  && tec.ForeignKey != null ? Tables.GetOrThrow(tec.ForeignKey.TargetTable) : kvp.Key
+                 select GetNamespace(GetFileName(targetTable)));
+
+            result.AddRange(fkNamespaces.Concat(mListNamespaces).Where(ns => ns != currentNamespace).Distinct());
 
             return result;
         }
@@ -177,10 +186,13 @@ namespace Signum.Engine.CodeGeneration
             if (mListInfo != null && mListInfo.TrivialElementColumn != null)
                 return null;
 
+            if (IsEnum(table.Name))
+                return WriteEnum(table);
+
             var name = GetEntityName(table.Name);
 
             StringBuilder sb = new StringBuilder();
-            WriteAttributeTag(sb, GetEntityAttributes(fileName, table, mListInfo));
+            WriteAttributeTag(sb, GetEntityAttributes(table, mListInfo));
             sb.AppendLine("public class {0} : {1}".Formato(name, GetBaseClass(table.Name, mListInfo)));
             sb.AppendLine("{");
 
@@ -209,19 +221,14 @@ namespace Signum.Engine.CodeGeneration
 
             if (mListInfo == null)
             {
-                foreach (var relatedTable in Graph.InverseRelatedTo(table))
+                foreach (KeyValuePair<DiffTable, MListInfo> kvp in GetMListFields(table))
                 {
-                    var mListInfo2 = GetMListInfo(relatedTable);
+                    string field = WriteFieldMList(fileName, table, kvp.Value, kvp.Key);
 
-                    if (mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey.TargetTable.Equals(table.Name))
+                    if (field != null)
                     {
-                        string field = WriteFieldMList(fileName, table, mListInfo2, relatedTable);
-
-                        if (field != null)
-                        {
-                            sb.AppendLine(field.Indent(4));
-                            sb.AppendLine();
-                        }
+                        sb.AppendLine(field.Indent(4));
+                        sb.AppendLine();
                     }
                 }
             }
@@ -256,6 +263,70 @@ namespace Signum.Engine.CodeGeneration
             }
 
             return sb.ToString();
+        }
+
+        protected virtual IEnumerable<KeyValuePair<DiffTable, MListInfo>> GetMListFields(DiffTable table)
+        {
+            return from relatedTable in Graph.InverseRelatedTo(table)
+                   let mListInfo2 = GetMListInfo(relatedTable)
+                   where mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey.TargetTable.Equals(table.Name)
+                   select KVP.Create(relatedTable, mListInfo2);
+        }
+
+        protected virtual string WriteEnum(DiffTable table)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            WriteAttributeTag(sb, GetEnumAttributes(table));
+            sb.AppendLine("public enum {0}".Formato(GetEntityName(table.Name)));
+            sb.AppendLine("{");
+
+            var dataTable = Executor.ExecuteDataTable("select * from " + table.Name);
+
+            foreach (var item in dataTable.Rows.Cast<DataRow>())
+            {
+                string description = GetEnumDescription(table, item);
+
+                string value = GetEnumValue(table, item);
+
+                sb.AppendLine("    " + (description != null ? @"[Description(""" + description + @""")]" : null) + value + ",");
+            }
+
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+
+        protected virtual List<string> GetEnumAttributes(DiffTable table)
+        {
+            List<string> atts = new List<string>();
+
+            string tableNameAttribute = GetTableNameAttribute(table.Name, null);
+
+            if (tableNameAttribute != null)
+                atts.Add(tableNameAttribute);
+
+            string primaryKeyAttribute = GetPrimaryKeyAttribute(table);
+
+            if (primaryKeyAttribute != null)
+                atts.Add(primaryKeyAttribute);
+
+            return atts;
+        }
+
+        protected virtual string GetEnumValue(DiffTable table, DataRow item)
+        {
+            throw new NotImplementedException("Override GetEnumValue");
+        }
+
+        protected virtual string GetEnumDescription(DiffTable table, DataRow item)
+        {
+            throw new NotImplementedException("Override GetEnumDescription");
+        }
+
+        protected virtual bool IsEnum(ObjectName objectName)
+        {
+            return false;
         }
 
         protected virtual string WriteBeforeFields(DiffTable table, string name)
@@ -301,7 +372,7 @@ namespace Signum.Engine.CodeGeneration
             return null;
         }
 
-        protected virtual IEnumerable<string> GetEntityAttributes(string fileName, DiffTable table, MListInfo mListInfo)
+        protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table, MListInfo mListInfo)
         {
             List<string> atts = new List<string> { "Serializable" };
 
@@ -348,12 +419,12 @@ namespace Signum.Engine.CodeGeneration
             List<string> parts = new List<string>();
           
             if (primaryKey.Name != def.Name)
-                parts.Add("Name=\"" + primaryKey.Name + "\"");
+                parts.Add("Name = \"" + primaryKey.Name + "\"");
 
             if (primaryKey.Identity != def.Identity)
             {
-                parts.Add("Identity=" + primaryKey.Identity.ToString().ToLower());
-                parts.Add("IdentityBehaviour=" + primaryKey.Identity.ToString().ToLower());
+                parts.Add("Identity = " + primaryKey.Identity.ToString().ToLower());
+                parts.Add("IdentityBehaviour = " + primaryKey.Identity.ToString().ToLower());
             }
 
             parts.AddRange(GetSqlDbTypeParts(primaryKey, type));
@@ -377,15 +448,15 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.Append("TableName(\"" + objectName.Name + "\"");
             if (objectName.Schema != SchemaName.Default)
-                sb.Append(", SchemaName=\"" + objectName.Schema.Name + "\"");
+                sb.Append(", SchemaName = \"" + objectName.Schema.Name + "\"");
 
             if (objectName.Schema.Database != null)
             {
-                sb.Append(", DatabaseName=\"" + objectName.Schema.Database.Name + "\"");
+                sb.Append(", DatabaseName = \"" + objectName.Schema.Database.Name + "\"");
 
                 if (objectName.Schema.Database != null)
                 {
-                    sb.Append(", ServerName=\"" + objectName.Schema.Database.Server.Name + "\"");
+                    sb.Append(", ServerName = \"" + objectName.Schema.Database.Server.Name + "\"");
                 }
             }
 
@@ -405,7 +476,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetEntityName(ObjectName objectName)
         {
-            return objectName.Name + "DN";
+            return objectName.Name + (IsEnum(objectName) ? "" : "DN");
         }
 
         protected virtual string GetBaseClass(ObjectName objectName, MListInfo mListInfo)
@@ -541,20 +612,20 @@ namespace Signum.Engine.CodeGeneration
             List<string> parts = new List<string>();
             var pair = CurrentSchema.Settings.GetSqlDbTypePair(type);
             if (pair.SqlDbType != col.SqlDbType)
-                parts.Add("SqlDbType=SqlDbType." + col.SqlDbType);
+                parts.Add("SqlDbType = SqlDbType." + col.SqlDbType);
 
             var defaultSize = CurrentSchema.Settings.GetSqlSize(null, pair.SqlDbType);
             if (!(defaultSize == null || defaultSize == col.Precission || defaultSize == col.Length / 2 || defaultSize == int.MaxValue && col.Length == -1))
-                parts.Add("Size=" + (col.Length == -1 ? "int.MaxValue" :
+                parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
                                     col.Length != 0 ? (col.Length / 2).ToString() :
                                     col.Precission != 0 ? col.Precission.ToString() : "0"));
 
             var defaultScale = CurrentSchema.Settings.GetSqlScale(null, col.SqlDbType);
             if (!(defaultScale == null || col.Scale == defaultScale))
-                parts.Add("Scale=" + col.Scale);
+                parts.Add("Scale = " + col.Scale);
 
             if (col.Default != null)
-                parts.Add("Default=\"" + CleanDefault(col.Default) + "\"");
+                parts.Add("Default = \"" + CleanDefault(col.Default) + "\"");
 
             return parts;
         }
@@ -571,7 +642,7 @@ namespace Signum.Engine.CodeGeneration
         {
             if (relatedEntity != null)
             {
-                if (IsLite(table, col))
+                if (!IsEnum(col.ForeignKey.TargetTable) && IsLite(table, col))
                     return "Lite<" + relatedEntity + ">";
 
                 return relatedEntity;
@@ -645,6 +716,9 @@ namespace Signum.Engine.CodeGeneration
 
                 fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity).ToList(); 
             }
+
+            if(mListInfo.PreserveOrderColumn != null)
+                fieldAttributes.Add(@"PreserveOrder(""{0}"")".Formato(mListInfo.PreserveOrderColumn.Name));
        
             string primaryKey = GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
@@ -721,5 +795,6 @@ namespace Signum.Engine.CodeGeneration
 
         public readonly DiffColumn BackReferenceColumn;
         public DiffColumn TrivialElementColumn;
+        public DiffColumn PreserveOrderColumn;
     }
 }

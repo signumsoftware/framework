@@ -146,6 +146,8 @@ namespace Signum.Engine.Maps
 
         public A TypeAttribute<A>(Type type) where A : Attribute
         {
+            type = EnumEntity.Extract(type) ?? type;
+
             return TypeAttributes(type).OfType<A>().FirstOrDefault();
         }
 

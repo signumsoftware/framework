@@ -725,5 +725,10 @@ namespace Signum.Entities
         public PreserveOrderAttribute()
         {
         }
+
+        public PreserveOrderAttribute(string name)
+        {
+            this.Name = name;
+        }
     }
 }
