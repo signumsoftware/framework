@@ -37,9 +37,6 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-
-        static NumberStyles numberStyles = NumberStyles.Integer | NumberStyles.AllowThousands;
-
         static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
             types = types.Where(t => Schema.Current.IsAllowed(t, inUserInterface: true) == null);
