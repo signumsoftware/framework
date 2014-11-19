@@ -319,7 +319,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
                              PrimaryKeyName = (from k in t.KeyConstraints()
                                                where k.type == "PK"
-                                               select new ObjectName(new SchemaName(db, k.Schema().name), k.name))
+                                               select k.name == null ? null : new ObjectName(new SchemaName(db, k.Schema().name), k.name))
                                                .SingleOrDefaultEx(),
 
                              Columns = (from c in t.Columns()

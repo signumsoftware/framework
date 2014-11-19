@@ -278,7 +278,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
         public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class PrimaryKeyAttribute : SqlDbTypeAttribute
     {
         public Type Type { get; set; }
@@ -331,7 +331,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
     { 
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class TableNameAttribute : Attribute
     {
         public string Name { get; set; }
