@@ -251,7 +251,7 @@ namespace Signum.Entities
             switch (PropertyRouteType)
             {
                 case PropertyRouteType.Root:
-                    return "({0})".Formato(TypeDN.GetCleanName(type));
+                    return "({0})".Formato(typeof(Entity).IsAssignableFrom(type) ? TypeDN.GetCleanName(type) : type.Name);
                 case PropertyRouteType.FieldOrProperty:
                     return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                 case PropertyRouteType.Mixin:
