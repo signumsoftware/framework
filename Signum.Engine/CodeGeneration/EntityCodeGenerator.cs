@@ -337,19 +337,28 @@ namespace Signum.Engine.CodeGeneration
 
             var dataTable = Executor.ExecuteDataTable("select * from " + table.Name);
 
-            foreach (var item in dataTable.Rows.Cast<DataRow>())
+            var rowsById = dataTable.Rows.Cast<DataRow>().ToDictionary(row=>GetEnumId(table, row));
+
+            int lastId = -1;
+            foreach (var kvp in rowsById.OrderBy(a => a.Key))
             {
-                string description = GetEnumDescription(table, item);
+                string description = GetEnumDescription(table, kvp.Value);
 
-                string value = GetEnumValue(table, item);
+                string value = GetEnumValue(table, kvp.Value);
 
-                sb.AppendLine("    " + (description != null ? @"[Description(""" + description + @""")]" : null) + value + ",");
+                string explicitId = kvp.Key == lastId + 1 ? "" : " = " + kvp.Key;
+
+                sb.AppendLine("    " + (description != null ? @"[Description(""" + description + @""")]" : null) + value + explicitId + ",");
+
+                lastId = kvp.Key;
             }
 
             sb.AppendLine("}");
 
             return sb.ToString();
         }
+
+
 
         protected virtual List<string> GetEnumAttributes(DiffTable table)
         {
@@ -366,6 +375,11 @@ namespace Signum.Engine.CodeGeneration
                 atts.Add(primaryKeyAttribute);
 
             return atts;
+        }
+
+        protected virtual int GetEnumId(DiffTable table, DataRow row)
+        {
+            throw new NotImplementedException("Override GetEnumId");
         }
 
         protected virtual string GetEnumValue(DiffTable table, DataRow item)
@@ -446,7 +460,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetTicksColumnAttribute(DiffTable table)
         {
-            return null;
+            return "TicksColumn(Default = \"0\")";
         }
 
 
@@ -687,10 +701,10 @@ namespace Signum.Engine.CodeGeneration
         {
             if (relatedEntity != null)
             {
-                if (!IsEnum(col.ForeignKey.TargetTable) && IsLite(table, col))
-                    return "Lite<" + relatedEntity + ">";
+                if (IsEnum(col.ForeignKey.TargetTable))
+                    return col.Nullable ? relatedEntity + "?" : relatedEntity;
 
-                return relatedEntity;
+                return IsLite(table, col) ? "Lite<" + relatedEntity + ">" : relatedEntity;
             }
 
             var valueType = GetValueType(col);
@@ -787,8 +801,9 @@ namespace Signum.Engine.CodeGeneration
                 fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity).ToList(); 
             }
 
-            if(mListInfo.PreserveOrderColumn != null)
-                fieldAttributes.Add(@"PreserveOrder(""{0}"")".Formato(mListInfo.PreserveOrderColumn.Name));
+            var preserveOrder = GetPreserveOrderAttribute(mListInfo);
+            if (preserveOrder != null)
+                fieldAttributes.Add(preserveOrder);
        
             string primaryKey = GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
@@ -816,6 +831,22 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        protected virtual string GetPreserveOrderAttribute(MListInfo mListInfo)
+        {
+            if(mListInfo.PreserveOrderColumn == null)
+                return null;
+
+            var parts = new List<string>();
+
+            parts.Add("\"" + mListInfo.PreserveOrderColumn.Name  +"\"");
+
+             Type type = GetValueType(mListInfo.PreserveOrderColumn);
+
+            parts.AddRange(GetSqlDbTypeParts(mListInfo.PreserveOrderColumn, type));
+
+            return @"PreserveOrder({0})".Formato(parts.ToString(", "));
         }
 
         protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
