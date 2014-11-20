@@ -269,9 +269,13 @@ namespace Signum.Engine.CodeGeneration
                               FromType = fromType,
                               Property = pi,
                               IsUnique = isUnique,
-                              Name = isUnique ? Reflector.CleanTypeName(toType) :
-                                     NaturalLanguageTools.Pluralize(Reflector.CleanTypeName(toType).SpacePascal()).ToPascal()
                           }).ToList();
+
+            foreach (var ei in result)
+            {
+                ei.Name = GetExpressionName(ei);
+            }
+
 
             result = result.GroupBy(ei => new { ei.FromType, ei.ToType }).Where(g => g.Count() == 1).SelectMany(g => g).ToList();
 
@@ -290,10 +294,26 @@ namespace Signum.Engine.CodeGeneration
             return result;
         }
 
-        bool? writeExpressions;
+        protected virtual string GetExpressionName(ExpressionInfo ei)
+        {
+            if (ei.Property.Name == "Parent")
+                return "Children";
+
+            if(ei.IsUnique)
+                return Reflector.CleanTypeName(ei.ToType);
+
+            return NaturalLanguageTools.Pluralize(Reflector.CleanTypeName(ei.ToType).SpacePascal()).ToPascal();
+        }
+
         protected virtual bool ShouldWriteExpression(ExpressionInfo ei)
         {
-            return SafeConsole.Ask(ref writeExpressions, "Create extensions {0} -[{1}]-> {2}?".Formato(ei.Property.PropertyType.CleanType(), ei.Name, ei.ToType));
+            switch (EntityKindCache.GetEntityKind(ei.FromType))
+            {
+                case EntityKind.Part:
+                case EntityKind.String:
+                case EntityKind.SystemString: return false;
+                default: return true;
+            }
         }
 
         protected virtual string WriteExpressionMethod(ExpressionInfo info)

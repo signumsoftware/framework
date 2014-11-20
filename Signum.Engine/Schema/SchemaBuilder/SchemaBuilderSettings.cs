@@ -122,7 +122,7 @@ namespace Signum.Engine.Maps
 
             return TypeAttributesCache.GetOrCreate(entityType, () =>
             {
-                return new AttributeCollection(AttributeTargets.Class, entityType.GetCustomAttributes(true).Cast<Attribute>().ToList(),
+                return new AttributeCollection(AttributeTargets.Class, (EnumEntity.Extract(entityType) ?? entityType).GetCustomAttributes(true).Cast<Attribute>().ToList(),
                     () => AssertNotIncluded(entityType));
             });
         }
@@ -146,8 +146,6 @@ namespace Signum.Engine.Maps
 
         public A TypeAttribute<A>(Type type) where A : Attribute
         {
-            type = EnumEntity.Extract(type) ?? type;
-
             return TypeAttributes(type).OfType<A>().FirstOrDefault();
         }
 

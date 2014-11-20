@@ -354,11 +354,16 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".Formato(route, route.Type.TypeName(), kof));
 
             //field name generation 
-            NameSequence name = preName;
-            if (route.PropertyRouteType != PropertyRouteType.MListItems)
-                name = name.Add(GenerateFieldName(route, kof));
+            NameSequence name;
+            ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
+            if (vc != null && vc.Name.HasText())
+                name = NameSequence.Void.Add(vc.Name);
+            else if (route.PropertyRouteType != PropertyRouteType.MListItems)
+                name = preName.Add(GenerateFieldName(route, kof));
             else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
-                name = name.Add(GenerateMListFieldName(route, kof));
+                name = preName.Add(GenerateMListFieldName(route, kof));
+            else
+                name = preName;
 
             switch (kof)
             {
@@ -701,10 +706,6 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateMListFieldName(PropertyRoute route, KindOfField kindOfField)
         {
-            ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
-            if (vc != null && vc.Name.HasText())
-                return vc.Name;
-
             Type type = Lite.Extract(route.Type) ?? route.Type;
 
             switch (kindOfField)
@@ -722,10 +723,6 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
-            ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
-            if (vc != null && vc.Name.HasText())
-                return vc.Name;
-
             string name = Reflector.PropertyName(route.FieldInfo.Name);
 
             switch (kindOfField)

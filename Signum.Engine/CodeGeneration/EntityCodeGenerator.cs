@@ -104,11 +104,10 @@ namespace Signum.Engine.CodeGeneration
             int length = sb.Length;
             foreach (var t in tables.OrderByDescending(a => a.Columns.Count))
             {
-                var entity = WriteEntity(fileName, t);
+                var entity = WriteTableEntity(fileName, t);
                 if (entity != null)
                 {
                     sb.Append(entity.Indent(4));
-
                     sb.AppendLine();
                     sb.AppendLine();
                 }
@@ -146,7 +145,6 @@ namespace Signum.Engine.CodeGeneration
                  let targetTable = Tables.GetOrThrow(c.ForeignKey.TargetTable)
                  select GetNamespace(GetFileName(targetTable)));
 
-            
             var mListNamespaces = 
                 (from t in tables
                  from kvp in GetMListFields(t)
@@ -179,37 +177,53 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-        protected virtual string WriteEntity(string fileName, DiffTable table)
+        protected virtual string WriteTableEntity(string fileName, DiffTable table)
         {
             var mListInfo = GetMListInfo(table);
 
-            if (mListInfo != null && mListInfo.TrivialElementColumn != null)
-                return null;
+            if (mListInfo != null)
+            {
+                if(mListInfo.TrivialElementColumn != null)
+                    return null;
+
+                var primaryKey = GetPrimaryKeyColumn(table);
+
+                var cols = table.Columns.Values.Where(col=>col != primaryKey && col != mListInfo.BackReferenceColumn).ToList();
+
+                return WriteEmbeddedEntity(fileName, table, GetEntityName(table.Name), cols);
+            }
 
             if (IsEnum(table.Name))
                 return WriteEnum(table);
 
+            return WriteEntity(fileName, table);
+        }
+
+        protected virtual string WriteEntity(string fileName, DiffTable table)
+        {
             var name = GetEntityName(table.Name);
 
             StringBuilder sb = new StringBuilder();
-            WriteAttributeTag(sb, GetEntityAttributes(table, mListInfo));
-            sb.AppendLine("public class {0} : {1}".Formato(name, GetBaseClass(table.Name, mListInfo)));
+            WriteAttributeTag(sb, GetEntityAttributes(table));
+            sb.AppendLine("public class {0} : {1}".Formato(name, GetEntityBaseClass(table.Name)));
             sb.AppendLine("{");
 
-            string beforeFields = WriteBeforeFields(table, name);
-            if (beforeFields != null)
+            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
+            if (multiColumnIndexComment != null)
             {
-                sb.Append(beforeFields.Indent(4));
+                sb.Append(multiColumnIndexComment.Indent(4));
                 sb.AppendLine();
             }
 
             var primaryKey = GetPrimaryKeyColumn(table);
 
-            foreach (var col in table.Columns.Values)
-            {
-                if (col == primaryKey || mListInfo != null && col == mListInfo.BackReferenceColumn)
-                    continue;
+            var columnGroups = (from col in table.Columns.Values
+                                where col != primaryKey
+                                group col by GetEmbeddedField(table, col) into g
+                                select g).ToList();
 
+            foreach (var col in columnGroups.SingleOrDefaultEx(g => g.Key == null).EmptyIfNull())
+            {
                 string field = WriteField(fileName, table, col);
 
                 if (field != null)
@@ -219,48 +233,88 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            if (mListInfo == null)
+            foreach (var gr in columnGroups.Where(g => g.Key != null))
             {
-                foreach (KeyValuePair<DiffTable, MListInfo> kvp in GetMListFields(table))
-                {
-                    string field = WriteFieldMList(fileName, table, kvp.Value, kvp.Key);
+                string embeddedField = WriteEmbeddedField(table, gr.Key);
 
-                    if (field != null)
-                    {
-                        sb.AppendLine(field.Indent(4));
-                        sb.AppendLine();
-                    }
+                if (embeddedField != null)
+                {
+                    sb.AppendLine(embeddedField.Indent(4));
+                    sb.AppendLine();
                 }
             }
 
-            string afterFields = WriteAfterFields(table, name);
-            if (afterFields != null)
+            foreach (KeyValuePair<DiffTable, MListInfo> kvp in GetMListFields(table))
             {
-                sb.Append(afterFields.Indent(4));
+                string field = WriteFieldMList(fileName, table, kvp.Value, kvp.Key);
+
+                if (field != null)
+                {
+                    sb.AppendLine(field.Indent(4));
+                    sb.AppendLine();
+                }
+            }
+
+            string toString = WriteToString(table);
+            if (toString != null)
+            {
+                sb.Append(toString.Indent(4));
                 sb.AppendLine();
             }
 
-            if (mListInfo == null)
+            sb.AppendLine("}");
+            sb.AppendLine();
+
+            foreach (var gr in columnGroups.Where(g => g.Key != null))
             {
-                string toString = WriteToString(table);
-                if (toString != null)
+                string embeddedEntity = WriteEmbeddedEntity(fileName, table, GetEmbeddedTypeName(gr.Key), gr.ToList());
+                if (embeddedEntity != null)
                 {
-                    sb.Append(toString.Indent(4));
+                    sb.AppendLine(embeddedEntity);
+                    sb.AppendLine();
+                }
+            }
+
+            string operations = WriteOperations(table);
+            if (operations != null)
+            {
+                sb.Append(operations);
+            }
+
+            return sb.ToString();
+        }
+
+        protected virtual string GetEmbeddedField(DiffTable table, DiffColumn col)
+        {
+            return null;
+        }
+
+        protected virtual string WriteEmbeddedEntity(string fileName, DiffTable table, string name, List<DiffColumn> columns)
+        {
+            StringBuilder sb = new StringBuilder();
+            WriteAttributeTag(sb, new[] { "Serializable" });
+            sb.AppendLine("public class {0} : {1}".Formato(name, typeof(EmbeddedEntity).Name));
+            sb.AppendLine("{");
+
+            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
+            if (multiColumnIndexComment != null)
+            {
+                sb.Append(multiColumnIndexComment.Indent(4));
+                sb.AppendLine();
+            }
+
+            foreach (var col in columns)
+            {
+                string field = WriteField(fileName, table, col);
+
+                if (field != null)
+                {
+                    sb.Append(field.Indent(4));
                     sb.AppendLine();
                 }
             }
 
             sb.AppendLine("}");
-
-            if (mListInfo == null)
-            {
-                string operations = WriteOperations(table);
-                if (operations != null)
-                {
-                    sb.AppendLine();
-                    sb.Append(operations);
-                }
-            }
 
             return sb.ToString();
         }
@@ -329,10 +383,12 @@ namespace Signum.Engine.CodeGeneration
             return false;
         }
 
-        protected virtual string WriteBeforeFields(DiffTable table, string name)
+        protected virtual string WriteMultiColumnIndexComment(DiffTable table, string name, IEnumerable<DiffColumn> columns)
         {
+            var columnNames = columns.Select(c=>c.Name).ToHashSet();
             StringBuilder sb = new StringBuilder();
-            foreach (var ix in table.Indices.Values.Where(a => a.Columns.Count > 1 || a.FilterDefinition.HasText()))
+            foreach (var ix in table.Indices.Values.Where(a => a.Columns.Count > 1 || a.FilterDefinition.HasText())
+                .Where(ix => ix.Columns.Intersect(columnNames).Any()))
             {
                 sb.AppendLine("//Add to Logic class");
                 sb.AppendLine("//sb.AddUniqueIndex<{0}>(e => new {{ {1} }}{2});".Formato(name,
@@ -341,11 +397,6 @@ namespace Signum.Engine.CodeGeneration
             }
 
             return sb.ToString().DefaultText(null);
-        }
-
-        protected virtual string WriteAfterFields(DiffTable table, string name)
-        {
-            return null;
         }
 
         protected virtual string WriteOperations(DiffTable table)
@@ -372,29 +423,23 @@ namespace Signum.Engine.CodeGeneration
             return null;
         }
 
-        protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table, MListInfo mListInfo)
+        protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table)
         {
             List<string> atts = new List<string> { "Serializable" };
 
-            if (mListInfo == null)
-            {
-                atts.Add("EntityKind(EntityKind." + GetEntityKind(table) + ", EntityData." + GetEntityData(table) + ")");
+            atts.Add("EntityKind(EntityKind." + GetEntityKind(table) + ", EntityData." + GetEntityData(table) + ")");
 
-                string tableNameAttribute = GetTableNameAttribute(table.Name, null);
+            string tableNameAttribute = GetTableNameAttribute(table.Name, null);
+            if (tableNameAttribute != null)
+                atts.Add(tableNameAttribute);
 
-                if (tableNameAttribute != null)
-                    atts.Add(tableNameAttribute);
+            string primaryKeyAttribute = GetPrimaryKeyAttribute(table);
+            if (primaryKeyAttribute != null)
+                atts.Add(primaryKeyAttribute);
 
-                string primaryKeyAttribute = GetPrimaryKeyAttribute(table);
-
-                if (primaryKeyAttribute != null)
-                    atts.Add(primaryKeyAttribute);
-
-
-                string ticksColumnAttribute = GetTicksColumnAttribute(table);
-                if (ticksColumnAttribute != null)
-                    atts.Add(ticksColumnAttribute);
-            }
+            string ticksColumnAttribute = GetTicksColumnAttribute(table);
+            if (ticksColumnAttribute != null)
+                atts.Add(ticksColumnAttribute);
 
             return atts;
         }
@@ -479,9 +524,9 @@ namespace Signum.Engine.CodeGeneration
             return objectName.Name + (IsEnum(objectName) ? "" : "DN");
         }
 
-        protected virtual string GetBaseClass(ObjectName objectName, MListInfo mListInfo)
+        protected virtual string GetEntityBaseClass(ObjectName objectName)
         {
-            return mListInfo != null ? typeof(EmbeddedEntity).Name : typeof(Entity).Name;
+            return typeof(Entity).Name;
         }
 
         protected virtual string WriteField(string fileName, DiffTable table, DiffColumn col)
@@ -572,7 +617,7 @@ namespace Signum.Engine.CodeGeneration
                     attributes.Add(sqlDbType);
             }
 
-            if (col.Name != DefaultColumnName(table, col))
+            if (GetEmbeddedField(table, col) != null || col.Name != DefaultColumnName(table, col))
                 attributes.Add("ColumnName(\"" + col.Name + "\")");
 
             if (HasUniqueIndex(table, col))
@@ -698,6 +743,31 @@ namespace Signum.Engine.CodeGeneration
                     .Key;
                 default: throw new NotImplementedException("Unknown translation for " + col.SqlDbType);
             }
+        }
+
+        protected virtual string WriteEmbeddedField(DiffTable table, string fieldName)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            fieldName = fieldName.FirstLower();
+            string propertyName = fieldName.FirstUpper();
+            string typeName = GetEmbeddedTypeName(fieldName);
+
+            sb.AppendLine("[NotNullable]");
+            sb.AppendLine("{0} {1};".Formato(typeName, fieldName));
+            sb.AppendLine("[NotNullValidator]");
+            sb.AppendLine("public {0} {1}".Formato(typeName, propertyName));
+            sb.AppendLine("{");
+            sb.AppendLine("    get { return " + fieldName + "; }");
+            sb.AppendLine("    set { Set(ref " + fieldName + ", value); }");
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+
+        protected virtual string GetEmbeddedTypeName(string fieldName)
+        {
+            return fieldName.FirstUpper() + "DN";
         }
 
         protected virtual string WriteFieldMList(string fileName, DiffTable table, MListInfo mListInfo, DiffTable relatedTable)
