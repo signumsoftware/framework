@@ -344,7 +344,6 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             this.Name = name;
         }
     }
- 
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public sealed class TicksColumnAttribute : SqlDbTypeAttribute
@@ -355,7 +354,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
         public Type Type { get; set; }
 
-        public TicksColumnAttribute(bool hasTicks)
+        public TicksColumnAttribute(bool hasTicks = true)
         {
             this.HasTicks = hasTicks;
         }
