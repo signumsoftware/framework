@@ -369,17 +369,39 @@ FROM {1} as [table]".Formato(
             string varName = "Constraint_" + tn.ToString().Replace(".", "_") + "_" + columnName;
 
             string command = @"
-declare @sql nvarchar(max)
-select  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
-from DB.sys.default_constraints dc
-join DB.sys.columns c on dc.parent_object_id = c.object_id and dc.parent_column_id = c.column_id
-where c.object_id = OBJECT_ID('{FullTable}') and c.name = '{Column}'
-exec DB.dbo.sp_executesql @sql"
+DECLARE @sql nvarchar(max)
+SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
+FROM DB.sys.default_constraints dc
+JOIN DB.sys.columns c ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id
+WHERE c.object_id = OBJECT_ID('{FullTable}') AND c.name = '{Column}'
+EXEC DB.dbo.sp_executesql @sql"
                 .Replace("DB.", db == null ? null : (db.ToString() + "."))
                 .Replace("@sql", "@" + varName)
                 .Replace("{FullTable}", tableName.ToString())
                 .Replace("{Table}", tn.ToString())
                 .Replace("{Column}", columnName.SqlEscape());
+
+            return new SqlPreCommandSimple(command);
+        }
+
+        public static SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
+        {
+            DatabaseName db = tableName.Schema.Database;
+
+            var tn = tableName.OnDatabase(null);
+
+            string varName = "PrimaryKey_Constraint_" + tn.ToString().Replace(".", "_");
+
+            string command = @"
+DECLARE @sql nvarchar(max)
+SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + kc.name  + '];' 
+FROM DB.sys.key_constraints kc
+WHERE kc.parent_object_id = OBJECT_ID('{FullTable}')
+EXEC DB.dbo.sp_executesql @sql"
+                .Replace("DB.", db == null ? null : (db.ToString() + "."))
+                .Replace("@sql", "@" + varName)
+                .Replace("{FullTable}", tableName.ToString())
+                .Replace("{Table}", tn.ToString());
 
             return new SqlPreCommandSimple(command);
         }
