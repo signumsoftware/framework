@@ -122,8 +122,18 @@ namespace Signum.Engine.Maps
 
             return TypeAttributesCache.GetOrCreate(entityType, () =>
             {
-                return new AttributeCollection(AttributeTargets.Class, (EnumEntity.Extract(entityType) ?? entityType).GetCustomAttributes(true).Cast<Attribute>().ToList(),
-                    () => AssertNotIncluded(entityType));
+                var list = entityType.GetCustomAttributes(true).Cast<Attribute>().ToList();
+
+                var enumType = EnumEntity.Extract(entityType);
+
+                if (enumType != null)
+                    foreach (var at in enumType.GetCustomAttributes(true).Cast<Attribute>().ToList())
+                    {
+                        list.RemoveAll(a => a.GetType() == at.GetType());
+                        list.Add(at);
+                    }
+
+                return new AttributeCollection(AttributeTargets.Class, list, () => AssertNotIncluded(entityType));
             });
         }
 
@@ -144,9 +154,9 @@ namespace Signum.Engine.Maps
             return FieldAttributes(propertyRoute).OfType<A>().FirstOrDefault();
         }
 
-        public A TypeAttribute<A>(Type type) where A : Attribute
+        public A TypeAttribute<A>(Type entityType) where A : Attribute
         {
-            return TypeAttributes(type).OfType<A>().FirstOrDefault();
+            return TypeAttributes(entityType).OfType<A>().FirstOrDefault();
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
