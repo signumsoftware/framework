@@ -182,6 +182,11 @@ namespace Signum.Entities
                     PropertyInfo = (PropertyInfo)fieldOrProperty;
                     FieldInfo = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);
                 }
+                else if(fieldOrProperty is MethodInfo && ((MethodInfo)fieldOrProperty).Name == "ToString")
+                {
+                    FieldInfo = (FieldInfo)fiToStr;
+                    PropertyInfo = null;
+                }
                 else
                 {
                     FieldInfo = (FieldInfo)fieldOrProperty;
@@ -192,6 +197,8 @@ namespace Signum.Entities
                 throw new NotSupportedException("Properties of {0} not supported".Formato(parent.Type));
 
         }
+
+        static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.toStr);
 
         public static PropertyRoute Root(Type rootEntity)
         {
