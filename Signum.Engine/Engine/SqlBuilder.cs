@@ -48,12 +48,12 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.Name, columnName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, string @default = null)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            if (@default == null)
-                @default = !column.Nullable && !column.Identity ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : "";
+            string defaulltComment = column.Default == null && !column.Nullable && !column.Identity ? 
+                " -- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : "";
 
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), (@default.HasText() ? " " + @default : null)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), defaulltComment));
         }
 
         private static bool IsNumber(SqlDbType sqlDbType)

@@ -147,8 +147,8 @@ namespace Signum.Engine
                         tab.Columns,
                         dif.Columns,
                         (cn, tabCol) => SqlPreCommandSimple.Combine(Spacing.Simple,
-                            SqlBuilder.AlterTableAddColumn(tab, tabCol, SimpleDefault(tab, tabCol))),
                             tabCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,                        
+                            SqlBuilder.AlterTableAddColumn(tab, tabCol)),
                         (cn, difCol) => SqlPreCommandSimple.Combine(Spacing.Simple,
                              difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, difCol.Name) : null,
                             SqlBuilder.AlterTableDropColumn(tab, cn)),
@@ -222,14 +222,6 @@ namespace Signum.Engine
                 }, Spacing.Double);
 
             return SqlPreCommand.Combine(Spacing.Triple, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
-        }
-
-        private static string SimpleDefault(ITable table, IColumn tabCol)
-        {
-            if (tabCol.Name == "Ticks")
-                return "DEFAULT(0)";
-
-            return null;
         }
 
         private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Index> dictionary)
