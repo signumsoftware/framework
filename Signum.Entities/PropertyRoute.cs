@@ -285,6 +285,8 @@ namespace Signum.Entities
                     return "[{0}]".Formato(type.Name);
                 case PropertyRouteType.MListItems:
                     return Parent.PropertyString() + "/";
+                case PropertyRouteType.LiteEntity:
+                    return Parent.ToString() + ".Entity";
             }
             throw new InvalidOperationException();
         }
