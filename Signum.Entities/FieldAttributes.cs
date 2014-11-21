@@ -287,20 +287,26 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
         public bool Identity { get; set; }
 
-        public bool IdentityBehaviour { get; set; }
+        bool identityBehaviour;
+        public bool IdentityBehaviour
+        {
+            get { return identityBehaviour; }
+            set
+            {
+                identityBehaviour = value;
+                if (Type == typeof(Guid))
+                {
+                    this.Default = identityBehaviour ? NewSequentialId : null;
+                }
+            }
+        }
 
         public PrimaryKeyAttribute(Type type, string name = "Id")
         {
             this.Type = type;
             this.Name = name;
-            this.Identity = true;
+            this.Identity = type == typeof(Guid) ? false : true;
             this.IdentityBehaviour = true;
-
-            if (type == typeof(Guid))
-            {
-                this.Default = NewSequentialId;
-                this.Identity = false;
-            }
         }
     }
 
