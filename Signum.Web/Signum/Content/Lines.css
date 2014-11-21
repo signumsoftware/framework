@@ -363,6 +363,16 @@ ul.nav-tabs
     width: auto;
 }
 
+.form-vertical .form-sm.form-group > label 
+{
+    margin-bottom:0px;
+}
+
+.form-vertical .form-xs.form-group > label 
+{
+    margin-bottom:0px;
+}
+
 .form-vertical .form-group
 {
     margin-left: 0;
