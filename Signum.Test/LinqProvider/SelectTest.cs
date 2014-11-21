@@ -540,6 +540,30 @@ namespace Signum.Test.LinqProvider
                 }).ToList();
         }
 
+        [TestMethod]
+        public void SelectToString()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTryToString()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.TryToString()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectToStringLite()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToLite().ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTryToStringLite()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToLite().TryToString()).ToList();
+        }
+
 
         [TestMethod]
         public void SelectConditionEnum()
