@@ -1037,6 +1037,13 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if(m.Method.Name == "TryToString")
+            {
+                var toStr = BindMethodCall(Expression.Call(source, EntityExpression.ToStringMethod));
+
+                return toStr;
+            }
+
             if (m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
             {
                 if (source is EntityExpression)
