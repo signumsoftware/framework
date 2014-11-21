@@ -60,6 +60,11 @@ namespace Signum.Web
                     return h.LightEntityLine((Lite<IEntity>)o, false);
                 })),
 
+                 new FormatterRule("Guid", c=>c.Type.UnNullify() == typeof(Guid), c => new CellFormatter((h,o) => 
+                {
+                    return o != null ? (new HtmlTag("span").Class("guid").SetInnerText(o.ToString().Start(5) + "…" + o.ToString().End(5))) : MvcHtmlString.Empty;
+                }){ WriteData = true, TextAlign = "middle" }),
+
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
                     return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;

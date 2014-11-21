@@ -251,6 +251,12 @@ th.sf-th-selection > input[type=checkbox]
     height: 16px;
 }
 
+
+span.guid{
+    color:gray;
+    white-space:nowrap;
+}
+
 /* sf-entity-ctxmenu-success */
 
 tr.sf-entity-ctxmenu-success
