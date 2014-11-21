@@ -103,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
 
         Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
         {
-            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key));
+            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key, "subtokens for " + this.Key));
         }
 
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
