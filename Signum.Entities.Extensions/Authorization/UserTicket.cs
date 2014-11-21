@@ -55,7 +55,7 @@ namespace Signum.Entities.Authorization
 
         public static Tuple<PrimaryKey, string> ParseTicket(string ticket)
         {
-            Match m = Regex.Match(ticket, @"^(?<id>\d+)\|(?<ticket>.*)$");
+            Match m = Regex.Match(ticket, @"^(?<id>.*)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
             return new Tuple<PrimaryKey, string>(PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserDN)), m.Groups["ticket"].Value);
         }
