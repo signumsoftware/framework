@@ -13,7 +13,7 @@ namespace Signum.Web.Basic
 {
     public static class BasicClient
     {
-        public static string ViewPrefix = "~/basic/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Basic/Views/{0}.cshtml";
 
         public static void Start()
         {
