@@ -13,6 +13,8 @@ using System.Web.Script.Serialization;
 using Signum.Engine.Translation;
 using Signum.Entities.Translation;
 using Signum.Utilities;
+using System.Web.Configuration;
+using System.Reflection;
 
 namespace Signum.Web.Translation
 {
@@ -35,10 +37,83 @@ namespace Signum.Web.Translation
             return list.Select(text => "In{0}({1})".Formato(to, text)).ToList();
         }
 
-
         public bool AutoSelect()
         {
             return false;
+        }
+    }
+
+    public class AlreadyTranslatedTranslator : ITranslator
+    {
+        ITranslator Inner;
+
+        public AlreadyTranslatedTranslator(ITranslator inner)
+        {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
+
+            this.Inner = inner;
+        }
+
+        public List<string> TranslateBatch(List<string> list, string from, string to)
+        {
+            var alreadyTranslated = (from ass in AppDomain.CurrentDomain.GetAssemblies()
+                                     let daca = ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()
+                                     where daca != null && daca.DefaultCulture == @from
+                                     from trans in GetAllTranslations(ass, @from, to)
+                                     group trans.Value by trans.Key into g
+                                     let only = g.Distinct().Only()
+                                     where only != null
+                                     select KVP.Create(g.Key, only))
+                                     .ToDictionary();
+
+            var dic = list.Distinct().ToDictionary(l=>l, l=>alreadyTranslated.TryGetC(l));
+ 
+            if(dic.Any(kvp=>kvp.Value == null))
+            {
+                var subList = dic.Where(kvp => kvp.Value == null).Select(kvp => kvp.Key).ToList();
+
+                var subResult = Inner.TranslateBatch(subList, from, to);
+
+                dic.SetRange(subList, subResult);
+            }
+
+            return list.Select(dic.GetOrThrow).ToList();
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
+        {
+            var locFrom = DescriptionManager.GetLocalizedAssembly(assembly, CultureInfo.GetCultureInfo(from));
+            var locTo = DescriptionManager.GetLocalizedAssembly(assembly, CultureInfo.GetCultureInfo(to));
+
+            if (locFrom == null || locTo == null)
+                return Enumerable.Empty<KeyValuePair<string, string>>();
+
+            return (locFrom.Types.JoinDictionary(locTo.Types, (type, ft, tt)=>GetAllTranslations(ft, tt))).Values.SelectMany(pairs => pairs);
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(LocalizedType from, LocalizedType to)
+        {
+            if(from.Description.HasText() && to.Description.HasText())
+                yield return KVP.Create(from.Description, to.Description);
+
+            if(from.PluralDescription.HasText() && to.PluralDescription.HasText())
+                yield return KVP.Create(from.PluralDescription, to.PluralDescription);
+
+            foreach (var item in from.Members)
+	        {
+                var toMember = to.Members.TryGetC(item.Key);
+
+                if(toMember.HasText())
+                    yield return KVP.Create(item.Value, toMember);
+	        }
+        }
+
+        
+
+        public bool AutoSelect()
+        {
+            return true;
         }
     }
 
