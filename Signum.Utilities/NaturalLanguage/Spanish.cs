@@ -52,7 +52,7 @@ namespace Signum.Utilities.NaturalLanguage
     public class SpanishGenderDetector : IGenderDetector
     {
         //http://roble.pntic.mec.es/acid0002/index_archivos/Gramatica/genero_sustantivos.htm
-        Dictionary<string, char> terminationIsFemenine = new Dictionary<string, char>()
+        Dictionary<string, char> terminations = new Dictionary<string, char>()
         {
             {"umbre", 'f' },
            
@@ -84,12 +84,9 @@ namespace Signum.Utilities.NaturalLanguage
             if (string.IsNullOrEmpty(name))
                 return null;
 
-            int index = name.IndexOf(' ');
+            name = name.TryBefore(' ') ?? name;
 
-            if (index != -1)
-                return GetGender(name.Substring(0, index));
-
-            foreach (var kvp in terminationIsFemenine)
+            foreach (var kvp in terminations)
             {
                 if (name.EndsWith(kvp.Key))
                     return kvp.Value;
