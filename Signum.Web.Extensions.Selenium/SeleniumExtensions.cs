@@ -106,7 +106,7 @@ namespace Signum.Web.Selenium
         }
 
         public static string PageLoadTimeout = "20000";
-        public static int AjaxTimeout = 10000;
+        public static int AjaxTimeout = 20000;
         public static int AjaxWait = 200;
 
         public static void WaitForPageToLoad(this ISelenium selenium)
