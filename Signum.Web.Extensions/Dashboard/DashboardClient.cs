@@ -101,7 +101,7 @@ namespace Signum.Web.Dashboard
 
                 WidgetsHelper.GetEmbeddedWidget += ctx =>
                 {
-                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is Entity))
+                    if (!DashboardPermission.ViewDashboard.IsAuthorized() || !(ctx.Entity is Entity) || ((Entity)ctx.Entity).IsNew)
                         return null;
 
                     var dashboard = DashboardLogic.GetEmbeddedDashboard(ctx.Entity.GetType());
