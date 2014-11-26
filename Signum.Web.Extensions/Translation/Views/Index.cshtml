@@ -41,7 +41,7 @@ else
                         <br />
                         @if (!tf.IsDefault && tf.CultureInfo.IsNeutralCulture)
                         {
-                        @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() })    
+                        @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false), new { @class = "status-" + tf.Status().ToString() })    
                         }
                     </td>
                 }

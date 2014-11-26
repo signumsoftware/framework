@@ -12,17 +12,24 @@ namespace Signum.Web.Translation
     {
         public static int MaxTotalSyncCharacters = 500;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, out int totalTypes)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, bool translatedOnly, out int totalTypes)
         {
             var types = GetMergeChanges(target, master, support);
 
             totalTypes = types.Count;
 
-
-            if (types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
+            if (!translatedOnly && types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
                 types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
-            return Translate(translator, target, types);
+            var result =  Translate(translator, target, types);
+
+            if (translatedOnly)
+                result.Types = result.Types.Where(t =>
+                    t.TypeConflict != null && t.TypeConflict.Values.Any(tc => tc.Translated.HasText()) ||
+                    t.MemberConflicts != null && t.MemberConflicts.Values.Any(m => m.Values.Any(mc => mc.Translated.HasText())))
+                    .ToList();
+
+            return result;
         }
 
         private static LocalizedAssemblyChanges Translate(ITranslator translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)

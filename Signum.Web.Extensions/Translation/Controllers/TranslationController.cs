@@ -169,7 +169,7 @@ namespace Signum.Web.Translation.Controllers
             Member,
         }
 
-        public ActionResult Sync(string assembly, string culture)
+        public ActionResult Sync(string assembly, string culture, bool translatedOnly)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
@@ -185,7 +185,7 @@ namespace Signum.Web.Translation.Controllers
             var target = reference.Extract(targetCulture); 
             DictionaryByTypeName(target); //To avoid finding duplicated types on save
             int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), true, out totalTypes);
 
             ViewBag.TotalTypes = totalTypes;
             ViewBag.Culture = targetCulture;
