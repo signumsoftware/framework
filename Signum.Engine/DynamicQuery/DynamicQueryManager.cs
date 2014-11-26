@@ -317,6 +317,9 @@ namespace Signum.Engine.DynamicQuery
 
         public Implementations? ForceImplementations;
         public PropertyRoute ForcePropertyRoute;
+        public string ForceFormat;
+        public string ForceUnit;
+
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -362,6 +365,12 @@ namespace Signum.Engine.DynamicQuery
 
                 if (ForceImplementations != null)
                     result.Implementations = ForceImplementations;
+
+                if (ForceFormat != null)
+                    result.Format = ForceFormat;
+
+                if (ForceUnit != null)
+                    result.Unit = ForceUnit;
               
                 result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
 
