@@ -255,6 +255,16 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Dashboard\DashboardOmniboxProvider.cs" />
+    <Compile Include="Isolation\Views\Isolation.generated.cs">
+      <DependentUpon>Isolation.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Isolation\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Controllers\MailingController.cs" />
     <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
       <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
@@ -1414,6 +1424,15 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Isolation\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Isolation\Views\Isolation.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Isolation.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Isolation\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>

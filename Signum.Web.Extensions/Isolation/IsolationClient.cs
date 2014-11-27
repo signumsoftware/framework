@@ -27,8 +27,8 @@ namespace Signum.Web.Isolation
                 WidgetsHelper.GetWidget += ctx => ctx.Entity is Entity && MixinDeclarations.IsDeclared(ctx.Entity.GetType(), typeof(IsolationMixin)) ?
                     IsolationWidgetHelper.CreateWidget(ctx) : null;
 
-                Navigator.AddSetting(new EntitySettings<IsolationDN>());
-
+                Navigator.AddSetting(new EntitySettings<IsolationDN> { PartialViewName = _ => ViewPrefix.Formato("Isolation") });
+                 
                 Constructor.ClientManager.GlobalPreConstructors += ctx =>
                     (!MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) || IsolationDN.Current != null) ? null :
                     Module["getIsolation"](ClientConstructorManager.ExtraJsonParams, ctx.Prefix,
