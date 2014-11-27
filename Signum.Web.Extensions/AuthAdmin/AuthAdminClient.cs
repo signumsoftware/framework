@@ -141,7 +141,7 @@ namespace Signum.Web.AuthAdmin
         {
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) =>
             {
-                if (TypeAuthLogic.GetAllowed(PackToRule.GetOrThrow(typeof(T))).MaxUI() >= TypeAllowedBasic.Modify())
+                if (TypeAuthLogic.GetAllowed(PackToRule.GetOrThrow(typeof(T))).MaxUI() >= TypeAllowedBasic.Modify)
                     return new[] 
                     { 
                         new ToolBarButton (ctx.Prefix,partialViewName)
@@ -158,7 +158,6 @@ namespace Signum.Web.AuthAdmin
 
             });
         }
-
 
         static Dictionary<Type, Type> PackToRule = new Dictionary<Type, Type> 
         {

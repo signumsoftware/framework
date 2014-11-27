@@ -53,18 +53,6 @@ namespace Signum.Engine.Files
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
-                dqm.RegisterQuery(typeof(FileRepositoryDN), () =>
-                    from r in Database.Query<FileRepositoryDN>()
-                    select new
-                    {
-                        Entity = r,
-                        r.Id,
-                        r.Name,
-                        r.Active,
-                        r.PhysicalPrefix,
-                        r.WebPrefix
-                    });
-
                 dqm.RegisterQuery(typeof(FilePathDN), () =>
                     from p in Database.Query<FilePathDN>()
                     select new
@@ -77,6 +65,47 @@ namespace Signum.Engine.Files
                         p.FullWebPath,
                         p.Repository
                     });
+
+                new Graph<FilePathDN>.Execute(FilePathOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (fp, _) =>
+                    {
+                        if (!fp.IsNew)
+                        {
+                            var originalData = fp.ToLite().InDB(f => new { FileName = f.FileName, Sufix = f.Sufix, FullPhysicalPath = f.FullPhysicalPath });
+
+                            if (fp.FileName != originalData.FileName || fp.Sufix != originalData.Sufix || fp.FullPhysicalPath != originalData.FullPhysicalPath)
+                            {
+                                using (Transaction tr = new Transaction())
+                                {
+                                    var preSufix = originalData.Sufix.Substring(0, originalData.Sufix.Length - originalData.FileName.Length);
+                                    fp.Sufix = Path.Combine(preSufix, fp.FileName);
+                                    fp.Save();
+                                    System.IO.File.Move(originalData.FullPhysicalPath, fp.FullPhysicalPath);
+                                    tr.Commit();
+                                }
+                            }
+                        }
+                    }
+                }.Register();
+
+                OperationLogic.SetProtectedSave<FilePathDN>(false);
+
+                dqm.RegisterQuery(typeof(FileRepositoryDN), () =>
+                    from r in Database.Query<FileRepositoryDN>()
+                    select new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.Name,
+                        r.Active,
+                        r.PhysicalPrefix,
+                        r.WebPrefix
+                    });
+
+
 
                 dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
                     from f in Database.Query<FileTypeSymbol>()
@@ -97,6 +126,10 @@ namespace Signum.Engine.Files
                     Lite = false,
                     Execute = (fr, _) => { }
                 }.Register();
+
+
+
+
             }
         }
 
@@ -170,6 +203,8 @@ namespace Signum.Engine.Files
                     while (!SaveFile(fp));
                 }
             }
+
+
         }
 
         const long ERROR_DISK_FULL = 112L;
@@ -262,7 +297,7 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathDN, string> Year_Month_GuidExtension_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
 
         public static readonly Func<FilePathDN, string> YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
-        public static readonly Func<FilePathDN, string> Isolated_YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(IsolationDN.Current.IdOrNull.ToString()??"None",TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));       
+        public static readonly Func<FilePathDN, string> Isolated_YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(IsolationDN.Current.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
 
     }
 }

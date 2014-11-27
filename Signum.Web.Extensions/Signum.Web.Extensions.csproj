@@ -232,6 +232,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Files\Views\FilePath.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FilePath.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Help\Views\MiniMenu.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1433,6 +1438,10 @@
       <LastGenOutput>Isolation.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Isolation\Views\Web.config" />
+    <Content Include="Files\Views\FilePath.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FilePath.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
