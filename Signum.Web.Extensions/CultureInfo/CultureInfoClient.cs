@@ -19,7 +19,7 @@ namespace Signum.Web.Basic
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.RegisterArea(typeof(CultureInfoClient), "Basic");
+                Navigator.RegisterArea(typeof(CultureInfoClient));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

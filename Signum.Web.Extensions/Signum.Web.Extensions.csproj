@@ -169,7 +169,17 @@
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\UserTicketClient.cs" />
-    <Compile Include="Basic\CultureInfoClient.cs" />
+    <Compile Include="CultureInfo\CultureInfoClient.cs" />
+    <Compile Include="CultureInfo\Views\CultureInfoView.generated.cs">
+      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="CultureInfo\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="DiffLog\DiffLogClient.cs" />
     <Compile Include="Dashboard\GridRepeaterHelper.cs" />
     <Compile Include="Dashboard\Views\Admin\DashboardAdmin.generated.cs">
@@ -875,11 +885,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Basic\Views\CultureInfoView.generated.cs">
-      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Translation\Views\Index.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1400,6 +1405,15 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MiniMenu.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="CultureInfo\Views\CultureInfoView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="CultureInfo\Views\Web.config" />
+    <Content Include="CultureInfo\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1656,10 +1670,6 @@
     <Content Include="Translation\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Basic\Views\CultureInfoView.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Translation\Views\TranslatorUserCulture.cshtml">
       <Generator>RazorGenerator</Generator>
