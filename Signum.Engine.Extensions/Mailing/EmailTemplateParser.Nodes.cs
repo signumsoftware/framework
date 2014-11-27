@@ -22,50 +22,7 @@ namespace Signum.Engine.Mailing
 {
     public static partial class EmailTemplateParser
     {
-        public class ParsedToken
-        {
-            public string String;
-            public QueryToken QueryToken;
-            public string Variable;
-
-            public string SimplifyToken(ScopedDictionary<string, ParsedToken> variables, string token)
-            {
-                var variable = (from kvp in variables
-                                let t = kvp.Value.QueryToken.FullKey()
-                                where token == t || token.StartsWith(t + ".")
-                                orderby t.Length descending
-                                select kvp).FirstOrDefault();
-
-                if (variable.Key.HasText())
-                {
-                    var fullKey = variable.Value.QueryToken.FullKey();
-
-                    return variable.Key + token.RemoveStart(fullKey.Length);
-                }
-
-                return token;
-            }
-
-            internal void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables, string afterToken)
-            {
-                sb.Append("[");
-                sb.Append(QueryToken == null ? String : SimplifyToken(variables, QueryToken.FullKey()));
-
-                if (afterToken.HasItems())
-                    sb.Append(afterToken);
-
-                sb.Append("]");
-
-                if (Variable.HasItems())
-                    sb.Append(" as " + Variable);
-            }
-
-            internal void Declare(ScopedDictionary<string, ParsedToken> newVars)
-            {
-                if (Variable.HasText())
-                    newVars.Add(Variable, this);
-            }
-        }
+      
 
         public abstract class TextNode
         {

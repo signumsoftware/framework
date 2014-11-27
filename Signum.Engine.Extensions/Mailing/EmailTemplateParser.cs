@@ -123,12 +123,6 @@ namespace Signum.Engine.Mailing
 
         internal class TemplateWalker
         {
-            public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
-
-            public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
-            public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
-
-
             QueryDescription qd;
             Type modelType;
             string text;
@@ -192,37 +186,7 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            ParsedToken TryParseToken(string tokenString, string variable, SubTokensOptions options)
-            {
-                ParsedToken result = new ParsedToken { String = tokenString, Variable = variable };
-
-                if (tokenString.StartsWith("$"))
-                {
-                    string v = tokenString.TryBefore('.') ?? tokenString;
-
-                    ParsedToken token;
-
-                    if (!variables.TryGetValue(v, out token))
-                    {
-                        AddError(false, "Variable '{0}' is not defined at this scope".Formato(v));
-                        return result;
-                    }
-
-                    var after = tokenString.TryAfter('.');
-
-                    tokenString = token.QueryToken.FullKey() + (after == null ? null : ("." + after));
-                }
-
-                try
-                {
-                    result.QueryToken = QueryUtils.Parse(tokenString, qd, options);
-                }
-                catch (Exception ex)
-                {
-                    AddError(false, ex.Message);
-                }
-                return result;
-            }
+           
 
             public BlockNode PopBlock(Type type)
             {
@@ -254,7 +218,7 @@ namespace Signum.Engine.Mailing
                 this.errors = new List<Error>(); 
                 PushBlock(mainBlock);
 
-                var matches = KeywordsRegex.Matches(text);
+                var matches = TemplateRegex.KeywordsRegex.Matches(text);
 
                 if (matches.Count == 0)
                 {
@@ -277,7 +241,7 @@ namespace Signum.Engine.Mailing
                     {
                         case "":
                         case "raw":
-                            var tok = TokenFormatRegex.Match(token);
+                            var tok = TemplateRegex.TokenFormatRegex.Match(token);
                             if (!tok.Success)
                                 AddError(true, "{0} has invalid format".Formato(token));
                             else
@@ -311,7 +275,7 @@ namespace Signum.Engine.Mailing
                             {
                                 AnyNode any;
                                 ParsedToken t;
-                                var filter = TokenOperationValueRegex.Match(token);
+                                var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
                                     t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
@@ -361,7 +325,7 @@ namespace Signum.Engine.Mailing
                             {
                                 IfNode ifn;
                                 ParsedToken t;
-                                var filter = TokenOperationValueRegex.Match(token);
+                                var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
                                     t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
@@ -404,6 +368,15 @@ namespace Signum.Engine.Mailing
                     stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
 
                 stack.Pop();
+            }
+
+            private ParsedToken TryParseToken(string tokenString, string variable, SubTokensOptions options)
+            {
+                string error;
+                ParsedToken result = ParsedToken.TryParseToken(tokenString, variable, options, this.qd, variables, out error);
+                if (error.HasText())
+                    this.AddError(false, error);
+                return result;
             }
         }
 

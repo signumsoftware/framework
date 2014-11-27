@@ -8,7 +8,7 @@
     <ProjectGuid>{7D851227-5294-4BEB-990E-56B4FBB7A148}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.Entities.Extensions</RootNamespace>
+    <RootNamespace>Signum.Entities</RootNamespace>
     <AssemblyName>Signum.Entities.Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -189,6 +189,8 @@
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
+    <Compile Include="Word\WordReportDN.cs" />
+    <Compile Include="Word\WordTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
