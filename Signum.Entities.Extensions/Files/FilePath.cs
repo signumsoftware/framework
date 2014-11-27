@@ -9,12 +9,15 @@ using Signum.Utilities;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using System.Web;
+using Signum.Entities.Patterns;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional), TicksColumn(false)]
-    public class FilePathDN : ImmutableEntity, IFile
+    [Serializable,  EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
+    public class FilePathDN : LockableEntity, IFile	
     {
+        public static string ForceExtensionIfEmpty = ".dat";
+
         public FilePathDN() { }
 
         public FilePathDN(FileTypeSymbol fileType)
@@ -36,21 +39,37 @@ namespace Signum.Entities.Files
             this.BinaryFile = fileData;
         }
 
+
+        DateTime creationDate = TimeZoneManager.Now;
+        public DateTime CreationDate
+        {
+            get { return creationDate; }
+            private set { Set(ref creationDate, value); }
+        }
+
         [NotNullable, SqlDbType(Size = 260)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value); }
+            set
+            {
+                var newValue=fileName;
+                if (ForceExtensionIfEmpty.HasText() && !Path.GetExtension(value).HasText())
+                    value += ForceExtensionIfEmpty;
+
+                SetToStr(ref fileName, value);
+               
+            }
         }
 
         [Ignore]
-        byte[] binaryFile;
+        byte[] binaryFile;   
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set 
+            set
             {
                 if (Set(ref binaryFile, value) && binaryFile != null)
                     FileLength = binaryFile.Length;
@@ -66,7 +85,7 @@ namespace Signum.Entities.Files
 
         public string FileLengthString
         {
-            get { return ((long)FileLength).ToComputerSize(true);}
+            get { return ((long)FileLength).ToComputerSize(true); }
         }
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -75,7 +94,7 @@ namespace Signum.Entities.Files
         public string Sufix
         {
             get { return sufix; }
-            internal set { Set(ref sufix, value); }
+             set { Set(ref sufix, value); }
         }
 
         [NotNullable]
@@ -100,7 +119,7 @@ namespace Signum.Entities.Files
             get { return Repository == null ? null : Path.Combine(Repository.FullPhysicalPrefix, Sufix); }
         }
 
-        static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 
+        static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp =>
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
                 fp.Repository.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
@@ -117,6 +136,13 @@ namespace Signum.Entities.Files
             return "{0} - {1}".Formato(FileName, ((long)FileLength).ToComputerSize(true));
         }
     }
+
+
+    public static class FilePathOperation
+    {
+        public static readonly ExecuteSymbol<FilePathDN> Save = OperationSymbol.Execute<FilePathDN>();        
+    }
+
 
     public class HttpFilePathUtils
     {

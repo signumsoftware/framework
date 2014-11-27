@@ -11,7 +11,7 @@ using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
-using System.Reflection; 
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -36,12 +36,12 @@ namespace Signum.Engine.Authorization
                     PropertyRouteLogic.ToPropertyRoute,
                     PropertyRouteLogic.ToPropertyRouteDN,
                     merger: new PropertyMerger(),
-                    invalidateWithTypes : true,
+                    invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
 
                 PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
-                
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(), 
+
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(),
                     exportAll ? TypeLogic.TypeToDN.Keys.SelectMany(PropertyRoute.GenerateRoutes).ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
@@ -49,8 +49,8 @@ namespace Signum.Engine.Authorization
 
                     string replacementKey = typeof(OperationSymbol).Name;
 
-                    var groups =  x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
-                        .AgGroupToDictionary(a=>a.Type, gr=>gr.Select(pp=> pp.Property).ToHashSet());
+                    var groups = x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
+                        .AgGroupToDictionary(a => a.Type, gr => gr.Select(pp => pp.Property).ToHashSet());
 
                     foreach (var item in groups)
                     {
@@ -102,7 +102,7 @@ namespace Signum.Engine.Authorization
         struct PropertyPair
         {
             public readonly string Type;
-            public readonly  string Property;
+            public readonly string Property;
             public PropertyPair(string str)
             {
                 var index = str.IndexOf("|");
@@ -114,7 +114,7 @@ namespace Signum.Engine.Authorization
 
         public static PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var result = new PropertyRulePack { Role = role, Type = typeDN }; 
+            var result = new PropertyRulePack { Role = role, Type = typeDN };
             cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeDN));
 
             var coercer = PropertyCoercer.Instance.GetCoerceValue(role);
@@ -129,6 +129,8 @@ namespace Signum.Engine.Authorization
         {
             cache.SetRules(rules, r => r.RootType == rules.Type); 
         }
+
+
 
         public static PropertyAllowed GetPropertyAllowed(Lite<RoleDN> role, PropertyRoute property)
         {

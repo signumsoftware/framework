@@ -188,31 +188,28 @@ namespace Signum.Entities.Authorization
 
         internal void SetRules(BaseRulePack<TypeAllowedRule> rules)
         {
-            using (AuthLogic.Disable())
-            {
-                var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
-                var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
+            var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
+            var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(should, current,
-                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
-                    (type, pr) => pr.Delete(),
-                    (type, ar, pr) =>
+            Synchronizer.Synchronize(should, current,
+                (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
+                (type, pr) => pr.Delete(),
+                (type, ar, pr) =>
+                {
+                    pr.Allowed = ar.Allowed.Fallback;
+
+                    var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
                     {
-                        pr.Allowed = ar.Allowed.Fallback;
+                        Allowed = a.Allowed,
+                        Condition = a.TypeCondition,
+                    }).ToMList();
 
-                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
-                        {
-                            Allowed = a.Allowed,
-                            Condition = a.TypeCondition,
-                        }).ToMList();
+                    if (!pr.Conditions.SequenceEqual(shouldConditions))
+                        pr.Conditions = shouldConditions;
 
-                        if (!pr.Conditions.SequenceEqual(shouldConditions))
-                            pr.Conditions = shouldConditions;
-
-                        if (pr.IsGraphModified)
-                            pr.Save();
-                    });
-            }
+                    if (pr.IsGraphModified)
+                        pr.Save();
+                });
         }
 
         internal TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type key)
