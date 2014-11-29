@@ -203,21 +203,18 @@ namespace Signum.Entities.Authorization
 
         internal void SetRules(BaseRulePack<AR> rules, Expression<Func<R, bool>> filterResources)
         {
-            using (AuthLogic.Disable())
-            {
-                var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
-                var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
+            var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
+            var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(should, current, 
-                    (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(), 
-                    (p, pr) => pr.Delete(), 
-                    (p, ar, pr) =>
-                    {
-                        pr.Allowed = ar.Allowed;
-                        if (pr.IsGraphModified)
-                            pr.Save();
-                    });
-            }
+            Synchronizer.Synchronize(should, current,
+                (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
+                (p, pr) => pr.Delete(),
+                (p, ar, pr) =>
+                {
+                    pr.Allowed = ar.Allowed;
+                    if (pr.IsGraphModified)
+                        pr.Save();
+                });
         }
 
         internal A GetAllowed(Lite<RoleDN> role, K key)

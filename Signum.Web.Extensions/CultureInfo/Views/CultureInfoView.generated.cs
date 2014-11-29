@@ -9,12 +9,12 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Basic.Views
+namespace Signum.Web.CultureInfo.Views
 {
     using System;
     using System.Collections.Generic;
     
-    #line 2 "..\..\Basic\Views\CultureInfoView.cshtml"
+    #line 2 "..\..\CultureInfo\Views\CultureInfoView.cshtml"
     using System.Globalization;
     
     #line default
@@ -34,7 +34,7 @@ namespace Signum.Web.Basic.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Basic\Views\CultureInfoView.cshtml"
+    #line 1 "..\..\CultureInfo\Views\CultureInfoView.cshtml"
     using Signum.Entities.Basics;
     
     #line default
@@ -43,7 +43,7 @@ namespace Signum.Web.Basic.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Basic/Views/CultureInfoView.cshtml")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/CultureInfo/Views/CultureInfoView.cshtml")]
     public partial class CultureInfoView : System.Web.Mvc.WebViewPage<dynamic>
     {
         public CultureInfoView()
@@ -52,7 +52,7 @@ namespace Signum.Web.Basic.Views
         public override void Execute()
         {
             
-            #line 3 "..\..\Basic\Views\CultureInfoView.cshtml"
+            #line 3 "..\..\CultureInfo\Views\CultureInfoView.cshtml"
  using (var tc = Html.TypeContext<CultureInfoDN>())
 {
     
@@ -60,7 +60,7 @@ namespace Signum.Web.Basic.Views
             #line default
             #line hidden
             
-            #line 5 "..\..\Basic\Views\CultureInfoView.cshtml"
+            #line 5 "..\..\CultureInfo\Views\CultureInfoView.cshtml"
 Write(Html.ValueLine(tc, t => t.Name, vl => 
     { 
         vl.ValueLineType = ValueLineType.Enum;
@@ -79,7 +79,7 @@ Write(Html.ValueLine(tc, t => t.Name, vl =>
             #line default
             #line hidden
             
-            #line 17 "..\..\Basic\Views\CultureInfoView.cshtml"
+            #line 17 "..\..\CultureInfo\Views\CultureInfoView.cshtml"
       ;
 }
             

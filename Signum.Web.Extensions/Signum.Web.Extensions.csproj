@@ -179,6 +179,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChangePassword.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Auth\Views\ResetPasswordSend.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResetPasswordSend.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="CultureInfo\CultureInfoClient.cs" />
+    <Compile Include="CultureInfo\Views\CultureInfoView.generated.cs">
+      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Auth\Views\ChangePasswordSuccess.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -204,11 +215,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResetPassword.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Auth\Views\ResetPasswordSend.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ResetPasswordSend.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Auth\Views\ResetPasswordSetNew.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -224,7 +230,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SetPassword.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Basic\CultureInfoClient.cs" />
+    <Compile Include="CultureInfo\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="DiffLog\DiffLogClient.cs" />
     <Compile Include="Dashboard\GridRepeaterHelper.cs" />
     <Compile Include="Dashboard\Views\Admin\DashboardAdmin.generated.cs">
@@ -278,6 +288,11 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\HelpTranslator.cs" />
+    <Compile Include="Files\Views\FilePath.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FilePath.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Help\Views\MiniMenu.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -301,6 +316,16 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Dashboard\DashboardOmniboxProvider.cs" />
+    <Compile Include="Isolation\Views\Isolation.generated.cs">
+      <DependentUpon>Isolation.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Isolation\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Controllers\MailingController.cs" />
     <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
       <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
@@ -876,11 +901,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Basic\Views\CultureInfoView.generated.cs">
-      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Translation\Views\Index.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1401,6 +1421,28 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MiniMenu.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="CultureInfo\Views\CultureInfoView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="CultureInfo\Views\Web.config" />
+    <Content Include="CultureInfo\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Isolation\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Isolation\Views\Isolation.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Isolation.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Isolation\Views\Web.config" />
+    <Content Include="Files\Views\FilePath.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FilePath.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1657,10 +1699,6 @@
     <Content Include="Translation\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Basic\Views\CultureInfoView.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Translation\Views\TranslatorUserCulture.cshtml">
       <Generator>RazorGenerator</Generator>

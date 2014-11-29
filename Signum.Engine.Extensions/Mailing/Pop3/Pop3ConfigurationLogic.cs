@@ -66,7 +66,7 @@ namespace Signum.Engine.Mailing.Pop3
             {
                 GetPop3Client = getPop3Client;
 
-                FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.YearMonth_Guid_Filename_Sufix });
+                FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.Isolated_YearMonth_Guid_Filename_Sufix });
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
 

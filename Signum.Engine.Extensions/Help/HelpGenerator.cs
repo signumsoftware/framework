@@ -139,7 +139,7 @@ namespace Signum.Engine.Help
         static string PropertyLink(this PropertyRoute route)
         {
             string cleanName = TypeLogic.GetCleanName(route.RootType);
-            return "[p:" + cleanName + "." + route.PropertyString() + "]";
+            return "[p:" + cleanName + "." + route.PropertyString().Replace("[", "[[").Replace("]", "]]") + "]";
         }
 
         static string NaturalTypeDescription(Type type)

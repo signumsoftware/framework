@@ -349,7 +349,9 @@ namespace Signum.Engine.Cache
             var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
 
             if (type != "SQL_LOGIN")
-                throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+            {
+                //throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+            }
         }
 
         private static InvalidOperationException EnableBlocker(DatabaseName database)
