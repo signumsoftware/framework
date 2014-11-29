@@ -20,6 +20,7 @@ using Signum.Web.Translation.Views;
 using Signum.Web.Omnibox;
 using Signum.Web.PortableAreas;
 using Signum.Web.Translation.Controllers;
+using Signum.Web.Cultures;
 
 namespace Signum.Web.Translation
 {

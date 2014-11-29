@@ -184,8 +184,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResetPasswordSend.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="CultureInfo\CultureInfoClient.cs" />
-    <Compile Include="CultureInfo\Views\CultureInfoView.generated.cs">
+    <Compile Include="Cultures\CultureInfoClient.cs" />
+    <Compile Include="Cultures\Views\CultureInfoView.generated.cs">
       <DependentUpon>CultureInfoView.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -230,7 +230,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SetPassword.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="CultureInfo\Views\_ViewStart.generated.cs">
+    <Compile Include="Cultures\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -1421,12 +1421,12 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MiniMenu.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="CultureInfo\Views\CultureInfoView.cshtml">
+    <Content Include="Cultures\Views\CultureInfoView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="CultureInfo\Views\Web.config" />
-    <Content Include="CultureInfo\Views\_ViewStart.cshtml">
+    <Content Include="Cultures\Views\Web.config" />
+    <Content Include="Cultures\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>

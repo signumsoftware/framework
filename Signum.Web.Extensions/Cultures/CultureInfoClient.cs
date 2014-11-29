@@ -9,7 +9,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 
-namespace Signum.Web.Basic
+namespace Signum.Web.Cultures
 {
     public static class CultureInfoClient
     {
@@ -19,7 +19,7 @@ namespace Signum.Web.Basic
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.RegisterArea(typeof(CultureInfoClient));
+                Navigator.RegisterArea(typeof(CultureInfoClient), "Cultures");
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
