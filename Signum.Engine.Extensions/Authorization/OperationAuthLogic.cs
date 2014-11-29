@@ -43,7 +43,6 @@ namespace Signum.Engine.Authorization
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
 
-                AuthLogic.SuggestRuleChanges += SuggestOperationRules;
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.Key, b => b.ToString(),
                     exportAll ? OperationLogic.RegisteredOperations.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
@@ -68,81 +67,6 @@ namespace Signum.Engine.Authorization
             return operation;
         }
 
-        static Action<Lite<RoleDN>> SuggestOperationRules()
-        {
-            var operations = (from type in Schema.Current.Tables.Keys
-                              let ops = OperationLogic.ServiceGetOperationInfos(type).Where(oi => oi.OperationType == OperationType.Execute && oi.Lite == false).ToList()
-                              where ops.Any()
-                              select KVP.Create(type, ops.ToList())).ToDictionary();
-
-            return r =>
-            {
-                bool? warnings = null;
-
-                foreach (var type in operations.Keys)
-                {
-                    var ta = TypeAuthLogic.GetAllowed(r, type);
-                    var max = ta.MaxCombined();
-
-
-                    if (max.GetUI() == TypeAllowedBasic.None)
-                    {
-                        OperationAllowed typeAllowed =
-                             max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
-                             max.GetDB() >= TypeAllowedBasic.Modify ? OperationAllowed.DBOnly :
-                             OperationAllowed.None;
-
-                        var ops = operations[type];
-                        foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.OperationSymbol) > typeAllowed))
-                        {
-                            bool isError = ta.MaxDB() == TypeAllowedBasic.None;
-
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Operation {1} is {2} but type {3} is [{4}]".Formato(
-                                  isError ? "Error" : "Warning",
-                                oi.OperationSymbol.Key,
-                                GetOperationAllowed(r, oi.OperationSymbol),
-                                type.Name,
-                                ta));
-
-
-                            SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
-                            string message = "{0} to {1} for {2}?".Formato(oi.OperationSymbol.Key, typeAllowed, r);
-                            if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
-                            {
-                                Manual.SetAllowed(r, oi.OperationSymbol, typeAllowed);
-                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Disallowed");
-                            }
-                            else
-                            {
-                                SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var ops = operations[type];
-                        if (ta.MaxUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.OperationSymbol, inUserInterface: true)))
-                        {
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no save operation is allowed".Formato(type.Name, ta));
-                            var only = ops.Only();
-                            if (only != null)
-                            {
-                                SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
-                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(only.OperationSymbol.Key, r)))
-                                {
-                                    Manual.SetAllowed(r, only.OperationSymbol, OperationAllowed.Allow);
-                                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
-                                }
-                                else
-                                {
-                                    SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
         static bool OperationLogic_AllowOperation(OperationSymbol operationKey, bool inUserInterface)
         {
             return GetOperationAllowed(operationKey, inUserInterface);

@@ -358,28 +358,6 @@ namespace Signum.Engine.Authorization
 
         public static event Func<bool, XElement> ExportToXml;
         public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand> ImportFromXml;
-        public static event Func<Action<Lite<RoleDN>>> SuggestRuleChanges;
-
-        public static void SuggestChanges()
-        {
-            foreach (var item in SuggestRuleChanges.GetInvocationListTyped())
-            {
-                if (SafeConsole.Ask("{0}?".Formato(item.Method.Name.NiceName())))
-                {
-                    var action = item();
-
-                    foreach (var role in RolesInOrder())
-                    {
-                        SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, "Suggestions for {0}", role);
-
-                        action(role);
-                    }
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-                }
-            }
-        }
 
         public static XDocument ExportRules(bool exportAll = false)
         {
@@ -600,7 +578,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i), sync roles (r) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
+            Console.WriteLine("You want to export (e), import (i) or sync roles (r) uthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 
@@ -658,14 +636,6 @@ namespace Signum.Engine.Authorization
                         SynchronizeRoles(doc);
                         if (SafeConsole.Ask("Import rules now?"))
                             goto case "i";
-
-                        break;
-                    }
-                case "s":
-                    {
-                        SuggestChanges();
-                        if (SafeConsole.Ask("Export now?"))
-                            goto case "e";
 
                         break;
                     }

@@ -55,62 +55,8 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToDN.Keys.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
-                AuthLogic.SuggestRuleChanges += SuggestTypeRules;
             }
         }
-
-        static Action<Lite<RoleDN>> SuggestTypeRules()
-        {
-            var graph = Schema.Current.ToDirectedGraph();
-            graph.RemoveEdges(graph.FeedbackEdgeSet().Edges);
-            var compilationOrder = graph.CompilationOrder().ToList();
-            var entityTypes = graph.ToDictionary(t => t.Type, t => EntityKindCache.GetEntityKind(t.Type));
-
-            return role =>
-            {
-                var result = (from parent in compilationOrder
-                              let parentAllowed = GetAllowed(role, parent.Type)
-                              where parentAllowed.MaxCombined() > TypeAllowed.None
-                              from kvp in graph.RelatedTo(parent)
-                              where !kvp.Value.IsLite && !kvp.Value.IsNullable && !kvp.Value.IsCollection && !kvp.Key.Type.IsEnumEntity()
-                              let relAllowed = GetAllowed(role, kvp.Key.Type)
-                              where relAllowed.MaxCombined() == TypeAllowed.None
-                              select new
-                              {
-                                  parent,
-                                  parentAllowed,
-                                  related = kvp.Key,
-                                  relAllowed
-                              }).ToList();
-
-                foreach (var tuple in result)
-	            {
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Type: {0} is [{1}] but the related entity {2} is just [{3}]".Formato(
-                        tuple.parent.Type.Name,
-                        tuple.parentAllowed,
-                        tuple.related.Type.Name,
-                        tuple.relAllowed                       
-                        ));
-
-                    if (tuple.relAllowed.Conditions.IsNullOrEmpty() && tuple.relAllowed.Conditions.IsNullOrEmpty())
-                    {
-                        var suggested = new TypeAllowedAndConditions(TypeAllowed.DBReadUINone);
-
-                        SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Grant ");
-                        if (SafeConsole.Ask("{0} for {1} to {2}?".Formato(suggested, tuple.related.Type.Name, role)))
-                        {
-                            Manual.SetAllowed(role, tuple.related.Type, suggested);
-                            SafeConsole.WriteLineColor(ConsoleColor.Green, "Granted");
-                        }
-                        else
-                        {   
-                            SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                        }
-                    }
-	            }
-            };
-        }
-
 
         static GenericInvoker<Action<Schema>> miRegister =
             new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeDN>(s));

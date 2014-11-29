@@ -43,7 +43,6 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes : true,
                     coercer: QueryCoercer.Instance);
 
-                AuthLogic.SuggestRuleChanges += SuggestQueryRules;
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString(), 
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
@@ -66,73 +65,6 @@ namespace Signum.Engine.Authorization
                     }, bool.Parse);
                 };
             }
-        }
-
-        static Action<Lite<RoleDN>> SuggestQueryRules()
-        {
-            var queries = (from type in Schema.Current.Tables.Keys
-                           where EntityKindCache.GetEntityKind(type) != EntityKind.Part
-                           let qs = DynamicQueryManager.Current.GetTypeQueries(type).Keys
-                           where qs.Any()
-                           select KVP.Create(type, qs.ToList())).ToDictionary();
-
-            return r =>
-            {
-                bool? warnings = null;
-
-                foreach (var type in queries.Keys)
-	            {
-                    var ta = TypeAuthLogic.GetAllowed(r, type);
-
-                    if (ta.MaxUI() == TypeAllowedBasic.None)
-                    {
-                        foreach (var query in queries[type].Where(q => QueryAuthLogic.GetQueryAllowed(r, q)))
-                        {
-                            bool isError = ta.MaxDB() == TypeAllowedBasic.None;
-
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Query {1} is allowed but type {2} is [{3}]".Formato(
-                                 isError ? "Error" : "Warning",
-                                QueryUtils.GetQueryUniqueKey(query), type.Name, ta));
-
-
-                            SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
-                            string message = "{0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(query), r);
-
-                            if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
-                            {
-                                Manual.SetAllowed(r, query, false);
-                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Disallowed");
-                            }
-                            else
-                            {
-                                SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var qs = queries[type];
-                        if (ta.MaxUI() > TypeAllowedBasic.Modify && qs.Any() && !qs.Any(q => QueryAuthLogic.GetQueryAllowed(r, q)))
-                        {
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no query is allowed".Formato(type.Name, ta));
-
-                            if (qs.Contains(type))
-                            {
-                                SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
-                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(type), r)))
-                                {
-                                    Manual.SetAllowed(r, type, true);
-                                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
-                                }
-                                else
-                                {
-                                    SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                                }
-                            }
-                        }
-                    }
-	            }
-            };
         }
 
         static bool dqm_AllowQuery(object queryName)
