@@ -13,7 +13,7 @@ using Signum.Entities;
 using Signum.Web.Controllers;
 using Signum.Engine.Dashboard;
 using Signum.Engine.Authorization;
-using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserQueries;
 using Signum.Web.UserAssets;
 using System.Web.Mvc.Html;
 

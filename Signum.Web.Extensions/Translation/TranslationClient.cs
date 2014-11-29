@@ -16,7 +16,7 @@ using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Web.Basic;
-using Signum.Web.Extensions.Translation.Views;
+using Signum.Web.Translation.Views;
 using Signum.Web.Omnibox;
 using Signum.Web.PortableAreas;
 using Signum.Web.Translation.Controllers;

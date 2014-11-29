@@ -18,7 +18,7 @@ using System.Web.Routing;
 using Signum.Engine.Chart;
 using Signum.Web.Basic;
 using Signum.Web.Operations;
-using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserQueries;
 using Signum.Web.Excel;
 using Signum.Web.UserAssets;
 using Signum.Entities.UserAssets;

@@ -8,7 +8,7 @@
     <ProjectGuid>{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}</ProjectGuid>
     <OutputType>library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.Windows.Extensions</RootNamespace>
+    <RootNamespace>Signum.Windows</RootNamespace>
     <AssemblyName>Signum.Windows.Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

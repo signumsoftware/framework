@@ -19,10 +19,10 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Web.Operations;
 using Signum.Web.Basic;
-using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
-using Signum.Web.Extensions.UserAssets;
+using Signum.Web.UserAssets;
 
 namespace Signum.Web.UserQueries
 {

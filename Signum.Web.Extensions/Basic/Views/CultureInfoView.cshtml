@@ -4,7 +4,7 @@
 {
     @Html.ValueLine(tc, t => t.Name, vl => 
     { 
-        vl.ValueLineType = ValueLineType.Combo;
+        vl.ValueLineType = ValueLineType.Enum;
         vl.EnumComboItems = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures)
             .OrderBy(a=>a.Name)
             .Select(ci => new SelectListItem

@@ -7,7 +7,6 @@ using System.Windows.Media.Imaging;
 using Signum.Entities.DynamicQuery;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Utilities;
 using System.IO;
 using Signum.Services;
