@@ -55,11 +55,6 @@ namespace Signum.Web.PortableAreas
             AllowedTypes.AddRange(types, t => t, t => areaName, "controllers");
         }
 
-        public static void RegisterControllersLike(Type clientClassType, string areaName)
-        {
-            RegisterControllersIn(clientClassType.Assembly, clientClassType.Namespace, areaName);
-        }
-
         static bool IsAllowed(Type type, out string areaName)
         {
             if (MainAssembly == null)

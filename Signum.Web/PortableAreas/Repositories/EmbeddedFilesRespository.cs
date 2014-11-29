@@ -23,12 +23,6 @@ namespace Signum.Web.PortableAreas
 
         readonly Dictionary<string, string> resources;
 
-        public EmbeddedFilesRepository(Assembly assembly, string areaName) :
-            this(assembly, "~/" + areaName + "/", assembly.GetName().Name + "." + areaName.Replace("/", "."))
-        {
-            
-        }
-
         public EmbeddedFilesRepository(Assembly assembly, string virtualPath, string namespaceName)
         {
             if (assembly == null)

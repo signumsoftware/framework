@@ -313,23 +313,34 @@ namespace Signum.Web
             return EntitySettings(entity.GetType()).OnPartialViewName(entity); 
         }
 
-        public static void RegisterArea(Type clientType)
+        public static void RegisterArea(Type clientType, 
+            string areaName = null, 
+            string controllerNamespace = null, 
+            string resourcesNamespace = null)
         {
-            if (!clientType.Name.EndsWith("Client"))
-                throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
+            if (areaName == null)
+            {
+                if (!clientType.Name.EndsWith("Client"))
+                    throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
 
-            RegisterArea(clientType, clientType.Name.RemoveEnd("Client".Length));
-        }
+                areaName = clientType.Name.RemoveEnd("Client".Length);
+            }
 
-        public static void RegisterArea(Type clientType, string areaName)
-        {
             if (areaName.Start(1) == "/")
                 throw new SystemException("Invalid start character / in {0}".Formato(areaName));
 
-            CompiledViews.RegisterArea(clientType.Assembly, areaName);
-            SignumControllerFactory.RegisterControllersLike(clientType, areaName);
+            if (controllerNamespace == null)
+                controllerNamespace = clientType.Namespace;
 
-            EmbeddedFilesRepository rep = new EmbeddedFilesRepository(clientType.Assembly, areaName);
+            if (resourcesNamespace == null)
+                resourcesNamespace = clientType.Namespace;
+
+            var assembly = clientType.Assembly;
+
+            CompiledViews.RegisterArea(assembly, areaName);
+            SignumControllerFactory.RegisterControllersIn(assembly, controllerNamespace, areaName);
+
+            EmbeddedFilesRepository rep = new EmbeddedFilesRepository(assembly, "~/" + areaName + "/", resourcesNamespace);
             if (!rep.IsEmpty)
                 FileRepositoryManager.Register(rep);
         }
@@ -409,8 +420,8 @@ namespace Signum.Web
                 WebTypeNames = EntitySettings.Values.Where(es => es.WebTypeName.HasText())
                     .ToDictionary(es => es.WebTypeName, es => es.StaticType, StringComparer.InvariantCultureIgnoreCase, "WebTypeNames");
 
-              
-                Navigator.RegisterArea(typeof(Navigator), "Signum");
+
+                Navigator.RegisterArea(typeof(Navigator), areaName: "Signum", resourcesNamespace: "Signum.Web.Signum");
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "Signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/Signum/calendarResources/"));
                 FileRepositoryManager.Register(new UrlsRepository("~/Signum/urls/"));
