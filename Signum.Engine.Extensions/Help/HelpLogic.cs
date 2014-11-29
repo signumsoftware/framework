@@ -201,11 +201,12 @@ namespace Signum.Engine.Help
                 sb.Include<OperationHelpDN>();
 
                 sb.AddUniqueIndex((EntityHelpDN e) => new { e.Type, e.Culture });
+                sb.AddUniqueIndexMList((EntityHelpDN e) => e.Properties, mle=>new { mle.Parent, mle.Element.Property });
                 sb.AddUniqueIndex((NamespaceHelpDN e) => new { e.Name, e.Culture });
                 sb.AddUniqueIndex((AppendixHelpDN e) => new { Name = e.UniqueName, e.Culture });
                 sb.AddUniqueIndex((QueryHelpDN e) => new { e.Query, e.Culture });
+                sb.AddUniqueIndexMList((QueryHelpDN e) => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName });
                 sb.AddUniqueIndex((OperationHelpDN e) => new { e.Operation, e.Culture });
-
 
                 Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>(),
                     invalidateWith: new InvalidateWith(typeof(EntityHelpDN)));
@@ -239,6 +240,7 @@ namespace Signum.Engine.Help
                         Entity = n,
                         n.Id,
                         n.Name,
+                        n.Culture,
                         Description = n.Description.Etc(100)
                     });
 
@@ -248,30 +250,33 @@ namespace Signum.Engine.Help
                     {
                         Entity = a,
                         a.Id,
-                        Name = a.UniqueName,
+                        a.UniqueName,
+                        a.Culture,
                         a.Title,
                         Description = a.Description.Etc(100)
                     });
 
                 dqm.RegisterQuery(typeof(QueryHelpDN), () =>
-                     from a in Database.Query<QueryHelpDN>()
+                     from q in Database.Query<QueryHelpDN>()
                      select new
                      {
-                         Entity = a,
-                         a.Id,
-                         a.Query,
-                         Description = a.Description.Etc(100)
+                         Entity = q,
+                         q.Id,
+                         q.Query,
+                         q.Culture,
+                         Description = q.Description.Etc(100)
                      });
 
 
                 dqm.RegisterQuery(typeof(OperationHelpDN), () =>
-                     from a in Database.Query<OperationHelpDN>()
+                     from o in Database.Query<OperationHelpDN>()
                      select new
                      {
-                         Entity = a,
-                         a.Id,
-                         a.Operation,
-                         Description = a.Description.Etc(100)
+                         Entity = o,
+                         o.Id,
+                         o.Operation,
+                         o.Culture,
+                         Description = o.Description.Etc(100)
                      });
 
                 new Graph<AppendixHelpDN>.Execute(AppendixHelpOperation.Save)
