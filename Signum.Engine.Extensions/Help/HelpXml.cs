@@ -39,9 +39,9 @@ namespace Signum.Engine.Help
                     new XDeclaration("1.0", "utf-8", "yes"),
                        new XElement(_Appendix,
                            new XAttribute(_Name, entity.UniqueName),
-                           new XAttribute(_Culture, entity.Culture),
+                           new XAttribute(_Culture, entity.Culture.Name),
                            new XAttribute(_Title, entity.Title),
-                           new XElement(_Description, entity.Description)
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
                        )
                     );
             }
@@ -61,7 +61,7 @@ namespace Signum.Engine.Help
                     }; 
              
                 entity.Title = element.Attribute(_Title).Value;
-                entity.Description = element.Element(_Description).Value;
+                element.Element(_Description).TryDo(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -81,8 +81,9 @@ namespace Signum.Engine.Help
                     new XDeclaration("1.0", "utf-8", "yes"),
                        new XElement(_Namespace,
                            new XAttribute(_Name, entity.Name),
+                           new XAttribute(_Culture, entity.Culture.Name),
                            new XAttribute(_Title, entity.Title),
-                           new XElement(_Description, entity.Description)
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
                        )
                     );
             }
@@ -102,7 +103,7 @@ namespace Signum.Engine.Help
 
             public static ImportAction Load(XDocument document, Dictionary<string, string> namespaces)
             {
-                XElement element = document.Element(_Name);
+                XElement element = document.Element(_Namespace);
 
                 var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
                 var name = SelectInteractive(element.Attribute(_Name).Value, namespaces, "namespaces");
@@ -117,7 +118,7 @@ namespace Signum.Engine.Help
                     };
 
                 entity.Title = element.Attribute(_Title).Value;
-                entity.Description = element.Element(_Description).Value;
+                element.Element(_Description).TryDo(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -138,7 +139,8 @@ namespace Signum.Engine.Help
                 return new XDocument(
                     new XDeclaration("1.0", "utf-8", "yes"),
                        new XElement(_Query,
-                           new XAttribute(_Key, entity.Query.Name),
+                           new XAttribute(_Key, entity.Query.Key),
+                           new XAttribute(_Culture, entity.Culture.Name),
                            entity.Description.HasText() ? new XElement(_Description, entity.Description) : null,
                             entity.Columns.Any() ?
                                new XElement(_Columns,
@@ -169,12 +171,12 @@ namespace Signum.Engine.Help
                         Query = query,
                     };
 
-                entity.Description = element.Element(_Description).Try(d => d.Value);
+                element.Element(_Description).TryDo(d => entity.Description = d.Value);
 
                 var cols = element.Element(_Columns);
                 if (cols != null)
                 {
-                    var queryColumns = DynamicQueryManager.Current.GetQuery(query).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
+                    var queryColumns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
 
                     foreach (var item in cols.Elements(_Column))
                     {
@@ -218,6 +220,7 @@ namespace Signum.Engine.Help
                     new XDeclaration("1.0", "utf-8", "yes"),
                        new XElement(_Operation,
                            new XAttribute(_Key, entity.Operation.Key),
+                           new XAttribute(_Culture, entity.Culture.Name),
                            entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
                            )
                        );
@@ -228,21 +231,19 @@ namespace Signum.Engine.Help
             {
                 XElement element = document.Element(_Operation);
                 var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var queryName = SelectInteractive(element.Attribute(_Key).Value, QueryLogic.QueryNames, "queries");
+                var operation = SelectInteractive(element.Attribute(_Key).Value, SymbolLogic<OperationSymbol>.Symbols.ToDictionary(a => a.Key), "operation");
 
-                if (queryName == null)
+                if (operation == null)
                     return ImportAction.Skipped;
 
-                var query = QueryLogic.GetQuery(queryName);
-
-                var entity = Database.Query<QueryHelpDN>().SingleOrDefaultEx(a => a.Culture == ci && a.Query == query) ??
-                    new QueryHelpDN
+                var entity = Database.Query<OperationHelpDN>().SingleOrDefaultEx(a => a.Culture == ci && a.Operation == operation) ??
+                    new OperationHelpDN
                     {
                         Culture = ci,
-                        Query = query,
+                        Operation = operation,
                     };
 
-                entity.Description = element.Element(_Description).Try(d => d.Value);
+                element.Element(_Description).Try(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -270,6 +271,7 @@ namespace Signum.Engine.Help
                     new XDeclaration("1.0", "utf-8", "yes"),
                     new XElement(_Entity,
                            new XAttribute(_FullName, entity.Type.FullClassName),
+                           new XAttribute(_Culture, entity.Culture.Name),
                            entity.Description.HasText() ? new XElement(_Description, entity.Description) : null,
                            entity.Properties.Any() ? new XElement(_Properties,
                                entity.Properties.Select(p => new XElement(_Property,
@@ -304,7 +306,7 @@ namespace Signum.Engine.Help
                         Type = typeDN,
                     };
 
-                entity.Description = element.Element(_Description).Try(d => d.Value);
+                element.Element(_Description).TryDo(d => entity.Description = d.Value);
 
                 var props = element.Element(_Properties);
                 if (props != null)
@@ -320,7 +322,7 @@ namespace Signum.Engine.Help
                         if (name == null)
                             continue;
 
-                        var col = property.IsNew ? null : entity.Properties.SingleOrDefaultEx(c => c.Property == property);
+                        var col = property.IsNew ? null : entity.Properties.SingleOrDefaultEx(c => c.Property.Is(property));
                         if (col != null)
                         {
                             col.Description = item.Value;
@@ -370,6 +372,7 @@ namespace Signum.Engine.Help
 
         public static string EntitiesDirectory = "Entity";
         public static string QueriesDirectory = "Query";
+        public static string OperationsDirectory = "Operation";
         public static string NamespacesDirectory = "Namespace";
         public static string AppendicesDirectory = "Appendix";
 
@@ -408,6 +411,8 @@ namespace Signum.Engine.Help
             {
                 string path = Path.Combine(directoryName, ah.Culture.Name, AppendicesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(ah.UniqueName), ah.Culture.Name));
 
+                FileTools.CreateParentDirectory(path);
+
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     AppendixXml.ToXDocument(ah).Save(path);
             }
@@ -415,6 +420,8 @@ namespace Signum.Engine.Help
             foreach (var nh in Database.Query<NamespaceHelpDN>())
             {
                 string path = Path.Combine(directoryName, nh.Culture.Name, NamespacesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(nh.Name), nh.Culture.Name));
+
+                FileTools.CreateParentDirectory(path);
 
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     NamespaceXml.ToXDocument(nh).Save(path);
@@ -424,6 +431,8 @@ namespace Signum.Engine.Help
             {
                 string path = Path.Combine(directoryName, eh.Culture.Name, EntitiesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(eh.Type.CleanName), eh.Culture.Name));
 
+                FileTools.CreateParentDirectory(path);
+
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     EntityXml.ToXDocument(eh).Save(path);
             }
@@ -432,13 +441,17 @@ namespace Signum.Engine.Help
             {
                 string path = Path.Combine(directoryName, qh.Culture.Name, QueriesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(qh.Query.Key), qh.Culture.Name));
 
+                FileTools.CreateParentDirectory(path);
+
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     QueryXml.ToXDocument(qh).Save(path);
             }
 
             foreach (var qh in Database.Query<OperationHelpDN>())
             {
-                string path = Path.Combine(directoryName, qh.Culture.Name, QueriesDirectory, "{0}.{1}.help".Formato(RemoveInvalid(qh.Operation.Key), qh.Culture.Name));
+                string path = Path.Combine(directoryName, qh.Culture.Name, OperationsDirectory, "{0}.{1}.help".Formato(RemoveInvalid(qh.Operation.Key), qh.Culture.Name));
+
+                FileTools.CreateParentDirectory(path);
 
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".Formato(path)))
                     OperationXml.ToXDocument(qh).Save(path);
@@ -478,6 +491,26 @@ namespace Signum.Engine.Help
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.Red, " Error {0}:\r\n\t".Formato(path) + e.Message);
                 }
+            }
+        }
+
+        public static void ImportExportHelp()
+        {
+            ImportExportHelp("../../Help");
+        }
+
+        public static void ImportExportHelp(string directoryName)
+        {
+            retry:
+             Console.WriteLine("You want to export (e) or import (i) Help? (nothing to exit)");
+
+            switch (Console.ReadLine().ToLower())
+            {
+                case "": return;
+                case "e": ExportAll(directoryName); break;
+                case "i": ImportAll(directoryName); break;
+                default:
+                    goto retry;
             }
         }
     }
