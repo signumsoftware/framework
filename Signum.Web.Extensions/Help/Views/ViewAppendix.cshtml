@@ -2,6 +2,8 @@
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
 @using Signum.Entities.Help
+@using Signum.Engine
+@using Signum.Engine.Basics
 
 @section head
 {
@@ -28,7 +30,15 @@
 
             if(!Navigator.IsReadOnly(typeof(AppendixHelpDN)))
             {
-                Html.RenderPartial(HelpClient.Buttons);
+                   Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
+                    {
+                        { "options",  Database.Query<AppendixHelpDN>()
+                        .Where(e => e.UniqueName == ac.Value.UniqueName && e.Culture != ac.Value.Culture)
+                        .Select(e => new { e.Culture })
+                        .ToList()
+                        .Select(e => KVP.Create(e.Culture.ToCultureInfo(), this.Url.Action((HelpController a) => a.TraslateAppendix(e.Culture.Name))))
+                        .ToDictionary() }                   
+                    });
             }
                 if (ac.Value.UniqueName == null)
                 {

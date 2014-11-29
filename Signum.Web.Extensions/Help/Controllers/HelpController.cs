@@ -11,7 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using Signum.Web.Extensions;
+using Signum.Web;
 using System.Text;
 using Signum.Engine;
 using Signum.Engine.WikiMarkup;
@@ -25,6 +25,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Services;
+using Signum.Web.Help;
 
 namespace Signum.Web.Help
 {
@@ -108,6 +109,18 @@ namespace Signum.Web.Help
             return null;
         }
 
+        [HttpPost]
+        public RedirectResult TraslateEntity(string from)
+        {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
+            var entity = this.ExtractEntity<EntityHelpDN>().ApplyChanges(this).Value;
+
+            entity.AssignTranslatedFullEntity(CultureInfoLogic.GetCultureInfoDN(from)); 
+
+            return null;
+        }
+
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewNamespace(string @namespace)
@@ -136,6 +149,18 @@ namespace Signum.Web.Help
             }
             else
                 entity.Execute(NamespaceHelpOperation.Save);
+
+            return null;
+        }
+
+        [HttpPost]
+        public RedirectResult TraslateNamespace(string from)
+        {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
+            var entity = this.ExtractEntity<NamespaceHelpDN>().ApplyChanges(this).Value;
+
+            entity.AsignTranslatedNamespace(CultureInfoLogic.GetCultureInfoDN(from));
 
             return null;
         }
@@ -188,6 +213,18 @@ namespace Signum.Web.Help
                     return JsonAction.RedirectAjax(RouteHelper.New().Action((HelpController a) => a.ViewAppendix(entity.UniqueName)));
                 return null;
             }
+        }
+
+        [HttpPost]
+        public RedirectResult TraslateAppendix(string from)
+        {
+            HelpPermissions.ViewHelp.AssertAuthorized();
+
+            var entity = this.ExtractEntity<AppendixHelpDN>().ApplyChanges(this).Value;
+
+            entity.AsignTranslatedAppendix(CultureInfoLogic.GetCultureInfoDN(from));
+
+            return null;
         }
 
         public ActionResult PropertyRoutes()

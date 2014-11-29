@@ -62,7 +62,15 @@
             @Html.HiddenRuntimeInfo(ec, e => e.Type)
                 if (!Navigator.IsReadOnly(typeof(EntityHelpDN)))
                 {
-                    Html.RenderPartial(HelpClient.Buttons);
+                    Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
+                    {
+                        { "options",  Database.Query<EntityHelpDN>()
+                        .Where(e => e.Type == ec.Value.Type && e.Culture != ec.Value.Culture)
+                        .Select(e => new { e.Culture })
+                        .ToList()
+                        .Select(e => KVP.Create(e.Culture.ToCultureInfo(), this.Url.Action((HelpController a) => a.TraslateEntity(e.Culture.Name))))
+                        .ToDictionary() }
+                    });
                 }
             <div class="edit-container">
                 <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>

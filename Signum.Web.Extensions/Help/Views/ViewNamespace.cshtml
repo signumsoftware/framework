@@ -2,6 +2,9 @@
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
 @using Signum.Entities.Help
+@using Signum.Engine
+@using Signum.Engine.Basics
+
 @model NamespaceHelp
 @section head
 {
@@ -27,7 +30,15 @@
             @Html.HiddenLine(nc, e => e.Name)
                 if (!Navigator.IsReadOnly(typeof(NamespaceHelpDN)))
                 {
-                    Html.RenderPartial(HelpClient.Buttons);
+                    Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
+                    {
+                        { "options",  Database.Query<NamespaceHelpDN>()
+                        .Where(e => e.Name == nc.Value.Name && e.Culture != nc.Value.Culture)
+                        .Select(e => new { e.Culture })
+                        .ToList()
+                        .Select(e => KVP.Create(e.Culture.ToCultureInfo(), this.Url.Action((HelpController a) => a.TraslateNamespace(e.Culture.Name))))
+                        .ToDictionary() }
+                    });
                 }
             <h1>
                 @Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" })
