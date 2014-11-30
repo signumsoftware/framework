@@ -48,7 +48,7 @@ namespace Signum.Windows.DiffLog
         {
             tabs.Items.Clear();
 
-            OperationLogDN log = (OperationLogDN)e.NewValue;
+            OperationLogEntity log = (OperationLogEntity)e.NewValue;
 
             if (log == null)
                 return;

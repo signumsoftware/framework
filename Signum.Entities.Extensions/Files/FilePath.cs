@@ -14,25 +14,25 @@ using Signum.Entities.Patterns;
 namespace Signum.Entities.Files
 {
     [Serializable,  EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
-    public class FilePathDN : LockableEntity, IFile	
+    public class FilePathEntity : LockableEntity, IFile	
     {
         public static string ForceExtensionIfEmpty = ".dat";
 
-        public FilePathDN() { }
+        public FilePathEntity() { }
 
-        public FilePathDN(FileTypeSymbol fileType)
+        public FilePathEntity(FileTypeSymbol fileType)
         {
             this.fileType = fileType;
         }
 
-        public FilePathDN(FileTypeSymbol fileType, string path)
+        public FilePathEntity(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
             this.FileName = Path.GetFileName(path);
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
-        public FilePathDN(FileTypeSymbol fileType, string fileName, byte[] fileData)
+        public FilePathEntity(FileTypeSymbol fileType, string fileName, byte[] fileData)
             : this(fileType)
         {
             this.FileName = fileName;
@@ -106,20 +106,20 @@ namespace Signum.Entities.Files
         }
 
         [NotNullable]
-        FileRepositoryDN repository;
-        public FileRepositoryDN Repository
+        FileRepositoryEntity repository;
+        public FileRepositoryEntity Repository
         {
             get { return repository; }
             internal set { Set(ref repository, value); }
         }
 
-        static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);
+        static Expression<Func<FilePathEntity, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);
         public string FullPhysicalPath
         {
             get { return Repository == null ? null : Path.Combine(Repository.FullPhysicalPrefix, Sufix); }
         }
 
-        static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp =>
+        static Expression<Func<FilePathEntity, string>> FullWebPathExpression = fp =>
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
                 fp.Repository.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
@@ -133,14 +133,14 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return "{0} - {1}".Formato(FileName, ((long)FileLength).ToComputerSize(true));
+            return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
         }
     }
 
 
     public static class FilePathOperation
     {
-        public static readonly ExecuteSymbol<FilePathDN> Save = OperationSymbol.Execute<FilePathDN>();        
+        public static readonly ExecuteSymbol<FilePathEntity> Save = OperationSymbol.Execute<FilePathEntity>();        
     }
 
 

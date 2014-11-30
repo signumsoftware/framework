@@ -82,9 +82,9 @@ namespace Signum.Web.Chart.Views
         {
             
             #line 8 "..\..\Chart\Views\UserChartFilter.cshtml"
- using (var e = Html.TypeContext<QueryFilterDN>())
+ using (var e = Html.TypeContext<QueryFilterEntity>())
 {
-    var parent = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
+    var parent = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
     e.FormGroupStyle = FormGroupStyle.None;
     
             

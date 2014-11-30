@@ -76,7 +76,7 @@ WriteLiteral("\r\n\r\n\r\n");
 
             
             #line 9 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
- using (var tc = Html.TypeContext<DashboardDN>())
+ using (var tc = Html.TypeContext<DashboardEntity>())
 {
     using (var sc = tc.SubContext())
     {
@@ -206,7 +206,7 @@ WriteLiteral("\r\n             </div>\r\n        </div>\r\n    </div>\r\n");
             #line 45 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
 Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
-            grid.PartialViewName = DashboardClient.AdminViewPrefix.Formato("PanelPartViewAdmin");
+            grid.PartialViewName = DashboardClient.AdminViewPrefix.FormatWith("PanelPartViewAdmin");
             grid.AttachFunction = DashboardClient.Module["attachGridControl"](grid,
                Url.Action("AddNewPart", "Dashboard"),
                DashboardClient.PanelPartViews.Keys.Select(t => t.ToJsTypeInfo(isSearch: false, prefix: grid.Prefix)).ToArray());

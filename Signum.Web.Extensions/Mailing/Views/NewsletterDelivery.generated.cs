@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Mailing\Views\NewsletterDelivery.cshtml"
- using (var nc = Html.TypeContext<NewsletterDeliveryDN>()) 
+ using (var nc = Html.TypeContext<NewsletterDeliveryEntity>()) 
 {
 	
             
@@ -120,7 +120,7 @@ Write(Html.EntityLine(nc, n => n.Newsletter));
             #line hidden
             
             #line 11 "..\..\Mailing\Views\NewsletterDelivery.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Line", nc.Value), new Context(nc, "Exceptions")));
+Write(Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineEntity), "Line", nc.Value), new Context(nc, "Exceptions")));
 
             
             #line default

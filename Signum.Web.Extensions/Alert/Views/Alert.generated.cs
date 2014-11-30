@@ -47,7 +47,7 @@ namespace Signum.Web.Alert.Views
         {
             
             #line 2 "..\..\Alert\Views\Alert.cshtml"
- using (var cp = Html.TypeContext<AlertDN>())
+ using (var cp = Html.TypeContext<AlertEntity>())
 {
     
             

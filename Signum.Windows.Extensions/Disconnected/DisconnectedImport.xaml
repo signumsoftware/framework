@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:me="clr-namespace:Signum.Windows.Extensions"
     xmlns:d="clr-namespace:Signum.Entities.Disconnected;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:DisconnectedImportDN}"
+    m:Common.TypeContext="{x:Type d:DisconnectedImportEntity}"
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="CreationDate" />
@@ -16,7 +16,7 @@
             <m:ValueLine m:Common.Route="DisableForeignKeys" />
             <m:EntityRepeater m:Common.Route="Copies" ViewOnCreate="False" Grid.Column="0" Height="150" VerticalScrollBarVisibility="Visible" >
                 <m:EntityRepeater.EntityTemplate>
-                    <DataTemplate DataType="d:DisconnectedImportTableDN">
+                    <DataTemplate DataType="d:DisconnectedImportTableEntity">
                         <Grid m:Common.LabelVisible="False" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" MinWidth="10"/>

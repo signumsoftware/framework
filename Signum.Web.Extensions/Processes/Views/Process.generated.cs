@@ -62,7 +62,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 5 "..\..\Processes\Views\Process.cshtml"
- using (var e = Html.TypeContext<ProcessDN>())
+ using (var e = Html.TypeContext<ProcessEntity>())
 {
     e.LabelColumns = new BsColumn(4);
 
@@ -427,7 +427,7 @@ WriteLiteral("\r\n        })\r\n    </script>\r\n");
             #line hidden
             
             #line 79 "..\..\Processes\Views\Process.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), new Context(e, "errors"), csc =>
+Write(Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineEntity), "Process", e.Value), new Context(e, "errors"), csc =>
         {
             csc.View = true;
         }));

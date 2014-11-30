@@ -14,14 +14,14 @@ namespace Signum.Entities.Chart
 {
     public interface IHasEntitytype
     {
-        Lite<TypeDN> EntityType { get; } 
+        Lite<TypeEntity> EntityType { get; } 
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class UserChartDN : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
+    public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
     {
-        public UserChartDN() { }
-        public UserChartDN(object queryName)
+        public UserChartEntity() { }
+        public UserChartEntity(object queryName)
         {
             this.queryName = queryName;
         }
@@ -30,23 +30,23 @@ namespace Signum.Entities.Chart
         public object QueryName
         {
             get { return ToQueryName(query); }
-            set { Query = ToQueryDN(value); }
+            set { Query = ToQueryEntity(value); }
         }
 
         [Ignore]
         internal object queryName;
 
         [NotNullable]
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
         }
 
-        Lite<TypeDN> entityType;
-        public Lite<TypeDN> EntityType
+        Lite<TypeEntity> entityType;
+        public Lite<TypeEntity> EntityType
         {
             get { return entityType; }
             set { Set(ref entityType, value); }
@@ -69,9 +69,9 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable]
-        ChartScriptDN chartScript;
+        ChartScriptEntity chartScript;
         [NotNullValidator]
-        public ChartScriptDN ChartScript
+        public ChartScriptEntity ChartScript
         {
             get { return chartScript; }
             set
@@ -98,8 +98,8 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
-        MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
-        public MList<ChartColumnDN> Columns
+        MList<ChartColumnEntity> columns = new MList<ChartColumnEntity>();
+        public MList<ChartColumnEntity> Columns
         {
             get { return columns; }
             set { Set(ref columns, value); }
@@ -114,16 +114,16 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
-        public MList<QueryFilterDN> Filters
+        MList<QueryFilterEntity> filters = new MList<QueryFilterEntity>();
+        public MList<QueryFilterEntity> Filters
         {
             get { return filters; }
             set { Set(ref filters, value); }
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
-        public MList<QueryOrderDN> Orders
+        MList<QueryOrderEntity> orders = new MList<QueryOrderEntity>();
+        public MList<QueryOrderEntity> Orders
         {
             get { return orders; }
             set { Set(ref orders, value); }
@@ -137,7 +137,7 @@ namespace Signum.Entities.Chart
             set { Set(ref guid, value); }
         }
 
-        static readonly Expression<Func<UserChartDN, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -158,13 +158,13 @@ namespace Signum.Entities.Chart
                     o.ParseData(this, description, SubTokensOptions.CanElement | (this.GroupResults ? SubTokensOptions.CanAggregate : 0));
         }
 
-        static Func<QueryDN, object> ToQueryName;
-        static Func<object, QueryDN> ToQueryDN;
+        static Func<QueryEntity, object> ToQueryName;
+        static Func<object, QueryEntity> ToQueryEntity;
 
-        public static void SetConverters(Func<QueryDN, object> toQueryName, Func<object, QueryDN> toQueryDN)
+        public static void SetConverters(Func<QueryEntity, object> toQueryName, Func<object, QueryEntity> toQueryEntity)
         {
             ToQueryName = toQueryName;
-            ToQueryDN = toQueryDN;
+            ToQueryEntity = toQueryEntity;
         }
 
         protected override void PostRetrieving()
@@ -198,7 +198,7 @@ namespace Signum.Entities.Chart
         {
             DisplayName = element.Attribute("DisplayName").Value;
             Query = ctx.GetQuery(element.Attribute("Query").Value);
-            EntityType = element.Attribute("EntityType").Try(a => Lite.Parse<TypeDN>(a.Value));
+            EntityType = element.Attribute("EntityType").Try(a => Lite.Parse<TypeEntity>(a.Value));
             Owner = element.Attribute("Owner").Try(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
@@ -211,7 +211,7 @@ namespace Signum.Entities.Chart
 
     public static class UserChartOperation
     {
-        public static readonly ExecuteSymbol<UserChartDN> Save = OperationSymbol.Execute<UserChartDN>();
-        public static readonly DeleteSymbol<UserChartDN> Delete = OperationSymbol.Delete<UserChartDN>();
+        public static readonly ExecuteSymbol<UserChartEntity> Save = OperationSymbol.Execute<UserChartEntity>();
+        public static readonly DeleteSymbol<UserChartEntity> Delete = OperationSymbol.Delete<UserChartEntity>();
     }
 }

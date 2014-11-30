@@ -16,12 +16,12 @@ namespace Signum.Entities.SMS
         string GetPhoneNumber(Entity ie);
 
         [OperationContract, NetDataContract]
-        List<string> GetLiteralsFromDataObjectProvider(TypeDN type);
+        List<string> GetLiteralsFromDataObjectProvider(TypeEntity type);
 
         [OperationContract, NetDataContract]
-        List<Lite<TypeDN>> GetAssociatedTypesForTemplates();
+        List<Lite<TypeEntity>> GetAssociatedTypesForTemplates();
 
         [OperationContract, NetDataContract]
-        CultureInfoDN GetDefaultCulture();
+        CultureInfoEntity GetDefaultCulture();
     }
 }

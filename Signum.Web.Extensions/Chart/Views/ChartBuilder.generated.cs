@@ -140,7 +140,7 @@ WriteLiteral(">");
 
             
             #line 20 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                       Write(typeof(ChartScriptDN).NiceName());
+                                       Write(typeof(ChartScriptEntity).NiceName());
 
             
             #line default

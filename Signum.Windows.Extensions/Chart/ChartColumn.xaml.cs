@@ -71,7 +71,7 @@ namespace Signum.Windows.Chart
             vl.Bind(ValueLine.LabelTextProperty, "ScriptColumn." + property + ".Name");
         }
 
-        public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterDN csp, QueryTokenDN token) =>
+        public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterEntity csp, QueryTokenEntity token) =>
         {
             if (csp == null || csp.Type != ChartParameterType.Enum)
                 return null;
@@ -100,12 +100,12 @@ namespace Signum.Windows.Chart
 
         void ChartToken_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var oldColumn = e.OldValue as ChartColumnDN;
+            var oldColumn = e.OldValue as ChartColumnEntity;
 
             if (oldColumn != null)
                 oldColumn.Notified -= UpdateGroup;
 
-            var newColumn = e.NewValue as ChartColumnDN;
+            var newColumn = e.NewValue as ChartColumnEntity;
 
             if (newColumn != null)
                 newColumn.Notified += UpdateGroup;
@@ -113,7 +113,7 @@ namespace Signum.Windows.Chart
 
         private List<QueryToken> token_SubTokensEvent(QueryToken token)
         {
-            var ct = DataContext as ChartColumnDN;
+            var ct = DataContext as ChartColumnEntity;
             if (ct == null)
                 return new List<QueryToken>();
 

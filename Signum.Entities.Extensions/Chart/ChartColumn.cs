@@ -16,17 +16,17 @@ using Signum.Entities.UserAssets;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartColumnDN : EmbeddedEntity
+    public class ChartColumnEntity : EmbeddedEntity
     {
         [Ignore]
-        ChartScriptColumnDN scriptColumn;
-        public ChartScriptColumnDN ScriptColumn
+        ChartScriptColumnEntity scriptColumn;
+        public ChartScriptColumnEntity ScriptColumn
         {
             get { return scriptColumn; }
             set { scriptColumn = value; Notify(() => ScriptColumn); } 
         }
         
-        public ChartColumnDN()
+        public ChartColumnEntity()
         {
         }
 
@@ -50,8 +50,8 @@ namespace Signum.Entities.Chart
             Parameter3 = scriptColumn.Parameter3.Try(a => a.DefaultValue(t));
         }
 
-        QueryTokenDN token;
-        public QueryTokenDN Token
+        QueryTokenEntity token;
+        public QueryTokenEntity Token
         {
             get { return token; }
             set
@@ -150,29 +150,29 @@ namespace Signum.Entities.Chart
             if (pi.Is(() => Token))
             {
                 if (Token == null)
-                    return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().Formato(scriptColumn.DisplayName) : null;
+                    return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().FormatWith(scriptColumn.DisplayName) : null;
 
                 if (parentChart.GroupResults)
                 {
                     if (scriptColumn.IsGroupKey)
                     {
                         if (Token.Token is AggregateToken)
-                            return ChartMessage._0IsKeyBut1IsAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
+                            return ChartMessage._0IsKeyBut1IsAnAggregate.NiceToString().FormatWith(scriptColumn.DisplayName, DisplayName);
                     }
                     else
                     {
                         if (!(Token.Token is AggregateToken))
-                            return ChartMessage._0ShouldBeAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
+                            return ChartMessage._0ShouldBeAnAggregate.NiceToString().FormatWith(scriptColumn.DisplayName, DisplayName);
                     }
                 }
                 else
                 {
                     if (Token.Token is AggregateToken)
-                        return ChartMessage._0IsAnAggregateButTheChartIsNotGrouping.NiceToString().Formato(DisplayName);
+                        return ChartMessage._0IsAnAggregateButTheChartIsNotGrouping.NiceToString().FormatWith(DisplayName);
                 }
 
                 if (!ChartUtils.IsChartColumnType(token.Token, ScriptColumn.ColumnType))
-                    return ChartMessage._0IsNot1.NiceToString().Formato(DisplayName, ScriptColumn.ColumnType);
+                    return ChartMessage._0IsNot1.NiceToString().FormatWith(DisplayName, ScriptColumn.ColumnType);
             }
 
             if (pi.Is(() => Parameter1) && token != null)
@@ -189,18 +189,18 @@ namespace Signum.Entities.Chart
 
         
 
-        string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterDN description)
+        string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterEntity description)
         {
             if (description != null)
             {
                 if (parameter == null)
-                    return ChartMessage._0ShouldBeSet.NiceToString().Formato(description.Name);
+                    return ChartMessage._0ShouldBeSet.NiceToString().FormatWith(description.Name);
 
                 return description.Valdidate(parameter, token.Token);
             }
 
             if (parameter.HasText())
-                return ChartMessage._0ShouldBeNull.NiceToString().Formato(pi.NiceName());
+                return ChartMessage._0ShouldBeNull.NiceToString().FormatWith(pi.NiceName());
 
             return null;
         }
@@ -212,7 +212,7 @@ namespace Signum.Entities.Chart
             Parameter3 = FixParameter(Parameter3, scriptColumn.Parameter3);
         }
 
-        private string FixParameter(string parameter, ChartScriptParameterDN description)
+        private string FixParameter(string parameter, ChartScriptParameterEntity description)
         {
             if (parameter != null && description == null)
                 return null;
@@ -227,7 +227,7 @@ namespace Signum.Entities.Chart
         {
             var unit = Token.Try(a=>a.Token.Unit);
 
-            return DisplayName + (unit.HasText() ? " ({0})".Formato(unit) : null);
+            return DisplayName + (unit.HasText() ? " ({0})".FormatWith(unit) : null);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -258,7 +258,7 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = element.Attribute("Token").Try(a => new QueryTokenDN(a.Value));
+            Token = element.Attribute("Token").Try(a => new QueryTokenEntity(a.Value));
             DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
             Parameter1 = element.Attribute("Parameter1").Try(a => a.Value);
             Parameter2 = element.Attribute("Parameter2").Try(a => a.Value);

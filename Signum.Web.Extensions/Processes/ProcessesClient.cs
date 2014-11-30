@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,29 +39,29 @@ namespace Signum.Web.Processes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process"), },
-                    new EntitySettings<ProcessAlgorithmSymbol>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm") },
+                    new EntitySettings<ProcessEntity>{ PartialViewName = e => ViewPrefix.FormatWith("Process"), },
+                    new EntitySettings<ProcessAlgorithmSymbol>{ PartialViewName = e => ViewPrefix.FormatWith("ProcessAlgorithm") },
                 });
 
                 if (packages || packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN> { PartialViewName = e => ViewPrefix.Formato("PackageLine") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineEntity> { PartialViewName = e => ViewPrefix.FormatWith("PackageLine") });
                 }
 
                 if (packages)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageDN> { PartialViewName = e => ViewPrefix.Formato("Package") });
+                    Navigator.AddSetting(new EntitySettings<PackageEntity> { PartialViewName = e => ViewPrefix.FormatWith("Package") });
                 }
 
                 if (packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN> { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationEntity> { PartialViewName = e => ViewPrefix.FormatWith("PackageOperation") });
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
 
-                if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
-                    Navigator.EntitySettings<ProcessDN>().CreateViewOverrides().AfterLine(p => p.Algorithm, 
+                if (MixinDeclarations.IsDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin)))
+                    Navigator.EntitySettings<ProcessEntity>().CreateViewOverrides().AfterLine(p => p.Algorithm, 
                         (html, tc) => html.EntityLine(tc, p => p.Mixin<UserProcessSessionMixin>().User));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
@@ -77,7 +77,7 @@ namespace Signum.Web.Processes
 
         public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)
         {
-            if (!Navigator.IsViewable(typeof(PackageOperationDN), null))
+            if (!Navigator.IsViewable(typeof(PackageOperationEntity), null))
                 return null;
 
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count <= 1)

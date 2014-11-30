@@ -331,7 +331,7 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 52 "..\..\Help\Views\Index.cshtml"
-     if (Navigator.IsCreable(typeof(AppendixHelpDN), isSearch: true))
+     if (Navigator.IsCreable(typeof(AppendixHelpEntity), isSearch: true))
     {
 
             

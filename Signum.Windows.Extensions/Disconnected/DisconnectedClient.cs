@@ -31,7 +31,7 @@ namespace Signum.Windows.Disconnected
 
         static Dictionary<Type, StrategyPair> strategies;
 
-        public static DisconnectedExportDN LastExport;
+        public static DisconnectedExportEntity LastExport;
      
 
         public static void Start()
@@ -40,9 +40,9 @@ namespace Signum.Windows.Disconnected
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN> { View = dm => new DisconnectedMachine() },
-                    new EntitySettings<DisconnectedExportDN> { View = dm => new DisconnectedExport() },
-                    new EntitySettings<DisconnectedImportDN> { View = dm => new DisconnectedImport() },
+                    new EntitySettings<DisconnectedMachineEntity> { View = dm => new DisconnectedMachine() },
+                    new EntitySettings<DisconnectedExportEntity> { View = dm => new DisconnectedExport() },
+                    new EntitySettings<DisconnectedImportEntity> { View = dm => new DisconnectedImport() },
                 });
 
                 Server.Connecting += UpdateCache;
@@ -58,9 +58,9 @@ namespace Signum.Windows.Disconnected
                         return true;
                 }; 
 
-                Lite<DisconnectedMachineDN> current = null; 
+                Lite<DisconnectedMachineEntity> current = null; 
 
-                DisconnectedMachineDN.CurrentVariable.ValueFactory = () =>
+                DisconnectedMachineEntity.CurrentVariable.ValueFactory = () =>
                 {
                     if (current != null)
                         return current;
@@ -68,7 +68,7 @@ namespace Signum.Windows.Disconnected
                     current = Server.Return((IDisconnectedServer s) => s.GetDisconnectedMachine(Environment.MachineName));
 
                     if (current == null)
-                        throw new ApplicationException("No {0} found for '{1}'".Formato(typeof(DisconnectedMachineDN).NiceName(), Environment.MachineName));
+                        throw new ApplicationException("No {0} found for '{1}'".FormatWith(typeof(DisconnectedMachineEntity).NiceName(), Environment.MachineName));
 
                     return current;
                 };
@@ -94,7 +94,7 @@ namespace Signum.Windows.Disconnected
                 {
                     var dm =  entity.Mixin<DisconnectedSubsetMixin>();
 
-                    return dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
+                    return dm.DisconnectedMachine.Is(DisconnectedMachineEntity.Current);
                 }
 
                 return false;

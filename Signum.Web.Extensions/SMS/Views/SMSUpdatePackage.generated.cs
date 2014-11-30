@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\SMS\Views\SMSUpdatePackage.cshtml"
- using (var sc = Html.TypeContext<SMSUpdatePackageDN>()) 
+ using (var sc = Html.TypeContext<SMSUpdatePackageEntity>()) 
 {
 	
             
@@ -71,7 +71,7 @@ Write(Html.ValueLine(sc, s => s.Name));
             #line hidden
             
             #line 6 "..\..\SMS\Views\SMSUpdatePackage.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(SMSMessageDN))
+Write(Html.SearchControl(new FindOptions(typeof(SMSMessageEntity))
     {
         FilterOptions = { new FilterOption("Entity.UpdatePackage", sc.Value) { Frozen = true } },
         SearchOnLoad = true

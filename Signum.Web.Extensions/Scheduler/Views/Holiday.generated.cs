@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\Holiday.cshtml"
- using (var e = Html.TypeContext<HolidayDN>()) 
+ using (var e = Html.TypeContext<HolidayEntity>()) 
 {
      e.LabelColumns = new BsColumn(4);
 

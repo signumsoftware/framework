@@ -10,21 +10,21 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
-    public class QueryHelpDN : Entity
+    public class QueryHelpEntity : Entity
     {
         [NotNullable]
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { SetToStr(ref query, value); }
         }
 
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -40,9 +40,9 @@ namespace Signum.Entities.Help
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryColumnHelpDN> columns = new MList<QueryColumnHelpDN>();
+        MList<QueryColumnHelpEntity> columns = new MList<QueryColumnHelpEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryColumnHelpDN> Columns
+        public MList<QueryColumnHelpEntity> Columns
         {
             get { return columns; }
             set { Set(ref columns, value); }
@@ -61,7 +61,7 @@ namespace Signum.Entities.Help
             return base.PropertyValidation(pi);
         }
 
-        static Expression<Func<QueryHelpDN, string>> ToStringExpression = e => e.Query.ToString();
+        static Expression<Func<QueryHelpEntity, string>> ToStringExpression = e => e.Query.ToString();
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -69,7 +69,7 @@ namespace Signum.Entities.Help
     }
 
     [Serializable]
-    public class QueryColumnHelpDN : EmbeddedEntity
+    public class QueryColumnHelpEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string columnName;
@@ -97,6 +97,6 @@ namespace Signum.Entities.Help
 
     public static class QueryHelpOperation
     {
-        public static readonly ExecuteSymbol<QueryHelpDN> Save = OperationSymbol.Execute<QueryHelpDN>();
+        public static readonly ExecuteSymbol<QueryHelpEntity> Save = OperationSymbol.Execute<QueryHelpEntity>();
     }
 }

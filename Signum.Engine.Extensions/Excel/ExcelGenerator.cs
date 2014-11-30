@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,7 +111,7 @@ namespace Signum.Engine.Excel
             var dic = templateCols.OuterJoinDictionaryCC(resultsCols, (name, cell, resultCol) =>
             {
                 if (resultCol == null)
-                    throw new ApplicationException(ExcelMessage.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.NiceToString().Formato(name));
+                    throw new ApplicationException(ExcelMessage.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.NiceToString().FormatWith(name));
                 
                 if (cell != null)
                 {

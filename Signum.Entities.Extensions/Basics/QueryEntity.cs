@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
-    public class QueryDN : Entity
+    public class QueryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref key, value); }
         }
 
-        static readonly Expression<Func<QueryDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<QueryEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -46,6 +46,6 @@ namespace Signum.Services
     public interface IQueryServer
     {
         [OperationContract, NetDataContract]
-        QueryDN GetQuery(object queryName);
+        QueryEntity GetQuery(object queryName);
     }
 }

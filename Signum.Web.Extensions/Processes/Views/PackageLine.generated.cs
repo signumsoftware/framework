@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Processes\Views\PackageLine.cshtml"
- using (var e = Html.TypeContext<PackageLineDN>())
+ using (var e = Html.TypeContext<PackageLineEntity>())
 {
     e.ReadOnly = true;
     
@@ -116,7 +116,7 @@ Write(Html.ValueLine(e, f => f.FinishTime));
             #line hidden
             
             #line 12 "..\..\Processes\Views\PackageLine.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Line", e.Value), new Context(e, "Exceptions")));
+Write(Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineEntity), "Line", e.Value), new Context(e, "Exceptions")));
 
             
             #line default

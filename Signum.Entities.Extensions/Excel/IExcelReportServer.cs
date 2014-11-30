@@ -13,10 +13,10 @@ namespace Signum.Services
     public interface IExcelReportServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<ExcelReportDN>> GetExcelReports(object queryName);
+        List<Lite<ExcelReportEntity>> GetExcelReports(object queryName);
 
         [OperationContract, NetDataContract]
-        byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request);
+        byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request);
 
         [OperationContract, NetDataContract]
         byte[] ExecutePlainExcel(QueryRequest request);

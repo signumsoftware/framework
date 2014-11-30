@@ -6,7 +6,7 @@ using System.Text;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ApplicationEventLogDN : Entity
+    public class ApplicationEventLogEntity : Entity
     {
         [SqlDbType(Size = 100), NotNullable]
         string machineName;

@@ -11,7 +11,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class Pop3ConfigurationDN : Entity, ITaskDN
+    public class Pop3ConfigurationEntity : Entity, ITaskEntity
     {
         bool active;
         public bool Active
@@ -84,8 +84,8 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        MList<ClientCertificationFileDN> clientCertificationFiles = new MList<ClientCertificationFileDN>();
-        public MList<ClientCertificationFileDN> ClientCertificationFiles
+        MList<ClientCertificationFileEntity> clientCertificationFiles = new MList<ClientCertificationFileEntity>();
+        public MList<ClientCertificationFileEntity> ClientCertificationFiles
         {
             get { return clientCertificationFiles; }
             set { Set(ref clientCertificationFiles, value); }
@@ -93,15 +93,15 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0} ({1})".Formato(Username, Host);
+            return "{0} ({1})".FormatWith(Username, Host);
         }
 
     }
 
     public static class Pop3ConfigurationOperation
     {
-        public static readonly ExecuteSymbol<Pop3ConfigurationDN> Save = OperationSymbol.Execute<Pop3ConfigurationDN>();
-        public static readonly ExecuteSymbol<Pop3ConfigurationDN> ReceiveEmails = OperationSymbol.Execute<Pop3ConfigurationDN>();
+        public static readonly ExecuteSymbol<Pop3ConfigurationEntity> Save = OperationSymbol.Execute<Pop3ConfigurationEntity>();
+        public static readonly ExecuteSymbol<Pop3ConfigurationEntity> ReceiveEmails = OperationSymbol.Execute<Pop3ConfigurationEntity>();
     }
 
     public static class Pop3ConfigurationAction
@@ -110,12 +110,12 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class Pop3ReceptionDN : Entity
+    public class Pop3ReceptionEntity : Entity
     {
         [NotNullable]
-        Lite<Pop3ConfigurationDN> pop3Configuration;
+        Lite<Pop3ConfigurationEntity> pop3Configuration;
         [NotNullValidator]
-        public Lite<Pop3ConfigurationDN> Pop3Configuration
+        public Lite<Pop3ConfigurationEntity> Pop3Configuration
         {
             get { return pop3Configuration; }
             set { Set(ref pop3Configuration, value); }
@@ -142,8 +142,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref newEmails, value); }
         }
 
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
+        Lite<ExceptionEntity> exception;
+        public Lite<ExceptionEntity> Exception
         {
             get { return exception; }
             set { Set(ref exception, value); }
@@ -152,21 +152,21 @@ namespace Signum.Entities.Mailing
 
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class Pop3ReceptionExceptionDN : Entity
+    public class Pop3ReceptionExceptionEntity : Entity
     {
         [NotNullable]
-        Lite<Pop3ReceptionDN> reception;
+        Lite<Pop3ReceptionEntity> reception;
         [NotNullValidator]
-        public Lite<Pop3ReceptionDN> Reception
+        public Lite<Pop3ReceptionEntity> Reception
         {
             get { return reception; }
             set { Set(ref reception, value); }
         }
 
         [NotNullable, UniqueIndex]
-        Lite<ExceptionDN> exception;
+        Lite<ExceptionEntity> exception;
         [NotNullValidator]
-        public Lite<ExceptionDN> Exception
+        public Lite<ExceptionEntity> Exception
         {
             get { return exception; }
             set { Set(ref exception, value); }

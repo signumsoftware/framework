@@ -115,7 +115,7 @@ WriteLiteral("                    ");
 
             
             #line 14 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(typeof(Signum.Entities.Basics.QueryDN).NiceName());
+               Write(typeof(Signum.Entities.Basics.QueryEntity).NiceName());
 
             
             #line default

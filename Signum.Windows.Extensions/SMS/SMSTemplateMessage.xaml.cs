@@ -72,9 +72,9 @@ namespace Signum.Windows.SMS
             }
         }
 
-        public SMSTemplateMessageDN TemplateMessageDC
+        public SMSTemplateMessageEntity TemplateMessageDC
         {
-            get { return (SMSTemplateMessageDN)DataContext; }
+            get { return (SMSTemplateMessageEntity)DataContext; }
             set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
         }
 

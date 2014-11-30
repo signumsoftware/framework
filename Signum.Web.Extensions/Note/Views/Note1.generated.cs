@@ -47,7 +47,7 @@ namespace Signum.Web.Note.Views
         {
             
             #line 2 "..\..\Note\Views\Note.cshtml"
- using (var cp = Html.TypeContext<NoteDN>())
+ using (var cp = Html.TypeContext<NoteEntity>())
 {
     
             

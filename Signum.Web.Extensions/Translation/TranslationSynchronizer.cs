@@ -134,7 +134,7 @@ namespace Signum.Web.Translation
 
         public override string ToString()
         {
-            return "Changes for {0}".Formato(LocalizedAssembly.ToString());
+            return "Changes for {0}".FormatWith(LocalizedAssembly.ToString());
         }
     }
 
@@ -148,7 +148,7 @@ namespace Signum.Web.Translation
 
         public override string ToString()
         {
-            return "Changes for {0}".Formato(Type);
+            return "Changes for {0}".FormatWith(Type);
         }
 
         public int TotalOriginalLength()
@@ -167,7 +167,7 @@ namespace Signum.Web.Translation
 
         public override string ToString()
         {
-            return "Conflict {0} -> {1}".Formato(Original, Translated);
+            return "Conflict {0} -> {1}".FormatWith(Original, Translated);
         }
     }
 
@@ -178,7 +178,7 @@ namespace Signum.Web.Translation
 
         public override string ToString()
         {
-            return "Conflict {0} -> {1}".Formato(Original, Translated);
+            return "Conflict {0} -> {1}".FormatWith(Original, Translated);
         }
     }
 }

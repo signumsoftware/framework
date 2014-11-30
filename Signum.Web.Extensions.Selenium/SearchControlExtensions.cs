@@ -17,36 +17,36 @@ namespace Signum.Web.Selenium
             return new SearchPopupProxy(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
-        public static PopupControl<ExcelReportDN> CreateExcelReport(this SearchControlProxy sc)
+        public static PopupControl<ExcelReportEntity> CreateExcelReport(this SearchControlProxy sc)
         {
             sc.Selenium.MouseUp(sc.MenuOptionLocator("qbReportCreate"));
-            return new PopupControl<ExcelReportDN>(sc.Selenium, sc.PrefixUnderscore + "New");
+            return new PopupControl<ExcelReportEntity>(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static string ExcelReportLocator(this SearchControlProxy sc, string title)
         {
-            return sc.MenuOptionLocatorByAttr("title='{0}'".Formato(title));
+            return sc.MenuOptionLocatorByAttr("title='{0}'".FormatWith(title));
         }
 
-        public static NormalPage<UserQueryDN> NewUserQuery(this SearchControlProxy sc)
+        public static NormalPage<UserQueryEntity> NewUserQuery(this SearchControlProxy sc)
         {
             sc.Selenium.MouseUp(sc.MenuOptionLocator("qbUserQueryNew"));
             sc.Selenium.WaitForPageToLoad();
 
-            return new NormalPage<UserQueryDN>(sc.Selenium); 
+            return new NormalPage<UserQueryEntity>(sc.Selenium); 
         }
 
-        public static NormalPage<UserQueryDN> EditUserQuery(this SearchControlProxy sc)
+        public static NormalPage<UserQueryEntity> EditUserQuery(this SearchControlProxy sc)
         {
             sc.Selenium.Click(sc.MenuOptionLocator("qbUserQueryEdit"));
             sc.Selenium.WaitForPageToLoad();
 
-            return new NormalPage<UserQueryDN>(sc.Selenium);
+            return new NormalPage<UserQueryEntity>(sc.Selenium);
         }
 
         public static string UserQueryLocator(this SearchControlProxy sc, string title)
         {
-            return sc.MenuOptionLocatorByAttr("title='{0}'".Formato(title));
+            return sc.MenuOptionLocatorByAttr("title='{0}'".FormatWith(title));
         }
 
         public static void UserQueryLocatorClick(this SearchControlProxy sc, string title)

@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
- using (var dc = Html.TypeContext<DisconnectedExportDN>())
+ using (var dc = Html.TypeContext<DisconnectedExportEntity>())
 {
     
             
@@ -177,7 +177,7 @@ WriteLiteral(">\r\n                <thead>\r\n                    <tr>\r\n      
 
             
             #line 20 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.Type));
+                       Write(Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.Type));
 
             
             #line default
@@ -186,7 +186,7 @@ WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 21 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedExportTableDN de) => de.CopyTable));
+                       Write(Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.CopyTable));
 
             
             #line default

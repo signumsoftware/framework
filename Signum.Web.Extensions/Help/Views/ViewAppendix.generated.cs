@@ -125,7 +125,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 24 "..\..\Help\Views\ViewAppendix.cshtml"
-         using (TypeContext<AppendixHelpDN> ac = new TypeContext<AppendixHelpDN>(ah.Entity, null))
+         using (TypeContext<AppendixHelpEntity> ac = new TypeContext<AppendixHelpEntity>(ah.Entity, null))
         {
             using (Html.BeginForm((HelpController hc) => hc.SaveAppendix(), new { id = "form-save" }))
             {
@@ -158,11 +158,11 @@ WriteLiteral(">\r\n");
             #line 29 "..\..\Help\Views\ViewAppendix.cshtml"
                                                        
 
-            if(!Navigator.IsReadOnly(typeof(AppendixHelpDN)))
+            if(!Navigator.IsReadOnly(typeof(AppendixHelpEntity)))
             {
                    Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
                     {
-                        { "options",  Database.Query<AppendixHelpDN>()
+                        { "options",  Database.Query<AppendixHelpEntity>()
                         .Where(e => e.UniqueName == ac.Value.UniqueName && e.Culture != ac.Value.Culture)
                         .Select(e => new { e.Culture })
                         .ToList()

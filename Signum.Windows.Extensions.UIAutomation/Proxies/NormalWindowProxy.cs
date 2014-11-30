@@ -28,7 +28,7 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element.AssertClassName("NormalWindow"))
         {
-            Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
+            Element.WaitDataContextSet(() => "DataContextSet for {0}".FormatWith(typeof(T).Name));
         }
 
         public ButtonBarProxy ButtonBar
@@ -69,12 +69,12 @@ namespace Signum.Windows.UIAutomation
                     if (childWindows != null)
                     {
                         MessageBoxProxy.ThrowIfError(childWindows);
-                        throw new InvalidOperationException("A window ({0})was open after pressing Ok on {1}. Consider using OkCapture".Formato(WaitExtensions.NiceToString(childWindows), entityId));
+                        throw new InvalidOperationException("A window ({0})was open after pressing Ok on {1}. Consider using OkCapture".FormatWith(WaitExtensions.NiceToString(childWindows), entityId));
                     }
 
                     return IsClosed;
                 },
-                actionDescription: () => "Waiting to close window after OK {0}".Formato(entityId));
+                actionDescription: () => "Waiting to close window after OK {0}".FormatWith(entityId));
         }
 
         public AutomationElement OkCapture()
@@ -82,7 +82,7 @@ namespace Signum.Windows.UIAutomation
             var entityId = EntityId;
             return Element.CaptureWindow(
                 action: () => ButtonBar.OkButton.ButtonInvoke(),
-                actionDescription: () => "Waiting to capture window after OK {0}".Formato(entityId));
+                actionDescription: () => "Waiting to capture window after OK {0}".FormatWith(entityId));
         }
 
         public void Reload()
@@ -192,7 +192,7 @@ namespace Signum.Windows.UIAutomation
             window.Element.WaitDataContextChangedAfter(
                 action: () => button.ButtonInvoke(),
                 timeOut : timeOut ?? OperationTimeouts.ExecuteTimeout,
-                actionDescription: () => "Executing {0} from {1}".Formato(symbol.Symbol, entityId));
+                actionDescription: () => "Executing {0} from {1}".FormatWith(symbol.Symbol, entityId));
         }
 
         public static AutomationElement ExecuteCapture<T>(this NormalWindowProxy<T> window, ExecuteSymbol<T> symbol, int? timeOut = null)
@@ -229,11 +229,11 @@ namespace Signum.Windows.UIAutomation
                 action: () =>
                 {
                     var dialog = window.Element.CaptureWindow(action: () => button.ButtonInvoke(),
-                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(operationSymbol.Key, entityId));
+                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".FormatWith(operationSymbol.Key, entityId));
 
                     dialogAction(dialog);
                 },
-                actionDescription: () => "Executing {0} from {1}".Formato(operationSymbol.Key, entityId));
+                actionDescription: () => "Executing {0} from {1}".FormatWith(operationSymbol.Key, entityId));
         }
 
         public static AutomationElement OperationCapture<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol, int? timeOut = null)
@@ -246,7 +246,7 @@ namespace Signum.Windows.UIAutomation
 
             return window.Element.CaptureWindow(
                 () => button.ButtonInvoke(),
-                actionDescription : () => "Finding a window after {0} from {1} took more than {2} ms".Formato(operationSymbol.Key, entityId, time));
+                actionDescription : () => "Finding a window after {0} from {1} took more than {2} ms".FormatWith(operationSymbol.Key, entityId, time));
         }
 
         public static AutomationElement GetOperationButton<T>(this NormalWindowProxy<T> window, OperationSymbol operationSymbol)
@@ -261,7 +261,7 @@ namespace Signum.Windows.UIAutomation
             if (result != null)
                 return result;
 
-            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".Formato(operationSymbol.Key));
+            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".FormatWith(operationSymbol.Key));
         }
     }
 
@@ -295,7 +295,7 @@ namespace Signum.Windows.UIAutomation
         {
             var button = TryGetButton(operationSymbol);
             if (button == null)
-                throw new ElementNotFoundException("No button for operation {0} found".Formato(operationSymbol.Key));
+                throw new ElementNotFoundException("No button for operation {0} found".FormatWith(operationSymbol.Key));
 
             return button;
         }
@@ -320,7 +320,7 @@ namespace Signum.Windows.UIAutomation
                     count++;
                     window = Element.CaptureChildWindow(
                         () => groupButton.ButtonInvoke(),
-                        actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+                        actionDescription: () => "Waiting for ContextMenu after click on {0}".FormatWith(groupName));
                 }
                 catch
                 {
@@ -375,7 +375,7 @@ namespace Signum.Windows.UIAutomation
             var button = left.QuickLinks().Child(c => c.Current.Name == name).Child(c => c.Current.ControlType == ControlType.Button);
 
             return button.ButtonInvokeCapture(
-                actionDescription: () => "Waiting to capture window after QuickLink {0} on LeftPanel".Formato(name));
+                actionDescription: () => "Waiting to capture window after QuickLink {0} on LeftPanel".FormatWith(name));
         }
 
         public static SearchWindowProxy QuickLinkExplore(this LeftPanelProxy left, object queryName)
@@ -391,7 +391,7 @@ namespace Signum.Windows.UIAutomation
 
     public static class IsolationExtensions
     {
-        public static Lite<IsolationDN> GetIsolation<T>(this NormalWindowProxy<T> window)
+        public static Lite<IsolationEntity> GetIsolation<T>(this NormalWindowProxy<T> window)
              where T: Entity
         {
             throw new NotImplementedException();

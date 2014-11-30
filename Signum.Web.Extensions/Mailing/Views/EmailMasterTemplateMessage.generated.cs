@@ -87,7 +87,7 @@ namespace Signum.Web.Mailing.Views
         {
             
             #line 9 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
- using (var ec = Html.TypeContext<EmailMasterTemplateMessageDN>())
+ using (var ec = Html.TypeContext<EmailMasterTemplateMessageEntity>())
 {
 
             

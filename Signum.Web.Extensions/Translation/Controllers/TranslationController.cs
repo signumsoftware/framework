@@ -40,13 +40,13 @@ namespace Signum.Web.Translation.Controllers
                     FileName = LocalizedAssembly.TranslationFileName(a, ci)
                 }).ToDictionary(tf => tf.CultureInfo));
 
-            return base.View(TranslationClient.ViewPrefix.Formato("Index"), dic);
+            return base.View(TranslationClient.ViewPrefix.FormatWith("Index"), dic);
         }
 
         [HttpGet]
         public ActionResult View(string assembly, string culture, bool searchPressed, string filter)
         {
-            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
             CultureInfo targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
@@ -63,7 +63,7 @@ namespace Signum.Web.Translation.Controllers
             ViewBag.DefaultCulture = defaultCulture;
             ViewBag.Culture = targetCulture;
 
-            return base.View(TranslationClient.ViewPrefix.Formato("View"), reference);
+            return base.View(TranslationClient.ViewPrefix.FormatWith("View"), reference);
         }
 
         [HttpPost]
@@ -156,7 +156,7 @@ namespace Signum.Web.Translation.Controllers
                     case TranslationRecordKind.PluralDescription: lt.PluralDescription = Value; break;
                     case TranslationRecordKind.Gender: lt.Gender = Value != null ? (char?)Value[0] : null; break;
                     case TranslationRecordKind.Member: lt.Members[Member] = Value; break;
-                    default: throw new InvalidOperationException("Unexpected kind {0}".Formato(Kind));
+                    default: throw new InvalidOperationException("Unexpected kind {0}".FormatWith(Kind));
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace Signum.Web.Translation.Controllers
 
         public ActionResult Sync(string assembly, string culture)
         {
-            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
@@ -189,13 +189,13 @@ namespace Signum.Web.Translation.Controllers
 
             ViewBag.TotalTypes = totalTypes;
             ViewBag.Culture = targetCulture;
-            return base.View(TranslationClient.ViewPrefix.Formato("Sync"), changes);
+            return base.View(TranslationClient.ViewPrefix.FormatWith("Sync"), changes);
         }
 
         [HttpPost]
         public ActionResult SaveSync(string assembly, string culture)
         {
-            Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
+            Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
 
             LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture), forceCreate: true);
 

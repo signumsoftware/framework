@@ -24,7 +24,7 @@ namespace Signum.Windows.SMS
     {
         public static IValueConverter StateToVisibility = ConverterFactory.New((SMSMessageState s) => s == SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
         public static IValueConverter NotStateToVisibility = ConverterFactory.New((SMSMessageState s) => s != SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
-        public static IValueConverter ReadOnlyMessageConverter = ConverterFactory.New((SMSMessageDN m) =>
+        public static IValueConverter ReadOnlyMessageConverter = ConverterFactory.New((SMSMessageEntity m) =>
             !m.EditableMessage ? true
             : m.State != SMSMessageState.Created);
 
@@ -93,9 +93,9 @@ namespace Signum.Windows.SMS
             }
         }
 
-        public SMSMessageDN MessageDC
+        public SMSMessageEntity MessageDC
         {
-            get { return (SMSMessageDN)DataContext; }
+            get { return (SMSMessageEntity)DataContext; }
             set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
         }
 

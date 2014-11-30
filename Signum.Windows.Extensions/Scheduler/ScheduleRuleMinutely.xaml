@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
-    m:Common.TypeContext="{x:Type d:ScheduleRuleMinutelyDN}"
+    m:Common.TypeContext="{x:Type d:ScheduleRuleMinutelyEntity}"
     Padding="2">
     <StackPanel>
         <m:ValueLine m:Common.Route="EachMinutes"/>

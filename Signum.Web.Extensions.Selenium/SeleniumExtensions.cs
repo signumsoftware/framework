@@ -130,7 +130,7 @@ namespace Signum.Web.Selenium
             } while (DateTime.Now < limit);
 
 
-            throw new TimeoutException("Timeout after {0} ms waiting for {1} in page {2}({3})".Formato(
+            throw new TimeoutException("Timeout after {0} ms waiting for {1} in page {2}({3})".FormatWith(
                 timeout ?? AjaxTimeout,
                 actionDescription == null ? "visual condition" : actionDescription(),
                 selenium.GetTitle(),
@@ -139,24 +139,24 @@ namespace Signum.Web.Selenium
 
         public static void WaitElementPresent(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
         {
-            selenium.Wait(() => selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to be present".Formato(locator)), timeout);
+            selenium.Wait(() => selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
         }
 
         public static void WaitElementDisapear(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
         {
-            selenium.Wait(() => !selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to disapear".Formato(locator)), timeout);
+            selenium.Wait(() => !selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to disapear".FormatWith(locator)), timeout);
         }
 
         public static void AssertElementPresent(this ISelenium selenium, string locator)
         {
             if (!selenium.IsElementPresent(locator))
-                throw new InvalidOperationException("{0} not found".Formato(locator));
+                throw new InvalidOperationException("{0} not found".FormatWith(locator));
         }
 
         public static void AssertElementNotPresent(this ISelenium selenium, string locator)
         {
             if (selenium.IsElementPresent(locator))
-                throw new InvalidOperationException("{0} is found".Formato(locator));
+                throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
         public static void SetChecked(this ISelenium selenium, string locator, bool isChecked)

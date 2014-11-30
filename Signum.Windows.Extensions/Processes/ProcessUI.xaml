@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:ProcessDN}"
+    m:Common.TypeContext="{x:Type d:ProcessEntity}"
     MinWidth="300">
     <StackPanel m:Common.IsReadOnly="True" m:Common.MinLabelWidth="105">
         <m:ValueLine m:Common.Route="State" />
@@ -25,6 +25,6 @@
                      Value="{Binding Progress, Converter={x:Static m2:Converters.DecimalOrZero}}"
                      Visibility="{Binding Progress, Converter={x:Static m:Converters.NullToVisibility}}"/>
      
-        <m:CountSearchControl QueryName="{x:Type d:ProcessExceptionLineDN}" FilterColumn="Process" />
+        <m:CountSearchControl QueryName="{x:Type d:ProcessExceptionLineEntity}" FilterColumn="Process" />
     </StackPanel>
 </UserControl>

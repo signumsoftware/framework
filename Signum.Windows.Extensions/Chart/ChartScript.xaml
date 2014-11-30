@@ -6,7 +6,7 @@
     xmlns:d="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     xmlns:swsh="clr-namespace:Signum.Windows.SyntaxHighlight"
     xmlns:swc ="clr-namespace:Signum.Windows.Chart"
-    m:Common.TypeContext="{x:Type d:ChartScriptDN}"
+    m:Common.TypeContext="{x:Type d:ChartScriptEntity}"
     MinWidth="300">
     <Grid>
         <Grid.RowDefinitions>

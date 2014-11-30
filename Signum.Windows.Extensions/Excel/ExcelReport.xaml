@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Files"
     xmlns:dq="clr-namespace:Signum.Entities.Excel;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type dq:ExcelReportDN}" MinWidth="300">
+    m:Common.TypeContext="{x:Type dq:ExcelReportEntity}" MinWidth="300">
     <StackPanel>
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
         <m:ValueLine m:Common.Route="DisplayName" />

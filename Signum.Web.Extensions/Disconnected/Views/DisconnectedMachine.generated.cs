@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
- using (var dc = Html.TypeContext<DisconnectedMachineDN>())
+ using (var dc = Html.TypeContext<DisconnectedMachineEntity>())
 {
     
             
@@ -140,7 +140,7 @@ WriteLiteral("            ");
 
             
             #line 16 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-       Write(Html.SearchControl(new FindOptions(typeof(DisconnectedImportDN), "Machine", dc.Value)
+       Write(Html.SearchControl(new FindOptions(typeof(DisconnectedImportEntity), "Machine", dc.Value)
        {
           OrderOptions = { new OrderOption("CreationDate", OrderType.Descending) },
       }, dc));

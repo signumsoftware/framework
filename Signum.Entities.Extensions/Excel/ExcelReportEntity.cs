@@ -12,11 +12,11 @@ using System.ComponentModel;
 namespace Signum.Entities.Excel
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class ExcelReportDN : Entity
+    public class ExcelReportEntity : Entity
     {
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
@@ -32,15 +32,15 @@ namespace Signum.Entities.Excel
         }
 
         [NotNullable]
-        EmbeddedFileDN file;
+        EmbeddedFileEntity file;
         [NotNullValidator]
-        public EmbeddedFileDN File
+        public EmbeddedFileEntity File
         {
             get { return file; }
             set { Set(ref file, value); }
         }
 
-        static readonly Expression<Func<ExcelReportDN, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -49,8 +49,8 @@ namespace Signum.Entities.Excel
 
     public static class ExcelReportOperation
     {
-        public static readonly ExecuteSymbol<ExcelReportDN> Save = OperationSymbol.Execute<ExcelReportDN>();
-        public static readonly DeleteSymbol<ExcelReportDN> Delete = OperationSymbol.Delete<ExcelReportDN>();
+        public static readonly ExecuteSymbol<ExcelReportEntity> Save = OperationSymbol.Execute<ExcelReportEntity>();
+        public static readonly DeleteSymbol<ExcelReportEntity> Delete = OperationSymbol.Delete<ExcelReportEntity>();
     }
 
     public enum ExcelMessage

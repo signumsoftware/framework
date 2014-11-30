@@ -44,18 +44,18 @@ namespace Signum.Windows.Chart
         {
             if (QueryDescription == null)
             {
-                UserChartDN uq = (UserChartDN)DataContext;
+                UserChartEntity uq = (UserChartEntity)DataContext;
 
                 QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
             chartBuilder.Description = QueryDescription;
 
-            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey);
+            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey);
         }
 
         private List<QueryToken> QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
         {
-            var cr = (UserChartDN)DataContext;
+            var cr = (UserChartEntity)DataContext;
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
@@ -64,7 +64,7 @@ namespace Signum.Windows.Chart
 
         private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
         {
-            var cr = (UserChartDN)DataContext;
+            var cr = (UserChartEntity)DataContext;
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 

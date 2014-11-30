@@ -75,7 +75,7 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\Chart\Views\ChartScript.cshtml"
- using (var cc = Html.TypeContext<ChartScriptDN>())
+ using (var cc = Html.TypeContext<ChartScriptEntity>())
 {
     var imageRoute = cc.Compose("ImageIco");
     

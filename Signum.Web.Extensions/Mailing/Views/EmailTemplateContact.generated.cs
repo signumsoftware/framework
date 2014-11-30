@@ -65,7 +65,7 @@ namespace Signum.Web.Mailing.Views
         {
             
             #line 5 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
- using (var tc = Html.TypeContext<EmailTemplateContactDN>())
+ using (var tc = Html.TypeContext<EmailTemplateContactEntity>())
 {
     
     using(var sc = tc.SubContext())
@@ -89,7 +89,7 @@ WriteLiteral(">\r\n                <label>");
 
             
             #line 13 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                  Write(Html.PropertyNiceName((EmailTemplateDN e)=>e.From));
+                  Write(Html.PropertyNiceName((EmailTemplateEntity e)=>e.From));
 
             
             #line default

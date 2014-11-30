@@ -87,7 +87,7 @@ namespace Signum.Web.Mailing.Views
         {
             
             #line 9 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
- using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
+ using (var ec = Html.TypeContext<EmailTemplateMessageEntity>())
 {
     ec.LabelColumns = new BsColumn(1);
 

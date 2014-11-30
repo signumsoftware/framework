@@ -61,7 +61,7 @@ WriteLiteral("\r\n");
 
             
             #line 5 "..\..\Scheduler\Views\ScheduleRuleDaily.cshtml"
- using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
+ using (var e = Html.TypeContext<ScheduleRuleDailyEntity>())
 {     
     
             

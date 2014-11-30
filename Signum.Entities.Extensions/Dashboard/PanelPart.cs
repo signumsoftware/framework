@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +14,7 @@ using Signum.Entities.UserQueries;
 namespace Signum.Entities.Dashboard
 {
     [Serializable]
-    public class PanelPartDN : EmbeddedEntity, IGridEntity
+    public class PanelPartEntity : EmbeddedEntity, IGridEntity
     {
         string title;
         public string Title
@@ -54,9 +54,9 @@ namespace Signum.Entities.Dashboard
             set { Set(ref style, value); }
         }
 
-        [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
-        IPartDN content;
-        public IPartDN Content
+        [ImplementedBy(typeof(UserChartPartEntity), typeof(UserQueryPartEntity), typeof(CountSearchControlPartEntity), typeof(LinkListPartEntity))]
+        IPartEntity content;
+        public IPartEntity Content
         {
             get { return content; }
             set { Set(ref content, value); }
@@ -72,15 +72,15 @@ namespace Signum.Entities.Dashboard
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
-                    return DashboardMessage.DashboardDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
+                    return DashboardMessage.DashboardDN_TitleMustBeSpecifiedFor0.NiceToString().FormatWith(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
         }
 
-        public PanelPartDN Clone()
+        public PanelPartEntity Clone()
         {
-            return new PanelPartDN
+            return new PanelPartEntity
             {
                 Columns = Columns,
                 StartColumn = StartColumn,
@@ -137,22 +137,22 @@ namespace Signum.Entities.Dashboard
         int Columns { get; set; }
     }
 
-    public interface IPartDN : IEntity
+    public interface IPartEntity : IEntity
     {
         bool RequiresTitle { get; }
-        IPartDN Clone();
+        IPartEntity Clone();
 
         XElement ToXml(IToXmlContext ctx);
         void FromXml(XElement element, IFromXmlContext ctx);
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class UserQueryPartDN : Entity, IPartDN
+    public class UserQueryPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        UserQueryDN userQuery;
+        UserQueryEntity userQuery;
         [NotNullValidator]
-        public UserQueryDN UserQuery
+        public UserQueryEntity UserQuery
         {
             get { return userQuery; }
             set { Set(ref userQuery, value); }
@@ -168,9 +168,9 @@ namespace Signum.Entities.Dashboard
             get { return false; }
         }
 
-        public IPartDN Clone()
+        public IPartEntity Clone()
         {
-            return new UserQueryPartDN
+            return new UserQueryPartEntity
             {
                 UserQuery = this.UserQuery,
             };
@@ -184,17 +184,17 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class UserChartPartDN : Entity, IPartDN
+    public class UserChartPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        UserChartDN userChart;
+        UserChartEntity userChart;
         [NotNullValidator]
-        public UserChartDN UserChart
+        public UserChartEntity UserChart
         {
             get { return userChart; }
             set { Set(ref userChart, value); }
@@ -217,9 +217,9 @@ namespace Signum.Entities.Dashboard
             get { return false; }
         }
 
-        public IPartDN Clone()
+        public IPartEntity Clone()
         {
-            return new UserChartPartDN
+            return new UserChartPartEntity
             {
                 UserChart = this.UserChart,
                 ShowData = this.ShowData
@@ -235,16 +235,16 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserChart = (UserChartDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
+            UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
         }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class CountSearchControlPartDN : Entity, IPartDN
+    public class CountSearchControlPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        MList<CountUserQueryElementDN> userQueries = new MList<CountUserQueryElementDN>();
-        public MList<CountUserQueryElementDN> UserQueries
+        MList<CountUserQueryElementEntity> userQueries = new MList<CountUserQueryElementEntity>();
+        public MList<CountUserQueryElementEntity> UserQueries
         {
             get { return userQueries; }
             set { Set(ref userQueries, value); }
@@ -252,7 +252,7 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
+            return "{0} {1}".FormatWith(userQueries.Count, typeof(UserQueryEntity).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -260,9 +260,9 @@ namespace Signum.Entities.Dashboard
             get { return true; }
         }
 
-        public IPartDN Clone()
+        public IPartEntity Clone()
         {
-            return new CountSearchControlPartDN
+            return new CountSearchControlPartEntity
             {
                 UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
             };
@@ -281,7 +281,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class CountUserQueryElementDN : EmbeddedEntity
+    public class CountUserQueryElementEntity : EmbeddedEntity
     {
         string label;
         public string Label
@@ -290,9 +290,9 @@ namespace Signum.Entities.Dashboard
             set { Set(ref label, value); }
         }
 
-        UserQueryDN userQuery;
+        UserQueryEntity userQuery;
         [NotNullValidator]
-        public UserQueryDN UserQuery
+        public UserQueryEntity UserQuery
         {
             get { return userQuery; }
             set { Set(ref userQuery, value); }
@@ -304,9 +304,9 @@ namespace Signum.Entities.Dashboard
             get { return href; }
             set { Set(ref href, value); }
         }
-        public CountUserQueryElementDN Clone()
+        public CountUserQueryElementEntity Clone()
         {
-            return new CountUserQueryElementDN
+            return new CountUserQueryElementEntity
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -326,16 +326,16 @@ namespace Signum.Entities.Dashboard
         {
             Label = element.Attribute("Label").Try(a => a.Value);
             Href = element.Attribute("Href").Try(a => a.Value);
-            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class LinkListPartDN : Entity, IPartDN
+    public class LinkListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        MList<LinkElementDN> links = new MList<LinkElementDN>();
-        public MList<LinkElementDN> Links
+        MList<LinkElementEntity> links = new MList<LinkElementEntity>();
+        public MList<LinkElementEntity> Links
         {
             get { return links; }
             set { Set(ref links, value); }
@@ -343,7 +343,7 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(links.Count, typeof(LinkElementDN).NicePluralName());
+            return "{0} {1}".FormatWith(links.Count, typeof(LinkElementEntity).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -351,9 +351,9 @@ namespace Signum.Entities.Dashboard
             get { return true; }
         }
 
-        public IPartDN Clone()
+        public IPartEntity Clone()
         {
-            return new LinkListPartDN
+            return new LinkListPartEntity
             {
                 Links = this.Links.Select(e => e.Clone()).ToMList(),
             };
@@ -373,7 +373,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class LinkElementDN : EmbeddedEntity
+    public class LinkElementEntity : EmbeddedEntity
     {
         string label;
         [NotNullValidator]
@@ -392,9 +392,9 @@ namespace Signum.Entities.Dashboard
             set { Set(ref link, value); }
         }
 
-        public LinkElementDN Clone()
+        public LinkElementEntity Clone()
         {
-            return new LinkElementDN
+            return new LinkElementEntity
             {
                 Label = this.Label,
                 Link = this.Link

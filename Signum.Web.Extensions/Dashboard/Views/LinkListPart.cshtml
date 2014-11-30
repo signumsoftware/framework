@@ -3,10 +3,10 @@
 @using Signum.Web.Dashboard
 @using Signum.Entities.DynamicQuery
 
-@using (var llp = Html.TypeContext<LinkListPartDN>())
+@using (var llp = Html.TypeContext<LinkListPartEntity>())
 {
     <ul class="sf-cp-link-list">
-        @foreach (LinkElementDN link in Model.Value.Links)
+        @foreach (LinkElementEntity link in Model.Value.Links)
         {
             <li>
                 @Html.Href(link.Link, link.Label.DefaultText(link.Link))

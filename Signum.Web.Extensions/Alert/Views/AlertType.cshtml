@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Alerts
 
-@using (var cp = Html.TypeContext<AlertTypeDN>())
+@using (var cp = Html.TypeContext<AlertTypeEntity>())
 {
     @Html.ValueLine(cp, d => d.Name)
 }

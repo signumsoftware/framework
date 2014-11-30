@@ -50,7 +50,7 @@ namespace Signum.Engine.Cache
 
         internal string CreatePartialInnerJoin(IColumn column)
         {
-            return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name.ToStringDbo(), currentAlias.Name.SqlEscape(), column.Name);
+            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToStringDbo(), currentAlias.Name.SqlEscape(), column.Name);
         }
 
         internal Type GetColumnType(IColumn column)
@@ -204,7 +204,7 @@ namespace Signum.Engine.Cache
                 return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
             }
 
-            throw new InvalidOperationException("Unexpected {0}".Formato(field.GetType().Name));
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
         }
 
         private Expression GetEntity(bool isLite, IColumn column, Type type)
@@ -240,7 +240,7 @@ namespace Signum.Engine.Cache
 
                             break;
                         }
-                    default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
+                    default: throw new InvalidOperationException("{0} should be cached at this stage".FormatWith(type));
                 }
 
                 if (!id.Type.IsNullable())
@@ -273,7 +273,7 @@ namespace Signum.Engine.Cache
 
                             return Expression.Call(retriever, miComplete.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()), lambda);
                         }
-                    default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
+                    default: throw new InvalidOperationException("{0} should be cached at this stage".FormatWith(type));
                 }
             }
         }

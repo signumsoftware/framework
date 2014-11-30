@@ -56,7 +56,7 @@ namespace Signum.Web.Dashboard.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/Dashboard.cshtml")]
-    public partial class Dashboard : System.Web.Mvc.WebViewPage<DashboardDN>
+    public partial class Dashboard : System.Web.Mvc.WebViewPage<DashboardEntity>
     {
         public Dashboard()
         {
@@ -227,7 +227,7 @@ WriteLiteral("            <a");
 WriteAttribute("href", Tuple.Create(" href=\"", 1049), Tuple.Create("\"", 1111)
             
             #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 1056), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardDN), Model.Id)
+, Tuple.Create(Tuple.Create("", 1056), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardEntity), Model.Id)
             
             #line default
             #line hidden
@@ -276,7 +276,7 @@ WriteLiteral("    </h2>\r\n");
     
       
 
-        Html.RenderPartial(DashboardClient.ViewPrefix.Formato("DashboardView"), Model);
+        Html.RenderPartial(DashboardClient.ViewPrefix.FormatWith("DashboardView"), Model);
 
         if (Model.AutoRefreshPeriod != null)
         {

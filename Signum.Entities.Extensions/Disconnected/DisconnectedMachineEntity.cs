@@ -10,7 +10,7 @@ using System.ComponentModel;
 namespace Signum.Entities.Disconnected
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class DisconnectedMachineDN : Entity
+    public class DisconnectedMachineEntity : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
@@ -49,15 +49,15 @@ namespace Signum.Entities.Disconnected
             set { Set(ref seedMax, value); }
         }
 
-        static Expression<Func<DisconnectedMachineDN, string>> ToStringExpression = e => e.machineName;
+        static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.machineName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public static readonly SessionVariable<Lite<DisconnectedMachineDN>> CurrentVariable = 
-            Statics.SessionVariable<Lite<DisconnectedMachineDN>>("disconectedMachine");
-        public static Lite<DisconnectedMachineDN> Current
+        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable = 
+            Statics.SessionVariable<Lite<DisconnectedMachineEntity>>("disconectedMachine");
+        public static Lite<DisconnectedMachineEntity> Current
         {
             get { return CurrentVariable.Value; }
             set { CurrentVariable.Value = value; }
@@ -74,9 +74,9 @@ namespace Signum.Entities.Disconnected
 
     public static class DisconnectedMachineOperation
     {
-        public static readonly ExecuteSymbol<DisconnectedMachineDN> Save = OperationSymbol.Execute<DisconnectedMachineDN>();
-        public static readonly ExecuteSymbol<DisconnectedMachineDN> UnsafeUnlock = OperationSymbol.Execute<DisconnectedMachineDN>();
-        public static readonly ConstructSymbol<DisconnectedImportDN>.From<DisconnectedMachineDN> FixImport = OperationSymbol.Construct<DisconnectedImportDN>.From<DisconnectedMachineDN>();
+        public static readonly ExecuteSymbol<DisconnectedMachineEntity> Save = OperationSymbol.Execute<DisconnectedMachineEntity>();
+        public static readonly ExecuteSymbol<DisconnectedMachineEntity> UnsafeUnlock = OperationSymbol.Execute<DisconnectedMachineEntity>();
+        public static readonly ConstructSymbol<DisconnectedImportEntity>.From<DisconnectedMachineEntity> FixImport = OperationSymbol.Construct<DisconnectedImportEntity>.From<DisconnectedMachineEntity>();
     }
 
     [Serializable]
@@ -104,8 +104,8 @@ namespace Signum.Entities.Disconnected
             set { Set(ref lastOnlineTicks, value); }
         }
 
-        Lite<DisconnectedMachineDN> disconnectedMachine;
-        public Lite<DisconnectedMachineDN> DisconnectedMachine
+        Lite<DisconnectedMachineEntity> disconnectedMachine;
+        public Lite<DisconnectedMachineEntity> DisconnectedMachine
         {
             get { return disconnectedMachine; }
             set { Set(ref disconnectedMachine, value); }

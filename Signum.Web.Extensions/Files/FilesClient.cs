@@ -36,7 +36,7 @@ namespace Signum.Web.Files
             {
                 Navigator.RegisterArea(typeof(FilesClient));
 
-                FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                FileRepositoryEntity.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
                 UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>>
                 {
@@ -49,14 +49,14 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryDN>{ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>{ PartialViewName = e => ViewPrefix.Formato("FilePath")},
+                        new EntitySettings<FileRepositoryEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FileRepository")},
+                        new EntitySettings<FilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FilePath")},
                         new EntitySettings<FileTypeSymbol>(),
                     });
 
-                    var es = Navigator.EntitySettings<FilePathDN>();
+                    var es = Navigator.EntitySettings<FilePathEntity>();
                      
-                    var baseMapping = (Mapping<FilePathDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FilePathEntity>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
                     es.MappingLine = ctx =>
                     {
@@ -71,7 +71,7 @@ namespace Signum.Web.Files
                                 if (hpf != null)
                                 {
                                     string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    return new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
+                                    return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
                                     {
                                         FileName = Path.GetFileName(hpf.FileName),
                                         BinaryFile = hpf.InputStream.ReadAllBytes(),
@@ -79,7 +79,7 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".Formato(ctx.Prefix));
+                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".FormatWith(ctx.Prefix));
                                 }
                             }
                             else
@@ -92,17 +92,17 @@ namespace Signum.Web.Files
 
                     es.MappingMain = es.MappingLine;
 
-                    var lm = new LiteMapping<FilePathDN>();
+                    var lm = new LiteMapping<FilePathEntity>();
                     lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
-                    Mapping.RegisterValue<Lite<FilePathDN>>(lm.GetValue);
+                    Mapping.RegisterValue<Lite<FilePathEntity>>(lm.GetValue);
                 }
 
                 if (file)
                 {
-                    var es = new EntitySettings<FileDN>();
+                    var es = new EntitySettings<FileEntity>();
                     Navigator.AddSetting(es);
 
-                    var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FileEntity>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
                     es.MappingLine = ctx =>
                     {
@@ -117,7 +117,7 @@ namespace Signum.Web.Files
 
                                 if (hpf != null)
                                 {
-                                    return new FileDN
+                                    return new FileEntity
                                     {
                                         FileName = Path.GetFileName(hpf.FileName),
                                         BinaryFile = hpf.InputStream.ReadAllBytes()
@@ -125,7 +125,7 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException("Impossible to create new FileDN {0}".Formato(ctx.Prefix));
+                                    throw new InvalidOperationException("Impossible to create new FileEntity {0}".FormatWith(ctx.Prefix));
                                 }
                             }
                             else
@@ -137,17 +137,17 @@ namespace Signum.Web.Files
 
                     FileLogic.DownloadFileUrl = DownloadFileUrl;
 
-                    var lm = new LiteMapping<FileDN>();
+                    var lm = new LiteMapping<FileEntity>();
                     lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
-                    Mapping.RegisterValue<Lite<FileDN>>(lm.GetValue);
+                    Mapping.RegisterValue<Lite<FileEntity>>(lm.GetValue);
                 }
 
                 if (embeddedFile)
                 {
-                    var es = new EmbeddedEntitySettings<EmbeddedFileDN>();
+                    var es = new EmbeddedEntitySettings<EmbeddedFileEntity>();
                     Navigator.AddSetting(es);
 
-                    var baseMapping = (Mapping<EmbeddedFileDN>) es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<EmbeddedFileEntity>) es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
                     es.MappingDefault = ctx =>
                     {
@@ -160,7 +160,7 @@ namespace Signum.Web.Files
 
                             if (hpf != null && hpf.ContentLength != 0)
                             {
-                                return new EmbeddedFileDN()
+                                return new EmbeddedFileEntity()
                                 {
                                     FileName = Path.GetFileName(hpf.FileName),
                                     BinaryFile = hpf.InputStream.ReadAllBytes()
@@ -168,7 +168,7 @@ namespace Signum.Web.Files
                             }
                             else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
                             {
-                                return (EmbeddedFileDN)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
+                                return (EmbeddedFileEntity)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
                             }
                             else
                                 return baseMapping(ctx);
@@ -190,7 +190,7 @@ namespace Signum.Web.Files
                 QuerySettings.FormatRules.Add(new FormatterRule("WebDownload",
                        col => col.Type == typeof(WebDownload),
                        col => new CellFormatter((help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
-                          new MvcHtmlString("<a href='{0}'>{1}</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }
+                          new MvcHtmlString("<a href='{0}'>{1}</a>".FormatWith(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }
                 ));
 
             }
@@ -205,7 +205,7 @@ namespace Signum.Web.Files
         }
 
 
-        static string DownloadFileUrl(Lite<FileDN> file)
+        static string DownloadFileUrl(Lite<FileEntity> file)
         {
             if (file == null)
                 return null;
@@ -219,7 +219,7 @@ namespace Signum.Web.Files
             if (webPath.HasText())
                 return RouteHelper.New().Content(webPath);
 
-            if (file is FilePathDN || file is FileDN)
+            if (file is FilePathEntity || file is FileEntity)
                 return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo((Entity)file).ToString()));
 
             return null;

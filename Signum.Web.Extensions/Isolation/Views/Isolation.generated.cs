@@ -44,7 +44,7 @@ namespace Signum.Web.Extensions.Isolation.Views
         {
             
             #line 2 "..\..\Isolation\Views\Isolation.cshtml"
- using (var cp = Html.TypeContext<IsolationDN>())
+ using (var cp = Html.TypeContext<IsolationEntity>())
 {
     
             

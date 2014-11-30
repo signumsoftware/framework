@@ -66,7 +66,7 @@ WriteLiteral("</h2>\r\n        <p>");
 
             
             #line 6 "..\..\Auth\Views\ResetPasswordSend.cshtml"
-      Write(AuthMessage.ResetPasswordCodeHasBeenSent.NiceToString().Formato(TempData["email"]));
+      Write(AuthMessage.ResetPasswordCodeHasBeenSent.NiceToString().FormatWith(TempData["email"]));
 
             
             #line default

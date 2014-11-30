@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
- using (var dc = Html.TypeContext<DisconnectedImportDN>())
+ using (var dc = Html.TypeContext<DisconnectedImportEntity>())
 {
     
             
@@ -161,7 +161,7 @@ WriteLiteral(">\r\n                <thead>\r\n                    <tr>\r\n      
 
             
             #line 17 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.Type));
 
             
             #line default
@@ -170,7 +170,7 @@ WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 18 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.CopyTable));
 
             
             #line default
@@ -179,7 +179,7 @@ WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 19 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.InsertedRows));
 
             
             #line default
@@ -188,7 +188,7 @@ WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 20 "..\..\Disconnected\Views\DisconnectedImport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows));
+                       Write(Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.UpdatedRows));
 
             
             #line default

@@ -62,7 +62,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
- using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
+ using (var ec = Html.TypeContext<EmailMasterTemplateEntity>())
 {
     
             

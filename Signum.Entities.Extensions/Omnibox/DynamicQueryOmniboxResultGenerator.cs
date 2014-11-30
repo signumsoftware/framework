@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -315,7 +315,7 @@ namespace Signum.Entities.Omnibox
         {
             PrimaryKey id;
             if (PrimaryKey.TryParse(value, type, out id))
-                return Lite.Create(type, id, "{0} {1}".Formato(type.NiceName(), id));
+                return Lite.Create(type, id, "{0} {1}".FormatWith(type.NiceName(), id));
 
             return null;
         }
@@ -377,7 +377,7 @@ namespace Signum.Entities.Omnibox
                 case FilterType.Guid: return "\"" + p.ToString() + "\"";
             }
 
-            throw new InvalidOperationException("Unexpected value type {0}".Formato(p.GetType()));
+            throw new InvalidOperationException("Unexpected value type {0}".FormatWith(p.GetType()));
         }
 
         public override List<HelpOmniboxResult> GetHelp()
@@ -390,9 +390,9 @@ namespace Signum.Entities.Omnibox
 
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "{0}".Formato(queryName), OmniboxResultType = resultType },
-                new HelpOmniboxResult { Text = "{0} {1}='{2}'".Formato(queryName, field, value), OmniboxResultType = resultType },
-                new HelpOmniboxResult { Text = "{0} {1}1='{2}1' {1}2='{2}2'".Formato(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0}".FormatWith(queryName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}='{2}'".FormatWith(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}1='{2}1' {1}2='{2}2'".FormatWith(queryName, field, value), OmniboxResultType = resultType },
             };
         }
     }

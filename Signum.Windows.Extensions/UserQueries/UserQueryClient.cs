@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,18 +24,18 @@ namespace Signum.Windows.UserQueries
     public class UserQueryClient
     {
         public static readonly DependencyProperty UserQueryProperty =
-            DependencyProperty.RegisterAttached("UserQuery", typeof(UserQueryDN), typeof(UserQueryClient), new FrameworkPropertyMetadata((s, e)=>OnUserQueryChanged(s, (UserQueryDN)e.NewValue)));
-        public static UserQueryDN GetUserQuery(DependencyObject obj)
+            DependencyProperty.RegisterAttached("UserQuery", typeof(UserQueryEntity), typeof(UserQueryClient), new FrameworkPropertyMetadata((s, e)=>OnUserQueryChanged(s, (UserQueryEntity)e.NewValue)));
+        public static UserQueryEntity GetUserQuery(DependencyObject obj)
         {
-            return (UserQueryDN)obj.GetValue(UserQueryProperty);
+            return (UserQueryEntity)obj.GetValue(UserQueryProperty);
         }
 
-        public static void SetUserQuery(DependencyObject obj, UserQueryDN value)
+        public static void SetUserQuery(DependencyObject obj, UserQueryEntity value)
         {
             obj.SetValue(UserQueryProperty, value);
         }
 
-        private static void OnUserQueryChanged(DependencyObject s, UserQueryDN uc)
+        private static void OnUserQueryChanged(DependencyObject s, UserQueryEntity uc)
         {
             UserQueryPermission.ViewUserQuery.Authorize();
 
@@ -70,15 +70,15 @@ namespace Signum.Windows.UserQueries
             {
                 TypeClient.Start();
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery(), Icon = ExtensionsImageLoader.GetImageSortName("userQuery.png")  });
+                Navigator.AddSetting(new EntitySettings<UserQueryEntity> { View = _ => new UserQuery(), Icon = ExtensionsImageLoader.GetImageSortName("userQuery.png")  });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
                 UserAssetsClient.Start();
-                UserAssetsClient.RegisterExportAssertLink<UserQueryDN>();
+                UserAssetsClient.RegisterExportAssertLink<UserQueryEntity>();
 
-                Constructor.Register<UserQueryDN>(ctx =>
+                Constructor.Register<UserQueryEntity>(ctx =>
                 {
                     MessageBox.Show(Window.GetWindow(ctx.Element),
-                        ChartMessage._0CanOnlyBeCreatedFromTheSearchWindow.NiceToString().Formato(typeof(UserQueryDN).NicePluralName()),
+                        ChartMessage._0CanOnlyBeCreatedFromTheSearchWindow.NiceToString().FormatWith(typeof(UserQueryEntity).NicePluralName()),
                         ChartMessage.CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
@@ -97,10 +97,10 @@ namespace Signum.Windows.UserQueries
 
         class UserQueryQuickLink : QuickLink
         {
-            Lite<UserQueryDN> userQuery;
+            Lite<UserQueryEntity> userQuery;
             Lite<Entity> entity;
 
-            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<Entity> entity)
+            public UserQueryQuickLink(Lite<UserQueryEntity> userQuery, Lite<Entity> entity)
             {
                 this.ToolTip = userQuery.ToString();
                 this.Label = userQuery.ToString();
@@ -124,13 +124,13 @@ namespace Signum.Windows.UserQueries
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl seachControl)
         {
-            if (!Navigator.IsViewable(typeof(UserQueryDN)))
+            if (!Navigator.IsViewable(typeof(UserQueryEntity)))
                 return null;
 
             return UserQueryMenuItemConstructor.Construct(seachControl);
         }
 
-        internal static UserQueryDN FromSearchControl(SearchControl searchControl)
+        internal static UserQueryEntity FromSearchControl(SearchControl searchControl)
         {
             QueryDescription description = DynamicQueryServer.GetQueryDescription(searchControl.QueryName);
 
@@ -140,7 +140,7 @@ namespace Signum.Windows.UserQueries
                 searchControl.SimpleFilterBuilder != null);
         }
 
-        internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
+        internal static void ToSearchControl(UserQueryEntity uq, SearchControl searchControl)
         {
             var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
                  searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
@@ -167,7 +167,7 @@ namespace Signum.Windows.UserQueries
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders, pagination);
         }
 
-        internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)
+        internal static void ToCountSearchControl(UserQueryEntity uq, CountSearchControl countSearchControl)
         {
             var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
@@ -201,7 +201,7 @@ namespace Signum.Windows.UserQueries
             };
         }
 
-        internal static void Explore(UserQueryDN userQuery, Entity currentEntity)
+        internal static void Explore(UserQueryEntity userQuery, Entity currentEntity)
         {
             var query = QueryClient.GetQueryName(userQuery.Query.Key);
 

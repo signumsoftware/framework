@@ -1,4 +1,4 @@
-@using Signum.Engine
+﻿@using Signum.Engine
 @using Signum.Entities.SMS;
 @using Signum.Web;
 @using Signum.Utilities;
@@ -6,7 +6,7 @@
 
 @Html.ScriptCss("~/SMS/Content/SMS.css")
 
-@using (var e = Html.TypeContext<SMSMessageDN>())
+@using (var e = Html.TypeContext<SMSMessageEntity>())
 {   
     @Html.ValueLine(e, s => s.MessageID, vl =>
     {

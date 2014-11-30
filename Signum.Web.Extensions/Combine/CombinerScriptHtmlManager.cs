@@ -22,8 +22,8 @@ namespace Signum.Web.Combine
 
             var key = GetKey(files, scriptType); 
 
-            string url = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).Formato(key);
-            return MvcHtmlString.Create((scriptType == ScriptType.Css ? cssElement : jsElement).Formato(Subdomain(url)));
+            string url = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).FormatWith(key);
+            return MvcHtmlString.Create((scriptType == ScriptType.Css ? cssElement : jsElement).FormatWith(Subdomain(url)));
         }
 
         private string GetKey(string[] files, ScriptType scriptType)
@@ -38,7 +38,7 @@ namespace Signum.Web.Combine
 
             string key = GetKey(files, scriptType);
 
-            string route = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).Formato(key);
+            string route = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).FormatWith(key);
             
             return new string[] { Subdomain(route) };
         }

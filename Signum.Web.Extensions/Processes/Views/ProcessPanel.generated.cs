@@ -120,7 +120,7 @@ WriteLiteral("    ");
 
             
             #line 12 "..\..\Processes\Views\ProcessPanel.cshtml"
-Write(Html.Partial(ProcessClient.ViewPrefix.Formato("ProcessPanelTable")));
+Write(Html.Partial(ProcessClient.ViewPrefix.FormatWith("ProcessPanelTable")));
 
             
             #line default

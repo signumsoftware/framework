@@ -11,11 +11,11 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class CultureInfoDN : Entity
+    public class CultureInfoEntity : Entity
     {
-        public CultureInfoDN() { }
+        public CultureInfoEntity() { }
 
-        public CultureInfoDN(CultureInfo ci)
+        public CultureInfoEntity(CultureInfo ci)
         {
             Name = ci.Name;
             NativeName = ci.NativeName;
@@ -55,7 +55,7 @@ namespace Signum.Entities.Basics
                 }
                 catch (CultureNotFoundException)
                 {
-                    return "'{0}' is not a valid culture name".Formato(Name);
+                    return "'{0}' is not a valid culture name".FormatWith(Name);
                 }
             }
 
@@ -77,7 +77,7 @@ namespace Signum.Entities.Basics
             base.PreSaving(ref graphModified);
         }
 
-        static Expression<Func<CultureInfoDN, string>> ToStringExpression = e => e.EnglishName;
+        static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -86,6 +86,6 @@ namespace Signum.Entities.Basics
 
     public static class CultureInfoOperation
     {
-        public static readonly ExecuteSymbol<CultureInfoDN> Save = OperationSymbol.Execute<CultureInfoDN>();
+        public static readonly ExecuteSymbol<CultureInfoEntity> Save = OperationSymbol.Execute<CultureInfoEntity>();
     }
 }

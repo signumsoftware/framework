@@ -5,7 +5,7 @@
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:swuq="clr-namespace:Signum.Windows.UserQueries"
     xmlns:d="clr-namespace:Signum.Entities.Dashboard;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:UserQueryPartDN}"
+    m:Common.TypeContext="{x:Type d:UserQueryPartEntity}"
     MinWidth="300">
     <c:ChartRenderer x:Name="chartRenderer"/>
     <!--<m:SearchControl x:Name="seachControl" ShowHeader="False" ShowFooter="False" 

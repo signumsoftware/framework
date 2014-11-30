@@ -34,7 +34,7 @@ namespace Signum.Windows.SMS
             sfLiterals.Items.Clear();
             if (newValue != null)
             {
-                var literals = Server.Return((ISmsServer s) => s.GetLiteralsFromDataObjectProvider((TypeDN)newValue));
+                var literals = Server.Return((ISmsServer s) => s.GetLiteralsFromDataObjectProvider((TypeEntity)newValue));
                 foreach (var l in literals)
                 {
                     sfLiterals.Items.Add(l);
@@ -74,12 +74,12 @@ namespace Signum.Windows.SMS
         private void deleteMessage_Click(object sender, RoutedEventArgs e)
         {
             var b = (Button)sender;
-            SMSTemplateMessageDN message = (SMSTemplateMessageDN)b.DataContext;
-            ((SMSTemplateDN)DataContext).Messages.Remove(message);
+            SMSTemplateMessageEntity message = (SMSTemplateMessageEntity)b.DataContext;
+            ((SMSTemplateEntity)DataContext).Messages.Remove(message);
         }
 
-        static CultureInfoDN defaultCulture;
-        static CultureInfoDN DefaultCulture
+        static CultureInfoEntity defaultCulture;
+        static CultureInfoEntity DefaultCulture
         {
             get 
             {
@@ -93,8 +93,8 @@ namespace Signum.Windows.SMS
 
         private void createMessage_Click(object sender, RoutedEventArgs e)
         {
-            ((SMSTemplateDN)DataContext).Messages.Add(new SMSTemplateMessageDN(DefaultCulture));
-            tabCulture.SelectedIndex = ((SMSTemplateDN)DataContext).Messages.Count - 1;
+            ((SMSTemplateEntity)DataContext).Messages.Add(new SMSTemplateMessageEntity(DefaultCulture));
+            tabCulture.SelectedIndex = ((SMSTemplateEntity)DataContext).Messages.Count - 1;
 
         }
     }

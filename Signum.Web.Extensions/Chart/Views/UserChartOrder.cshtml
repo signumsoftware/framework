@@ -6,9 +6,9 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserAssets
 
-@using (var e = Html.TypeContext<QueryOrderDN>())
+@using (var e = Html.TypeContext<QueryOrderEntity>())
 {
-    var userChart = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
+    var userChart = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
 
     e.FormGroupStyle = FormGroupStyle.None;
 

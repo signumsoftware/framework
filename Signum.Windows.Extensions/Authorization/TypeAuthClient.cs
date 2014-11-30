@@ -39,7 +39,7 @@ namespace Signum.Windows.Authorization
 
             Server.SetSymbolIds<TypeConditionSymbol>();
 
-            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleEntity>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.IsAuthorized();
                 return new QuickLink[]

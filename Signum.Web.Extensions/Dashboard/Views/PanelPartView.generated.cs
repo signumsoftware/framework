@@ -50,7 +50,7 @@ namespace Signum.Web.Dashboard.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/PanelPartView.cshtml")]
-    public partial class PanelPartView : System.Web.Mvc.WebViewPage<PanelPartDN>
+    public partial class PanelPartView : System.Web.Mvc.WebViewPage<PanelPartEntity>
     {
         public PanelPartView()
         {
@@ -60,7 +60,7 @@ namespace Signum.Web.Dashboard.Views
             
             #line 6 "..\..\Dashboard\Views\PanelPartView.cshtml"
    
-    string prefix = "r{0}c{1}".Formato(Model.Row, Model.StartColumn);
+    string prefix = "r{0}c{1}".FormatWith(Model.Row, Model.StartColumn);
     DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
     var link = config.TitleLink == null ? null : config.TitleLink(Model.Content); 
 

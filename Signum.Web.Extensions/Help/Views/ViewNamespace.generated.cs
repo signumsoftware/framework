@@ -126,7 +126,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 24 "..\..\Help\Views\ViewNamespace.cshtml"
-         using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
+         using (TypeContext<NamespaceHelpEntity> nc = new TypeContext<NamespaceHelpEntity>(nh.Entity, null))
         {
             using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
             {
@@ -172,11 +172,11 @@ WriteLiteral(">\r\n");
             
             #line 30 "..\..\Help\Views\ViewNamespace.cshtml"
                                              
-                if (!Navigator.IsReadOnly(typeof(NamespaceHelpDN)))
+                if (!Navigator.IsReadOnly(typeof(NamespaceHelpEntity)))
                 {
                     Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
                     {
-                        { "options",  Database.Query<NamespaceHelpDN>()
+                        { "options",  Database.Query<NamespaceHelpEntity>()
                         .Where(e => e.Name == nc.Value.Name && e.Culture != nc.Value.Culture)
                         .Select(e => new { e.Culture })
                         .ToList()

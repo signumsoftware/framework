@@ -130,7 +130,7 @@ namespace Signum.Web.Selenium
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Prefix));
 
             if (!ChooserPopup.IsChooser(Selenium, SearchControl.Prefix))
-                throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
+                throw new InvalidOperationException("{0} is not a Chooser".FormatWith(Selenium));
 
             ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T));
 
@@ -171,7 +171,7 @@ namespace Signum.Web.Selenium
 
         public string SearchButtonLocator
         {
-            get { return "jq=#{0}qbSearch".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}qbSearch".FormatWith(PrefixUnderscore); }
         }
 
         public string PrefixUnderscore
@@ -186,7 +186,7 @@ namespace Signum.Web.Selenium
 
         public void WaitSearchCompleted(Action searchTrigger)
         {
-            string counter = Selenium.GetEval("window.$('#{0}qbSearch').attr('data-searchcount')".Formato(this.PrefixUnderscore));
+            string counter = Selenium.GetEval("window.$('#{0}qbSearch').attr('data-searchcount')".FormatWith(this.PrefixUnderscore));
             searchTrigger();
             WaitSearchCompleted(counter);
         }
@@ -198,21 +198,21 @@ namespace Signum.Web.Selenium
 
         void WaitSearchCompleted(string counter)
         {
-            var searchButtonDisctinct = SearchButtonLocator + (counter == "null" ? "[data-searchcount]" : "[data-searchcount!={0}]".Formato(counter));
+            var searchButtonDisctinct = SearchButtonLocator + (counter == "null" ? "[data-searchcount]" : "[data-searchcount!={0}]".FormatWith(counter));
             Selenium.Wait(() =>
                 Selenium.IsElementPresent(searchButtonDisctinct)
-                , () => "button {0} to finish searching".Formato(SearchButtonLocator));
+                , () => "button {0} to finish searching".FormatWith(SearchButtonLocator));
         }
 
 
         public string ToggleFiltersLocator
         {
-            get { return "jq=#{0}sfSearchControl .sf-filters-header".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}sfSearchControl .sf-filters-header".FormatWith(PrefixUnderscore); }
         }
 
         public string FiltersPanelLocator
         {
-            get { return "jq=#{0}sfSearchControl .sf-filters".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}sfSearchControl .sf-filters".FormatWith(PrefixUnderscore); }
         }
 
         public void ToggleFilters(bool show)
@@ -225,7 +225,7 @@ namespace Signum.Web.Selenium
 
         public string AddColumnButtonLocator
         {
-            get { return "jq=#{0}btnAddColumn".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}btnAddColumn".FormatWith(PrefixUnderscore); }
         }
 
         public bool IsAddColumnEnabled
@@ -270,7 +270,7 @@ namespace Signum.Web.Selenium
             string cellLocator = Results.HeaderCellLocator(token);
             Selenium.ContextMenuAt(cellLocator, "0,0");
 
-            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter-header".Formato(cellLocator);
+            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter-header".FormatWith(cellLocator);
             Selenium.WaitElementPresent(quickFilterLocator);
             Selenium.Click(quickFilterLocator);
 
@@ -282,7 +282,7 @@ namespace Signum.Web.Selenium
 
         public string QueryButtonLocator(string id)
         {
-            return "jq=#{0}.sf-query-button".Formato(id);
+            return "jq=#{0}.sf-query-button".FormatWith(id);
         }
 
         public void QueryButtonClick(string id)
@@ -309,7 +309,7 @@ namespace Signum.Web.Selenium
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, Prefix));
 
             if (!ChooserPopup.IsChooser(Selenium, Prefix))
-                throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
+                throw new InvalidOperationException("{0} is not a Chooser".FormatWith(Selenium));
 
             ChooserPopup.ChooseButton(Selenium, Prefix, typeof(T));
 
@@ -323,17 +323,17 @@ namespace Signum.Web.Selenium
 
         public bool HasMultiplyMessage
         {
-            get { return Selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-td-multiply".Formato(PrefixUnderscore)); }
+            get { return Selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-td-multiply".FormatWith(PrefixUnderscore)); }
         }
 
         public string MenuOptionLocator(string optionId)
         {
-            return "jq=#{0}sfSearchControl a#{1}".Formato(PrefixUnderscore, optionId);
+            return "jq=#{0}sfSearchControl a#{1}".FormatWith(PrefixUnderscore, optionId);
         }
 
         public string MenuOptionLocatorByAttr(string optionLocator)
         {
-            return "jq=#{0}sfSearchControl a[{1}]".Formato(PrefixUnderscore, optionLocator);
+            return "jq=#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator);
         }
     }
 
@@ -352,14 +352,14 @@ namespace Signum.Web.Selenium
 
         public int NumFilters()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').length".Formato(this.PrefixUnderscore));
+            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').length".FormatWith(this.PrefixUnderscore));
 
             return int.Parse(result);
         }
 
         public int NewFilterIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').get().map(function(a){{return parseInt(a.id.substr('{0}trFilter'.length + 1));}}).join()".Formato(PrefixUnderscore));
+            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').get().map(function(a){{return parseInt(a.id.substr('{0}trFilter'.length + 1));}}).join()".FormatWith(PrefixUnderscore));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -386,7 +386,7 @@ namespace Signum.Web.Selenium
 
         public string AddFilterButtonLocator
         {
-            get { return "jq=#{0}btnAddFilter".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}btnAddFilter".FormatWith(PrefixUnderscore); }
         }
 
         public bool IsAddFilterEnabled
@@ -418,7 +418,7 @@ namespace Signum.Web.Selenium
 
         public string TokenLocator(int tokenIndex, string previousToken, bool isEnd)
         {
-            var result = "jq=#{0}{1}_{2}".Formato(PrefixUnderscore, !isEnd ? "ddlTokens" : "ddlTokensEnd", tokenIndex);
+            var result = "jq=#{0}{1}_{2}".FormatWith(PrefixUnderscore, !isEnd ? "ddlTokens" : "ddlTokensEnd", tokenIndex);
 
             result += "[data-parenttoken='" + previousToken + "']";
 
@@ -479,22 +479,22 @@ namespace Signum.Web.Selenium
 
         public string ResultTableLocator
         {
-            get { return "jq=#{0}tblResults".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}tblResults".FormatWith(PrefixUnderscore); }
         }
 
         public string RowsLocator
         {
-            get { return "jq=#{0}tblResults > tbody > tr".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}tblResults > tbody > tr".FormatWith(PrefixUnderscore); }
         }
 
         public string RowLocator(int rowIndex)
         {
-            return RowsLocator + ":nth-child({0})".Formato(rowIndex + 1);
+            return RowsLocator + ":nth-child({0})".FormatWith(rowIndex + 1);
         }
 
         public string RowLocator(Lite<IEntity> lite)
         {
-            return "{0}[data-entity='{1}']".Formato(RowsLocator, lite.Key());
+            return "{0}[data-entity='{1}']".FormatWith(RowsLocator, lite.Key());
         }
 
         public string CellLocator(int rowIndex, string token)
@@ -504,14 +504,14 @@ namespace Signum.Web.Selenium
             var index = tokens.IndexOf(token);
 
             if (index == -1)
-                throw new InvalidOperationException("Token {0} not found between {1}".Formato(token, tokens.CommaAnd()));
+                throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.CommaAnd()));
 
-            return RowLocator(rowIndex) + "> td:nth-child({0})".Formato(index + 1);
+            return RowLocator(rowIndex) + "> td:nth-child({0})".FormatWith(index + 1);
         }
 
         public string RowSelectorLocator(int rowIndex)
         {
-            return "{0}rowSelection_{1}".Formato(PrefixUnderscore, rowIndex);
+            return "{0}rowSelection_{1}".FormatWith(PrefixUnderscore, rowIndex);
         }
 
         public void SelectRow(int rowIndex)
@@ -532,12 +532,12 @@ namespace Signum.Web.Selenium
 
         public bool HasFooter
         {
-            get { return Selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-search-footer".Formato(PrefixUnderscore)); }
+            get { return Selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-search-footer".FormatWith(PrefixUnderscore)); }
         }
 
         public string HeaderLocator
         {
-            get { return "jq=#{0}tblResults > thead > tr > th".Formato(PrefixUnderscore); }
+            get { return "jq=#{0}tblResults > thead > tr > th".FormatWith(PrefixUnderscore); }
         }
 
         public string[] GetColumnTokens()
@@ -550,7 +550,7 @@ namespace Signum.Web.Selenium
 
         public string HeaderCellLocator(string token)
         {
-            return HeaderLocator + "[data-column-name='{0}']".Formato(token);
+            return HeaderLocator + "[data-column-name='{0}']".FormatWith(token);
         }
 
         public ResultTableProxy OrderBy(string token)
@@ -612,12 +612,12 @@ namespace Signum.Web.Selenium
 
         public string EntityLinkLocator(Lite<IEntity> lite, bool allowSelection = true)
         {
-            return RowLocator(lite) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
+            return RowLocator(lite) + " > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1);
         }
 
         public string EntityLinkLocator(int rowIndex, bool allowSelection = true)
         {
-            return RowLocator(rowIndex) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
+            return RowLocator(rowIndex) + " > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1);
         }
 
         public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
@@ -647,7 +647,7 @@ namespace Signum.Web.Selenium
 
         public EntityContextMenuProxy SelectedClick()
         {
-            Selenium.Click("jq=#{0}sfSearchControl .sf-tm-selected".Formato(PrefixUnderscore));
+            Selenium.Click("jq=#{0}sfSearchControl .sf-tm-selected".FormatWith(PrefixUnderscore));
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: false);
 
@@ -658,7 +658,7 @@ namespace Signum.Web.Selenium
 
         public int RowsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblResults > tbody > tr{1}').length".Formato(PrefixUnderscore, (HasDataEntity ? "[data-entity]" : null)));
+            string result = Selenium.GetEval("window.$('#{0}tblResults > tbody > tr{1}').length".FormatWith(PrefixUnderscore, (HasDataEntity ? "[data-entity]" : null)));
 
             int num = int.Parse(result);
 
@@ -667,7 +667,7 @@ namespace Signum.Web.Selenium
 
         public Lite<Entity> EntityInIndex(int index)
         {
-            var result = Selenium.GetEval("window.$('{0}').data('entity')".Formato(RowLocator(index).RemoveStart(3)));
+            var result = Selenium.GetEval("window.$('{0}').data('entity')".FormatWith(RowLocator(index).RemoveStart(3)));
 
             return Lite.Parse(result);
         }
@@ -707,7 +707,7 @@ namespace Signum.Web.Selenium
                 popup.OkWaitClosed();
             }
 
-            Selenium.WaitElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName));
+            Selenium.WaitElementPresent("{0}:contains('{1}')".FormatWith(headerSelector, newName));
         }
 
 
@@ -753,13 +753,13 @@ namespace Signum.Web.Selenium
                 if (IsContext)
                     return "jq=#sfContextMenu:visible";
                 else
-                    return "jq=#{0}btnSelectedDropDown:visible".Formato(resultTable.PrefixUnderscore);
+                    return "jq=#{0}btnSelectedDropDown:visible".FormatWith(resultTable.PrefixUnderscore);
             }
         }
 
         public void QuickLinkClick(string title)
         {
-            resultTable.Selenium.Click("{0} li.sf-quick-link[data-name='{1}'] > a".Formato(EntityContextMenuLocator, title));
+            resultTable.Selenium.Click("{0} li.sf-quick-link[data-name='{1}'] > a".FormatWith(EntityContextMenuLocator, title));
         }
 
         public SearchPopupProxy QuickLinkClickSearch(string title)
@@ -797,17 +797,17 @@ namespace Signum.Web.Selenium
                 this.resultTable.Selenium.ConsumeConfirmation();
         }
 
-        public PopupControl<ProcessDN> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
+        public PopupControl<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
         {
             return DeleteProcessClick(symbolContainer.Symbol);
         }
 
-        public PopupControl<ProcessDN> DeleteProcessClick(OperationSymbol operationSymbol)
+        public PopupControl<ProcessEntity> DeleteProcessClick(OperationSymbol operationSymbol)
         {
             MenuClick(operationSymbol.KeyWeb());
             resultTable.Selenium.ConsumeConfirmation();
 
-            var result = new PopupControl<ProcessDN>(this.resultTable.Selenium, "New");
+            var result = new PopupControl<ProcessEntity>(this.resultTable.Selenium, "New");
             result.Selenium.WaitElementPresent(result.PopupVisibleLocator);
             return result;
         }
@@ -822,7 +822,7 @@ namespace Signum.Web.Selenium
 
         public string MenuItemLocator(string itemId)
         {
-            return "{0} li a#{1}".Formato(EntityContextMenuLocator, itemId);
+            return "{0} li a#{1}".FormatWith(EntityContextMenuLocator, itemId);
         }
 
         public bool IsDisabled(string itemId)
@@ -876,7 +876,7 @@ namespace Signum.Web.Selenium
 
         public string ElementsPerPageLocator
         {
-            get { return "jq=#{0}sfElems".Formato(SearchControl.PrefixUnderscore); }
+            get { return "jq=#{0}sfElems".FormatWith(SearchControl.PrefixUnderscore); }
         }
 
         public void SetElementsPerPage(int elementPerPage)
@@ -891,7 +891,7 @@ namespace Signum.Web.Selenium
 
         public string PaginationModeLocator
         {
-            get { return "jq=#{0}sfPaginationMode".Formato(SearchControl.Prefix); }
+            get { return "jq=#{0}sfPaginationMode".FormatWith(SearchControl.Prefix); }
         }
 
         public void SetPaginationMode(PaginationMode mode)
@@ -915,7 +915,7 @@ namespace Signum.Web.Selenium
 
         public string OperationLocator
         {
-            get { return "jq=#{0}ddlSelector_{1}".Formato(Filters.PrefixUnderscore, FilterIndex); }
+            get { return "jq=#{0}ddlSelector_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex); }
         }
 
         public FilterOperation Operation
@@ -926,7 +926,7 @@ namespace Signum.Web.Selenium
 
         public string DeleteButtonLocator
         {
-            get { return "jq=#{0}btnDelete_{1}".Formato(Filters.PrefixUnderscore, FilterIndex); }
+            get { return "jq=#{0}btnDelete_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex); }
         }
 
         public void Delete()
@@ -936,12 +936,12 @@ namespace Signum.Web.Selenium
 
         public ValueLineProxy ValueLine()
         {
-            return new ValueLineProxy(Filters.Selenium, "{0}value_{1}".Formato(Filters.PrefixUnderscore, FilterIndex), null);
+            return new ValueLineProxy(Filters.Selenium, "{0}value_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex), null);
         }
 
         public EntityLineProxy EntityLine()
         {
-            return new EntityLineProxy(Filters.Selenium, "{0}value_{1}".Formato(Filters.PrefixUnderscore, FilterIndex), null);
+            return new EntityLineProxy(Filters.Selenium, "{0}value_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex), null);
         }
 
         internal void SetValue(object value)

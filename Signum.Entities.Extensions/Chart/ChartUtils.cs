@@ -81,7 +81,7 @@ namespace Signum.Entities.Chart
 
         
         
-        public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart, bool changeParameters)
+        public static bool SyncronizeColumns(this ChartScriptEntity chartScript, IChartBase chart, bool changeParameters)
         {
             bool result = false;
 
@@ -95,7 +95,7 @@ namespace Signum.Entities.Chart
             {
                 if (chart.Columns.Count <= i)
                 {
-                    chart.Columns.Add(new ChartColumnDN());
+                    chart.Columns.Add(new ChartColumnEntity());
                     result = true;
                 }
 
@@ -128,9 +128,9 @@ namespace Signum.Entities.Chart
             return result;
         }
 
-        public static UserChartDN ToUserChart(this ChartRequest request)
+        public static UserChartEntity ToUserChart(this ChartRequest request)
         {
-            var result = new UserChartDN
+            var result = new UserChartEntity
             {
                 Owner = UserQueryUtils.DefaultRelated(),
 
@@ -139,16 +139,16 @@ namespace Signum.Entities.Chart
                 GroupResults = request.GroupResults,
                 ChartScript = request.ChartScript,
 
-                Filters = request.Filters.Select(f => new QueryFilterDN
+                Filters = request.Filters.Select(f => new QueryFilterEntity
                 {
-                    Token = new QueryTokenDN(f.Token),
+                    Token = new QueryTokenEntity(f.Token),
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
                 }).ToMList(),
 
-                Orders = request.Orders.Select(o => new QueryOrderDN
+                Orders = request.Orders.Select(o => new QueryOrderEntity
                 {
-                    Token = new QueryTokenDN(o.Token),
+                    Token = new QueryTokenEntity(o.Token),
                     OrderType = o.OrderType
                 }).ToMList()
             };
@@ -165,7 +165,7 @@ namespace Signum.Entities.Chart
             return result;
         }
 
-        public static ChartRequest ToRequest(this UserChartDN uq)
+        public static ChartRequest ToRequest(this UserChartEntity uq)
         {
             var result = new ChartRequest(uq.QueryName)
             {
@@ -243,7 +243,7 @@ namespace Signum.Entities.Chart
             };
         }
 
-        private static Func<ResultRow, object> Converter(this ChartColumnDN ct, int columnIndex)
+        private static Func<ResultRow, object> Converter(this ChartColumnEntity ct, int columnIndex)
         {
             if (ct == null || ct.Token == null)
                 return null;
@@ -305,11 +305,11 @@ namespace Signum.Entities.Chart
                 };;
         }
 
-        public static List<List<ChartScriptDN>> PackInGroups(IEnumerable<ChartScriptDN> scripts, int rowWidth)
+        public static List<List<ChartScriptEntity>> PackInGroups(IEnumerable<ChartScriptEntity> scripts, int rowWidth)
         {
             var heigth = (scripts.Count() + rowWidth - 1) / rowWidth; //round-up division
 
-            var result = 0.To(heigth).Select(a => new List<ChartScriptDN>()).ToList();
+            var result = 0.To(heigth).Select(a => new List<ChartScriptEntity>()).ToList();
 
             var groups = scripts
                 .OrderBy(s => s.Name)

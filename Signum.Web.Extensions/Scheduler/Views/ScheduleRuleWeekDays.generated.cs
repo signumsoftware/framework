@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\ScheduleRuleWeekDays.cshtml"
- using (var e = Html.TypeContext<ScheduleRuleWeekDaysDN>())
+ using (var e = Html.TypeContext<ScheduleRuleWeekDaysEntity>())
 {
     e.LabelColumns = new BsColumn(4);
 

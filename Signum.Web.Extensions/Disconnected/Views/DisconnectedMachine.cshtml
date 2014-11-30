@@ -1,7 +1,7 @@
 ﻿@using Signum.Entities.Disconnected
 @using Signum.Entities.DynamicQuery
 
-@using (var dc = Html.TypeContext<DisconnectedMachineDN>())
+@using (var dc = Html.TypeContext<DisconnectedMachineEntity>())
 {
     @Html.ValueLine(dc, d => d.CreationDate)
     @Html.ValueLine(dc, d => d.MachineName)
@@ -13,7 +13,7 @@
     {
         <fieldset>
             <legend>Last Imports</legend>
-            @Html.SearchControl(new FindOptions(typeof(DisconnectedImportDN), "Machine", dc.Value)
+            @Html.SearchControl(new FindOptions(typeof(DisconnectedImportEntity), "Machine", dc.Value)
        {
           OrderOptions = { new OrderOption("CreationDate", OrderType.Descending) },
       }, dc)

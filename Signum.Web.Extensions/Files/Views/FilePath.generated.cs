@@ -47,7 +47,7 @@ namespace Signum.Web.Extensions.Files.Views
         {
             
             #line 2 "..\..\Files\Views\FilePath.cshtml"
- using (var e = Html.TypeContext<FilePathDN>())
+ using (var e = Html.TypeContext<FilePathEntity>())
 {
     
             

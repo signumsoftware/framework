@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -152,9 +152,9 @@ namespace Signum.Engine.Authorization
                     List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
                         .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
 
-                    string details = debugInfo.ToString(a => "  '{0}'  because {1}".Formato(a.Lite, a.Error), "\r\n");
+                    string details = debugInfo.ToString(a => "  '{0}'  because {1}".FormatWith(a.Lite, a.Error), "\r\n");
 
-                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                         typeAllowed.NiceToString(),
                         notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
                 }
@@ -169,7 +169,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (!ident.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
         public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed)
@@ -183,7 +183,7 @@ namespace Signum.Engine.Authorization
                 AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -208,7 +208,7 @@ namespace Signum.Engine.Authorization
                 return true;
 
             if (entity.IsNew)
-                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
+                throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
             var tac = GetAllowed(entity.GetType());
 
@@ -304,7 +304,7 @@ namespace Signum.Engine.Authorization
                 return null;
 
             if (entity.IsNew)
-                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
+                throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
             using (DisableQueryFilter())
                 return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
@@ -392,7 +392,7 @@ namespace Signum.Engine.Authorization
             var allowed = GetAllowed(typeof(T));
             var max = ui ? allowed.MaxUI() : allowed.MaxDB();
             if (max < TypeAllowedBasic.Read)
-                throw new UnauthorizedAccessException("Type {0} is not authorized{1}{2}".Formato(typeof(T).Name,
+                throw new UnauthorizedAccessException("Type {0} is not authorized{1}{2}".FormatWith(typeof(T).Name,
                     ui ? " in user interface" : null,
                     allowed.Conditions.Any() ? " for any condition" : null));
         }
@@ -426,7 +426,7 @@ namespace Signum.Engine.Authorization
                 return miCallWhereAllowed.GetInvoker(mi.GetGenericArguments()).Invoke(arguments[0]);
             }
 
-            static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new GenericInvoker<Func<Expression, Expression>>(exp => CallWhereAllowed<TypeDN>(exp));
+            static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new GenericInvoker<Func<Expression, Expression>>(exp => CallWhereAllowed<TypeEntity>(exp));
             static Expression CallWhereAllowed<T>(Expression expression)
                 where T : Entity
             {
@@ -447,7 +447,7 @@ namespace Signum.Engine.Authorization
             }
 
             static GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>> miCallWhereIsAllowedFor =
-                new GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>>((ex, tab, ui) => CallWhereIsAllowedFor<TypeDN>(ex, tab, ui));
+                new GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>>((ex, tab, ui) => CallWhereIsAllowedFor<TypeEntity>(ex, tab, ui));
             static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool inUserInterface)
                 where T : Entity
             {
@@ -549,11 +549,11 @@ namespace Signum.Engine.Authorization
                     {
                         if (cond.InGroup)
                             return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".Formato(Lite.EntityType.TypeName(), cond.TypeCondition, cond.Allowed.Get(UserInterface), Requested);
+                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".FormatWith(Lite.EntityType.TypeName(), cond.TypeCondition, cond.Allowed.Get(UserInterface), Requested);
                     }
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
-                        "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
+                        "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".FormatWith(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
                 }
             }
         }
@@ -608,14 +608,14 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static RuleTypeDN ToRuleType(this TypeAllowedAndConditions allowed, Lite<RoleDN> role, TypeDN resource)
+        public static RuleTypeEntity ToRuleType(this TypeAllowedAndConditions allowed, Lite<RoleEntity> role, TypeEntity resource)
         {
-            return new RuleTypeDN
+            return new RuleTypeEntity
             {
                 Role = role,
                 Resource = resource,
                 Allowed = allowed.Fallback,
-                Conditions = allowed.Conditions.Select(a => new RuleTypeConditionDN
+                Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEntity
                 {
                     Allowed = a.Allowed,
                     Condition = a.TypeCondition
@@ -623,7 +623,7 @@ namespace Signum.Engine.Authorization
             };
         }
 
-        public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeDN rule)
+        public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
                 rule.Conditions.Select(c => new TypeConditionRule(c.Condition, c.Allowed)).ToReadOnly());
@@ -631,7 +631,7 @@ namespace Signum.Engine.Authorization
 
         static SqlPreCommand Schema_Synchronizing(Replacements arg)
         {
-            var conds = (from rt in Database.Query<RuleTypeDN>()
+            var conds = (from rt in Database.Query<RuleTypeEntity>()
                          from c in rt.Conditions
                          select new { rt.Resource, c.Condition, rt.Role }).ToList();
 
@@ -639,9 +639,9 @@ namespace Signum.Engine.Authorization
                 .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition))
                 .ToList();
 
-            return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeDN rt) => rt.Conditions)
+            return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
                 .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
-                .AddComment("TypeCondition {0} not defined for {1} (roles {2})".Formato(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
+                .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
                 .Combine(Spacing.Double);
         }
     }

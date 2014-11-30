@@ -19,7 +19,7 @@ namespace Signum.Web.Dashboard
 {
     public class DashboardController : Controller
     {
-        public ViewResult View(Lite<DashboardDN> panel, Lite<Entity> currentEntity)
+        public ViewResult View(Lite<DashboardEntity> panel, Lite<Entity> currentEntity)
         {
             DashboardPermission.ViewDashboard.AssertAuthorized();
 
@@ -35,23 +35,23 @@ namespace Signum.Web.Dashboard
                 ViewData["currentEntity"] = currentEntity.Retrieve();
             }
 
-            return View(DashboardClient.ViewPrefix.Formato("Dashboard"), cp);
+            return View(DashboardClient.ViewPrefix.FormatWith("Dashboard"), cp);
         }
 
         public ActionResult AddNewPart(string rootType, string propertyRoute, string newPartType, string partialViewName)
         {
             var type = Navigator.ResolveType(newPartType);
 
-            PanelPartDN part = new PanelPartDN
+            PanelPartEntity part = new PanelPartEntity
             {
                 StartColumn = 0,
                 Columns = 12,
-                Content = (IPartDN)Activator.CreateInstance(type),
+                Content = (IPartEntity)Activator.CreateInstance(type),
             };
 
             PropertyRoute route = PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute);
             ViewData[GridRepeaterHelper.LastEnd] = 0;
-            return Navigator.PartialView(this, new TypeContext<PanelPartDN>(part, null, this.Prefix(), route), partialViewName);
+            return Navigator.PartialView(this, new TypeContext<PanelPartEntity>(part, null, this.Prefix(), route), partialViewName);
         }
     }
 }

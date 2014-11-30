@@ -11,7 +11,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class NamespaceHelpDN : Entity
+    public class NamespaceHelpEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 300)]
         string name;
@@ -23,9 +23,9 @@ namespace Signum.Entities.Help
         }
 
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -47,7 +47,7 @@ namespace Signum.Entities.Help
             set { Set(ref description, value); }
         }
 
-        static Expression<Func<NamespaceHelpDN, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<NamespaceHelpEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -56,7 +56,7 @@ namespace Signum.Entities.Help
 
     public static class NamespaceHelpOperation
     {
-        public static readonly ExecuteSymbol<NamespaceHelpDN> Save = OperationSymbol.Execute<NamespaceHelpDN>();
+        public static readonly ExecuteSymbol<NamespaceHelpEntity> Save = OperationSymbol.Execute<NamespaceHelpEntity>();
     }
 
 

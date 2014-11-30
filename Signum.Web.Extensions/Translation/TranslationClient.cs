@@ -47,8 +47,8 @@ namespace Signum.Web.Translation
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<TranslatorUserDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUser")},
-                        new EmbeddedEntitySettings<TranslatorUserCultureDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUserCulture")},
+                        new EntitySettings<TranslatorUserEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUser")},
+                        new EmbeddedEntitySettings<TranslatorUserCultureEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUserCulture")},
                     });
                 }
 
@@ -58,7 +58,7 @@ namespace Signum.Web.Translation
 
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<TranslationReplacementDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslationReplacement")},
+                        new EntitySettings<TranslationReplacementEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslationReplacement")},
                     });
                 }
 

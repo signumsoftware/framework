@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\ScheduleRuleMinutely.cshtml"
- using (var sr = Html.TypeContext<ScheduleRuleMinutelyDN>())
+ using (var sr = Html.TypeContext<ScheduleRuleMinutelyEntity>())
 {
     
             

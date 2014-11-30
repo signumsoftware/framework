@@ -288,7 +288,7 @@ namespace Signum.Windows.Chart
 
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
-            Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
+            Binding b = new Binding("[{0}]".FormatWith(c.Index)) { Mode = BindingMode.OneTime };
             DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }

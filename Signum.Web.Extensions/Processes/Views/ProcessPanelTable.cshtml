@@ -71,7 +71,7 @@
     <br />
     <h2>Latest Processes</h2>
 
-    @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
+    @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessEntity))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     ShowFilters = false,

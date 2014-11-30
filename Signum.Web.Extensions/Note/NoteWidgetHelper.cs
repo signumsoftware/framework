@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -14,7 +14,7 @@ namespace Signum.Web.Notes
     {
         public static int CountNotes(Lite<Entity> identifiable)
         { 
-            return Finder.QueryCount(new CountOptions(typeof(NoteDN))
+            return Finder.QueryCount(new CountOptions(typeof(NoteEntity))
             {
                 FilterOptions = { new FilterOption("Target", identifiable) }
             });
@@ -26,7 +26,7 @@ namespace Signum.Web.Notes
 
             var findOptions = new FindOptions
             {
-                QueryName = typeof(NoteDN),
+                QueryName = typeof(NoteEntity),
                 Create = false,
                 SearchOnLoad = true,
                 ShowFilters = false,

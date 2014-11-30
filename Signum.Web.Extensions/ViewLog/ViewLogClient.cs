@@ -20,7 +20,7 @@ namespace Signum.Web.ViewLog
             {
                 Navigator.Manager.RetrievingForView += Manager_RetrievingForView;
 
-                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => new[] { new QuickLinkExplore(typeof(ViewLogDN), "Target", ident) });
+                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => new[] { new QuickLinkExplore(typeof(ViewLogEntity), "Target", ident) });
             }
         }
 

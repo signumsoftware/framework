@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Dashboard\Views\Admin\CountSearchControlPart.cshtml"
- using (var tc = Html.TypeContext<CountSearchControlPartDN>())
+ using (var tc = Html.TypeContext<CountSearchControlPartEntity>())
 {
     tc.FormGroupStyle = FormGroupStyle.SrOnly;
     tc.PlaceholderLabels = true;

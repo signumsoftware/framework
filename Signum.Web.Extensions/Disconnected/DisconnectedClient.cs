@@ -32,9 +32,9 @@ namespace Signum.Web.Disconnected
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedMachine") },
-                    new EntitySettings<DisconnectedExportDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedExport") },
-                    new EntitySettings<DisconnectedImportDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedImport") },
+                    new EntitySettings<DisconnectedMachineEntity> { PartialViewName = e => ViewPrefix.FormatWith("DisconnectedMachine") },
+                    new EntitySettings<DisconnectedExportEntity> { PartialViewName = e => ViewPrefix.FormatWith("DisconnectedExport") },
+                    new EntitySettings<DisconnectedImportEntity> { PartialViewName = e => ViewPrefix.FormatWith("DisconnectedImport") },
                 });
             }
         }

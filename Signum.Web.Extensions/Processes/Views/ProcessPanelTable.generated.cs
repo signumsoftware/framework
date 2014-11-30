@@ -277,7 +277,7 @@ WriteLiteral("    ");
 
             
             #line 74 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
+Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessEntity))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     ShowFilters = false,

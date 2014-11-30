@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace Signum.Windows.Authorization
 
         private void changePassword_Click(object sender, RoutedEventArgs e)
         {
-            UserDN user = (UserDN)DataContext;
+            UserEntity user = (UserEntity)DataContext;
             var np = new NewPassword()
             {
                 User = user,

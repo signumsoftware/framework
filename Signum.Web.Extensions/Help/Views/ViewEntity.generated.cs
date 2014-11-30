@@ -90,7 +90,7 @@ namespace Signum.Web.Help.Views
     {
 
 #line 20 "..\..\Help\Views\ViewEntity.cshtml"
-public System.Web.WebPages.HelperResult WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpDN>>> node, string entityName)
+public System.Web.WebPages.HelperResult WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpEntity>>> node, string entityName)
 {
 #line default
 #line hidden
@@ -345,7 +345,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 52 "..\..\Help\Views\ViewEntity.cshtml"
-         using (TypeContext<EntityHelpDN> ec = new TypeContext<EntityHelpDN>(eh.Entity.Value, null))
+         using (TypeContext<EntityHelpEntity> ec = new TypeContext<EntityHelpEntity>(eh.Entity.Value, null))
         {
             var name = Navigator.ResolveWebTypeName(eh.Type);
             ec.FormGroupStyle = FormGroupStyle.None;
@@ -395,11 +395,11 @@ WriteLiteral(">\r\n");
             
             #line 62 "..\..\Help\Views\ViewEntity.cshtml"
                                                     
-                if (!Navigator.IsReadOnly(typeof(EntityHelpDN)))
+                if (!Navigator.IsReadOnly(typeof(EntityHelpEntity)))
                 {
                     Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
                     {
-                        { "options",  Database.Query<EntityHelpDN>()
+                        { "options",  Database.Query<EntityHelpEntity>()
                         .Where(e => e.Type == ec.Value.Type && e.Culture != ec.Value.Culture)
                         .Select(e => new { e.Culture })
                         .ToList()
@@ -688,7 +688,7 @@ WriteLiteral(">\r\n");
             #line 133 "..\..\Help\Views\ViewEntity.cshtml"
                              foreach (var op in allowedOperations)
                             {
-                                using (TypeElementContext<OperationHelpDN> ctx = operations.GetOrThrow(op.Key))
+                                using (TypeElementContext<OperationHelpEntity> ctx = operations.GetOrThrow(op.Key))
                                 {
 
             
@@ -870,7 +870,7 @@ WriteLiteral(">");
 
             
             #line 165 "..\..\Help\Views\ViewEntity.cshtml"
-                                         Write(typeof(QueryDN).NicePluralName());
+                                         Write(typeof(QueryEntity).NicePluralName());
 
             
             #line default
@@ -887,7 +887,7 @@ WriteLiteral("</h2>\r\n");
             #line 166 "..\..\Help\Views\ViewEntity.cshtml"
                          foreach (var mq in allowedQueries)
                         {
-                            using (TypeElementContext<QueryHelpDN> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
+                            using (TypeElementContext<QueryHelpEntity> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
                             {
                                         
                             

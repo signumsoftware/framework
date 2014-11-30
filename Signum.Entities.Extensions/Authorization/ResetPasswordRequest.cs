@@ -7,7 +7,7 @@ using Signum.Entities;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ResetPasswordRequestDN : Entity
+    public class ResetPasswordRequestEntity : Entity
     {
         string code;
         public string Code
@@ -16,9 +16,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref code, value); }
         }
 
-        UserDN user;
+        UserEntity user;
         [NotNullValidator]
-        public UserDN User
+        public UserEntity User
         {
             get { return user; }
             set { Set(ref user, value); }

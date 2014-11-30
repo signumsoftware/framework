@@ -65,7 +65,7 @@ namespace Signum.Windows.UserAssets
                {
                    SaveFileDialog sfd = new SaveFileDialog
                    {
-                       FileName = "{0}{1}.xml".Formato(lite.EntityType.Name, lite.Id),
+                       FileName = "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id),
                        DefaultExt = ".xml",
                        Filter = "UserAssets file (*.xml)|*.xml"
                    };

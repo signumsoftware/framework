@@ -65,7 +65,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
- using (var tc = Html.TypeContext<SMSTemplateMessageDN>())
+ using (var tc = Html.TypeContext<SMSTemplateMessageEntity>())
 {
     tc.LabelColumns = new BsColumn(4);
 

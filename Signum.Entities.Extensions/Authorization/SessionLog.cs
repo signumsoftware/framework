@@ -8,11 +8,11 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class SessionLogDN : Entity
+    public class SessionLogEntity : Entity
     {
-        Lite<UserDN> user;
+        Lite<UserEntity> user;
         [NotNullValidator]
-        public Lite<UserDN> User
+        public Lite<UserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
@@ -61,11 +61,11 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return "{0} ({1}-{2})".Formato(
+            return "{0} ({1}-{2})".FormatWith(
                 user.TryToString(), sessionStart.TryToString(), sessionEnd.TryToString());
         }
 
-        static Expression<Func<SessionLogDN, double?>> DurationExpression = 
+        static Expression<Func<SessionLogEntity, double?>> DurationExpression = 
             sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).TotalSeconds : (double?)null;
         [Unit("s")]
         public double? Duration

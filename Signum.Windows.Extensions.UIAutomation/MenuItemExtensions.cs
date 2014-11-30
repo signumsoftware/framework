@@ -47,7 +47,7 @@ namespace Signum.Windows.UIAutomation
                     }
 
                     return false;
-                }, actionDescription: () => "Popup window or MenuItem after expanding MenuItem {0}".Formato(menuNames[i - 1]));
+                }, actionDescription: () => "Popup window or MenuItem after expanding MenuItem {0}".FormatWith(menuNames[i - 1]));
 
                 if (result.Current.ControlType == ControlType.Window)
                 {

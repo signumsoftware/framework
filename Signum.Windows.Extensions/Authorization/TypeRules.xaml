@@ -1,4 +1,4 @@
-<Window x:Class="Signum.Windows.Authorization.TypeRules"
+﻿<Window x:Class="Signum.Windows.Authorization.TypeRules"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
@@ -51,7 +51,7 @@
                     <ColumnDefinition Width="58" />
                     <ColumnDefinition Width="58" />
                 </Grid.ColumnDefinitions>
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="0" Content="{m:LocType {x:Type seb:TypeDN}}"/>
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="0" Content="{m:LocType {x:Type seb:TypeEntity}}"/>
 
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="1" Content="{m:Loc {x:Static d:TypeAllowedBasic.Create}}" />
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="2" Content="{m:Loc {x:Static d:TypeAllowedBasic.Modify}}" />
@@ -59,9 +59,9 @@
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="4" Content="{m:Loc {x:Static d:TypeAllowedBasic.None}}" />
 
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb2:PropertyRouteDN}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb2:PropertyRouteEntity}}" />
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="{m:LocTypePlural {x:Type se:OperationSymbol}}" />
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb2:QueryDN}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb2:QueryEntity}}" />
             </Grid>
         </ScrollViewer>
 

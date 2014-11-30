@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:ScheduledTaskLogDN}"
+    m:Common.TypeContext="{x:Type d:ScheduledTaskLogEntity}"
     MinWidth="300">
     <StackPanel m:Common.IsReadOnly="True">
         <m:EntityCombo m:Common.Route="Task" />

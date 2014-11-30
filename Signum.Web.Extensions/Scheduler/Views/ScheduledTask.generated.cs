@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\ScheduledTask.cshtml"
- using (var e = Html.TypeContext<ScheduledTaskDN>())
+ using (var e = Html.TypeContext<ScheduledTaskEntity>())
 {
     
             

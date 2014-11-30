@@ -22,7 +22,7 @@
             </Style>
         </ItemsControl.ItemContainerStyle>
         <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type secp:PanelPartDN}">
+            <DataTemplate DataType="{x:Type secp:PanelPartEntity}">
                 <GroupBox Style="{StaticResource EntityGroupBox}" Margin="8" Loaded="GroupBox_Loaded">
                     <GroupBox.Header>
                         <StackPanel Orientation="Horizontal">

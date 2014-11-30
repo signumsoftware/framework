@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\ScheduleRuleWeekly.cshtml"
- using (var e = Html.TypeContext<ScheduleRuleWeeklyDN>())
+ using (var e = Html.TypeContext<ScheduleRuleWeeklyEntity>())
 {
     
             

@@ -20,7 +20,7 @@ namespace Signum.Web.Selenium
         {
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
-                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
+                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".FormatWith(formValue));
 
             string entityTypeString = parts[0];
 
@@ -38,12 +38,12 @@ namespace Signum.Web.Selenium
         public override string ToString()
         {
             if (IdOrNull != null && IsNew)
-                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
+                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".FormatWith(IdOrNull));
 
             if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
-            return "{0};{1};{2};{3}".Formato(
+            return "{0};{1};{2};{3}".FormatWith(
                 (EntityType == null) ? "" : TypeLogic.GetCleanName(EntityType),
                 IdOrNull.TryToString(),
                 IsNew ? "n" : "o",

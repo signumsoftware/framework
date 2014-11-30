@@ -47,7 +47,7 @@ namespace Signum.Web.Chart.Views
         {
             
             #line 2 "..\..\Chart\Views\ChartScriptParameter.cshtml"
- using (var cc = Html.TypeContext<ChartScriptParameterDN>())
+ using (var cc = Html.TypeContext<ChartScriptParameterEntity>())
 {
     cc.FormGroupStyle = FormGroupStyle.Basic;
 

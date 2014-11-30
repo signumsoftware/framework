@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailRecipient.cshtml"
- using (var sc = Html.TypeContext<EmailRecipientDN>())
+ using (var sc = Html.TypeContext<EmailRecipientEntity>())
 {
     sc.PlaceholderLabels = true;
     sc.FormGroupStyle = FormGroupStyle.SrOnly;

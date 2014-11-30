@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Mailing\Views\EmailAttachment.cshtml"
- using (var sc = Html.TypeContext<EmailAttachmentDN>())
+ using (var sc = Html.TypeContext<EmailAttachmentEntity>())
 {
     sc.FormGroupStyle = FormGroupStyle.SrOnly;
     

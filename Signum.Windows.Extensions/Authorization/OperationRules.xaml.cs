@@ -24,21 +24,21 @@ namespace Signum.Windows.Authorization
     public partial class OperationRules : Window
     {
         public static readonly DependencyProperty TypeProperty =
-            DependencyProperty.Register("Type", typeof(TypeDN), typeof(OperationRules), new UIPropertyMetadata(null));
-        public TypeDN Type
+            DependencyProperty.Register("Type", typeof(TypeEntity), typeof(OperationRules), new UIPropertyMetadata(null));
+        public TypeEntity Type
         {
-            get { return (TypeDN)GetValue(TypeProperty); }
+            get { return (TypeEntity)GetValue(TypeProperty); }
             set { SetValue(TypeProperty, value); }
         }
 
-        public Lite<RoleDN> Role
+        public Lite<RoleEntity> Role
         {
-            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleEntity>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(OperationRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lite<RoleEntity>), typeof(OperationRules), new UIPropertyMetadata(null));
 
         public OperationRules()
         {
@@ -53,7 +53,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationSymbol).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
             DataContext = Server.Return((IOperationAuthServer s) => s.GetOperationRules(Role, Type));
         }
 

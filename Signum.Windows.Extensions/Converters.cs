@@ -56,9 +56,9 @@ namespace Signum.Windows.Extensions
         public static readonly IValueConverter NotNullToRedBrush = ConverterFactory.New(
             (object d) => d == null ? null : Brushes.Pink);
 
-        public static readonly IValueConverter TokenToDN = ConverterFactory.New(
-            (QueryTokenDN qt) => qt.Try(t => t.TryToken),
-            (QueryToken t) => new QueryTokenDN(t));
+        public static readonly IValueConverter TokenToEntity = ConverterFactory.New(
+            (QueryTokenEntity qt) => qt.Try(t => t.TryToken),
+            (QueryToken t) => new QueryTokenEntity(t));
 
 
         public static readonly IValueConverter ThicknessToBool = ConverterFactory.New(

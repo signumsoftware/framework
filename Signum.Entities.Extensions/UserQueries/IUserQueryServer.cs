@@ -14,15 +14,15 @@ namespace Signum.Services
     public interface IUserQueryServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> GetUserQueries(object queryName);
+        List<Lite<UserQueryEntity>> GetUserQueries(object queryName);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType);
+        List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> AutocompleteUserQueries(string subString, int limit);
+        List<Lite<UserQueryEntity>> AutocompleteUserQueries(string subString, int limit);
 
         [OperationContract, NetDataContract]
-        UserQueryDN RetrieveUserQuery(Lite<UserQueryDN> userQuery);
+        UserQueryEntity RetrieveUserQuery(Lite<UserQueryEntity> userQuery);
     }
 }

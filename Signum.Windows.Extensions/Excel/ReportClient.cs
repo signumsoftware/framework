@@ -18,13 +18,13 @@ namespace Signum.Windows.Excel
                 if (excelReport)
                 {
                     if (toExcel)
-                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ExcelMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportEntity) ? null : ExcelMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
                     else
-                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ExcelMenuItemConstructor.Construct(sc, null);
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportEntity) ? null : ExcelMenuItemConstructor.Construct(sc, null);
 
                     QueryClient.Start();
 
-                    Navigator.AddSetting(new EntitySettings<ExcelReportDN> { View = e => new ExcelReport() });
+                    Navigator.AddSetting(new EntitySettings<ExcelReportEntity> { View = e => new ExcelReport() });
                 }
                 else
                 {

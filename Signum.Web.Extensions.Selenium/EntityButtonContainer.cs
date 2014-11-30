@@ -169,7 +169,7 @@ namespace Signum.Web.Selenium
 
         public static bool HasChanges(this IEntityButtonContainer container)
         {
-            return container.Selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(container.PrefixUnderscore()));
+            return container.Selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".FormatWith(container.PrefixUnderscore()));
         }
 
         public static long? TestTicks(this IEntityButtonContainer container)

@@ -23,7 +23,7 @@ namespace Signum.Web.Cultures
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<CultureInfoDN> { PartialViewName = _ => ViewPrefix.Formato("CultureInfoView") },
+                    new EntitySettings<CultureInfoEntity> { PartialViewName = _ => ViewPrefix.FormatWith("CultureInfoView") },
                 });
             }
         }

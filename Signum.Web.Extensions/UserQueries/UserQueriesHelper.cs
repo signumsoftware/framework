@@ -11,7 +11,7 @@ namespace Signum.Web.UserQueries
 {
     public static class UserQueriesHelper
     {
-        public static MvcHtmlString SearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, Context context, Action<SearchControl> searchControl = null)
+        public static MvcHtmlString SearchControl(this HtmlHelper helper, UserQueryEntity userQuery, FindOptions findOptions, Context context, Action<SearchControl> searchControl = null)
         {
             if (findOptions == null)
                 throw new ArgumentNullException("findOptions");
@@ -21,7 +21,7 @@ namespace Signum.Web.UserQueries
             return helper.SearchControl(findOptions, context, searchControl);
         }
 
-        public static MvcHtmlString SearchControl(this HtmlHelper helper, UserQueryDN userQuery, Context context, Action<SearchControl> searchControl = null)
+        public static MvcHtmlString SearchControl(this HtmlHelper helper, UserQueryEntity userQuery, Context context, Action<SearchControl> searchControl = null)
         {
             FindOptions findOptions = userQuery.ToFindOptions();
 

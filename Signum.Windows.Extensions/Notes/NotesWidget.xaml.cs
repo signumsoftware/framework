@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,16 +30,16 @@ namespace Signum.Windows.Notes
     {
         public event Action ForceShow;
 
-        public static NoteDN CreateNote(Entity entity)
+        public static NoteEntity CreateNote(Entity entity)
         {
             if (entity.IsNew)
                 return null;
 
-            return new NoteDN
+            return new NoteEntity
             {
                 Target = entity.ToLite(),
                 CreationDate = Server.Return((IBaseServer s) => s.ServerNow()),
-                CreatedBy = UserDN.Current.ToLite(),
+                CreatedBy = UserEntity.Current.ToLite(),
             };
         }
 
@@ -60,7 +60,7 @@ namespace Signum.Windows.Notes
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                Lite<NoteDN> nota = (Lite<NoteDN>)b.Tag;
+                Lite<NoteEntity> nota = (Lite<NoteEntity>)b.Tag;
                 ViewNote(Server.RetrieveAndForget(nota));
             }
         }
@@ -70,7 +70,7 @@ namespace Signum.Windows.Notes
             if (DataContext == null)
                 return;
 
-            NoteDN nota = CreateNote((Entity)DataContext);
+            NoteEntity nota = CreateNote((Entity)DataContext);
 
             ViewNote(nota);
         }
@@ -81,7 +81,7 @@ namespace Signum.Windows.Notes
         {
             var func = CustomFilter.TryGetValue(DataContext.GetType());
 
-            var eo = new ExploreOptions(typeof(NoteDN))
+            var eo = new ExploreOptions(typeof(NoteEntity))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
@@ -102,7 +102,7 @@ namespace Signum.Windows.Notes
             Finder.Explore(eo);
         }
 
-        void ViewNote(NoteDN note)
+        void ViewNote(NoteEntity note)
         {
             Navigator.NavigateUntyped(note, new NavigateOptions()
             {
@@ -121,7 +121,7 @@ namespace Signum.Windows.Notes
 
             var func = CustomFilter.TryGetValue(DataContext.GetType());
 
-            DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteDN))
+            DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteEntity))
             {
                 FilterOptions = 
                 { 

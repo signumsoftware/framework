@@ -9,26 +9,26 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ScheduledTaskLogDN : Entity
+    public class ScheduledTaskLogEntity : Entity
     {
-        ScheduledTaskDN scheduledTask;
-        public ScheduledTaskDN ScheduledTask
+        ScheduledTaskEntity scheduledTask;
+        public ScheduledTaskEntity ScheduledTask
         {
             get { return scheduledTask; }
             set { Set(ref scheduledTask, value); }
         }
 
-        Lite<IUserDN> user;
-        public Lite<IUserDN> User
+        Lite<IUserEntity> user;
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
         }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        ITaskDN task;
+        ITaskEntity task;
         [NotNullValidator]
-        public ITaskDN Task
+        public ITaskEntity Task
         {
             get { return task; }
             set { Set(ref task, value); }
@@ -50,7 +50,7 @@ namespace Signum.Entities.Scheduler
             set { Set(ref endTime, value); }
         }
 
-        static Expression<Func<ScheduledTaskLogDN, double?>> DurationExpression =
+        static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
             log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
         public double? Duration
         {
@@ -83,8 +83,8 @@ namespace Signum.Entities.Scheduler
             set { Set(ref productEntity, value); }
         }
 
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
+        Lite<ExceptionEntity> exception;
+        public Lite<ExceptionEntity> Exception
         {
             get { return exception; }
             set { Set(ref exception, value); }
@@ -93,9 +93,9 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             if (endTime.HasValue)
-                return "{0}-{1}".Formato(startTime, endTime);
+                return "{0}-{1}".FormatWith(startTime, endTime);
             else if (exception != null)
-                return "{0} Error: {1}".Formato(startTime, exception);
+                return "{0} Error: {1}".FormatWith(startTime, exception);
             return startTime.ToString();
         }
     }

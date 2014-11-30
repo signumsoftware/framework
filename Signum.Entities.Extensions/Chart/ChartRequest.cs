@@ -17,11 +17,11 @@ namespace Signum.Entities.Chart
 {
     public interface IChartBase 
     {
-        ChartScriptDN ChartScript { get; }
+        ChartScriptEntity ChartScript { get; }
 
         bool GroupResults { get; set; }
 
-        MList<ChartColumnDN> Columns { get; }
+        MList<ChartColumnEntity> Columns { get; }
 
         void InvalidateResults(bool needNewQuery);
 
@@ -43,9 +43,9 @@ namespace Signum.Entities.Chart
             get { return queryName; }
         }
 
-        ChartScriptDN chartScript;
+        ChartScriptEntity chartScript;
         [NotNullValidator]
-        public ChartScriptDN ChartScript
+        public ChartScriptEntity ChartScript
         {
             get { return chartScript; }
             set
@@ -83,8 +83,8 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
-        MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
-        public MList<ChartColumnDN> Columns
+        MList<ChartColumnEntity> columns = new MList<ChartColumnEntity>();
+        public MList<ChartColumnEntity> Columns
         {
             get { return columns; }
             set { Set(ref columns, value); }

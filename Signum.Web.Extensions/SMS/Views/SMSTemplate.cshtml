@@ -1,4 +1,4 @@
-@using Signum.Engine
+﻿@using Signum.Engine
 @using Signum.Entities.SMS
 @using Signum.Entities
 @using Signum.Web
@@ -9,7 +9,7 @@
 
 @Html.ScriptCss("~/SMS/Content/SMS.css")
 
-@using (var tc = Html.TypeContext<SMSTemplateDN>())
+@using (var tc = Html.TypeContext<SMSTemplateEntity>())
 {   
     @Html.ValueLine(tc, s => s.Name)
     

@@ -1,4 +1,4 @@
-@using Signum.Web
+﻿@using Signum.Web
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -15,21 +15,21 @@
 {
     var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
     <div class="col-sm-4">
-        @Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
+        @Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().FormatWith(type.NiceName()),
                     Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
                                     (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)), new { @class = "form-control" }))
     </div>
 }
 
-@using (var tc = Html.TypeContext<ChartColumnDN>())
+@using (var tc = Html.TypeContext<ChartColumnEntity>())
 {
 
     if (tc.Value == null)
     {
-        tc.Value = new ChartColumnDN();
+        tc.Value = new ChartColumnEntity();
     }
     
-    <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
+    <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnEntity>)tc.Parent).Index)">
         <th>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
         </th>
         <td style="text-align: center">
@@ -94,7 +94,7 @@
                             <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3))</div>
                         }
 
-                        @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
+                        @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
 

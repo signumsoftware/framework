@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -76,13 +76,13 @@ namespace Signum.Engine.Help
             else if (pr.Type.UnNullify() == typeof(PrimaryKey))
             {
                 var vt = ValueType(PrimaryKey.Type(pr.RootType), null, null);
-                return HelpMessage._0IsThePrimaryKeyOf1OfType2.NiceToString().Formato(pr.PropertyInfo.NiceName(), pr.RootType.NiceName(), vt) + validations;
+                return HelpMessage._0IsThePrimaryKeyOf1OfType2.NiceToString().FormatWith(pr.PropertyInfo.NiceName(), pr.RootType.NiceName(), vt) + validations;
             }
             else
             {
                 string valueType = ValueType(pr);
 
-                return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
+                return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).FormatWith(pr.PropertyInfo.NiceName(), valueType) + validations;
             }
         }
 
@@ -90,11 +90,11 @@ namespace Signum.Engine.Help
         {
             if (pr.PropertyInfo.IsDefaultName())
                 return
-                    HelpMessage.The0.NiceToString().ForGenderAndNumber(propertyType.GetGender()).Formato(typeName) + " " +
-                    HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent.Type.GetGender()).Formato(pr.Parent.Type.NiceName());
+                    HelpMessage.The0.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(typeName) + " " +
+                    HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent.Type.GetGender()).FormatWith(pr.Parent.Type.NiceName());
             else
                 return
-                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).Formato(pr.PropertyInfo.NiceName(), typeName);
+                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(pr.PropertyInfo.NiceName(), typeName);
         }
 
         static string ValueType(PropertyRoute pr)
@@ -185,19 +185,19 @@ namespace Signum.Engine.Help
 
             switch (operationInfo.OperationType)
             {
-                case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(
+                case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(
                     operationInfo.OperationSymbol.NiceToString(),
                     operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), 
                     type.NiceName());
                 case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
                 case OperationType.Constructor: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
                 case OperationType.ConstructorFrom: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), type.NiceName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+                    HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), type.NiceName());
                 case OperationType.ConstructorFromMany: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NicePluralName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+                    HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NicePluralName());
             }
 
             return "";
@@ -242,7 +242,7 @@ namespace Signum.Engine.Help
 
         internal static string GetEntityHelp(Type type)
         {
-            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).Formato(type.NiceName(), type.BaseType.NiceName());
+            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).FormatWith(type.NiceName(), type.BaseType.NiceName());
 
             string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 
@@ -267,7 +267,7 @@ namespace Signum.Engine.Help
                 case EntityKind.Main: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + data;
                 case EntityKind.Part: return HelpKindMessage.StorePartOfTheInformationOfAnotherEntity.NiceToString() + data;
                 case EntityKind.SharedPart: return HelpKindMessage.StorePartsOfInformationSharedByDifferentEntities.NiceToString() + data;
-                default: throw new InvalidOperationException("Unexpected {0}".Formato(entityKind));
+                default: throw new InvalidOperationException("Unexpected {0}".FormatWith(entityKind));
             }
         }
     }

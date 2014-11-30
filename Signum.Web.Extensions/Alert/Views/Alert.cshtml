@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Alerts
-@using (var cp = Html.TypeContext<AlertDN>())
+@using (var cp = Html.TypeContext<AlertEntity>())
 {
     @Html.ValueLine(cp, d => d.CreationDate, vl => vl.ReadOnly = true)
     @Html.EntityLine(cp, d => d.Target, vl => vl.ReadOnly = true)

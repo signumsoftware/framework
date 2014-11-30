@@ -1,4 +1,4 @@
-@using Signum.Web
+﻿@using Signum.Web
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -17,7 +17,7 @@
         <div class="col-lg-2">
             <div class="sf-chart-type panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">@typeof(ChartScriptDN).NiceName()</h3>
+                    <h3 class="panel-title">@typeof(ChartScriptEntity).NiceName()</h3>
                     @using (var csc = chart.SubContext(c => c.ChartScript))
                     {
                         @Html.Hidden(csc.Compose("sfRuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" })

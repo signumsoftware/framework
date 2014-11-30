@@ -43,7 +43,7 @@ namespace Signum.Web.Auth.Views
         {
             
             #line 1 "..\..\Auth\Views\LoginUserControl.cshtml"
- if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser))
+ if (UserEntity.Current != null && !UserEntity.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser))
 {
     
             
@@ -54,7 +54,7 @@ namespace Signum.Web.Auth.Views
 Write(Html.WebMenu(new WebMenuItem
     {
         Class = "sf-user",
-        Text = UserDN.Current.UserName,
+        Text = UserEntity.Current.UserName,
         Children = 
         {
             new WebMenuItem

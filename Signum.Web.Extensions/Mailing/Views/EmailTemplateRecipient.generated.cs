@@ -61,7 +61,7 @@ WriteLiteral("\r\n");
 
             
             #line 5 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
- using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
+ using (var tc = Html.TypeContext<EmailTemplateRecipientEntity>())
 {
     using (var sc = tc.SubContext())
     {

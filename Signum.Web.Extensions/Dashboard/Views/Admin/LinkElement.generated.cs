@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Dashboard\Views\Admin\LinkElement.cshtml"
- using (var tc = Html.TypeContext<LinkElementDN>())
+ using (var tc = Html.TypeContext<LinkElementEntity>())
 {
     
             

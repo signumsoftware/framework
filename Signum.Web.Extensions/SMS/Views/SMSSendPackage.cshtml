@@ -1,8 +1,8 @@
 ﻿@using Signum.Entities.SMS
-@using (var sc = Html.TypeContext<SMSSendPackageDN>())
+@using (var sc = Html.TypeContext<SMSSendPackageEntity>())
 {
     @Html.ValueLine(sc, s => s.Name)
-    @Html.SearchControl(new FindOptions(typeof(SMSMessageDN))
+    @Html.SearchControl(new FindOptions(typeof(SMSMessageEntity))
     {
         FilterOptions = { new FilterOption("Entity.SendPackage", sc.Value) { Frozen = true } },
         SearchOnLoad = true

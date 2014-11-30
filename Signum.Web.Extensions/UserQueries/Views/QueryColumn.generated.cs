@@ -65,7 +65,7 @@ namespace Signum.Web.UserQueries.Views
         {
             
             #line 5 "..\..\UserQueries\Views\QueryColumn.cshtml"
- using (var e = Html.TypeContext<QueryColumnDN>())
+ using (var e = Html.TypeContext<QueryColumnEntity>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
     

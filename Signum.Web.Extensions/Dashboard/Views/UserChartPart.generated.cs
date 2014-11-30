@@ -100,9 +100,9 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 13 "..\..\Dashboard\Views\UserChartPart.cshtml"
- using (var tc = Html.TypeContext<UserChartPartDN>())
+ using (var tc = Html.TypeContext<UserChartPartEntity>())
 {
-    UserChartDN uc = tc.Value.UserChart;
+    UserChartEntity uc = tc.Value.UserChart;
     ChartRequest request = uc.ToRequest();
 
     using (var crc = new TypeContext<ChartRequest>(request, tc.Prefix))

@@ -24,9 +24,9 @@ namespace Signum.Windows.Dashboard.Admin
     /// </summary>
     public partial class DashboardEdit : UserControl
     {
-        public DashboardDN Panel
+        public DashboardEntity Panel
         {
-            get { return (DashboardDN)DataContext; }
+            get { return (DashboardEntity)DataContext; }
         }
 
         public DashboardEdit()
@@ -36,19 +36,19 @@ namespace Signum.Windows.Dashboard.Admin
 
         private object EntityRepeater_Creating()
         {
-            var imp = (Implementations)PropertyRoute.Construct((DashboardDN cp) => cp.Parts.First().Content).GetImplementations();
+            var imp = (Implementations)PropertyRoute.Construct((DashboardEntity cp) => cp.Parts.First().Content).GetImplementations();
 
             var type = Navigator.SelectType(Window.GetWindow(this), imp.Types, t => Navigator.IsCreable(t, isSearch: false));
 
             if (type == null)
                 return null;
 
-            return new PanelPartDN
+            return new PanelPartEntity
             {
                 Row = Panel.Parts.IsEmpty() ? 0 : Panel.Parts.Max(a => Math.Max(a.Row, 0)) + 1,
                 Columns = 12,
                 StartColumn = 0,
-                Content = (IPartDN)new ConstructorContext(this).ConstructUntyped(type),
+                Content = (IPartEntity)new ConstructorContext(this).ConstructUntyped(type),
                 Title = null,
             };
         }

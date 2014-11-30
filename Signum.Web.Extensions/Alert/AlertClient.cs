@@ -30,8 +30,8 @@ namespace Signum.Web.Alerts
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlertDN> { PartialViewName = _ => ViewPrefix.Formato("Alert") },
-                    new EntitySettings<AlertTypeDN> { PartialViewName = _ => ViewPrefix.Formato("AlertType") },
+                    new EntitySettings<AlertEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Alert") },
+                    new EntitySettings<AlertTypeEntity> { PartialViewName = _ => ViewPrefix.FormatWith("AlertType") },
                 });
 
                 Types = types;
@@ -41,8 +41,8 @@ namespace Signum.Web.Alerts
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings<Entity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
-                    new EntityOperationSettings<AlertDN>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
-                    new EntityOperationSettings<AlertDN>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
+                    new EntityOperationSettings<AlertEntity>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
+                    new EntityOperationSettings<AlertEntity>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
             }
         }
@@ -56,7 +56,7 @@ namespace Signum.Web.Alerts
             if (!Types.Contains(ie.GetType()))
                 return null;
 
-            if (!Finder.IsFindable(typeof(AlertDN)))
+            if (!Finder.IsFindable(typeof(AlertEntity)))
                 return null;
 
             return AlertWidgetHelper.CreateWidget(ctx);

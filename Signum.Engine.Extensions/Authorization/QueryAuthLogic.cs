@@ -19,7 +19,7 @@ namespace Signum.Engine.Authorization
 
     public static class QueryAuthLogic
     {
-        static AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool> cache;
+        static AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, bool> cache;
 
         public static IManualAuth<object, bool> Manual { get { return cache; } }
 
@@ -36,7 +36,7 @@ namespace Signum.Engine.Authorization
 
                 dqm.AllowQuery += new Func<object, bool>(dqm_AllowQuery);
 
-                cache = new AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool>(sb,
+                cache = new AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
                     QueryLogic.GetQuery,
                     merger: new QueryMerger(), 
@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
-                    string replacementKey = typeof(QueryDN).Name;
+                    string replacementKey = typeof(QueryEntity).Name;
 
                     replacements.AskForReplacements(
                         x.Element("Queries").Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
@@ -77,10 +77,10 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        public static QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN)
+        public static QueryRulePack GetQueryRules(Lite<RoleEntity> role, TypeEntity typeEntity)
         {
-            var result = new QueryRulePack { Role = role, Type = typeDN };
-            cache.GetRules(result, QueryLogic.GetTypeQueries(typeDN));
+            var result = new QueryRulePack { Role = role, Type = typeEntity };
+            cache.GetRules(result, QueryLogic.GetTypeQueries(typeEntity));
 
             var coercer = QueryCoercer.Instance.GetCoerceValue(role);
             result.Rules.ForEach(r => r.CoercedValues = new[] { false, true }
@@ -102,15 +102,15 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), queryName);
+            return cache.GetAllowed(RoleEntity.Current.ToLite(), queryName);
         }
 
-        public static bool GetQueryAllowed(Lite<RoleDN> role, object queryName)
+        public static bool GetQueryAllowed(Lite<RoleEntity> role, object queryName)
         {
             return cache.GetAllowed(role, queryName);
         }
 
-        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
+        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
         {
             return DynamicQueryManager.Current.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
         }
@@ -126,7 +126,7 @@ namespace Signum.Engine.Authorization
 
     class QueryMerger : IMerger<object, bool>
     {
-        public bool Merge(object key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
+        public bool Merge(object key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, bool>> baseValues)
         {
             bool best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
                 baseValues.Any(a => a.Value) :
@@ -141,7 +141,7 @@ namespace Signum.Engine.Authorization
             return best;
         }
 
-        public Func<object, bool> MergeDefault(Lite<RoleDN> role)
+        public Func<object, bool> MergeDefault(Lite<RoleEntity> role)
         {
             return key =>
             {
@@ -152,7 +152,7 @@ namespace Signum.Engine.Authorization
             };
         }
 
-        bool GetDefault(object key, Lite<RoleDN> role)
+        bool GetDefault(object key, Lite<RoleEntity> role)
         {
             return DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
         }
@@ -166,7 +166,7 @@ namespace Signum.Engine.Authorization
         {
         }
 
-        public override Func<object, bool, bool> GetCoerceValue(Lite<RoleDN> role)
+        public override Func<object, bool, bool> GetCoerceValue(Lite<RoleEntity> role)
         {
             return (queryName, allowed) =>
             {
@@ -179,7 +179,7 @@ namespace Signum.Engine.Authorization
             };
         }
 
-        public override Func<Lite<RoleDN>, bool, bool> GetCoerceValueManual(object queryName)
+        public override Func<Lite<RoleEntity>, bool, bool> GetCoerceValueManual(object queryName)
         {
             return (role, allowed) =>
             {

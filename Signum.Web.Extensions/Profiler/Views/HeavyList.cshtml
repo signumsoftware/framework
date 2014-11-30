@@ -7,7 +7,7 @@
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div class="row">
     <div class="col-sm-6">
-        @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+        @Html.Partial(ProfilerClient.ViewPrefix.FormatWith("ProfilerButtons"))
         <div>
             <br />
             @Html.ActionLink(orderByTime ? "Order by ID" : "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))

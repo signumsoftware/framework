@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class HolidayCalendarDN : Entity
+    public class HolidayCalendarEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -22,9 +22,9 @@ namespace Signum.Entities.Scheduler
         }
         
         [NotNullable]
-        MList<HolidayDN> holidays = new MList<HolidayDN>();
+        MList<HolidayEntity> holidays = new MList<HolidayEntity>();
         [NotNullValidator]
-        public MList<HolidayDN> Holidays
+        public MList<HolidayEntity> Holidays
         {
             get { return holidays; }
             set { Set(ref holidays, value); }
@@ -42,7 +42,7 @@ namespace Signum.Entities.Scheduler
                 string rep = (from h in holidays
                               group 1 by h.Date into g
                               where g.Count() > 2
-                              select new { Date = g.Key, Num = g.Count() }).ToString(g => "{0} ({1})".Formato(g.Date, g.Num), ", ");
+                              select new { Date = g.Key, Num = g.Count() }).ToString(g => "{0} ({1})".FormatWith(g.Date, g.Num), ", ");
 
                 if (rep.HasText())
                     return "Some dates have been repeated: " + rep;
@@ -51,7 +51,7 @@ namespace Signum.Entities.Scheduler
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<HolidayCalendarDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<HolidayCalendarEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -60,12 +60,12 @@ namespace Signum.Entities.Scheduler
 
     public static class HolidayCalendarOperation
     {
-        public static readonly ExecuteSymbol<HolidayCalendarDN> Save = OperationSymbol.Execute<HolidayCalendarDN>();
-        public static readonly DeleteSymbol<HolidayCalendarDN> Delete = OperationSymbol.Delete<HolidayCalendarDN>();
+        public static readonly ExecuteSymbol<HolidayCalendarEntity> Save = OperationSymbol.Execute<HolidayCalendarEntity>();
+        public static readonly DeleteSymbol<HolidayCalendarEntity> Delete = OperationSymbol.Delete<HolidayCalendarEntity>();
     }
 
     [Serializable]
-    public class HolidayDN : EmbeddedEntity
+    public class HolidayEntity : EmbeddedEntity
     {
         DateTime date = DateTime.Today;
         [DaysPrecissionValidator]
@@ -86,7 +86,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0:d} {1}".Formato(date, name);
+            return "{0:d} {1}".FormatWith(date, name);
         }
     }
 }

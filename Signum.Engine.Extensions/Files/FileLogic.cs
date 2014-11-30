@@ -15,20 +15,20 @@ namespace Signum.Engine.Files
 {
     public static class FileLogic
     {
-        public static Func<Lite<FileDN>, string> DownloadFileUrl;
+        public static Func<Lite<FileEntity>, string> DownloadFileUrl;
 
-        static Expression<Func<FileDN, WebImage>> WebImageFileExpression =
+        static Expression<Func<FileEntity, WebImage>> WebImageFileExpression =
             f => new WebImage { FullWebPath = DownloadFileUrl(f.ToLite()) };
         [ExpressionField("WebImageFileExpression")]
-        public static WebImage WebImage(this FileDN f)
+        public static WebImage WebImage(this FileEntity f)
         {
             return WebImageFileExpression.Evaluate(f);
         }
 
-        static Expression<Func<FileDN, WebDownload>> WebDownloadFileExpression =
+        static Expression<Func<FileEntity, WebDownload>> WebDownloadFileExpression =
            f => new WebDownload { FullWebPath = DownloadFileUrl(f.ToLite()) };
         [ExpressionField("WebDownloadFileExpression")]
-        public static WebDownload WebDownload(this FileDN f)
+        public static WebDownload WebDownload(this FileEntity f)
         {
             return WebDownloadFileExpression.Evaluate(f);
         }
@@ -38,10 +38,10 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<FileDN>();
+                sb.Include<FileEntity>();
 
-                dqm.RegisterQuery(typeof(FileDN), () =>
-                    from a in Database.Query<FileDN>()
+                dqm.RegisterQuery(typeof(FileEntity), () =>
+                    from a in Database.Query<FileEntity>()
                     select new
                     {
                         Entity = a,
@@ -50,8 +50,8 @@ namespace Signum.Engine.Files
                     });
 
 
-                dqm.RegisterExpression((FileDN f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FileDN f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+                dqm.RegisterExpression((FileEntity f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FileEntity f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
     }

@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,17 +42,17 @@ namespace Signum.Web.Excel
 
                 if (excelReport)
                 {
-                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(EmbeddedFileDN)))
-                        throw new InvalidOperationException("Call EmbeddedFileDN first");
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(EmbeddedFileEntity)))
+                        throw new InvalidOperationException("Call EmbeddedFileEntity first");
 
-                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
-                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryEntity)))
+                        Navigator.Manager.EntitySettings.Add(typeof(QueryEntity), new EntitySettings<QueryEntity>());
 
                     
                     Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportDN> 
+                        new EntitySettings<ExcelReportEntity> 
                         { 
-                            PartialViewName = _ => ViewPrefix.Formato("ExcelReport"),
+                            PartialViewName = _ => ViewPrefix.FormatWith("ExcelReport"),
                         }
                     });
                 }
@@ -74,14 +74,14 @@ namespace Signum.Web.Excel
                 if (ToExcelPlain)
                     items.Add(PlainExcel(ctx).ToMenuItem());
 
-                List<Lite<ExcelReportDN>> reports = ExcelLogic.GetExcelReports(ctx.QueryName);
+                List<Lite<ExcelReportEntity>> reports = ExcelLogic.GetExcelReports(ctx.QueryName);
 
                 if (reports.Count > 0)
                 {
                     if (items.Count > 0)
                         items.Add(new MenuItemSeparator());
 
-                    foreach (Lite<ExcelReportDN> report in reports)
+                    foreach (Lite<ExcelReportEntity> report in reports)
                     {
                         items.Add(new MenuItem(ctx.Prefix, "sfExcelReport" + report.Id)
                         {
@@ -100,7 +100,7 @@ namespace Signum.Web.Excel
                 {
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
-                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportDN)),current),
+                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportEntity)),current),
                 });
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportCreate")

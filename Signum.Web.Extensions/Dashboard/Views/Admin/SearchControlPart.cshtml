@@ -3,7 +3,7 @@
 @using Signum.Web.Dashboard
 @using Signum.Entities.DynamicQuery
 
-@using(var tc = Html.TypeContext<UserQueryPartDN>())
+@using(var tc = Html.TypeContext<UserQueryPartEntity>())
 {
     @Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false)
 }

@@ -47,7 +47,7 @@ namespace Signum.Web.Chart.Views
         {
             
             #line 2 "..\..\Chart\Views\ChartScriptColumn.cshtml"
- using (var cc = Html.TypeContext<ChartScriptColumnDN>())
+ using (var cc = Html.TypeContext<ChartScriptColumnEntity>())
 {
     
             

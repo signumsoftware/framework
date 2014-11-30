@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Disconnected
 
-@using (var dc = Html.TypeContext<DisconnectedImportDN>())
+@using (var dc = Html.TypeContext<DisconnectedImportEntity>())
 {
     @Html.ValueLine(dc, d => d.CreationDate)
     @Html.EntityLine(dc, d => d.Machine)
@@ -14,10 +14,10 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.Type)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.CopyTable)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.InsertedRows)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableDN de) => de.UpdatedRows)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.Type)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.CopyTable)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.InsertedRows)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.UpdatedRows)</td>
                     </tr>
                 </thead>
                 @foreach (var dtc in dc.TypeElementContext(a => a.Copies))

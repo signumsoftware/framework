@@ -10,7 +10,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Disconnected
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class DisconnectedExportDN : Entity
+    public class DisconnectedExportEntity : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
@@ -19,9 +19,9 @@ namespace Signum.Entities.Disconnected
             set { Set(ref creationDate, value); }
         }
 
-        Lite<DisconnectedMachineDN> machine;
+        Lite<DisconnectedMachineEntity> machine;
         [NotNullValidator]
-        public Lite<DisconnectedMachineDN> Machine
+        public Lite<DisconnectedMachineEntity> Machine
         {
             get { return machine; }
             set { Set(ref machine, value); }
@@ -60,8 +60,8 @@ namespace Signum.Entities.Disconnected
         }
 
         [NotNullable, PreserveOrder]
-        MList<DisconnectedExportTableDN> copies = new MList<DisconnectedExportTableDN>();
-        public MList<DisconnectedExportTableDN> Copies
+        MList<DisconnectedExportTableEntity> copies = new MList<DisconnectedExportTableEntity>();
+        public MList<DisconnectedExportTableEntity> Copies
         {
             get { return copies; }
             set { Set(ref copies, value); }
@@ -114,14 +114,14 @@ namespace Signum.Entities.Disconnected
             set { Set(ref state, value); }
         }
 
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
+        Lite<ExceptionEntity> exception;
+        public Lite<ExceptionEntity> Exception
         {
             get { return exception; }
             set { Set(ref exception, value); }
         }
 
-        public double Ratio(DisconnectedExportDN estimation)
+        public double Ratio(DisconnectedExportEntity estimation)
         {
             double total = (long)estimation.Total.Value;
  
@@ -170,7 +170,7 @@ namespace Signum.Entities.Disconnected
             return result;
         }
 
-        static Expression<Func<DisconnectedExportDN, int>> CalculateTotalExpression =
+        static Expression<Func<DisconnectedExportEntity, int>> CalculateTotalExpression =
             stat =>
                 stat.Lock.Value +
                 stat.CreateDatabase.Value +
@@ -186,15 +186,15 @@ namespace Signum.Entities.Disconnected
             return CalculateTotalExpression.Evaluate(this);
         }
 
-        internal DisconnectedExportDN Clone()
+        internal DisconnectedExportEntity Clone()
         {
-            return new DisconnectedExportDN
+            return new DisconnectedExportEntity
             {
                 Machine = machine,
                 Lock = Lock,
                 CreateDatabase = CreateDatabase,
                 DisableForeignKeys = DisableForeignKeys,
-                Copies = Copies.Select(c=>new DisconnectedExportTableDN
+                Copies = Copies.Select(c=>new DisconnectedExportTableEntity
                 {
                     Type = c.Type,
                     CopyTable = c.CopyTable,
@@ -219,11 +219,11 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedExportTableDN : EmbeddedEntity
+    public class DisconnectedExportTableEntity : EmbeddedEntity
     {
-        Lite<TypeDN> type;
+        Lite<TypeEntity> type;
         [NotNullValidator]
-        public Lite<TypeDN> Type
+        public Lite<TypeEntity> Type
         {
             get { return type; }
             set { Set(ref type, value); }

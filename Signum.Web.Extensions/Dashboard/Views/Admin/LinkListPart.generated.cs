@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Dashboard\Views\Admin\LinkListPart.cshtml"
- using (var tc = Html.TypeContext<LinkListPartDN>())
+ using (var tc = Html.TypeContext<LinkListPartEntity>())
 {
     tc.FormGroupStyle = FormGroupStyle.None;
     tc.PlaceholderLabels = true;

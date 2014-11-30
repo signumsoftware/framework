@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Dashboard\Views\Admin\CountUserQueryElement.cshtml"
- using (var tc = Html.TypeContext<CountUserQueryElementDN>())
+ using (var tc = Html.TypeContext<CountUserQueryElementEntity>())
 {
     
             

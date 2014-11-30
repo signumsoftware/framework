@@ -90,7 +90,7 @@ namespace Signum.Windows.UIAutomation
             try
             {
                 if (IsError)
-                    throw new MessageBoxErrorException("Error MessageBox shown: {0}\r\nMessage: {1}".Formato(Title, Message));
+                    throw new MessageBoxErrorException("Error MessageBox shown: {0}\r\nMessage: {1}".FormatWith(Title, Message));
             }
             finally
             {
@@ -103,7 +103,7 @@ namespace Signum.Windows.UIAutomation
             try
             {
                 if (!IsError)
-                    throw new AssertFailedException("Error was expected instead of MessageBox: {0}\r\nMessage: {1}".Formato(Title, Message));
+                    throw new AssertFailedException("Error was expected instead of MessageBox: {0}\r\nMessage: {1}".FormatWith(Title, Message));
             }
             finally
             {

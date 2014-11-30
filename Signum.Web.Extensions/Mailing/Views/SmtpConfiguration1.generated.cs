@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
- using (var sc = Html.TypeContext<SmtpConfigurationDN>()) 
+ using (var sc = Html.TypeContext<SmtpConfigurationEntity>()) 
 {
 	
             

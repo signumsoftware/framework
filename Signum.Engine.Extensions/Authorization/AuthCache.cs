@@ -19,30 +19,30 @@ namespace Signum.Entities.Authorization
 {
     public interface IMerger<K, A>
     {
-        A Merge(K key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, A>> baseValues);
-        Func<K, A> MergeDefault(Lite<RoleDN> role);
+        A Merge(K key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, A>> baseValues);
+        Func<K, A> MergeDefault(Lite<RoleEntity> role);
     }
 
     public interface IManualAuth<K, A>
     {
-        A GetAllowed(Lite<RoleDN> role, K key);
-        void SetAllowed(Lite<RoleDN> role, K key, A allowed);
+        A GetAllowed(Lite<RoleEntity> role, K key);
+        void SetAllowed(Lite<RoleEntity> role, K key, A allowed);
     }
 
     class Coercer<A, K>
     {
         public static readonly Coercer<A, K> None = new Coercer<A, K>();
 
-        public virtual Func<Lite<RoleDN>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
-        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleDN> role) { return (key, allowed) => allowed; } 
+        public virtual Func<Lite<RoleEntity>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
+        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleEntity> role) { return (key, allowed) => allowed; } 
     }
 
     class AuthCache<RT, AR, R, K, A>: IManualAuth<K, A> 
-        where RT : RuleDN<R, A>, new()
+        where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
         where R : Entity
     {
-        readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
+        readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules; 
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
@@ -60,8 +60,8 @@ namespace Signum.Entities.Authorization
 
             runtimeRules = sb.GlobalLazy(this.NewCache,
                 invalidateWithTypes ?
-                new InvalidateWith(typeof(RT), typeof(RoleDN), typeof(RuleTypeDN)) :
-                new InvalidateWith(typeof(RT), typeof(RoleDN)));
+                new InvalidateWith(typeof(RT), typeof(RoleEntity), typeof(RuleTypeEntity)) :
+                new InvalidateWith(typeof(RT), typeof(RoleEntity)));
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
@@ -75,10 +75,10 @@ namespace Signum.Entities.Authorization
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name.SqlEscape(), param.ParameterName), new List<DbParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name.SqlEscape(), param.ParameterName), new List<DbParameter> { param });
         }
 
-        A IManualAuth<K, A>.GetAllowed(Lite<RoleDN> role, K key)
+        A IManualAuth<K, A>.GetAllowed(Lite<RoleEntity> role, K key)
         {
             R resource = ToEntity(key);
 
@@ -87,7 +87,7 @@ namespace Signum.Entities.Authorization
             return miniCache.GetAllowed(role);
         }
 
-        void IManualAuth<K, A>.SetAllowed(Lite<RoleDN> role, K key, A allowed)
+        void IManualAuth<K, A>.SetAllowed(Lite<RoleEntity> role, K key, A allowed)
         {
             R resource = ToEntity(key);
 
@@ -120,15 +120,15 @@ namespace Signum.Entities.Authorization
 
         public class ManualResourceCache
         {
-            readonly Dictionary<Lite<RoleDN>, A> specificRules;
+            readonly Dictionary<Lite<RoleEntity>, A> specificRules;
 
             readonly IMerger<K, A> merger;
 
-            readonly Func<Lite<RoleDN>, A, A> coercer;
+            readonly Func<Lite<RoleEntity>, A, A> coercer;
 
             readonly K key;
 
-            public ManualResourceCache(K key, R resource, IMerger<K, A> merger, Func<Lite<RoleDN>, A, A> coercer)
+            public ManualResourceCache(K key, R resource, IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
             {
                 this.key = key;
 
@@ -142,7 +142,7 @@ namespace Signum.Entities.Authorization
                 this.merger = merger;
             }
 
-            public A GetAllowed(Lite<RoleDN> role)
+            public A GetAllowed(Lite<RoleEntity> role)
             {
                 A result;
                 if (specificRules.TryGetValue(role, out result))
@@ -151,7 +151,7 @@ namespace Signum.Entities.Authorization
                 return GetAllowedBase(role);
             }
 
-            public A GetAllowedBase(Lite<RoleDN> role)
+            public A GetAllowedBase(Lite<RoleEntity> role)
             {
                 var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KVP.Create(r, GetAllowed(r))));
 
@@ -159,17 +159,17 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        Dictionary<Lite<RoleDN>, RoleAllowedCache> NewCache()
+        Dictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
         {
-            List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
+            List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder().ToList();
 
-            Dictionary<Lite<RoleDN>, Dictionary<K, A>> realRules =
+            Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules =
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role, gr => gr
                       .ToDictionary(ru => ToKey(ru.Resource), ru => ru.Allowed));
 
-            Dictionary<Lite<RoleDN>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleDN>, RoleAllowedCache>();
+            Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
             foreach (var role in roles)
             {
                 var related = AuthLogic.RelatedTo(role);
@@ -217,19 +217,19 @@ namespace Signum.Entities.Authorization
                 });
         }
 
-        internal A GetAllowed(Lite<RoleDN> role, K key)
+        internal A GetAllowed(Lite<RoleEntity> role, K key)
         {
             return runtimeRules.Value[role].GetAllowed(key);
         }
       
         internal DefaultDictionary<K, A> GetDefaultDictionary()
         {
-            return runtimeRules.Value[RoleDN.Current.ToLite()].DefaultDictionary();
+            return runtimeRules.Value[RoleEntity.Current.ToLite()].DefaultDictionary();
         }
 
         public class RoleAllowedCache
         {
-            readonly Lite<RoleDN> role;
+            readonly Lite<RoleEntity> role;
             readonly IMerger<K, A> merger;
             readonly Func<K, A, A> coercer;
 
@@ -237,7 +237,7 @@ namespace Signum.Entities.Authorization
             readonly List<RoleAllowedCache> baseCaches;
 
 
-            public RoleAllowedCache(Lite<RoleDN> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
+            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
             {
                 this.role = role;
 
@@ -321,7 +321,7 @@ namespace Signum.Entities.Authorization
         }
 
 
-        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles,
+        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
             Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
@@ -336,7 +336,7 @@ namespace Signum.Entities.Authorization
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
                                select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
-                               .ToDictionary("{0} rules for {1}".Formato(typeof(R).NiceName(), role));
+                               .ToDictionary("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
                     {
@@ -356,7 +356,7 @@ namespace Signum.Entities.Authorization
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
                                select KVP.Create(r, xr))
-                               .ToDictionary("{0} rules for {1}".Formato(typeof(R).NiceName(), role));
+                               .ToDictionary("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         dic, 
@@ -380,14 +380,14 @@ namespace Signum.Entities.Authorization
         }
 
 
-        internal static string Comment(Lite<RoleDN> role, R resource, A allowed)
+        internal static string Comment(Lite<RoleEntity> role, R resource, A allowed)
         {
-            return "{0} {1} for {2} ({3})".Formato(typeof(R).NiceName(), resource.ToString(), role, allowed);
+            return "{0} {1} for {2} ({3})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, allowed);
         }
 
-        internal static string Comment(Lite<RoleDN> role, R resource, A from, A to)
+        internal static string Comment(Lite<RoleEntity> role, R resource, A from, A to)
         {
-            return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToString(), role, from, to);
+            return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, from, to);
         }
     }
 

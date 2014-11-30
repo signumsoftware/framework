@@ -6,7 +6,7 @@
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 
 
-@using (var e = Html.TypeContext<EmailMessageDN>())
+@using (var e = Html.TypeContext<EmailMessageEntity>())
 {
     <div class="sf-email-message">
 
@@ -18,7 +18,7 @@
             }
 
 
-            tabs.Tab("sfEmailMessage", typeof(EmailMessageDN).NiceName(), @<text>
+            tabs.Tab("sfEmailMessage", typeof(EmailMessageEntity).NiceName(), @<text>
 
 
             <div class="row">

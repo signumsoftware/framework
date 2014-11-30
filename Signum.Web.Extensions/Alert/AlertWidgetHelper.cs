@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -16,17 +16,17 @@ namespace Signum.Web.Alerts
 {
     public static class AlertWidgetHelper
     {
-        public static AlertDN CreateAlert(Entity entity)
+        public static AlertEntity CreateAlert(Entity entity)
         {
             if(entity.IsNew)
                 return null;
 
-            return new AlertDN { Target = entity.ToLite() };
+            return new AlertEntity { Target = entity.ToLite() };
         }
 
         public static int CountAlerts(Lite<Entity> identifiable, string filterField)
         {
-            return Finder.QueryCount(new CountOptions(typeof(AlertDN))
+            return Finder.QueryCount(new CountOptions(typeof(AlertEntity))
             {
                 FilterOptions = 
                 {
@@ -106,7 +106,7 @@ namespace Signum.Web.Alerts
         {
             return new FindOptions
             {
-                QueryName = typeof(AlertDN),
+                QueryName = typeof(AlertEntity),
                 Create = false,
                 SearchOnLoad = true,
                 ShowFilters = false,

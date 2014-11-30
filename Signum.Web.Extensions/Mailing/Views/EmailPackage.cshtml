@@ -1,11 +1,11 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var e = Html.TypeContext<EmailPackageDN>())
+@using (var e = Html.TypeContext<EmailPackageEntity>())
 {
     @Html.ValueLine(e, f => f.Name, f => f.ReadOnly = true)
 
 <fieldset>
     <legend>Lines</legend>
-    @Html.SearchControl(new FindOptions(typeof(EmailMessageDN), "Package", e.Value), e)
+    @Html.SearchControl(new FindOptions(typeof(EmailMessageEntity), "Package", e.Value), e)
 </fieldset>
 }

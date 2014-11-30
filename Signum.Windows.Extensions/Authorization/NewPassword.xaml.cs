@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +34,7 @@ namespace Signum.Windows.Authorization
             get { return pb1.Password; }
         }
 
-        public UserDN User { get; set; }
+        public UserEntity User { get; set; }
 
         private void bntOk_Click(object sender, RoutedEventArgs e)
         {

@@ -56,7 +56,7 @@ namespace Signum.Web.Chart.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartScriptCode.cshtml")]
-    public partial class ChartScriptCode : System.Web.Mvc.WebViewPage<TypeContext<ChartScriptDN>>
+    public partial class ChartScriptCode : System.Web.Mvc.WebViewPage<TypeContext<ChartScriptEntity>>
     {
         public ChartScriptCode()
         {

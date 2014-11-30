@@ -11,21 +11,21 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EntityHelpDN : Entity
+    public class EntityHelpEntity : Entity
     {
         [NotNullable]
-        TypeDN type;
+        TypeEntity type;
         [NotNullValidator]
-        public TypeDN Type
+        public TypeEntity Type
         {
             get { return type; }
             set { SetToStr(ref type, value); }
         }
 
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -40,31 +40,31 @@ namespace Signum.Entities.Help
         }
 
         [NotNullable]
-        MList<PropertyRouteHelpDN> properties = new MList<PropertyRouteHelpDN>();
+        MList<PropertyRouteHelpEntity> properties = new MList<PropertyRouteHelpEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<PropertyRouteHelpDN> Properties
+        public MList<PropertyRouteHelpEntity> Properties
         {
             get { return properties; }
             set { Set(ref properties, value); }
         }
 
         [Ignore]
-        MList<OperationHelpDN> operations = new MList<OperationHelpDN>();
-        public MList<OperationHelpDN> Operations
+        MList<OperationHelpEntity> operations = new MList<OperationHelpEntity>();
+        public MList<OperationHelpEntity> Operations
         {
             get { return operations; }
             set { Set(ref operations, value); }
         }
 
         [Ignore]
-        MList<QueryHelpDN> queries = new MList<QueryHelpDN>();
-        public MList<QueryHelpDN> Queries
+        MList<QueryHelpEntity> queries = new MList<QueryHelpEntity>();
+        public MList<QueryHelpEntity> Queries
         {
             get { return queries; }
             set { Set(ref queries, value); }
         }
 
-        static Expression<Func<EntityHelpDN, string>> ToStringExpression = e => e.Type.ToString();
+        static Expression<Func<EntityHelpEntity, string>> ToStringExpression = e => e.Type.ToString();
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -86,16 +86,16 @@ namespace Signum.Entities.Help
 
     public static class EntityHelpOperation
     {
-        public static readonly ExecuteSymbol<EntityHelpDN> Save = OperationSymbol.Execute<EntityHelpDN>();
+        public static readonly ExecuteSymbol<EntityHelpEntity> Save = OperationSymbol.Execute<EntityHelpEntity>();
     }
 
     [Serializable]
-    public class PropertyRouteHelpDN : EmbeddedEntity
+    public class PropertyRouteHelpEntity : EmbeddedEntity
     {
         [NotNullable]
-        PropertyRouteDN property;
+        PropertyRouteEntity property;
         [NotNullValidator]
-        public PropertyRouteDN Property
+        public PropertyRouteEntity Property
         {
             get { return property; }
             set { Set(ref property, value); }

@@ -7,7 +7,7 @@
 	x:Class="Signum.Windows.Notes.Note"
 	xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows" 
     xmlns:sen="clr-namespace:Signum.Entities.Notes;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type sen:NoteDN}"
+    m:Common.TypeContext="{x:Type sen:NoteEntity}"
 	x:Name="UserControl" MinWidth="350" MinHeight="250">
     <UserControl.Resources>
         <ResourceDictionary>

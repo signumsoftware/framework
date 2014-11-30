@@ -84,9 +84,9 @@ WriteLiteral("\r\n");
 
             
             #line 9 "..\..\Chart\Views\UserChartOrder.cshtml"
- using (var e = Html.TypeContext<QueryOrderDN>())
+ using (var e = Html.TypeContext<QueryOrderEntity>())
 {
-    var userChart = ((TypeContext<UserChartDN>)e.Parent.Parent).Value;
+    var userChart = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
 
     e.FormGroupStyle = FormGroupStyle.None;
 

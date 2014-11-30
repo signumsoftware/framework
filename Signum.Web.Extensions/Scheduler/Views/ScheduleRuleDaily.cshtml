@@ -2,7 +2,7 @@
 @using Signum.Entities.Scheduler
 @using System.Globalization
 
-@using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
+@using (var e = Html.TypeContext<ScheduleRuleDailyEntity>())
 {     
     @Html.ValueLine(e, srd => srd.StartingOn)
 }

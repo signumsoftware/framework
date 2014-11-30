@@ -12,7 +12,7 @@ using System.Reflection;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartScriptParameterDN : EmbeddedEntity
+    public class ChartScriptParameterEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 50)]
         string name;
@@ -169,20 +169,20 @@ namespace Signum.Entities.Chart
 
             public override string ToString()
             {
-                return "{0}[{1},{2}]".Formato(DefaultValue, MinValue, MaxValue);
+                return "{0}[{1},{2}]".FormatWith(DefaultValue, MinValue, MaxValue);
             }
 
             public string Validate(string parameter)
             {
                 decimal value;
                 if (!decimal.TryParse(parameter, out value))
-                    return "{0} is not a valid number".Formato(parameter);
+                    return "{0} is not a valid number".FormatWith(parameter);
 
                 if (MinValue.HasValue && value < MinValue)
-                    return "{0} is lesser than the minimum {1}".Formato(value, MinValue);
+                    return "{0} is lesser than the minimum {1}".FormatWith(value, MinValue);
 
                 if (MaxValue.HasValue && MaxValue < value)
-                    return "{0} is grater than the maximum {1}".Formato(value, MinValue);
+                    return "{0} is grater than the maximum {1}".FormatWith(value, MinValue);
 
                 return null;
             }
@@ -214,17 +214,17 @@ namespace Signum.Entities.Chart
                 var enumValue = this.SingleOrDefault(a => a.Name == parameter);
 
                 if (enumValue == null)
-                    return "{0} is not in the list".Formato(parameter);
+                    return "{0} is not in the list".FormatWith(parameter);
 
                 if (!enumValue.CompatibleWith(token))
-                    return "{0} is not compatible with {1}".Formato(parameter, token.NiceName());
+                    return "{0} is not compatible with {1}".FormatWith(parameter, token.NiceName());
 
                 return null;
             }
 
             internal string DefaultValue(QueryToken token)
             {
-                return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".Formato(token.NiceName())).Name;
+                return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token.NiceName())).Name;
             }
         }
 
@@ -238,7 +238,7 @@ namespace Signum.Entities.Chart
                 if (TypeFilter == null)
                     return Name;
 
-                return "{0} ({1})".Formato(Name, TypeFilter.Value.GetComposedCode());
+                return "{0} ({1})".FormatWith(Name, TypeFilter.Value.GetComposedCode());
             }
 
             public static string TryParse(string value, out EnumValue enumValue)
@@ -288,14 +288,14 @@ namespace Signum.Entities.Chart
                 new XAttribute("ValueDefinition", ValueDefinition));
         }
 
-        internal static ChartScriptParameterDN ImportXml(XElement c, int index)
+        internal static ChartScriptParameterEntity ImportXml(XElement c, int index)
         {
             var element = c.Element("Parameter" + index);
 
             if (element == null)
                 return null;
 
-            return new ChartScriptParameterDN
+            return new ChartScriptParameterEntity
             {
                 Name = element.Attribute("Name").Value,
                 Type = element.Attribute("Type").Value.ToEnum<ChartParameterType>(),
@@ -303,9 +303,9 @@ namespace Signum.Entities.Chart
             };
         }
 
-        internal ChartScriptParameterDN Clone()
+        internal ChartScriptParameterEntity Clone()
         {
-            return new ChartScriptParameterDN
+            return new ChartScriptParameterEntity
             {
                 Name = Name,
                 Type = Type,

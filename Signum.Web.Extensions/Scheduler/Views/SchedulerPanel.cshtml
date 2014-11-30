@@ -62,9 +62,9 @@
         </table>
 
         <br />
-        <h2>@typeof(ScheduledTaskDN).NicePluralName()</h2>
+        <h2>@typeof(ScheduledTaskEntity).NicePluralName()</h2>
 
-        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
+        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskEntity))
 {
     ShowFilters = false,
     SearchOnLoad = true,
@@ -72,9 +72,9 @@
 }, new Context(null, "st"))
         <br />
         <br />
-        <h2>@typeof(ScheduledTaskLogDN).NicePluralName()</h2>
+        <h2>@typeof(ScheduledTaskLogEntity).NicePluralName()</h2>
 
-        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
+        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogEntity))
 {
     OrderOptions = { new OrderOption("StartTime", Signum.Entities.DynamicQuery.OrderType.Descending) },
     ShowFilters = false,

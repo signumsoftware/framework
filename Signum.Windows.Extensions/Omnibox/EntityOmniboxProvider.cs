@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,7 +67,7 @@ namespace Signum.Windows.Omnibox
 
         public override Run GetIcon()
         {
-            return new Run("({0})".Formato(AuthMessage.View.NiceToString())) { Foreground = Brushes.DodgerBlue };
+            return new Run("({0})".FormatWith(AuthMessage.View.NiceToString())) { Foreground = Brushes.DodgerBlue };
         }
 
         public override void OnSelected(EntityOmniboxResult result, Window window)

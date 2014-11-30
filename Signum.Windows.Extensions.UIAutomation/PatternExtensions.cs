@@ -19,7 +19,7 @@ namespace Signum.Windows.UIAutomation
             var result = (P)ae.GetCurrentPattern(key);
 
             if (result == null)
-                throw new InvalidOperationException("AutomationElement {0} does not implement pattern {1}".Formato(ae, typeof(P).Name));
+                throw new InvalidOperationException("AutomationElement {0} does not implement pattern {1}".FormatWith(ae, typeof(P).Name));
 
             return result;
         }

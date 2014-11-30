@@ -24,10 +24,10 @@ namespace Signum.Windows.UserAssets
         public event Func<QueryToken, List<QueryToken>> SubTokensEvent;
 
         public static readonly DependencyProperty TokenProperty = 
-            DependencyProperty.Register("Token", typeof(QueryTokenDN), typeof(QueryTokenDNBuilder), new PropertyMetadata(null));
-        public QueryTokenDN Token
+            DependencyProperty.Register("Token", typeof(QueryTokenEntity), typeof(QueryTokenDNBuilder), new PropertyMetadata(null));
+        public QueryTokenEntity Token
         {
-            get { return (QueryTokenDN)GetValue(TokenProperty); }
+            get { return (QueryTokenEntity)GetValue(TokenProperty); }
             set { SetValue(TokenProperty, value); }
         }
 

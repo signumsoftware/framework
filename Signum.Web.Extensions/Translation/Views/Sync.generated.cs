@@ -80,11 +80,11 @@ namespace Signum.Web.Translation.Views
     CultureInfo culture = ViewBag.Culture;
     int totalTypes = ViewBag.TotalTypes;
 
-    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().FormatWith(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
     if(Model.Types.Count < totalTypes)
     {
-        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Types.Count, totalTypes); 
+        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".FormatWith(Model.Types.Count, totalTypes); 
     }
     
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
@@ -132,7 +132,7 @@ WriteLiteral("    <h2>");
 
             
             #line 43 "..\..\Translation\Views\Sync.cshtml"
-   Write(TranslationMessage._0AlreadySynchronized.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name));
+   Write(TranslationMessage._0AlreadySynchronized.NiceToString().FormatWith(Model.LocalizedAssembly.Assembly.GetName().Name));
 
             
             #line default

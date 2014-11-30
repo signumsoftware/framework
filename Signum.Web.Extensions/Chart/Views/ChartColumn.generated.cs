@@ -123,7 +123,7 @@ WriteLiteralTo(__razor_helper_writer, "        ");
 
 
 #line 18 "..\..\Chart\Views\ChartColumn.cshtml"
-WriteTo(__razor_helper_writer, Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
+WriteTo(__razor_helper_writer, Html.FormGroup(tc, null, ChartMessage.ColorsFor0.NiceToString().FormatWith(type.NiceName()),
                     Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
                                     (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)), new { @class = "form-control" })));
 
@@ -156,12 +156,12 @@ WriteLiteral("\r\n");
 
             
             #line 24 "..\..\Chart\Views\ChartColumn.cshtml"
- using (var tc = Html.TypeContext<ChartColumnDN>())
+ using (var tc = Html.TypeContext<ChartColumnEntity>())
 {
 
     if (tc.Value == null)
     {
-        tc.Value = new ChartColumnDN();
+        tc.Value = new ChartColumnEntity();
     }
     
 
@@ -176,7 +176,7 @@ WriteLiteral(" data-token=\"");
 
             
             #line 32 "..\..\Chart\Views\ChartColumn.cshtml"
-                                       Write(((TypeElementContext<ChartColumnDN>)tc.Parent).Index);
+                                       Write(((TypeElementContext<ChartColumnEntity>)tc.Parent).Index);
 
             
             #line default
@@ -461,7 +461,7 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 97 "..\..\Chart\Views\ChartColumn.cshtml"
-                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
+                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
 

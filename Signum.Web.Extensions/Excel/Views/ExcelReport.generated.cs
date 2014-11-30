@@ -73,7 +73,7 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\Excel\Views\ExcelReport.cshtml"
- using (var e = Html.TypeContext<ExcelReportDN>())
+ using (var e = Html.TypeContext<ExcelReportEntity>())
 {
     
             

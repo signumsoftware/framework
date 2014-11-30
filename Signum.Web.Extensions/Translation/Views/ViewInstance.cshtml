@@ -1,4 +1,4 @@
-﻿@model Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>>
+﻿@model Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>
 @using System.Globalization
 @using Signum.Engine.Translation
 @using Signum.Entities.Translation
@@ -9,7 +9,7 @@
     CultureInfo culture = ViewBag.Culture;
     Type type = ViewBag.Type;
 
-    ViewBag.Title = TranslationMessage.View0In1.NiceToString().Formato(type.NiceName(), culture == null ? TranslationMessage.AllLanguages.NiceToString() : culture.DisplayName);
+    ViewBag.Title = TranslationMessage.View0In1.NiceToString().FormatWith(type.NiceName(), culture == null ? TranslationMessage.AllLanguages.NiceToString() : culture.DisplayName);
 
     Dictionary<LocalizedInstanceKey, string> master = ViewBag.Master;
 
@@ -100,7 +100,7 @@ else
                     }
                     else
                     {
-                        TranslatedInstanceDN trans = Model.TryGetC(ci).TryGetC(key);
+                        TranslatedInstanceEntity trans = Model.TryGetC(ci).TryGetC(key);
 
                         if (trans != null && editCulture(ci))
                         {

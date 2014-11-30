@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Files
-@using (var e = Html.TypeContext<FilePathDN>())
+@using (var e = Html.TypeContext<FilePathEntity>())
 {
     @Html.ValueLine(e, f => f.Locked)
     @Html.ValueLine(e, f => f.FileName)

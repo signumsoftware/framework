@@ -86,11 +86,11 @@ WriteLiteral("\r\n");
 
             
             #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
- using (var nc = Html.TypeContext<NewsletterDN>())
+ using (var nc = Html.TypeContext<NewsletterEntity>())
 {  
     using(var tabs = Html.Tabs(nc)) 
     {
-        tabs.Tab("emTabMain", typeof(NewsletterDN).NiceName(), 
+        tabs.Tab("emTabMain", typeof(NewsletterEntity).NiceName(), 
             
             #line default
             #line hidden
@@ -476,7 +476,7 @@ WriteLiteralTo(__razor_template_writer, "    ");
            );
         if (!nc.Value.IsNew)
         {
-            tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
+            tabs.Tab("emTabSend", typeof(NewsletterDeliveryEntity).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryEntity))
                {
                    FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
                    SearchOnLoad = true,

@@ -16,7 +16,7 @@ using System.Reflection;
 namespace Signum.Entities.Chart
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class ChartScriptDN : Entity
+    public class ChartScriptEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -27,8 +27,8 @@ namespace Signum.Entities.Chart
             set { SetToStr(ref name, value); }
         }
 
-        Lite<FileDN> icon;
-        public Lite<FileDN> Icon
+        Lite<FileEntity> icon;
+        public Lite<FileEntity> Icon
         {
             get { return icon; }
             set { Set(ref icon, value); }
@@ -51,8 +51,8 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
-        MList<ChartScriptColumnDN> columns = new MList<ChartScriptColumnDN>();
-        public MList<ChartScriptColumnDN> Columns
+        MList<ChartScriptColumnEntity> columns = new MList<ChartScriptColumnEntity>();
+        public MList<ChartScriptColumnEntity> Columns
         {
             get { return columns; }
             set { Set(ref columns, value); }
@@ -67,7 +67,7 @@ namespace Signum.Entities.Chart
             set { Set(ref columnsStructure, value); }
         }
 
-        static Expression<Func<ChartScriptDN, string>> ToStringExpression = e => e.name;
+        static Expression<Func<ChartScriptEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -80,14 +80,14 @@ namespace Signum.Entities.Chart
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
         {
-            var column = sender as ChartScriptColumnDN;
+            var column = sender as ChartScriptColumnEntity;
 
             if (column != null && pi.Is(() => column.IsGroupKey))
             {
                 if (column.IsGroupKey)
                 {
                     if (!ChartUtils.Flag(ChartColumnType.Groupable, column.ColumnType))
-                        return "{0} can not be true for {1}".Formato(pi.NiceName(), column.ColumnType.NiceToString());
+                        return "{0} can not be true for {1}".FormatWith(pi.NiceName(), column.ColumnType.NiceToString());
                 }
             }
 
@@ -101,12 +101,12 @@ namespace Signum.Entities.Chart
                 if (GroupBy == GroupByChart.Always || GroupBy == GroupByChart.Optional)
                 {
                     if (!Columns.Any(a => a.IsGroupKey))
-                        return "{0} {1} requires some key columns".Formato(pi.NiceName(), groupBy.NiceToString());
+                        return "{0} {1} requires some key columns".FormatWith(pi.NiceName(), groupBy.NiceToString());
                 }
                 else
                 {
                     if (Columns.Any(a => a.IsGroupKey))
-                        return "{0} {1} should not have key".Formato(pi.NiceName(), groupBy.NiceToString());
+                        return "{0} {1} should not have key".FormatWith(pi.NiceName(), groupBy.NiceToString());
                 }
             }
 
@@ -114,7 +114,7 @@ namespace Signum.Entities.Chart
             {
                 if (!Regex.IsMatch(Script, @"function\s+DrawChart\s*\(\s*chart\s*,\s*data\s*\)", RegexOptions.Singleline))
                 {
-                    return "{0} should be a definition of function DrawChart(chart, data)".Formato(pi.NiceName());
+                    return "{0} should be a definition of function DrawChart(chart, data)".FormatWith(pi.NiceName());
                 }
             }
 
@@ -126,7 +126,7 @@ namespace Signum.Entities.Chart
             string from = Columns.Where(a => a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
             string to = Columns.Where(a => !a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
 
-            ColumnsStructure = "{0} -> {1}".Formato(from, to);
+            ColumnsStructure = "{0} -> {1}".FormatWith(from, to);
 
             base.PreSaving(ref graphModified);
         }
@@ -167,15 +167,15 @@ namespace Signum.Entities.Chart
 
             GroupByChart groupBy = script.Attribute("GroupBy").Value.ToEnum<GroupByChart>();
 
-            List<ChartScriptColumnDN> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnDN
+            List<ChartScriptColumnEntity> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnEntity
             {
                 DisplayName = c.Attribute("DisplayName").Value,
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
                 IsGroupKey = c.Attribute("IsGroupKey").Let(a => a != null && a.Value == "true"),
                 IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "true"),
-                Parameter1 = ChartScriptParameterDN.ImportXml(c, 1),
-                Parameter2 = ChartScriptParameterDN.ImportXml(c, 2),
-                Parameter3 = ChartScriptParameterDN.ImportXml(c, 3)
+                Parameter1 = ChartScriptParameterEntity.ImportXml(c, 1),
+                Parameter2 = ChartScriptParameterEntity.ImportXml(c, 2),
+                Parameter3 = ChartScriptParameterEntity.ImportXml(c, 3)
             }).ToList();
 
             if (!IsNew && !force)
@@ -201,7 +201,7 @@ namespace Signum.Entities.Chart
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
 
-            var newFile = script.Element("Icon").Try(icon => new FileDN
+            var newFile = script.Element("Icon").Try(icon => new FileEntity
             {
                 FileName = icon.Attribute("FileName").Value,
                 BinaryFile = Convert.FromBase64String(icon.Nodes().OfType<XCData>().Single().Value),
@@ -232,23 +232,23 @@ namespace Signum.Entities.Chart
             return true;
         }
 
-        private void AsssertColumns(List<ChartScriptColumnDN> columns)
+        private void AsssertColumns(List<ChartScriptColumnEntity> columns)
         {
             string errors = Columns.ZipOrDefault(columns, (o, n) =>
             {
                 if (o == null)
                 {
                     if (!n.IsOptional)
-                        return "Adding non optional column {0}".Formato(n.DisplayName);
+                        return "Adding non optional column {0}".FormatWith(n.DisplayName);
                 }
                 else if (n == null)
                 {
                     if (o.IsOptional)
-                        return "Removing non optional column {0}".Formato(o.DisplayName);
+                        return "Removing non optional column {0}".FormatWith(o.DisplayName);
                 }
                 else if (n.ColumnType != o.ColumnType)
                 {
-                    return "The column type of '{0}' ({1}) does not match with '{2}' ({3})".Formato(
+                    return "The column type of '{0}' ({1}) does not match with '{2}' ({3})".FormatWith(
                         o.DisplayName, o.ColumnType,
                         n.DisplayName, n.ColumnType);
                 }
@@ -296,9 +296,9 @@ namespace Signum.Entities.Chart
 
     public static class ChartScriptOperation
     {
-        public static readonly ExecuteSymbol<ChartScriptDN> Save = OperationSymbol.Execute<ChartScriptDN>();
-        public static readonly ConstructSymbol<ChartScriptDN>.From<ChartScriptDN> Clone = OperationSymbol.Construct<ChartScriptDN>.From<ChartScriptDN>();
-        public static readonly DeleteSymbol<ChartScriptDN> Delete = OperationSymbol.Delete<ChartScriptDN>();
+        public static readonly ExecuteSymbol<ChartScriptEntity> Save = OperationSymbol.Execute<ChartScriptEntity>();
+        public static readonly ConstructSymbol<ChartScriptEntity>.From<ChartScriptEntity> Clone = OperationSymbol.Construct<ChartScriptEntity>.From<ChartScriptEntity>();
+        public static readonly DeleteSymbol<ChartScriptEntity> Delete = OperationSymbol.Delete<ChartScriptEntity>();
     }
 
     public enum GroupByChart
@@ -309,7 +309,7 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable]
-    public class ChartScriptColumnDN : EmbeddedEntity       
+    public class ChartScriptColumnEntity : EmbeddedEntity       
     {
         [NotNullable, SqlDbType(Size = 80)]
         string displayName;
@@ -341,30 +341,30 @@ namespace Signum.Entities.Chart
             set { Set(ref isGroupKey, value); }
         }
 
-        ChartScriptParameterDN parameter1;
-        public ChartScriptParameterDN Parameter1
+        ChartScriptParameterEntity parameter1;
+        public ChartScriptParameterEntity Parameter1
         {
             get { return parameter1; }
             set { Set(ref parameter1, value); }
         }
 
-        ChartScriptParameterDN parameter2;
-        public ChartScriptParameterDN Parameter2
+        ChartScriptParameterEntity parameter2;
+        public ChartScriptParameterEntity Parameter2
         {
             get { return parameter2; }
             set { Set(ref parameter2, value); }
         }
 
-        ChartScriptParameterDN parameter3;
-        public ChartScriptParameterDN Parameter3
+        ChartScriptParameterEntity parameter3;
+        public ChartScriptParameterEntity Parameter3
         {
             get { return parameter3; }
             set { Set(ref parameter3, value); }
         }
 
-        internal ChartScriptColumnDN Clone()
+        internal ChartScriptColumnEntity Clone()
         {
-            return new ChartScriptColumnDN
+            return new ChartScriptColumnEntity
             {
                 DisplayName = DisplayName,
                 IsGroupKey = IsGroupKey,
@@ -443,7 +443,7 @@ namespace Signum.Entities.Chart
            if(fromCodes.TryGetValue(code, out type))
                return null;
                 
-           return "{0} is not a valid type code, use {1} instead".Formato(code, fromCodes.Keys.CommaOr());
+           return "{0} is not a valid type code, use {1} instead".FormatWith(code, fromCodes.Keys.CommaOr());
        }
 
        public static string TryParseComposed(string code, out ChartColumnType type)

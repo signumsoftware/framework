@@ -55,7 +55,7 @@ namespace Signum.Web.AuthAdmin.Views
         {
             
             #line 3 "..\..\AuthAdmin\Views\Role.cshtml"
- using (var e = Html.TypeContext<RoleDN>())
+ using (var e = Html.TypeContext<RoleEntity>())
 {
     
             

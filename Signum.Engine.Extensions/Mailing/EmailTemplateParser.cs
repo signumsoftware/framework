@@ -101,8 +101,8 @@ namespace Signum.Engine.Mailing
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
             return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
-                () =>"No values for column {0}".Formato(column.Column.Token.FullKey()),
-                () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
+                () =>"No values for column {0}".FormatWith(column.Column.Token.FullKey()),
+                () =>"Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
         }
 
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
@@ -186,7 +186,7 @@ namespace Signum.Engine.Mailing
                 if (token.Variable.HasText())
                 {
                     if (variables.ContainsKey(token.Variable))
-                        AddError(true, "There's already a variable '{0}' defined in this scope".Formato(token.Variable));
+                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
 
                     variables.Add(token.Variable, token);
                 }
@@ -204,7 +204,7 @@ namespace Signum.Engine.Mailing
 
                     if (!variables.TryGetValue(v, out token))
                     {
-                        AddError(false, "Variable '{0}' is not defined at this scope".Formato(v));
+                        AddError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                         return result;
                     }
 
@@ -228,14 +228,14 @@ namespace Signum.Engine.Mailing
             {
                 if (stack.Count() <= 1)
                 {
-                    AddError(true, "No {0} has been opened".Formato(BlockNode.UserString(type)));
+                    AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(type)));
                     return null;
                 }
                 var n = stack.Pop();
                 variables = variables.Previous;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
-                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.Try(p => p.GetType()))));
+                    AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.owner.Try(p => p.GetType()))));
                     return null;
                 }
                 return n;
@@ -279,7 +279,7 @@ namespace Signum.Engine.Mailing
                         case "raw":
                             var tok = TokenFormatRegex.Match(token);
                             if (!tok.Success)
-                                AddError(true, "{0} has invalid format".Formato(token));
+                                AddError(true, "{0} has invalid format".FormatWith(token));
                             else
                             {
                                 var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
@@ -397,7 +397,7 @@ namespace Signum.Engine.Mailing
                 }
 
                 if (stack.Count != 1)
-                    AddError(true, "Last block is not closed: {0}".Formato(stack.Peek()));
+                    AddError(true, "Last block is not closed: {0}".FormatWith(stack.Peek()));
 
                 var lastM = matches.Cast<Match>().LastOrDefault();
                 if (lastM != null && lastM.Index + lastM.Length < text.Length)
@@ -441,10 +441,10 @@ namespace Signum.Engine.Mailing
 
                         ParsedToken part;
                         if (!Variables.TryGetValue(v, out part))
-                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".Formato(v));
+                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
 
                         if (part != null && part.QueryToken == null)
-                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".Formato(v, part.String));
+                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));
 
                         var after = tokenString.TryAfter('.');
 
@@ -508,7 +508,7 @@ namespace Signum.Engine.Mailing
         }
 
 
-        internal static SqlPreCommand ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateDN et, StringDistance sd)
+        internal static SqlPreCommand ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
         {
             try
             {
@@ -523,7 +523,7 @@ namespace Signum.Engine.Mailing
 
                 if (et.From != null && et.From.Token != null)
                 {
-                    QueryTokenDN token = et.From.Token;
+                    QueryTokenEntity token = et.From.Token;
                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false))
                     {
                         case FixTokenResult.Nothing: break;
@@ -539,7 +539,7 @@ namespace Signum.Engine.Mailing
                     Console.WriteLine(" Recipients:");
                     foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                     {
-                        QueryTokenDN token = item.Token;
+                        QueryTokenEntity token = item.Token;
                         switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient"))
                         {
                             case FixTokenResult.Nothing: break;
@@ -579,7 +579,7 @@ namespace Signum.Engine.Mailing
                     if (ex.Result == FixTokenResult.DeleteEntity)
                         return table.DeleteSqlSync(et);
 
-                    throw new InvalidOperationException("Unexcpected {0}".Formato(ex.Result));
+                    throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
                 }
                 finally
                 {
@@ -588,7 +588,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
-                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(et.BaseToString(), e.Message));
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(et.BaseToString(), e.Message));
             }
         }
     

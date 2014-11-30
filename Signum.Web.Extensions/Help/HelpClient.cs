@@ -34,18 +34,18 @@ namespace Signum.Web.Help
         public static JsModule WidgetModule = new JsModule("Extensions/Signum.Web.Extensions/Help/Scripts/helpWidget");
 
         //pages        
-        public static string IndexUrl = ViewPrefix.Formato("Index");
-        public static string ViewEntityUrl = ViewPrefix.Formato("ViewEntity");
-        public static string ViewAppendixUrl = ViewPrefix.Formato("ViewAppendix");
-        public static string ViewNamespaceUrl = ViewPrefix.Formato("ViewNamespace");
-        public static string TodoUrl = ViewPrefix.Formato("ViewTodo");
-        public static string SearchResults = ViewPrefix.Formato("Search");
+        public static string IndexUrl = ViewPrefix.FormatWith("Index");
+        public static string ViewEntityUrl = ViewPrefix.FormatWith("ViewEntity");
+        public static string ViewAppendixUrl = ViewPrefix.FormatWith("ViewAppendix");
+        public static string ViewNamespaceUrl = ViewPrefix.FormatWith("ViewNamespace");
+        public static string TodoUrl = ViewPrefix.FormatWith("ViewTodo");
+        public static string SearchResults = ViewPrefix.FormatWith("Search");
 
         //controls
-        public static string Buttons = ViewPrefix.Formato("Buttons");
-        public static string MiniMenu = ViewPrefix.Formato("MiniMenu");
-        public static string ViewEntityPropertyUrl = ViewPrefix.Formato("EntityProperty");
-        public static string NamespaceControlUrl = ViewPrefix.Formato("NamespaceControl");
+        public static string Buttons = ViewPrefix.FormatWith("Buttons");
+        public static string MiniMenu = ViewPrefix.FormatWith("MiniMenu");
+        public static string ViewEntityPropertyUrl = ViewPrefix.FormatWith("EntityProperty");
+        public static string NamespaceControlUrl = ViewPrefix.FormatWith("NamespaceControl");
 
         public static void Start(string imageFolder,string baseUrl)
         {
@@ -58,20 +58,20 @@ namespace Signum.Web.Help
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EntityHelpDN>(),
-                    new EntitySettings<QueryHelpDN>(),
-                    new EntitySettings<AppendixHelpDN>(),
-                    new EntitySettings<NamespaceHelpDN>(),
-                    new EmbeddedEntitySettings<PropertyRouteHelpDN>(),
-                    new EntitySettings<OperationHelpDN>(),
-                    new EmbeddedEntitySettings<QueryColumnHelpDN>(),
+                    new EntitySettings<EntityHelpEntity>(),
+                    new EntitySettings<QueryHelpEntity>(),
+                    new EntitySettings<AppendixHelpEntity>(),
+                    new EntitySettings<NamespaceHelpEntity>(),
+                    new EmbeddedEntitySettings<PropertyRouteHelpEntity>(),
+                    new EntitySettings<OperationHelpEntity>(),
+                    new EmbeddedEntitySettings<QueryColumnHelpEntity>(),
                 });
 
-                Navigator.EmbeddedEntitySettings<PropertyRouteHelpDN>().MappingDefault.AsEntityMapping()
+                Navigator.EmbeddedEntitySettings<PropertyRouteHelpEntity>().MappingDefault.AsEntityMapping()
                     .SetProperty(a => a.Property, ctx =>
                     {
-                        var type = ctx.FindParent<EntityHelpDN>().Value.Type.ToType();
-                        return PropertyRoute.Parse(type, ctx.Input).ToPropertyRouteDN();
+                        var type = ctx.FindParent<EntityHelpEntity>().Value.Type.ToType();
+                        return PropertyRoute.Parse(type, ctx.Input).ToPropertyRouteEntity();
                     });
 
                 RegisterHelpRoutes();
@@ -214,7 +214,7 @@ namespace Signum.Web.Help
             else if (result.SearchString.HasText())
                 html = html.Concat(" \"{0}\"".FormatHtml(result.SearchString));
             else
-                html = html.Concat(this.ColoredSpan(typeof(TypeDN).NiceName() + "...", "lightgray"));
+                html = html.Concat(this.ColoredSpan(typeof(TypeEntity).NiceName() + "...", "lightgray"));
 
             html = Icon().Concat(html);
 

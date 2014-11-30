@@ -23,9 +23,9 @@ namespace Signum.Windows.Dashboard
     /// </summary>
     public partial class DashboardSelector : Window
     {
-        public DashboardDN Current
+        public DashboardEntity Current
         {
-            get { return (DashboardDN)borderDashboard.DataContext; }
+            get { return (DashboardEntity)borderDashboard.DataContext; }
             set { borderDashboard.DataContext = value; }
         }
 
@@ -35,11 +35,11 @@ namespace Signum.Windows.Dashboard
             InitializeComponent();
             
             cpCombo.LoadData += cpCombo_LoadData;
-            cpCombo.Implementations = Implementations.By(typeof(DashboardDN));
-            cpCombo.Type = typeof(Lite<DashboardDN>);
-            cpCombo.LabelText = typeof(DashboardDN).NiceName();
-            cpCombo.Create = Navigator.IsCreable(typeof(DashboardDN));
-            cpCombo.View = Navigator.IsViewable(typeof(DashboardDN));
+            cpCombo.Implementations = Implementations.By(typeof(DashboardEntity));
+            cpCombo.Type = typeof(Lite<DashboardEntity>);
+            cpCombo.LabelText = typeof(DashboardEntity).NiceName();
+            cpCombo.Create = Navigator.IsCreable(typeof(DashboardEntity));
+            cpCombo.View = Navigator.IsViewable(typeof(DashboardEntity));
             cpCombo.Find = false;
             cpCombo.Remove = false;
             this.Loaded += new RoutedEventHandler(DashboardView_Loaded);
@@ -74,7 +74,7 @@ namespace Signum.Windows.Dashboard
         {
             if (userInteraction)
             {
-                Lite<DashboardDN> cp = newValue as Lite<DashboardDN>;
+                Lite<DashboardEntity> cp = newValue as Lite<DashboardEntity>;
                 Current = cp == null ? null : Server.Return((IDashboardServer cps) => cps.RetrieveDashboard(cp));
             }
 

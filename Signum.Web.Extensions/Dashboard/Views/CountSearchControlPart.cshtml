@@ -4,12 +4,12 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserQueries
 
-@using (var tc = Html.TypeContext<CountSearchControlPartDN>())
+@using (var tc = Html.TypeContext<CountSearchControlPartEntity>())
 {
     <div class="sf-cp-count-uq-list">
         @for (int i = 0; i < tc.Value.UserQueries.Count; i++)
         {
-            CountUserQueryElementDN uq = tc.Value.UserQueries[i];
+            CountUserQueryElementEntity uq = tc.Value.UserQueries[i];
             object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
             FindOptions fo = new FindOptions(queryName)
             {
@@ -18,7 +18,7 @@
 
             fo.ApplyUserQuery(uq.UserQuery);
             <p>
-                @Html.CountSearchControlSpan(fo, new Context(tc, "{0}_cnt".Formato(i)), csc =>
+                @Html.CountSearchControlSpan(fo, new Context(tc, "{0}_cnt".FormatWith(i)), csc =>
            {
                csc.Navigate = true;
                csc.Href = uq.Href;

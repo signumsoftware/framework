@@ -17,10 +17,10 @@ using Signum.Entities.UserAssets;
 namespace Signum.Entities.UserQueries
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class UserQueryDN : Entity, IUserAssetEntity
+    public class UserQueryEntity : Entity, IUserAssetEntity
     {
-        public UserQueryDN() { }
-        public UserQueryDN(object queryName)
+        public UserQueryEntity() { }
+        public UserQueryEntity(object queryName)
         {
             this.queryName = queryName;
         }
@@ -28,16 +28,16 @@ namespace Signum.Entities.UserQueries
         [Ignore]
         internal object queryName;
         
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
         }
 
-        Lite<TypeDN> entityType;
-        public Lite<TypeDN> EntityType
+        Lite<TypeEntity> entityType;
+        public Lite<TypeEntity> EntityType
         {
             get { return entityType; }
             set { Set(ref entityType, value); }
@@ -71,16 +71,16 @@ namespace Signum.Entities.UserQueries
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
-        public MList<QueryFilterDN> Filters
+        MList<QueryFilterEntity> filters = new MList<QueryFilterEntity>();
+        public MList<QueryFilterEntity> Filters
         {
             get { return filters; }
             set { Set(ref filters, value); }
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
-        public MList<QueryOrderDN> Orders
+        MList<QueryOrderEntity> orders = new MList<QueryOrderEntity>();
+        public MList<QueryOrderEntity> Orders
         {
             get { return orders; }
             set { Set(ref orders, value); }
@@ -94,8 +94,8 @@ namespace Signum.Entities.UserQueries
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryColumnDN> columns = new MList<QueryColumnDN>();
-        public MList<QueryColumnDN>  Columns
+        MList<QueryColumnEntity> columns = new MList<QueryColumnEntity>();
+        public MList<QueryColumnEntity>  Columns
         {
             get { return columns; }
             set { Set(ref columns, value); }
@@ -124,7 +124,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref guid, value); }
         }
 
-        static readonly Expression<Func<UserQueryDN, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<UserQueryEntity, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -135,14 +135,14 @@ namespace Signum.Entities.UserQueries
             if (pi.Is(() => ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.Try(pm=>pm.NiceToString()) ?? "" );
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.Try(pm=>pm.NiceToString()) ?? "" );
 
                 if (ElementsPerPage == null && ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
             }
 
             if (pi.Is(() => Filters) && WithoutFilters && Filters.Any())
-                return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
+                return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().FormatWith(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
 
             return base.PropertyValidation(pi);
         }
@@ -223,18 +223,18 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryOperation
     {
-        public static readonly ExecuteSymbol<UserQueryDN> Save = OperationSymbol.Execute<UserQueryDN>();
-        public static readonly DeleteSymbol<UserQueryDN> Delete = OperationSymbol.Delete<UserQueryDN>();
+        public static readonly ExecuteSymbol<UserQueryEntity> Save = OperationSymbol.Execute<UserQueryEntity>();
+        public static readonly DeleteSymbol<UserQueryEntity> Delete = OperationSymbol.Delete<UserQueryEntity>();
     }
 
 
     [Serializable]
-    public class QueryOrderDN : EmbeddedEntity
+    public class QueryOrderEntity : EmbeddedEntity
     {
         [NotNullable]
-        QueryTokenDN token;
+        QueryTokenEntity token;
         [NotNullValidator]
-        public QueryTokenDN Token
+        public QueryTokenEntity Token
         {
             get { return token; }
             set { Set(ref token, value); }
@@ -257,7 +257,7 @@ namespace Signum.Entities.UserQueries
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenDN(element.Attribute("Token").Value);
+            Token = new QueryTokenEntity(element.Attribute("Token").Value);
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
         }
 
@@ -278,17 +278,17 @@ namespace Signum.Entities.UserQueries
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(token, orderType);
+            return "{0} {1}".FormatWith(token, orderType);
         }
     }
 
     [Serializable]
-    public class QueryColumnDN : EmbeddedEntity
+    public class QueryColumnEntity : EmbeddedEntity
     {
         [NotNullable]
-        QueryTokenDN token;
+        QueryTokenEntity token;
         [NotNullValidator]
-        public QueryTokenDN Token
+        public QueryTokenEntity Token
         {
             get { return token; }
             set { Set(ref token, value); }
@@ -310,7 +310,7 @@ namespace Signum.Entities.UserQueries
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenDN(element.Attribute("Token").Value);
+            Token = new QueryTokenEntity(element.Attribute("Token").Value);
             DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
         }
 
@@ -331,19 +331,19 @@ namespace Signum.Entities.UserQueries
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(token, displayName);
+            return "{0} {1}".FormatWith(token, displayName);
         }
     }
 
     [Serializable]
-    public class QueryFilterDN : EmbeddedEntity
+    public class QueryFilterEntity : EmbeddedEntity
     {
-        public QueryFilterDN() { }
+        public QueryFilterEntity() { }
 
         [NotNullable]
-        QueryTokenDN token;
+        QueryTokenEntity token;
         [NotNullValidator]
-        public QueryTokenDN Token
+        public QueryTokenEntity Token
         {
             get { return token; }
             set
@@ -391,10 +391,10 @@ namespace Signum.Entities.UserQueries
                     FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
 
                     if (filterType == null)
-                        return UserQueryMessage._0IsNotFilterable.NiceToString().Formato(token);
+                        return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
 
                     if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(operation))
-                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().Formato(operation, filterType);
+                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(operation, filterType);
                 }
 
                 if (pi.Is(() => ValueString))
@@ -417,14 +417,14 @@ namespace Signum.Entities.UserQueries
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenDN(element.Attribute("Token").Value);
+            Token = new QueryTokenEntity(element.Attribute("Token").Value);
             Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
             ValueString = element.Attribute("Value").Value;
         }
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(token, operation, ValueString);
+            return "{0} {1} {2}".FormatWith(token, operation, ValueString);
         }
 
       
@@ -432,9 +432,9 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryUtils
     {
-        public static Func<Lite<Entity>> DefaultRelated = () => UserDN.Current.ToLite();
+        public static Func<Lite<Entity>> DefaultRelated = () => UserEntity.Current.ToLite();
 
-        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, Pagination defaultPagination, bool withoutFilters)
+        public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination, bool withoutFilters)
         {
             var tuple = SmartColumns(request.Columns, qd);
 
@@ -446,22 +446,22 @@ namespace Signum.Entities.UserQueries
 
             bool isDefaultPaginate = defaultMode == mode && defaultElementsPerPage == elementsPerPage;
 
-            return new UserQueryDN
+            return new UserQueryEntity
             {
                 Query = query,
                 WithoutFilters = withoutFilters,
                 Owner = DefaultRelated(),
-                Filters = withoutFilters ? new MList<QueryFilterDN>() : request.Filters.Select(f => new QueryFilterDN
+                Filters = withoutFilters ? new MList<QueryFilterEntity>() : request.Filters.Select(f => new QueryFilterEntity
                 {
-                    Token = new QueryTokenDN(f.Token),
+                    Token = new QueryTokenEntity(f.Token),
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
                 }).ToMList(),
                 ColumnsMode = tuple.Item1,
                 Columns = tuple.Item2,
-                Orders = request.Orders.Select(oo => new QueryOrderDN
+                Orders = request.Orders.Select(oo => new QueryOrderEntity
                 {
-                    Token = new QueryTokenDN(oo.Token),
+                    Token = new QueryTokenEntity(oo.Token),
                     OrderType = oo.OrderType
                 }).ToMList(),
                 PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
@@ -469,7 +469,7 @@ namespace Signum.Entities.UserQueries
             };
         }
 
-        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, QueryDescription qd)
+        public static Tuple<ColumnOptionsMode, MList<QueryColumnEntity>> SmartColumns(List<Column> current, QueryDescription qd)
         {
             var ideal = (from cd in qd.Columns
                          where !cd.IsEntity
@@ -494,22 +494,22 @@ namespace Signum.Entities.UserQueries
                 }
 
                 if (toRemove.Count + current.Count == ideal.Count)
-                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnDN { Token = new QueryTokenDN(c.Token) }).ToMList());
+                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnEntity { Token = new QueryTokenEntity(c.Token) }).ToMList());
             }
             else
             {
                 if (current.Zip(ideal).All(t => t.Item1.Similar(t.Item2)))
-                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN
+                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnEntity
                     {
-                        Token = new QueryTokenDN(c.Token),
+                        Token = new QueryTokenEntity(c.Token),
                         DisplayName = c.DisplayName
                     }).ToMList());
 
             }
 
-            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN
+            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnEntity
             {
-                Token = new QueryTokenDN(c.Token),
+                Token = new QueryTokenEntity(c.Token),
                 DisplayName = c.DisplayName
             }).ToMList());
         }

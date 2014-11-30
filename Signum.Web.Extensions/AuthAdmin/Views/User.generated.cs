@@ -43,7 +43,7 @@ namespace Signum.Web.AuthAdmin.Views
         {
             
             #line 1 "..\..\AuthAdmin\Views\User.cshtml"
- using (var e = Html.TypeContext<UserDN>())
+ using (var e = Html.TypeContext<UserEntity>())
 {
     
             

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,12 +26,12 @@ namespace Signum.Windows.Chart
     public static class ChartClient
     {
         public static readonly DependencyProperty UserChartProperty =
-            DependencyProperty.RegisterAttached("UserChart", typeof(UserChartDN), typeof(ChartClient), new UIPropertyMetadata(null));
-        public static UserChartDN GetUserChart(DependencyObject obj)
+            DependencyProperty.RegisterAttached("UserChart", typeof(UserChartEntity), typeof(ChartClient), new UIPropertyMetadata(null));
+        public static UserChartEntity GetUserChart(DependencyObject obj)
         {
-            return (UserChartDN)obj.GetValue(UserChartProperty);
+            return (UserChartEntity)obj.GetValue(UserChartProperty);
         }
-        public static void SetUserChart(DependencyObject obj, UserChartDN value)
+        public static void SetUserChart(DependencyObject obj, UserChartEntity value)
         {
             obj.SetValue(UserChartProperty, value);
         }
@@ -46,17 +46,17 @@ namespace Signum.Windows.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<UserChartDN> { View = e => new UserChart(), Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png") },
-                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript(), Icon = ExtensionsImageLoader.GetImageSortName("chartScript.png") },
-                    new EmbeddedEntitySettings<ChartScriptParameterDN> { View = e => new ChartScriptParameter() }
+                    new EntitySettings<UserChartEntity> { View = e => new UserChart(), Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png") },
+                    new EntitySettings<ChartScriptEntity> { View = e => new ChartScript(), Icon = ExtensionsImageLoader.GetImageSortName("chartScript.png") },
+                    new EmbeddedEntitySettings<ChartScriptParameterEntity> { View = e => new ChartScriptParameter() }
                 });
 
                 UserAssetsClient.Start();
-                UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
+                UserAssetsClient.RegisterExportAssertLink<UserChartEntity>();
 
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
 
-                UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
+                UserChartEntity.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
 
                 string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
 
@@ -70,10 +70,10 @@ namespace Signum.Windows.Chart
 
                 main.SetValue(processName, 9999, RegistryValueKind.DWord);
 
-                Constructor.Register<UserChartDN>(ctx =>
+                Constructor.Register<UserChartEntity>(ctx =>
                 {
                     MessageBox.Show(Window.GetWindow(ctx.Element),
-                        ChartMessage._0CanOnlyBeCreatedFromTheChartWindow.NiceToString().Formato(typeof(UserChartDN).NicePluralName()),
+                        ChartMessage._0CanOnlyBeCreatedFromTheChartWindow.NiceToString().FormatWith(typeof(UserChartEntity).NicePluralName()),
                         ChartMessage.CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
@@ -87,10 +87,10 @@ namespace Signum.Windows.Chart
 
         class UserChartQuickLink : QuickLink
         {
-            Lite<UserChartDN> userChart;
+            Lite<UserChartEntity> userChart;
             Lite<Entity> entity;
 
-            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<Entity> entity)
+            public UserChartQuickLink(Lite<UserChartEntity> userChart, Lite<Entity> entity)
             {
                 this.ToolTip = userChart.ToString();
                 this.Label = userChart.ToString();
@@ -135,7 +135,7 @@ namespace Signum.Windows.Chart
             return miResult;
         }
 
-        internal static void View(UserChartDN uc, Entity currentEntity)
+        internal static void View(UserChartEntity uc, Entity currentEntity)
         {
             if (uc.EntityType != null)
             {
@@ -155,14 +155,14 @@ namespace Signum.Windows.Chart
             OpenChartRequest(new ChartRequest(query), uc, currentEntity);
         }
 
-        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc, Entity currentEntity)
+        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartEntity uc, Entity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => 
             {
                 var crw = new ChartRequestWindow()
                 {
                     DataContext = chartRequest,
-                    Title = ChartMessage.ChartOf0.NiceToString().Formato(QueryUtils.GetNiceName(chartRequest.QueryName)),
+                    Title = ChartMessage.ChartOf0.NiceToString().FormatWith(QueryUtils.GetNiceName(chartRequest.QueryName)),
                     Icon = Finder.Manager.GetFindIcon(chartRequest.QueryName, false) ?? ExtensionsImageLoader.GetImageSortName("chartIcon.png")
                 };
 

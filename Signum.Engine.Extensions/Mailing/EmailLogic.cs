@@ -40,8 +40,8 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
-        static Func<EmailConfigurationDN> getConfiguration;
-        public static EmailConfigurationDN Configuration
+        static Func<EmailConfigurationEntity> getConfiguration;
+        public static EmailConfigurationEntity Configuration
         {
             get { return getConfiguration(); }
         }
@@ -53,7 +53,7 @@ namespace Signum.Engine.Mailing
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationDN> getConfiguration, Func<SmtpConfigurationDN> defaultSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<SmtpConfigurationEntity> defaultSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -61,12 +61,12 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
-                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration ?? (Func<SmtpConfigurationDN>)(() => null)); 
+                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration ?? (Func<SmtpConfigurationEntity>)(() => null)); 
 
-                sb.Include<EmailMessageDN>();
+                sb.Include<EmailMessageEntity>();
 
-                dqm.RegisterQuery(typeof(EmailMessageDN), () =>
-                    from e in Database.Query<EmailMessageDN>()
+                dqm.RegisterQuery(typeof(EmailMessageEntity), () =>
+                    from e in Database.Query<EmailMessageEntity>()
                     select new
                     {
                         Entity = e,
@@ -91,13 +91,13 @@ namespace Signum.Engine.Mailing
                 SenderManager.Send(email);
         }
 
-        public static void SendMail(this Lite<EmailTemplateDN> template, IEntity entity)
+        public static void SendMail(this Lite<EmailTemplateEntity> template, IEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 SenderManager.Send(email);
         }
 
-        public static void SendMail(this EmailMessageDN email)
+        public static void SendMail(this EmailMessageEntity email)
         {
             SenderManager.Send(email);
         }
@@ -108,13 +108,13 @@ namespace Signum.Engine.Mailing
                 SenderManager.SendAsync(email);
         }
 
-        public static void SendMailAsync(this Lite<EmailTemplateDN> template, IEntity entity)
+        public static void SendMailAsync(this Lite<EmailTemplateEntity> template, IEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 SenderManager.SendAsync(email);
         }
 
-        public static void SendMailAsync(this EmailMessageDN email)
+        public static void SendMailAsync(this EmailMessageEntity email)
         {
             SenderManager.SendAsync(email);
         }
@@ -165,9 +165,9 @@ namespace Signum.Engine.Mailing
             };
         }
 
-        public static MList<EmailTemplateMessageDN> CreateMessages(Func<EmailTemplateMessageDN> func)
+        public static MList<EmailTemplateMessageEntity> CreateMessages(Func<EmailTemplateMessageEntity> func)
         {
-            var list = new MList<EmailTemplateMessageDN>();
+            var list = new MList<EmailTemplateMessageEntity>();
             foreach (var ci in CultureInfoLogic.ApplicationCultures)
             {
                 using (CultureInfoUtils.ChangeBothCultures(ci))
@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
             return list;
         }
 
-        public static MailAddress ToMailAddress(this EmailAddressDN address)
+        public static MailAddress ToMailAddress(this EmailAddressEntity address)
         {
             if (address.DisplayName != null)
                 return new MailAddress(address.EmailAddress, address.DisplayName);
@@ -186,10 +186,10 @@ namespace Signum.Engine.Mailing
             return new MailAddress(address.EmailAddress);
         }
 
-        public static MailAddress ToMailAddress(this EmailRecipientDN recipient)
+        public static MailAddress ToMailAddress(this EmailRecipientEntity recipient)
         {
             if(!Configuration.SendEmails)
-                throw new InvalidOperationException("EmailConfigurationDN.SendEmails is set to false");
+                throw new InvalidOperationException("EmailConfigurationEntity.SendEmails is set to false");
 
             if (recipient.DisplayName != null)
                 return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);
@@ -197,12 +197,12 @@ namespace Signum.Engine.Mailing
             return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
         }
 
-        public static ProcessDN SendAll<T>(List<T> emails, string packageName = null)
+        public static ProcessEntity SendAll<T>(List<T> emails, string packageName = null)
                    where T : ISystemEmail
         {
-            EmailPackageDN package = new EmailPackageDN
+            EmailPackageEntity package = new EmailPackageEntity
             {
-                Name = packageName ?? "Package of {0} created on {0}".Formato(typeof(T).TypeName(), TimeZoneManager.Now)
+                Name = packageName ?? "Package of {0} created on {0}".FormatWith(typeof(T).TypeName(), TimeZoneManager.Now)
             }.Save();
 
             var packLite = package.ToLite();
@@ -220,7 +220,7 @@ namespace Signum.Engine.Mailing
             return process;
         }
 
-        class EmailGraph : Graph<EmailMessageDN, EmailMessageState>
+        class EmailGraph : Graph<EmailMessageEntity, EmailMessageState>
         {
             public static void Register()
             {            
@@ -229,20 +229,20 @@ namespace Signum.Engine.Mailing
                 new Construct(EmailMessageOperation.CreateMail)
                 {
                     ToState = EmailMessageState.Created,
-                    Construct = _ => new EmailMessageDN
+                    Construct = _ => new EmailMessageEntity
                     {
                         State = EmailMessageState.Created,
                     }
                 }.Register();
 
-                new ConstructFrom<EmailTemplateDN>(EmailMessageOperation.CreateMailFromTemplate)
+                new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateMailFromTemplate)
                 {
                     AllowsNew = false,
                     ToState = EmailMessageState.Created,
                     CanConstruct = et => 
                     {
                         if (et.SystemEmail != null)
-                            return "Cannot send email because {0} is a SystemEmail ({1})".Formato(et, et.SystemEmail);
+                            return "Cannot send email because {0} is a SystemEmail ({1})".FormatWith(et, et.SystemEmail);
 
                         if (et.SendDifferentMessages)
                             return "Cannot create email becaue {0} has SendDifferentMessages set";
@@ -258,7 +258,7 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMessageOperation.Send)
                 {
-                    CanExecute = m => m.State == EmailMessageState.Created ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().Formato(m.State.NiceToString()),
+                    CanExecute = m => m.State == EmailMessageState.Created ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().FormatWith(m.State.NiceToString()),
                     AllowsNew = true,
                     Lite = false,
                     FromStates = { EmailMessageState.Created },
@@ -266,11 +266,11 @@ namespace Signum.Engine.Mailing
                     Execute = (m, _) => EmailLogic.SenderManager.Send(m)
                 }.Register();
 
-                new ConstructFrom<EmailMessageDN>(EmailMessageOperation.ReSend)
+                new ConstructFrom<EmailMessageEntity>(EmailMessageOperation.ReSend)
                 {
                     AllowsNew = false,
                     ToState = EmailMessageState.Created,
-                    Construct = (m, _) => new EmailMessageDN
+                    Construct = (m, _) => new EmailMessageEntity
                     {
                         From = m.From.Clone(),
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
@@ -285,7 +285,7 @@ namespace Signum.Engine.Mailing
                     }
                 }.Register();
 
-                new Graph<EmailMessageDN>.Delete(EmailMessageOperation.Delete)
+                new Graph<EmailMessageEntity>.Delete(EmailMessageOperation.Delete)
                 {
                     Delete = (m, _) => m.Delete()
                 }.Register();
@@ -300,9 +300,9 @@ namespace Signum.Engine.Mailing
 
         }
 
-        public static Func<EmailMessageDN, MailMessage> CustomCreateMailMessage;
+        public static Func<EmailMessageEntity, MailMessage> CustomCreateMailMessage;
 
-        public MailMessage CreateMailMessage(EmailMessageDN email)
+        public MailMessage CreateMailMessage(EmailMessageEntity email)
         {
             MailMessage message = new MailMessage()
             {
@@ -335,12 +335,12 @@ namespace Signum.Engine.Mailing
             return message;
         }
 
-        public virtual void Send(EmailMessageDN email)
+        public virtual void Send(EmailMessageEntity email)
         {
             if (!EmailLogic.Configuration.SendEmails)
                 return;
 
-            using (OperationLogic.AllowSave<EmailMessageDN>())
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
             {
                 try
                 {
@@ -379,7 +379,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        SmtpClient CreateSmtpClient(EmailMessageDN email)
+        SmtpClient CreateSmtpClient(EmailMessageEntity email)
         {
             if (email.SmtpConfiguration != null)
             {
@@ -403,9 +403,9 @@ namespace Signum.Engine.Mailing
             return EmailLogic.SafeSmtpClient();
         }
 
-        public virtual void SendAsync(EmailMessageDN email)
+        public virtual void SendAsync(EmailMessageEntity email)
         {
-            using (OperationLogic.AllowSave<EmailMessageDN>())
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
             {
                 try
                 {

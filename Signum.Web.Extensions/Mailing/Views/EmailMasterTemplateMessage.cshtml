@@ -6,7 +6,7 @@
 @using Signum.Web
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.Mailing
-@using (var ec = Html.TypeContext<EmailMasterTemplateMessageDN>())
+@using (var ec = Html.TypeContext<EmailMasterTemplateMessageEntity>())
 {
     <div class="sf-email-template-message">
         <input type="hidden" class="sf-tab-title" value="@(ec.Value.CultureInfo.TryToString())" />

@@ -10,12 +10,12 @@ using System.Reflection;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class RuleDN<R, A> : Entity
+    public class RuleEntity<R, A> : Entity
         where R: Entity
     {
-        Lite<RoleDN> role;
+        Lite<RoleEntity> role;
         [NotNullValidator]
-        public Lite<RoleDN> Role
+        public Lite<RoleEntity> Role
         {
             get { return role; }
             set { Set(ref role, value); }
@@ -39,7 +39,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return "{0} for {1} <- {2}".Formato(resource, role, allowed);
+            return "{0} for {1} <- {2}".FormatWith(resource, role, allowed);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -49,23 +49,23 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleQueryDN : RuleDN<QueryDN, bool> { }
+    public class RuleQueryEntity : RuleEntity<QueryEntity, bool> { }
 
     [Serializable]
-    public class RulePermissionDN : RuleDN<PermissionSymbol, bool> { }
+    public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : RuleDN<OperationSymbol, OperationAllowed> { }
+    public class RuleOperationEntity : RuleEntity<OperationSymbol, OperationAllowed> { }
 
     [Serializable]
-    public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
+    public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }
    
     [Serializable]
-    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
+    public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed> 
     {
         [ValidateChildProperty, NotNullable, PreserveOrder]
-        MList<RuleTypeConditionDN> conditions = new MList<RuleTypeConditionDN>();
-        public MList<RuleTypeConditionDN> Conditions
+        MList<RuleTypeConditionEntity> conditions = new MList<RuleTypeConditionEntity>();
+        public MList<RuleTypeConditionEntity> Conditions
         {
             get { return conditions; }
             set { Set(ref conditions, value); }
@@ -73,7 +73,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN> 
+    public class RuleTypeConditionEntity : EmbeddedEntity, IEquatable<RuleTypeConditionEntity> 
     {
         TypeConditionSymbol condition;
         [NotNullValidator]
@@ -90,7 +90,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref allowed, value); }
         }
 
-        public bool Equals(RuleTypeConditionDN other)
+        public bool Equals(RuleTypeConditionEntity other)
         {
             return this.condition.Equals(other.condition) 
                 && this.allowed == other.allowed; 
@@ -98,7 +98,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return "{0} ({1})".Formato(condition, allowed);
+            return "{0} ({1})".FormatWith(condition, allowed);
         }
     }
 
@@ -192,7 +192,7 @@ namespace Signum.Entities.Authorization
             if (db == ui)
                 return db.ToString();
 
-            return "{0},{1}".Formato(db, ui); 
+            return "{0},{1}".FormatWith(db, ui); 
         }
 
         public static PropertyAllowed ToPropertyAllowed(this TypeAllowedBasic ta)

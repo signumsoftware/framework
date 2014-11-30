@@ -7,17 +7,17 @@ using Signum.Entities.SMS;
 
 namespace Signum.Engine.SMS
 {
-    public class SMSTemplateGraph : Graph<SMSTemplateDN>
+    public class SMSTemplateGraph : Graph<SMSTemplateEntity>
     {
         public static void Register()
         {
             new Construct(SMSTemplateOperation.Create)
             {
-                Construct = _ => new SMSTemplateDN
+                Construct = _ => new SMSTemplateEntity
                 {
-                    Messages = new Entities.MList<SMSTemplateMessageDN> 
+                    Messages = new Entities.MList<SMSTemplateMessageEntity> 
                     {
-                        new SMSTemplateMessageDN
+                        new SMSTemplateMessageEntity
                         {
                             CultureInfo = SMSLogic.Configuration.DefaultCulture
                         }

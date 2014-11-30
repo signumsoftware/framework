@@ -1,4 +1,4 @@
-@using Signum.Web.AuthAdmin
+﻿@using Signum.Web.AuthAdmin
 @using Signum.Entities.Basics
 @using Signum.Engine.Basics
 @Html.ScriptCss("~/authAdmin/Content/AuthAdmin.css")
@@ -30,7 +30,7 @@
     <table class="sf-auth-rules">
         <thead>
             <tr>
-                <th>@typeof(TypeDN).NiceName()
+                <th>@typeof(TypeEntity).NiceName()
                 </th>
                 <th>@TypeAllowed.Create.NiceToString()
                 </th>
@@ -44,7 +44,7 @@
                 </th>
                 @if (propertyRules)
                 {
-                    <th>@typeof(PropertyRouteDN).NiceName()
+                    <th>@typeof(PropertyRouteEntity).NiceName()
                     </th>
                 }
                 @if (operationRules)
@@ -54,7 +54,7 @@
                 }
                 @if (queryRules)
                 {
-                    <th>@typeof(QueryDN).NiceName()
+                    <th>@typeof(QueryEntity).NiceName()
                     </th>
                 }
             </tr>
@@ -84,11 +84,11 @@
                             style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
                             <span class="glyphicon glyphicon-plus"></span></a>
                         
-                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(ac.Key, ac.NiceToString()), ",")" />
+                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".FormatWith(ac.Key, ac.NiceToString()), ",")" />
                     }
                     <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
-                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
+                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
                 </td>
                 @using (var fallback = item.SubContext(a => a.Allowed.Fallback))
                 {

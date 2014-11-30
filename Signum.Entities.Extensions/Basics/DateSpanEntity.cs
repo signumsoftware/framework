@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class DateSpanDN : EmbeddedEntity
+    public class DateSpanEntity : EmbeddedEntity
     {
         int years;
         public int Years
@@ -36,14 +36,14 @@ namespace Signum.Entities.Basics
             return years == 0 && months == 0 && days == 0;
         }
 
-        static Expression<Func<DateSpanDN, DateTime, DateTime>> AddExpression =
+        static Expression<Func<DateSpanEntity, DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
         public DateTime Add(DateTime date)
         {
             return AddExpression.Evaluate(this, date);
         }
 
-        static Expression<Func<DateSpanDN, DateTime, DateTime>> SubtractExpression =
+        static Expression<Func<DateSpanEntity, DateTime, DateTime>> SubtractExpression =
            (ds, dt) => dt.AddYears(-ds.Years).AddMonths(-ds.Months).AddDays(-ds.Days);
         public DateTime Subtract(DateTime date)
         {
@@ -60,10 +60,10 @@ namespace Signum.Entities.Basics
             return ToDateSpan().ToString();
         }
 
-        public DateSpanDN Clonar()
+        public DateSpanEntity Clonar()
         {
 
-            DateSpanDN ds = new DateSpanDN
+            DateSpanEntity ds = new DateSpanEntity
             {
                 Days = this.days,
                 Months = this.months,

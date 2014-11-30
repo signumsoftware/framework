@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<ClientCertificationFileDN>())
+@using (var sc = Html.TypeContext<ClientCertificationFileEntity>())
 {
     @Html.ValueLine(sc, s => s.CertFileType)
     @Html.ValueLine(sc, s => s.FullFilePath)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +11,9 @@ namespace Signum.Entities.Dashboard
 {
     public class DashboardOmniboxResultGenerator : OmniboxResultGenerator<DashboardOmniboxResult>
     {
-        Func<string, int, IEnumerable<Lite<DashboardDN>>> autoComplete;
+        Func<string, int, IEnumerable<Lite<DashboardEntity>>> autoComplete;
 
-        public DashboardOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<DashboardDN>>> autoComplete)
+        public DashboardOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<DashboardEntity>>> autoComplete)
         {
             this.autoComplete = autoComplete;
         }
@@ -38,7 +38,7 @@ namespace Signum.Entities.Dashboard
                     ToStr = ident,
                     ToStrMatch = match,
                     Distance = match.Distance,
-                    Dashboard = (Lite<DashboardDN>)uq,
+                    Dashboard = (Lite<DashboardEntity>)uq,
                 };
             }
         }
@@ -49,7 +49,7 @@ namespace Signum.Entities.Dashboard
             var userQuery = OmniboxMessage.Omnibox_Dashboard.NiceToString();
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "'{0}'".FormatWith(userQuery), OmniboxResultType = resultType }
             };
         }
     }
@@ -59,11 +59,11 @@ namespace Signum.Entities.Dashboard
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite<DashboardDN> Dashboard { get; set; }
+        public Lite<DashboardEntity> Dashboard { get; set; }
 
         public override string ToString()
         {
-            return "\"{0}\"".Formato(ToStr);
+            return "\"{0}\"".FormatWith(ToStr);
         }
     }
 }

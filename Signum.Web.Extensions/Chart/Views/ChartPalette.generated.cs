@@ -145,7 +145,7 @@ WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n                <th>Co
             #line hidden
             
             #line 28 "..\..\Chart\Views\ChartPalette.cshtml"
-             foreach (TypeContext<ChartColorDN> clc in cpt.TypeElementContext(cp => cp.Colors))
+             foreach (TypeContext<ChartColorEntity> clc in cpt.TypeElementContext(cp => cp.Colors))
             {  
 
             

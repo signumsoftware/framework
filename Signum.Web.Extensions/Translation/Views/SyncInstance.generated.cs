@@ -85,13 +85,13 @@ namespace Signum.Web.Translation.Views
   
     CultureInfo culture = ViewBag.Culture;
 
-    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.Type.NiceName(), culture.DisplayName);
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().FormatWith(Model.Type.NiceName(), culture.DisplayName);
 
     int totalInstances = ViewBag.TotalInstances;
 
     if (Model.Instances.Count < totalInstances)
     {
-        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Instances.Count, totalInstances);
+        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".FormatWith(Model.Instances.Count, totalInstances);
     }
 
 
@@ -131,7 +131,7 @@ WriteLiteral("    <h2>");
 
             
             #line 29 "..\..\Translation\Views\SyncInstance.cshtml"
-   Write(TranslationMessage._0AlreadySynchronized.NiceToString().Formato(@Model.Type.NiceName()));
+   Write(TranslationMessage._0AlreadySynchronized.NiceToString().FormatWith(@Model.Type.NiceName()));
 
             
             #line default

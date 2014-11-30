@@ -53,7 +53,7 @@ namespace Signum.Web.Cultures.Views
         {
             
             #line 3 "..\..\Cultures\Views\CultureInfoView.cshtml"
- using (var tc = Html.TypeContext<CultureInfoDN>())
+ using (var tc = Html.TypeContext<CultureInfoEntity>())
 {
     
             
@@ -68,7 +68,7 @@ Write(Html.ValueLine(tc, t => t.Name, vl =>
             .OrderBy(a=>a.Name)
             .Select(ci => new SelectListItem
             {
-                Text = "{0} :  {1}".Formato(ci.Name, ci.DisplayName),
+                Text = "{0} :  {1}".FormatWith(ci.Name, ci.DisplayName),
                 Value = ci.Name,
                 Selected = object.Equals(tc.Value.Name, ci.Name),
             }).ToList();

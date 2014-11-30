@@ -28,12 +28,12 @@ namespace Signum.Windows.UserQueries
 
         public override Run GetIcon()
         {
-            return new Run("({0})".Formato(typeof(UserQueryDN).NiceName())) { Foreground = Brushes.DodgerBlue };
+            return new Run("({0})".FormatWith(typeof(UserQueryEntity).NiceName())) { Foreground = Brushes.DodgerBlue };
         }
 
         public override void OnSelected(UserQueryOmniboxResult result, Window window)
         {
-            UserQueryDN uq = result.UserQuery.RetrieveAndForget();
+            UserQueryEntity uq = result.UserQuery.RetrieveAndForget();
 
             var query = QueryClient.GetQueryName(uq.Query.Key);
 

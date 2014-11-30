@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Entities.ViewLog
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ViewLogDN : Entity
+    public class ViewLogEntity : Entity
     {
         [NotNullable, ImplementedByAll]
         Lite<Entity> target;
@@ -21,9 +21,9 @@ namespace Signum.Entities.ViewLog
         }
 
         [NotNullable]
-        Lite<IUserDN> user;
+        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserDN> User
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
@@ -52,7 +52,7 @@ namespace Signum.Entities.ViewLog
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<ViewLogDN, double>> DurationExpression =
+        static Expression<Func<ViewLogEntity, double>> DurationExpression =
            sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;
         [Unit("ms")]
         public double Duration

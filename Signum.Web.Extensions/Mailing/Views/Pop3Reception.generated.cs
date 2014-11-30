@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Mailing\Views\Pop3Reception.cshtml"
- using (var sc = Html.TypeContext<Pop3ReceptionDN>())
+ using (var sc = Html.TypeContext<Pop3ReceptionEntity>())
 {
     
             
@@ -134,7 +134,7 @@ Write(Html.EntityLine(sc, s => s.Exception));
             #line hidden
             
             #line 12 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
+Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageEntity))
     {
         FilterOptions = { new FilterOption("Entity.ReceptionInfo.Reception", sc.Value) }
     }, new Context(sc, "emails"), csc => { csc.View = true; }));
@@ -152,7 +152,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
             #line hidden
             
             #line 17 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
+Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionEntity))
     {
         FilterOptions = { new FilterOption("Entity.Pop3Reception", sc.Value) }
     }, new Context(sc, "ex"), csc => { csc.View = true; }));

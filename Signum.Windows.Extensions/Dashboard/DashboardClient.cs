@@ -34,57 +34,57 @@ namespace Signum.Windows.Dashboard
                 TypeClient.Start();
 
                 UserAssetsClient.Start();
-                UserAssetsClient.RegisterExportAssertLink<DashboardDN>();
+                UserAssetsClient.RegisterExportAssertLink<DashboardEntity>();
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DashboardDN>() { View = e => new DashboardEdit(), Icon = ExtensionsImageLoader.GetImageSortName("dashboard.png") },
+                    new EntitySettings<DashboardEntity>() { View = e => new DashboardEdit(), Icon = ExtensionsImageLoader.GetImageSortName("dashboard.png") },
 
-                    new EntitySettings<CountSearchControlPartDN>() { View = e => new CountSearchControlPartEdit() },
-                    new EntitySettings<LinkListPartDN>() { View = e => new LinkListPartEdit() },
-                    new EntitySettings<UserQueryPartDN>() { View = e => new UserQueryPartEdit() },                
-                    new EntitySettings<UserChartPartDN>() { View = e => new UserChartPartEdit() }
+                    new EntitySettings<CountSearchControlPartEntity>() { View = e => new CountSearchControlPartEdit() },
+                    new EntitySettings<LinkListPartEntity>() { View = e => new LinkListPartEdit() },
+                    new EntitySettings<UserQueryPartEntity>() { View = e => new UserQueryPartEdit() },                
+                    new EntitySettings<UserChartPartEntity>() { View = e => new UserChartPartEdit() }
                 });
 
-                PartViews.Add(typeof(UserQueryPartDN), new PartView
+                PartViews.Add(typeof(UserQueryPartEntity), new PartView
                 {
                     ViewControl = () => new UserQueryPartView(),
-                    IsTitleEnabled = () => Navigator.IsNavigable(typeof(UserQueryDN), true),
+                    IsTitleEnabled = () => Navigator.IsNavigable(typeof(UserQueryEntity), true),
                     OnTitleClick = part =>
                     {
-                        Navigator.Navigate(((UserQueryPartDN)part).UserQuery);
+                        Navigator.Navigate(((UserQueryPartEntity)part).UserQuery);
                     },
                     FullScreen = (elem, part) =>
                     {
-                        UserQueryClient.Explore(((UserQueryPartDN)part).UserQuery, UserAssetsClient.GetCurrentEntity(elem)); 
+                        UserQueryClient.Explore(((UserQueryPartEntity)part).UserQuery, UserAssetsClient.GetCurrentEntity(elem)); 
                     }
                 });
 
-                PartViews.Add(typeof(UserChartPartDN), new PartView
+                PartViews.Add(typeof(UserChartPartEntity), new PartView
                 {
                     ViewControl = () => new UserChartPartView(),
-                    IsTitleEnabled = ()=> Navigator.IsNavigable(typeof(UserChartDN), true),
+                    IsTitleEnabled = ()=> Navigator.IsNavigable(typeof(UserChartEntity), true),
                     OnTitleClick = part =>
                     {
-                        Navigator.Navigate(((UserChartPartDN)part).UserChart);
+                        Navigator.Navigate(((UserChartPartEntity)part).UserChart);
                     },
                     FullScreen = (elem, part) =>
                     {
-                        ChartClient.View(((UserChartPartDN)part).UserChart, UserAssetsClient.GetCurrentEntity(elem));
+                        ChartClient.View(((UserChartPartEntity)part).UserChart, UserAssetsClient.GetCurrentEntity(elem));
                     }
                 });
 
-                PartViews.Add(typeof(CountSearchControlPartDN), new PartView
+                PartViews.Add(typeof(CountSearchControlPartEntity), new PartView
                 {
                     ViewControl = () => new CountSearchControlPartView()
                 });
 
-                PartViews.Add(typeof(LinkListPartDN), new PartView
+                PartViews.Add(typeof(LinkListPartEntity), new PartView
                 {
                     ViewControl = () => new LinkListPartView()
                 });
 
-                LinksClient.RegisterEntityLinks<DashboardDN>((cp, ctrl) => new[]
+                LinksClient.RegisterEntityLinks<DashboardEntity>((cp, ctrl) => new[]
                 {  
                     new QuickLinkAction(DashboardMessage.Preview, () => Navigate(cp, null)) 
                     {
@@ -126,10 +126,10 @@ namespace Signum.Windows.Dashboard
 
         class DashboardQuickLink : QuickLink
         {
-            Lite<DashboardDN> dashboard;
+            Lite<DashboardEntity> dashboard;
             Lite<Entity> entity;
 
-            public DashboardQuickLink(Lite<DashboardDN> dashboard, Lite<Entity> entity)
+            public DashboardQuickLink(Lite<DashboardEntity> dashboard, Lite<Entity> entity)
             {
                 this.ToolTip = dashboard.ToString(); 
                 this.Label = dashboard.ToString();
@@ -150,11 +150,11 @@ namespace Signum.Windows.Dashboard
             }
         }
 
-        public static void Navigate(Lite<DashboardDN> dashboard, Entity currentEntity)
+        public static void Navigate(Lite<DashboardEntity> dashboard, Entity currentEntity)
         {
             Navigator.OpenIndependentWindow(() => new DashboardWindow
             {
-                tbDashboard = { Text = NormalWindowMessage.Loading0.NiceToString().Formato(dashboard.EntityType.NiceName()) }
+                tbDashboard = { Text = NormalWindowMessage.Loading0.NiceToString().FormatWith(dashboard.EntityType.NiceName()) }
             },
             afterShown: win =>
             {
@@ -173,9 +173,9 @@ namespace Signum.Windows.Dashboard
     public class PartView
     {
         public Expression<Func<FrameworkElement>> ViewControl;
-        public Action<IPartDN> OnTitleClick;
+        public Action<IPartEntity> OnTitleClick;
         public Func<bool> IsTitleEnabled;
-        public Action<FrameworkElement, IPartDN> FullScreen; 
+        public Action<FrameworkElement, IPartEntity> FullScreen; 
     }
 
     public class DashboardViewDataTemplateSelector : DataTemplateSelector

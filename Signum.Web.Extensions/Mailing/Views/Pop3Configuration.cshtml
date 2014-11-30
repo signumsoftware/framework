@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<Pop3ConfigurationDN>())
+@using (var sc = Html.TypeContext<Pop3ConfigurationEntity>())
 {
     @Html.ValueLine(sc, s => s.Active)
     @Html.ValueLine(sc, s => s.Port)
@@ -14,7 +14,7 @@
 
     if (!sc.Value.IsNew)
     {
-    @Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
+    @Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionEntity))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
     }, new Context(sc, "receptions"), csc => { csc.View = true; });

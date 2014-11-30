@@ -28,10 +28,10 @@ namespace Signum.Web.Notes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NoteTypeDN>{ PartialViewName = _ => ViewPrefix.Formato("NoteType") },
-                    new EntitySettings<NoteDN> 
+                    new EntitySettings<NoteTypeEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("NoteType") },
+                    new EntitySettings<NoteEntity> 
                     { 
-                        PartialViewName = _ => ViewPrefix.Formato("Note"), 
+                        PartialViewName = _ => ViewPrefix.FormatWith("Note"), 
                         IsCreable = EntityWhen.Never 
                     },
                 });
@@ -58,7 +58,7 @@ namespace Signum.Web.Notes
             if (!Types.Contains(ie.GetType()))
                 return null;
 
-            if (!Finder.IsFindable(typeof(NoteDN)))
+            if (!Finder.IsFindable(typeof(NoteEntity)))
                 return null;
 
             return NoteWidgetHelper.CreateWidget(ctx);

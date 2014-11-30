@@ -15,7 +15,7 @@ namespace Signum.Engine.SMS
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
+            SMSSendPackageEntity package = (SMSSendPackageEntity)executingProcess.Data;
 
             executingProcess.ForEachLine(package.SMSMessages().Where(s => s.State == SMSMessageState.Created),
                 sms => sms.Execute(SMSMessageOperation.Send));
@@ -26,7 +26,7 @@ namespace Signum.Engine.SMS
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            SMSUpdatePackageDN package = (SMSUpdatePackageDN)executingProcess.Data;
+            SMSUpdatePackageEntity package = (SMSUpdatePackageEntity)executingProcess.Data;
 
             executingProcess.ForEachLine(package.SMSMessages().Where(sms => sms.State == SMSMessageState.Sent && !sms.UpdatePackageProcessed), sms =>
             {

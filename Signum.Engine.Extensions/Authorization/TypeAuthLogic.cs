@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,13 +53,13 @@ namespace Signum.Engine.Authorization
 
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToDN.Keys.ToList() : null);
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToEntity.Keys.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
             }
         }
 
         static GenericInvoker<Action<Schema>> miRegister =
-            new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeDN>(s));
+            new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeEntity>(s));
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : Entity
         {
@@ -76,7 +76,7 @@ namespace Signum.Engine.Authorization
             var allowed = GetAllowed(type);
 
             if (allowed.Max(inUserInterface) == TypeAllowedBasic.None)
-                return "Type '{0}' is set to None".Formato(type.NiceName());
+                return "Type '{0}' is set to None".FormatWith(type.NiceName());
 
             return null;
         }
@@ -95,7 +95,7 @@ namespace Signum.Engine.Authorization
                     return;
 
                 if (max < requested)
-                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
 
                 Schema_Saving_Instance(ident);
             }
@@ -107,14 +107,14 @@ namespace Signum.Engine.Authorization
             Type type = ident.GetType();
             TypeAllowedBasic access = GetAllowed(type).MaxDB();
             if (access < TypeAllowedBasic.Read)
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().Formato(type.NicePluralName()));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().FormatWith(type.NicePluralName()));
         }
 
-        public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
+        public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
         {
             var result = new TypeRulePack { Role = roleLite };
 
-            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
+            cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
@@ -144,7 +144,7 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return new TypeAllowedAndConditions(TypeAllowed.Create);
 
-            if (!TypeLogic.TypeToDN.ContainsKey(type))
+            if (!TypeLogic.TypeToEntity.ContainsKey(type))
                 return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             if (EnumEntity.Extract(type) != null)
@@ -154,15 +154,15 @@ namespace Signum.Engine.Authorization
             if (temp.HasValue)
                 return new TypeAllowedAndConditions(temp.Value);
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), type);
+            return cache.GetAllowed(RoleEntity.Current.ToLite(), type);
         }
 
-        public static TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type type)
+        public static TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type type)
         {
             return cache.GetAllowed(role, type);
         }
 
-        public static TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role, Type type)
+        public static TypeAllowedAndConditions GetAllowedBase(Lite<RoleEntity> role, Type type)
         {
             return cache.GetAllowedBase(role, type);
         }
@@ -203,7 +203,7 @@ namespace Signum.Engine.Authorization
 
         TypeAllowedMerger() { }
 
-        public TypeAllowedAndConditions Merge(Type key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, TypeAllowedAndConditions>> baseValues)
+        public TypeAllowedAndConditions Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, TypeAllowedAndConditions>> baseValues)
         {
             if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
                 return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
@@ -243,7 +243,7 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role)
+        public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleEntity> role)
         {
             var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
             return new ConstantFunction<Type, TypeAllowedAndConditions>(taac).GetValue;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -190,7 +190,7 @@ namespace Signum.Windows.Files
             }
             else
                 throw new InvalidOperationException(FileMessage.ViewingHasNotDefaultImplementationFor0.NiceToString()
-                    .Formato(Type));
+                    .FormatWith(Type));
         }
 
         public static void DefaultViewFile(IFile file, Func<IFile, byte[]> resolveBinaryFile = null)
@@ -225,7 +225,7 @@ namespace Signum.Windows.Files
                     File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
             }
             else
-                throw new NotSupportedException(FileMessage.SavingHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
+                throw new NotSupportedException(FileMessage.SavingHasNotDefaultImplementationFor0.NiceToString().FormatWith(Type)); 
         }
 
 
@@ -261,7 +261,7 @@ namespace Signum.Windows.Files
                 return null;
             }
 
-            throw new NotSupportedException(FileMessage.OpeningHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
+            throw new NotSupportedException(FileMessage.OpeningHasNotDefaultImplementationFor0.NiceToString().FormatWith(Type)); 
         }
 
         object CreateFile(string fileName)

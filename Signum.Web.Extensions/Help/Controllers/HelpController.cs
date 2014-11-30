@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -63,7 +63,7 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var entity = this.ExtractEntity<EntityHelpDN>();
+            var entity = this.ExtractEntity<EntityHelpEntity>();
 
             var oldProperties = entity.Properties.ToList();
 
@@ -114,9 +114,9 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var entity = this.ExtractEntity<EntityHelpDN>().ApplyChanges(this).Value;
+            var entity = this.ExtractEntity<EntityHelpEntity>().ApplyChanges(this).Value;
 
-            entity.AssignTranslatedFullEntity(CultureInfoLogic.GetCultureInfoDN(from)); 
+            entity.AssignTranslatedFullEntity(CultureInfoLogic.GetCultureInfoEntity(from)); 
 
             return null;
         }
@@ -138,7 +138,7 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var ctx = this.ExtractEntity<NamespaceHelpDN>().ApplyChanges(this);
+            var ctx = this.ExtractEntity<NamespaceHelpEntity>().ApplyChanges(this);
 
             var entity = ctx.Value;
 
@@ -158,9 +158,9 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var entity = this.ExtractEntity<NamespaceHelpDN>().ApplyChanges(this).Value;
+            var entity = this.ExtractEntity<NamespaceHelpEntity>().ApplyChanges(this).Value;
 
-            entity.AsignTranslatedNamespace(CultureInfoLogic.GetCultureInfoDN(from));
+            entity.AsignTranslatedNamespace(CultureInfoLogic.GetCultureInfoEntity(from));
 
             return null;
         }
@@ -181,7 +181,7 @@ namespace Signum.Web.Help
             HelpPermissions.ViewHelp.AssertAuthorized();
 
             var culture = HelpLogic.GetCulture();
-            AppendixHelp model = new AppendixHelp(culture, new AppendixHelpDN { Culture = culture.ToCultureInfoDN() });
+            AppendixHelp model = new AppendixHelp(culture, new AppendixHelpEntity { Culture = culture.ToCultureInfoEntity() });
 
             return View(HelpClient.ViewAppendixUrl, model);
         }
@@ -191,7 +191,7 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var ctx = this.ExtractEntity<AppendixHelpDN>().ApplyChanges(this);
+            var ctx = this.ExtractEntity<AppendixHelpEntity>().ApplyChanges(this);
 
             var entity = ctx.Value;
 
@@ -220,9 +220,9 @@ namespace Signum.Web.Help
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
 
-            var entity = this.ExtractEntity<AppendixHelpDN>().ApplyChanges(this).Value;
+            var entity = this.ExtractEntity<AppendixHelpEntity>().ApplyChanges(this).Value;
 
-            entity.AsignTranslatedAppendix(CultureInfoLogic.GetCultureInfoDN(from));
+            entity.AsignTranslatedAppendix(CultureInfoLogic.GetCultureInfoEntity(from));
 
             return null;
         }

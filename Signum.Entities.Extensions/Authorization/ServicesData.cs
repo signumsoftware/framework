@@ -57,7 +57,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return "Constant {0}".Formato(Allowed);
+            return "Constant {0}".FormatWith(Allowed);
         }
     }
 
@@ -65,9 +65,9 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
-        Lite<RoleDN> role;
+        Lite<RoleEntity> role;
         [NotNullValidator]
-        public Lite<RoleDN> Role
+        public Lite<RoleEntity> Role
         {
             get { return role; }
             internal set { Set(ref role, value); }
@@ -82,9 +82,9 @@ namespace Signum.Entities.Authorization
         }
 
         [NotNullable]
-        MList<Lite<RoleDN>> subRoles = new MList<Lite<RoleDN>>();
+        MList<Lite<RoleEntity>> subRoles = new MList<Lite<RoleEntity>>();
         [HiddenProperty]
-        public MList<Lite<RoleDN>> SubRoles
+        public MList<Lite<RoleEntity>> SubRoles
         {
             get { return subRoles; }
             set { Set(ref subRoles, value); }
@@ -94,16 +94,16 @@ namespace Signum.Entities.Authorization
         {
             get
             {
-                return AuthAdminMessage._0of1.NiceToString().Formato(
+                return AuthAdminMessage._0of1.NiceToString().FormatWith(
                     mergeStrategy.NiceToString(),
                     subRoles.IsNullOrEmpty() ? "∅  -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
                     subRoles.CommaAnd());
             }
         }
 
-        TypeDN type;
+        TypeEntity type;
         [NotNullValidator]
-        public TypeDN Type
+        public TypeEntity Type
         {
             get { return type; }
             internal set { Set(ref type, value); }
@@ -161,7 +161,7 @@ namespace Signum.Entities.Authorization
 
         public override string ToString()
         {
-            return "{0} -> {1}".Formato(resource, Allowed) + (Overriden ? "(overriden from {0})".Formato(AllowedBase) : "");
+            return "{0} -> {1}".FormatWith(resource, Allowed) + (Overriden ? "(overriden from {0})".FormatWith(AllowedBase) : "");
         }
 
     }
@@ -171,12 +171,12 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(TypeEntity).NiceName(), Role);
         }
     }
 
     [Serializable]
-    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowedAndConditions> 
+    public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions> 
     {
         AuthThumbnail? properties;
         public AuthThumbnail? Properties
@@ -308,7 +308,7 @@ namespace Signum.Entities.Authorization
             if (conditions.IsEmpty())
                 return Fallback.ToString();
 
-            return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.TypeCondition, c.Allowed), " | "));
+            return "{0} | {1}".FormatWith(Fallback, conditions.ToString(c=>"{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
         }
 
         internal bool Exactly(TypeAllowed current)
@@ -371,11 +371,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
         }
     }
     [Serializable]
-    public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteDN, PropertyAllowed>
+    public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, PropertyAllowed>
     {
     }
 
@@ -385,11 +385,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
         }
     }
     [Serializable]
-    public class QueryAllowedRule : AllowedRuleCoerced<QueryDN, bool> { }
+    public class QueryAllowedRule : AllowedRuleCoerced<QueryEntity, bool> { }
 
 
     [Serializable]
@@ -397,7 +397,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationSymbol).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
         }
     }
     [Serializable]
@@ -409,7 +409,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionSymbol).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PermissionSymbol).NiceName(), Role);
         }
     }
     [Serializable]

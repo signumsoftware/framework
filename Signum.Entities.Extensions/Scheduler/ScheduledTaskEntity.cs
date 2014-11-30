@@ -11,21 +11,21 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class ScheduledTaskDN : Entity
+    public class ScheduledTaskEntity : Entity
     {
-        [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
-        IScheduleRuleDN rule;
+        [ImplementedBy(typeof(ScheduleRuleDailyEntity), typeof(ScheduleRuleWeeklyEntity), typeof(ScheduleRuleWeekDaysEntity), typeof(ScheduleRuleMinutelyEntity), typeof(ScheduleRuleHourlyEntity))]
+        IScheduleRuleEntity rule;
         [NotNullValidator]
-        public IScheduleRuleDN Rule
+        public IScheduleRuleEntity Rule
         {
             get { return rule; }
             set { SetToStr(ref rule, value); }
         }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        ITaskDN task;
+        ITaskEntity task;
         [NotNullValidator]
-        public ITaskDN Task
+        public ITaskEntity Task
         {
             get { return task; }
             set { SetToStr(ref task, value); }
@@ -58,7 +58,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
+            return "{0} {1}".FormatWith(task, rule) + (suspended ? " [{0}]".FormatWith(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
 
         public const string None = "none";
@@ -66,8 +66,8 @@ namespace Signum.Entities.Scheduler
 
     public static class ScheduledTaskOperation
     {
-        public static readonly ExecuteSymbol<ScheduledTaskDN> Save = OperationSymbol.Execute<ScheduledTaskDN>();
-        public static readonly DeleteSymbol<ScheduledTaskDN> Delete = OperationSymbol.Delete<ScheduledTaskDN>();
+        public static readonly ExecuteSymbol<ScheduledTaskEntity> Save = OperationSymbol.Execute<ScheduledTaskEntity>();
+        public static readonly DeleteSymbol<ScheduledTaskEntity> Delete = OperationSymbol.Delete<ScheduledTaskEntity>();
     }
 
     public enum TaskMessage
@@ -79,8 +79,8 @@ namespace Signum.Entities.Scheduler
 
     public static class TaskOperation
     {
-        public static readonly ConstructSymbol<IEntity>.From<ITaskDN> ExecuteSync = OperationSymbol.Construct<IEntity>.From<ITaskDN>();
-        public static readonly ExecuteSymbol<ITaskDN> ExecuteAsync = OperationSymbol.Execute<ITaskDN>();
+        public static readonly ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync = OperationSymbol.Construct<IEntity>.From<ITaskEntity>();
+        public static readonly ExecuteSymbol<ITaskEntity> ExecuteAsync = OperationSymbol.Execute<ITaskEntity>();
     }
 
 
@@ -89,7 +89,7 @@ namespace Signum.Entities.Scheduler
         public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
     }
 
-    public interface ITaskDN : IEntity
+    public interface ITaskEntity : IEntity
     {
     }
 }

@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\Dashboard\Views\LinkListPart.cshtml"
- using (var llp = Html.TypeContext<LinkListPartDN>())
+ using (var llp = Html.TypeContext<LinkListPartEntity>())
 {
 
             
@@ -87,7 +87,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 9 "..\..\Dashboard\Views\LinkListPart.cshtml"
-         foreach (LinkElementDN link in Model.Value.Links)
+         foreach (LinkElementEntity link in Model.Value.Links)
         {
 
             

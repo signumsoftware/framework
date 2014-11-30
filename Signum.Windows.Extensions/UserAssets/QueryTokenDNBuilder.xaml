@@ -4,7 +4,7 @@
         xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
         xmlns:swe="clr-namespace:Signum.Windows.Extensions" x:Name="me">
     <StackPanel>
-        <m:QueryTokenBuilder Token="{Binding Token, ElementName=me, Converter={x:Static swe:Converters.TokenToDN}}" SubTokensEvent="QueryTokenBuilder_SubTokensEvent" x:Name="tokenBuilder"/>
+        <m:QueryTokenBuilder Token="{Binding Token, ElementName=me, Converter={x:Static swe:Converters.TokenToEntity}}" SubTokensEvent="QueryTokenBuilder_SubTokensEvent" x:Name="tokenBuilder"/>
         <StackPanel Visibility="{Binding Token, Converter={x:Static m:Converters.NullToVisibility}}">
             <TextBlock Foreground="Red" FontWeight="Black"  Text="{Binding Token.TokenString}" Visibility="{Binding Token.ParseException, Converter={x:Static m:Converters.NullToVisibility}}"/>
         </StackPanel>

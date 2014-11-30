@@ -24,18 +24,18 @@ namespace Signum.Windows.Authorization
     public partial class PropertyRules : Window
     {
         public static readonly DependencyProperty TypeProperty =
-         DependencyProperty.Register("Type", typeof(TypeDN), typeof(PropertyRules), new UIPropertyMetadata(null));
-        public TypeDN Type
+         DependencyProperty.Register("Type", typeof(TypeEntity), typeof(PropertyRules), new UIPropertyMetadata(null));
+        public TypeEntity Type
         {
-            get { return (TypeDN)GetValue(TypeProperty); }
+            get { return (TypeEntity)GetValue(TypeProperty); }
             set { SetValue(TypeProperty, value); }
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(PropertyRules), new UIPropertyMetadata(null));
-        public Lite<RoleDN> Role
+            DependencyProperty.Register("Role", typeof(Lite<RoleEntity>), typeof(PropertyRules), new UIPropertyMetadata(null));
+        public Lite<RoleEntity> Role
         {
-            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleEntity>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
@@ -47,7 +47,7 @@ namespace Signum.Windows.Authorization
 
         void Test_Loaded(object sender, RoutedEventArgs e)
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
             Load();
         }
 

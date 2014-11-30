@@ -153,7 +153,7 @@ WriteLiteral(">\r\n        <thead>\r\n            <tr>\r\n                <th>")
 
             
             #line 33 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(typeof(TypeDN).NiceName());
+               Write(typeof(TypeEntity).NiceName());
 
             
             #line default
@@ -223,7 +223,7 @@ WriteLiteral("                    <th>");
 
             
             #line 47 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(typeof(PropertyRouteDN).NiceName());
+                   Write(typeof(PropertyRouteEntity).NiceName());
 
             
             #line default
@@ -279,7 +279,7 @@ WriteLiteral("                    <th>");
 
             
             #line 57 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(typeof(QueryDN).NiceName());
+                   Write(typeof(QueryEntity).NiceName());
 
             
             #line default
@@ -481,7 +481,7 @@ WriteLiteral(" class=\"sf-auth-available-conditions\"");
 WriteAttribute("value", Tuple.Create(" value=\"", 4150), Tuple.Create("\"", 4255)
             
             #line 87 "..\..\AuthAdmin\Views\Types.cshtml"
-                             , Tuple.Create(Tuple.Create("", 4158), Tuple.Create<System.Object, System.Int32>(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(ac.Key, ac.NiceToString()), ",")
+                             , Tuple.Create(Tuple.Create("", 4158), Tuple.Create<System.Object, System.Int32>(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".FormatWith(ac.Key, ac.NiceToString()), ",")
             
             #line default
             #line hidden
@@ -527,7 +527,7 @@ WriteLiteral("                    ");
 
             
             #line 91 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";")))));
+               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";")))));
 
             
             #line default

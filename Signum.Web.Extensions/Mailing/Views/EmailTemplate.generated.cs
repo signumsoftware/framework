@@ -76,7 +76,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 8 "..\..\Mailing\Views\EmailTemplate.cshtml"
- using (var ec = Html.TypeContext<EmailTemplateDN>())
+ using (var ec = Html.TypeContext<EmailTemplateEntity>())
 {
     ec.LabelColumns = new BsColumn(3);
 

@@ -47,7 +47,7 @@ namespace Signum.Web.Files.Views
         {
             
             #line 2 "..\..\Files\Views\FileRepository.cshtml"
- using (var e = Html.TypeContext<FileRepositoryDN>())
+ using (var e = Html.TypeContext<FileRepositoryEntity>())
 {
     
             
@@ -127,7 +127,7 @@ Write(Html.EntityList(e, f => f.FileTypes));
             #line hidden
             
             #line 11 "..\..\Files\Views\FileRepository.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(FilePathDN), "Repository", e.Value),
+Write(Html.CountSearchControl(new FindOptions(typeof(FilePathEntity), "Repository", e.Value),
     new Context(e, "repos"), csc => { csc.View = true; }));
 
             

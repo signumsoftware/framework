@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Scheduler\Views\HolidayCalendar.cshtml"
- using (var e = Html.TypeContext<HolidayCalendarDN>())
+ using (var e = Html.TypeContext<HolidayCalendarEntity>())
 {
     
             

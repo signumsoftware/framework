@@ -117,7 +117,7 @@ namespace Signum.Engine.Mailing
             internal DeclareNode(ParsedToken token, TemplateWalker walker)
             {
                 if (!token.Variable.HasText())
-                    walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".Formato(token));
+                    walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(token));
 
                 this.Token = token;
             }
@@ -193,7 +193,7 @@ namespace Signum.Engine.Mailing
                     entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
                 if (entityToken.Type.IsAssignableFrom(Route.RootType))
-                    return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
+                    return "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
 
                 return null;
             }
@@ -251,7 +251,7 @@ namespace Signum.Engine.Mailing
                 this.globalKey = globalKey;
                 this.globalFunc = EmailTemplateParser.GlobalVariables.TryGet(globalKey, null);
                 if (globalFunc == null)
-                    walker.AddError(false, "The global key {0} was not found".Formato(globalKey));
+                    walker.AddError(false, "The global key {0} was not found".FormatWith(globalKey));
             }
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -288,7 +288,7 @@ namespace Signum.Engine.Mailing
             {
                 if (systemEmail == null)
                 {
-                    walker.AddError(false, EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().Formato(fieldOrPropertyChain));
+                    walker.AddError(false, EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().FormatWith(fieldOrPropertyChain));
                     return;
                 }
 
@@ -303,7 +303,7 @@ namespace Signum.Engine.Mailing
 
                     if (info == null)
                     {
-                        walker.AddError(false, EmailTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().Formato(type.Name, field));
+                        walker.AddError(false, EmailTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().FormatWith(type.Name, field));
                         members = null;
                         break;
                     }
@@ -374,7 +374,7 @@ namespace Signum.Engine.Mailing
                 {
                     var allMembers = type.GetFields(flags).Cast<MemberInfo>().Concat(type.GetProperties(flags)).ToDictionary(a => a.Name);
                     
-                    string s = replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".Formato(type.FullName), sd);
+                    string s = replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), sd);
 
                     if (s == null)
                         return null;

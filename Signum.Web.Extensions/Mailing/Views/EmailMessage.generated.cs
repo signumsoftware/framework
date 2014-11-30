@@ -76,7 +76,7 @@ WriteLiteral("\r\n\r\n\r\n");
 
             
             #line 9 "..\..\Mailing\Views\EmailMessage.cshtml"
- using (var e = Html.TypeContext<EmailMessageDN>())
+ using (var e = Html.TypeContext<EmailMessageEntity>())
 {
 
             
@@ -104,7 +104,7 @@ WriteLiteral(">\r\n\r\n");
             }
 
 
-            tabs.Tab("sfEmailMessage", typeof(EmailMessageDN).NiceName(), 
+            tabs.Tab("sfEmailMessage", typeof(EmailMessageEntity).NiceName(), 
             
             #line default
             #line hidden

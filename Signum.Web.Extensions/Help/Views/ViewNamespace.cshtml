@@ -21,18 +21,18 @@
 
 <div class="row">
     <div class="col-md-9" id="entityName">
-        @using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
+        @using (TypeContext<NamespaceHelpEntity> nc = new TypeContext<NamespaceHelpEntity>(nh.Entity, null))
         {
             using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
             {
             @Html.HiddenRuntimeInfo(nc)
             @Html.HiddenRuntimeInfo(nc, e => e.Culture)
             @Html.HiddenLine(nc, e => e.Name)
-                if (!Navigator.IsReadOnly(typeof(NamespaceHelpDN)))
+                if (!Navigator.IsReadOnly(typeof(NamespaceHelpEntity)))
                 {
                     Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
                     {
-                        { "options",  Database.Query<NamespaceHelpDN>()
+                        { "options",  Database.Query<NamespaceHelpEntity>()
                         .Where(e => e.Name == nc.Value.Name && e.Culture != nc.Value.Culture)
                         .Select(e => new { e.Culture })
                         .ToList()

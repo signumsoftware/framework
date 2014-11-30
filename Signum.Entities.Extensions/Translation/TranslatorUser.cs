@@ -12,21 +12,21 @@ using Signum.Utilities;
 namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class TranslatorUserDN : Entity
+    public class TranslatorUserEntity : Entity
     {
-        [NotNullable, UniqueIndex, ImplementedBy(typeof(UserDN))]
-        Lite<IUserDN> user;
+        [NotNullable, UniqueIndex, ImplementedBy(typeof(UserEntity))]
+        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserDN> User
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
         }
 
         [NotNullable, PreserveOrder]
-        MList<TranslatorUserCultureDN> cultures = new MList<TranslatorUserCultureDN>();
+        MList<TranslatorUserCultureEntity> cultures = new MList<TranslatorUserCultureEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatorUserCultureDN> Cultures
+        public MList<TranslatorUserCultureEntity> Cultures
         {
             get { return cultures; }
             set { Set(ref cultures, value); }
@@ -39,7 +39,7 @@ namespace Signum.Entities.Translation
                 var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
 
                 if (error.HasText())
-                    return TranslationMessage.RepeatedCultures0.NiceToString().Formato(error); 
+                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error); 
             }
 
             return base.PropertyValidation(pi);
@@ -52,12 +52,12 @@ namespace Signum.Entities.Translation
     }
 
     [Serializable]
-    public class TranslatorUserCultureDN : EmbeddedEntity
+    public class TranslatorUserCultureEntity : EmbeddedEntity
     {
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -85,8 +85,8 @@ namespace Signum.Entities.Translation
 
     public static class TranslatorUserOperation
     {
-        public static readonly ExecuteSymbol<TranslatorUserDN> Save = OperationSymbol.Execute<TranslatorUserDN>();
-        public static readonly DeleteSymbol<TranslatorUserDN> Delete = OperationSymbol.Delete<TranslatorUserDN>();
+        public static readonly ExecuteSymbol<TranslatorUserEntity> Save = OperationSymbol.Execute<TranslatorUserEntity>();
+        public static readonly DeleteSymbol<TranslatorUserEntity> Delete = OperationSymbol.Delete<TranslatorUserEntity>();
     }
 
     public enum TranslationMessage

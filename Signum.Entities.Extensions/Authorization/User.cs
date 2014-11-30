@@ -18,7 +18,7 @@ using Signum.Entities.Translation;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class UserDN : Entity, IEmailOwnerDN, IUserDN
+    public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
         public static Func<string, string> ValidatePassword = p =>
         {
@@ -71,9 +71,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordNeverExpires, value); }
         }
        
-        RoleDN role;
+        RoleEntity role;
         [NotNullValidator]
-        public RoleDN Role
+        public RoleEntity Role
         {
             get { return role; }
             set { Set(ref role, value); }
@@ -87,8 +87,8 @@ namespace Signum.Entities.Authorization
             set { Set(ref email, value); }
         }
 
-        CultureInfoDN cultureInfo;
-        public CultureInfoDN CultureInfo
+        CultureInfoEntity cultureInfo;
+        public CultureInfoEntity CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value); }
@@ -119,19 +119,19 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<UserDN, string>> ToStringExpression = e => e.userName;
+        static readonly Expression<Func<UserEntity, string>> ToStringExpression = e => e.userName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public static UserDN Current
+        public static UserEntity Current
         {
-            get { return (UserDN)UserHolder.Current; }
+            get { return (UserEntity)UserHolder.Current; }
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserDN, EmailOwnerData>> EmailOwnerDataExpression = entity => new EmailOwnerData
+        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = entity => new EmailOwnerData
         {
             Owner = entity.ToLite(),
             CultureInfo = entity.CultureInfo,
@@ -154,12 +154,12 @@ namespace Signum.Entities.Authorization
 
     public static class UserOperation
     {
-        public static readonly ConstructSymbol<UserDN>.Simple Create = OperationSymbol.Construct<UserDN>.Simple();
-        public static readonly ExecuteSymbol<UserDN> SaveNew = OperationSymbol.Execute<UserDN>();
-        public static readonly ExecuteSymbol<UserDN> Save = OperationSymbol.Execute<UserDN>();
-        public static readonly ExecuteSymbol<UserDN> Enable = OperationSymbol.Execute<UserDN>();
-        public static readonly ExecuteSymbol<UserDN> Disable = OperationSymbol.Execute<UserDN>();
-        public static readonly ExecuteSymbol<UserDN> SetPassword = OperationSymbol.Execute<UserDN>();
+        public static readonly ConstructSymbol<UserEntity>.Simple Create = OperationSymbol.Construct<UserEntity>.Simple();
+        public static readonly ExecuteSymbol<UserEntity> SaveNew = OperationSymbol.Execute<UserEntity>();
+        public static readonly ExecuteSymbol<UserEntity> Save = OperationSymbol.Execute<UserEntity>();
+        public static readonly ExecuteSymbol<UserEntity> Enable = OperationSymbol.Execute<UserEntity>();
+        public static readonly ExecuteSymbol<UserEntity> Disable = OperationSymbol.Execute<UserEntity>();
+        public static readonly ExecuteSymbol<UserEntity> SetPassword = OperationSymbol.Execute<UserEntity>();
     }
 
     [Serializable]

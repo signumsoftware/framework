@@ -9,13 +9,13 @@ using Signum.Utilities;
 namespace Signum.Entities.UserAssets
 {
     [Serializable]
-    public sealed class QueryTokenDN : EmbeddedEntity, IEquatable<QueryTokenDN>
+    public sealed class QueryTokenEntity : EmbeddedEntity, IEquatable<QueryTokenEntity>
     {
-        private QueryTokenDN()
+        private QueryTokenEntity()
         {
         }
 
-        public QueryTokenDN(QueryToken token)
+        public QueryTokenEntity(QueryToken token)
         {
             if (token == null)
                 throw new ArgumentNullException("token");
@@ -23,7 +23,7 @@ namespace Signum.Entities.UserAssets
             this.token = token;
         }
 
-        public QueryTokenDN(string tokenString)
+        public QueryTokenEntity(string tokenString)
         {
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
@@ -80,7 +80,7 @@ namespace Signum.Entities.UserAssets
             }
             catch (Exception e)
             {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message), e);
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".FormatWith(context.GetType().Name, context.IdOrNull, context, e.Message), e);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Signum.Entities.UserAssets
         {
             if (pi.Is(() => TokenString) && token == null)
             {
-                return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().Formato(pi.NiceName());
+                return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().FormatWith(pi.NiceName());
             }
 
             return base.PropertyValidation(pi);
@@ -102,7 +102,7 @@ namespace Signum.Entities.UserAssets
             return tokenString;
         }
 
-        public bool Equals(QueryTokenDN other)
+        public bool Equals(QueryTokenEntity other)
         {
             return this.GetTokenString() == other.GetTokenString();
         }
@@ -114,7 +114,7 @@ namespace Signum.Entities.UserAssets
         
         public override bool Equals(object obj)
         {
-            return obj is QueryTokenDN && this.Equals((QueryTokenDN)obj);
+            return obj is QueryTokenEntity && this.Equals((QueryTokenEntity)obj);
         }
 
         public override int GetHashCode()

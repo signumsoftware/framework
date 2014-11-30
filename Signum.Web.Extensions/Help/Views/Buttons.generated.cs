@@ -174,7 +174,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</a></td>\r\n                <td><code>[e:MyEntityDN]</code></td>\r\n            </tr" +
+WriteLiteral("</a></td>\r\n                <td><code>[e:MyEntityEntity]</code></td>\r\n            </tr" +
 ">\r\n            <tr>\r\n                <td><a");
 
 WriteLiteral(" href=\"#\"");
@@ -188,7 +188,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</a></td>\r\n                <td><code>[p:MyEntityDN.Property]</code></td>\r\n       " +
+WriteLiteral("</a></td>\r\n                <td><code>[p:MyEntityEntity.Property]</code></td>\r\n       " +
 "     </tr>\r\n            <tr>\r\n                <td><a");
 
 WriteLiteral(" href=\"#\"");

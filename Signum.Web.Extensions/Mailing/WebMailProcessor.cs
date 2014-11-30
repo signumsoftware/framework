@@ -12,7 +12,7 @@ namespace Signum.Web.Mailing
     public class WebMailOptions
     {
         public bool ForEditing;
-        public IEnumerable<EmailAttachmentDN> Attachments;
+        public IEnumerable<EmailAttachmentEntity> Attachments;
         public string UntrustedImage;
         public UrlHelper Url;
         public bool HasUntrusted;
@@ -37,7 +37,7 @@ namespace Signum.Web.Mailing
                     {
                         options.HasUntrusted = true;
                         prevSource = value;
-                        return "src=\"{0}\"".Formato(options.Url.Content(options.UntrustedImage));
+                        return "src=\"{0}\"".FormatWith(options.Url.Content(options.UntrustedImage));
                     }
 
                     return src.Value;
@@ -66,7 +66,7 @@ namespace Signum.Web.Mailing
             string imageUrl = options.Url.Content(options.UntrustedImage);
 
             if (body.Contains(imageUrl))
-                throw new InvalidOperationException("{0} found when saving the Email".Formato(imageUrl));
+                throw new InvalidOperationException("{0} found when saving the Email".FormatWith(imageUrl));
 
             return body; 
         }
@@ -85,9 +85,9 @@ namespace Signum.Web.Mailing
 
                 string cid = value.After("cid:");
 
-                EmailAttachmentDN only = options.Attachments.Where(a => a.ContentId == cid).Only();
+                EmailAttachmentEntity only = options.Attachments.Where(a => a.ContentId == cid).Only();
                 if (only != null)
-                    return "src=\"{0}\"".Formato(options.Url.Content(only.File.FullWebPath));
+                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath));
 
                 string fileName = cid.TryBefore('@');
                 if (fileName == null)
@@ -95,7 +95,7 @@ namespace Signum.Web.Mailing
 
                 only = options.Attachments.Where(a => a.File.FileName == fileName).Only();
                 if (only != null)
-                    return "src=\"{0}\"".Formato(options.Url.Content(only.File.FullWebPath));
+                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath));
 
                 return src.Value;
             });
@@ -119,7 +119,7 @@ namespace Signum.Web.Mailing
                 if (link == null)
                     return m.Value;
 
-                return "src=\"cid:{0}\"".Formato(link);
+                return "src=\"cid:{0}\"".FormatWith(link);
             });
         }
     }

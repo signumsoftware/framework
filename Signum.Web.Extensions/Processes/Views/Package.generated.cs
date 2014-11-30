@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Processes\Views\Package.cshtml"
- using (var e = Html.TypeContext<PackageDN>())
+ using (var e = Html.TypeContext<PackageEntity>())
 {
     
             
@@ -90,7 +90,7 @@ WriteLiteral("        ");
             
             #line 9 "..\..\Processes\Views\Package.cshtml"
    Write(Html.SearchControl(
-        new FindOptions(typeof(PackageLineDN),"Package",e.Value.ToLite()), e));
+        new FindOptions(typeof(PackageLineEntity),"Package",e.Value.ToLite()), e));
 
             
             #line default

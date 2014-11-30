@@ -97,7 +97,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 12 "..\..\SMS\Views\SMSTemplate.cshtml"
- using (var tc = Html.TypeContext<SMSTemplateDN>())
+ using (var tc = Html.TypeContext<SMSTemplateEntity>())
 {   
     
             

@@ -21,12 +21,12 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertStarted(sb);
 
-                sb.Include<SessionLogDN>();
+                sb.Include<SessionLogEntity>();
 
                 PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
-                dqm.RegisterQuery(typeof(SessionLogDN), () =>
-                    from sl in Database.Query<SessionLogDN>()
+                dqm.RegisterQuery(typeof(SessionLogEntity), () =>
+                    from sl in Database.Query<SessionLogEntity>()
                     select new
                     {
                         Entity = sl,
@@ -41,24 +41,24 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
-            Database.Query<SessionLogDN>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<SessionLogEntity>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
-        static bool RoleTracked(Lite<RoleDN> role)
+        static bool RoleTracked(Lite<RoleEntity> role)
         {
             return SessionLogPermission.TrackSession.IsAuthorized(role);
         }
 
         public static void SessionStart(string userHostAddress, string userAgent)
         {
-            var user = UserDN.Current;
+            var user = UserEntity.Current;
             if (SessionLogLogic.RoleTracked(user.Role.ToLite()))
             {
                 using (AuthLogic.Disable())
                 {
-                    new SessionLogDN
+                    new SessionLogEntity
                     {
                         User = user.ToLite(),
                         SessionStart = TimeZoneManager.Now.TrimToSeconds(),
@@ -69,7 +69,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void SessionEnd(UserDN user, TimeSpan? timeOut)
+        public static void SessionEnd(UserEntity user, TimeSpan? timeOut)
         {
             if (user == null || !RoleTracked(user.Role.ToLite()))
                 return;
@@ -78,7 +78,7 @@ namespace Signum.Engine.Authorization
             {
                 var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
 
-                var rows = Database.Query<SessionLogDN>()
+                var rows = Database.Query<SessionLogEntity>()
                     .Where(sl => sl.User.RefersTo(user))
                     .OrderByDescending(sl => sl.SessionStart)
                     .Take(1)

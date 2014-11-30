@@ -16,9 +16,9 @@ namespace Signum.Web.Help
 {
     public static class HelpTranslator
     {
-        public static void AssignTranslatedFullEntity(this EntityHelpDN entity, CultureInfoDN fromCulture)
+        public static void AssignTranslatedFullEntity(this EntityHelpEntity entity, CultureInfoEntity fromCulture)
         {
-            var fromEntity = Database.Query<EntityHelpDN>().SingleOrDefaultEx(e => e.Type == entity.Type && e.Culture == fromCulture);
+            var fromEntity = Database.Query<EntityHelpEntity>().SingleOrDefaultEx(e => e.Type == entity.Type && e.Culture == fromCulture);
 
             if(fromEntity != null)
             {
@@ -29,12 +29,12 @@ namespace Signum.Web.Help
 
             foreach (var q in queries)
             {
-                var fromQuery = Database.Query<QueryHelpDN>().SingleOrDefaultEx(e => e.Query == q && e.Culture == fromCulture);
+                var fromQuery = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(e => e.Query == q && e.Culture == fromCulture);
 
                 if (fromQuery != null)
                 {
-                    var query = Database.Query<QueryHelpDN>().SingleOrDefaultEx(e => e.Query == q && e.Culture == entity.Culture) ??
-                        new QueryHelpDN { Culture = entity.Culture, Query = q };
+                    var query = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(e => e.Query == q && e.Culture == entity.Culture) ??
+                        new QueryHelpEntity { Culture = entity.Culture, Query = q };
 
                     AsignTranslatedQuery(query, fromQuery);
                 }
@@ -44,12 +44,12 @@ namespace Signum.Web.Help
 
             foreach (var oper in operations)
             {
-                var fromOper = Database.Query<OperationHelpDN>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == fromCulture);
+                var fromOper = Database.Query<OperationHelpEntity>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == fromCulture);
 
                 if (fromOper != null)
                 {
-                    var operation = Database.Query<OperationHelpDN>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == entity.Culture) ??
-                        new OperationHelpDN { Culture = entity.Culture, Operation = oper };
+                    var operation = Database.Query<OperationHelpEntity>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == entity.Culture) ??
+                        new OperationHelpEntity { Culture = entity.Culture, Operation = oper };
 
                     AsignTranslatedOperation(operation, fromOper);
                 }
@@ -65,7 +65,7 @@ namespace Signum.Web.Help
             return dic;
         }
 
-        static void AssignTranslatedEntity(EntityHelpDN entity, EntityHelpDN fromEntity)
+        static void AssignTranslatedEntity(EntityHelpEntity entity, EntityHelpEntity fromEntity)
         {
             HashSet<string> toTranslate = new HashSet<string>();
             if (!entity.Description.HasText() && fromEntity.Description.HasText())
@@ -90,7 +90,7 @@ namespace Signum.Web.Help
 
                 if (prop == null)
                 {
-                    entity.Properties.Add(new PropertyRouteHelpDN
+                    entity.Properties.Add(new PropertyRouteHelpEntity
                     {
                         Property = fromProp.Property,
                         Description = dic.GetOrThrow(fromProp.Description)
@@ -105,7 +105,7 @@ namespace Signum.Web.Help
             entity.Execute(EntityHelpOperation.Save);
         }
 
-        static void AsignTranslatedQuery(QueryHelpDN query, QueryHelpDN fromQuery)
+        static void AsignTranslatedQuery(QueryHelpEntity query, QueryHelpEntity fromQuery)
         {
             HashSet<string> toTranslate = new HashSet<string>();
             if (!query.Description.HasText() && fromQuery.Description.HasText())
@@ -130,7 +130,7 @@ namespace Signum.Web.Help
 
                 if (col == null)
                 {
-                    query.Columns.Add(new QueryColumnHelpDN
+                    query.Columns.Add(new QueryColumnHelpEntity
                     {
                         ColumnName = fromProp.ColumnName,
                         Description = dic.GetOrThrow(fromProp.Description)
@@ -145,7 +145,7 @@ namespace Signum.Web.Help
             query.Execute(QueryHelpOperation.Save);
         }
 
-        static void AsignTranslatedOperation(OperationHelpDN operation, OperationHelpDN fromOperation)
+        static void AsignTranslatedOperation(OperationHelpEntity operation, OperationHelpEntity fromOperation)
         {
             HashSet<string> toTranslate = new HashSet<string>();
             if (!operation.Description.HasText() && fromOperation.Description.HasText())
@@ -159,9 +159,9 @@ namespace Signum.Web.Help
             operation.Execute(OperationHelpOperation.Save);
         }
 
-        public static void AsignTranslatedNamespace(this NamespaceHelpDN @namespace, CultureInfoDN fromCulture)
+        public static void AsignTranslatedNamespace(this NamespaceHelpEntity @namespace, CultureInfoEntity fromCulture)
         {
-            var fromNamespace = Database.Query<NamespaceHelpDN>().SingleEx(n => n.Name == @namespace.Name && n.Culture == fromCulture);
+            var fromNamespace = Database.Query<NamespaceHelpEntity>().SingleEx(n => n.Name == @namespace.Name && n.Culture == fromCulture);
 
             HashSet<string> toTranslate = new HashSet<string>();
             if (!@namespace.Description.HasText() && fromNamespace.Description.HasText())
@@ -174,9 +174,9 @@ namespace Signum.Web.Help
             @namespace.Execute(NamespaceHelpOperation.Save);
         }
 
-        public static void AsignTranslatedAppendix(this AppendixHelpDN appendix, CultureInfoDN fromCulture)
+        public static void AsignTranslatedAppendix(this AppendixHelpEntity appendix, CultureInfoEntity fromCulture)
         {
-            var fromAppendix = Database.Query<AppendixHelpDN>().SingleEx(n => n.UniqueName == appendix.UniqueName && n.Culture == fromCulture);
+            var fromAppendix = Database.Query<AppendixHelpEntity>().SingleEx(n => n.UniqueName == appendix.UniqueName && n.Culture == fromCulture);
 
             HashSet<string> toTranslate = new HashSet<string>();
             if (!appendix.Title.HasText() && fromAppendix.Title.HasText())

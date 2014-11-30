@@ -165,7 +165,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 19 "..\..\Chart\Views\UserChart.cshtml"
-     using (var uc = Html.TypeContext<UserChartDN>())
+     using (var uc = Html.TypeContext<UserChartEntity>())
     {
         uc.LabelColumns = new BsColumn(2);
 
@@ -247,7 +247,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 43 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+   Write(Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryEntity).NiceName(), Finder.IsFindable(queryName) ?
                 new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                 Html.Span(null, niceName, "form-control-static")));
 
@@ -323,7 +323,7 @@ WriteLiteral("            ");
 
             
             #line 60 "..\..\Chart\Views\UserChart.cshtml"
-       Write(UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey));
+       Write(UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey));
 
             
             #line default

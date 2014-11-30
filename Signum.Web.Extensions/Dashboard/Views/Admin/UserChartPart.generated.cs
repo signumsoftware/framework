@@ -73,7 +73,7 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\Dashboard\Views\Admin\UserChartPart.cshtml"
- using(var tc = Html.TypeContext<UserChartPartDN>())
+ using(var tc = Html.TypeContext<UserChartPartEntity>())
 {
     
             

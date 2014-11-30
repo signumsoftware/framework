@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Alert\Views\AlertType.cshtml"
- using (var cp = Html.TypeContext<AlertTypeDN>())
+ using (var cp = Html.TypeContext<AlertTypeEntity>())
 {
     
             

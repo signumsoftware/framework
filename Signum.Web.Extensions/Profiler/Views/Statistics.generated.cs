@@ -74,7 +74,7 @@ WriteLiteral("  ");
 
             
             #line 9 "..\..\Profiler\Views\Statistics.cshtml"
-Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
+Write(Html.Partial(ProfilerClient.ViewPrefix.FormatWith("ProfilerButtons")));
 
             
             #line default
@@ -94,7 +94,7 @@ WriteLiteral("\r\n</div>\r\n\r\n");
 
             
             #line 13 "..\..\Profiler\Views\Statistics.cshtml"
-Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable")));
+Write(Html.Partial(ProfilerClient.ViewPrefix.FormatWith("StatisticsTable")));
 
             
             #line default

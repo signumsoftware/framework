@@ -79,7 +79,7 @@ WriteLiteral("\r\n");
 
             
             #line 8 "..\..\DiffLog\Views\OperationLog.cshtml"
- using (var e = Html.TypeContext<OperationLogDN>())
+ using (var e = Html.TypeContext<OperationLogEntity>())
 {
     e.LabelColumns = new BsColumn(4);
 

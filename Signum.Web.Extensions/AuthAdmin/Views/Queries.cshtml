@@ -1,4 +1,4 @@
-@Html.ScriptCss("~/authAdmin/Content/AuthAdmin.css")
+﻿@Html.ScriptCss("~/authAdmin/Content/AuthAdmin.css")
 @using Signum.Engine.Authorization
 @using (var tc = Html.TypeContext<QueryRulePack>())
 {
@@ -11,7 +11,7 @@
         <thead>
             <tr>
                 <th>
-                    @typeof(Signum.Entities.Basics.QueryDN).NiceName()
+                    @typeof(Signum.Entities.Basics.QueryEntity).NiceName()
                 </th>
                 <th>
                     @AuthAdminMessage.Allow.NiceToString()

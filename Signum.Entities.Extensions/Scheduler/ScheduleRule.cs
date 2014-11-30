@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,14 +9,14 @@ using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
-    public interface IScheduleRuleDN : IEntity
+    public interface IScheduleRuleEntity : IEntity
     {
         DateTime Next(DateTime now);
     }
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
+    public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     {
         public DateTime Next(DateTime now)
         {
@@ -40,7 +40,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return SchedulerMessage.Each0Minutes.NiceToString().Formato(eachMinutes.ToString());
+            return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(eachMinutes.ToString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -48,7 +48,7 @@ namespace Signum.Entities.Scheduler
             if (pi.Is(() => EachMinutes))
             {
                 if ((60 % EachMinutes) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 60);
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 60);
             }
 
             return base.PropertyValidation(pi);
@@ -56,7 +56,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
+    public class ScheduleRuleHourlyEntity : Entity, IScheduleRuleEntity
     {
         public DateTime Next(DateTime now)
         {
@@ -80,7 +80,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return SchedulerMessage.Each0Hours.NiceToString().Formato(eachHours.ToString());
+            return SchedulerMessage.Each0Hours.NiceToString().FormatWith(eachHours.ToString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -88,7 +88,7 @@ namespace Signum.Entities.Scheduler
             if (pi.Is(() => EachHours))
             {
                 if ((24 % EachHours) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 24);
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 24);
             }
 
             return base.PropertyValidation(pi);
@@ -99,7 +99,7 @@ namespace Signum.Entities.Scheduler
 
 
     [Serializable]
-    public abstract class ScheduleRuleDayDN : Entity, IScheduleRuleDN
+    public abstract class ScheduleRuleDayEntity : Entity, IScheduleRuleEntity
     {
         DateTime startingOn = TimeZoneManager.Now.Date;
         public DateTime StartingOn
@@ -127,7 +127,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleDailyDN : ScheduleRuleDayDN
+    public class ScheduleRuleDailyEntity : ScheduleRuleDayEntity
     {
         public override string ToString()
         {
@@ -141,7 +141,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleWeeklyDN : ScheduleRuleDayDN
+    public class ScheduleRuleWeeklyEntity : ScheduleRuleDayEntity
     {
         DayOfWeek dayOfTheWeek;
         public DayOfWeek DayOfTheWeek
@@ -152,7 +152,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(
+            return "{0} {1} {2}".FormatWith(
                 CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)dayOfTheWeek],
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
@@ -171,7 +171,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleWeekDaysDN : ScheduleRuleDayDN
+    public class ScheduleRuleWeekDaysEntity : ScheduleRuleDayEntity
     {
         bool monday;
         public bool Monday
@@ -223,8 +223,8 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref sunday, value); }
         }
 
-        HolidayCalendarDN calendar;
-        public HolidayCalendarDN Calendar
+        HolidayCalendarEntity calendar;
+        public HolidayCalendarEntity Calendar
         {
             get { return calendar; }
             set { Set(ref calendar, value); }
@@ -267,7 +267,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0} {1} {2} {3}".Formato(
+            return "{0} {1} {2} {3}".FormatWith(
                 (monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_M.NiceToString() : "") +
                 (tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_T.NiceToString() : "") +
                 (wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_W.NiceToString() : "") +
@@ -290,17 +290,17 @@ namespace Signum.Entities.Scheduler
         [Description("Each {0} minutes")]
         Each0Minutes,
         [Description("Dialy")]
-        ScheduleRuleDailyDN,
+        ScheduleRuleDailyEntity,
         [Description("Every day at ")]
         ScheduleRuleDailyDN_Everydayat,
         [Description("Starting On")]
         ScheduleRuleDayDN_StartingOn,
         [Description("Each X Hours")]
-        ScheduleRuleHourlyDN,
+        ScheduleRuleHourlyEntity,
         [Description("Each X Minutes")]
-        ScheduleRuleMinutelyDN,
+        ScheduleRuleMinutelyEntity,
         [Description("Days of week")]
-        ScheduleRuleWeekDaysDN,
+        ScheduleRuleWeekDaysEntity,
         [Description("and holidays")]
         ScheduleRuleWeekDaysDN_AndHoliday,
         [Description("at")]
@@ -340,7 +340,7 @@ namespace Signum.Entities.Scheduler
         [Description("Wednesday")]
         ScheduleRuleWeekDaysDN_Wednesday,
         [Description("Weekly")]
-        ScheduleRuleWeeklyDN,
+        ScheduleRuleWeeklyEntity,
         [Description("Day of the week")]
         ScheduleRuleWeeklyDN_DayOfTheWeek
     }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,9 +26,9 @@ namespace Signum.Engine.Excel
             {
                 QueryLogic.Start(sb);
 
-                sb.Include<ExcelReportDN>();
-                dqm.RegisterQuery(typeof(ExcelReportDN), () =>
-                    from s in Database.Query<ExcelReportDN>()
+                sb.Include<ExcelReportEntity>();
+                dqm.RegisterQuery(typeof(ExcelReportEntity), () =>
+                    from s in Database.Query<ExcelReportEntity>()
                     select new
                     {
                         Entity = s,
@@ -38,14 +38,14 @@ namespace Signum.Engine.Excel
                         s.DisplayName,
                     });
 
-                new Graph<ExcelReportDN>.Execute(ExcelReportOperation.Save)
+                new Graph<ExcelReportEntity>.Execute(ExcelReportOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (er, _) => { }
                 }.Register();
 
-                new Graph<ExcelReportDN>.Delete(ExcelReportOperation.Delete)
+                new Graph<ExcelReportEntity>.Delete(ExcelReportOperation.Delete)
                 {
                     Lite = true,
                     Delete = (er, _) => { er.Delete(); }
@@ -53,21 +53,21 @@ namespace Signum.Engine.Excel
             }
         }
 
-        public static List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
+        public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)
         {
-            return (from er in Database.Query<ExcelReportDN>()
+            return (from er in Database.Query<ExcelReportEntity>()
                     where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
                     select er.ToLite()).ToList();
         }
 
-        public static byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
+        public static byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
         {
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
-            ExcelReportDN report = excelReport.RetrieveAndForget();
+            ExcelReportEntity report = excelReport.RetrieveAndForget();
             string extension = Path.GetExtension(report.File.FileName);
             if (extension != ".xlsx")
-                throw new ApplicationException(ExcelMessage.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.NiceToString().Formato(extension));
+                throw new ApplicationException(ExcelMessage.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.NiceToString().FormatWith(extension));
 
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }

@@ -115,7 +115,7 @@ WriteLiteral("                    ");
 
             
             #line 14 "..\..\AuthAdmin\Views\Properties.cshtml"
-               Write(typeof(Signum.Entities.Basics.PropertyRouteDN).NiceName());
+               Write(typeof(Signum.Entities.Basics.PropertyRouteEntity).NiceName());
 
             
             #line default

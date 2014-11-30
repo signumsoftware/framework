@@ -37,14 +37,14 @@ namespace Signum.Windows.Chart
     {
         public static ChartTypeBackgroundConverter ChartTypeBackground = new ChartTypeBackgroundConverter();
 
-        public ObservableCollection<ChartScriptDN> chartScripts = ChartUtils.PackInGroups(Server.Return((IChartServer cs) => cs.GetChartScripts()), 4).SelectMany(a => a).ToObservableCollection();
+        public ObservableCollection<ChartScriptEntity> chartScripts = ChartUtils.PackInGroups(Server.Return((IChartServer cs) => cs.GetChartScripts()), 4).SelectMany(a => a).ToObservableCollection();
 
-        public ObservableCollection<ChartScriptDN> ChartScripts
+        public ObservableCollection<ChartScriptEntity> ChartScripts
         {
             get { return chartScripts; }
         }
 
-        public static IValueConverter ChartTypeToImage = ConverterFactory.New((Lite<FileDN> ct) =>
+        public static IValueConverter ChartTypeToImage = ConverterFactory.New((Lite<FileEntity> ct) =>
         {
             if (ct == null)
                 return null;
@@ -73,10 +73,10 @@ namespace Signum.Windows.Chart
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length != 4 || !(values[0] is ChartScriptDN) || !(values[1] is IChartBase) || !(values[2] is bool) || ((bool)values[2]))
+            if (values.Length != 4 || !(values[0] is ChartScriptEntity) || !(values[1] is IChartBase) || !(values[2] is bool) || ((bool)values[2]))
                 return null;
 
-            if (((ChartScriptDN)values[0]).IsCompatibleWith((IChartBase)values[1]))
+            if (((ChartScriptEntity)values[0]).IsCompatibleWith((IChartBase)values[1]))
                 return superLightBlue;
 
             return null;

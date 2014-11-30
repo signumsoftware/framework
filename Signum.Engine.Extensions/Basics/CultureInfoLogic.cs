@@ -18,7 +18,7 @@ namespace Signum.Engine.Basics
 {
     public static class CultureInfoLogic
     {
-        public static CultureInfo ToCultureInfo(this CultureInfoDN ci)
+        public static CultureInfo ToCultureInfo(this CultureInfoEntity ci)
         {
             if (ci == null)
                 return null;
@@ -33,17 +33,17 @@ namespace Signum.Engine.Basics
 
         public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
 
-        public static ResetLazy<Dictionary<string, CultureInfoDN>> CultureInfoToEntity;
-        public static ResetLazy<Dictionary<CultureInfoDN, CultureInfo>> CultureInfoDNToCultureInfo;
+        public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity;
+        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> CultureInfoDNToCultureInfo;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<CultureInfoDN>();
+                sb.Include<CultureInfoEntity>();
 
-                dqm.RegisterQuery(typeof(CultureInfoDN), () =>
-                    from c in Database.Query<CultureInfoDN>()
+                dqm.RegisterQuery(typeof(CultureInfoEntity), () =>
+                    from c in Database.Query<CultureInfoEntity>()
                     select new
                     {
                         Entity = c,
@@ -53,15 +53,15 @@ namespace Signum.Engine.Basics
                         c.NativeName,
                     });
 
-                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci.Name,
+                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci.Name,
                     ci => ci),
-                    invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
+                    invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci, 
+                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci, 
                     ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
-                    invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
+                    invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-                new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)
+                new Graph<CultureInfoEntity>.Execute(CultureInfoOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -74,14 +74,14 @@ namespace Signum.Engine.Basics
 
         static SqlPreCommand Schema_Synchronizing(Replacements arg)
         {
-            var cis = Database.Query<CultureInfoDN>().ToList();
+            var cis = Database.Query<CultureInfoEntity>().ToList();
 
-            var table = Schema.Current.Table(typeof(CultureInfoDN));
+            var table = Schema.Current.Table(typeof(CultureInfoEntity));
 
             return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
         }
 
-        public static CultureInfoDN ToCultureInfoDN(this CultureInfo ci)
+        public static CultureInfoEntity ToCultureInfoEntity(this CultureInfo ci)
         {
             return CultureInfoToEntity.Value.GetOrThrow(ci.Name);
         }
@@ -94,10 +94,10 @@ namespace Signum.Engine.Basics
             }
         }
 
-        public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoDN, T> func)
+        public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoEntity, T> func)
         {
             if (CultureInfoDNToCultureInfo.Value.Count == 0)
-                throw new InvalidOperationException("No {0} found in the database".Formato(typeof(CultureInfoDN).Name));
+                throw new InvalidOperationException("No {0} found in the database".FormatWith(typeof(CultureInfoEntity).Name));
 
 
             foreach (var c in CultureInfoDNToCultureInfo.Value)
@@ -109,7 +109,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        public static CultureInfoDN GetCultureInfoDN(string cultureName)
+        public static CultureInfoEntity GetCultureInfoEntity(string cultureName)
         {
             return CultureInfoToEntity.Value.GetOrThrow(cultureName);
         }

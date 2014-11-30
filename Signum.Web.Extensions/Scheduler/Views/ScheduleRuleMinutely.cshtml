@@ -1,7 +1,7 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Scheduler
 
-@using (var sr = Html.TypeContext<ScheduleRuleMinutelyDN>())
+@using (var sr = Html.TypeContext<ScheduleRuleMinutelyEntity>())
 {
     @Html.ValueLine(sr, s => s.EachMinutes)
 }

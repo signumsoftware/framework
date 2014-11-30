@@ -32,7 +32,7 @@ namespace Signum.Web.Cache
 
             ViewData[ViewDataKeys.Title] = "Cache Statistics";
 
-            return View(CacheClient.ViewPrefix.Formato("Statistics"), list);
+            return View(CacheClient.ViewPrefix.FormatWith("Statistics"), list);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

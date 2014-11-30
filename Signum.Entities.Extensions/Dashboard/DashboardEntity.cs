@@ -18,15 +18,15 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Dashboard
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class DashboardDN : Entity, IUserAssetEntity
+    public class DashboardEntity : Entity, IUserAssetEntity
     {
-        public DashboardDN()
+        public DashboardEntity()
         {
             RebindEvents();
         }
 
-        Lite<TypeDN> entityType;
-        public Lite<TypeDN> EntityType
+        Lite<TypeEntity> entityType;
+        public Lite<TypeEntity> EntityType
         {
             get { return entityType; }
             set
@@ -74,9 +74,9 @@ namespace Signum.Entities.Dashboard
         }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
-        MList<PanelPartDN> parts = new MList<PanelPartDN>();
+        MList<PanelPartEntity> parts = new MList<PanelPartEntity>();
         [NoRepeatValidator]
-        public MList<PanelPartDN> Parts
+        public MList<PanelPartEntity> Parts
         {
             get { return parts; }
             set { Set(ref parts, value); }
@@ -90,18 +90,18 @@ namespace Signum.Entities.Dashboard
             set { Set(ref guid, value); }
         }
 
-        static Expression<Func<DashboardDN, IPartDN, bool>> ContainsContentExpression =
+        static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
-        public bool ContainsContent(IPartDN content)
+        public bool ContainsContent(IPartEntity content)
         {
             return ContainsContentExpression.Evaluate(this, content);
         }
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
-            if (sender is PanelPartDN)
+            if (sender is PanelPartEntity)
             {
-                PanelPartDN part = (PanelPartDN)sender;
+                PanelPartEntity part = (PanelPartEntity)sender;
 
                 if (pi.Is(() => part.StartColumn))
                 {
@@ -139,7 +139,7 @@ namespace Signum.Entities.Dashboard
         //        int maxRow = rows.Max();
         //        var numbers = 0.To(maxRow);
         //        if (maxRow != rows.Count)
-        //            return DashboardMessage.DashboardDN_Rows0DontHaveAnyParts.NiceToString().Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
+        //            return DashboardMessage.DashboardDN_Rows0DontHaveAnyParts.NiceToString().FormatWith(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
         //    }
 
         //    return base.PropertyValidation(pi);
@@ -159,7 +159,7 @@ namespace Signum.Entities.Dashboard
         bool invalidating = false;
         protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!invalidating && sender is PanelPartDN && (e.PropertyName == "Row" || e.PropertyName == "Column"))
+            if (!invalidating && sender is PanelPartEntity && (e.PropertyName == "Row" || e.PropertyName == "Column"))
             {
                 invalidating = true;
                 foreach (var pp in Parts)
@@ -170,17 +170,17 @@ namespace Signum.Entities.Dashboard
             base.ChildPropertyChanged(sender, e);
         }
 
-        static readonly Expression<Func<DashboardDN, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public DashboardDN Clone()
+        public DashboardEntity Clone()
         {
-            return new DashboardDN
+            return new DashboardEntity
             {
-                DisplayName = "Clone {0}".Formato(this.DisplayName),
+                DisplayName = "Clone {0}".FormatWith(this.DisplayName),
                 DashboardPriority = DashboardPriority,
                 Parts = Parts.Select(p => p.Clone()).ToMList(),
                 Owner = Owner,
@@ -232,10 +232,10 @@ namespace Signum.Entities.Dashboard
 
     public static class DashboardOperation
     {
-        public static readonly ConstructSymbol<DashboardDN>.Simple Create = OperationSymbol.Construct<DashboardDN>.Simple();
-        public static readonly ExecuteSymbol<DashboardDN> Save = OperationSymbol.Execute<DashboardDN>();
-        public static readonly ConstructSymbol<DashboardDN>.From<DashboardDN> Clone = OperationSymbol.Construct<DashboardDN>.From<DashboardDN>();
-        public static readonly DeleteSymbol<DashboardDN> Delete = OperationSymbol.Delete<DashboardDN>();
+        public static readonly ConstructSymbol<DashboardEntity>.Simple Create = OperationSymbol.Construct<DashboardEntity>.Simple();
+        public static readonly ExecuteSymbol<DashboardEntity> Save = OperationSymbol.Execute<DashboardEntity>();
+        public static readonly ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone = OperationSymbol.Construct<DashboardEntity>.From<DashboardEntity>();
+        public static readonly DeleteSymbol<DashboardEntity> Delete = OperationSymbol.Delete<DashboardEntity>();
     }
 
     public enum DashboardMessage
@@ -246,7 +246,7 @@ namespace Signum.Entities.Dashboard
         [Description("Title must be specified for {0}")]
         DashboardDN_TitleMustBeSpecifiedFor0,
         [Description("Counter list")]
-        CountSearchControlPartDN,
+        CountSearchControlPartEntity,
         [Description("Counter")]
         CountUserQueryElement,
         Preview,

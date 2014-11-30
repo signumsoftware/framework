@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:PackageLineDN}"
+    m:Common.TypeContext="{x:Type d:PackageLineEntity}"
     MinWidth="300">
     <StackPanel>
         <m:EntityLine m:Common.Route="Package" />

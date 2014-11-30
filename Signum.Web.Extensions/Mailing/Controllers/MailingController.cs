@@ -35,9 +35,9 @@ namespace Signum.Web.Mailing
         [HttpPost]
         public ActionResult RemoveRecipientsExecute()
         {
-            var deliveries = this.ParseLiteKeys<NewsletterDeliveryDN>();
+            var deliveries = this.ParseLiteKeys<NewsletterDeliveryEntity>();
 
-            var newsletter = this.ExtractEntity<NewsletterDN>();
+            var newsletter = this.ExtractEntity<NewsletterEntity>();
             
             newsletter.Execute(NewsletterOperation.RemoveRecipients, deliveries);
 
@@ -49,7 +49,7 @@ namespace Signum.Web.Mailing
         {
             var entity = Lite.Parse(Request["keys"]).Retrieve();
 
-            var emailMessage = this.ExtractEntity<EmailTemplateDN>()
+            var emailMessage = this.ExtractEntity<EmailTemplateEntity>()
                 .ConstructFrom(EmailMessageOperation.CreateMailFromTemplate, entity);
 
             return this.DefaultConstructResult(emailMessage);

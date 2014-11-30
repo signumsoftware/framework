@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -37,16 +37,16 @@ namespace Signum.Web.Chart
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Chart/Scripts/Chart");
         public static JsModule ModuleScript = new JsModule("Extensions/Signum.Web.Extensions/Chart/Scripts/ChartScript");
 
-        public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
-        public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
-        public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
-        public static string ChartResultsTableView = ViewPrefix.Formato("ChartResultsTable");
-        public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
+        public static string ChartRequestView = ViewPrefix.FormatWith("ChartRequestView");
+        public static string ChartBuilderView = ViewPrefix.FormatWith("ChartBuilder");
+        public static string ChartResultsView = ViewPrefix.FormatWith("ChartResults");
+        public static string ChartResultsTableView = ViewPrefix.FormatWith("ChartResultsTable");
+        public static string ChartScriptCodeView = ViewPrefix.FormatWith("ChartScriptCode");
 
         public static void Start()
         {
-            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileDN)))
-                throw new InvalidOperationException("Call FileClient.Start first with FileDN"); 
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileEntity)))
+                throw new InvalidOperationException("Call FileClient.Start first with FileEntity"); 
 
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -55,10 +55,10 @@ namespace Signum.Web.Chart
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
-                    new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
-                    new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
-                    new EmbeddedEntitySettings<ChartScriptParameterDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptParameter") },
-                    new EntitySettings<ChartScriptDN> { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
+                    new EmbeddedEntitySettings<ChartColumnEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ChartColumn") },
+                    new EmbeddedEntitySettings<ChartScriptColumnEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptColumn") },
+                    new EmbeddedEntitySettings<ChartScriptParameterEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptParameter") },
+                    new EntitySettings<ChartScriptEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ChartScript") },
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
@@ -71,7 +71,7 @@ namespace Signum.Web.Chart
             }
         }
 
-        public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
+        public static EntityMapping<ChartColumnEntity> MappingChartColumn = new EntityMapping<ChartColumnEntity>(true)
             .SetProperty(ct => ct.Token, ctx =>
             {
                 var tokenName = UserAssetsHelper.GetTokenString(ctx);
@@ -82,14 +82,14 @@ namespace Signum.Web.Chart
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Finder.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
-                var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
+                var chartToken = (ChartColumnEntity)ctx.Parent.UntypedValue;
 
                 var token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate /* chartToken.ParentChart.GroupResults*/);
 
                 if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
                     token = token.Parent;
 
-                return new QueryTokenDN(token);
+                return new QueryTokenEntity(token);
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -102,7 +102,7 @@ namespace Signum.Web.Chart
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnDN>(MappingChartColumn));
+            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEntity>(MappingChartColumn));
 
 
         public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
@@ -183,7 +183,7 @@ namespace Signum.Web.Chart
             };
         }
 
-        public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
+        public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptEntity current, ChartScriptEntity script)
         {
             string css = "sf-chart-img";
 
@@ -212,7 +212,7 @@ namespace Signum.Web.Chart
             };
         }
 
-        public static JObject ToChartBuilder(this UserChartDN userChart, UrlHelper url, string prefix)
+        public static JObject ToChartBuilder(this UserChartEntity userChart, UrlHelper url, string prefix)
         {
             return new JObject
             {
@@ -222,12 +222,12 @@ namespace Signum.Web.Chart
             };
         }
 
-        public static string ToJS(this QueryOrderDN order)
+        public static string ToJS(this QueryOrderEntity order)
         {
             return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.Token.FullKey();
         }
 
-        public static void SetupParameter(ValueLine vl, ChartColumnDN column, ChartScriptParameterDN scriptParameter)
+        public static void SetupParameter(ValueLine vl, ChartColumnEntity column, ChartScriptParameterEntity scriptParameter)
         {
             if (scriptParameter == null)
             {

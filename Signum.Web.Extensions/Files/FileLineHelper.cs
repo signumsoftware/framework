@@ -126,8 +126,8 @@ namespace Signum.Web.Files
 
                     HtmlStringBuilder sb = new HtmlStringBuilder();
                     sb.AddLine(helper.HiddenRuntimeInfo(fileLine));
-                    sb.AddLine(MvcHtmlString.Create("<input type='file' id='{0}' name='{0}' class='form-control'/>".Formato(fileLine.Compose(FileLineKeys.File))));
-                    sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
+                    sb.AddLine(MvcHtmlString.Create("<input type='file' id='{0}' name='{0}' class='form-control'/>".FormatWith(fileLine.Compose(FileLineKeys.File))));
+                    sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".FormatWith(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
 
 
                     sbg.AddLine(helper.FormGroup(fileLine,

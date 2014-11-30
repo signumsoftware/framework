@@ -7,11 +7,11 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.SMS
 {
     [Serializable]
-    public class SMSConfigurationDN : EmbeddedEntity
+    public class SMSConfigurationEntity : EmbeddedEntity
     {
-        CultureInfoDN defaultCulture;
+        CultureInfoEntity defaultCulture;
         [NotNullValidator]
-        public CultureInfoDN DefaultCulture
+        public CultureInfoEntity DefaultCulture
         {
             get { return defaultCulture; }
             set { Set(ref defaultCulture, value); }

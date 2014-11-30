@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailPackage.cshtml"
- using (var e = Html.TypeContext<EmailPackageDN>())
+ using (var e = Html.TypeContext<EmailPackageEntity>())
 {
     
             
@@ -76,7 +76,7 @@ WriteLiteral("    ");
 
             
             #line 9 "..\..\Mailing\Views\EmailPackage.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(EmailMessageDN), "Package", e.Value), e));
+Write(Html.SearchControl(new FindOptions(typeof(EmailMessageEntity), "Package", e.Value), e));
 
             
             #line default

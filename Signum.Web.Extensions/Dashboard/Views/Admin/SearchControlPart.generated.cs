@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
- using(var tc = Html.TypeContext<UserQueryPartDN>())
+ using(var tc = Html.TypeContext<UserQueryPartEntity>())
 {
     
             

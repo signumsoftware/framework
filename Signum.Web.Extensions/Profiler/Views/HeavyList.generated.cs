@@ -82,7 +82,7 @@ WriteLiteral("        ");
 
             
             #line 10 "..\..\Profiler\Views\HeavyList.cshtml"
-   Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
+   Write(Html.Partial(ProfilerClient.ViewPrefix.FormatWith("ProfilerButtons")));
 
             
             #line default

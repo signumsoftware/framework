@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,15 +32,15 @@ namespace Signum.Web.AuthAdmin
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(AuthAdminClient));
-                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
+                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserEntity)))
+                    Navigator.EntitySettings<UserEntity>().PartialViewName = _ => ViewPrefix.FormatWith("User");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN> { PartialViewName = _ => ViewPrefix.Formato("User") });
+                    Navigator.AddSetting(new EntitySettings<UserEntity> { PartialViewName = _ => ViewPrefix.FormatWith("User") });
 
-                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role");
+                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleEntity)))
+                    Navigator.EntitySettings<RoleEntity>().PartialViewName = _ => ViewPrefix.FormatWith("Role");
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN> { PartialViewName = _ => ViewPrefix.Formato("Role") });
+                    Navigator.AddSetting(new EntitySettings<RoleEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Role") });
 
                 if (types)
                 {
@@ -48,14 +48,14 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteEntity, PropertyAllowed, string>("properties", a => a.Resource.Path,
                         Mapping.New<PropertyAllowed>(), true);
 
                 if (queries)
                 {
                     QueryClient.Start();
 
-                    Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key,
+                    Register<QueryRulePack, QueryAllowedRule, QueryEntity, bool, string>("queries", a => a.Resource.Key,
                         Mapping.New<bool>(), true);
                 }
 
@@ -67,7 +67,7 @@ namespace Signum.Web.AuthAdmin
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionSymbol, bool, PermissionSymbol>("permissions", a => a.Resource,
                         Mapping.New<bool>(), false);
 
-                LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
+                LinksClient.RegisterEntityLinks<RoleEntity>((role, ctx) =>
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
@@ -101,7 +101,7 @@ namespace Signum.Web.AuthAdmin
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>
             {
-                PartialViewName = e => viewPrefix.Formato(partialViewName),
+                PartialViewName = e => viewPrefix.FormatWith(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey,
@@ -118,10 +118,10 @@ namespace Signum.Web.AuthAdmin
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>
             {
-                PartialViewName = e => viewPrefix.Formato("types"),
+                PartialViewName = e => viewPrefix.FormatWith("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
                     .SetProperty(m => m.Rules,
-                        new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource,
+                        new MListDictionaryMapping<TypeAllowedRule, TypeEntity>(a => a.Resource,
                             new EntityMapping<TypeAllowedRule>(false)
                             .SetProperty(p => p.Allowed, ctx => new TypeAllowedAndConditions(
                                 ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
@@ -161,11 +161,11 @@ namespace Signum.Web.AuthAdmin
 
         static Dictionary<Type, Type> PackToRule = new Dictionary<Type, Type> 
         {
-            {typeof(TypeRulePack),typeof(RuleTypeDN)},
-            {typeof(PropertyRulePack),typeof(RulePropertyDN)},
-            {typeof(QueryRulePack),typeof(RuleQueryDN)},
-            {typeof(OperationRulePack),typeof(RuleOperationDN)},
-            {typeof(PermissionRulePack),typeof(RulePermissionDN)},        
+            {typeof(TypeRulePack),typeof(RuleTypeEntity)},
+            {typeof(PropertyRulePack),typeof(RulePropertyEntity)},
+            {typeof(QueryRulePack),typeof(RuleQueryEntity)},
+            {typeof(OperationRulePack),typeof(RuleOperationEntity)},
+            {typeof(PermissionRulePack),typeof(RulePermissionEntity)},        
         };
     }
 }

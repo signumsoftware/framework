@@ -56,7 +56,7 @@ namespace Signum.Web.Dashboard.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/DashboardView.cshtml")]
-    public partial class DashboardView : System.Web.Mvc.WebViewPage<DashboardDN>
+    public partial class DashboardView : System.Web.Mvc.WebViewPage<DashboardEntity>
     {
         public DashboardView()
         {
@@ -151,7 +151,7 @@ WriteLiteral("                ");
 
             
             #line 25 "..\..\Dashboard\Views\DashboardView.cshtml"
-           Write(Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part));
+           Write(Html.Partial(DashboardClient.ViewPrefix.FormatWith("PanelPartView"), part));
 
             
             #line default

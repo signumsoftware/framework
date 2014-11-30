@@ -47,7 +47,7 @@ namespace Signum.Web.Translation.Views
         {
             
             #line 2 "..\..\Translation\Views\TranslationReplacement.cshtml"
- using (var tc = Html.TypeContext<TranslationReplacementDN>())
+ using (var tc = Html.TypeContext<TranslationReplacementEntity>())
 {
     
             

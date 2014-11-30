@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,10 +19,10 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<PasswordExpiresIntervalDN>();
+                sb.Include<PasswordExpiresIntervalEntity>();
 
-                dqm.RegisterQuery(typeof(PasswordExpiresIntervalDN), ()=>
-                    from e in Database.Query<PasswordExpiresIntervalDN>()
+                dqm.RegisterQuery(typeof(PasswordExpiresIntervalEntity), ()=>
+                    from e in Database.Query<PasswordExpiresIntervalEntity>()
                      select new
                      {
                          Entity = e,
@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
                          e.DaysWarning
                      });
 
-                new Graph<PasswordExpiresIntervalDN>.Execute(PasswordExpiresIntervalOperation.Save)
+                new Graph<PasswordExpiresIntervalEntity>.Execute(PasswordExpiresIntervalOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
                     if (u.PasswordNeverExpires)
                         return;
 
-                    var ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
+                    var ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
                     if (ivp == null)
                         return;
                     
@@ -54,14 +54,14 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.LoginMessage += (() =>
                 {
-                    UserDN u = UserDN.Current;
+                    UserEntity u = UserEntity.Current;
 
                     if (u.PasswordNeverExpires)
                         return null;
 
-                    PasswordExpiresIntervalDN ivp = null;
+                    PasswordExpiresIntervalEntity ivp = null;
                     using (AuthLogic.Disable())
-                        ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
+                        ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
                     
                     if (ivp == null)
                         return null;

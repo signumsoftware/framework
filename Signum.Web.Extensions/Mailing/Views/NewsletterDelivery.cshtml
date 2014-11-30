@@ -1,12 +1,12 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.Processes
 
-@using (var nc = Html.TypeContext<NewsletterDeliveryDN>()) 
+@using (var nc = Html.TypeContext<NewsletterDeliveryEntity>()) 
 {
 	@Html.ValueLine(nc, n => n.Sent)
 	@Html.ValueLine(nc, n => n.SendDate)
 	@Html.EntityLine(nc, n => n.Recipient)
 	@Html.EntityLine(nc, n => n.Newsletter)
 
-    @Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Line", nc.Value), new Context(nc, "Exceptions"))
+    @Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineEntity), "Line", nc.Value), new Context(nc, "Exceptions"))
 }

@@ -55,7 +55,7 @@ namespace Signum.Web.AuthAdmin.Views
         {
             
             #line 3 "..\..\AuthAdmin\Views\PasswordValidInterval.cshtml"
- using (var e = Html.TypeContext<PasswordExpiresIntervalDN>())
+ using (var e = Html.TypeContext<PasswordExpiresIntervalEntity>())
 {
     
             

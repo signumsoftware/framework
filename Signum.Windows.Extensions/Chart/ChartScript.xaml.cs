@@ -25,7 +25,7 @@ namespace Signum.Windows.Chart
     /// </summary>
     public partial class ChartScript : UserControl
     {
-        public static IValueConverter ImageConverter = ConverterFactory.New((Lite<FileDN> file) =>
+        public static IValueConverter ImageConverter = ConverterFactory.New((Lite<FileEntity> file) =>
         {
             if (file == null)
                 return null;
@@ -67,7 +67,7 @@ namespace Signum.Windows.Chart
 
         void oldEntity_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var cs = sender as ChartScriptDN;
+            var cs = sender as ChartScriptEntity;
 
             if (RequestWindow != null && e.PropertyName == "Script")
             {

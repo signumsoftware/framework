@@ -9,12 +9,12 @@ using System.Reflection;
 namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class TranslatedInstanceDN : Entity
+    public class TranslatedInstanceEntity : Entity
     {
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -30,9 +30,9 @@ namespace Signum.Entities.Translation
         }
 
         [NotNullable]
-        PropertyRouteDN propertyRoute;
+        PropertyRouteEntity propertyRoute;
         [NotNullValidator]
-        public PropertyRouteDN PropertyRoute
+        public PropertyRouteEntity PropertyRoute
         {
             get { return propertyRoute; }
             set { Set(ref propertyRoute, value); }
@@ -65,7 +65,7 @@ namespace Signum.Entities.Translation
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(culture, instance, propertyRoute);
+            return "{0} {1} {2}".FormatWith(culture, instance, propertyRoute);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -73,10 +73,10 @@ namespace Signum.Entities.Translation
             if (pi.Is(() => RowId) && PropertyRoute != null)
             {
                 if (RowId == null && PropertyRoute.Path.Contains("/"))
-                    return "{0} should be set for route {1}".Formato(pi.NiceName(), PropertyRoute);
+                    return "{0} should be set for route {1}".FormatWith(pi.NiceName(), PropertyRoute);
 
                 if (RowId != null && !PropertyRoute.Path.Contains("/"))
-                    return "{0} should be null for route {1}".Formato(pi.NiceName(), PropertyRoute);
+                    return "{0} should be null for route {1}".FormatWith(pi.NiceName(), PropertyRoute);
             }
 
             return null;

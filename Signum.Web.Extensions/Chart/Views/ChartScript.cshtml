@@ -4,7 +4,7 @@
 @using Signum.Web.Chart
 @Html.ScriptCss(
     "~/Chart/Content/Chart.css")
-@using (var cc = Html.TypeContext<ChartScriptDN>())
+@using (var cc = Html.TypeContext<ChartScriptEntity>())
 {
     var imageRoute = cc.Compose("ImageIco");
     

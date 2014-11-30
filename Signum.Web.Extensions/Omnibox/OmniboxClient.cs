@@ -89,7 +89,7 @@ namespace Signum.Web.Omnibox
             {
                 return new HtmlTag("span")
                     .InnerHtml(new MvcHtmlString(text))
-                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".Formato(colorName)).ToHtml();
+                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".FormatWith(colorName)).ToHtml();
             }
 
             public MvcHtmlString ColoredGlyphicon(string icon, string colorName)
@@ -97,7 +97,7 @@ namespace Signum.Web.Omnibox
                 return new HtmlTag("span")
                     .Class("glyphicon")
                     .Class(icon)
-                    .Attr("style", "color:{0}".Formato(colorName))
+                    .Attr("style", "color:{0}".FormatWith(colorName))
                     .ToHtml();
             }
         }

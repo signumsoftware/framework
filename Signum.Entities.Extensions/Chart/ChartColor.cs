@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Chart
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
-    public class ChartColorDN : Entity
+    public class ChartColorEntity : Entity
     {
         [ImplementedByAll, UniqueIndex]
         Lite<Entity> related;
@@ -21,9 +21,9 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable]
-        ColorDN color;
+        ColorEntity color;
         //[NotNullValidator]
-        public ColorDN Color
+        public ColorEntity Color
         {
             get { return color; }
             set { SetToStr(ref color, value); }
@@ -32,27 +32,27 @@ namespace Signum.Entities.Chart
         public override string ToString()
         {
             if (related == null)
-                return " -> {0}".Formato(color);
+                return " -> {0}".FormatWith(color);
 
 
-            return "{0} {1} -> {2}".Formato(related.GetType().NiceName(), related.Id, color);
+            return "{0} {1} -> {2}".FormatWith(related.GetType().NiceName(), related.Id, color);
         }
     }
 
     [Serializable]
     public class ChartPaletteModel : ModelEntity
     {
-        TypeDN type;
+        TypeEntity type;
         [NotNullValidator]
-        public TypeDN Type
+        public TypeEntity Type
         {
             get { return type; }
             set { Set(ref type, value); }
         }
 
         [NotNullable]
-        MList<ChartColorDN> colors = new MList<ChartColorDN>();
-        public MList<ChartColorDN> Colors
+        MList<ChartColorEntity> colors = new MList<ChartColorEntity>();
+        public MList<ChartColorEntity> Colors
         {
             get { return colors; }
             set { Set(ref colors, value); }
@@ -60,7 +60,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return ChartMessage.ColorsFor0.NiceToString().Formato(type.CleanName);
+            return ChartMessage.ColorsFor0.NiceToString().FormatWith(type.CleanName);
         }
     }
 }

@@ -4,7 +4,7 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.Chart
 
-@using(var tc = Html.TypeContext<UserChartPartDN>())
+@using(var tc = Html.TypeContext<UserChartPartEntity>())
 {
     @Html.EntityLine(tc, ucp => ucp.UserChart, el => el.Create = false)
     @Html.ValueLine(tc, ucp => ucp.ShowData)

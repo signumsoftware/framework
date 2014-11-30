@@ -23,9 +23,9 @@ namespace Signum.Windows.Dashboard
     /// </summary>
     public partial class DashboardView : UserControl
     {
-        public DashboardDN Current
+        public DashboardEntity Current
         {
-            get { return (DashboardDN)DataContext; }
+            get { return (DashboardEntity)DataContext; }
             set { DataContext = value; }
         }
 
@@ -38,7 +38,7 @@ namespace Signum.Windows.Dashboard
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {
             GroupBox gb = (GroupBox)sender;
-            PanelPartDN pp = (PanelPartDN)gb.DataContext;
+            PanelPartEntity pp = (PanelPartEntity)gb.DataContext;
             PartView pv = DashboardClient.PartViews.GetOrThrow(pp.Content.GetType());
             if (pv.OnTitleClick != null && (pv.IsTitleEnabled == null || pv.IsTitleEnabled()))
             {
@@ -58,14 +58,14 @@ namespace Signum.Windows.Dashboard
         private void TextBlock_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TextBlock tb = (TextBlock)sender;
-            PanelPartDN pp = (PanelPartDN)tb.DataContext;
+            PanelPartEntity pp = (PanelPartEntity)tb.DataContext;
             DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).OnTitleClick(pp.Content);
         }
 
         private void fullScreen_Click(object sender, RoutedEventArgs e)
         {
             Button tb = (Button)sender;
-            PanelPartDN pp = (PanelPartDN)tb.DataContext;
+            PanelPartEntity pp = (PanelPartEntity)tb.DataContext;
             DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).FullScreen(tb, pp.Content);
         }
     }

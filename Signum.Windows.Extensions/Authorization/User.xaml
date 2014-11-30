@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
-    m:Common.TypeContext="{x:Type d:UserDN}" MinWidth="300" m:Common.MinLabelWidth="130">
+    m:Common.TypeContext="{x:Type d:UserEntity}" MinWidth="300" m:Common.MinLabelWidth="130">
     <StackPanel>
         <m:ValueLine m:Common.Route="State"  m:Common.IsReadOnly="True" />
         <m:ValueLine m:Common.Route="UserName"  m:Common.IsReadOnly="False" />

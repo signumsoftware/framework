@@ -18,16 +18,16 @@ namespace Signum.Windows.Isolation
 {
     public class IsolationClient
     {
-        public static Func<Window, Func<Lite<IsolationDN>, string>, Lite<IsolationDN>> SelectIsolationInteractively;
+        public static Func<Window, Func<Lite<IsolationEntity>, string>, Lite<IsolationEntity>> SelectIsolationInteractively;
 
-        public static Func<Lite<IsolationDN>, ImageSource> GetIsolationIcon; 
+        public static Func<Lite<IsolationEntity>, ImageSource> GetIsolationIcon; 
 
         public static void AsserIsStarted()
         {
             Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => IsolationClient.Start(null)));
         }
 
-        public static void Start(Func<Lite<IsolationDN>, ImageSource> getIsolationIcon)
+        public static void Start(Func<Lite<IsolationEntity>, ImageSource> getIsolationIcon)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -36,11 +36,11 @@ namespace Signum.Windows.Isolation
                 WidgetPanel.GetWidgets += (e, c) => e is Entity && MixinDeclarations.IsDeclared(e.GetType(), typeof(IsolationMixin)) ?
                     new IsolationWidget().Set(Common.OrderProperty, -1.0) : null;
 
-                List<Lite<IsolationDN>> isolations = null;
+                List<Lite<IsolationEntity>> isolations = null;
 
                 Server.OnOperation += context =>
                 {
-                    var iso = IsolationDN.CurrentThreadVariable.Value;
+                    var iso = IsolationEntity.CurrentThreadVariable.Value;
 
                     if (iso != null)
                     {
@@ -55,12 +55,12 @@ namespace Signum.Windows.Isolation
                 SelectIsolationInteractively = (owner, isValid) =>
                 {
                     if (isolations == null)
-                        isolations = Server.RetrieveAllLite<IsolationDN>();
+                        isolations = Server.RetrieveAllLite<IsolationEntity>();
 
 
                     var isos = isValid == null ? isolations : isolations.Where(i => isValid(i) == null).ToList();
 
-                    Lite<IsolationDN> result;
+                    Lite<IsolationEntity> result;
                     if (SelectorWindow.ShowDialog(isos, out result,
                         elementIcon: getIsolationIcon,
                         elementText: iso => getIsolationIcon(iso) == null ? iso.ToString() : null,
@@ -80,10 +80,10 @@ namespace Signum.Windows.Isolation
 
         static Action<Window> Async_OnShowInAnotherThread()
         {
-            if (IsolationDN.Default != null)
+            if (IsolationEntity.Default != null)
                 return win => { };
 
-            Lite<IsolationDN> prev = IsolationDN.Current;
+            Lite<IsolationEntity> prev = IsolationEntity.Current;
 
             return win =>
             {
@@ -104,28 +104,28 @@ namespace Signum.Windows.Isolation
                 }
                 else if (prev != null)
                 {
-                    IsolationDN.CurrentThreadVariable.Value = Tuple.Create(prev);
+                    IsolationEntity.CurrentThreadVariable.Value = Tuple.Create(prev);
                 }
             }; 
         }
 
-        private static void SetIsolation(Entity entity, Lite<IsolationDN> prev)
+        private static void SetIsolation(Entity entity, Lite<IsolationEntity> prev)
         {
             if (entity == null)
-                IsolationDN.CurrentThreadVariable.Value = Tuple.Create(prev);
+                IsolationEntity.CurrentThreadVariable.Value = Tuple.Create(prev);
             else
             {
                 var cur = entity.TryIsolation();
-                IsolationDN.CurrentThreadVariable.Value = Tuple.Create(cur);
+                IsolationEntity.CurrentThreadVariable.Value = Tuple.Create(cur);
             }
         }
 
         static void Manager_TaskSearchWindow(SearchWindow sw, object queryName)
         {
-            if (IsolationDN.Default != null)
+            if (IsolationEntity.Default != null)
                 return;
 
-            var iso = IsolationDN.Current;
+            var iso = IsolationEntity.Current;
             
             if (iso == null)
                 return;
@@ -135,9 +135,9 @@ namespace Signum.Windows.Isolation
             tb.Before(new Image { Stretch = Stretch.None, SnapsToDevicePixels = true, Source = GetIsolationIcon(iso) }); 
         }
 
-        public static Dictionary<Type, Func<Lite<IsolationDN>, string>> IsValid = new Dictionary<Type, Func<Lite<IsolationDN>, string>>();
+        public static Dictionary<Type, Func<Lite<IsolationEntity>, string>> IsValid = new Dictionary<Type, Func<Lite<IsolationEntity>, string>>();
 
-        public static void RegisterIsValid<T>(Func<Lite<IsolationDN>, string> isValid) where T : Entity
+        public static void RegisterIsValid<T>(Func<Lite<IsolationEntity>, string> isValid) where T : Entity
         {
             IsValid[typeof(T)] = isValid;
         }
@@ -146,7 +146,7 @@ namespace Signum.Windows.Isolation
         {
             if (MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)))
             {
-                Lite<IsolationDN> isolation = GetIsolation(ctx, IsValid.TryGetC(ctx.Type));
+                Lite<IsolationEntity> isolation = GetIsolation(ctx, IsValid.TryGetC(ctx.Type));
 
                 if (isolation == null)
                 {
@@ -155,17 +155,17 @@ namespace Signum.Windows.Isolation
                 }
                 ctx.Args.Add(isolation);
 
-                return IsolationDN.Override(isolation);
+                return IsolationEntity.Override(isolation);
             }
 
             return null;
         }
 
-        public static Lite<IsolationDN> GetIsolation(ConstructorContext ctx, Func<Lite<IsolationDN>, string> isValid = null)
+        public static Lite<IsolationEntity> GetIsolation(ConstructorContext ctx, Func<Lite<IsolationEntity>, string> isValid = null)
         {
             var element = ctx.Element;
 
-            var result = IsolationDN.Current;
+            var result = IsolationEntity.Current;
 
             if (result == null)
             {

@@ -25,9 +25,9 @@ namespace Signum.Windows.Dashboard
     /// </summary>
     public partial class DashboardWindow : Window
     {
-        public DashboardDN Current
+        public DashboardEntity Current
         {
-            get { return (DashboardDN)DataContext; }
+            get { return (DashboardEntity)DataContext; }
             set { DataContext = value; }
         }
 

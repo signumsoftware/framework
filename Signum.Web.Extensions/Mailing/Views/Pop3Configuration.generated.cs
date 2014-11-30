@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\Pop3Configuration.cshtml"
- using (var sc = Html.TypeContext<Pop3ConfigurationDN>())
+ using (var sc = Html.TypeContext<Pop3ConfigurationEntity>())
 {
     
             
@@ -186,7 +186,7 @@ Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
             #line hidden
             
             #line 17 "..\..\Mailing\Views\Pop3Configuration.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
+Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionEntity))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
     }, new Context(sc, "receptions"), csc => { csc.View = true; }));

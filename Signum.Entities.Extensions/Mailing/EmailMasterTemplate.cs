@@ -13,7 +13,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailMasterTemplateDN : Entity
+    public class EmailMasterTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -25,8 +25,8 @@ namespace Signum.Entities.Mailing
         }
 
         [NotifyCollectionChanged, NotNullable]
-        MList<EmailMasterTemplateMessageDN> messages = new MList<EmailMasterTemplateMessageDN>();
-        public MList<EmailMasterTemplateMessageDN> Messages
+        MList<EmailMasterTemplateMessageEntity> messages = new MList<EmailMasterTemplateMessageEntity>();
+        public MList<EmailMasterTemplateMessageEntity> Messages
         {
             get { return messages; }
             set { Set(ref messages, value); }
@@ -35,7 +35,7 @@ namespace Signum.Entities.Mailing
         [Ignore]
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
-        static Expression<Func<EmailMasterTemplateDN, string>> ToStringExpression = e => e.name;
+        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -60,11 +60,11 @@ namespace Signum.Entities.Mailing
             if (sender == messages)
             {
                 if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageDN>())
+                    foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEntity>())
                         item.MasterTemplate = null;
 
                 if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<EmailMasterTemplateMessageDN>())
+                    foreach (var item in args.NewItems.Cast<EmailMasterTemplateMessageEntity>())
                         item.MasterTemplate = this;
             }
         }
@@ -79,32 +79,32 @@ namespace Signum.Entities.Mailing
 
     public static class EmailMasterTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailMasterTemplateDN>.Simple Create = OperationSymbol.Construct<EmailMasterTemplateDN>.Simple();
-        public static readonly ExecuteSymbol<EmailMasterTemplateDN> Save = OperationSymbol.Execute<EmailMasterTemplateDN>();
+        public static readonly ConstructSymbol<EmailMasterTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailMasterTemplateEntity>.Simple();
+        public static readonly ExecuteSymbol<EmailMasterTemplateEntity> Save = OperationSymbol.Execute<EmailMasterTemplateEntity>();
     }
 
     [Serializable]
-    public class EmailMasterTemplateMessageDN : EmbeddedEntity
+    public class EmailMasterTemplateMessageEntity : EmbeddedEntity
     {
-        private EmailMasterTemplateMessageDN() { }
+        private EmailMasterTemplateMessageEntity() { }
 
-        public EmailMasterTemplateMessageDN(CultureInfoDN culture)
+        public EmailMasterTemplateMessageEntity(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }
 
         [Ignore]
-        internal EmailMasterTemplateDN masterTemplate;
-        public EmailMasterTemplateDN MasterTemplate
+        internal EmailMasterTemplateEntity masterTemplate;
+        public EmailMasterTemplateEntity MasterTemplate
         {
             get { return masterTemplate; }
             set { masterTemplate = value; }
         }
 
         [NotNullable]
-        CultureInfoDN cultureInfo;
+        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoDN CultureInfo
+        public CultureInfoEntity CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value); }
@@ -126,9 +126,9 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Text) && !EmailMasterTemplateDN.MasterTemplateContentRegex.IsMatch(Text))
+            if (pi.Is(() => Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {
-                throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().Formato("@[content]"));
+                throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().FormatWith("@[content]"));
             }
 
             return base.PropertyValidation(pi);

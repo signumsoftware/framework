@@ -47,7 +47,7 @@ namespace Signum.Web.SMS.Views
         {
             
             #line 2 "..\..\SMS\Views\SMSSendPackage.cshtml"
- using (var sc = Html.TypeContext<SMSSendPackageDN>())
+ using (var sc = Html.TypeContext<SMSSendPackageEntity>())
 {
     
             
@@ -69,7 +69,7 @@ Write(Html.ValueLine(sc, s => s.Name));
             #line hidden
             
             #line 5 "..\..\SMS\Views\SMSSendPackage.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(SMSMessageDN))
+Write(Html.SearchControl(new FindOptions(typeof(SMSMessageEntity))
     {
         FilterOptions = { new FilterOption("Entity.SendPackage", sc.Value) { Frozen = true } },
         SearchOnLoad = true
