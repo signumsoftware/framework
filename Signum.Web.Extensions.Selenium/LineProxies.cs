@@ -552,16 +552,7 @@ namespace Signum.Web.Selenium
 
         public bool HasDetailEntity()
         {
-            bool parentVisible = Selenium.IsElementPresent(DetailsDivSelector + ":parent");
-            bool emptyVisible = Selenium.IsElementPresent(DetailsDivSelector + ":empty");
-
-            if (parentVisible != !emptyVisible)
-                throw new InvalidOperationException("{0}_sfDetail is {1} but has {1}".FormatWith(Prefix,
-                    parentVisible ? "has parent" : "has no parent",
-                    emptyVisible ? "empty" : "not empty"));
-
-
-            return parentVisible;
+            return Selenium.IsElementPresent(DetailsDivSelector + ":parent");
         }
 
         public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
