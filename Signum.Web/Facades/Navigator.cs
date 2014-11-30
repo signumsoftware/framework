@@ -319,12 +319,7 @@ namespace Signum.Web
             string resourcesNamespace = null)
         {
             if (areaName == null)
-            {
-                if (!clientType.Name.EndsWith("Client"))
-                    throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
-
-                areaName = clientType.Name.RemoveEnd("Client".Length);
-            }
+                areaName = clientType.Namespace.AfterLast('.');
 
             if (areaName.Start(1) == "/")
                 throw new SystemException("Invalid start character / in {0}".FormatWith(areaName));
