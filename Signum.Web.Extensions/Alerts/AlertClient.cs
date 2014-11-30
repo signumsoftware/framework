@@ -13,9 +13,9 @@ namespace Signum.Web.Alerts
 {
     public static class AlertClient
     {
-        public static string ViewPrefix = "~/Alert/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Alerts/Views/{0}.cshtml";
 
-        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Alert/Scripts/Alerts");
+        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Alerts/Scripts/Alerts");
 
         public static Type[] Types;
 

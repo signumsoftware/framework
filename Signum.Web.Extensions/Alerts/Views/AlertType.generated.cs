@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Note.Views
+namespace Signum.Web.Alerts.Views
 {
     using System;
     using System.Collections.Generic;
@@ -28,8 +28,8 @@ namespace Signum.Web.Note.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Note\Views\NoteType.cshtml"
-    using Signum.Entities.Notes;
+    #line 1 "..\..\Alerts\Views\AlertType.cshtml"
+    using Signum.Entities.Alerts;
     
     #line default
     #line hidden
@@ -37,31 +37,33 @@ namespace Signum.Web.Note.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Note/Views/NoteType.cshtml")]
-    public partial class NoteType : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Alerts/Views/AlertType.cshtml")]
+    public partial class AlertType : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public NoteType()
+        public AlertType()
         {
         }
         public override void Execute()
         {
+WriteLiteral("\r\n");
+
             
-            #line 2 "..\..\Note\Views\NoteType.cshtml"
- using (var cp = Html.TypeContext<NoteTypeEntity>())
+            #line 3 "..\..\Alerts\Views\AlertType.cshtml"
+ using (var cp = Html.TypeContext<AlertTypeEntity>())
 {
     
             
             #line default
             #line hidden
             
-            #line 4 "..\..\Note\Views\NoteType.cshtml"
+            #line 5 "..\..\Alerts\Views\AlertType.cshtml"
 Write(Html.ValueLine(cp, d => d.Name));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\Note\Views\NoteType.cshtml"
+            #line 5 "..\..\Alerts\Views\AlertType.cshtml"
                                     
 }
             

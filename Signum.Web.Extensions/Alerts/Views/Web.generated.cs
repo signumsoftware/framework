@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Note.Views
+namespace Signum.Web.Alerts.Views
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Signum.Web.Note.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Note/Views/Web.config")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Alerts/Views/Web.config")]
     public partial class Web : System.Web.Mvc.WebViewPage<dynamic>
     {
         public Web()
