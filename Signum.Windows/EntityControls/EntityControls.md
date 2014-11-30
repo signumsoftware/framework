@@ -1,4 +1,4 @@
-## Entity Controls
+﻿## Entity Controls
 
 Entity Controls are a family of controls designed to manipulate any property of your entities using **just a simple line of XAML**.
 
@@ -54,7 +54,7 @@ public partial class ValueLine : LineBase
 | single double, decimal | Number |
 | DateTime      | DateTime      |
 | TimeSpan      | TimeSpan      |
-| ColorDN       | Color         |
+| ColorEntity       | Color         |
 | any Enum      | Enum          |
 | string, char  | String      |
 | any object    | String      |
@@ -165,14 +165,14 @@ public Product()
 {
     InitializeComponent();
     this.category.Remove = true;
-    this.category.Create = Navigator.IsCreable(typeof(CategoryDN), isSearch: true); 
+    this.category.Create = Navigator.IsCreable(typeof(CategoryEntity), isSearch: true); 
 }
 
 private object EntityCombo_Creating()
 {
-    return Navigator.View(new CategoryDN
+    return Navigator.View(new CategoryEntity
     {
-        CategoryName = ((ProductDN)this.DataContext).ProductName
+        CategoryName = ((ProductEntity)this.DataContext).ProductName
     });
 }
 ``` 
@@ -196,7 +196,7 @@ Example of using `Finding` to search using a custom `FindOptions`:
 ```C#
 private object EntityLine_Fining()
 {
-   return Finder.Find<CustomerDN>(new FindOptions()
+   return Finder.Find<CustomerEntity>(new FindOptions()
    {
        FilterOptions = { new FilterOption("IsActive", true) { Frozen = true } },
    }); 
@@ -299,7 +299,7 @@ Example:
 private void EntityLine_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
 {
     if (userInteraction)
-        this.OrderEntity.ShipAddress = ((CustomerDN)newValue).Try(a => a.Address.Clone());
+        this.OrderEntity.ShipAddress = ((CustomerEntity)newValue).Try(a => a.Address.Clone());
 }
 ``` 
 
@@ -342,7 +342,7 @@ private IEnumerable<Lite<Entity>> EntityLine_Autocompleting(string term)
 ```
 ```C#
 //And in the server side
-return Database.Query<PersonDN>()
+return Database.Query<PersonEntity>()
     .Where(p => !p.Corrupt)
     .Autocomplete(term, 5);  //Defined in AutoCompleteUtils
 ```
@@ -384,7 +384,7 @@ public partial class EntityCombo : EntityBase
 ```C#
 private IEnumerable<Lite<Entity>> EntityCombo_LoadData(string term)
 {
-   return new List<Lite<CountryDN>>
+   return new List<Lite<CountryEntity>>
    {
       brazil, rusia, india, china
    }; 
@@ -442,7 +442,7 @@ public partial class EntityListBase : EntityBase
  * `T` should be a `Lite<T>` or `ModifiableEntity`. 
  * `EntityBase.Entity` will be used as the selected element if any that makes sense (`EntityList`).
  
-* **EntitiesType:** The `ElementType` of the collection.  For example if `EntityBase.Type` is `MList<CustomerDN>`, `EntitiesType` will be just `CustomerDN`.  All the controls inheriting from `EntityBase `EntityBase.Implementations` will also 
+* **EntitiesType:** The `ElementType` of the collection.  For example if `EntityBase.Type` is `MList<CustomerEntity>`, `EntitiesType` will be just `CustomerEntity`.  All the controls inheriting from `EntityBase `EntityBase.Implementations` will also 
 
 ### Move
 
@@ -463,7 +463,7 @@ In fact, the default implementation is overriden in `EntityListBase` to use `Fin
 ```C#
 private object EntityList_Finding()
 {
-   return Finder.FindMany<CustomerDN>(new FindOptions()
+   return Finder.FindMany<CustomerEntity>(new FindOptions()
    {
        FilterOptions = { new FilterOption("IsActive", true) { Frozen = true } },
    }); 

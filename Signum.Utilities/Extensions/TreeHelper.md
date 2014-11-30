@@ -1,4 +1,4 @@
-# TreeHelper
+﻿# TreeHelper
  
 Since this class is not used very often, the methods are not extension method any more to avoid clutter. This class has also been renamed from `TreeExtensions` to `TreeHelper`.
 
@@ -38,11 +38,11 @@ Example:
 //    Node 7
 ```
 
-> **Note:** If you're curious, below is the function we used to write the text, it uses [anonymous recursion](http://blogs.msdn.com/wesdyer/archive/2007/02/02/anonymous-recursion-in-c.aspx), and many `StringExtensions` like `Formato`, `Add`, `ToString` and `Ident`:
+> **Note:** If you're curious, below is the function we used to write the text, it uses [anonymous recursion](http://blogs.msdn.com/wesdyer/archive/2007/02/02/anonymous-recursion-in-c.aspx), and many `StringExtensions` like `FormatWith`, `Add`, `ToString` and `Ident`:
 
 ```c#
 ¬Func<¬Node<int>, string> toStr = null;
-toStr = node => "Node {0}".Formato(node.Value).Add(node.Childs.ToString(toStr, "\r\n").Indent(2), "\r\n");
+toStr = node => "Node {0}".FormatWith(node.Value).Add(node.Childs.ToString(toStr, "\r\n").Indent(2), "\r\n");
 ¬Console.WriteLine(toStr(parent));
 ```
 

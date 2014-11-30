@@ -1,4 +1,4 @@
-# OperationServer
+﻿# OperationServer
 
 `OperationServer` class contains extension methods over entities to call `IOperationServer` from a Signum.Windows client application simulating the same strongly-typed experience that you could have in the server using [`OperationLogic`](../../Signum.Engine/Operations/Operation.md) class. 
 
@@ -26,7 +26,7 @@ public static class OperationServer
 Example: 
 
 ```C#
-var order = new OrderDN().Execute(OrderOperation.SaveNew);  //Entity is new but works because AllowsNew = true
+var order = new OrderEntity().Execute(OrderOperation.SaveNew);  //Entity is new but works because AllowsNew = true
 oder.Customer = customer
 order = order.Execute(OrderOperation.Save); //Entity is dirty but works because Lite = false
 order = order.ToLite().Execute(OrderOperation.Ship); //Entity will be retrieved from the database
@@ -73,7 +73,7 @@ public static class OperationServer
 Execute: 
 
 ```C#
-OrderDN order = OperationLogic.Construct(OrderOperation.Create); //Type inferred from OrderOperation.Create 
+OrderEntity order = OperationLogic.Construct(OrderOperation.Create); //Type inferred from OrderOperation.Create 
 ```
 
 ### ConstructFrom
@@ -98,7 +98,7 @@ Execute:
 
 ```C#
 //Type inferred from OrderOperation.CreateOrderFromCustomer 
-OrderDN order = customer.ConstructFrom(OrderOperation.CreateOrderFromCustomer); 
+OrderEntity order = customer.ConstructFrom(OrderOperation.CreateOrderFromCustomer); 
 ```
 
 ### ConstructFromMany
@@ -117,5 +117,5 @@ Execute:
 
 ```C#
 //Type inferred from OrderOperation.CreateOrderFromProducts 
-OrderDN order = OperationLogic.ConstructFromMany(OrderOperation.CreateOrderFromProducts, products); 
+OrderEntity order = OperationLogic.ConstructFromMany(OrderOperation.CreateOrderFromProducts, products); 
 ```

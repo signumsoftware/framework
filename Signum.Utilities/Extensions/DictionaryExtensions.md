@@ -1,4 +1,4 @@
-# Signum.Utilities.DictionaryExtensions class
+﻿# Signum.Utilities.DictionaryExtensions class
 
 Some useful extension methods to deal with Dictionaries.
 
@@ -66,8 +66,8 @@ int? blueSatellites = colorToSatelitesSum.TryGetS("Blue");
 ```C#
 Dictionary<Type, Dictionary<string, PropertyInfo>> propertyCache = types.ToDictionary(t=>t, t=>t.GetProperties().ToDictionary(p=>p.PropertyName)); 
 
-PropertyInfo pi = propertyCache.TryGetC(typeof(AnimalDN)).TryGetC("Color");
-//Returns null even if AnimalDN is not in the initial dictionary
+PropertyInfo pi = propertyCache.TryGetC(typeof(AnimalEntity)).TryGetC("Color");
+//Returns null even if AnimalEntity is not in the initial dictionary
 ```
 
 ### GetOrCreate
@@ -231,9 +231,9 @@ This method is specially useful to create efficient database queries that genera
 
 ```C#
 
-Database.Que<PersonDN>().ToDictionary(p => p.Id, p => p.Name); //Retrieves whole persons! SLOW!! 
-Database.Que<PersonDN>().Select(p=>new { p.Id, p.Name }).ToDictionary(p => p.Id, p => p.Name);  //Efficient but to long
-Database.Que<PersonDN>().Select(p=>KVP.Create(p.Id, p.Name)).ToDictionary(); //Efficient and a little bit sorter
+Database.Que<PersonEntity>().ToDictionary(p => p.Id, p => p.Name); //Retrieves whole persons! SLOW!! 
+Database.Que<PersonEntity>().Select(p=>new { p.Id, p.Name }).ToDictionary(p => p.Id, p => p.Name);  //Efficient but to long
+Database.Que<PersonEntity>().Select(p=>KVP.Create(p.Id, p.Name)).ToDictionary(); //Efficient and a little bit sorter
 ```
 
 ### JumpDictionary
@@ -258,7 +258,7 @@ Dictionary<Color, string> dicColors = new Dictionary<Color, string>()
 
 Dictionary<string, List<Planet>> dictionary = planets.GroupToDictionary(a => a.Color);
 
-dicColors.JumpDictionary(dictionary).ToConsole(kvp => "{0} -> {1}".Formato(kvp.Key, kvp.Value.ToString(", "))); 
+dicColors.JumpDictionary(dictionary).ToConsole(kvp => "{0} -> {1}".FormatWith(kvp.Key, kvp.Value.ToString(", "))); 
 
 //Writes: 
 //#FF808080 -> Mercury (Gray)

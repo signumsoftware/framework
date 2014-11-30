@@ -1,4 +1,4 @@
-# RecentDictionary 
+﻿# RecentDictionary 
 `RecentDictionary` implements a Most Recently Used HashTable. It's usually handy to implement a cache.
 
 Out implementation is based on the work of [Jim Wiese](http://www.codeproject.com/KB/recipes/mostrecentlyused.aspx). 
@@ -76,7 +76,7 @@ for (int i = 0; i < 10000; i++)
     byte[] fileData = images.GetOrCreate(fileName, () => File.ReadAllBytes(fileName)); //Expensive and cached operations
 }
 sw.Stop();
-Console.WriteLine("CacheSize {0} Time {1}".Formato(4, sw.Elapsed));
+Console.WriteLine("CacheSize {0} Time {1}".FormatWith(4, sw.Elapsed));
 //CacheSize 4 Time 00:00:02.2218371
 ```
 

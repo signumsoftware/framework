@@ -1,4 +1,4 @@
-# Database.Save
+﻿# Database.Save
 
 Saving is the process of storing entities in the database, inserting them if they are new, or updating them if they are already there. 
 
@@ -32,12 +32,12 @@ public static void SaveList<T>(this IEnumerable<T> entities) where T : class, IE
 Example: 
 
 ```C#
-new UserDN
+new UserEntity
 {
    UserName = "john"
 }.Save();
 
-0.To(10).Select(i=> new UserDN
+0.To(10).Select(i=> new UserEntity
 {
    UserName = "john"
 }).SaveList();

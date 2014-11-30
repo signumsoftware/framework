@@ -1,11 +1,11 @@
-# MixinEntity
+﻿# MixinEntity
 
 `MixinEntity` is the base class to create **Mixins**, an alternative to inheritance to expand types.
 
 `Mixins` are used to append fields, properties, columns or methods to types in two important use-cases: 
 
-* When you don't have control the type because it's in a reusable module. (i.e.: Add a property `EmployeeDN` in `UserDN` only for this application). 
-* When you need to add properties to different types independently of their position in the inheritance hierarchy (i.e.: `AddressDN`, `OrderDN` and `EmployeeDN` all need to be `Corrupt`, or `Isolated`, or `Disconnected`).
+* When you don't have control the type because it's in a reusable module. (i.e.: Add a property `EmployeeEntity` in `UserEntity` only for this application). 
+* When you need to add properties to different types independently of their position in the inheritance hierarchy (i.e.: `AddressEntity`, `OrderEntity` and `EmployeeEntity` all need to be `Corrupt`, or `Isolated`, or `Disconnected`).
 
 Under the covers a `MixinEntity` inherits from `ModifiableEntity` and is ensured to be appended to any instance of types that include the Mixin.
 
@@ -15,10 +15,10 @@ Mixins have two advantages over inheritance:
 
 ### Real type expansion
 
-When you inherit from a type (i.e.: `AnimalDN`) and add some new properties to it you are actually creating a new type, not modifying the original one. That's Ok if you want to create a hierarchy of types (i.e.: `LionDN`) but if you want expand the type (i.e.: `CustomAnimalDN`) you'll need to find all the points where the old type is instantiated (i.e.: `new AnimalDN`) and replaced by the new type (i.e.: `new CustomAnimalDN`). You could use a factory instead, but this doesn't play nicely with [object initializers](http://msdn.microsoft.com/en-us/library/bb384062.aspx). 
+When you inherit from a type (i.e.: `AnimalEntity`) and add some new properties to it you are actually creating a new type, not modifying the original one. That's Ok if you want to create a hierarchy of types (i.e.: `LionEntity`) but if you want expand the type (i.e.: `CustomAnimalEntity`) you'll need to find all the points where the old type is instantiated (i.e.: `new AnimalEntity`) and replaced by the new type (i.e.: `new CustomAnimalEntity`). You could use a factory instead, but this doesn't play nicely with [object initializers](http://msdn.microsoft.com/en-us/library/bb384062.aspx). 
 
-With Mixins you just associate the type (i.e.: `AnimalDN`) with your custom Mixin (i.e.: `CustomAnimalMixin`) and then every single instantiated animal will carry your mixin with it, no need to change the 
-instantiations (i.e.: `new AnimalDN`). 
+With Mixins you just associate the type (i.e.: `AnimalEntity`) with your custom Mixin (i.e.: `CustomAnimalMixin`) and then every single instantiated animal will carry your mixin with it, no need to change the 
+instantiations (i.e.: `new AnimalEntity`). 
 
 
 ### Multi-directional expansion
@@ -31,16 +31,16 @@ Additionally, some entities can be used off-line in a boat, using **Disconnected
 
 And finally, some entities have been loaded from a legacy application and have some validations disabled, using corruption. 
 
-Using inheritance it will be a mess. For example, a `LionDN`: 
+Using inheritance it will be a mess. For example, a `LionEntity`: 
 
-* should inherit from `AnimalDN`?, 
-* or from `IsolatedAnimalDN`? 
-* or from `DisconnectedIsolatedAnimalDN`? 
-* or from `CorruptedDisconnctedIsolatedAnimalDN`?
+* should inherit from `AnimalEntity`?, 
+* or from `IsolatedAnimalEntity`? 
+* or from `DisconnectedIsolatedAnimalEntity`? 
+* or from `CorruptedDisconnctedIsolatedAnimalEntity`?
 
-maybe `AnimalDN` should inherit from `CorruptedDisconnctedIsolatedEntityDN`?  but what if `GiraffeDN` doesn't need to be used off-line, neither isolated or corrupted...
+maybe `AnimalEntity` should inherit from `CorruptedDisconnctedIsolatedEntityEntity`?  but what if `GiraffeEntity` doesn't need to be used off-line, neither isolated or corrupted...
 
-Using mixin the problem is simple, `LionDN` inherits from `AnimalDN`, but also includes `IsolationMixin`, `DisconnectedMixin` and `CorruptMixin`. 
+Using mixin the problem is simple, `LionEntity` inherits from `AnimalEntity`, but also includes `IsolationMixin`, `DisconnectedMixin` and `CorruptMixin`. 
 
 ## MixinEntity vs EmbeddedEntity
 
@@ -65,8 +65,8 @@ public class UserEmployeeMixin : MixinEntity
     {
     }
 
-    EmployeeDN employee;
-    public EmployeeDN Employee
+    EmployeeEntity employee;
+    public EmployeeEntity Employee
     {
         get { return employee; }
         set { Set(ref employee, value); }
@@ -91,7 +91,7 @@ There's two ways of associating an entity with a mixin:
 ```C#
 [Mixin(typeof(DisconnectedMixin))]
 [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class OrderDN : Entity
+public class OrderEntity : Entity
 {
    ...
 }
@@ -100,7 +100,7 @@ public class OrderDN : Entity
 * But frequently you want to add mixins to entities that you can not modify, in this case just include this line **before including the entitiy in the schema**: 
 
 ```C#
-MixinDeclarations.Register<UserDN, UserEmployeeMixin>();
+MixinDeclarations.Register<UserEntity, UserEmployeeMixin>();
 ```
 
 > **Note:*** *Signum.Windows also requires this information, but is automatically transited by the WCF webservice when started.
@@ -128,7 +128,7 @@ Most of the time you just use the first method.
 Example: 
 
 ```C#
-UserDN user = new UserDN(); 
+UserEntity user = new UserEntity(); 
 user.Mixin<UserEmployeeMixin>().Employee = new Employee(); //The UserEmployeeMixin is already there!
 Console.WriteLine(user.Mixin<UserEmployeeMixin>().Employee.ToString()); 
 ```
@@ -146,11 +146,11 @@ public static T SetMixin<T, M, V>(this T entity, Expression<Func<M, V>> mixinPro
 Example: 
 
 ```C#
-return new UserDN
+return new UserEntity
 {
    UserName = "bmarley",
    Password = Security.EncodePassword("jamaica")
-}.SetMixin((UserEmployeeMixin m) => m.Employee, new EmployeeDN
+}.SetMixin((UserEmployeeMixin m) => m.Employee, new EmployeeEntity
 	{
        FirsName = "Bob",
        LastName = "Marley"
@@ -163,22 +163,22 @@ Mixins are completely supported by the Linq provider.
 
 * **Queries:**
 ```C#
-Database.Query<UserDN>()
+Database.Query<UserEntity>()
     .Select(u => u.Mixin<UserEmployeeMixin>().Employee)
     .ToList();
 ````
 
 * **UnsafeUpdates:**
 ```C#
-Database.Query<UserDN>().UnsafeUpdate()
+Database.Query<UserEntity>().UnsafeUpdate()
     .Set(u => u.Mixin<UserEmployeeMixin>().Employee, u => null)
     .Execute();
 ````
 
 * **UnsafeInserts:**
 ```C#
-Database.Query<UserDN>()
-    .UnsafeInsert(u=>new UserDN
+Database.Query<UserEntity>()
+    .UnsafeInsert(u=>new UserEntity
 	{
 	   UserName = u.UserName + "2",
 	   Password = u.Password,
@@ -191,11 +191,11 @@ Database.Query<UserDN>()
 PropertyRoute also support Mixins 
 
 ```C#
-//returns (UserDN)[UserEmployeeMixin]
-PropertyRoute.Construct((UserDN a) => a.Mixin<UserEmployeeMixin>()) 
+//returns (UserEntity)[UserEmployeeMixin]
+PropertyRoute.Construct((UserEntity a) => a.Mixin<UserEmployeeMixin>()) 
 
-//returns (UserDN)[UserEmployeeMixin].Employee
-PropertyRoute.Construct((UserDN a) => a.Mixin<UserEmployeeMixin>().Employee) 
+//returns (UserEntity)[UserEmployeeMixin].Employee
+PropertyRoute.Construct((UserEntity a) => a.Mixin<UserEmployeeMixin>().Employee) 
 ```
 
 That means that other parts of the framework that are based on `PropertyRoute` also support mixins, like `OverrideAttributes` or property authorization. 
@@ -211,12 +211,12 @@ A `QueryToken` represents the sequence of combos in the `SearchControl`.
 
 * in Employee.cshtml 
 ```C#
-@Html.SearchControl(new FindOptions(typeof(UserDN), "Entity.Employee", e.Value), new Context(e, "users"))
+@Html.SearchControl(new FindOptions(typeof(UserEntity), "Entity.Employee", e.Value), new Context(e, "users"))
 ```
 
 * in Employee.xaml
 ```xml
-<m:SearchControl QueryName="{x:Type d:UserDN}" FilterColumn="Entity.Employee" />
+<m:SearchControl QueryName="{x:Type d:UserEntity}" FilterColumn="Entity.Employee" />
 ```
 
 ### Signum.Windows
@@ -226,7 +226,7 @@ Mixins won't make a lot of sense if the new properties could not be shown to the
 in `App.xaml.cs` or `EmployeeClient.cs`: 
 
 ```C#
-Navigator.EntitySettings<UserDN>().OverrideView += usr, ctrl =>
+Navigator.EntitySettings<UserEntity>().OverrideView += usr, ctrl =>
 {
     ctrl.Child<EntityLine>("Role").After(new EntityLine().Set(Common.RouteProperty, "[UserEmployeeMixin].Employee"));
     return ctrl;
@@ -244,8 +244,8 @@ Mixins also won't make sense if the new properties could not be shown to the use
 in `Global.asax.cs` or `EmployeeClient.cs`:
 
 ```C#
-Navigator.EntitySettings<UserDN>().CreateViewOverride()
-    .AfterLine((UserDN u) => u.Role, (html, tc) => html.ValueLine(tc, u => u.Mixin<UserEmployeeMixin>().AllowLogin));
+Navigator.EntitySettings<UserEntity>().CreateViewOverride()
+    .AfterLine((UserEntity u) => u.Role, (html, tc) => html.ValueLine(tc, u => u.Mixin<UserEmployeeMixin>().AllowLogin));
 ```
 
 * In ASP.Net MVC there's no server-side tree to manipulate because Razor generates plain text, but `CreateViewOverride` gives some extension points in strategic locations: `BeforeLine`, `AfterLine`, `HideLine`, `BeforeTab` and `AfterTab`. 

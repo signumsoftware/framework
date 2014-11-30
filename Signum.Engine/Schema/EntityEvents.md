@@ -1,4 +1,4 @@
-# Schema.EntityEvents
+﻿# Schema.EntityEvents
 
 `EntityEvents<T>` is a generic class that contains the events that will when Signum.Engine interacts with your entities (i.e. `Save`, `Retrieve`, etc..). 
 
@@ -51,14 +51,14 @@ Consider overriding `ModifiableEntity.PreSaving` instead if you have control of 
 ```C#
 //in BugLogic.Start..
 
-sb.Schema.EntityEvents<BugDN>().PreSaving += Bug_PreSaving;
+sb.Schema.EntityEvents<BugEntity>().PreSaving += Bug_PreSaving;
 
-static void Bug_PreSaving(BugDN bug, ref bool graphModified)
+static void Bug_PreSaving(BugEntity bug, ref bool graphModified)
 {
-   if(bug.LastUser.Is(UserDN.Current))
+   if(bug.LastUser.Is(UserEntity.Current))
       return;
 
-   bug.LastUser = UserDN.Current;
+   bug.LastUser = UserEntity.Current;
    graphModified = true;
 }
 
@@ -129,8 +129,8 @@ public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
 This event is really useful for cascade deleting and cache invalidation: 
 
 ```C#
-Schema.Current.EntityEvents<ProjectDN>().PreUnsafeDelete += query => 
-	query.SelectMany(proj => Database.Query<BugDN>().Where(b=>b.Project.RefersTo(proj)))
+Schema.Current.EntityEvents<ProjectEntity>().PreUnsafeDelete += query => 
+	query.SelectMany(proj => Database.Query<BugEntity>().Where(b=>b.Project.RefersTo(proj)))
     .UnsafeDelete();
 ```
 ## PreUnsafeMListDelete

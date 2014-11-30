@@ -1,4 +1,4 @@
-# Finder class 
+﻿# Finder class 
 
 The main responsibilities of `Finder` is to open query result to search for a particular entity using a modal window (`Find` and `FindMany`) or just take a look at the entities and start actions from there in an independent window (`Explore`). 
 
@@ -121,7 +121,7 @@ public class QuerySettings
 Example: 
 
 ```C#
-QuerySettings.RegisterPropertyFormat((AlbumDN a) => a.BonusTrack.Duration, 
+QuerySettings.RegisterPropertyFormat((AlbumEntity a) => a.BonusTrack.Duration, 
                 b => Fluent.GetDataTemplate(() => new TextBlock().Bind(TextBlock.TextProperty, b)));
 ```
 

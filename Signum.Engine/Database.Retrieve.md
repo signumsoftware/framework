@@ -1,4 +1,4 @@
-## Database.Retrieve
+﻿## Database.Retrieve
 
 `Database` class has a lot of overloads for retrieving single entities or a list of all the entities of a given type, the entities themselves or just Lazy objects, in a reusable weak-typed way or in a strong-typed way using generics. 
 
@@ -76,7 +76,7 @@ public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntit
 
 Example
 ```C#
-var lionLite = Lite.Create<LionDN>(2);
+var lionLite = Lite.Create<LionEntity>(2);
 lionLite.ToString();
 ```
 

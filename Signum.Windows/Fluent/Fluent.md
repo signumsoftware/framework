@@ -1,4 +1,4 @@
-# Fluent
+﻿# Fluent
 
 Fluent are a set of static classes that contain extension method to make the creation and exploration of WPF objects simpler from C#. Think of it as a small subset of **jQuery for WPF**. 
 
@@ -179,7 +179,7 @@ public partial class Album : UserControl
         InitializeComponent();
         this.OnDataContextPropertyChanged((sender, args) =>
         {
-            var album = (AlbumDN)sender;
+            var album = (AlbumEntity)sender;
 
             if (args.PropertyName == "Name" && album.Name == null)
                 album.Songs.Clear(); 

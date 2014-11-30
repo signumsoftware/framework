@@ -1,4 +1,4 @@
-# Common class
+﻿# Common class
 Common static class defines the [Attached Properties](http://msdn.microsoft.com/en-us/library/ms749011.aspx) that, in conjunction with [Entity Controls](EntityControls.md), simplifies building UI code of business applications. 
 
 Let's see what these properties are and why they are useful. 
@@ -30,7 +30,7 @@ Example:
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Southwind.Entities;assembly=Southwind.Entities"
-    m:Common.TypeContext="{x:Type d:TerritoryDN}"
+    m:Common.TypeContext="{x:Type d:TerritoryEntity}"
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Description" />
@@ -41,9 +41,9 @@ Example:
 
 This is what this code does:
 
-* Created a `UserControl` for `DataContext` of type `TerritoryDN` by setting the `Common.TypeContext` property. 
+* Created a `UserControl` for `DataContext` of type `TerritoryEntity` by setting the `Common.TypeContext` property. 
 * Add a `ValueLine` for the property `Description` of type string by setting `Common.Route` property.
-* Add a `EntityCombo` for the property `Region` of type `RegionDN` by setting `Common.Route` property.
+* Add a `EntityCombo` for the property `Region` of type `RegionEntity` by setting `Common.Route` property.
 
 
 ### Route tasks
@@ -62,7 +62,7 @@ When `Route` property is set, a battery of extensible tasks are executed to conf
 So writing something like this: 
 
 ```XML
-<StackPanel m:Common.TypeContext="{x:Type d:MyEntityDN}">
+<StackPanel m:Common.TypeContext="{x:Type d:MyEntityEntity}">
     <m:EntityLine m:Common.Route="MyProperty"/>
 </StackPanel>
 ```
@@ -70,13 +70,13 @@ So writing something like this:
 Will expand to this pseudo-XAML:
 
 ```XML
-<StackPanel m:Common.TypeContext="d:MyEntityDN">
+<StackPanel m:Common.TypeContext="d:MyEntityEntity">
   <m:EntityLine 
      m:Common.Route="MyProperty" 
      m:Common.TypeContext="TypeSubContext MyProperty"
      EntityType="MyPropertyType"
      Entity="{Binding MyProperty, NotifyOnValidationError=true, ValidatesOnExceptions=true, ValidatesOnDataErrors=true}"
-     Implementations="Server.FindImplementations(MyEntityDN, MyProperty)"
+     Implementations="Server.FindImplementations(MyEntityEntity, MyProperty)"
      LabelText="MyProperty"/>
 </StackPanel>
 ```
