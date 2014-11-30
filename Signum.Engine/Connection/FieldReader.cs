@@ -551,7 +551,7 @@ namespace Signum.Engine
                     return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
             }
 
-            throw new InvalidOperationException("Type {0} not supported".Formato(type));
+            throw new InvalidOperationException("Type {0} not supported".FormatWith(type));
         }
 
         static MethodInfo miIsNull = ReflectionTools.GetMethodInfo((FieldReader r) => r.IsNull(0)); 
@@ -585,17 +585,17 @@ namespace Signum.Engine
         {
             get
             {
-                string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".Formato(
+                string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(
                     InnerException.Message, Ordinal, ColumnName, Row);
 
                 if (Projector != null)
                 {
-                    text += "\r\nCalling: row.Reader.Get{0}({1})".Formato(ColumnType.Name, Ordinal);
-                    text += "\r\nProjector:\r\n{0}".Formato(Projector.ToString().Indent(4));
+                    text += "\r\nCalling: row.Reader.Get{0}({1})".FormatWith(ColumnType.Name, Ordinal);
+                    text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToString().Indent(4));
                 }
 
                 if(Command != null)
-                    text += "\r\nCommand:\r\n{0}".Formato(Command.PlainSql().Indent(4));
+                    text += "\r\nCommand:\r\n{0}".FormatWith(Command.PlainSql().Indent(4));
 
                  return text;
             }

@@ -21,10 +21,10 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ExceptionDN>();
+                sb.Include<ExceptionEntity>();
 
-                dqm.RegisterQuery(typeof(ExceptionDN),()=>
-                    from r in Database.Query<ExceptionDN>()
+                dqm.RegisterQuery(typeof(ExceptionEntity),()=>
+                    from r in Database.Query<ExceptionEntity>()
                     select new
                     {
                         Entity = r,
@@ -35,8 +35,8 @@ namespace Signum.Engine.Basics
                         r.StackTraceHash,
                     });
 
-                dqm.RegisterQuery(typeof(ExceptionDN), ()=>
-                     from r in Database.Query<ExceptionDN>()
+                dqm.RegisterQuery(typeof(ExceptionEntity), ()=>
+                     from r in Database.Query<ExceptionEntity>()
                      select new
                      {
                          Entity = r,
@@ -51,7 +51,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        public static ExceptionDN LogException(this Exception ex, Action<ExceptionDN> completeContext)
+        public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
         {
             var entity = GetEntity(ex);
             
@@ -60,16 +60,16 @@ namespace Signum.Engine.Basics
             return entity.SaveForceNew();
         }
 
-        public static ExceptionDN LogException(this Exception ex)
+        public static ExceptionEntity LogException(this Exception ex)
         {
             var entity = GetEntity(ex);
 
             return entity.SaveForceNew();
         }
 
-        static ExceptionDN PreviousExceptionDN(this Exception ex)
+        static ExceptionEntity PreviousExceptionEntity(this Exception ex)
         {
-            var exEntity = ex.Data[ExceptionDN.ExceptionDataKey] as ExceptionDN;
+            var exEntity = ex.Data[ExceptionEntity.ExceptionDataKey] as ExceptionEntity;
 
             if (exEntity != null)
                 return exEntity;
@@ -77,9 +77,9 @@ namespace Signum.Engine.Basics
             return null;
         }
 
-        static ExceptionDN GetEntity(Exception ex)
+        static ExceptionEntity GetEntity(Exception ex)
         {
-            ExceptionDN entity = ex.PreviousExceptionDN() ?? new ExceptionDN(ex);
+            ExceptionEntity entity = ex.PreviousExceptionEntity() ?? new ExceptionEntity(ex);
 
             entity.ExceptionType = ex.GetType().Name;
 
@@ -105,7 +105,7 @@ namespace Signum.Engine.Basics
             return entity;
         }
 
-        static ExceptionDN SaveForceNew(this ExceptionDN entity)
+        static ExceptionEntity SaveForceNew(this ExceptionEntity entity)
         {
             if (entity.Modified == ModifiedState.Clean)
                 return entity;
@@ -133,11 +133,11 @@ namespace Signum.Engine.Basics
         }
 
 
-        public static event Action<DeleteLogParametersDN> DeleteLogs;
+        public static event Action<DeleteLogParametersEntity> DeleteLogs;
 
         public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
 
-        public static void DeleteLogsAndExceptions(DeleteLogParametersDN parameters)
+        public static void DeleteLogsAndExceptions(DeleteLogParametersEntity parameters)
         {
             using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
             {
@@ -146,23 +146,23 @@ namespace Signum.Engine.Basics
                         action(parameters);
 	                }
 
-                int exceptions = Database.Query<ExceptionDN>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
+                int exceptions = Database.Query<ExceptionEntity>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
 
-                var ex = Schema.Current.Table<ExceptionDN>();
-                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionDN e)=>e.Referenced));
+                var ex = Schema.Current.Table<ExceptionEntity>();
+                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionEntity e)=>e.Referenced));
 
                 var commands = (from t in Schema.Current.GetDatabaseTables()
                                from c in t.Columns.Values
                                where c.ReferenceTable == ex
                                 select new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
-                                   .Formato(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
+                                   .FormatWith(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
 
                 foreach (var c in commands) 
                 {
                     c.ExecuteNonQuery();
                 }
 
-                int deletedExceptions = Database.Query<ExceptionDN>()
+                int deletedExceptions = Database.Query<ExceptionEntity>()
                     .Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
                     .UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
             }

@@ -35,7 +35,7 @@ namespace Signum.Engine.CodeGeneration
             string projectFolder = GetProjectFolder();
 
             if (!Directory.Exists(projectFolder))
-                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
+                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
 
             bool? overwriteFiles = null;
 
@@ -47,7 +47,7 @@ namespace Signum.Engine.CodeGeneration
                     string fullFileName = Path.Combine(projectFolder, GetClientFileName(mod));
                     FileTools.CreateParentDirectory(fullFileName);
 
-                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                         File.WriteAllText(fullFileName, str);
                 }
 
@@ -58,14 +58,14 @@ namespace Signum.Engine.CodeGeneration
                     {
                         string fullFileName = Path.Combine(projectFolder, GetViewFileName(mod, t));
                         FileTools.CreateParentDirectory(fullFileName);
-                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                             File.WriteAllText(fullFileName, view);
 
 
                         fullFileName += ".cs";
 
                         string codeBehind = WriteViewCodeBehindFile(t);
-                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                             File.WriteAllText(fullFileName, codeBehind);
                     }
                 }
@@ -106,7 +106,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetClienUsingNamespaces(mod))
-                sb.AppendLine("using {0};".Formato(item));
+                sb.AppendLine("using {0};".FormatWith(item));
 
             sb.AppendLine();
             sb.AppendLine("namespace " + GetClientNamespace(mod));
@@ -206,7 +206,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "new {0}<{1}>() {{ View = {2} => new {3}() }},".Formato(
+            return "new {0}<{1}>() {{ View = {2} => new {3}() }},".FormatWith(
                 type.IsEmbeddedEntity() ? "EmbeddedEntitySettings" : "EntitySettings",
                 type.Name, v, GetViewName(type));
         }
@@ -266,10 +266,10 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             foreach (var ns in GetViewCodeBehindUsingNamespaces(type))
-                sb.AppendLine("using {0};".Formato(ns));
+                sb.AppendLine("using {0};".FormatWith(ns));
 
             sb.AppendLine();
-            sb.AppendLine("namespace {0}".Formato(GetViewNamespace(type)));
+            sb.AppendLine("namespace {0}".FormatWith(GetViewNamespace(type)));
             sb.AppendLine("{");
 
             string viewClass = WriteViewCodeBehindClass(type);
@@ -287,11 +287,11 @@ namespace Signum.Engine.CodeGeneration
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("/// <summary>");
-            sb.AppendLine("/// Interaction logic for {0}.xaml".Formato(viewName));
+            sb.AppendLine("/// Interaction logic for {0}.xaml".FormatWith(viewName));
             sb.AppendLine("/// </summary>");
-            sb.AppendLine("public partial class {0} : UserControl".Formato(viewName));
+            sb.AppendLine("public partial class {0} : UserControl".FormatWith(viewName));
             sb.AppendLine("{");
-            sb.AppendLine("    public {0}()".Formato(viewName));
+            sb.AppendLine("    public {0}()".FormatWith(viewName));
             sb.AppendLine("    {");
             sb.AppendLine("        InitializeComponent();");
             sb.AppendLine("    }");
@@ -308,12 +308,12 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WriteViewFile(Type type)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<UserControl x:Class=\"{0}.{1}\"".Formato(this.GetViewNamespace(type), this.GetViewName(type)));
+            sb.AppendLine("<UserControl x:Class=\"{0}.{1}\"".FormatWith(this.GetViewNamespace(type), this.GetViewName(type)));
             foreach (var item in GetViewUsingNamespaces(type))
-                sb.AppendLine("    xmlns{0}=\"{1}\"".Formato(item.Key.HasText() ? ":" + item.Key : "", item.Value));
+                sb.AppendLine("    xmlns{0}=\"{1}\"".FormatWith(item.Key.HasText() ? ":" + item.Key : "", item.Value));
 
             if (typeof(IRootEntity).IsAssignableFrom(type))
-                sb.AppendLine("    m:Common.TypeContext=\"{{x:Type d:{0}}}\"".Formato(type.Name));
+                sb.AppendLine("    m:Common.TypeContext=\"{{x:Type d:{0}}}\"".FormatWith(type.Name));
             sb.AppendLine("    MinWidth=\"300\">");
             sb.AppendLine("    <StackPanel>");
 
@@ -337,9 +337,9 @@ namespace Signum.Engine.CodeGeneration
                 {"", "http://schemas.microsoft.com/winfx/2006/xaml/presentation"}, 
                 {"x", "http://schemas.microsoft.com/winfx/2006/xaml"}, 
                 {"m", "clr-namespace:Signum.Windows;assembly=Signum.Windows"}, 
-                {"d", "clr-namespace:{0};assembly={1}".Formato(type.Namespace, type.Assembly.GetName().Name) }, 
-                {"s", "clr-namespace:{0}.Windows".Formato(this.SolutionName) }, 
-                {"sc", "clr-namespace:{0}".Formato(this.GetViewNamespace(type))}, 
+                {"d", "clr-namespace:{0};assembly={1}".FormatWith(type.Namespace, type.Assembly.GetName().Name) }, 
+                {"s", "clr-namespace:{0}.Windows".FormatWith(this.SolutionName) }, 
+                {"sc", "clr-namespace:{0}".FormatWith(this.GetViewNamespace(type))}, 
             };
         }
 
@@ -365,19 +365,19 @@ namespace Signum.Engine.CodeGeneration
             var elementType = pi.PropertyType.ElementType().CleanType();
 
             if (!(elementType.IsLite() || elementType.IsModifiableEntity()))
-                return "<!--{0} not supported-->//\r\n".Formato(pi.PropertyType.TypeName());
+                return "<!--{0} not supported-->//\r\n".FormatWith(pi.PropertyType.TypeName());
             
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
             if (elementType.IsEmbeddedEntity() || (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
-                return "<m:EntityRepeater m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+                return "<m:EntityRepeater m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
 
-            return "<m:EntityStrip m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+            return "<m:EntityStrip m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
         }
 
         protected virtual string WriteEmbeddedProperty(PropertyInfo pi)
         {
-            return "<m:EntityDetail m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+            return "<m:EntityDetail m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
         }
 
         protected virtual string WriteEntityProperty(PropertyInfo pi)
@@ -387,15 +387,15 @@ namespace Signum.Engine.CodeGeneration
             var eka = type.GetCustomAttribute<EntityKindAttribute>();
 
             if (eka == null)
-                throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".Formato(type.Name));
+                throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".FormatWith(type.Name));
 
             if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
-                return "<m:EntityDetail m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+                return "<m:EntityDetail m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
 
             if (eka.IsLowPopulation)
-                return "<m:EntityCombo m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+                return "<m:EntityCombo m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
 
-            return "<m:EntityLine m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+            return "<m:EntityLine m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
         }
 
 
@@ -403,7 +403,7 @@ namespace Signum.Engine.CodeGeneration
         {
             type = type.UnNullify();
 
-            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorDN))
+            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorEntity))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);
@@ -415,7 +415,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteValueLine(PropertyInfo pi)
         {
-            return "<m:ValueLine m:Common.Route=\"{0}\" />\r\n".Formato(pi.Name);
+            return "<m:ValueLine m:Common.Route=\"{0}\" />\r\n".FormatWith(pi.Name);
         }
 
         protected virtual IEnumerable<PropertyInfo> GetProperties(Type type)

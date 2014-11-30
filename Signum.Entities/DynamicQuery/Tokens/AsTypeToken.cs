@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,12 +34,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return QueryTokenMessage.As0.NiceToString().Formato(Type.NiceName());
+            return QueryTokenMessage.As0.NiceToString().FormatWith(Type.NiceName());
         }
 
         public override string Key
         {
-            get { return "({0})".Formato(TypeDN.GetCleanName(entityType)); }
+            get { return "({0})".FormatWith(TypeEntity.GetCleanName(entityType)); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
@@ -89,7 +89,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0As1.NiceToString().Formato(Parent.ToString(), entityType.NiceName());
+            return QueryTokenMessage._0As1.NiceToString().FormatWith(Parent.ToString(), entityType.NiceName());
         }
 
         public override QueryToken Clone()

@@ -89,7 +89,7 @@ namespace Signum.Utilities
         public static string Ask(string question, params string[] answers)
         {
 
-            Console.Write(question + " ({0}) ".Formato(answers.ToString("/")));
+            Console.Write(question + " ({0}) ".FormatWith(answers.ToString("/")));
             do
             {
                 var userAnswer = Console.ReadLine().ToLower();
@@ -97,7 +97,7 @@ namespace Signum.Utilities
                 if (result != null)
                     return result;
 
-                Console.Write("Possible answers: {0} ".Formato(answers.ToString("/")));
+                Console.Write("Possible answers: {0} ".FormatWith(answers.ToString("/")));
             } while (true);
         }
 
@@ -124,7 +124,7 @@ namespace Signum.Utilities
 
             lock (SyncKey)
             {
-                Console.Write(question + " ({0} - !forAll) ".Formato(answers.ToString("/")));
+                Console.Write(question + " ({0} - !forAll) ".FormatWith(answers.ToString("/")));
                 do
                 {
                     var userAnswer = Console.ReadLine().ToLower();
@@ -141,7 +141,7 @@ namespace Signum.Utilities
                         return result;
                     }
 
-                    Console.Write("Possible answers: ({0} - !forAll)".Formato(answers.ToString("/")));
+                    Console.Write("Possible answers: ({0} - !forAll)".FormatWith(answers.ToString("/")));
                 } while (true);
             }
         }

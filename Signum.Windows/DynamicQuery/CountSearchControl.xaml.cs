@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -137,7 +137,7 @@ namespace Signum.Windows
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
             if (IsLoaded)
-                throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
+                throw new InvalidProgramException("You can not change {0} property once loaded".FormatWith(e.Property));
         }
 
         public event EventHandler LinkClick; 
@@ -224,12 +224,12 @@ namespace Signum.Windows
                 ItemsCount = count;
                 if (ItemsCount == 0)
                 {
-                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString()).Formato(QueryUtils.GetNiceName(QueryName));
+                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString()).FormatWith(QueryUtils.GetNiceName(QueryName));
                     tb.FontWeight = FontWeights.Regular;
                 }
                 else
                 {
-                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}")).Formato(ItemsCount);
+                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}")).FormatWith(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
                 }
 

@@ -69,7 +69,7 @@ namespace Signum.Entities
         public bool Equals(PrimaryKey other)
         {
             if (other.Object.GetType() != this.Object.GetType())
-                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".Formato(other.Object.GetType(), this.Object.GetType()));
+                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".FormatWith(other.Object.GetType(), this.Object.GetType()));
 
             return other.Object.Equals(this.Object);
         }
@@ -82,7 +82,7 @@ namespace Signum.Entities
         public int CompareTo(PrimaryKey other)
         {
             if (other.Object.GetType() != this.Object.GetType())
-                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".Formato(other.Object.GetType(), this.Object.GetType()));
+                throw new InvalidOperationException("Comparing PrimaryKey of types {0} with anotherone of the {1}".FormatWith(other.Object.GetType(), this.Object.GetType()));
 
             return this.Object.CompareTo(other.Object);
         }

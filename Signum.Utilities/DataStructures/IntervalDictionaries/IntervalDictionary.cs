@@ -55,7 +55,7 @@ namespace Signum.Utilities.DataStructures
                 {
                     Interval<K> previousInt = dic.Keys[index];
                     if (previousInt.Overlap(interval))
-                        throw new ArgumentException("Interval {0} overlaps with the exisiting one {1} (value {2})".Formato(interval, previousInt, value));
+                        throw new ArgumentException("Interval {0} overlaps with the exisiting one {1} (value {2})".FormatWith(interval, previousInt, value));
                 }
 
                 int next = index + 1;
@@ -263,7 +263,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return dic.ToString(a => "[{0},{1}] -> {2}".Formato(a.Key.Min, a.Key.Max, a.Value), "\r\n");
+            return dic.ToString(a => "[{0},{1}] -> {2}".FormatWith(a.Key.Min, a.Key.Max, a.Value), "\r\n");
         }
     }    
 

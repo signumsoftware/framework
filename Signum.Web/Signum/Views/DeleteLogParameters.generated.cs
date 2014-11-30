@@ -46,7 +46,7 @@ namespace Signum.Web.Views
 
             
             #line 2 "..\..\Signum\Views\DeleteLogParameters.cshtml"
- using (var e = Html.TypeContext<DeleteLogParametersDN>())
+ using (var e = Html.TypeContext<DeleteLogParametersEntity>())
 {
     
             

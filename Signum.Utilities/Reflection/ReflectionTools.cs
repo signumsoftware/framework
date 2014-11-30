@@ -407,7 +407,7 @@ namespace Signum.Utilities.Reflection
             if (type == typeof(SqlGeometry))
                 return SqlGeometry.Parse(value);
 
-            throw new InvalidOperationException("Unexpected {0}".Formato(type.Name));
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(type.Name));
         }
 
         public static T Parse<T>(string value, CultureInfo culture)

@@ -21,20 +21,20 @@ namespace Signum.Test.Environment
             {
                 if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
                 {
-                    sb.Settings.FieldAttributes((AlbumDN a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
-                    sb.Settings.FieldAttributes((AlbumDN a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
                 }
 
-                sb.Include<AlbumDN>();
-                sb.Include<NoteWithDateDN>();
-                sb.Include<PersonalAwardDN>();
-                sb.Include<AwardNominationDN>();
-                sb.Include<ConfigDN>();
+                sb.Include<AlbumEntity>();
+                sb.Include<NoteWithDateEntity>();
+                sb.Include<PersonalAwardEntity>();
+                sb.Include<AwardNominationEntity>();
+                sb.Include<ConfigEntity>();
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
 
-                dqm.RegisterQuery(typeof(AlbumDN), ()=> 
-                    from a in Database.Query<AlbumDN>()
+                dqm.RegisterQuery(typeof(AlbumEntity), ()=> 
+                    from a in Database.Query<AlbumEntity>()
                     select new
                     {
                         Entity = a,
@@ -45,8 +45,8 @@ namespace Signum.Test.Environment
                         a.Year
                     });
 
-                dqm.RegisterQuery(typeof(NoteWithDateDN), ()=> 
-                    from a in Database.Query<NoteWithDateDN>()
+                dqm.RegisterQuery(typeof(NoteWithDateEntity), ()=> 
+                    from a in Database.Query<NoteWithDateEntity>()
                     select new
                     {
                         Entity = a,
@@ -56,8 +56,8 @@ namespace Signum.Test.Environment
                         a.CreationTime,
                     });
 
-                dqm.RegisterQuery(typeof(ArtistDN), ()=> 
-                    from a in Database.Query<ArtistDN>()
+                dqm.RegisterQuery(typeof(ArtistEntity), ()=> 
+                    from a in Database.Query<ArtistEntity>()
                     select new
                     {
                         Entity = a,
@@ -69,10 +69,10 @@ namespace Signum.Test.Environment
                         a.LastAward,
                     });
 
-                dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => typeof(AlbumDN).NicePluralName(), "Albums");
+                dqm.RegisterExpression((IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au), () => typeof(AlbumEntity).NicePluralName(), "Albums");
 
-                dqm.RegisterQuery(typeof(BandDN), ()=> 
-                    from a in Database.Query<BandDN>()
+                dqm.RegisterQuery(typeof(BandEntity), ()=> 
+                    from a in Database.Query<BandEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -82,8 +82,8 @@ namespace Signum.Test.Environment
                     });
 
 
-                dqm.RegisterQuery(typeof(LabelDN), ()=> 
-                    from a in Database.Query<LabelDN>()
+                dqm.RegisterQuery(typeof(LabelEntity), ()=> 
+                    from a in Database.Query<LabelEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -92,8 +92,8 @@ namespace Signum.Test.Environment
                     });
 
 
-                dqm.RegisterQuery(typeof(AmericanMusicAwardDN), ()=> 
-                    from a in Database.Query<AmericanMusicAwardDN>()
+                dqm.RegisterQuery(typeof(AmericanMusicAwardEntity), ()=> 
+                    from a in Database.Query<AmericanMusicAwardEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -103,8 +103,8 @@ namespace Signum.Test.Environment
                         a.Result,
                     });
 
-                dqm.RegisterQuery(typeof(GrammyAwardDN), ()=> 
-                    from a in Database.Query<GrammyAwardDN>()
+                dqm.RegisterQuery(typeof(GrammyAwardEntity), ()=> 
+                    from a in Database.Query<GrammyAwardEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -114,8 +114,8 @@ namespace Signum.Test.Environment
                         a.Result
                     });
 
-                dqm.RegisterQuery(typeof(PersonalAwardDN), ()=> 
-                    from a in Database.Query<PersonalAwardDN>()
+                dqm.RegisterQuery(typeof(PersonalAwardEntity), ()=> 
+                    from a in Database.Query<PersonalAwardEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -125,8 +125,8 @@ namespace Signum.Test.Environment
                         a.Result
                     });
 
-                dqm.RegisterQuery(typeof(AwardNominationDN), ()=> 
-                    from a in Database.Query<AwardNominationDN>()
+                dqm.RegisterQuery(typeof(AwardNominationEntity), ()=> 
+                    from a in Database.Query<AwardNominationEntity>()
                     select new
                     {
                         Entity = a.ToLite(),
@@ -136,12 +136,12 @@ namespace Signum.Test.Environment
                     });
 
 
-                dqm.RegisterQuery(typeof(IAuthorDN), () => DynamicQuery.Manual((request, descriptions) =>
+                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQuery.Manual((request, descriptions) =>
                     {
-                        var one = (from a in Database.Query<ArtistDN>()
+                        var one = (from a in Database.Query<ArtistEntity>()
                                    select new
                                    {
-                                       Entity = (IAuthorDN)a,
+                                       Entity = (IAuthorEntity)a,
                                        a.Id,
                                        Type = "Artist",
                                        a.Name,
@@ -149,10 +149,10 @@ namespace Signum.Test.Environment
                                        LastAward = a.LastAward
                                    }).ToDQueryable(descriptions).AllQueryOperations(request);
 
-                        var two = (from a in Database.Query<BandDN>()
+                        var two = (from a in Database.Query<BandEntity>()
                                    select new
                                    {
-                                       Entity = (IAuthorDN)a,
+                                       Entity = (IAuthorEntity)a,
                                        a.Id,
                                        Type = "Band",
                                        a.Name,
@@ -164,10 +164,10 @@ namespace Signum.Test.Environment
 
                     })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
-                    .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistDN a)=>a.Id), PropertyRoute.Construct((BandDN a)=>a.Id)),
-                    entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
+                    .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a)=>a.Id), PropertyRoute.Construct((BandEntity a)=>a.Id)),
+                    entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
-                Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
+                Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)
                     .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
 
                 AlbumGraph.Register();
@@ -178,7 +178,7 @@ namespace Signum.Test.Environment
 
         private static void RegisterOperations()
         {
-            new Graph<AwardDN>.Execute(AwardOperation.Save)
+            new Graph<AwardEntity>.Execute(AwardOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -186,49 +186,49 @@ namespace Signum.Test.Environment
             }.Register();
 
 
-            new Graph<NoteWithDateDN>.Execute(NoteWithDateOperation.Save)
+            new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (n, _) => { }
             }.Register();
 
-            new Graph<ArtistDN>.Execute(ArtistOperation.Save)
+            new Graph<ArtistEntity>.Execute(ArtistOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (a, _) => { }
             }.Register();
 
-            new Graph<ArtistDN>.Execute(ArtistOperation.AssignPersonalAward)
+            new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
             {
                 Lite = true,
                 AllowsNew = false,
                 CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
-                Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
+                Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
             }.Register();
 
-            new Graph<BandDN>.Execute(BandOperation.Save)
+            new Graph<BandEntity>.Execute(BandOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (b, _) => 
                 {
-                    using (OperationLogic.AllowSave<ArtistDN>())
+                    using (OperationLogic.AllowSave<ArtistEntity>())
                     {
                         b.Save();
                     }
                 }
             }.Register();
 
-            new Graph<LabelDN>.Execute(LabelOperation.Save)
+            new Graph<LabelEntity>.Execute(LabelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (l, _) => { }
             }.Register();
 
-            new Graph<ConfigDN>.Execute(ConfigOperation.Save)
+            new Graph<ConfigEntity>.Execute(ConfigOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -237,7 +237,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    public class AlbumGraph : Graph<AlbumDN, AlbumState>
+    public class AlbumGraph : Graph<AlbumEntity, AlbumState>
     {
         public static void Register()
         {
@@ -261,34 +261,34 @@ namespace Signum.Test.Environment
                 Execute = (album, _) => { },
             }.Register();
 
-            new ConstructFrom<BandDN>(AlbumOperation.CreateAlbumFromBand)
+            new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToState = AlbumState.Saved,
                 AllowsNew = false,
                 Lite = true,
-                Construct = (BandDN band, object[] args) =>
-                    new AlbumDN
+                Construct = (BandEntity band, object[] args) =>
+                    new AlbumEntity
                     {
                         Author = band,
                         Name = args.GetArg<string>(),
                         Year = args.GetArg<int>(),
                         State = AlbumState.Saved,
-                        Label = args.GetArg<LabelDN>()
+                        Label = args.GetArg<LabelEntity>()
                     }.Save()
             }.Register();
 
-            new ConstructFrom<AlbumDN>(AlbumOperation.Clone)
+            new ConstructFrom<AlbumEntity>(AlbumOperation.Clone)
             {
                 ToState = AlbumState.New,
                 AllowsNew = false,
                 Lite = true,
                 Construct = (g, args) =>
                 {
-                    return new AlbumDN
+                    return new AlbumEntity
                     {
                         Author = g.Author,
                         Label = g.Label,
-                        BonusTrack = new SongDN
+                        BonusTrack = new SongEntity
                         {
                             Name = "Clone bonus track"
                         }
@@ -296,16 +296,16 @@ namespace Signum.Test.Environment
                 }
             }.Register();
 
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateGreatestHitsAlbum)
+            new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateGreatestHitsAlbum)
             {
                 ToState = AlbumState.New,
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 
-                    return new AlbumDN()
+                    return new AlbumEntity()
                     {
                         Author = albums.FirstEx().Author,
                         Year = DateTime.Now.Year,
@@ -315,16 +315,16 @@ namespace Signum.Test.Environment
             }.Register();
 
 
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
+            new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
             {
                 ToState = AlbumState.New,
                 Construct = (albumLites, _) =>
                 {
-                    List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                    List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
                         throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
 
-                    return new AlbumDN()
+                    return new AlbumEntity()
                     {
                         Author = albums.FirstEx().Author,
                         Year = DateTime.Now.Year,

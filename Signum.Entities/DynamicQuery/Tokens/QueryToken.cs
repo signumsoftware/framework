@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -285,7 +285,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (IsCollection(type))
                 {
-                    return QueryTokenMessage.ListOf0.NiceToString().Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
+                    return QueryTokenMessage.ListOf0.NiceToString().FormatWith(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
                 }
 
                 return GetNiceTypeName(Type, GetImplementations());
@@ -327,7 +327,7 @@ namespace Signum.Entities.DynamicQuery
 
                     return imp.Types.CommaOr(t => t.NiceName());
                 }
-                case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().Formato(type.NiceName());
+                case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().FormatWith(type.NiceName());
                 default: return type.TypeName();
             }
         }

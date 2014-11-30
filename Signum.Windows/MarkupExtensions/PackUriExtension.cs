@@ -64,7 +64,7 @@ namespace Signum.Windows
     {
         public static Uri Local(string path)
         {
-            return new Uri("pack://application:,,,/{0}".Formato(path), UriKind.Absolute);
+            return new Uri("pack://application:,,,/{0}".FormatWith(path), UriKind.Absolute);
         }
 
         public static Uri Reference(string path, Type assemblyTypeExample)
@@ -74,12 +74,12 @@ namespace Signum.Windows
 
         public static Uri Reference(string path, string assemblyName)
         {
-            return new Uri("pack://application:,,,/{0};component/{1}".Formato(assemblyName, path), UriKind.Absolute);
+            return new Uri("pack://application:,,,/{0};component/{1}".FormatWith(assemblyName, path), UriKind.Absolute);
         }
 
         public static Uri SiteOfOrigin(string path)
         {
-            return new Uri("pack://siteoforigin:,,,/{0}".Formato(path), UriKind.Absolute);
+            return new Uri("pack://siteoforigin:,,,/{0}".FormatWith(path), UriKind.Absolute);
         }
     }
 }

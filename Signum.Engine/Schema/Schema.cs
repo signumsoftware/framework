@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,7 +58,7 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
-        const string errorType = "TypeDN table not cached. Remember to call Schema.Current.Initialize";
+        const string errorType = "TypeEntity table not cached. Remember to call Schema.Current.Initialize";
 
 
         #region Events
@@ -88,7 +88,7 @@ namespace Signum.Engine.Maps
             string error = IsAllowed(type, inUserInterface);
 
             if (error != null)
-                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(type.NiceName(), error));
+                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(type.NiceName(), error));
         }
 
         readonly IEntityEvents entityEventsGlobal = new EntityEvents<Entity>();
@@ -277,7 +277,7 @@ namespace Signum.Engine.Maps
                 {
                     if(item.InMemoryFunction == null)
                         throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
-                        .Formato(item.InDatabaseExpresson.ToString()));
+                        .FormatWith(item.InDatabaseExpresson.ToString()));
 
                     result = CombineFunc(result, item.InMemoryFunction);
                 }
@@ -350,7 +350,7 @@ namespace Signum.Engine.Maps
                         }
                         catch (Exception ex)
                         {
-                            return new SqlPreCommandSimple(" -- Exception on {0}.{1}: {2}".Formato(e.Method.DeclaringType.Name, e.Method.Name, ex.Message));
+                            return new SqlPreCommandSimple(" -- Exception on {0}.{1}: {2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message));
                         }
                     })
                     .Combine(Spacing.Triple);
@@ -359,13 +359,13 @@ namespace Signum.Engine.Maps
                     return null;
 
                 var replacementsComment = replacements.Interactive ? null : replacements.Select(r =>
-                    SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".Formato(r.Key)),
-                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple)));
+                    SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".FormatWith(r.Key)),
+                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".FormatWith(a.Key, a.Value))).Combine(Spacing.Simple)));
 
                 return SqlPreCommand.Combine(Spacing.Double,
-                    new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().Formato(DateTime.Now)),
+                    new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().FormatWith(DateTime.Now)),
 
-                    new SqlPreCommandSimple("use {0}".Formato(databaseName)),
+                    new SqlPreCommandSimple("use {0}".FormatWith(databaseName)),
                     command,
                     new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
             }
@@ -451,7 +451,7 @@ namespace Signum.Engine.Maps
             foreach (var mi in members)
             {
                 if (current == null)
-                    throw new InvalidOperationException("{0} does not implement {1}".Formato(result, typeof(IFieldFinder).Name));
+                    throw new InvalidOperationException("{0} does not implement {1}".FormatWith(result, typeof(IFieldFinder).Name));
 
                 result = current.GetField(mi);
 
@@ -544,7 +544,7 @@ namespace Signum.Engine.Maps
                 return Implementations.TryFromAttributes(route.Type.CleanType(), route, ib, iba) ?? Implementations.By();
             }
 
-            throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IEntity).Name));
+            throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(route, typeof(IEntity).Name));
         }
 
         private Implementations? CalculateExpressionImplementations(PropertyRoute route)
@@ -581,7 +581,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Schema ( tables: {0} )".Formato(tables.Count);
+            return "Schema ( tables: {0} )".FormatWith(tables.Count);
         }
 
         public IEnumerable<ITable> GetDatabaseTables()

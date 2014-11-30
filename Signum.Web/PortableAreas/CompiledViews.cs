@@ -17,7 +17,7 @@ namespace Signum.Web.PortableAreas
             PageVirtualPathAttribute attribute = viewType.GetCustomAttribute<PageVirtualPathAttribute>();
 
             if (attribute == null)
-                throw new InvalidOperationException("{0} has not {1}".Formato(viewType.Name, typeof(PageVirtualPathAttribute).Name));
+                throw new InvalidOperationException("{0} has not {1}".FormatWith(viewType.Name, typeof(PageVirtualPathAttribute).Name));
 
             Views.AddOrThrow(attribute.VirtualPath, viewType, "compiled view {0} already registered");
         }

@@ -155,7 +155,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "{0} Children: {1}".Formato(Children.Count, Value);
+            return "{0} Children: {1}".FormatWith(Children.Count, Value);
         }
 
         void Never()

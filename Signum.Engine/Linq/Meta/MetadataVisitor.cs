@@ -244,7 +244,7 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "PropertyRoutes for {0}. Metas don't work over polymorphic MLists".Formato(meta.Meta)).Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "PropertyRoutes for {0}. Metas don't work over polymorphic MLists".FormatWith(meta.Meta)).Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
@@ -455,7 +455,7 @@ namespace Signum.Engine.Linq
                 if (member.Name == "Element")
                     return new MetaExpression(ga[1], mme.Element);
 
-                throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
+                throw new InvalidOperationException("Property {0} not found on {1}".FormatWith(member.Name, mme.Type.TypeName()));
             }
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IEntity).IsAssignableFrom(source.Type))
@@ -563,7 +563,7 @@ namespace Signum.Engine.Linq
             if (implementations.IsByAll)
             {
                 if (!Schema.Current.Tables.ContainsKey(cleanType))
-                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
+                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".FormatWith(cleanType));
 
                 return Signum.Entities.Implementations.By(cleanType);
             }

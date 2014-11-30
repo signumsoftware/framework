@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,17 +22,17 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-        static Expression<Func<Entity, IQueryable<OperationLogDN>>> OperationLogsEntityExpression =
-            e => Database.Query<OperationLogDN>().Where(a => a.Target.RefersTo(e));
+        static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
+            e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField("OperationLogsEntityExpression")]
-        public static IQueryable<OperationLogDN> OperationLogs(this Entity e)
+        public static IQueryable<OperationLogEntity> OperationLogs(this Entity e)
         {
             return OperationLogsEntityExpression.Evaluate(e);
         }
 
-        static Expression<Func<OperationSymbol, IQueryable<OperationLogDN>>> LogsExpression =
-            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
-        public static IQueryable<OperationLogDN> Logs(this OperationSymbol o)
+        static Expression<Func<OperationSymbol, IQueryable<OperationLogEntity>>> LogsExpression =
+            o => Database.Query<OperationLogEntity>().Where(a => a.Operation == o);
+        public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o)
         {
             return LogsExpression.Evaluate(o);
         }
@@ -81,7 +81,7 @@ namespace Signum.Engine.Operations
 
         public static HashSet<Type> GetSaveProtectedTypes()
         {
-            return TypeLogic.TypeToDN.Keys.Where(IsSaveProtected).ToHashSet();
+            return TypeLogic.TypeToEntity.Keys.Where(IsSaveProtected).ToHashSet();
         }
         
         public static void SetProtectedSave<T>(bool? isProtected) where T : IEntity
@@ -115,7 +115,7 @@ namespace Signum.Engine.Operations
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<OperationLogDN>();
+                sb.Include<OperationLogEntity>();
 
                 SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
 
@@ -128,8 +128,8 @@ namespace Signum.Engine.Operations
                         os.Key
                     });
 
-                dqm.RegisterQuery(typeof(OperationLogDN), () =>
-                    from lo in Database.Query<OperationLogDN>()
+                dqm.RegisterQuery(typeof(OperationLogEntity), () =>
+                    from lo in Database.Query<OperationLogEntity>()
                     select new
                     {
                         Entity = lo,
@@ -143,12 +143,12 @@ namespace Signum.Engine.Operations
                     });
 
                 dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
-                dqm.RegisterExpression((Entity o) => o.OperationLogs(), () => typeof(OperationLogDN).NicePluralName());
+                dqm.RegisterExpression((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Operation_PreDeleteSqlSync);
-                sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.Initializing += OperationLogic_Initializing;
 
@@ -156,9 +156,9 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
-            Database.Query<OperationLogDN>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         static void OperationLogic_Initializing()
@@ -166,8 +166,8 @@ namespace Signum.Engine.Operations
             var errors = (from t in Schema.Current.Tables.Keys
                           let et = EntityKindCache.TryGetAttribute(t)
                           let sp = IsSaveProtected(t)
-                          select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
-                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".Formato(t.TypeName(), et.EntityKind, sp ? "" : "NOT ") :
+                          select et == null ? "{0} has no EntityTypeAttribute set".FormatWith(t.FullName) :
+                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".FormatWith(t.TypeName(), et.EntityKind, sp ? "" : "NOT ") :
                           null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
@@ -193,27 +193,27 @@ namespace Signum.Engine.Operations
                     return false;
 
                 default:
-                    throw new InvalidOperationException("Unexpected {0}".Formato(entityType)); 
+                    throw new InvalidOperationException("Unexpected {0}".FormatWith(entityType)); 
             }
         }
         static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)
         {
-            var t = Schema.Current.Table<OperationLogDN>();
+            var t = Schema.Current.Table<OperationLogEntity>();
             var f = (FieldReference)t.Fields["operation"].Field;
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
-            var t = Schema.Current.Table<OperationLogDN>();
+            var t = Schema.Current.Table<OperationLogEntity>();
             var f = ((FieldImplementedByAll)t.Fields["target"].Field).ColumnType;
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
         static void EntityEventsGlobal_Saving(Entity ident)
@@ -221,7 +221,7 @@ namespace Signum.Engine.Operations
             if (ident.IsGraphModified && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Values
                     .Where(IsExecuteNoLite)
@@ -233,7 +233,7 @@ namespace Signum.Engine.Operations
         public static event SurroundOperationHandler SurroundOperation;
         public static event AllowOperationHandler AllowOperation;
 
-        internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogDN log, IEntity entity, object[] args)
+        internal static IDisposable OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity entity, object[] args)
         {
             return Disposable.Combine(SurroundOperation, f => f(operation, log, (Entity)entity, args));
         }
@@ -256,7 +256,7 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
         {
             if (!OperationAllowed(operationSymbol, inUserInterface))
-                throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().Formato(operationSymbol.NiceToString(), operationSymbol.Key) +
+                throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
                     (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
         }
         #endregion
@@ -266,7 +266,7 @@ namespace Signum.Engine.Operations
         public static void Register(this IOperation operation)
         {
             if (!operation.OverridenType.IsIEntity())
-                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.OverridenType.Name));
+                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".FormatWith(operation.OverridenType.Name));
 
             operation.AssertIsValid();
 
@@ -288,7 +288,7 @@ namespace Signum.Engine.Operations
         public static void RegisterReplace(this IOperation operation)
         {
             if (!operation.OverridenType.IsIEntity())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.OverridenType));
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".FormatWith(operation.OverridenType));
 
             operation.AssertIsValid();
 
@@ -522,7 +522,7 @@ namespace Signum.Engine.Operations
             IOperation result = FindOperation(type, operationSymbol);
 
             if (!(result is T))
-                throw new InvalidOperationException("Operation '{0}' is a {1} not a {2} use {3} instead".Formato(operationSymbol, result.GetType().TypeName(), typeof(T).TypeName(),
+                throw new InvalidOperationException("Operation '{0}' is a {1} not a {2} use {3} instead".FormatWith(operationSymbol, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
                     result is IConstructOperation ? "Construct" :
@@ -536,7 +536,7 @@ namespace Signum.Engine.Operations
         {
             IOperation result = operations.TryGetValue(type).TryGetC(operationSymbol);
             if (result == null)
-                throw new InvalidOperationException("Operation '{0}' not found for type {1}".Formato(operationSymbol, type));
+                throw new InvalidOperationException("Operation '{0}' not found for type {1}".FormatWith(operationSymbol, type));
             return result;
         }
 
@@ -576,7 +576,7 @@ namespace Signum.Engine.Operations
              where T : IEntityOperation
         {
             if (!result.Lite)
-                throw new InvalidOperationException("Operation {0} is not allowed for Lites".Formato(result.OperationSymbol));
+                throw new InvalidOperationException("Operation {0} is not allowed for Lites".FormatWith(result.OperationSymbol));
 
             return result;
         }
@@ -589,7 +589,7 @@ namespace Signum.Engine.Operations
                 var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiedState.SelfModified);
                 if (list.Any())
                     throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\r\n {1}"
-                        .Formato(result.OperationSymbol, list.ToString("\r\n")));
+                        .FormatWith(result.OperationSymbol, list.ToString("\r\n")));
             }
 
             return result;
@@ -618,7 +618,7 @@ namespace Signum.Engine.Operations
         public static string InState<T>(this T state, params T[] fromStates) where T : struct
         {
             if (!fromStates.Contains(state))
-                return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                     fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                     ((Enum)(object)state).NiceToString());
 
@@ -694,7 +694,7 @@ namespace Signum.Engine.Operations
                     let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                     where invalid.Any()
                     select KVP.Create(o.OperationSymbol,
-                        OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                        OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
         }
@@ -720,7 +720,7 @@ namespace Signum.Engine.Operations
     }
 
 
-    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogDN log, Entity entity, object[] args);
+    public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity entity, object[] args);
     public delegate void OperationHandler(IOperation operation, Entity entity);
     public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
     public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);

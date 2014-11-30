@@ -31,88 +31,88 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void Take()
         {
-            var takeArtist = Database.Query<ArtistDN>().Take(2).ToList();
+            var takeArtist = Database.Query<ArtistEntity>().Take(2).ToList();
             Assert.AreEqual(takeArtist.Count, 2);
         }
 
         [TestMethod]
         public void TakeOrder()
         {
-            var takeArtist = Database.Query<ArtistDN>().OrderBy(a => a.Name).Take(2).ToList();
+            var takeArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Take(2).ToList();
             Assert.AreEqual(takeArtist.Count, 2);
         }
 
         [TestMethod]
         public void TakeSql()
         {
-            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Songs.Take(2) }).ToList();
+            var takeAlbum = Database.Query<AlbumEntity>().Select(a => new { a.Name, TwoSongs = a.Songs.Take(2) }).ToList();
             Assert.IsTrue(takeAlbum.All(a => a.TwoSongs.Count() <= 2));
         }
 
         [TestMethod]
         public void Skip()
         {
-            var skipArtist = Database.Query<ArtistDN>().Skip(2).ToList();
+            var skipArtist = Database.Query<ArtistEntity>().Skip(2).ToList();
         }
 
         [TestMethod]
         public void SkipOrder()
         {
-            var skipArtist = Database.Query<ArtistDN>().OrderBy(a => a.Name).Skip(2).ToList();
+            var skipArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Skip(2).ToList();
         }
 
         [TestMethod]
         public void SkipSql()
         {
-            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Songs.Skip(2) }).ToList();
+            var takeAlbum = Database.Query<AlbumEntity>().Select(a => new { a.Name, TwoSongs = a.Songs.Skip(2) }).ToList();
         }
 
         [TestMethod]
         public void SkipTake()
         {
-            var skipArtist = Database.Query<ArtistDN>().Skip(2).Take(1).ToList();
+            var skipArtist = Database.Query<ArtistEntity>().Skip(2).Take(1).ToList();
         }
 
         [TestMethod]
         public void SkipTakeOrder()
         {
-            var skipArtist = Database.Query<ArtistDN>().OrderBy(a => a.Name).Skip(2).Take(1).ToList();
+            var skipArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Skip(2).Take(1).ToList();
         }
 
         [TestMethod]
         public void OrderByCommonSelectPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Sex).Select(a => a.Name));
+            TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Sex).Select(a => a.Name));
         }
 
         [TestMethod]
         public void OrderBySelectPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Name).Select(a => a.Name));
+            TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Name).Select(a => a.Name));
         }
 
         [TestMethod]
         public void OrderByDescendingSelectPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().OrderByDescending(a => a.Name).Select(a => a.Name));
+            TestPaginate(Database.Query<ArtistEntity>().OrderByDescending(a => a.Name).Select(a => a.Name));
         }
 
         [TestMethod]
         public void OrderByThenBySelectPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Name).ThenBy(a => a.Id).Select(a => a.Name));
+            TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Name).ThenBy(a => a.Id).Select(a => a.Name));
         }
 
         [TestMethod]
         public void SelectOrderByPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().Select(a => a.Name).OrderBy(a => a));
+            TestPaginate(Database.Query<ArtistEntity>().Select(a => a.Name).OrderBy(a => a));
         }
 
         [TestMethod]
         public void SelectOrderByDescendingPaginate()
         {
-            TestPaginate(Database.Query<ArtistDN>().Select(a => a.Name).OrderByDescending(a => a));
+            TestPaginate(Database.Query<ArtistEntity>().Select(a => a.Name).OrderByDescending(a => a));
         }
 
         private void TestPaginate<T>(IQueryable<T> query)

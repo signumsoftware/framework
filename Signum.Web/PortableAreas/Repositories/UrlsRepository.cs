@@ -74,7 +74,7 @@ namespace Signum.Web.PortableAreas
                     sw.WriteLine("var SF = SF || {}; ");
                     sw.WriteLine("SF.Urls = $.extend(SF.Urls || {}, { ");
                     var helper = RouteHelper.New();
-                    sw.WriteLine(DefaultSFUrls.ToString(kvp => "{0}:'{1}'".Formato(kvp.Key, kvp.Value(helper)), ", "));
+                    sw.WriteLine(DefaultSFUrls.ToString(kvp => "{0}:'{1}'".FormatWith(kvp.Key, kvp.Value(helper)), ", "));
                     sw.WriteLine("});");
                 }
 
@@ -97,7 +97,7 @@ namespace Signum.Web.PortableAreas
 
         public override string ToString()
         {
-            return "UrlsRepository {0}".Formato(VirtualPathPrefix);
+            return "UrlsRepository {0}".FormatWith(VirtualPathPrefix);
         }
     }
 }

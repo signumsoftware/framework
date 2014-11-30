@@ -530,7 +530,7 @@ namespace Signum.Engine
 
         public static string CurrentStatus()
         {
-            return GetCurrent().Follow(a => a.Parent).ToString(t => "{0} Started : {1} Rollbacked: {2} Connection: {3} Transaction: {4}".Formato(
+            return GetCurrent().Follow(a => a.Parent).ToString(t => "{0} Started : {1} Rollbacked: {2} Connection: {3} Transaction: {4}".FormatWith(
                 t.GetType().Name,
                 t.Started,
                 t.IsRolledback,

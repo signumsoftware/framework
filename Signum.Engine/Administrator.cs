@@ -275,7 +275,7 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>(IQueryable<T> query) where T : Entity, new()
         {
-            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
+            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".FormatWith(typeof(T).TypeName()));
 
             if (!query.Any())
                 return;
@@ -301,7 +301,7 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : Entity, new()
         {
-            SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+            SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".FormatWith(typeof(T).TypeName()), () =>
                 query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
         }
 
@@ -335,12 +335,12 @@ namespace Signum.Engine
             if (disableForeignKeys)
             {
                 SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " NOCHECK  Foreign Keys");
-                Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT ALL".Formato(table.Name));
+                Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT ALL".FormatWith(table.Name));
 
                 onDispose += () =>
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " RE-CHECK Foreign Keys");
-                    Executor.ExecuteNonQuery("ALTER TABLE {0}  WITH CHECK CHECK CONSTRAINT ALL".Formato(table.Name));
+                    Executor.ExecuteNonQuery("ALTER TABLE {0}  WITH CHECK CHECK CONSTRAINT ALL".FormatWith(table.Name));
                 };
             }
 
@@ -352,7 +352,7 @@ namespace Signum.Engine
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
                     multiIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
-                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(i, table.Name), "\r\n"));
 
                     onDispose += () =>
                     {
@@ -422,7 +422,7 @@ namespace Signum.Engine
 
             foreach (var t in tuples)
             {
-                SafeConsole.WaitRows("{0}.{1}".Formato(t.ColumnTable.Table.Name.Name, t.ColumnTable.Column.Name), () => t.UpdateScript.ExecuteNonQuery());
+                SafeConsole.WaitRows("{0}.{1}".FormatWith(t.ColumnTable.Table.Name.Name, t.ColumnTable.Column.Name), () => t.UpdateScript.ExecuteNonQuery());
             }
         }
 
@@ -449,7 +449,7 @@ namespace Signum.Engine
             return columns.Select(ct => new ColumnTableScript
             {
                 ColumnTable = ct,
-                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".Formato(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
+                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
                 {
                     pb.CreateReferenceParameter("@oldEntity", oldEntity.Id, ct.Column),
                     pb.CreateReferenceParameter("@newEntity", newEntity.Id, ct.Column),

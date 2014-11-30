@@ -49,7 +49,7 @@ namespace Signum.Engine
             database = replacements.ApplyReplacementsToOld(database, Replacements.KeyTables);
 
             Dictionary<ITable, Dictionary<string, Index>> modelIndices = model.Values
-                .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
+                .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
             model.JoinDictionaryForeach(database, (tn, tab, diff) =>
             {
@@ -288,7 +288,7 @@ namespace Signum.Engine
 @"UPDATE {2}
 SET {0} = GetId{5}({4}.Id)
 FROM {1} {2}
-JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
+JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 tn, ag.NextTableAlias(tn),
                 oldFk, ag.NextTableAlias(oldFk.Name),
                 tabCol.ReferenceTable.Name.Name));
@@ -473,7 +473,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                                        from col in t.Columns.Values
                                        where col.ReferenceTable == table
                                        select new SqlPreCommandSimple("UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed"
-                                           .Formato(t.Name, col.Name, s.Id, c.Id, c.toStr)))
+                                           .FormatWith(t.Name, col.Name, s.Id, c.Id, c.toStr)))
                                         .Combine(Spacing.Simple);
 
                            var delete = table.DeleteSqlSync(c, comment: c.toStr);
@@ -519,14 +519,14 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple("use master -- Start Snapshot"),
                 cmd,
-                new SqlPreCommandSimple("use {0} -- Stop Snapshot".Formato(Connector.Current.DatabaseName())));
+                new SqlPreCommandSimple("use {0} -- Stop Snapshot".FormatWith(Connector.Current.DatabaseName())));
         }
 
         public static SqlPreCommandSimple DisconnectUsers(string databaseName, string variableName)
         {
             return new SqlPreCommandSimple(@"DECLARE @{1} VARCHAR(7000)
 SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
-EXEC(@{1})".Formato(databaseName, variableName));
+EXEC(@{1})".FormatWith(databaseName, variableName));
         }
     }
 
@@ -590,7 +590,7 @@ EXEC(@{1})".Formato(databaseName, variableName));
 
         public override string ToString()
         {
-            return "{0} ({1})".Formato(IndexName, Columns.ToString(", "));
+            return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
         }
 
         public bool IsControlledIndex

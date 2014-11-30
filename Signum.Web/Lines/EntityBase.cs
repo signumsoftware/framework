@@ -183,7 +183,7 @@ namespace Signum.Web
 
         string NewLine(string varLines, string type)
         {
-            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, type, this.Prefix, JsonConvert.SerializeObject(this.OptionsJSInternal()));
+            return "new {0}.{1}($('#{2}'), {3})".FormatWith(varLines, type, this.Prefix, JsonConvert.SerializeObject(this.OptionsJSInternal()));
         }
     }
 }

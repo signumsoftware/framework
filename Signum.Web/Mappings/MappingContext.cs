@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,7 +105,7 @@ namespace Signum.Web
             var mapping = Mapping.ForValue<V>();
 
             if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+                throw new InvalidOperationException("No mapping for value {0}".FormatWith(typeof(V).TypeName()));
 
             var sc = new SubContext<V>(TypeContextUtilities.Compose(this.Prefix, property), null, null, this);
 
@@ -119,7 +119,7 @@ namespace Signum.Web
             var mapping = Mapping.ForValue<V>();
 
             if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+                throw new InvalidOperationException("No mapping for value {0}".FormatWith(typeof(V).TypeName()));
 
             var sc = new SubContext<V>(this.Prefix, null, null, this);
 
@@ -193,7 +193,7 @@ namespace Signum.Web
             var result = TryFindParent<T>();
 
             if (result == null)
-                throw new InvalidOperationException("{0} not found in the chain of parents".Formato(typeof(MappingContext<T>).TypeName()));
+                throw new InvalidOperationException("{0} not found in the chain of parents".FormatWith(typeof(MappingContext<T>).TypeName()));
 
             return result;
         }

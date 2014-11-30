@@ -34,9 +34,9 @@ namespace Signum.Windows.Controls
         {
             InitializeComponent();
             this.Loaded += (s, e) =>UpdateValue(Value);
-            txtYear.Text = DateTimeMessage._0Years.NiceToString().Formato("");
-            txtMonth.Text = DateTimeMessage._0Month.NiceToString().Formato("");
-            txtDay.Text = DateTimeMessage._0Days.NiceToString().Formato("");
+            txtYear.Text = DateTimeMessage._0Years.NiceToString().FormatWith("");
+            txtMonth.Text = DateTimeMessage._0Month.NiceToString().FormatWith("");
+            txtDay.Text = DateTimeMessage._0Days.NiceToString().FormatWith("");
 
             this.Day.ValueChanged += (s, e) => Value = new DateSpan(Value.Years, Value.Months, (int?)e.NewValue ?? 0);
             this.Month.ValueChanged += (s, e) => Value = new DateSpan(Value.Years, (int?)e.NewValue ?? 0, Value.Days);

@@ -26,82 +26,82 @@ namespace Signum.Test.Environment
 
         public static void Load()
         {
-            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
+            var ama = new AmericanMusicAwardEntity { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
                 .Execute(AwardOperation.Save);
 
-            BandDN smashingPumpkins = new BandDN
+            BandEntity smashingPumpkins = new BandEntity
             {
                 Name = "Smashing Pumpkins",
                 Members = "Billy Corgan, James Iha, D'arcy Wretzky, Jimmy Chamberlin"
-                .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married : (Status?)null }).ToMList(),
+                .Split(',').Select(s => new ArtistEntity { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married : (Status?)null }).ToMList(),
                 LastAward = ama,
             }.Execute(BandOperation.Save);
 
-            CountryDN usa = new CountryDN { Name = "USA" };
-            CountryDN japan = new CountryDN { Name = Japan };
+            CountryEntity usa = new CountryEntity { Name = "USA" };
+            CountryEntity japan = new CountryEntity { Name = Japan };
 
             smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
             smashingPumpkins.Execute(BandOperation.Save);
 
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
+            LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
                 .Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Siamese Dream",
                 Year = 1993,
                 Author = smashingPumpkins,
-                Songs = { new SongDN { Name = "Disarm" } },
+                Songs = { new SongEntity { Name = "Disarm" } },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
 
-            AlbumDN mellon = new AlbumDN
+            AlbumEntity mellon = new AlbumEntity
             {
                 Name = "Mellon Collie and the Infinite Sadness",
                 Year = 1995,
                 Author = smashingPumpkins,
                 Songs = 
                 { 
-                    new SongDN { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
-                    new SongDN { Name = "1976" }, 
-                    new SongDN { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
+                    new SongEntity { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
+                    new SongEntity { Name = "1976" }, 
+                    new SongEntity { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
                 },
-                BonusTrack = new SongDN { Name = "Jellybelly" },
+                BonusTrack = new SongEntity { Name = "Jellybelly" },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
             
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
+            LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
             
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Zeitgeist",
                 Year = 2007,
                 Author = smashingPumpkins,
-                Songs = { new SongDN { Name = "Tarantula" } },
-                BonusTrack = new SongDN { Name = "1976" },
+                Songs = { new SongEntity { Name = "Tarantula" } },
+                BonusTrack = new SongEntity { Name = "1976" },
                 Label = wea,
             }.Execute(AlbumOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "American Gothic",
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = { new SongDN { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
+                Songs = { new SongEntity { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
                 Label = wea,
             }.Execute(AlbumOperation.Save);
 
-            var pa = new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }.Execute(AwardOperation.Save);
+            var pa = new PersonalAwardEntity { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }.Execute(AwardOperation.Save);
 
-            ArtistDN michael = new ArtistDN
+            ArtistEntity michael = new ArtistEntity
             {
                 Name = "Michael Jackson",
                 Dead = true,
@@ -110,137 +110,137 @@ namespace Signum.Test.Environment
                 Friends = { smashingPumpkins.Members.SingleEx(a=>a.Name.Contains("Billy Corgan")).ToLite() }
             }.Execute(ArtistOperation.Save); ;
 
-            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }
+            new NoteWithDateEntity { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }
                 .Execute(NoteWithDateOperation.Save);
 
-            new NoteWithDateDN { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null, Target = michael }
+            new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null, Target = michael }
                 .SetMixin((CorruptMixin c) => c.Corrupt, true)
                 .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }
+            LabelEntity universal = new LabelEntity { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }
                 .Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Ben",
                 Year = 1972,
                 Author = michael,
-                Songs = { new SongDN { Name = "Ben" } },
-                BonusTrack = new SongDN { Name = "Michael" },
+                Songs = { new SongEntity { Name = "Ben" } },
+                BonusTrack = new SongEntity { Name = "Michael" },
                 Label = universal,
             }.Execute(AlbumOperation.Save);
 
-            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }
+            LabelEntity sony = new LabelEntity { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }
                 .Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Thriller",
                 Year = 1982,
                 Author = michael,
                 Songs = "Wanna Be Startin' Somethin', Thriller, Beat It"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongDN { Name = "Billie Jean" },
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEntity { Name = "Billie Jean" },
                 Label = sony
             }.Execute(AlbumOperation.Save);
 
-            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }
+            LabelEntity mjj = new LabelEntity { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Bad",
                 Year = 1989,
                 Author = michael,
                 Songs = "Bad, Man in the Mirror, Dirty Diana, Smooth Criminal"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Dangerous",
                 Year = 1991,
                 Author = michael,
                 Songs = "Black or White, Who Is It, Give it to Me"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "HIStory",
                 Year = 1995,
                 Author = michael,
                 Songs = "Billie Jean, Stranger In Moscow"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongDN { Name = "Heal The World" },
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEntity { Name = "Heal The World" },
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Blood on the Dance Floor",
                 Year = 1995,
                 Author = michael,
                 Songs = "Blood on the Dance Floor, Morphine"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save); ;
 
-            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
+            var ga = new GrammyAwardEntity { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
                 .Execute(AwardOperation.Save);
 
-            BandDN sigurRos = new BandDN
+            BandEntity sigurRos = new BandEntity
             {
                 Name = "Sigur Ros",
                 Members = "Jón Þór Birgisson, Georg Hólm, Orri Páll Dýrason"
-                .Split(',').Select(s => new ArtistDN { Name = s.Trim() }.Execute(ArtistOperation.Save)).ToMList(),
+                .Split(',').Select(s => new ArtistEntity { Name = s.Trim() }.Execute(ArtistOperation.Save)).ToMList(),
                 LastAward = ga,
             }.Execute(BandOperation.Save);
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }
+            LabelEntity fatCat = new LabelEntity { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Ágaetis byrjun",
                 Year = 1999,
                 Author = sigurRos,
                 Songs = "Scefn-g-englar"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongDN { Name = "Intro" },
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEntity { Name = "Intro" },
                 Label = fatCat,
             }.Execute(AlbumOperation.Save);
 
-            LabelDN emi = new LabelDN { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }.Execute(LabelOperation.Save);
+            LabelEntity emi = new LabelEntity { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }.Execute(LabelOperation.Save);
 
-            new AlbumDN
+            new AlbumEntity
             {
                 Name = "Takk...",
                 Year = 2005,
                 Author = sigurRos,
                 Songs = "Hoppípolla, Glósóli, Saeglópur"
-                .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongDN { Name = "Svo hljótt" },
+                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEntity { Name = "Svo hljótt" },
                 Label = emi
             }.Execute(AlbumOperation.Save);
 
-            new AwardNominationDN { Author = sigurRos.ToLite(), Award = ga.ToLite() }.Save();
-            new AwardNominationDN { Author = michael.ToLite(), Award = ga.ToLite() }.Save();
-            new AwardNominationDN { Author = smashingPumpkins.ToLite(), Award = ga.ToLite() }.Save();
+            new AwardNominationEntity { Author = sigurRos.ToLite(), Award = ga.ToLite() }.Save();
+            new AwardNominationEntity { Author = michael.ToLite(), Award = ga.ToLite() }.Save();
+            new AwardNominationEntity { Author = smashingPumpkins.ToLite(), Award = ga.ToLite() }.Save();
 
-            new AwardNominationDN { Author = sigurRos.ToLite(), Award = ama.ToLite() }.Save();
-            new AwardNominationDN { Author = michael.ToLite(), Award = ama.ToLite() }.Save();
-            new AwardNominationDN { Author = smashingPumpkins.ToLite(), Award = ama.ToLite() }.Save();
+            new AwardNominationEntity { Author = sigurRos.ToLite(), Award = ama.ToLite() }.Save();
+            new AwardNominationEntity { Author = michael.ToLite(), Award = ama.ToLite() }.Save();
+            new AwardNominationEntity { Author = smashingPumpkins.ToLite(), Award = ama.ToLite() }.Save();
 
-            new AwardNominationDN { Author = michael.ToLite(), Award = pa.ToLite() }.Save();
-            new AwardNominationDN { Author = michael.ToLite(), Award = null}.Save();
+            new AwardNominationEntity { Author = michael.ToLite(), Award = pa.ToLite() }.Save();
+            new AwardNominationEntity { Author = michael.ToLite(), Award = null}.Save();
 
-            new ConfigDN
+            new ConfigEntity
             {
-                EmbeddedConfig = new EmbeddedConfigDN
+                EmbeddedConfig = new EmbeddedConfigEntity
                 {
                     Awards = { ga.ToLite() }
                 }

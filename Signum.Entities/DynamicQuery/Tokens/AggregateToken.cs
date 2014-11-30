@@ -55,7 +55,7 @@ namespace Signum.Entities.DynamicQuery
             if (AggregateFunction == AggregateFunction.Count)
                 return AggregateFunction.NiceToString();
 
-            return "{0} of {1}".Formato(AggregateFunction.NiceToString(), Parent.ToString());
+            return "{0} of {1}".FormatWith(AggregateFunction.NiceToString(), Parent.ToString());
         }
 
         public override string Format

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,7 +33,7 @@ namespace Signum.Entities
             get
             {
                 if (id == null)
-                    throw new InvalidOperationException("{0} is new and has no Id".Formato(this.GetType().Name));
+                    throw new InvalidOperationException("{0} is new and has no Id".FormatWith(this.GetType().Name));
                 return id.Value;
             }
             internal set { id = value; }
@@ -70,7 +70,7 @@ namespace Signum.Entities
 
             if (!IsNew)
             {
-                throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".Formato(automaticPropertyName));
+                throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".FormatWith(automaticPropertyName));
             }
 
             return base.Set<T>(ref field, value, automaticPropertyName);
@@ -83,7 +83,7 @@ namespace Signum.Entities
 
         public string BaseToString()
         {
-            return "{0} ({1})".Formato(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
+            return "{0} ({1})".FormatWith(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
         }
 
         public override bool Equals(object obj)
@@ -140,7 +140,7 @@ namespace Signum.Entities
             }
 
             throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                .Formato(typeof(M).TypeName(), GetType().TypeName()));
+                .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
         }
 
         public MixinEntity GetMixin(Type mixinType)
@@ -154,7 +154,7 @@ namespace Signum.Entities
             }
 
             throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                .Formato(mixinType.TypeName(), GetType().TypeName()));
+                .FormatWith(mixinType.TypeName(), GetType().TypeName()));
         }
 
         [HiddenProperty]
@@ -171,7 +171,7 @@ namespace Signum.Entities
                 }
 
                 throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                    .Formato(mixinName, GetType().TypeName()));
+                    .FormatWith(mixinName, GetType().TypeName()));
             }
         }
 

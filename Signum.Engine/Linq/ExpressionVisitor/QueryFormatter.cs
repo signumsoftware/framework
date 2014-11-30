@@ -650,7 +650,7 @@ namespace Signum.Engine.Linq
                 case SetOperator.Intersect: sb.Append("INTERSECT"); break;
                 case SetOperator.Except: sb.Append("EXCEPT"); break;
                 default:
-                    throw new InvalidOperationException("Unexpected SetOperator {0}".Formato(set.Operator));
+                    throw new InvalidOperationException("Unexpected SetOperator {0}".FormatWith(set.Operator));
             }
 
             VisitSetPart(set.Right);
@@ -671,7 +671,7 @@ namespace Signum.Engine.Linq
                 VisitSetOperator((SetOperatorExpression)source);
             }
             else
-                throw new InvalidOperationException("{0} not expected in SetOperatorExpression".Formato(source.ToString()));
+                throw new InvalidOperationException("{0} not expected in SetOperatorExpression".FormatWith(source.ToString()));
         }
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
@@ -909,7 +909,7 @@ namespace Signum.Engine.Linq
 
         private InvalidOperationException InvalidSqlExpression(Expression expression)
         {
-            return new InvalidOperationException("Unexepected expression on sql {0}".Formato(expression.ToString()));
+            return new InvalidOperationException("Unexepected expression on sql {0}".FormatWith(expression.ToString()));
         }
         
     }

@@ -22,7 +22,7 @@ namespace Signum.Entities
             protected internal set
             {
                 if (modified == ModifiedState.Sealed)
-                    throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
+                    throw new InvalidOperationException("The instance {0} is sealed and can not be modified".FormatWith(this));
 
                 modified = value;
             }

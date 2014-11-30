@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            throw new InvalidOperationException("ColumnToken {0} not found on replacements".Formato(this));
+            throw new InvalidOperationException("ColumnToken {0} not found on replacements".FormatWith(this));
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

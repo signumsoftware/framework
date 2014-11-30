@@ -31,16 +31,16 @@ namespace Signum.Test
         public void SaveCycle()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                ArtistDN m = new ArtistDN() { Name = "Michael" };
-                ArtistDN f = new ArtistDN() { Name = "Frank" };
+                ArtistEntity m = new ArtistEntity() { Name = "Michael" };
+                ArtistEntity f = new ArtistEntity() { Name = "Frank" };
                 m.Friends.Add(f.ToLiteFat());
                 f.Friends.Add(m.ToLiteFat());
 
                 Database.SaveParams(m, f);
 
-                var list = Database.Query<ArtistDN>().Where(a => a == m || a == f).ToList();
+                var list = Database.Query<ArtistEntity>().Where(a => a == m || a == f).ToList();
 
                 Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
                 Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
@@ -54,9 +54,9 @@ namespace Signum.Test
         public void SaveSelfCycle()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                ArtistDN m = new ArtistDN() { Name = "Michael" };
+                ArtistEntity m = new ArtistEntity() { Name = "Michael" };
                 m.Friends.Add(m.ToLiteFat());
 
                 m.Save();
@@ -74,17 +74,17 @@ namespace Signum.Test
         public void SaveMany()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                var prev =  Database.Query<ArtistDN>().Count();
+                var prev =  Database.Query<ArtistEntity>().Count();
 
                 Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
 
-                var list = types.Select(t => new ArtistDN() { Name = t.Name }).ToList();
+                var list = types.Select(t => new ArtistEntity() { Name = t.Name }).ToList();
 
                 list.SaveList();
 
-                Assert.AreEqual(prev + types.Length, Database.Query<ArtistDN>().Count());
+                Assert.AreEqual(prev + types.Length, Database.Query<ArtistEntity>().Count());
 
                 list.ForEach(a => a.Name += "Updated");
 
@@ -98,25 +98,25 @@ namespace Signum.Test
         public void SaveMList()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<AlbumEntity>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
+                var prev = Database.MListQuery((AlbumEntity a) => a.Songs).Count();
 
                 Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
 
-                AlbumDN album = new AlbumDN()
+                AlbumEntity album = new AlbumEntity()
                 {
                     Name = "System Greatest hits",
-                    Author = new ArtistDN { Name = ".Net Framework" },
+                    Author = new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList(),
+                    Songs = types.Select(t => new SongEntity() { Name = t.Name }).ToMList(),
                     State = AlbumState.Saved
                 }.Save();
 
                 Assert2.AssertAll(GraphExplorer.FromRoot(album), a => !a.IsGraphModified);
 
-                Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumDN a) => a.Songs).Count());
+                Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
 
                 album.Name += "Updated";
 
@@ -135,23 +135,23 @@ namespace Signum.Test
         public void SmartSaveMList()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<AlbumEntity>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                var maxRowId = Database.MListQuery((AlbumDN a) => a.Songs).Max(a => a.RowId);
+                var maxRowId = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
 
-                var artist = Database.Query<ArtistDN>().First();
+                var artist = Database.Query<ArtistEntity>().First();
 
-                var album = new AlbumDN
+                var album = new AlbumEntity
                 {
                     Name = "Test album",
                     Author = artist,
                     Year = 2000,
-                    Songs = { new SongDN { Name = "Song 1" } },
+                    Songs = { new SongEntity { Name = "Song 1" } },
                     State = AlbumState.Saved,
                 };
 
-                var innerList = ((IMListPrivate<SongDN>)album.Songs).InnerList;
+                var innerList = ((IMListPrivate<SongEntity>)album.Songs).InnerList;
 
                 Assert.IsNull(innerList[0].RowId);
                 //Insert and row-id is set
@@ -160,7 +160,7 @@ namespace Signum.Test
                 Assert.IsTrue(innerList[0].RowId > maxRowId); 
 
 
-                album.Songs.Add(new SongDN { Name = "Song 2" });
+                album.Songs.Add(new SongEntity { Name = "Song 2" });
 
                 Assert.IsNull(innerList[1].RowId);
 
@@ -178,7 +178,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
 
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEntity>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
 
@@ -190,7 +190,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
                     
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEntity>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
@@ -203,17 +203,17 @@ namespace Signum.Test
         public void SmartSaveMListOrder()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<AlbumEntity>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                var artist = Database.Query<ArtistDN>().First();
+                var artist = Database.Query<ArtistEntity>().First();
 
-                var album = new AlbumDN
+                var album = new AlbumEntity
                 {
                     Name = "Test album",
                     Author = artist,
                     Year = 2000,
-                    Songs = { new SongDN { Name = "Song 0" }, new SongDN { Name = "Song 1" }, new SongDN { Name = "Song 2" }, },
+                    Songs = { new SongEntity { Name = "Song 0" }, new SongEntity { Name = "Song 1" }, new SongEntity { Name = "Song 2" }, },
                     State = AlbumState.Saved,
                 };
 
@@ -263,21 +263,21 @@ namespace Signum.Test
         public void SaveManyMList()
         {
             using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            using (OperationLogic.AllowSave<AlbumEntity>())
+            using (OperationLogic.AllowSave<ArtistEntity>())
             {
-                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
+                var prev = Database.MListQuery((AlbumEntity a) => a.Songs).Count();
 
                 var authors = 
-                    Database.Query<BandDN>().Take(6).ToList().Concat<IAuthorDN>(
-                    Database.Query<ArtistDN>().Take(8).ToList()).ToList();
+                    Database.Query<BandEntity>().Take(6).ToList().Concat<IAuthorEntity>(
+                    Database.Query<ArtistEntity>().Take(8).ToList()).ToList();
 
-                List<AlbumDN> albums = 0.To(16).Select(i => new AlbumDN()
+                List<AlbumEntity> albums = 0.To(16).Select(i => new AlbumEntity()
                 {
-                    Name = "System Greatest hits {0}".Formato(i),
-                    Author = i < authors.Count ? authors[i] : new ArtistDN { Name = ".Net Framework" },
+                    Name = "System Greatest hits {0}".FormatWith(i),
+                    Author = i < authors.Count ? authors[i] : new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }},
+                    Songs =  { new SongEntity { Name = "Compilation {0}".FormatWith(i) }},
                     State = AlbumState.Saved
                 }).ToList();
 
@@ -285,7 +285,7 @@ namespace Signum.Test
 
                 Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => !a.IsGraphModified);
 
-                Assert.AreEqual(prev + 16, Database.MListQuery((AlbumDN a) => a.Songs).Count());
+                Assert.AreEqual(prev + 16, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
 
                 albums.ForEach(a => a.Name += "Updated");
 
@@ -306,14 +306,14 @@ namespace Signum.Test
             using (Transaction tr = new Transaction())
             using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
-                var albums = Database.Query<AlbumDN>().ToList();
+                var albums = Database.Query<AlbumEntity>().ToList();
 
                 Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.Modified == ModifiedState.Sealed);
 
                 Assert2.Throws<InvalidOperationException>("sealed", () => albums.First().Name = "New name");
 
 
-                var notes = Database.Query<NoteWithDateDN>().ToList();
+                var notes = Database.Query<NoteWithDateEntity>().ToList();
                 Assert2.AssertAll(GraphExplorer.FromRoots(notes), a => a.Modified == ModifiedState.Sealed);
 
                 //tr.Commit();
@@ -325,9 +325,9 @@ namespace Signum.Test
         {
             using (Transaction tr = new Transaction())
             {
-                var max = Database.Query<NoteWithDateDN>().Select(a => a.Id).ToList().Max();
+                var max = Database.Query<NoteWithDateEntity>().Select(a => a.Id).ToList().Max();
 
-                var list = Database.Query<AlbumDN>().Select(a => new NoteWithDateDN
+                var list = Database.Query<AlbumEntity>().Select(a => new NoteWithDateEntity
                 {
                     CreationTime = DateTime.Now,
                     Text = "Nice album " + a.Name,
@@ -336,7 +336,7 @@ namespace Signum.Test
 
                 Administrator.BulkInsert(list);
 
-                Database.Query<NoteWithDateDN>().Where(a => a.Id > max).UnsafeDelete(); 
+                Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete(); 
 
                 tr.Commit();
             }
@@ -349,18 +349,18 @@ namespace Signum.Test
         {
             using (Transaction tr = new Transaction())
             {
-                var max = Database.MListQuery((AlbumDN a) => a.Songs).Max(a => a.RowId);
+                var max = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
 
-                var list = Database.Query<AlbumDN>().Select(a => new MListElement<AlbumDN, SongDN>
+                var list = Database.Query<AlbumEntity>().Select(a => new MListElement<AlbumEntity, SongEntity>
                 {
                     Order = 100,
-                    Element = new SongDN { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
+                    Element = new SongEntity { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
                     Parent = a,
                 }).ToList();
 
-                Administrator.BulkInsertMList((AlbumDN a) => a.Songs, list);
+                Administrator.BulkInsertMList((AlbumEntity a) => a.Songs, list);
 
-                Database.MListQuery((AlbumDN a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
+                Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 
                 tr.Commit();
             }

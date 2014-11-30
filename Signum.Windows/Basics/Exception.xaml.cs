@@ -35,7 +35,7 @@ namespace Signum.Windows.Basics
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ExceptionDN>() { View = e => new ExceptionCtrl(), Icon = ImageLoader.GetImageSortName("exception.png") });
+                Navigator.AddSetting(new EntitySettings<ExceptionEntity>() { View = e => new ExceptionCtrl(), Icon = ImageLoader.GetImageSortName("exception.png") });
             }
         }
     }

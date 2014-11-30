@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -199,7 +199,7 @@ namespace Signum.Utilities
         {
             int index = dictionary.Keys.IndexOf(value);
             if (index == -1)
-                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().Formato(value));
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().FormatWith(value));
 
             return index;
         }

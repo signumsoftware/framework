@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,7 +68,7 @@ namespace Signum.Entities.DynamicQuery
                     fi.GetCustomAttribute<ImplementedByAllAttribute>());
 
             if (cleanType.IsAbstract)
-                throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(PropertyInfo.PropertyName()));
+                throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(PropertyInfo.PropertyName()));
 
             return Implementations.By(cleanType);
         }

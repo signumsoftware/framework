@@ -36,11 +36,11 @@ namespace Signum.Windows.Basics
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<TypeDN>() { View = e => new TypeUI()});
+                Navigator.AddSetting(new EntitySettings<TypeEntity>() { View = e => new TypeUI()});
             }
         }
 
-        public static IEnumerable<TypeDN> ViewableServerTypes()
+        public static IEnumerable<TypeEntity> ViewableServerTypes()
         {
             return from t in Navigator.Manager.EntitySettings.Keys
                    let tdn = Server.ServerTypes.TryGetC(t)

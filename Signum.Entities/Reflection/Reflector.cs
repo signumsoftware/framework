@@ -37,7 +37,7 @@ namespace Signum.Entities.Reflection
 
         static Reflector()
         {
-            DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
+            DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityEntity
             DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
 
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
@@ -92,8 +92,8 @@ namespace Signum.Entities.Reflection
 
         public static string CleanTypeName(Type t)
         {
-            if (t.Name.EndsWith("DN"))
-                return t.Name.RemoveSuffix("DN");
+            if (t.Name.EndsWith("Entity"))
+                return t.Name.RemoveSuffix("Entity");
 
             if (t.Name.EndsWith("Model"))
                 return t.Name.RemoveSuffix("Model");
@@ -229,7 +229,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.Parameter: return null;
             }
 
-            throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
+            throw new InvalidCastException("Not supported {0}".FormatWith(e.NodeType));
         }
 
         static readonly string[] collectionMethods = new[] { "Element" };
@@ -259,7 +259,7 @@ namespace Signum.Entities.Reflection
                 }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
+                default: throw new InvalidCastException("Not supported {0}".FormatWith(e.NodeType));
             }
         }
 
@@ -268,7 +268,7 @@ namespace Signum.Entities.Reflection
             var fi = TryFindFieldInfo(type, value);
 
             if (fi == null)
-                throw new InvalidOperationException("No FieldInfo for '{0}' found on '{1}'".Formato(value.Name, type.Name));
+                throw new InvalidOperationException("No FieldInfo for '{0}' found on '{1}'".FormatWith(value.Name, type.Name));
 
             return fi;
         }
@@ -292,7 +292,7 @@ namespace Signum.Entities.Reflection
             var pi = TryFindPropertyInfo(fi);
 
             if (pi == null)
-                throw new InvalidOperationException("No PropertyInfo for '{0}' found".Formato(fi.Name));
+                throw new InvalidOperationException("No PropertyInfo for '{0}' found".FormatWith(fi.Name));
 
             return pi;
         }
@@ -473,7 +473,7 @@ namespace Signum.Entities.Reflection
         public static void AssertValidIdentifier(string step)
         {
             if (!ValidIdentifier(step))
-                throw new FormatException("'{0}' is not a valid identifier".Formato(step));
+                throw new FormatException("'{0}' is not a valid identifier".FormatWith(step));
         }
     }
 }
