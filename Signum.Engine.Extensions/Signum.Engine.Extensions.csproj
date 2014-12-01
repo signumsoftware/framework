@@ -185,6 +185,7 @@
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
     <Compile Include="Word\WordTemplateParser.cs" />
     <Compile Include="Word\WordLogic.cs" />
+    <Compile Include="Word\WordTemplateParser.Nodes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

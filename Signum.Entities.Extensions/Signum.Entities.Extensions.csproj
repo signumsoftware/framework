@@ -189,8 +189,8 @@
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
-    <Compile Include="Word\WordReportDN.cs" />
-    <Compile Include="Word\WordTemplate.cs" />
+    <Compile Include="Word\WordReport.cs" />
+    <Compile Include="Word\WordTemplateModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

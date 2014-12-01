@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -76,9 +77,9 @@ namespace Signum.Engine.Word
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            var parsedDoc = new WordTemplateParser(qd).ParseDocument(template.Template.Entity.BinaryFile);
+            new WordTemplateParser(qd, null).ParseDocument(template.Template.Entity.BinaryFile);
 
-
+            return null;
         }
     }
 }
