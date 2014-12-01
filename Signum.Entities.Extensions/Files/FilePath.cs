@@ -94,7 +94,7 @@ namespace Signum.Entities.Files
         public string Sufix
         {
             get { return sufix; }
-             set { Set(ref sufix, value); }
+            set { Set(ref sufix, value); }
         }
 
         [NotNullable]
@@ -110,7 +110,7 @@ namespace Signum.Entities.Files
         public FileRepositoryEntity Repository
         {
             get { return repository; }
-            internal set { Set(ref repository, value); }
+            set { Set(ref repository, value); }
         }
 
         static Expression<Func<FilePathEntity, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);
