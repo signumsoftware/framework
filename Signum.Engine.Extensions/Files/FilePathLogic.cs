@@ -34,7 +34,7 @@ namespace Signum.Engine.Files
             return WebDownloadExpression.Evaluate(fp);
         }
 
-        static Dictionary<FileTypeSymbol, FileTypeAlgorithm> fileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
+        public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> fileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
         {
