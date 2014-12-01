@@ -20,6 +20,8 @@ namespace Signum.Windows
 
     public static class Server
     {
+        public static bool OfflineMode { get; set; }
+
         static Func<IBaseServer> getServer;
         
         static IBaseServer current;
@@ -41,11 +43,17 @@ namespace Signum.Windows
 
         public static void SetSymbolIds<S>() where S :Symbol 
         {
+            if (OfflineMode)
+                return;
+
             Symbol.SetSymbolIds<S>(Server.Return((IBaseServer s) => s.GetSymbolIds(typeof(S))));
         }
 
         public static void SetSemiSymbolIds<S>() where S : SemiSymbol
         {
+            if (OfflineMode)
+                return;
+
             SemiSymbol.SetSemiSymbolIdsAndNames<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIdsAndNames(typeof(S))));
         }
 
@@ -61,7 +69,6 @@ namespace Signum.Windows
 
             if (!Connect())
                 throw new NotConnectedToServerException(ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue.NiceToString());
-
         }
 
         public static bool Connect()
@@ -209,6 +216,21 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.Save(entidad)); 
         }
 
+        public static bool Exists<T>(int id) where T : IdentifiableEntity
+        {
+            return Return((IBaseServer s) => s.Exists(typeof(T), id));
+        }
+
+        public static bool Exists<T>(Lite<T> lite) where T : class, IIdentifiable
+        {
+            return Return((IBaseServer s) => s.Exists(lite.EntityType, lite.Id));
+        }
+
+        public static bool Exists<T>(T entity) where T : class, IIdentifiable
+        {
+            return Return((IBaseServer s) => s.Exists(entity.GetType(), entity.Id));
+        }
+
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
             return (T)Return((IBaseServer s) => s.Retrieve(typeof(T), id)); 
@@ -267,6 +289,13 @@ namespace Signum.Windows
             where T: IdentifiableEntity
         {
             return Return((IBaseServer s) => s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
+        }
+
+        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+        {
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
+
+            return lite;
         }
 
         static ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>>();
@@ -350,12 +379,8 @@ namespace Signum.Windows
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
-        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
-        {
-            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
+        
 
-           return lite;
-        }
     }
 
     [Serializable]

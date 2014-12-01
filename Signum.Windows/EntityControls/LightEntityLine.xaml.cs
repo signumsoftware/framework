@@ -44,7 +44,7 @@ namespace Signum.Windows
 
                 Type cleanType = Entity is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)Entity).EntityType : Entity.GetType();
 
-                btNavigate.IsEnabled = Navigator.IsNavigable(cleanType, isSearchEntity: false);
+                btNavigate.IsEnabled = Navigator.IsNavigable(cleanType, isSearch: false);
             }
             else
             {

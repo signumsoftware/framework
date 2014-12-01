@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             return new ScalarSubqueryRewriter().Visit(expression);
         }
 
-        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             var saveInAggregate = this.inAggregate;
 
@@ -35,7 +35,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             var saveFrom = this.currentFrom;
             var saveInAggregate = this.inAggregate;
@@ -47,9 +47,9 @@ namespace Signum.Engine.Linq
 
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
-            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
-            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
+            ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
 
             from = this.currentFrom;
 
@@ -63,7 +63,7 @@ namespace Signum.Engine.Linq
 
         }
 
-        protected override Expression VisitScalar(ScalarExpression scalar)
+        protected internal override Expression VisitScalar(ScalarExpression scalar)
         {
             if (connector.SupportsScalarSubquery &&
                (!inAggregate || connector.SupportsScalarSubqueryInAggregates))

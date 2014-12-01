@@ -26,7 +26,8 @@ namespace Signum.Web
             CommonTask += TaskSetLabelText;
             CommonTask += TaskSetFormatText;
             CommonTask += TaskSetUnitText;
-            //CommonTask += new CommonTask(TaskSetImplementations);
+            //CommonTask += TaskSetImplementations;
+            CommonTask += TaskSetMove;
             CommonTask += TaskSetReadOnly;
             CommonTask += TaskSetHtmlProperties;
         }
@@ -89,6 +90,17 @@ namespace Signum.Web
                             el.Autocomplete = false;
                     }
                 }
+            }
+        }
+
+        public static void TaskSetMove(BaseLine bl)
+        {
+            EntityListBase eb = bl as EntityListBase;
+            if (eb != null)
+            {
+                PropertyRoute route = bl.PropertyRoute;
+
+                eb.Move = bl.PropertyRoute.FieldInfo.HasAttribute<PreserveOrderAttribute>();
             }
         }
 

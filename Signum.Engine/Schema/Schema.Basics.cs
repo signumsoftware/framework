@@ -162,23 +162,30 @@ namespace Signum.Engine.Maps
             if (Mixins != null)
                 fields = fields.Concat(Mixins.Values.SelectMany(m => m.Fields.Values));
 
-            var result = fields.SelectMany(f => f.Field.GeneratIndexes(this)).ToList();
+            var result = fields.SelectMany(f => f.Field.GenerateIndexes(this)).ToList();
 
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
 
             if (result.OfType<UniqueIndex>().Any())
             {
-                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToAllUniqueIndexesAttribute>() != null)
+                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToUniqueIndexesAttribute>() != null)
                    .SelectMany(f => Index.GetColumnsFromFields(f.Field))
                    .ToList();
 
                 if (attachedFields.Any())
                 {
-                    foreach (var ui in result.OfType<UniqueIndex>())
+                    result = result.Select(ix =>
                     {
-                        ui.Columns = ui.Columns.Concat(attachedFields).ToArray();
-                    }
+                        var ui = ix as UniqueIndex;
+                        if (ui == null || ui.AvoidAttachToUniqueIndexes)
+                            return ix;
+
+                        return new UniqueIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                        {
+                            Where = ui.Where
+                        };
+                    }).ToList();
                 }
             }
 
@@ -207,8 +214,9 @@ namespace Signum.Engine.Maps
             return tables; 
         }
 
-        
-
+        /// <summary>
+        /// Use this method also to change the Server
+        /// </summary>
         public void ToDatabase(DatabaseName databaseName)
         {
             this.Name = this.Name.OnDatabase(databaseName);
@@ -249,7 +257,7 @@ namespace Signum.Engine.Maps
     public abstract partial class Field
     {
         public Type FieldType { get; private set; }
-        public IndexType IndexType { get; set; }
+        public UniqueIndex UniqueIndex { get; set; }
 
         public Field(Type fieldType)
         {
@@ -258,30 +266,33 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<IColumn> Columns();
 
-        public virtual IEnumerable<Index> GeneratIndexes(ITable table)
+        public virtual IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            switch (IndexType)
-            {
-                case IndexType.None: return Enumerable.Empty<Index>();
-                case IndexType.Unique: return new[] { new UniqueIndex(table, Index.GetColumnsFromFields(this)) };
-                case IndexType.UniqueMultipleNulls:
-                    var index = new UniqueIndex(table, Index.GetColumnsFromFields(this));
-                    index.Where = IndexWhereExpressionVisitor.IsNull(this, false);
-                    return new[] { index };
-            }
-            throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
+            if (UniqueIndex == null)
+                return Enumerable.Empty<Index>();
+
+            return new[] { UniqueIndex };
+        }
+
+        public virtual UniqueIndex GenerateUniqueIndex(ITable table, UniqueIndexAttribute attribute)
+        {
+            if (attribute == null)
+                return null;
+
+            var result = new UniqueIndex(table, Index.GetColumnsFromFields(this)) 
+            { 
+                AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes 
+            }; 
+
+            if(attribute.AllowMultipleNulls)
+                result.Where = IndexWhereExpressionVisitor.IsNull(this, false);
+
+            return result;
         }
 
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
         internal abstract IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter); 
-    }
-
-    public enum IndexType
-    {
-        None,
-        Unique,
-        UniqueMultipleNulls
     }
 
     public static class FieldExtensions
@@ -365,9 +376,9 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            if (IndexType != Maps.IndexType.None)
+            if (this.UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
             return Enumerable.Empty<Index>();
@@ -403,13 +414,12 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} {1} ({2},{3},{4}) {5}".Formato(
+            return "{0} {1} ({2},{3},{4})".Formato(
                 Name,
                 SqlDbType,
                 Nullable ? "Nullable" : "",
                 Size,
-                Scale,
-                IndexType.DefaultToNull().ToString());
+                Scale);
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -498,9 +508,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table));
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -577,7 +587,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
             throw new InvalidOperationException();
         }
@@ -623,12 +633,11 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2}) {3}".Formato(
+            return "{0} -> {1} {4} ({2})".Formato(
                 Name,
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",
-                Nullable ? "Nullable" : "",
-                IndexType.DefaultToNull().ToString());
+                Nullable ? "Nullable" : "");
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -646,12 +655,12 @@ namespace Signum.Engine.Maps
             }); 
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            if (IndexType == Maps.IndexType.None)
+            if (UniqueIndex == null)
                 return new[] { new Index(table, (IColumn)this) };
 
-            return base.GeneratIndexes(table);
+            return base.GenerateIndexes(table);
         }
 
         bool clearEntityOnSaving;
@@ -681,12 +690,11 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2}) {3}".Formato(
+            return "{0} -> {1} {4} ({2})".Formato(
                 Name,
                 "-",
                 IsLite ? "Lite" : "",
-                Nullable ? "Nullable" : "",
-                IndexType.DefaultToNull().ToString());
+                Nullable ? "Nullable" : "");
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -738,9 +746,9 @@ namespace Signum.Engine.Maps
             }));
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            return this.Columns().Select(c => new Index(table, c)).Concat(base.GeneratIndexes(table));
+            return this.Columns().Select(c => new Index(table, c)).Concat(base.GenerateIndexes(table));
         }
 
         bool clearEntityOnSaving;
@@ -800,12 +808,12 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            if (IndexType == Maps.IndexType.None)
+            if (UniqueIndex == null)
                 return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
 
-            return base.GeneratIndexes(table);
+            return base.GenerateIndexes(table);
         }
 
         internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
@@ -859,9 +867,9 @@ namespace Signum.Engine.Maps
             return new IColumn[0];
         }
 
-        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        public override IEnumerable<Index> GenerateIndexes(ITable table)
         {
-            if (IndexType != Maps.IndexType.None)
+            if (UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
 
             return Enumerable.Empty<Index>();
@@ -888,7 +896,7 @@ namespace Signum.Engine.Maps
     {
         public class PrimaryKeyColumn : IColumn
         {
-            string IColumn.Name { get { return SqlBuilder.PrimaryKeyName; } }
+            public string Name { get { return SqlBuilder.PrimaryKeyName; } }
             bool IColumn.Nullable { get { return false; } }
             SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
             string IColumn.UdtTypeName { get { return null; } }
@@ -905,6 +913,7 @@ namespace Signum.Engine.Maps
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
+        public FieldValue Order { get; set; }
         public Field Field { get; set; }
 
         public Type CollectionType { get; private set; }
@@ -924,14 +933,21 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
+            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference }; 
+
+            if(Order != null)
+                cols.Add(Order); 
+
+            cols.AddRange(Field.Columns());
+
+            Columns = cols.ToDictionary(a => a.Name);
         }
 
         public List<Index> GeneratAllIndexes()
         {
-            var result = BackReference.GeneratIndexes(this).ToList();
+            var result = BackReference.GenerateIndexes(this).ToList();
 
-            result.AddRange(Field.GeneratIndexes(this));
+            result.AddRange(Field.GenerateIndexes(this));
 
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
@@ -969,15 +985,5 @@ namespace Signum.Engine.Maps
         {
             this.Name = this.Name.OnSchema(schemaName);
         }
-    }
-
-
-    public enum InitLevel
-    {
-        Level0SyncEntities,
-        Level1SimpleEntities,
-        Level2NormalEntities,
-        Level3MainEntities,
-        Level4BackgroundProcesses,
     }
 }

@@ -90,6 +90,9 @@ namespace Signum.Engine.Linq
         }
 
         public abstract override string ToString();
+
+        protected abstract override Expression Accept(ExpressionVisitor visitor);
+
     }
 
     internal abstract class SourceExpression : DbExpression
@@ -149,6 +152,11 @@ namespace Signum.Engine.Linq
 
             return expression;
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSqlTableValuedFunction(this);
+        }
     }
 
     internal class TableExpression : SourceWithAliasExpression
@@ -181,6 +189,11 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Name));
 
             return expression;
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitTable(this);
         }
     }
 
@@ -220,6 +233,11 @@ namespace Signum.Engine.Linq
         public override int GetHashCode()
         {
             return Alias.GetHashCode() ^ Name.GetHashCode();
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitColumn(this);
         }
     }
 
@@ -274,6 +292,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0}({1})".Formato(AggregateFunction, Source.NiceToString() ?? "*");
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitAggregate(this);
         }
     }
 
@@ -377,12 +400,12 @@ namespace Signum.Engine.Linq
                 if (Where != null)
                     roles |= SelectRoles.Where;
 
-                if (GroupBy != null && GroupBy.Count > 0)
+                if (GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
                 else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
                     roles |= SelectRoles.Aggregate;
 
-                if (OrderBy != null && OrderBy.Count > 0)
+                if (OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
 
                 if (!Columns.All(cd => cd.Expression is ColumnExpression))
@@ -403,11 +426,11 @@ namespace Signum.Engine.Linq
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".Formato(
                 IsDistinct ? "DISTINCT " : "",
                 Top.Try(t => "TOP {0} ".Formato(t.NiceToString())),
-                Columns.Try(c => c.ToString(", ")),
+                Columns.ToString(", "),
                 From.Try(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
                 Where.Try(a => "WHERE " + a.NiceToString() + "\r\n"),
-                OrderBy.Try(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
-                GroupBy.Try(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
+                OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
+                GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.NiceToString(), " ,") + "\r\n") : null,
                 SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
                 Alias);
         }
@@ -420,6 +443,11 @@ namespace Signum.Engine.Linq
                 return true;
 
             return false;
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSelect(this);
         }
     }
 
@@ -469,6 +497,11 @@ namespace Signum.Engine.Linq
         {
             return "{0}\r\n{1}\r\n{2}\r\nON {3}".Formato(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitJoin(this);
+        }
     }
     
     internal enum SetOperator
@@ -507,6 +540,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0}\r\n{1}\r\n{2}\r\n as {3}".Formato(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSetOperator(this);
         }
     }
 
@@ -589,6 +627,11 @@ namespace Signum.Engine.Linq
         {
             return Value.ToString();
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSqlEnum(this);
+        }
     }
 
     internal class SqlCastExpression : DbExpression
@@ -611,6 +654,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "Cast({0} as {1})".Formato(Expression.NiceToString(), SqlDbType.ToString().ToUpper());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSqlCast(this);
         }
     }
 
@@ -635,6 +683,11 @@ namespace Signum.Engine.Linq
                 return result;
             return Object.ToString() + "." + result;
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSqlFunction(this);
+        }
     }
 
     internal class SqlConstantExpression : DbExpression
@@ -655,6 +708,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return Value.TryToString() ?? "NULL";
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSqlConstant(this);
         }
     }
 
@@ -768,6 +826,11 @@ namespace Signum.Engine.Linq
             sb.AppendLine("END");
             return sb.ToString();
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitCase(this);
+        }
     }
 
     internal class LikeExpression : DbExpression
@@ -790,6 +853,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0} LIKE {1}".Formato(Expression.NiceToString(), Pattern.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitLike(this);
         }
     }
 
@@ -815,6 +883,11 @@ namespace Signum.Engine.Linq
         {
             return "SCALAR({0})".Formato(Select.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitScalar(this);
+        }
     }
 
     internal class IsNullExpression : DbExpression
@@ -830,6 +903,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0} IS NULL".Formato(Expression.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitIsNull(this);
         }
     }
 
@@ -847,6 +925,11 @@ namespace Signum.Engine.Linq
         {
             return "{0} IS NOT NULL".Formato(Expression.NiceToString());
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitIsNotNull(this);
+        }
     }
 
     internal class ExistsExpression : SubqueryExpression
@@ -859,6 +942,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "EXIST({0})".Formato(Select.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitExists(this);
         }
     }
 
@@ -904,6 +992,11 @@ namespace Signum.Engine.Linq
             else
                 return "{0} IN ({1})".Formato(Expression.NiceToString(), Values.ToString(", "));
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitIn(this);
+        }
     }
 
     internal class AggregateRequestsExpression : DbExpression
@@ -921,6 +1014,11 @@ namespace Signum.Engine.Linq
         {
             return "AggregateRequest OF {0}({1})".Formato(GroupByAlias, Aggregate);
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitAggregateRequest(this);
+        }
     }
 
     internal class RowNumberExpression : DbExpression
@@ -936,6 +1034,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "ROW_NUMBER()";
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitRowNumber(this);
         }
     }
 
@@ -981,6 +1084,11 @@ namespace Signum.Engine.Linq
         {
             return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".Formato(Select.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitProjection(this);
+        }
     }
 
     internal class ChildProjectionExpression : DbExpression
@@ -1002,6 +1110,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0}.InLookup({1})".Formato(Projection.NiceToString(), OuterKey.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitChildProjection(this);
         }
     }
 
@@ -1034,6 +1147,11 @@ namespace Signum.Engine.Linq
                 Source.NiceToString(), 
                 Where.Try(w => "WHERE " + w.NiceToString())); 
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitDelete(this);
+        }
     }
 
     internal class UpdateExpression : CommandExpression
@@ -1060,6 +1178,11 @@ namespace Signum.Engine.Linq
                 Source.NiceToString(),
                 Where.Try(w => "WHERE " + w.NiceToString()));
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitUpdate(this);
+        }
     }
 
     internal class InsertSelectExpression : CommandExpression
@@ -1083,6 +1206,11 @@ namespace Signum.Engine.Linq
                 Assigments.ToString(a => a.Column, ",\r\n"),
                 Assigments.ToString(a => a.Expression.NiceToString(), ",\r\n"),
                 Source.NiceToString());
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitInsertSelect(this);
         }
     }
 
@@ -1117,6 +1245,11 @@ namespace Signum.Engine.Linq
         {
             return Commands.ToString(a => a.NiceToString(), "\r\n\r\n");
         }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitCommandAggregate(this);
+        }
     }
 
     internal class SelectRowCountExpression : CommandExpression
@@ -1129,6 +1262,11 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "SELECT @@rowcount";
+        }
+
+        protected override Expression Accept(ExpressionVisitor visitor)
+        {
+            return ((DbExpressionVisitor)visitor).VisitSelectRowCount(this);
         }
     }
 }

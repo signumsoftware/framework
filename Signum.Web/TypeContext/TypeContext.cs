@@ -15,6 +15,7 @@ using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 using System.Web.WebPages;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -58,6 +59,7 @@ namespace Signum.Web
         public static readonly Context Default = new Context(null, null)
         {
             FormGroupStyle = FormGroupStyle.LabelColumns,
+            FormGroupSize = FormGroupSize.Small,
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
             PlaceholderLabels = false,
@@ -68,6 +70,23 @@ namespace Signum.Web
         {
             get { return formGroupStyle ?? Parent.FormGroupStyle; }
             set { formGroupStyle = value; }
+        }
+
+        FormGroupSize? formGroupSize;
+        public FormGroupSize FormGroupSize
+        {
+            get { return formGroupSize ?? Parent.FormGroupSize; }
+            set { formGroupSize = value; }
+        }
+
+        public string FormGroupSizeCss 
+        {
+            get 
+            {
+                return FormGroupSize == FormGroupSize.Normal ? "form-md" :
+                    FormGroupSize == FormGroupSize.Small ? "form-sm" :
+                    "form-xs";
+            }
         }
 
         bool? placeholderLabels;
@@ -186,14 +205,45 @@ namespace Signum.Web
         }
     }
 
+    /// <summary>
+    /// Nomenclature from http://getbootstrap.com/css/#forms
+    /// </summary>
     public enum FormGroupStyle
     {
+        /// <summary>
+        /// Unaffected by FormGroupSize
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         Basic,
+
+        /// <summary>
+        /// Requires form-vertical container
+        /// </summary>
         BasicDown,
+
+        /// <summary>
+        /// Requires form-vertical / form-inline container
+        /// </summary>
         SrOnly,
+
+        /// <summary>
+        /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
+        /// </summary>
         LabelColumns,
     }
+
+    public enum FormGroupSize
+    { 
+        Normal,
+        Small,
+        ExtraSmall
+    }
+
+
 
     #region TypeContext
     public abstract class TypeContext : Context
@@ -247,6 +297,12 @@ namespace Signum.Web
         }
 
         internal abstract TypeContext Clone(object newValue);
+
+        internal static void AssertId(string id)
+        {
+            if (!Regex.IsMatch(id, @"^[A-Za-z][A-Za-z0-9-_]*$"))
+                throw new InvalidOperationException("'{0}' is not a valid HTML id".Formato(id));
+        }
     }
     #endregion
 
@@ -327,16 +383,18 @@ namespace Signum.Web
     public class TypeElementContext<T> : TypeContext<T>
     {
         public int Index { get; private set; }
+        public int? RowId { get; private set; }
 
-        public TypeElementContext(T value, TypeContext parent, int index)
+        public TypeElementContext(T value, TypeContext parent, int index, int? rowId)
             : base(value, parent, index.ToString(), parent.PropertyRoute.Add("Item"))
         {
             this.Index = index;
+            this.RowId = rowId;
         }
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeElementContext<T>((T)newValue, (TypeContext)Parent, Index);
+            return new TypeElementContext<T>((T)newValue, (TypeContext)Parent, Index, RowId);
         }
     }
     #endregion
@@ -372,54 +430,69 @@ namespace Signum.Web
             return this;
         }
 
+        HashSet<string> hiddenTabs;
+
+        public ViewOverrides<T> HideTab(string id)
+        {
+            if (hiddenTabs == null)
+                hiddenTabs = new HashSet<string>();
+            hiddenTabs.Add(id);
+
+            return this;
+        }
+
         List<Tab> IViewOverrides.ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context)
         {
+            if (hiddenTabs != null && hiddenTabs.Contains(containerId))
+                return null;
+
             List<Tab> newTabs = new List<Tab>();
 
             var before = BeforeTabDictionary.TryGetC(containerId);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var b in before.GetInvocationListTyped())
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
             foreach (var item in tabs)
-                Expand(item, helper, context, newTabs);
+                ExpandTab(item, helper, context, newTabs);
 
             var after = AfterTabDictionary.TryGetC(containerId);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var a in after.GetInvocationListTyped())
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
             return newTabs;
         }
 
-        void Expand(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
+        void ExpandTab(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
         {
             var before = BeforeTabDictionary.TryGetC(item.Id);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var b in before.GetInvocationListTyped())
                 {
                     var newTab = b(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
 
-            newTabs.Add(item);
+            if (hiddenTabs == null || !hiddenTabs.Contains(item.Id))
+                newTabs.Add(item);
 
             var after = AfterTabDictionary.TryGetC(item.Id);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, Tab>>())
+                foreach (var a in after.GetInvocationListTyped())
                 {
                     var newTab = a(helper, context);
                     if (newTab != null)
-                        Expand(newTab, helper, context, newTabs);
+                        ExpandTab(newTab, helper, context, newTabs);
                 }
         }
 
@@ -461,12 +534,12 @@ namespace Signum.Web
         {
             var before = beforeLine.TryGetC(propertyRoute);
             if (before != null)
-                foreach (var b in before.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                foreach (var b in before.GetInvocationListTyped())
                     result = b(helper, tc).Concat(result);
 
             var after = afterLine.TryGetC(propertyRoute);
             if (after != null)
-                foreach (var a in after.GetInvocationList().Cast<Func<HtmlHelper, TypeContext, MvcHtmlString>>())
+                foreach (var a in after.GetInvocationListTyped())
                     result = result.Concat(a(helper, tc));
 
             return result;

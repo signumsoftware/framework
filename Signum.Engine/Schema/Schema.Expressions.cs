@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Maps
 {
@@ -104,11 +105,27 @@ namespace Signum.Engine.Maps
             return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
         }
 
-        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder)
+        internal ColumnExpression OrderExpression(Alias tableAlias)
+        {
+            return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.Order).Name);
+        }
+
+        internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, bool withRowId)
         {
             var rowId = RowIdExpression(tableAlias);
 
-            return Field.GetExpression(tableAlias, binder, rowId);
+            var exp = Field.GetExpression(tableAlias, binder, rowId);
+
+            if (!withRowId)
+                return exp;
+
+            var type = this.Field.FieldType;
+
+            var ci = typeof(MList<>.RowIdValue).MakeGenericType(type).GetConstructor(new[] { type, typeof(int), typeof(int?) });
+
+            var order =  Order == null ? (Expression)Expression.Constant(null, typeof(int?)) : OrderExpression(tableAlias).Nullify();
+
+            return Expression.New(ci, exp, rowId, order);
         }
 
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
@@ -122,6 +139,7 @@ namespace Signum.Engine.Maps
             return new MListElementExpression(
                 rowId,
                 (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null),
+                this.Order == null ? null: OrderExpression(tableAlias), 
                 this.Field.GetExpression(tableAlias, binder, rowId), this);
         }
 

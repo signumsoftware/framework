@@ -26,7 +26,7 @@ namespace Signum.Engine.Linq
             }.Visit(expression);
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             if (this.selectsToRemove.Contains(select))
                 return this.Visit(select.From);
@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
                 return base.VisitSelect(select);
         }
 
-        protected override Expression VisitColumn(ColumnExpression column)
+        protected internal override Expression VisitColumn(ColumnExpression column)
         {
             return map.TryGetC(column.Alias)
                     .Try(d => d.GetOrThrow(column.Name, "Reference to undefined column {0}")) ?? column;

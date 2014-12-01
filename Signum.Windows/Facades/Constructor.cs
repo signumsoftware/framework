@@ -22,32 +22,30 @@ namespace Signum.Windows
             Manager = manager;
         }
 
-        public static T Construct<T>(this FrameworkElement element, List<object> args = null)
-         where T : ModifiableEntity
-        {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), element, args), Manager.ConstructCore);
-        }
-
-        public static ModifiableEntity Construct(this FrameworkElement element, Type type, List<object> args = null)
-        {
-            return Manager.SurroundConstruct(new ConstructorContext(type, element, args), Manager.ConstructCore);
-        }
-
-        public static T SurroundConstruct<T>(this FrameworkElement element, Func<ConstructorContext, T> constructor)
-          where T : ModifiableEntity
-        {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), element, null), constructor);
-        }
-
-        public static T SurroundConstruct<T>(this FrameworkElement element, List<object> args,  Func<ConstructorContext, T> constructor)
+        public static T Construct<T>(this ConstructorContext ctx)
             where T : ModifiableEntity
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), element, args), constructor);
+            return (T)ctx.SurroundConstructUntyped(typeof(T), Manager.ConstructCore);
         }
 
-        public static ModifiableEntity SurroundConstruct(this FrameworkElement element, Type type, List<object> args, Func<ConstructorContext, ModifiableEntity> constructor)
+        public static ModifiableEntity ConstructUntyped(this ConstructorContext ctx, Type type)
         {
-            return Manager.SurroundConstruct(new ConstructorContext(type, element, args), constructor);
+            return ctx.SurroundConstructUntyped(type, Manager.ConstructCore);
+        }
+
+        public static T SurroundConstruct<T>(this ConstructorContext ctx, Func<ConstructorContext, T> constructor)
+            where T : ModifiableEntity
+        {
+            ctx.Type = typeof(T);
+
+            return (T)Manager.SurroundConstruct(ctx, constructor);
+        }
+
+        public static ModifiableEntity SurroundConstructUntyped(this ConstructorContext ctx, Type type, Func<ConstructorContext, ModifiableEntity> constructor)
+        {
+            ctx.Type = type;
+
+            return Manager.SurroundConstruct(ctx, constructor);
         }
 
         public static void Register<T>(Func<ConstructorContext, T> constructor)
@@ -59,20 +57,18 @@ namespace Signum.Windows
 
     public class ConstructorContext
     {
-        public ConstructorContext(Type type, FrameworkElement element, List<object> args)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type"); 
-
-            this.Type = type;
-            this.Element = element;
-            this.Args = args ?? new List<object>();
-        }
-
-        public Type Type { get; private set; }
+        public Type Type { get; internal set; }
         public FrameworkElement Element { get; private set; }
+        public OperationInfo OperationInfo { get; private set; }
         public List<object> Args { get; private set; }
         public bool CancelConstruction { get; set; }
+
+        public ConstructorContext(FrameworkElement element = null, OperationInfo operationInfo = null, List<object> args = null)
+        {
+            this.Element = element;
+            this.Args = args ?? new List<object>();
+            this.OperationInfo = operationInfo;
+        }
     }
 
     public class ConstructorManager
@@ -108,29 +104,26 @@ namespace Signum.Windows
             IDisposable disposable = null;
             try
             {
+                foreach (var pre in PreConstructors.GetInvocationListTyped())
+                {
+                    disposable = Disposable.Combine(disposable, pre(ctx));
 
-                if (PreConstructors != null)
-                    foreach (Func<ConstructorContext, IDisposable> pre in PreConstructors.GetInvocationList())
-                    {
-                        disposable = Disposable.Combine(disposable, pre(ctx));
-
-                        if (ctx.CancelConstruction)
-                            return null;
-                    }
+                    if (ctx.CancelConstruction)
+                        return null;
+                }
 
                 var entity = constructor(ctx);
 
                 if (entity == null || ctx.CancelConstruction)
                     return null;
 
-                if (PostConstructors != null)
-                    foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationList())
-                    {
-                        post(ctx, entity);
+                foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationListTyped())
+                {
+                    post(ctx, entity);
 
-                        if (ctx.CancelConstruction)
-                            return null;
-                    }
+                    if (ctx.CancelConstruction)
+                        return null;
+                }
 
                 return entity;
             }

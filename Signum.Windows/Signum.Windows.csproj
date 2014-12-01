@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Windows</RootNamespace>
     <AssemblyName>Signum.Windows</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -49,6 +49,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -58,11 +59,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
     <OutputPath>bin\Partial\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -115,6 +118,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="EntityControls\EntityStrip.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MultiSelectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -162,6 +169,10 @@
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\EnumWindowsExtensions.cs" />
+    <Compile Include="EntityControls\EntityStrip.xaml.cs">
+      <DependentUpon>EntityStrip.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Facades\Finder.cs" />
     <Compile Include="MultiSelectorWindow.xaml.cs">
       <DependentUpon>MultiSelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -434,7 +445,6 @@
       <DependentUpon>QueryTokenRenderer.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicQuery\SortGridViewColumnHeader.cs" />
-    <Compile Include="Fluent\ControlExtensions.cs" />
     <Compile Include="Fluent\EntityExtensions.cs" />
     <Compile Include="Fluent\Fluent.cs" />
     <Compile Include="Fluent\FrameworkFactoryGenerator.cs" />
@@ -614,6 +624,26 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\role.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Common.md" />
+    <None Include="Controls\AutoCompleteTextBox.md" />
+    <None Include="Controls\ColorPicker.md" />
+    <None Include="Controls\DateTimePicker.md" />
+    <None Include="Controls\NumericTextBox.md" />
+    <None Include="Converters\Converters.md" />
+    <None Include="DataBorder.md" />
+    <None Include="DynamicQuery\SearchControl.md" />
+    <None Include="EntityControls\EntityControls.md" />
+    <None Include="Facades\Constructor.md" />
+    <None Include="Facades\Finder.md" />
+    <None Include="Facades\Navigator.md" />
+    <None Include="Facades\Server.md" />
+    <None Include="Introduction.md" />
+    <None Include="LocExtension.md" />
+    <None Include="NormalWindow.md" />
+    <None Include="Widgets\LinksClient.md" />
+    <None Include="Widgets\WidgetPanel.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

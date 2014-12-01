@@ -29,32 +29,30 @@ namespace Signum.Web
             ClientManager = clientManager;
         }
 
-        public static T Construct<T>(this ControllerBase controller, List<object> args = null)
+        public static T Construct<T>(this ConstructorContext ctx)
             where T : ModifiableEntity
         {
-            return (T)controller.Construct(typeof(T), args);
+            return (T)ctx.SurroundConstructUntyped(typeof(T), Manager.ConstructCore);
         }
 
-        public static ModifiableEntity Construct(this ControllerBase controller, Type entityType, List<object> args = null)
+        public static ModifiableEntity ConstructUntyped(this ConstructorContext ctx, Type type)
         {
-            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, args), Manager.ConstructCore);
+            return ctx.SurroundConstructUntyped(type, Manager.ConstructCore);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, Func<ConstructorContext, T> constructor)
+        public static T SurroundConstruct<T>(this ConstructorContext ctx, Func<ConstructorContext, T> constructor)
             where T : ModifiableEntity
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, null), constructor);
+            ctx.Type = typeof(T);
+
+            return (T)Manager.SurroundConstruct(ctx, constructor);
         }
 
-        public static T SurroundConstruct<T>(this ControllerBase controller, List<object> args, Func<ConstructorContext, T> constructor)
-            where T : ModifiableEntity
+        public static ModifiableEntity SurroundConstructUntyped(this ConstructorContext ctx, Type type, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            return (T)Manager.SurroundConstruct(new ConstructorContext(typeof(T), controller, args), constructor);
-        }
+            ctx.Type = type;
 
-        public static ModifiableEntity SurroundConstruct(this ControllerBase controller, Type entityType, List<object> args, Func<ConstructorContext, ModifiableEntity> constructor)
-        {
-            return Manager.SurroundConstruct(new ConstructorContext(entityType, controller, null), constructor);
+            return Manager.SurroundConstruct(ctx, constructor);
         }
 
         public static void Register<T>(Func<ConstructorContext, T> constructor) where T:ModifiableEntity
@@ -76,7 +74,6 @@ namespace Signum.Web
         }
 
         public Type Type { get; private set; }
-        public HtmlHelper Helper { get; private set; }
         public string Prefix { get; private set; }
     }
 
@@ -96,26 +93,31 @@ namespace Signum.Web
             if (!ctx.Type.IsIdentifiableEntity())
                 return Default();
 
-            var concat = GlobalPreConstructors + PreConstructors.TryGetC(ctx.Type);
+            List<JsFunction> list = new List<JsFunction>();
 
-            if (concat == null)
+            if (GlobalPreConstructors != null)
+                list.AddRange(GlobalPreConstructors.GetInvocationListTyped().Select(f => f(ctx)));
+
+            var pre = PreConstructors.TryGetC(ctx.Type);
+
+            if (pre != null)
+                list.Add(pre(ctx));
+            else
+                list.Add(OperationClient.Manager.ClientConstruct(ctx));
+
+            list.RemoveAll(a => a == null);
+
+            if (list.IsEmpty())
                 return Default();
 
-            var pre = GlobalPreConstructors.GetInvocationList()
-                .Cast<Func<ClientConstructorContext, JsFunction>>()
-                .Select(f => f(ctx)).NotNull().ToArray();
+            var modules = list.Select(p => p.Module).Distinct();
 
-            if(pre.IsEmpty())
-                return Default();
-
-            var modules = pre.Select(p => p.Module).Distinct();
-
-            var code = pre.Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
+            var code = list.AsEnumerable().Reverse().Aggregate("resolve(extraArgs);", (acum, js) =>
 @"if(extraArgs == null) return Promise.resolve(null);
 " + InvokeFunction(js) + @"
 .then(function(extraArgs){ 
 " + acum.Indent(4) + @"
-});"); 
+});");
 
             var result =
 @"function(extraArgs){ 
@@ -128,7 +130,6 @@ namespace Signum.Web
 }".Replace("{moduleNames}", modules.ToString(m => "'" + m.Name + "'", ", "))
   .Replace("{moduleVars}", modules.ToString(m => JsFunction.VarName(m), ", "))
   .Replace("{code}", code.Indent(12));
-
 
             return result;
         }
@@ -148,19 +149,18 @@ namespace Signum.Web
 
     public class ConstructorContext
     {
-        public ConstructorContext(Type type, ControllerBase controller, List<object> args)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
+        public Type Type { get; internal set; }
+        public ControllerBase Controller { get; private set; }
+        public OperationInfo OperationInfo { get; private set; }
+        public List<object> Args { get; private set; }
 
-            this.Type = type;
+        public ConstructorContext(ControllerBase controller = null, OperationInfo info = null, List<object> args = null)
+        {
+
             this.Controller = controller;
+            this.OperationInfo = info;
             this.Args = args ?? new List<object>();
         }
-
-        public Type Type { get; private set; }
-        public ControllerBase Controller { get; private set; }
-        public List<object> Args { get; private set; }
     }
 
     public class ConstructorManager
@@ -187,7 +187,7 @@ namespace Signum.Web
             }
 
             if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
-                return OperationClient.Manager.ConstructSingle(ctx.Type);
+                return OperationClient.Manager.Construct(ctx);
 
             return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
         }
@@ -202,7 +202,7 @@ namespace Signum.Web
             if (!(entity is IdentifiableEntity))
                 return;
 
-            object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
+            object queryName = Finder.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
             if (entity.GetType() != queryName as Type)
                 return;
@@ -226,33 +226,20 @@ namespace Signum.Web
 
         public virtual ModifiableEntity SurroundConstruct(ConstructorContext ctx, Func<ConstructorContext, ModifiableEntity> constructor)
         {
-            IDisposable disposable = null;
-            try
+            using (Disposable.Combine(PreConstructors, f => f(ctx)))
             {
-
-                if (PreConstructors != null)
-                    foreach (Func<ConstructorContext, IDisposable> pre in PreConstructors.GetInvocationList())
-                    {
-                        disposable = Disposable.Combine(disposable, pre(ctx));
-                    }
-
                 var entity = constructor(ctx);
 
                 if (entity == null)
                     return null;
 
                 if (PostConstructors != null)
-                    foreach (Action<ConstructorContext, ModifiableEntity> post in PostConstructors.GetInvocationList())
+                    foreach (var post in PostConstructors.GetInvocationListTyped())
                     {
                         post(ctx, entity);
                     }
 
                 return entity;
-            }
-            finally
-            {
-                if (disposable != null)
-                    disposable.Dispose();
             }
         }
     }

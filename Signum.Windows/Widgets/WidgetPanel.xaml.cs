@@ -50,13 +50,13 @@ namespace Signum.Windows
         void LeftNavigationPanel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             List<IWidget> widgets = GetWidgets == null || e.NewValue == null ? new List<IWidget>() :
-                GetWidgets.GetInvocationList().Cast<GetWidgetDelegate>().Select(d => d((ModifiableEntity)DataContext, MainControl)).NotNull().ToList();
+                GetWidgets.GetInvocationListTyped().Select(d => d((ModifiableEntity)DataContext, MainControl)).NotNull().ToList();
 
             this.Visibility = widgets.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
             stackPanel.Children.Clear();
 
-            foreach (var item in widgets.OrderBy(a=>a.Order))
+            foreach (var item in widgets.OrderBy(a => Common.GetOrder((DependencyObject)a)))
             {
                 stackPanel.Children.Add((UIElement)item);
                 item.ForceShow += () => expander.IsExpanded = true;
@@ -79,6 +79,5 @@ namespace Signum.Windows
     public interface IWidget
     {
         event Action ForceShow;
-        decimal Order { get; set; }
     }
 }

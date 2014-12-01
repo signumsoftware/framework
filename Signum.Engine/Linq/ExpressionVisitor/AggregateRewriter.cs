@@ -25,7 +25,7 @@ namespace Signum.Engine.Linq
             return new AggregateRewriter(expr).Visit(expr);
         }
 
-        protected override Expression VisitSelect(SelectExpression select)
+        protected internal override Expression VisitSelect(SelectExpression select)
         {
             select = (SelectExpression)base.VisitSelect(select);
             if (lookup.Contains(select.Alias))
@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
+        protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
             return this.map.GetOrThrow(aggregate);
         }
@@ -61,7 +61,7 @@ namespace Signum.Engine.Linq
                 return gatherer.aggregates;
             }
 
-            protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
+            protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
             {
                 this.aggregates.Add(aggregate);
                 return base.VisitAggregateRequest(aggregate);

@@ -90,6 +90,26 @@ define(["require", "exports"], function(require, exports) {
                 throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
         };
 
+        EntityValue.prototype.key = function () {
+            return this.runtimeInfo.key() + ";" + this.toStr;
+        };
+
+        EntityValue.fromKey = function (key) {
+            if (SF.isEmpty(key))
+                return null;
+
+            var index = key.indexOf(";");
+            if (index == -1)
+                throw Error("{0} not found".format(";"));
+
+            index = key.indexOf(";");
+
+            if (index == -1)
+                return new EntityValue(RuntimeInfo.parse(key));
+
+            return new EntityValue(RuntimeInfo.parse(key.substr(0, index)), key.substr(index + 1));
+        };
+
         EntityValue.prototype.isLoaded = function () {
             return false;
         };

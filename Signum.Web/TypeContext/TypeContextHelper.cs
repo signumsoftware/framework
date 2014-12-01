@@ -31,11 +31,12 @@ namespace Signum.Web
                 if (!typeof(T).IsAssignableFrom(stc.Type))
                     throw new InvalidOperationException("{0} is not convertible to {1}".Formato(stc.GetType().TypeName(), typeof(TypeContext<T>).TypeName()));
 
-                return new TypeContext<T>((T)stc.UntypedValue, stc, stc.Prefix, stc.PropertyRoute);
+                return new TypeContext<T>((T)stc.UntypedValue, stc, "", stc.PropertyRoute);
             }
 
-            throw new InvalidCastException("Impossible to convert object {0} of type {1} to {2}".Formato(
-                helper.ViewData.Model,
+            throw new InvalidCastException("Impossible to convert object '{0}' of type '{1}' to '{2}'".Formato(
+                helper.ViewData.Model.TryToString() ?? "null",
+                helper.ViewData.Model == null ? "object" :
                 helper.ViewData.Model.GetType().TypeName(),
                 typeof(TypeContext<T>).TypeName()));
         }

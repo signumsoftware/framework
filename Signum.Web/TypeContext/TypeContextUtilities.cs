@@ -17,9 +17,11 @@ namespace Signum.Web
     {
         public static IEnumerable<TypeElementContext<S>> TypeElementContext<S>(TypeContext<MList<S>> typeContext)
         {
-            for (int i = 0; i < typeContext.Value.Count; i++)
+            var innerList = ((IMListPrivate<S>)typeContext.Value).InnerList;
+
+            for (int i = 0; i < innerList.Count; i++)
             {
-                var econtext = new TypeElementContext<S>(typeContext.Value[i], typeContext, i);
+                var econtext = new TypeElementContext<S>(innerList[i].Value, typeContext, i, innerList[i].RowId);
                 yield return econtext;
             }
         }
@@ -59,6 +61,11 @@ namespace Signum.Web
         public static TypeContext UntypedNew(IRootEntity entity, string prefix)
         {
             return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, prefix);
+        }
+
+        public static TypeContext UntypedNew(ModifiableEntity entity, string prefix, PropertyRoute route)
+        {
+            return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, (TypeContext)null, prefix, route);
         }
 
         public static string Compose(string prefix, string nameToAppend)

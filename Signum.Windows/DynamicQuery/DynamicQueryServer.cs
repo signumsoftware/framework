@@ -37,7 +37,7 @@ namespace Signum.Windows
 
         private static ResultTable Query(this QueryRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request));
         }
 
@@ -48,7 +48,7 @@ namespace Signum.Windows
 
         public static void QueryBatch(this QueryRequest request, Action<ResultTable> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((ResultTable)obj), @finally);
         }
 
@@ -56,16 +56,16 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetColumnTokens(options.ColumnOptions, qd);
-            SetFilterTokens(options.FilterOptions, qd);
-            SetOrderTokens(options.OrderOptions, qd);
+            ColumnOption.SetColumnTokens(options.ColumnOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd);
 
             var request = new QueryRequest
             {
                 QueryName = options.QueryName,
                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
-                Columns = MergeColumns(options.ColumnOptions, options.ColumnOptionsMode, qd),
+                Columns = ColumnOption.MergeColumns(options.ColumnOptions, options.ColumnOptionsMode, qd),
                 Pagination = options.Pagination ?? QueryOptions.DefaultPagination,
             };
             return request;
@@ -80,7 +80,7 @@ namespace Signum.Windows
 
         private static ResultTable QueryGroup(this QueryGroupRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryGroup(request));
         }
 
@@ -91,7 +91,7 @@ namespace Signum.Windows
 
         public static void QueryGroupBatch(this QueryGroupRequest request, Action<ResultTable> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((ResultTable)obj), @finally);
         }
 
@@ -99,9 +99,9 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetColumnTokens(options.ColumnOptions, qd, canAggregate:true);
-            SetFilterTokens(options.FilterOptions, qd, canAggregate: true);
-            SetOrderTokens(options.OrderOptions, qd, canAggregate: true);
+            ColumnOption.SetColumnTokens(options.ColumnOptions, qd, canAggregate:true);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd, canAggregate: true);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd, canAggregate: true);
 
             var request = new QueryGroupRequest
             {
@@ -115,8 +115,7 @@ namespace Signum.Windows
         #endregion
 
         #region QueryUnique
-        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)
-   where T : class, IIdentifiable
+        public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)where T : class, IIdentifiable
         {
             return (Lite<T>)new UniqueOptions(typeof(T))
             {
@@ -144,7 +143,7 @@ namespace Signum.Windows
 
         private static Lite<IdentifiableEntity> QueryUnique(this UniqueEntityRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
 
             return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
         }
@@ -156,7 +155,7 @@ namespace Signum.Windows
 
         private static void QueryUniqueBatch(this UniqueEntityRequest request, Action<Lite<IdentifiableEntity>> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((Lite<IdentifiableEntity>)obj), @finally);
         }
 
@@ -164,8 +163,8 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetFilterTokens(options.FilterOptions, qd);
-            SetOrderTokens(options.OrderOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
+            OrderOption.SetOrderTokens(options.OrderOptions, qd);
 
             var request = new UniqueEntityRequest
             {
@@ -186,7 +185,7 @@ namespace Signum.Windows
 
         public static int QueryCount(this QueryCountRequest request)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
         }
 
@@ -197,7 +196,7 @@ namespace Signum.Windows
 
         private static void QueryCountBatch(this QueryCountRequest request, Action<int> onResult, Action @finally)
         {
-            Navigator.Manager.AssertFindable(request.QueryName);
+            Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((int)obj), @finally);
         }
 
@@ -205,7 +204,7 @@ namespace Signum.Windows
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
-            SetFilterTokens(options.FilterOptions, qd);
+            FilterOption.SetFilterTokens(options.FilterOptions, qd);
 
             var request = new QueryCountRequest
             {
@@ -215,50 +214,6 @@ namespace Signum.Windows
             return request;
         }
         #endregion
-
-
-        public static void SetFilterTokens(IEnumerable<FilterOption> filters, QueryDescription qd, bool canAggregate = false)
-        {
-            foreach (var f in filters)
-            {
-                if (f.Token == null && f.Path.HasText())
-                    f.Token = QueryUtils.Parse(f.Path, qd, canAggregate);
-
-                f.RefreshRealValue();
-            }
-        }
-
-        public static void SetOrderTokens(IEnumerable<OrderOption> orders, QueryDescription qd, bool canAggregate = false)
-        {
-            foreach (var o in orders)
-            {
-                o.Token = QueryUtils.Parse(o.Path, qd, canAggregate);
-            }
-        }
-
-        public static void SetColumnTokens(IEnumerable<ColumnOption> columns, QueryDescription qd, bool canAggregate = false)
-        {
-            foreach (var c in columns)
-            {
-                c.Token = QueryUtils.Parse(c.Path, qd, canAggregate);
-            }
-        }
-
-        public static List<Column> MergeColumns(IEnumerable<ColumnOption> columns, ColumnOptionsMode mode, QueryDescription qd)
-        {
-            switch (mode)
-            {
-                case ColumnOptionsMode.Add:
-                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
-                        columns.Select(co => co.ToColumn())).ToList();
-                case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
-                case ColumnOptionsMode.Replace:
-                    return columns.Select(co => co.ToColumn()).ToList();
-                default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(mode));
-            }
-        }    
 
         #region Batch
         class RequestTuple

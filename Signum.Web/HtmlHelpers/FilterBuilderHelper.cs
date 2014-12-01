@@ -23,7 +23,7 @@ namespace Signum.Web
             if (filterOptions.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd, canAggregate: false);
+                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
             }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
@@ -31,9 +31,9 @@ namespace Signum.Web
 
             var id = context.Compose("trFilter", index.ToString());
 
-            using (sb.Surround(new HtmlTag("tr").Id(id)))
+            using (sb.SurroundLine(new HtmlTag("tr").Id(id)))
             {
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     if (!filterOptions.Frozen)
                     {
@@ -45,7 +45,7 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("td")))
+                using (sb.SurroundLine(new HtmlTag("td")))
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
@@ -59,7 +59,7 @@ namespace Signum.Web
                     }
                 }
 
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     var dic = new Dictionary<string, object> { { "class", "form-control" } };
                     if (filterOptions.Frozen)
@@ -78,7 +78,7 @@ namespace Signum.Web
                             dic));
                 }
 
-                using (sb.Surround("td"))
+                using (sb.SurroundLine("td"))
                 {
                     Context valueContext = new Context(context, "value_" + index.ToString());
 
@@ -153,13 +153,20 @@ namespace Signum.Web
             }
             else
             {
-                return ValueLineHelper.ValueLine(helper, new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                var vl = new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                 {
                     FormGroupStyle = FormGroupStyle.None,
                     ReadOnly = filterOption.Frozen,
                     Format = filterOption.Token.Format,
                     UnitText = filterOption.Token.Unit,
-                });
+                }; 
+
+                if (filterOption.Token.Type.UnNullify().IsEnum)
+                {
+                    vl.EnumComboItems = ValueLine.CreateComboItems(EnumEntity.GetValues(vl.Type.UnNullify()), vl.UntypedValue == null || vl.Type.IsNullable());
+                }
+
+                return ValueLineHelper.ValueLine(helper, vl);
             }
             
             throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));

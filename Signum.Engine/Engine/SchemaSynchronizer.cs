@@ -38,6 +38,41 @@ namespace Signum.Engine
                 null, Spacing.Simple);
         }
 
+        public static SqlPreCommand SynchronizeSystemDefaultConstraints(Replacements replacements)
+        {
+            var allConstraints = Schema.Current.DatabaseNames().Select(db =>
+            {
+                using (Administrator.OverrideDatabaseInViews(db))
+                {
+                    var constaints = (from t in Database.View<SysTables>()
+                                      join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                                      join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                                      join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
+                                      where ctr.is_system_named
+                                      select new
+                                      {
+                                          table = new ObjectName(new SchemaName(db, s.name), t.name),
+                                          column = c.name,
+                                          constraint = ctr.name,
+                                          definition = ctr.definition,
+                                      }).ToList();
+
+                    if (!constaints.Any())
+                        return null;
+
+                    return new SqlPreCommandSimple(
+                        constaints.ToString(a => "-- because default constraint " + a.constraint + " in " + a.table.ToString() + "." + a.column, "\r\n") + @"
+declare @sql nvarchar(max)
+set @sql = ''
+select @sql = @sql + 'ALTER TABLE [' + t.name + '] DROP CONSTRAINT [' + dc.name  + '];' 
+from {0}sys.default_constraints dc
+join {0}sys.tables t on dc.parent_object_id = t.object_id
+exec {0}dbo.sp_executesql @sql".Formato(db == null ? null : (db.ToString() + ".")));
+                }
+            }).ToList();
+
+            return allConstraints.Combine(Spacing.Simple);
+        } 
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
@@ -166,9 +201,7 @@ namespace Signum.Engine
                         tab.Columns,
                         dif.Colums,
                         (cn, tabCol) => SqlBuilder.AlterTableAddColumn(tab, tabCol),
-                        (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
-                                    difCol.DefaultConstraintName.HasText() ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraintName) : null,
-                                    SqlBuilder.AlterTableDropColumn(tab, cn)),
+                        (cn, difCol) => SqlBuilder.AlterTableDropColumn(tab, cn),
                         (cn, tabCol, difCol) =>SqlPreCommand.Combine(Spacing.Simple,
                             difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
                             difCol.ColumnEquals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tab, tabCol),
@@ -419,41 +452,77 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                 Type enumType = EnumEntity.Extract(table.Type);
                 if (enumType != null)
                 {
-                    var should = EnumEntity.GetEntities(enumType);
-                    var shouldByName = should.ToDictionary(a => a.ToString());
+                    IEnumerable<IdentifiableEntity> should = EnumEntity.GetEntities(enumType);
+                    Dictionary<string, IdentifiableEntity> shouldByName = should.ToDictionary(a => a.ToString());
 
-                    var current = Administrator.TryRetrieveAll(table.Type, replacements);
+                    List<IdentifiableEntity> current = Administrator.TryRetrieveAll(table.Type, replacements);
+                    Dictionary<string, IdentifiableEntity> currentByName = current.ToDictionary(a => a.toStr, table.Name.Name);
 
-                    Func<IdentifiableEntity, SqlPreCommand> updateRelatedTables = c =>
+                    string key = Replacements.KeyEnumsForTable(table.Name.Name);
+
+                    replacements.AskForReplacements(currentByName.Keys.ToHashSet(), shouldByName.Keys.ToHashSet(), key);
+
+                    currentByName = replacements.ApplyReplacementsToOld(currentByName, key);
+
+                    var mix = shouldByName.JoinDictionary(currentByName, (n, s, c) => new { s, c }).Where(a =>a.Value.s.id != a.Value.c.id).ToDictionary();
+
+                    HashSet<int> usedIds = current.Select(a => a.Id).ToHashSet();
+
+                    Dictionary<string, IdentifiableEntity> middleByName = mix.Where(kvp => usedIds.Contains(kvp.Value.s.Id)).ToDictionary(kvp => kvp.Key, kvp => Clone(kvp.Value.c));
+
+                    if (middleByName.Any())
                     {
-                        var s = shouldByName.TryGetC(c.toStr);
+                        var moveToAux = SyncEnums(schema, table,  currentByName.Where(a => middleByName.ContainsKey(a.Key)).ToDictionary(), middleByName);
+                        if (moveToAux != null)
+                            commands.Add(moveToAux);
+                    }
 
-                        if (s == null || s.id == c.id)
-                            return null;
+                    var currentMiddleByName = currentByName.ToDictionary();
 
-                        var updates = (from t in schema.GetDatabaseTables()
-                                       from col in t.Columns.Values
-                                       where col.ReferenceTable == table
-                                       select new SqlPreCommandSimple("REVIEW THIS! UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed".Formato(
-                                           t.Name, col.Name, s.Id, c.Id, c.toStr)))
-                                           .Combine(Spacing.Simple);
+                    currentMiddleByName.SetRange(middleByName);
 
-                        return updates;
-                    };
-
-                    SqlPreCommand com = Synchronizer.SynchronizeScript(
-                        should.ToDictionary(s => s.Id),
-                        current.ToDictionary(c => c.Id),
-                        (id, s) => table.InsertSqlSync(s),
-                        (id, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.DeleteSqlSync(c, comment: c.toStr)),
-                        (id, s, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.UpdateSqlSync(c, comment: c.toStr)),
-                        Spacing.Double);
-
-                    commands.Add(com);
+                    var com = SyncEnums(schema, table, currentMiddleByName, shouldByName);
+                    if (com != null)
+                        commands.Add(com);
                 }
             }
 
             return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
+        }
+
+        private static SqlPreCommand SyncEnums(Schema schema, Table table, Dictionary<string, IdentifiableEntity> current, Dictionary<string, IdentifiableEntity> should)
+        {
+            return Synchronizer.SynchronizeScript(
+                       should,
+                       current,
+                       (str, s) => table.InsertSqlSync(s),
+                       (str, c) => table.DeleteSqlSync(c, comment: c.toStr),
+                       (str, s, c) =>
+                       {
+                           if (s.id == c.id)
+                               return table.UpdateSqlSync(c, comment: c.toStr);
+
+                           var insert = table.InsertSqlSync(s);
+
+                           var move = (from t in schema.GetDatabaseTables()
+                                       from col in t.Columns.Values
+                                       where col.ReferenceTable == table
+                                       select new SqlPreCommandSimple("UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed"
+                                           .Formato(t.Name, col.Name, s.Id, c.Id, c.toStr)))
+                                        .Combine(Spacing.Simple);
+
+                           var delete = table.DeleteSqlSync(c, comment: c.toStr);
+
+                           return SqlPreCommand.Combine(Spacing.Simple, insert, move, delete);
+                       }, Spacing.Double);
+        }
+
+        private static IdentifiableEntity Clone(IdentifiableEntity current)
+        {
+            var instance = (IdentifiableEntity)Activator.CreateInstance(current.GetType());
+            instance.toStr = current.toStr;
+            instance.id = current.id.Value + 1000000;
+            return instance;
         }
 
         public static SqlPreCommand SnapshotIsolation(Replacements replacements)

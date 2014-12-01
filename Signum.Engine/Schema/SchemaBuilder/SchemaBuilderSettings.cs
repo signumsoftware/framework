@@ -14,14 +14,6 @@ using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Maps
 {
-    public enum DBMS
-    {
-        SqlCompact,
-        SqlServer2005,
-        SqlServer2008,
-        SqlServer2012,
-    }
-
     public class SchemaSettings
     {
         public SchemaSettings()
@@ -29,24 +21,10 @@ namespace Signum.Engine.Maps
 
         }
 
-        public SchemaSettings(DBMS dbms)
-        {
-            DBMS = dbms;
-            if (dbms >= Maps.DBMS.SqlServer2008)
-            {
-                TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-
-                UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-                UdtSqlName.Add(typeof(SqlGeography), "Geography");
-                UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
-            }
-        }
-
+        public Func<Type, string> CanOverrideAttributes = null;
 
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16; 
-
-        public DBMS DBMS { get; private set; }
 
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
@@ -114,6 +92,11 @@ namespace Signum.Engine.Maps
 
         public void OverrideAttributes(PropertyRoute propertyRoute, params Attribute[] attributes)
         {
+            string error = CanOverrideAttributes == null ? null : CanOverrideAttributes(propertyRoute.RootType); 
+
+            if (error != null)
+                throw new InvalidOperationException(error);
+
             AssertCorrect(attributes, AttributeTargets.Field);
 
             OverridenAttributes.Add(propertyRoute, attributes);
@@ -181,13 +164,9 @@ namespace Signum.Engine.Maps
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
         }
 
-        internal IndexType GetIndexType(PropertyRoute propertyRoute)
+        internal UniqueIndexAttribute GetUniqueIndexAttribute(PropertyRoute propertyRoute)
         {
-            UniqueIndexAttribute at = FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
-
-            return at == null ? IndexType.None :
-                at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
-                IndexType.Unique;
+            return FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
         }
 
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
@@ -263,15 +242,6 @@ namespace Signum.Engine.Maps
                 desambiguatedNames = new Dictionary<Type, string>();
 
             desambiguatedNames[type] = cleanName;
-        }
-
-        internal void FixType(ref SqlDbType type, ref int? size, ref int? scale)
-        {
-            if (DBMS == Maps.DBMS.SqlCompact && (type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
-            {
-                type = SqlDbType.NText;
-                size = null;
-            }
         }
 
         public SqlDbTypePair GetSqlDbTypePair(Type type)

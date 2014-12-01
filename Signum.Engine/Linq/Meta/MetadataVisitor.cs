@@ -23,7 +23,7 @@ namespace Signum.Engine.Linq
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
-    internal class MetadataVisitor : SimpleExpressionVisitor
+    internal class MetadataVisitor : ExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
 
@@ -204,12 +204,12 @@ namespace Signum.Engine.Linq
             if (m.Object != null)
             {
                 var a = this.Visit(m.Object);
-                var list = this.VisitExpressionList(m.Arguments);
+                var list = this.Visit(m.Arguments);
                 return MakeDirtyMeta(m.Type, null, list.PreAnd(a).ToArray());
             }
             else
             {
-                var list = this.VisitExpressionList(m.Arguments);
+                var list = this.Visit(m.Arguments);
                 return MakeDirtyMeta(m.Type, null, list.ToArray());
             }
         }
@@ -375,7 +375,7 @@ namespace Signum.Engine.Linq
                 null;
         }
 
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             if (exp is MetaExpression)
                 return exp;
@@ -418,7 +418,7 @@ namespace Signum.Engine.Linq
             return map.TryGetC(p) ?? p;
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             Expression source = Visit(m.Expression);
 
@@ -539,7 +539,7 @@ namespace Signum.Engine.Linq
             return Signum.Entities.Implementations.By(types);
         }
 
-        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        protected override Expression VisitTypeBinary(TypeBinaryExpression b)
         {
             return MakeDirtyMeta(b.Type, null, Visit(b.Expression));
         }

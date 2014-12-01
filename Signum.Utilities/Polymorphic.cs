@@ -27,10 +27,10 @@ namespace Signum.Utilities
             if (conflicts.Count() > 1)
                 throw new InvalidOperationException("Ambiguity for type {0} between interfaces {1}".Formato(currentValue.Key.Name, newInterfacesValues.CommaAnd(t => t.Key.Name)));
 
-            return conflicts.Select(a => a.Value).SingleOrDefaultEx(); 
+            return conflicts.Select(a => a.Value).SingleOrDefaultEx();
         }
 
-         public static Dictionary<K, V> InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
+        public static Dictionary<K, V> InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
         {
             if (currentValue.Value == null && baseValue.Value == null)
                 return null;
@@ -78,7 +78,7 @@ namespace Signum.Utilities
     }
 
     public delegate T PolymorphicMerger<T>(KeyValuePair<Type, T> currentValue, KeyValuePair<Type, T> baseValue, List<KeyValuePair<Type, T>> newInterfacesValues) where T : class;
- 
+
     public class Polymorphic<T> where T : class
     {
         Dictionary<Type, T> definitions = new Dictionary<Type, T>();
@@ -122,11 +122,11 @@ namespace Signum.Utilities
         public T GetValue(Type type)
         {
             var result = TryGetValue(type);
-         
+
             if (result == null)
                 throw new InvalidOperationException("No value defined for type {0}".Formato(type));
 
-            return result; 
+            return result;
         }
 
         public T TryGetValue(Type type)
@@ -170,7 +170,7 @@ namespace Signum.Utilities
 
             definitions[type] = value;
 
-            ClearCache(); 
+            ClearCache();
         }
 
         public void ClearCache()
@@ -207,7 +207,7 @@ namespace Signum.Utilities
         }
 
 
-        public static void Register<T, S>(this Polymorphic<Action<T>> polymorphic, Action<S> action) where S:T
+        public static void Register<T, S>(this Polymorphic<Action<T>> polymorphic, Action<S> action) where S : T
         {
             polymorphic.SetDefinition(typeof(S), t => action((S)t));
         }
@@ -277,7 +277,7 @@ namespace Signum.Utilities
             action(instance, p0, p1);
         }
 
-        public static void Call<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
+        public static void Invoke<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
         {
             var action = polymorphic.GetValue(instance.GetType());
             action(instance, p0, p1, p2);

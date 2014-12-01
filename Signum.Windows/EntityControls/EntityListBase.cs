@@ -13,7 +13,7 @@ namespace Signum.Windows
     public class EntityListBase : EntityBase
     {
         public static readonly DependencyProperty EntitiesProperty =
-          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).EntitiesChanged(e)));
+          DependencyProperty.Register("Entities", typeof(IList), typeof(EntityListBase), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityListBase)d).OnEntitiesChanged(e)));
         public IList Entities
         {
             get { return (IList)GetValue(EntitiesProperty); }
@@ -60,6 +60,11 @@ namespace Signum.Windows
             return Create && !Common.GetIsReadOnly(this);
         }
 
+        protected virtual bool CanMove()
+        {
+            return Move && !Common.GetIsReadOnly(this);
+        }
+
         protected new object OnFinding()
         {
             if (!CanFind())
@@ -68,11 +73,11 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(Finder.IsFindable);
                 if (type == null)
                     return null;
 
-                value = Navigator.FindMany(new FindManyOptions { QueryName = type });
+                value = Finder.FindMany(new FindManyOptions { QueryName = type });
             }
             else
                 value = Finding();
@@ -95,16 +100,30 @@ namespace Signum.Windows
             return tc.Add("Item");
         }
 
+        bool isListUserInteraction = true;
+
         public IList EnsureEntities()
         {
-            if (Entities == null)
-                Entities = (IList)Activator.CreateInstance(EntitiesType);
-            return Entities;
+            try
+            {
+                this.isListUserInteraction = false;
+                if (Entities == null)
+                    Entities = (IList)Activator.CreateInstance(EntitiesType);
+                return Entities;
+            }
+            finally
+            {
+                this.isListUserInteraction = true;
+            }
         }
 
-        public virtual void EntitiesChanged(DependencyPropertyChangedEventArgs e)
-        {
 
+        public event EntityChangedEventHandler EntitiesChanged;
+
+        public virtual void OnEntitiesChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (EntitiesChanged != null)
+                EntitiesChanged(this, isListUserInteraction, e.OldValue, e.NewValue);
         }
     }
 }

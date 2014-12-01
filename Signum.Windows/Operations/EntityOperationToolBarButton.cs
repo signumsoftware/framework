@@ -16,7 +16,7 @@ namespace Signum.Windows.Operations
 {
     public static class EntityOperationToolBarButton
     {
-        public static bool MoveToSearchControls(EntityOperationContext eoc)
+        public static bool MoveToSearchControls(IEntityOperationContext eoc)
         {
             var controls = eoc.EntityControl.Children<SearchControl>()
                 .Where(sc => eoc.OperationInfo.OperationSymbol.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
@@ -46,7 +46,7 @@ namespace Signum.Windows.Operations
             return true;
         }
 
-        public static ToolBarButton NewToolbarButton(EntityOperationContext eoc)
+        public static ToolBarButton NewToolbarButton(IEntityOperationContext eoc)
         {
             var man = OperationClient.Manager;
 
@@ -80,7 +80,7 @@ namespace Signum.Windows.Operations
         }
 
 
-        internal static MenuItem NewMenuItem(EntityOperationContext eoc, EntityOperationGroup group)
+        internal static MenuItem NewMenuItem(IEntityOperationContext eoc, EntityOperationGroup group)
         {
             var man = OperationClient.Manager;
 
@@ -115,14 +115,14 @@ namespace Signum.Windows.Operations
             return menuItem;
         }
 
-        static void OperationExecute(EntityOperationContext eoc)
+        static void OperationExecute(IEntityOperationContext eoc)
         {
             if (eoc.CanExecute != null)
                 throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
 
-            if (eoc.OperationSettings != null && eoc.OperationSettings.Click != null)
+            if (eoc.OperationSettings != null && eoc.OperationSettings.HasClick)
             {
-                IIdentifiable newIdent = eoc.OperationSettings.Click(eoc);
+                IIdentifiable newIdent = eoc.OperationSettings.OnClick(eoc);
                 if (newIdent != null)
                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
             }
@@ -135,47 +135,55 @@ namespace Signum.Windows.Operations
                     {
                         if (eoc.EntityControl.LooseChangesIfAny())
                         {
-                            Lite<IdentifiableEntity> lite = ident.ToLite();
-                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
-                            if (eoc.OperationInfo.Returns)
-                                eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            if (eoc.ConfirmMessage())
+                            {
+                                Lite<IdentifiableEntity> lite = ident.ToLite();
+                                IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
+                                if (eoc.OperationInfo.Returns)
+                                    eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            }
                         }
                     }
                     else
                     {
-                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
-                        if (eoc.OperationInfo.Returns)
-                            eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                        if (eoc.ConfirmMessage())
+                        {
+                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
+                            if (eoc.OperationInfo.Returns)
+                                eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                        }
                     }
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
                 {
-                    IIdentifiable result = null;
-                    if (eoc.OperationInfo.Lite.Value)
-                    {
-                        if (!eoc.EntityControl.LooseChangesIfAny())
-                            return;
+                    if (eoc.OperationInfo.Lite.Value && !eoc.EntityControl.LooseChangesIfAny())
+                        return;
 
-                        Lite<IdentifiableEntity> lite = ident.ToLite();
-                        result = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.OperationSymbol, null));
-                    }
-                    else
+                    if (!eoc.ConfirmMessage())
+                        return;
+
+                    IIdentifiable result = (IdentifiableEntity)new ConstructorContext(eoc.EntityControl, eoc.OperationInfo).SurroundConstructUntyped(eoc.OperationInfo.ReturnType, ctx =>
                     {
-                        result = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
-                    }
+                        var entity = eoc.OperationInfo.Lite.Value ?
+                            Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :
+                            Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+
+                        if (entity == null)
+                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
+
+                        return entity;
+                    });
 
                     if (result != null)
                         Navigator.Navigate(result);
-                    else
-                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
-
+                       
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.Delete)
                 {
-                    if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString(),  OperationMessage.Delete.NiceToString(), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (eoc.ConfirmMessage())
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.OperationSymbol, null));
+                        Server.Execute((IOperationServer s) => s.DeleteLite(lite, eoc.OperationInfo.OperationSymbol, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }
@@ -186,7 +194,7 @@ namespace Signum.Windows.Operations
         {
             ToolBarButton groupButton = new ToolBarButton
             {
-                Content = group.Description(),
+                Content = group.Text(),
                 ContextMenu = new ContextMenu(),
                 Background = group.Background,
             };

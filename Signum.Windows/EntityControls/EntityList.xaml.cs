@@ -40,16 +40,15 @@ namespace Signum.Windows
             get { return (IList)listBox.SelectedItems; }
         }
 
-
         protected override void UpdateVisibility()
         {
-            btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
-            btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
-            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
-            btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
-            btUp.Visibility = Move ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
-            btDown.Visibility = Move ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
+            btCreate.Visibility = CanCreate().ToVisibility();
+            btFind.Visibility = CanFind().ToVisibility();
+            btView.Visibility = CanView().ToVisibility();
+            btNavigate.Visibility = CanNavigate().ToVisibility();
+            btRemove.Visibility = CanRemove().ToVisibility();
+            btUp.Visibility = this.CanMove() ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
+            btDown.Visibility = this.CanMove() ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
         }
 
         static EntityList()
@@ -188,6 +187,21 @@ namespace Signum.Windows
         private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             btView_Click(sender, null);
+        }
+
+        protected override void OnEntityChanged(object oldValue, object newValue)
+        {
+            listBox.SelectedItem = newValue;
+
+            base.OnEntityChanged(oldValue, newValue);
+        }
+
+        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var newEntity = e.AddedItems.Cast<object>().SingleOrDefault();
+
+            if (this.Entity != newEntity)
+                this.Entity = newEntity;
         }
     }
 }

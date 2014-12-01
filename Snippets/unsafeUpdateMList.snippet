@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>UnsafeUpdateMList</Title>
+      <Shortcut>unsafeUpdateMList</Shortcut>
+      <Description>continues a query with UnsafeUpdate</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Engine</Namespace>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>entityName</ID>
+          <ToolTip>Entity Type</ToolTip>
+          <Default>Entity</Default>
+        </Literal>
+        <Literal>
+          <ID>entityParam</ID>
+          <ToolTip>Entity parameter</ToolTip>
+          <Default>e</Default>
+        </Literal>
+        <Literal>
+          <ID>mlistProperty</ID>
+          <ToolTip>collection property name</ToolTip>
+          <Default>Collection</Default>
+        </Literal>
+        <Literal>
+          <ID>entityProperty</ID>
+          <ToolTip>Property name</ToolTip>
+          <Default>Property</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[Database.MListQuery(($entityName$ $entityParam$) => $entityParam$.$mlistProperty$)
+            .Where(mle => false)
+            .UnsafeUpdateMList()
+            .Set(mle => mle.Element.$entityProperty$, mle => $end$)
+            .Execute();]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

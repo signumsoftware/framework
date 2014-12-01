@@ -23,7 +23,7 @@ namespace Signum.Test.LinqProvider
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad();
+            MusicStarter.StartAndLoad();
         }
 
         [TestInitialize]
@@ -210,7 +210,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WherePolyExpressionMethodSwitch()
         {
-            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineSwitch().Lonely()).ToArray();
+            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineCase().Lonely()).ToArray();
         }
 
 

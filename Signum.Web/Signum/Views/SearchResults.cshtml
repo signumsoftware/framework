@@ -34,7 +34,7 @@
     <tr data-entity="@entityField.Key()">
         @if (allowSelection)
         {
-            <td>@Html.CheckBox(
+            <td style="text-align:center">@Html.CheckBox(
                     Model.Compose("rowSelection", row.Index.ToString()),
                         new
                         {
@@ -51,7 +51,7 @@
             var value = row[col];
             var ft = formatters[col.Index];
             
-            <td @ft.WriteDataAttribute(value)>@ft.Formatter(Html, value)</td>
+            <td @ft.WriteDataAttribute(value) style="@(ft.TextAlign == null ? null : "text-align:" + ft.TextAlign)">@ft.Formatter(Html, value)</td>
         }
     </tr>
 }
@@ -68,7 +68,7 @@
 
     <tr class="extract">
         <td>
-            @Html.Partial(Navigator.Manager.PaginationSelectorView, Model)
+            @Html.Partial(Finder.Manager.PaginationSelectorView, Model)
         </td>
     </tr>
 }

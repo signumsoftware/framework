@@ -20,11 +20,8 @@ namespace Signum.Windows
     {
         public object QueryName { get; private set; }
 
-        public int? Top { get; set; }
         public ImageSource Icon { get; set; }
         public Pagination Pagination { get; set; }
-
-        internal QueryDescription QueryDescription { get; set; }
 
         public QuerySettings(object queryName)
         {
@@ -97,7 +94,7 @@ namespace Signum.Windows
 
     public class FormatterRule
     {
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         public Func<Column, Func<Binding, DataTemplate>> Formatter { get; set; }
         public Func<Column, bool> IsApplicable { get; set; }

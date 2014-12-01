@@ -22,7 +22,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad();
+            MusicStarter.StartAndLoad();
         }
 
 
@@ -71,7 +71,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeDelete();
+                int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeDeleteMList();
                 //tr.Commit();
             }
         }
@@ -81,7 +81,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int count = Database.MListQuery((BandDN a) => a.Members).UnsafeDelete();
+                int count = Database.MListQuery((BandDN a) => a.Members).UnsafeDeleteMList();
 
                 //tr.Commit();
             }
@@ -92,7 +92,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeDelete();
+                int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeDeleteMList();
 
                 //tr.Commit();
             }

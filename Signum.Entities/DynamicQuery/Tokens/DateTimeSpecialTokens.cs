@@ -48,7 +48,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "MonthStart"; }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }
@@ -121,7 +121,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "DayOfYear"; }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }
@@ -161,7 +161,6 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class DayOfWeekToken : QueryToken
     {
-      
         internal DayOfWeekToken(QueryToken parent)
             : base(parent)
         {
@@ -198,7 +197,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "DayOfWeek"; }
         }
 
-        protected override List<QueryToken> SubTokensOverride()
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }
@@ -231,6 +230,79 @@ namespace Signum.Entities.DynamicQuery
         {
             return new DayOfWeekToken(Parent.Clone());
         }
-    }   
+    }
 
+
+    [Serializable]
+    public class WeekNumberToken : QueryToken
+    {
+        internal WeekNumberToken(QueryToken parent)
+            : base(parent)
+        {
+        }
+
+        public override string ToString()
+        {
+            return QueryTokenMessage.WeekNumber.NiceToString();
+        }
+
+        public override string NiceName()
+        {
+            return QueryTokenMessage.WeekNumber.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+        }
+
+        public override string Format
+        {
+            get { return null; }
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override Type Type
+        {
+            get { return typeof(int?); }
+        }
+
+        public override string Key
+        {
+            get { return "WeekNumber"; }
+        }
+
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+        {
+            return new List<QueryToken>();
+        }
+
+        static MethodInfo miWeekNumber = ReflectionTools.GetMethodInfo(() => DateTime.MinValue.WeekNumber());
+
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        {
+            var exp = Parent.BuildExpression(context);
+
+            return Expression.Call(miWeekNumber, exp.UnNullify()).Nullify();
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return Parent.GetPropertyRoute();
+        }
+
+        public override Implementations? GetImplementations()
+        {
+            return null;
+        }
+
+        public override string IsAllowed()
+        {
+            return Parent.IsAllowed();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new WeekNumberToken(Parent.Clone());
+        }
+    }   
 }

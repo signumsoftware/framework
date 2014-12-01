@@ -106,6 +106,7 @@ namespace Signum.Windows
         static EntityRepeater()
         {
             ViewProperty.OverrideMetadata(typeof(EntityRepeater), new FrameworkPropertyMetadata(false));
+            ViewOnCreateProperty.OverrideMetadata(typeof(EntityRepeater), new FrameworkPropertyMetadata(false));
         }
 
         public EntityRepeater()
@@ -232,7 +233,7 @@ namespace Signum.Windows
             
            
             RemoveVisibility = this.CanRemove().ToVisibility();
-            MoveVisibility = this.Move.ToVisibility();
+            MoveVisibility = this.CanMove().ToVisibility();
             ViewVisibility = this.View.ToVisibility();
         }
 
