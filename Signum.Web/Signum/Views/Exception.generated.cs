@@ -47,7 +47,7 @@ namespace Signum.Web.Views
         {
             
             #line 2 "..\..\Signum\Views\Exception.cshtml"
- using (var e = Html.TypeContext<ExceptionDN>())
+ using (var e = Html.TypeContext<ExceptionEntity>())
 {
     e.LabelColumns = new BsColumn(4);
 

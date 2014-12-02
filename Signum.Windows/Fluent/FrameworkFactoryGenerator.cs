@@ -72,7 +72,7 @@ namespace Signum.Windows
                                 {
                                     DependencyPropertyDescriptor desc = DependencyPropertyDescriptor.FromName(pi.Name, pi.DeclaringType, pi.DeclaringType);
                                     if (desc == null)
-                                        throw new InvalidOperationException("{0} is not a DependencyProperty".Formato(pi.PropertyName()));
+                                        throw new InvalidOperationException("{0} is not a DependencyProperty".FormatWith(pi.PropertyName()));
 
                                     list.Add(Expression.Call(factory, miSetValue, Expression.Constant(desc.DependencyProperty), Expression.Convert(ma.Expression, typeof(object))));
                                 }
@@ -89,7 +89,7 @@ namespace Signum.Windows
                                 foreach (var item in bindings.Initializers)
                                 {
                                     if(item.Arguments.Count != 1)
-                                        throw new InvalidOperationException("Add Method {0} not supported".Formato(item.AddMethod.MethodName()));
+                                        throw new InvalidOperationException("Add Method {0} not supported".FormatWith(item.AddMethod.MethodName()));
 
                                     list.AddRange(ProcessChild(item.Arguments.SingleEx(), factory));
                                 }
@@ -110,7 +110,7 @@ namespace Signum.Windows
                 MethodInfo mi = call.Method;
 
                 if (mi.DeclaringType != typeof(Fluent) || mi.ReturnType != mi.GetParameters()[0].ParameterType)
-                    throw new InvalidOperationException("Method {0} not supported".Formato(mi.MethodName()));
+                    throw new InvalidOperationException("Method {0} not supported".FormatWith(mi.MethodName()));
 
                 var list = Process(call.Arguments[0], factory);
 
@@ -130,7 +130,7 @@ namespace Signum.Windows
         private static List<Expression> ProcessChild(Expression single, ParameterExpression factory)
         {
             if (!typeof(w.FrameworkElement).IsAssignableFrom(single.Type) && !typeof(w.FrameworkContentElement).IsAssignableFrom(single.Type))
-                throw new InvalidOperationException("Can not make a {0} from a {1}".Formato(typeof(w.FrameworkElementFactory).Name, single.Type));
+                throw new InvalidOperationException("Can not make a {0} from a {1}".FormatWith(typeof(w.FrameworkElementFactory).Name, single.Type));
 
             ParameterExpression newFactory = Expression.Parameter(typeof(w.FrameworkElementFactory));
             var list = Process(single, newFactory);
@@ -161,7 +161,7 @@ namespace Signum.Windows
                 case "Bind": return Expression.Call(factory, miSetBinding, call.Arguments[1], GetBinding(call.Method.GetGenericArguments().Length == 2, call.Arguments.Skip(2).ToArray())); 
             }
 
-            throw new InvalidOperationException("Methods {0} not supported".Formato(call.Method.Name)); 
+            throw new InvalidOperationException("Methods {0} not supported".FormatWith(call.Method.Name)); 
         }
 
         static ConstructorInfo ciBinding = ReflectionTools.GetConstuctorInfo(() => new Binding(""));

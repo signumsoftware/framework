@@ -45,7 +45,7 @@ namespace Signum.Engine.Operations
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Symbol, inUserInterface: false);
 
-                    OperationLogDN log = new OperationLogDN
+                    OperationLogEntity log = new OperationLogEntity
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
@@ -114,12 +114,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have Constructor initialized".FormatWith(Symbol.Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} Construct {1}".Formato(Symbol.Symbol, typeof(T));
+                return "{0} Construct {1}".FormatWith(Symbol.Symbol, typeof(T));
             }
         }
 
@@ -171,7 +171,7 @@ namespace Signum.Engine.Operations
             string OnCanConstruct(IEntity entity)
             {
                 if (entity.IsNew && !AllowsNew)
-                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+                    return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
 
                 if (CanConstruct != null)
                     return CanConstruct((F)entity);
@@ -189,7 +189,7 @@ namespace Signum.Engine.Operations
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    OperationLogDN log = new OperationLogDN
+                    OperationLogEntity log = new OperationLogEntity
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
@@ -263,12 +263,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not hace Construct initialized".FormatWith(Symbol.Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} ConstructFrom {1} -> {2}".Formato(Symbol.Symbol, typeof(F), typeof(T));
+                return "{0} ConstructFrom {1} -> {2}".FormatWith(Symbol.Symbol, typeof(F), typeof(T));
             }
 
         }
@@ -306,7 +306,7 @@ namespace Signum.Engine.Operations
                 {
                     OperationLogic.AssertOperationAllowed(Symbol.Symbol, inUserInterface: false);
 
-                    OperationLogDN log = new OperationLogDN
+                    OperationLogEntity log = new OperationLogEntity
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
@@ -384,12 +384,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Construct == null)
-                    throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(Symbol));
+                    throw new InvalidOperationException("Operation {0} Constructor initialized".FormatWith(Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} ConstructFromMany {1} -> {2}".Formato(Symbol, typeof(F), typeof(T));
+                return "{0} ConstructFromMany {1} -> {2}".FormatWith(Symbol, typeof(F), typeof(T));
             }
         }
 
@@ -436,7 +436,7 @@ namespace Signum.Engine.Operations
             protected virtual string OnCanExecute(T entity)
             {
                 if (entity.IsNew && !AllowsNew)
-                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+                    return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
 
                 if (CanExecute != null)
                     return CanExecute(entity);
@@ -454,7 +454,7 @@ namespace Signum.Engine.Operations
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    OperationLogDN log = new OperationLogDN
+                    OperationLogEntity log = new OperationLogEntity
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
@@ -516,12 +516,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Execute == null)
-                    throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have Execute initialized".FormatWith(Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} Execute on {1}".Formato(Symbol, typeof(T));
+                return "{0} Execute on {1}".FormatWith(Symbol, typeof(T));
             }
         }
 
@@ -568,7 +568,7 @@ namespace Signum.Engine.Operations
             protected virtual string OnCanDelete(T entity)
             {
                 if (entity.IsNew)
-                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+                    return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
 
                 if (CanDelete != null)
                     return CanDelete(entity);
@@ -586,7 +586,7 @@ namespace Signum.Engine.Operations
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    OperationLogDN log = new OperationLogDN
+                    OperationLogEntity log = new OperationLogEntity
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
@@ -645,12 +645,12 @@ namespace Signum.Engine.Operations
             public virtual void AssertIsValid()
             {
                 if (Delete == null)
-                    throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have Delete initialized".FormatWith(Symbol.Symbol));
             }
 
             public override string ToString()
             {
-                return "{0} Delete {1}".Formato(Symbol.Symbol, typeof(T));
+                return "{0} Delete {1}".FormatWith(Symbol.Symbol, typeof(T));
             }
         }
     }

@@ -53,7 +53,7 @@ namespace Signum.Windows
                 return;
 
             if (this.Type == null)
-                throw new InvalidOperationException("Type property is not set for control {0}".Formato(LabelText));
+                throw new InvalidOperationException("Type property is not set for control {0}".FormatWith(LabelText));
         }
     }
 

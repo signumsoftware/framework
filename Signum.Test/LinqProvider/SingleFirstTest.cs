@@ -29,28 +29,28 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectFirstOrDefault()
         {
-            var bandsCount = Database.Query<BandDN>().Select(b => new
+            var bandsCount = Database.Query<BandEntity>().Select(b => new
             {
                 b.Name,
-                Members = b.Members.Select(a => new { a.Name, a.Sex }).ToString(p => "{0} ({1})".Formato(p.Name, p.Sex), "\r\n")
+                Members = b.Members.Select(a => new { a.Name, a.Sex }).ToString(p => "{0} ({1})".FormatWith(p.Name, p.Sex), "\r\n")
             }).ToList();
 
-            var bands1 = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault().Name }).ToList();
-            var bands2 = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.FirstEx().Name }).ToList();
-            var bands3 = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx().Name }).ToList();
-            var bands4 = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.SingleEx().Name }).ToList();
+            var bands1 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault().Name }).ToList();
+            var bands2 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstEx().Name }).ToList();
+            var bands3 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx().Name }).ToList();
+            var bands4 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleEx().Name }).ToList();
 
-            var bands1b = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault(a => a.Sex == Sex.Female).Name }).ToList();
-            var bands2b = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.FirstEx(a => a.Sex == Sex.Female).Name }).ToList();
-            var bands3b = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx(a => a.Sex == Sex.Female).Name }).ToList();
-            var bands4b = Database.Query<BandDN>().Select(b => new { b.Name, Member = b.Members.SingleEx(a => a.Sex == Sex.Female).Name }).ToList();
+            var bands1b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault(a => a.Sex == Sex.Female).Name }).ToList();
+            var bands2b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstEx(a => a.Sex == Sex.Female).Name }).ToList();
+            var bands3b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx(a => a.Sex == Sex.Female).Name }).ToList();
+            var bands4b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleEx(a => a.Sex == Sex.Female).Name }).ToList();
         }
        
 
         [TestMethod]
         public void SelectSingleCellWhere()
         {
-            var list = Database.Query<BandDN>()
+            var list = Database.Query<BandEntity>()
                 .Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).FirstEx() == Sex.Male)
                 .Select(a => a.Name)
                 .ToList();
@@ -59,7 +59,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectSingleCellSingle()
         {
-            var list = Database.Query<BandDN>().Select(b => new
+            var list = Database.Query<BandEntity>().Select(b => new
             {
                 FirstName = b.Members.Select(m => m.Name).FirstEx(),
                 FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
@@ -71,7 +71,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectDoubleSingle()
         {
-            var query = Database.Query<BandDN>().Select(b => new
+            var query = Database.Query<BandEntity>().Select(b => new
             {
                 b.Members.FirstEx().Name,
                 b.Members.FirstEx().Dead,
@@ -86,7 +86,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedFirstOrDefault()
         {
-            var neasted = ((from b in Database.Query<BandDN>()
+            var neasted = ((from b in Database.Query<BandEntity>()
                             select b.Members.Select(a => a.Sex).FirstOrDefault())).ToList();
         }
 
@@ -94,21 +94,21 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedFirstOrDefaultNullify()
         {
-            var neasted = ((from b in Database.Query<BandDN>()
+            var neasted = ((from b in Database.Query<BandEntity>()
                             select b.Members.Where(a => a.Name.StartsWith("a")).Select(a => (Sex?)a.Sex).FirstOrDefault())).ToList();
         }
 
         [TestMethod]
         public void SelectGroupLast()
         {
-            var result = (from lab in Database.Query<LabelDN>()
-                          join al in Database.Query<AlbumDN>().DefaultIfEmpty() on lab equals al.Label into g
+            var result = (from lab in Database.Query<LabelEntity>()
+                          join al in Database.Query<AlbumEntity>().DefaultIfEmpty() on lab equals al.Label into g
                           select new
                           {
                               lab.Id,
                               lab.Name,
                               NumExecutions = (int?)g.Count(),
-                              LastExecution = (from al2 in Database.Query<AlbumDN>()
+                              LastExecution = (from al2 in Database.Query<AlbumEntity>()
                                                where (int?)al2.Id == g.Max(a => (int?)a.Id)
                                                select al2.ToLite()).FirstOrDefault()
                           }).ToList();
@@ -117,7 +117,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEmbeddedWithMList()
         {
-            var config = Database.Query<ConfigDN>().SingleEx();
+            var config = Database.Query<ConfigEntity>().SingleEx();
         }
     }
 }

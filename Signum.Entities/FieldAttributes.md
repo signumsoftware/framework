@@ -1,4 +1,4 @@
-# Field Attributes
+﻿# Field Attributes
 
 We should have it clear now that in Signum Framework, entities rule. The database just reflects the structure of your entities and there's not a lot of room for customization. 
 
@@ -106,7 +106,7 @@ Additionally, `SqlDbType` has a `Default` property to create a default constrain
 
 ```C#
 [ColumnName("DepartmentID")]
-Lite<DepartmentDN> department;
+Lite<DepartmentEntity> department;
 ```
 
 Note that when applied to a field inside an embedded entity, the name will still be concatenated to the field name of the embedded entity itself. In order to override this you'll need to manipulate the generated `Schema` object directly. 
@@ -132,7 +132,7 @@ Example:
 ```C#
 [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
 [PrimaryKey(typeof(Guid))]
-public class NoteWithDateDN : Entity
+public class NoteWithDateEntity : Entity
 {
   ...
 }

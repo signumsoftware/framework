@@ -97,7 +97,7 @@ namespace Signum.Engine
 
         public static string OpenSqlFile(this SqlPreCommand command)
         {
-            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".Formato(DateTime.Now));
+            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".FormatWith(DateTime.Now));
         }
 
         public static string OpenSqlFile(this SqlPreCommand command, string fileName)
@@ -162,16 +162,16 @@ namespace Signum.Engine
                 return "\'" + ((Guid)value).ToString() + "'";
 
             if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".Formato(value);
+                return "convert(datetime, '{0:s}', 126)".FormatWith(value);
 
             if (value is TimeSpan)
-                return "convert(time, '{0:g}')".Formato(value);
+                return "convert(time, '{0:g}')".FormatWith(value);
 
             if (value is bool)
                 return (((bool)value) ? 1 : 0).ToString();
 
             if (value is SqlHierarchyId)
-                return "CAST('{0}' AS hierarchyid)".Formato(value);
+                return "CAST('{0}' AS hierarchyid)".FormatWith(value);
 
             if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();

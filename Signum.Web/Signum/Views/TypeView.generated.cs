@@ -47,7 +47,7 @@ namespace Signum.Web.Views
         {
             
             #line 2 "..\..\Signum\Views\TypeView.cshtml"
- using (var e = Html.TypeContext<TypeDN>())
+ using (var e = Html.TypeContext<TypeEntity>())
 {
   
     

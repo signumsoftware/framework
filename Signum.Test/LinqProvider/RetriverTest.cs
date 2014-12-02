@@ -39,7 +39,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveSimple()
         {
-            var list = Database.Query<CountryDN>().ToList();
+            var list = Database.Query<CountryEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -47,7 +47,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveWithEnum()
         {
-            var list = Database.Query<GrammyAwardDN>().ToList();
+            var list = Database.Query<GrammyAwardEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -56,7 +56,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveWithRelatedEntityAndLite()
         {
-            var list = Database.Query<LabelDN>().ToList();
+            var list = Database.Query<LabelEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -64,7 +64,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveWithIBA()
         {
-            var list = Database.Query<NoteWithDateDN>().ToList();
+            var list = Database.Query<NoteWithDateEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -72,7 +72,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveWithMList()
         {
-            var list = Database.Query<ArtistDN>().ToList();
+            var list = Database.Query<ArtistEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -80,7 +80,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetrieveWithMListEmbedded()
         {
-            var list = Database.Query<AlbumDN>().ToList();
+            var list = Database.Query<AlbumEntity>().ToList();
 
             AssertRetrieved(list);
         }
@@ -94,14 +94,14 @@ namespace Signum.Test.LinqProvider
                 a is Entity && (((Entity)a).IdOrNull == null || ((Entity)a).IsNew));
 
             if (problematic.Any())
-                throw new AssertFailedException("Some non-retrived elements: {0}".Formato(problematic.ToString(", ")));  
+                throw new AssertFailedException("Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));  
         }
 
 
         [TestMethod]
         public void RetrieveWithMListCount()
         {
-            var artist = Database.Query<ArtistDN>().OrderBy(a => a.Name).First();
+            var artist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).First();
 
             Assert.AreEqual(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
         }

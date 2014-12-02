@@ -139,10 +139,10 @@ namespace Signum.Services
                   () => Database.Exists(type, id));
         }
 
-        public virtual Dictionary<Type, TypeDN> ServerTypes()
+        public virtual Dictionary<Type, TypeEntity> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeLogic.TypeToDN);
+                () => TypeLogic.TypeToEntity);
         }
 
         public virtual DateTime ServerNow()

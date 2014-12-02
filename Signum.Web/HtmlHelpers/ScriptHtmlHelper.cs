@@ -56,7 +56,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (var f in files)
-                sb.AddLine(MvcHtmlString.Create(scriptElement.Formato(Subdomain(f + "?v=" + Version))));
+                sb.AddLine(MvcHtmlString.Create(scriptElement.FormatWith(Subdomain(f + "?v=" + Version))));
 
             return sb.ToHtml();
         }

@@ -118,7 +118,7 @@ namespace Signum.Windows.Operations
         static void OperationExecute(IEntityOperationContext eoc)
         {
             if (eoc.CanExecute != null)
-                throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
+                throw new ApplicationException("Operation {0} is disabled: {1}".FormatWith(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
 
             if (eoc.OperationSettings != null && eoc.OperationSettings.HasClick)
             {
@@ -169,7 +169,7 @@ namespace Signum.Windows.Operations
                             Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
 
                         if (entity == null)
-                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
+                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().FormatWith(eoc.OperationInfo.OperationSymbol.NiceToString()));
 
                         return entity;
                     });

@@ -28,7 +28,7 @@ namespace Signum.Utilities.Reflection
         public T GetInvoker(params Type[] types)
         {
             if (types.Length != numParams)
-                throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".Formato(types.Length, numParams));
+                throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".FormatWith(types.Length, numParams));
 
                 return executor.GetOrAdd(types, (ts) =>
                      GeneratorVisitor.GetGenerator<T>(expression, ts).Compile());
@@ -71,7 +71,7 @@ namespace Signum.Utilities.Reflection
             gpv.Visit(expression);
 
             if (gpv.parameters == null)
-                throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".Formato(expression.ToString()));
+                throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".FormatWith(expression.ToString()));
 
             return gpv.parameters.Value;
         }
@@ -79,7 +79,7 @@ namespace Signum.Utilities.Reflection
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if(!m.Method.IsGenericMethod)
-                throw new InvalidOperationException("The method '{0}' should be generic".Formato(m.Method.MethodName()));
+                throw new InvalidOperationException("The method '{0}' should be generic".FormatWith(m.Method.MethodName()));
 
             parameters = m.Method.GetGenericMethodDefinition().GetGenericArguments().Length;
 
@@ -89,7 +89,7 @@ namespace Signum.Utilities.Reflection
         protected override Expression VisitNew(NewExpression nex)
         {
             if (!nex.Type.IsGenericType)
-                throw new InvalidOperationException("The constructor of {0} should be generic".Formato(nex.Type.TypeName()));
+                throw new InvalidOperationException("The constructor of {0} should be generic".FormatWith(nex.Type.TypeName()));
 
             parameters = nex.Type.GetGenericArguments().Length;
 

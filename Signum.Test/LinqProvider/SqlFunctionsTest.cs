@@ -38,7 +38,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringFunctions()
         {
-            var artists = Database.Query<ArtistDN>();
+            var artists = Database.Query<ArtistEntity>();
             Assert.IsTrue(artists.Any(a => a.Name.IndexOf('M') == 0));
             Assert.IsTrue(artists.Any(a => a.Name.IndexOf("Mi") == 0));
             Assert.IsTrue(artists.Any(a => a.Name.Contains("Jackson")));
@@ -46,36 +46,36 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
             Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
 
-            Dump((ArtistDN a) => a.Name.Length);
-            Dump((ArtistDN a) => a.Name.ToLower());
-            Dump((ArtistDN a) => a.Name.ToUpper());
-            Dump((ArtistDN a) => a.Name.TrimStart());
-            Dump((ArtistDN a) => a.Name.TrimEnd());
-            Dump((ArtistDN a) => a.Name.Substring(2).InSql());
-            Dump((ArtistDN a) => a.Name.Substring(2, 2).InSql());
+            Dump((ArtistEntity a) => a.Name.Length);
+            Dump((ArtistEntity a) => a.Name.ToLower());
+            Dump((ArtistEntity a) => a.Name.ToUpper());
+            Dump((ArtistEntity a) => a.Name.TrimStart());
+            Dump((ArtistEntity a) => a.Name.TrimEnd());
+            Dump((ArtistEntity a) => a.Name.Substring(2).InSql());
+            Dump((ArtistEntity a) => a.Name.Substring(2, 2).InSql());
 
-            Dump((ArtistDN a) => a.Name.Start(2).InSql());
-            Dump((ArtistDN a) => a.Name.End(2).InSql());
-            Dump((ArtistDN a) => a.Name.Reverse().InSql());
-            Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
+            Dump((ArtistEntity a) => a.Name.Start(2).InSql());
+            Dump((ArtistEntity a) => a.Name.End(2).InSql());
+            Dump((ArtistEntity a) => a.Name.Reverse().InSql());
+            Dump((ArtistEntity a) => a.Name.Replicate(2).InSql());
         }
 
         [TestMethod]
         public void StringFunctionsPolymorphicUnion()
         {
-            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineUnion().Name.Contains("Jackson")));
+            Assert.IsTrue(Database.Query<AlbumEntity>().Any(a => a.Author.CombineUnion().Name.Contains("Jackson")));
         }
 
         [TestMethod]
         public void StringFunctionsPolymorphicSwitch()
         {
-            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineCase().Name.Contains("Jackson")));
+            Assert.IsTrue(Database.Query<AlbumEntity>().Any(a => a.Author.CombineCase().Name.Contains("Jackson")));
         }
 
         [TestMethod]
         public void CoalesceFirstOrDefault()
         {
-            var list = Database.Query<BandDN>()
+            var list = Database.Query<BandEntity>()
                .Select(b => b.Members.FirstOrDefault(a => a.Sex == Sex.Female) ?? b.Members.FirstOrDefault(a => a.Sex == Sex.Male))
                .Select(a => a.ToLite()).ToList();
         }
@@ -83,62 +83,62 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringContainsUnion()
         {
-            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
         }
 
         [TestMethod]
         public void StringContainsSwitch()
         {
-            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineCase().ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineCase().ToString().Contains("Hola")).ToList();
         }
 
         [TestMethod]
         public void DateTimeFunctions()
         {
-            Dump((NoteWithDateDN n) => n.CreationTime.Year);
-            Dump((NoteWithDateDN n) => n.CreationTime.Month);
-            Dump((NoteWithDateDN n) => n.CreationTime.Day);
-            Dump((NoteWithDateDN n) => n.CreationTime.DayOfYear);
-            Dump((NoteWithDateDN n) => n.CreationTime.Hour);
-            Dump((NoteWithDateDN n) => n.CreationTime.Minute);
-            Dump((NoteWithDateDN n) => n.CreationTime.Second);
-            Dump((NoteWithDateDN n) => n.CreationTime.Millisecond);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Year);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Month);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Day);
+            Dump((NoteWithDateEntity n) => n.CreationTime.DayOfYear);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Hour);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Minute);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Second);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Millisecond);
         }
 
         [TestMethod]
         public void DateTimeDayOfWeek()
         {
-            //var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
-            var list = Database.Query<NoteWithDateDN>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            //var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var list = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
 
-            var list2 = Database.Query<NoteWithDateDN>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+            var list2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
         }
 
         [TestMethod]
         public void DateDiffFunctions()
         {
-            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
-            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
-            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
-            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
-            Dump((NoteWithDateDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 
         [TestMethod]
         public void DateFunctions()
         {
-            Dump((NoteWithDateDN n) => n.CreationTime.Date);
+            Dump((NoteWithDateEntity n) => n.CreationTime.Date);
 
             if (Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
             {
-                Dump((NoteWithDateDN n) => n.CreationTime.TimeOfDay);
+                Dump((NoteWithDateEntity n) => n.CreationTime.TimeOfDay);
             }
         }
 
         [TestMethod]
         public void DayOfWeekFunction()
         {
-            var list = Database.Query<NoteWithDateDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
+            var list = Database.Query<NoteWithDateEntity>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
                 .Select(n => n.CreationTime.DayOfWeek).ToList();
         }
 
@@ -148,7 +148,7 @@ namespace Signum.Test.LinqProvider
             if (!Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
                 return;
 
-            var durations = Database.MListQuery((AlbumDN a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
+            var durations = Database.MListQuery((AlbumEntity a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
 
             Debug.WriteLine(durations.Select(d => d.Value.Hours.InSql()).ToString(", "));
             Debug.WriteLine(durations.Select(d => d.Value.Minutes.InSql()).ToString(", "));
@@ -156,13 +156,13 @@ namespace Signum.Test.LinqProvider
             Debug.WriteLine(durations.Select(d => d.Value.Milliseconds.InSql()).ToString(", "));
 
 
-            Debug.WriteLine((from n in Database.Query<NoteWithDateDN>()
-                             from d in Database.MListQuery((AlbumDN a) => a.Songs)
+            Debug.WriteLine((from n in Database.Query<NoteWithDateEntity>()
+                             from d in Database.MListQuery((AlbumEntity a) => a.Songs)
                              where d.Element.Duration != null
                              select (n.CreationTime + d.Element.Duration.Value).InSql()).ToString(", "));
 
-            Debug.WriteLine((from n in Database.Query<NoteWithDateDN>()
-                             from d in Database.MListQuery((AlbumDN a) => a.Songs)
+            Debug.WriteLine((from n in Database.Query<NoteWithDateEntity>()
+                             from d in Database.MListQuery((AlbumEntity a) => a.Songs)
                              where d.Element.Duration != null
                              select (n.CreationTime - d.Element.Duration.Value).InSql()).ToString(", "));
         }
@@ -174,7 +174,7 @@ namespace Signum.Test.LinqProvider
             if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
                 return;
 
-            var nodes = Database.Query<LabelDN>().Select(a => a.Node);
+            var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
  
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
@@ -189,24 +189,24 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void MathFunctions()
         {
-            Dump((AlbumDN a) => Math.Sign(a.Year));
-            Dump((AlbumDN a) => -Math.Sign(a.Year) * a.Year);
-            Dump((AlbumDN a) => Math.Abs(a.Year));
-            Dump((AlbumDN a) => Math.Sin(a.Year));
-            Dump((AlbumDN a) => Math.Asin(Math.Sin(a.Year)));
-            Dump((AlbumDN a) => Math.Cos(a.Year));
-            Dump((AlbumDN a) => Math.Acos(Math.Cos(a.Year)));
-            Dump((AlbumDN a) => Math.Tan(a.Year));
-            Dump((AlbumDN a) => Math.Atan(Math.Tan(a.Year)));
-            Dump((AlbumDN a) => Math.Atan2(1,1).InSql());
-            Dump((AlbumDN a) => Math.Pow(a.Year, 2).InSql());
-            Dump((AlbumDN a) => Math.Sqrt(a.Year));
-            Dump((AlbumDN a) => Math.Exp(Math.Log(a.Year)));
-            Dump((AlbumDN a) => Math.Floor(a.Year + 0.5).InSql());
-            Dump((AlbumDN a) => Math.Log10(a.Year));
-            Dump((AlbumDN a) => Math.Ceiling(a.Year + 0.5).InSql());
-            Dump((AlbumDN a) => Math.Round(a.Year + 0.5).InSql());
-            Dump((AlbumDN a) => Math.Truncate(a.Year + 0.5).InSql());
+            Dump((AlbumEntity a) => Math.Sign(a.Year));
+            Dump((AlbumEntity a) => -Math.Sign(a.Year) * a.Year);
+            Dump((AlbumEntity a) => Math.Abs(a.Year));
+            Dump((AlbumEntity a) => Math.Sin(a.Year));
+            Dump((AlbumEntity a) => Math.Asin(Math.Sin(a.Year)));
+            Dump((AlbumEntity a) => Math.Cos(a.Year));
+            Dump((AlbumEntity a) => Math.Acos(Math.Cos(a.Year)));
+            Dump((AlbumEntity a) => Math.Tan(a.Year));
+            Dump((AlbumEntity a) => Math.Atan(Math.Tan(a.Year)));
+            Dump((AlbumEntity a) => Math.Atan2(1,1).InSql());
+            Dump((AlbumEntity a) => Math.Pow(a.Year, 2).InSql());
+            Dump((AlbumEntity a) => Math.Sqrt(a.Year));
+            Dump((AlbumEntity a) => Math.Exp(Math.Log(a.Year)));
+            Dump((AlbumEntity a) => Math.Floor(a.Year + 0.5).InSql());
+            Dump((AlbumEntity a) => Math.Log10(a.Year));
+            Dump((AlbumEntity a) => Math.Ceiling(a.Year + 0.5).InSql());
+            Dump((AlbumEntity a) => Math.Round(a.Year + 0.5).InSql());
+            Dump((AlbumEntity a) => Math.Truncate(a.Year + 0.5).InSql());
         }
 
         public void Dump<T,S>(Expression<Func<T, S>> bla)
@@ -218,7 +218,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ConcatenateNull()
         {
-            var list = Database.Query<ArtistDN>().Select(a => (a.Name + null).InSql()).ToList();
+            var list = Database.Query<ArtistEntity>().Select(a => (a.Name + null).InSql()).ToList();
 
             Assert.IsFalse(list.Any(string.IsNullOrEmpty));
         }
@@ -227,25 +227,25 @@ namespace Signum.Test.LinqProvider
         public void Etc()
         {
             Assert.IsTrue(Enumerable.SequenceEqual(
-                Database.Query<AlbumDN>().Select(a => a.Name.Etc(10)).OrderBy().ToList(),
-                Database.Query<AlbumDN>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).OrderBy().ToList()));
+                Database.Query<AlbumEntity>().Select(a => a.Name.Etc(10)).OrderBy().ToList(),
+                Database.Query<AlbumEntity>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).OrderBy().ToList()));
 
             Assert.AreEqual(
-                Database.Query<AlbumDN>().Count(a => a.Name.Etc(10).EndsWith("s")),
-                Database.Query<AlbumDN>().Count(a => a.Name.EndsWith("s")));
+                Database.Query<AlbumEntity>().Count(a => a.Name.Etc(10).EndsWith("s")),
+                Database.Query<AlbumEntity>().Count(a => a.Name.EndsWith("s")));
         }
 
         [TestMethod]
         public void TableValuedFunction()
         {
-            var list = Database.Query<AlbumDN>()
+            var list = Database.Query<AlbumEntity>()
                 .Where(a => MinimumExtensions.MinimumTableValued((int)a.Id * 2, (int)a.Id).Select(m => m.MinValue).First() > 2).Select(a => a.Id).ToList();
         }
 
         [TestMethod]
         public void TableValuedPerformanceTest()
         {
-            var songs = Database.MListQuery((AlbumDN a) => a.Songs).Select(a => a.Element);
+            var songs = Database.MListQuery((AlbumEntity a) => a.Songs).Select(a => a.Element);
 
             var t1 = PerfCounter.Ticks;
             
@@ -287,7 +287,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SimplifyMinimumTableValued()
         {
-            var result = (from b in Database.Query<BandDN>()
+            var result = (from b in Database.Query<BandEntity>()
                           let min = MinimumExtensions.MinimumTableValued((int)b.Id, (int)b.Id).FirstOrDefault().MinValue
                           select b.Name).ToList();
         }
@@ -295,7 +295,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void NominateEnumSwitch()
         {
-            var list = Database.Query<AlbumDN>().Select(a =>
+            var list = Database.Query<AlbumEntity>().Select(a =>
                 (a.Songs.Count > 10 ? AlbumSize.Large :
                 a.Songs.Count > 5 ? AlbumSize.Medium :
                  AlbumSize.Small).InSql()).ToList();

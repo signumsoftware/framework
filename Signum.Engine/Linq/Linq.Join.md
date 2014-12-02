@@ -1,4 +1,4 @@
-## LINQ `Join` differences
+﻿## LINQ `Join` differences
 
 We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hard thing is to know where you are).
 
@@ -60,8 +60,8 @@ The example above, using Linq to Signum, will just be:
 
 
 ```C#
-var q = from b in Database.Query<BugDN>()
-        join c in Database.Query<CommentDN>().DefaultIfEmpty() on b equals c.Bug
+var q = from b in Database.Query<BugEntity>()
+        join c in Database.Query<CommentEntity>().DefaultIfEmpty() on b equals c.Bug
         select new { b.Description, OrderNumber = c == null ? "(no comment)" : c.Text };
 ```
 
@@ -76,8 +76,8 @@ In this super-simple database we have to make up an artificial example. Let's fo
 Returns only the matched pair, with `b1` being the previous bug and `b2` the next bug: 
 
 ```C#
-from b1 in Database.Query<BugDN>()
-join b2 in Database.Query<BugDN>() on b.Start equals c.Date 
+from b1 in Database.Query<BugEntity>()
+join b2 in Database.Query<BugEntity>() on b.Start equals c.Date 
 select new { b1, b2 }
 ````
 
@@ -86,8 +86,8 @@ select new { b1, b2 }
 Returns all the bugs in `b1`, with `null` or the next bug in `b2`:
 
 ```C#
-from b1 in Database.Query<BugDN>()
-join b2 in Database.Query<BugDN>().DefaultIfEmpty() on b.Start equals c.Date 
+from b1 in Database.Query<BugEntity>()
+join b2 in Database.Query<BugEntity>().DefaultIfEmpty() on b.Start equals c.Date 
 select new { b1, b2 }
 ````
 
@@ -96,8 +96,8 @@ select new { b1, b2 }
 Returns all the bugs in `b2`, with `null` or the previous bug in `b1`:
 
 ```C#
-from b1 in Database.Query<BugDN>().DefaultIfEmpty() 
-join b2 in Database.Query<BugDN>() on b.Start equals c.Date 
+from b1 in Database.Query<BugEntity>().DefaultIfEmpty() 
+join b2 in Database.Query<BugEntity>() on b.Start equals c.Date 
 select new { b1, b2 }
 ````
 
@@ -106,7 +106,7 @@ select new { b1, b2 }
 Returns all the bugs in `b1` and `b2`, with matching pairs if exists or `null` if not. 
 
 ```C#
-from b1 in Database.Query<BugDN>().DefaultIfEmpty() 
-join b2 in Database.Query<BugDN>().DefaultIfEmpty() on b.Start equals c.Date 
+from b1 in Database.Query<BugEntity>().DefaultIfEmpty() 
+join b2 in Database.Query<BugEntity>().DefaultIfEmpty() on b.Start equals c.Date 
 select new { b1, b2 }
 ````

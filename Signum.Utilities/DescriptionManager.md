@@ -1,4 +1,4 @@
-# DescriptionManager
+﻿# DescriptionManager
 
 This class is the responsible for localization of `Properties`, `Types` (singular and plural) and `Enums`. 
 
@@ -74,12 +74,12 @@ It tries to find the value in the following order:
  * If has `_`, just replace them by space
  * Otherwise, space the name by each uppercase change (`SpacePascal`)
 
-Additionally, there's an overload for the common case of calling `Formato` after `NiceToString`
+Additionally, there's an overload for the common case of calling `FormatWith` after `NiceToString`
 
 ```C#
 public static string NiceToString(this Enum a, params object[] args)
 {
-    return a.NiceToString().Formato(args);
+    return a.NiceToString().FormatWith(args);
 }
 ```
 Example: 
@@ -149,7 +149,7 @@ int count = Database.Query<T>().Count();
 
 "Se ha[n] encontrado [1m:un|1f:una|m:unos|f:unas] {0} eliminad[1m:o|1f:a|m:os|f:as]"
 .ForGenderAndNumber( typeof(T).GetGender(), count)
-.Formato(count == 1 ? typeof(T).NiceName(), typeof(T).NicePluralName());  
+.FormatWith(count == 1 ? typeof(T).NiceName(), typeof(T).NicePluralName());  
 ```
  
 

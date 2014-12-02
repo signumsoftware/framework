@@ -34,38 +34,38 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DistinctString()
         {
-            var authors = Database.Query<AlbumDN>().Select(a => a.Label.Name).Distinct().ToList();
+            var authors = Database.Query<AlbumEntity>().Select(a => a.Label.Name).Distinct().ToList();
         }
 
         [TestMethod]
         public void DistinctPair()
         {
-            var authors = Database.Query<ArtistDN>().Select(a =>new {a.Sex, a.Dead}).Distinct().ToList();
+            var authors = Database.Query<ArtistEntity>().Select(a =>new {a.Sex, a.Dead}).Distinct().ToList();
         }
 
         [TestMethod]
         public void DistinctFie()
         {
-            var authors = Database.Query<AlbumDN>().Select(a => a.Label).Distinct().ToList();
+            var authors = Database.Query<AlbumEntity>().Select(a => a.Label).Distinct().ToList();
         }
 
         [TestMethod]
         public void DistinctFieExpanded()
         {
-            var authors = Database.Query<AlbumDN>().Where(a => a.Year != 0).Select(a => a.Label).Distinct().ToList();
+            var authors = Database.Query<AlbumEntity>().Where(a => a.Year != 0).Select(a => a.Label).Distinct().ToList();
         }
 
         [TestMethod]
         public void DistinctIb()
         {
-            var authors = Database.Query<AlbumDN>().Select(a => a.Author).Distinct().ToList();
+            var authors = Database.Query<AlbumEntity>().Select(a => a.Author).Distinct().ToList();
         }
 
         [TestMethod]
         public void DistinctCount()
         {
-            var count1 = Database.Query<AlbumDN>().Select(a => a.Name).Distinct().Select(a => a).Count();
-            var count2 = Database.Query<AlbumDN>().Select(a => a.Name).Distinct().ToList().Count();
+            var count1 = Database.Query<AlbumEntity>().Select(a => a.Name).Distinct().Select(a => a).Count();
+            var count2 = Database.Query<AlbumEntity>().Select(a => a.Name).Distinct().ToList().Count();
             Assert.AreEqual(count1, count2);
         }
 
@@ -73,13 +73,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DistinctTake()
         {
-            var bla = Database.Query<BandDN>().SelectMany(a => a.Members.SelectMany(m => m.Friends).Distinct()).Take(4).ToList();
+            var bla = Database.Query<BandEntity>().SelectMany(a => a.Members.SelectMany(m => m.Friends).Distinct()).Take(4).ToList();
         }
 
         [TestMethod]
         public void GroupTake()
         {
-            var bla = (from b in Database.Query<BandDN>()
+            var bla = (from b in Database.Query<BandEntity>()
                       from g in b.Members.GroupBy(a=>a.Sex).Select(gr=> new {gr.Key, Count = gr.Count() })
                       select new 
                       {

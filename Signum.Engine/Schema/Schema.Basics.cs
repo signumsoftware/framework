@@ -106,7 +106,7 @@ namespace Signum.Engine.Maps
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
                     if(Mixins == null)
-                        throw new InvalidOperationException("{0} has not mixins".Formato(this.Type.Name));
+                        throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
                 }
@@ -115,7 +115,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, Type));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, Type));
 
             EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -345,7 +345,7 @@ namespace Signum.Engine.Maps
         public static void AssertImplements(this Field field, Type type)
         {
             if (!Implements(field, type))
-                throw new InvalidOperationException("{0} does not implement {1}".Formato(field.ToString(), type.Name));
+                throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
         }
     }
 
@@ -407,7 +407,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} PrimaryKey".Formato(Name);
+            return "{0} PrimaryKey".FormatWith(Name);
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -460,7 +460,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} {1} ({2},{3},{4})".Formato(
+            return "{0} {1} ({2},{3},{4})".FormatWith(
                 Name,
                 SqlDbType,
                 Nullable ? "Nullable" : "",
@@ -536,7 +536,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Embebed\r\n{0}".Formato(EmbeddedFields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+            return "Embebed\r\n{0}".FormatWith(EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -544,7 +544,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
 
             EntityField field = EmbeddedFields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -632,7 +632,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Mixin\r\n{0}".Formato(Fields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+            return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -640,7 +640,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
 
             EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -731,7 +731,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {3} ({2})".Formato(
+            return "{0} -> {1} {3} ({2})".FormatWith(
                 Name,
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",
@@ -792,7 +792,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2})".Formato(
+            return "{0} -> {1} {4} ({2})".FormatWith(
                 Name,
                 "-",
                 IsLite ? "Lite" : "",
@@ -834,7 +834,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "ImplementedBy\r\n{0}".Formato(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".Formato(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
+            return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -978,7 +978,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Coleccion\r\n{0}".Formato(TableMList.ToString().Indent(2));
+            return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -986,7 +986,7 @@ namespace Signum.Engine.Maps
             if (member.Name == "Item")
                 return TableMList.Field;
 
-            throw new InvalidOperationException("{0} not supported by MList field".Formato(member.Name));
+            throw new InvalidOperationException("{0} not supported by MList field".FormatWith(member.Name));
         }
 
         public Field TryGetField(MemberInfo member)
@@ -1073,7 +1073,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "[{0}]\r\n  {1}\r\n  {2}".Formato(Name, BackReference.Name, Field.ToString());
+            return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
         }
 
         public void GenerateColumns()
@@ -1105,7 +1105,7 @@ namespace Signum.Engine.Maps
             Field result = TryGetField(member); 
 
             if(result  == null)
-                throw new InvalidOperationException("'{0}' not found".Formato(member.Name));
+                throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
 
             return result;
         }

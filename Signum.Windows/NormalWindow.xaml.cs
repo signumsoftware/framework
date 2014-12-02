@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -108,7 +108,7 @@ namespace Signum.Windows
                 Type type = Common.GetPropertyRoute(MainControl).Type;
                 Type entityType = e.NewDataContext.GetType();
                 if (type != null && !type.IsAssignableFrom(entityType))
-                    throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".Formato(entityType.Name, type.Name));
+                    throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".FormatWith(entityType.Name, type.Name));
 
                 DataContext = null;
                 DataContext = e.NewDataContext;
@@ -180,14 +180,14 @@ namespace Signum.Windows
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
                             MessageBox.Show(this,
-                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)),
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName(), errors.Indent(3)),
                                 NormalWindowMessage.FixErrors.NiceToString(),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
                             if (MessageBox.Show(this,
-                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + NormalWindowMessage.ContinueAnyway.NiceToString(),
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName(), errors.Indent(3)) + "\r\n" + NormalWindowMessage.ContinueAnyway.NiceToString(),
                                 NormalWindowMessage.ContinueWithErrors.NiceToString(),
                                 MessageBoxButton.YesNo,
                                 MessageBoxImage.Exclamation,

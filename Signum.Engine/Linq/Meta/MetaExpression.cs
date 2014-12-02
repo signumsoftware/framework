@@ -62,7 +62,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "MetaProjector({0})".Formato(this.Projector.ToString());
+            return "MetaProjector({0})".FormatWith(this.Projector.ToString());
         }  
     }
 
@@ -83,7 +83,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "Exp({0})".Formato(Meta);
+            return "Exp({0})".FormatWith(Meta);
         }
 
         internal static MetaExpression FromToken(QueryToken token, Type sourceType)
@@ -98,7 +98,7 @@ namespace Signum.Engine.Linq
 
             return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr }));
 
-            //throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(pr.Type.TypeName(), sourceType.TypeName()));
+            //throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(pr.Type.TypeName(), sourceType.TypeName()));
         }
 
         static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
@@ -119,7 +119,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ExpMList({0}, {1})".Formato(Parent, Element);
+            return "ExpMList({0}, {1})".FormatWith(Parent, Element);
         }
     }
 }

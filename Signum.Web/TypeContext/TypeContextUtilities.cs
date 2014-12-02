@@ -26,7 +26,7 @@ namespace Signum.Web
             }
         }
 
-        static MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+        static MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeEntity> l) => l.Retrieve()).GetGenericMethodDefinition();
         public static TypeContext CleanTypeContext(TypeContext typeContext)
         {
             if (typeContext == null)

@@ -64,7 +64,7 @@ namespace Signum.Entities
         public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
         {
             if (ib != null && iba != null)
-                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
+                throw new NotSupportedException("Route {0} contains both {1} and {2}".FormatWith(route, ib.GetType().Name, iba.GetType().Name));
 
             if (ib != null) return Implementations.By(ib.ImplementedTypes);
             if (iba != null) return Implementations.ByAll;
@@ -82,13 +82,13 @@ namespace Signum.Entities
 
             if (imp == null)
             {
-                var message = Error(t) + @". Set implementations for {0}.".Formato(route);
+                var message = Error(t) + @". Set implementations for {0}.".FormatWith(route);
 
                 if(t.IsInterface || t.IsAbstract)
                 {
                     message += @"\r\nConsider writing something like this in your Starter class: 
 sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribute(typeof(YourConcrete{2}));"
-                    .Formato(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
+                    .FormatWith(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
                 }
 
                 throw new InvalidOperationException(message);
@@ -128,13 +128,13 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
         static string Error(Type type)
         {
             if (type.IsInterface)
-                return "{0} is an interface".Formato(type.Name);
+                return "{0} is an interface".FormatWith(type.Name);
 
             if (type.IsAbstract)
-                return "{0} is abstract".Formato(type.Name);
+                return "{0} is abstract".FormatWith(type.Name);
 
             if (!type.IsEntity())
-                return "{0} is not {1}".Formato(type.Name, typeof(Entity).Name);
+                return "{0} is not {1}".FormatWith(type.Name, typeof(Entity).Name);
 
             return null;
         }
@@ -144,7 +144,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             if (IsByAll)
                 return "ImplementedByAll";
 
-            return "ImplementedBy({0})".Formato(Types.ToString(t => t.Name, ", "));
+            return "ImplementedBy({0})".FormatWith(Types.ToString(t => t.Name, ", "));
         }
 
         public override bool Equals(object obj)

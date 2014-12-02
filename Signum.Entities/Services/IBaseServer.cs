@@ -47,7 +47,7 @@ namespace Signum.Services
         Dictionary<Type, HashSet<Type>> FindAllMixins();
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeDN> ServerTypes();
+        Dictionary<Type, TypeEntity> ServerTypes();
 
         [OperationContract, NetDataContract]
         DateTime ServerNow();

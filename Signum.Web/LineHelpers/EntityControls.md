@@ -1,4 +1,4 @@
-## Entity Controls
+﻿## Entity Controls
 
 Entity Controls are a family of MVC Helpers and TypeScript clases designed to manipulate any property of your entities using **just a simple line of Razor**.
 
@@ -77,7 +77,7 @@ public class ValueLine : LineBase
 | single double, decimal | Number |
 | DateTime      | DateTime      |
 | TimeSpan      | TimeSpan      |
-| ColorDN       | Color         |
+| ColorEntity       | Color         |
 | any Enum      | Enum          |
 | string, char  | String      |
 | any object    | String      |
@@ -267,7 +267,7 @@ Example of using `creating` to initialize to customize the entity initialization
 @Html.EntityCombo(pc, p => p.Category, ec =>
 {
     ec.AttachFunction = SouthwindClient.ProductModule["attachCategory"](ec);
-    ec.Create = Navigator.IsCreable(typeof(CategoryDN), isSearch: true);
+    ec.Create = Navigator.IsCreable(typeof(CategoryEntity), isSearch: true);
     ec.Remove = true;
 })
 ```
@@ -305,7 +305,7 @@ Example of using `finding` to search using a custom `FindOptions`:
 ```C#
 @Html.EntityLine(oc, o => o.Customer, el =>
 {
-    el.AttachFunction = SouthwindClient.OrderModule["attachCustomerEntityLine"](el, new FindOptions(typeof(CustomerDN)).ToJS(el.Prefix));
+    el.AttachFunction = SouthwindClient.OrderModule["attachCustomerEntityLine"](el, new FindOptions(typeof(CustomerEntity)).ToJS(el.Prefix));
 })
 ```
 
@@ -327,7 +327,7 @@ Example of using `viewing` to customize the view:
 @Html.EntityLine(oc, o => o.Customer, el =>
 {
     el.AttachFunction = SouthwindClient.OrderModule["attachCustomerEntityLine"](el, 
-     SouthwindClient.ViewPrefix.Formato("CustomerUI"));
+     SouthwindClient.ViewPrefix.FormatWith("CustomerUI"));
 })
 ```
 
@@ -471,7 +471,7 @@ Example:
 [HttpPost]
 public JsonNetResult PersonAutocomplete(string types, string q, int l)
 {
-    var result = Database.Query<PersonDN>()
+    var result = Database.Query<PersonEntity>()
         .Where(p => !p.Corrupt)
         .Select(p => p.ToLite())
         .Autocomplete(q, l)
@@ -512,7 +512,7 @@ public class EntityCombo : EntityBase
 ```C#
 @Html.EntityCombo(tc, s => s.Country, ec =>
 {
-    ec.Data = new List<Lite<CountryDN>>
+    ec.Data = new List<Lite<CountryEntity>>
     {
       brazil, rusia, india, china
     }
@@ -530,7 +530,7 @@ In order to change the view that will be used to as detail view, change the inhe
 Example:
 
 ```C# 
-@Html.EntityDetail(oc, o => o.Customer, el => el.PartialViewName = SouthwindClient.ViewPrefix.Formato("CustomerUI"))
+@Html.EntityDetail(oc, o => o.Customer, el => el.PartialViewName = SouthwindClient.ViewPrefix.FormatWith("CustomerUI"))
 ```
 
 ## EntityListBase (abstract)
@@ -575,7 +575,7 @@ In fact, the default implementation is overridden in `EntityListBase` to use `Fi
 ```C#
 @Html.EntityList(oc, o => o.Customers, el =>
 {
-    el.AttachFunction = SouthwindClient.OrderModule["attachCustomerEntityLine"](el, new FindOptions(typeof(CustomerDN)).ToJS(el.Prefix));
+    el.AttachFunction = SouthwindClient.OrderModule["attachCustomerEntityLine"](el, new FindOptions(typeof(CustomerEntity)).ToJS(el.Prefix));
 })
 ```
 

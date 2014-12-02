@@ -23,8 +23,8 @@ namespace Signum.Web.Exceptions
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ExceptionDN>() { PartialViewName = e => NavigationManager.ViewPrefix.Formato("Exception") });
-                Navigator.AddSetting(new EmbeddedEntitySettings<DeleteLogParametersDN>() { PartialViewName = e => NavigationManager.ViewPrefix.Formato("DeleteLogParameters") });
+                Navigator.AddSetting(new EntitySettings<ExceptionEntity>() { PartialViewName = e => NavigationManager.ViewPrefix.FormatWith("Exception") });
+                Navigator.AddSetting(new EmbeddedEntitySettings<DeleteLogParametersEntity>() { PartialViewName = e => NavigationManager.ViewPrefix.FormatWith("DeleteLogParameters") });
             }
         }
     }

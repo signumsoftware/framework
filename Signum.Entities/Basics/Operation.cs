@@ -57,7 +57,7 @@ namespace Signum.Entities
 
                 public override string ToString()
                 {
-                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
                 }
             }
 
@@ -79,7 +79,7 @@ namespace Signum.Entities
 
                 public override string ToString()
                 {
-                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
                 }
             }
 
@@ -101,7 +101,7 @@ namespace Signum.Entities
 
                 public override string ToString()
                 {
-                    return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
                 }
             }
         }
@@ -143,7 +143,7 @@ namespace Signum.Entities
 
             public override string ToString()
             {
-                return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
             }
         }
 
@@ -165,7 +165,7 @@ namespace Signum.Entities
 
             public override string ToString()
             {
-                return "{0}({1})".Formato(this.GetType().TypeName(), Symbol);
+                return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
             }
         }
     }
@@ -237,7 +237,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0} ({1}) Lite = {2}, Returns {3}".Formato(OperationSymbol, OperationType, Lite, Returns);
+            return "{0} ({1}) Lite = {2}, Returns {3}".FormatWith(OperationSymbol, OperationType, Lite, Returns);
         }
 
         public bool IsEntityOperation

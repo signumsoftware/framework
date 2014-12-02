@@ -33,7 +33,7 @@ namespace Signum.Utilities
             using (Stream stream = assembly.GetManifestResourceStream(name))
             {
                 if (stream == null)
-                    throw new MissingManifestResourceException("{0} not found on {1}".Formato(name, assembly));
+                    throw new MissingManifestResourceException("{0} not found on {1}".FormatWith(name, assembly));
 
                 using (StreamReader reader = new StreamReader(stream))
                     return reader.ReadToEnd();

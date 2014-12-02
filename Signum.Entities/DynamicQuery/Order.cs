@@ -27,7 +27,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(token.FullKey(), orderType);
+            return "{0} {1}".FormatWith(token.FullKey(), orderType);
         }
     }
 

@@ -47,13 +47,13 @@ namespace Signum.Utilities
         public static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
         {
             if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
-                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
+                throw new InvalidOperationException("{0} has {1} set also requires {2}".FormatWith(member.Name, opts, DescriptionOptions.Description));
 
             if ((member is PropertyInfo || member is FieldInfo) &&
                 (opts.IsSet(DescriptionOptions.PluralDescription) ||
                  opts.IsSet(DescriptionOptions.Gender) ||
                  opts.IsSet(DescriptionOptions.Members)))
-                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
+                throw new InvalidOperationException("Member {0} has {1} set".FormatWith(member.Name, opts));
 
             return opts.IsSet(flag);
         }
@@ -120,7 +120,7 @@ namespace Signum.Utilities
 
     public static class DescriptionManager
     {
-        public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
+        public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityEntity
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
 
         public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
@@ -157,7 +157,7 @@ namespace Signum.Utilities
             {
                 var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
                 if (loc == null)
-                    throw new InvalidOperationException("Type {0} is not localizable".Formato(type.TypeName()));
+                    throw new InvalidOperationException("Type {0} is not localizable".FormatWith(type.TypeName()));
 
                 return typeValue(loc);
             }
@@ -194,7 +194,7 @@ namespace Signum.Utilities
 
         public static string NiceToString(this Enum a, params object[] args)
         {
-            return a.NiceToString().Formato(args);
+            return a.NiceToString().FormatWith(args);
         }
 
         public static string NiceToString(this Enum a)
@@ -366,7 +366,7 @@ namespace Signum.Utilities
 
         public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
         {
-            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
+            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".FormatWith(assembly.GetName().Name, cultureInfo.Name));
         }
 
         public static DescriptionOptions GetDescriptionOptions(Type type)
@@ -450,7 +450,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "Localized {0}".Formato(Assembly.GetName().Name);
+            return "Localized {0}".FormatWith(Assembly.GetName().Name);
         }
     }
 
@@ -553,7 +553,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "Localized {0}".Formato(Type.Name);
+            return "Localized {0}".FormatWith(Type.Name);
         }
 
         public bool Contains(string text)

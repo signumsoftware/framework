@@ -1,4 +1,4 @@
-# Extensions class
+﻿# Extensions class
 
 As a general rule we tried to avoid adding ExtensionMethods to basic
 types, like object (or a free generic type) to avoid cluttering
@@ -82,13 +82,13 @@ more than once _in an expression_:
 ```C#
 FileInfo fi = new FileInfo("MyPicture.bmp"); 
 
-Console.WriteLine("Name {0} Size {1}".Formato(fi.Name, fi.Length)); 
+Console.WriteLine("Name {0} Size {1}".FormatWith(fi.Name, fi.Length)); 
 ```
 
 Let method allows you to avoid 'braking the line' doing this:
 
 ```C#
-Console.WriteLine(new FileInfo("MyPicture.bmp").Let(fi=>"Name {0} Size {1}".Formato(fi.Name, fi.Length))); 
+Console.WriteLine(new FileInfo("MyPicture.bmp").Let(fi=>"Name {0} Size {1}".FormatWith(fi.Name, fi.Length))); 
 ```
 
 Let is defined just like this.
@@ -276,7 +276,7 @@ With `ThrowIfNull` you can assert not nullability on the fly:
 ```C#
 Departament.Boss.ThrowIfNullC("Departament has no Boss").Promote(); 
 
-Departament.Boss.ThrowIfNullC(()=>"Departament {0} has no Boss".Formato(Departament)).Promote();  //Lambda overload
+Departament.Boss.ThrowIfNullC(()=>"Departament {0} has no Boss".FormatWith(Departament)).Promote();  //Lambda overload
 ```
 
 This specially useful on queries, you will have to change to a [

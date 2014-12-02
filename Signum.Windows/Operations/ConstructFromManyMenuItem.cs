@@ -57,7 +57,7 @@ namespace Signum.Windows.Operations
                         if (result != null)
                             Navigator.Navigate(result);
                         else
-                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.OperationSymbol.NiceToString()));
+                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().FormatWith(coc.OperationInfo.OperationSymbol.NiceToString()));
                     }
                 }
             };

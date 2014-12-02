@@ -354,7 +354,7 @@ namespace Signum.Engine
             result.SqlDbType = sqlType;
 
             if (sqlType == SqlDbType.Udt)
-                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".FormatWith(udtTypeName));
 
             return result;
         }
@@ -378,7 +378,7 @@ namespace Signum.Engine
             };
 
             if (sqlType == SqlDbType.Udt)
-                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".FormatWith(udtTypeName));
 
             return Expression.MemberInit(newExpr, mb);
         }

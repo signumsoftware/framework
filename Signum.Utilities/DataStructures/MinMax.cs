@@ -19,7 +19,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return "[Min = {0}, Max = {1}]".Formato(Min, Max);
+            return "[Min = {0}, Max = {1}]".FormatWith(Min, Max);
         }
 
         public bool Equals(MinMax<T> value)

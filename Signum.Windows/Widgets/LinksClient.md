@@ -1,4 +1,4 @@
-# LinkClient
+﻿# LinkClient
 
 `LinkClient` allows you to register links from any entity to navigate to other entities, open `SearchWindows` or do any other custom action. 
 
@@ -20,13 +20,13 @@ public static class LinksClient
 }
 ```
 
-For example, this is how `OperationClient` registers `OperationLogDN` as a `QuickLink` for any entity but `OperationLogDN` itself: 
+For example, this is how `OperationClient` registers `OperationLogEntity` as a `QuickLink` for any entity but `OperationLogEntity` itself: 
 
 ```C#
 LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
-    entity.GetType() == typeof(OperationLogDN) ? null : 
-        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+    entity.GetType() == typeof(OperationLogEntity) ? null : 
+        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
         {
             OrderOptions = { new OrderOption("Start") }
         }){ IsShy = true}
@@ -60,7 +60,7 @@ Abstract base class that contains:
 * **Label:** That will be shown in the elements of the `LinkWidget` or the `MenuItem`. 
 * **Name:** Unique name used for `UIAutomation`. 
 * **IsVisible:** Hides the `QuickLink`
-* **IsShy:** If LinksWidgets finds some `QuickLinks` for a parcicular entitiy that are `IsShy == false`, it raises `ForceShow` event to make `WidgetPanel` visible. By default is `false`, but can be set to `true` for common QuickLinks, like `OperationLogDN`.  
+* **IsShy:** If LinksWidgets finds some `QuickLinks` for a parcicular entitiy that are `IsShy == false`, it raises `ForceShow` event to make `WidgetPanel` visible. By default is `false`, but can be set to `true` for common QuickLinks, like `OperationLogEntity`.  
 * **ToolTip:** A ToolTip that will be shown when overing over the elements of the `LinkWidget` or the `MenuItem` in the contextual menu.
 * **Icon:** A small 16x16 icon that will be shown in the `LinkWidget` or the `MenuItem`.
 
@@ -84,7 +84,7 @@ public class QuickLinkAction : QuickLink
 The `action` will be invoked when the user clicks the `QuickLink`. Example:
 
 ```C#
-LinksClient.RegisterEntityLinks<DashboardDN>((cp, ctrl) => new[]
+LinksClient.RegisterEntityLinks<DashboardEntity>((cp, ctrl) => new[]
 {  
     new QuickLinkAction(DashboardMessage.Preview, () => Navigate(cp, null)) 
     {
@@ -124,8 +124,8 @@ Example:
 ```C#
 LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
-    entity.GetType() == typeof(OperationLogDN) ? null : 
-        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+    entity.GetType() == typeof(OperationLogEntity) ? null : 
+        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
         {
             OrderOptions = { new OrderOption("Start") }
         }){ IsShy = true}

@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -186,7 +186,7 @@ namespace Signum.Web
         }
 
         static GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
-            new GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, prefix, route, dic));
+            new GenericInvoker<Func<ModifiableEntity, ControllerBase, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, route, dic) => ApplyChanges<TypeEntity>((TypeEntity)me, cc, prefix, route, dic));
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerBase controller, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).UntypedMappingMain;
@@ -313,23 +313,29 @@ namespace Signum.Web
             return EntitySettings(entity.GetType()).OnPartialViewName(entity); 
         }
 
-        public static void RegisterArea(Type clientType)
+        public static void RegisterArea(Type clientType, 
+            string areaName = null, 
+            string controllerNamespace = null, 
+            string resourcesNamespace = null)
         {
-            if (!clientType.Name.EndsWith("Client"))
-                throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
+            if (areaName == null)
+                areaName = clientType.Namespace.AfterLast('.');
 
-            RegisterArea(clientType, clientType.Name.RemoveEnd("Client".Length));
-        }
-
-        public static void RegisterArea(Type clientType, string areaName)
-        {
             if (areaName.Start(1) == "/")
-                throw new SystemException("Invalid start character / in {0}".Formato(areaName));
+                throw new SystemException("Invalid start character / in {0}".FormatWith(areaName));
 
-            CompiledViews.RegisterArea(clientType.Assembly, areaName);
-            SignumControllerFactory.RegisterControllersLike(clientType, areaName);
+            if (controllerNamespace == null)
+                controllerNamespace = clientType.Namespace;
 
-            EmbeddedFilesRepository rep = new EmbeddedFilesRepository(clientType.Assembly, areaName);
+            if (resourcesNamespace == null)
+                resourcesNamespace = clientType.Namespace;
+
+            var assembly = clientType.Assembly;
+
+            CompiledViews.RegisterArea(assembly, areaName);
+            SignumControllerFactory.RegisterControllersIn(assembly, controllerNamespace, areaName);
+
+            EmbeddedFilesRepository rep = new EmbeddedFilesRepository(assembly, "~/" + areaName + "/", resourcesNamespace);
             if (!rep.IsEmpty)
                 FileRepositoryManager.Register(rep);
         }
@@ -343,7 +349,7 @@ namespace Signum.Web
         internal static void AssertNotReadonly(Entity ident)
         {
             if (Navigator.IsReadOnly(ident))
-                throw new UnauthorizedAccessException("{0} is read-only".Formato(ident));
+                throw new UnauthorizedAccessException("{0} is read-only".FormatWith(ident));
         }
     }
     
@@ -353,10 +359,10 @@ namespace Signum.Web
 
         public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
-        public string NormalPageView = ViewPrefix.Formato("NormalPage");
-        public string NormalControlView = ViewPrefix.Formato("NormalControl");
-        public string PopupControlView = ViewPrefix.Formato("PopupControl");
-        public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
+        public string NormalPageView = ViewPrefix.FormatWith("NormalPage");
+        public string NormalControlView = ViewPrefix.FormatWith("NormalControl");
+        public string PopupControlView = ViewPrefix.FormatWith("PopupControl");
+        public string ValueLineBoxView = ViewPrefix.FormatWith("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
       
@@ -409,8 +415,8 @@ namespace Signum.Web
                 WebTypeNames = EntitySettings.Values.Where(es => es.WebTypeName.HasText())
                     .ToDictionary(es => es.WebTypeName, es => es.StaticType, StringComparer.InvariantCultureIgnoreCase, "WebTypeNames");
 
-              
-                Navigator.RegisterArea(typeof(Navigator), "Signum");
+
+                Navigator.RegisterArea(typeof(Navigator), areaName: "Signum", resourcesNamespace: "Signum.Web.Signum");
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "Signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/Signum/calendarResources/"));
                 FileRepositoryManager.Register(new UrlsRepository("~/Signum/urls/"));
@@ -440,7 +446,7 @@ namespace Signum.Web
             string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new InvalidOperationException("Call {0} first".Formato(name));
+                throw new InvalidOperationException("Call {0} first".FormatWith(name));
         }
 
         protected internal string GetOrCreateTabID(ControllerBase c)
@@ -557,7 +563,7 @@ namespace Signum.Web
             Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType, partialViewName))
-                throw new Exception(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(cleanType.Name));
+                throw new Exception(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
 
@@ -594,7 +600,7 @@ namespace Signum.Web
                     return cleanName;
             }
 
-            throw new InvalidOperationException("Impossible to resolve WebTypeName for '{0}' because is not registered in Navigator's EntitySettings".Formato(type.Name) + 
+            throw new InvalidOperationException("Impossible to resolve WebTypeName for '{0}' because is not registered in Navigator's EntitySettings".FormatWith(type.Name) + 
                 (type.IsEntity() ? " or the Schema" : null));
         }
 
@@ -626,7 +632,7 @@ namespace Signum.Web
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[key]);
 
             if (runtimeInfo == null)
-                throw new ArgumentNullException("{0} not found in form request".Formato(key));
+                throw new ArgumentNullException("{0} not found in form request".FormatWith(key));
 
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
@@ -709,13 +715,13 @@ namespace Signum.Web
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
-                throw new InvalidOperationException("No EntitySettings for type {0}".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("No EntitySettings for type {0}".FormatWith(entity.GetType().Name));
 
             if (es.OnPartialViewName(entity) == null)
-                throw new InvalidOperationException("No view has been set in the EntitySettings for {0}".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("No view has been set in the EntitySettings for {0}".FormatWith(entity.GetType().Name));
 
             if (!IsViewableBase(entity.GetType(), entity))
-                throw new InvalidOperationException("Entities of type {0} are not viewable".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("Entities of type {0} are not viewable".FormatWith(entity.GetType().Name));
 
             return es;
         }

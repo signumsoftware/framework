@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,15 +33,15 @@ namespace Signum.Engine.Maps
         {
             schema = new Schema(new SchemaSettings());
 
-            TypeDN.SetTypeNameCallbacks(
+            TypeEntity.SetTypeNameCallbacks(
                 t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
-            Include<TypeDN>();
+            Include<TypeEntity>();
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {
                 if (schema.Tables.ContainsKey(t))
-                    throw new InvalidOperationException("{0} is already included in the Schema".Formato(t.TypeName()));
+                    throw new InvalidOperationException("{0} is already included in the Schema".FormatWith(t.TypeName()));
             };
         }
 
@@ -126,7 +126,7 @@ namespace Signum.Engine.Maps
             {
                 var ib = f as FieldImplementedBy;
                 if (ib == null)
-                    throw new InvalidOperationException("Casting only supported for {0}".Formato(typeof(FieldImplementedBy).Name));
+                    throw new InvalidOperationException("Casting only supported for {0}".FormatWith(typeof(FieldImplementedBy).Name));
 
                 return (from ic in ib.ImplementationColumns
                         where type.IsAssignableFrom(ic.Key)
@@ -198,14 +198,14 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
                 if (type.IsAbstract)
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is abstract".FormatWith(type));
 
                 if (!Reflector.IsEntity(type))
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".Formato(type));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".FormatWith(type));
 
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
-                        throw new InvalidOperationException("Type {0} is not marked as serializable".Formato(t.TypeName()));
+                        throw new InvalidOperationException("Type {0} is not marked as serializable".FormatWith(t.TypeName()));
 
                 result = new Table(type);
 
@@ -214,7 +214,7 @@ namespace Signum.Engine.Maps
                 string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
+                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
 
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
@@ -261,7 +261,7 @@ namespace Signum.Engine.Maps
                 .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));
 
             foreach (var f in fields)
-                should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".Formato(f.Name));
+                should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".FormatWith(f.Name));
 
 
             return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
@@ -272,7 +272,7 @@ namespace Signum.Engine.Maps
             string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new ApplicationException("Call {0} first".Formato(name));
+                throw new ApplicationException("Call {0} first".FormatWith(name));
         }
 
         #region Field Generator
@@ -312,7 +312,7 @@ namespace Signum.Engine.Maps
                     Field field = GenerateField(table, route, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fiToStr.Name))
-                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".FormatWith(fiToStr.Name, type.TypeName()));
 
                     result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
                 }
@@ -325,12 +325,12 @@ namespace Signum.Engine.Maps
                 if (Settings.FieldAttribute<IgnoreAttribute>(route) == null)
                 {
                     if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
-                        throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".Formato(fi.Name, type.Name));
+                        throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".FormatWith(fi.Name, type.Name));
 
                     Field field = GenerateField(table, route, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fi.Name))
-                        throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".Formato(fi.Name, type.TypeName()));
+                        throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".FormatWith(fi.Name, type.TypeName()));
 
                     result.Add(fi.Name, new EntityField(type, fi) { Field = field });
                 }
@@ -348,10 +348,10 @@ namespace Signum.Engine.Maps
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
 
-            KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
+            KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
 
             if(kof == KindOfField.MList && inMList)
-                throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".Formato(route, route.Type.TypeName(), kof));
+                throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".FormatWith(route, route.Type.TypeName(), kof));
 
             //field name generation 
             NameSequence name;
@@ -390,7 +390,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.MList:
                     return GenerateFieldMList((Table)table, route, name);
                 default:
-                    throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().Formato(route.Type));
+                    throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().FormatWith(route.Type));
             }
         }
 
@@ -531,7 +531,7 @@ namespace Signum.Engine.Maps
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
             string errors = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (errors.Length != 0)
-                throw new InvalidOperationException("Type {0} do not implement {1}".Formato(errors, cleanType));
+                throw new InvalidOperationException("Type {0} do not implement {1}".FormatWith(errors, cleanType));
 
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
@@ -570,7 +570,7 @@ namespace Signum.Engine.Maps
                 {
                     Name = preName.Add("Type").ToString(),
                     Nullable = nullable,
-                    ReferenceTable = Include(typeof(TypeDN), route),
+                    ReferenceTable = Include(typeof(TypeEntity), route),
                     AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
                 },
                 IsLite = route.Type.IsLite(),
@@ -583,7 +583,7 @@ namespace Signum.Engine.Maps
             Type elementType = route.Type.ElementType();
 
             if (table.Ticks == null)
-                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList require concurrency control.".Formato(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
+                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList require concurrency control.".FormatWith(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
             var orderAttr = Settings.FieldAttribute<PreserveOrderAttribute>(route);
 
@@ -686,7 +686,9 @@ namespace Signum.Engine.Maps
         {
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
-            return new ObjectName(sn, tn.Try(a => a.Name) ?? CleanType(type).Name);
+            string name =  tn.Try(a => a.Name) ?? EnumEntity.Extract(type).Try(t => t.Name) ?? Reflector.CleanTypeName(type);
+
+            return new ObjectName(sn, name);
         }
 
         private SchemaName GetSchemaName(TableNameAttribute tn)
@@ -715,9 +717,9 @@ namespace Signum.Engine.Maps
                     return type.Name.FirstUpper();
                 case KindOfField.Enum:
                 case KindOfField.Reference:
-                    return "id" + CleanType(type).Name;
+                    return "id" + (EnumEntity.Extract(type).Try(t => t.Name) ?? Reflector.CleanTypeName(type));
                 default:
-                    throw new InvalidOperationException("No field name for type {0} defined".Formato(type));
+                    throw new InvalidOperationException("No field name for type {0} defined".FormatWith(type));
             }
         }
 
@@ -737,7 +739,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return "id" + name;
                 default:
-                    throw new InvalidOperationException("No name for {0} defined".Formato(route.FieldInfo.Name));
+                    throw new InvalidOperationException("No name for {0} defined".FormatWith(route.FieldInfo.Name));
             }
         }
 

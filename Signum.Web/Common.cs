@@ -143,7 +143,7 @@ namespace Signum.Web
         }
 
         static GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>> miWalkExpression = 
-            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeDN, TypeDN>((TypeContext<TypeDN>)tc, (Expression<Func<TypeDN, TypeDN>>)le));
+            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeEntity, TypeEntity>((TypeContext<TypeEntity>)tc, (Expression<Func<TypeEntity, TypeEntity>>)le));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);
@@ -159,7 +159,7 @@ namespace Signum.Web
         //        if (context == null)
         //            return null;
 
-        //        string appPath = "{0}://{1}{2}{3}".Formato(
+        //        string appPath = "{0}://{1}{2}{3}".FormatWith(
         //              context.Request.Url.Scheme,
         //              context.Request.Url.Host,
         //              context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port,
@@ -197,7 +197,7 @@ namespace Signum.Web
                 }
             }
 
-            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".Formato(obj, objType, type));
+            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".FormatWith(obj, objType, type));
         }
     }
 }

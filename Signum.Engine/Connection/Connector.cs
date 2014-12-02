@@ -83,7 +83,7 @@ namespace Signum.Engine
                 log.WriteLine(pcs.Sql);
                 if (pcs.Parameters != null)
                     log.WriteLine(pcs.Parameters
-                        .ToString(p => "{0} {1}: {2}".Formato(
+                        .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
                             p.Value.Try(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
@@ -145,7 +145,7 @@ namespace Signum.Engine
 
             int index = connectionString.IndexOf(toFind);
             if (index == -1)
-                throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".Formato(toFind));
+                throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".FormatWith(toFind));
 
             connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
 

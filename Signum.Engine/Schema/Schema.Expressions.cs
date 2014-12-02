@@ -193,7 +193,7 @@ namespace Signum.Engine.Maps
             if (this.Type == typeof(DateTime))
                 return Expression.Property(new ColumnExpression(this.Type, tableAlias, this.Name), piDateTimeTicks);
 
-            throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
+            throw new NotImplementedException("FieldTicks of type {0} not supported".FormatWith(this.Type));
         }
     }
 

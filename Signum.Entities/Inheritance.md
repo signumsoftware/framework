@@ -1,4 +1,4 @@
-# Inheritance
+﻿# Inheritance
 
 Inheritances (and interface implementation) is maybe the most popular feature of Object Oriented Programming ~~since encapsulation is for paranoid people and nobody understands polymorphism :)~~ and it is the one that has more difficulties to map to the relational world. 
 
@@ -16,35 +16,35 @@ A PFK is just FK that could point to entities of different types. We have them i
 
 ## ImplementedByAttribute
 
-This [FieldAttributes](FieldAttributes.md) take a `params Type[]` as constructor, what it does is to allow the field to have objects of any of the defined types. Let's supose we have a `PlayerDN` entity with the following field: 
+This [FieldAttributes](FieldAttributes.md) take a `params Type[]` as constructor, what it does is to allow the field to have objects of any of the defined types. Let's supose we have a `PlayerEntity` entity with the following field: 
 
 ```C#
-[ImplemetedBy(typeof(RevolverDN), typeof(BazookaDN), typeof(MachineGunDN)]
+[ImplemetedBy(typeof(RevolverEntity), typeof(BazookaEntity), typeof(MachineGunEntity)]
 IWeapon weapon;
 ```
 
-The actual implementation in the database is just multiple foreign keys, each one with different tables of each mapped type (`RevolverDN`, `BazookaDN`, `MachineGunDN`). Due to that, the types should be: 
+The actual implementation in the database is just multiple foreign keys, each one with different tables of each mapped type (`RevolverEntity`, `BazookaEntity`, `MachineGunEntity`). Due to that, the types should be: 
 
 * A subclass of `Entity` (they need their own table)
 * A type assignable to the field's Type (in this case, an implementation of `IWeapon`). 
 
 ### Performance considerations 
 
-When there are many common fields in the different implementations of an `ImplementedBy` field  (in this example, if `RevolverDN`, `BazookaDN` and `MachineGunDN` share many fields, declared in `IWeapon`) writing polymorphic foreign key can be quite slow. For example: 
+When there are many common fields in the different implementations of an `ImplementedBy` field  (in this example, if `RevolverEntity`, `BazookaEntity` and `MachineGunEntity` share many fields, declared in `IWeapon`) writing polymorphic foreign key can be quite slow. For example: 
 
 ```C#
-Database.Query<PlayerDN>().Select(p=>p.Weapon.Ammunition > 0)
+Database.Query<PlayerEntity>().Select(p=>p.Weapon.Ammunition > 0)
 ```
 
 This query will need to join with the three different implementations and coalesce each of the three Ammunition columns. This case is even worst: 
 
 ```C#
-Database.Query<PlayerDN>().Select(p=>p.Weapon.Provider.Name)
+Database.Query<PlayerEntity>().Select(p=>p.Weapon.Provider.Name)
 ```
 
-In this case, the `ProviderDN` table will be joined with the three different tables, creating a slow join due to the use or `ORs`. 
+In this case, the `ProviderEntity` table will be joined with the three different tables, creating a slow join due to the use or `ORs`. 
 
-In our experience, the best idea many times is to fusion all the common fields in a single class (`WeaponDN`) with an field of type `WeaponExtensionDN` implemented by `RevolverWX`, `BazookaWS` and  `MachineGunWS` containing the different fields.
+In our experience, the best idea many times is to fusion all the common fields in a single class (`WeaponEntity`) with an field of type `WeaponExtensionEntity` implemented by `RevolverWX`, `BazookaWS` and  `MachineGunWS` containing the different fields.
 
 When this is not an option, use `CombineStrategyAttribute` on the `ImplementedByField`, or use `CombineSwitch` and `CombineUnion` extensions method on each particular query could help you tuning the performance using SQL `SWITCH` (default) or `UNION` in each case. 
 
@@ -59,9 +59,9 @@ Entity weapon;
 The implementation in the database uses just two columns:
 
 * One for the actual Id of the related entity. This column has no Foreign Key restriction.
-* Another for the Type Id of the Entity. Referring to the mandatory `TypeDN` table. 
+* Another for the Type Id of the Entity. Referring to the mandatory `TypeEntity` table. 
 
-Think of `TypeDN` as Signum Engine's equivalent to System.Type. It's a table containing a row for each concrete `Entity` included in the schema. 
+Think of `TypeEntity` as Signum Engine's equivalent to System.Type. It's a table containing a row for each concrete `Entity` included in the schema. 
 
 That's all you need to know about Inheritance in Signum Engine.... unless you want to know more :).
 
@@ -73,7 +73,7 @@ That's all you need to know about Inheritance in Signum Engine.... unless you wa
 You can use PFK with Lite<T> seamlessly. In fact, the whole reason Lite<T> are covariant is to support these kind of scenarios. 
 
 ```C#
-[ImplemetedBy(typeof(RevolverDN), typeof(BazookaDN), typeof(MachineGunDN)]
+[ImplemetedBy(typeof(RevolverEntity), typeof(BazookaEntity), typeof(MachineGunEntity)]
 Lite<IWeapon> weapon;
 ```
 
@@ -97,21 +97,21 @@ We support polymorphic foreign keys in queries also.
 Given the next simple hierarchy:
 
 ```C#
-public abstract class PersonDN : Entity
+public abstract class PersonEntity : Entity
 {
     string name;
     (..)
 }
 
-public class SoldierDN : PersonDN
+public class SoldierEntity : PersonEntity
 {
-    WeaponDN weapon;
+    WeaponEntity weapon;
     (..)
 }
 
-public class TeacherDN : PersonDN
+public class TeacherEntity : PersonEntity
 {
-    BookDN book; 
+    BookEntity book; 
     (..)
 }
 
@@ -120,15 +120,15 @@ public class TeacherDN : PersonDN
 There are different ways of persisting with inheritance hierarchies, using NHibernate's terminology:
 
 
-1. **Table-per-class-hierarchy:** A table `PersonDN {Id, ToStr, Discriminator, Name, idWeapon, idBook, }`. Every Soldier and Teacher goes to the this table using Discriminator values `{'S', 'T'}` to differentiate between them. This approach has some problems:
+1. **Table-per-class-hierarchy:** A table `PersonEntity {Id, ToStr, Discriminator, Name, idWeapon, idBook, }`. Every Soldier and Teacher goes to the this table using Discriminator values `{'S', 'T'}` to differentiate between them. This approach has some problems:
  * It works only with hierarchies that are not very deep, or you will end up with a lot of null values.
- * Type mismatch appears, since Soldier could have, let's say, int NumberOfKilledPeople, that would need to be null in case the row contains a `TeacherDN`.
+ * Type mismatch appears, since Soldier could have, let's say, int NumberOfKilledPeople, that would need to be null in case the row contains a `TeacherEntity`.
  * It's not easy for an army to have a list of Soldiers, or for a school to have a list of teachers, since they all are in the same table.
-2. **Table-per sub-class:** Here we have three tables, `PersonDN { Id, ToStr, Name }`, `SoldierDN{idPerson, idWeapon}` and `TeacherDN{idPerson, idBook}`. Problems:
+2. **Table-per sub-class:** Here we have three tables, `PersonEntity { Id, ToStr, Name }`, `SoldierEntity{idPerson, idWeapon}` and `TeacherEntity{idPerson, idBook}`. Problems:
  * Relationally, you could have someone who is both Soldier and Teacher. This is valid in the real world but not in the Object model :)
- * If you don't put an `Id` column in `SoldierDN` (or `TeacherDN`),then `ArmyDN` and `SchoolDN` will have the same problems for referencing concrete classes.
- * If you put `Id` column on `SoldierDN` (or `TeacherDN`), you will have two different Ids: For a soldier `idPerson` and `idSoldier`, and for a teacher `idPerson` and `idTeacher`. This creates ambiguities.
-3. **Table-per-concrete-class:** In this solution, you will have just two tables, `SoldierDN { id, ToStr, Name, idWeapon }` and `TeacherDN { id, ToStr, Name, idBook }`. Since `PersonDN` is an abstract class there's no point in having its own table. Problems:
+ * If you don't put an `Id` column in `SoldierEntity` (or `TeacherEntity`),then `ArmyEntity` and `SchoolEntity` will have the same problems for referencing concrete classes.
+ * If you put `Id` column on `SoldierEntity` (or `TeacherEntity`), you will have two different Ids: For a soldier `idPerson` and `idSoldier`, and for a teacher `idPerson` and `idTeacher`. This creates ambiguities.
+3. **Table-per-concrete-class:** In this solution, you will have just two tables, `SoldierEntity { id, ToStr, Name, idWeapon }` and `TeacherEntity { id, ToStr, Name, idBook }`. Since `PersonEntity` is an abstract class there's no point in having its own table. Problems:
  * Not easy to have a Foreign Key to Persons in a generic way.
 
 When we designed inheritances in our framework we went just for the option #3 because it is the simplest.

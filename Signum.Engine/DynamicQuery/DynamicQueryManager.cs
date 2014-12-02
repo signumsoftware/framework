@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
             var property = type.GetProperty("Entity", BindingFlags.Instance | BindingFlags.Public);
 
             if (property == null)
-                throw new InvalidOperationException("Entity property not found on query {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)));
+                throw new InvalidOperationException("Entity property not found on query {0}".FormatWith(QueryUtils.GetQueryUniqueKey(queryName)));
 
             return Implementations.By(property.PropertyType.CleanType());
         }
@@ -157,7 +157,7 @@ namespace Signum.Engine.DynamicQuery
         public void AssertQueryAllowed(object queryName)
         {
             if(!QueryAllowed(queryName))
-                throw new UnauthorizedAccessException("Access to query {0} not allowed".Formato(queryName));
+                throw new UnauthorizedAccessException("Access to query {0} not allowed".FormatWith(queryName));
         }
 
         public List<object> GetAllowedQueryNames()
@@ -218,7 +218,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => pi.NiceName(), pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.ToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
@@ -237,7 +237,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.ToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)

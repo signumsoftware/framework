@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -284,12 +284,12 @@ namespace Signum.Engine
 
             int startingIndex = 0;
 
-            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().Formato(oldValue, replacementsKey));
+            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().FormatWith(oldValue, replacementsKey));
         retry:
             int maxElement = Console.LargestWindowHeight - 7;
 
         newValues.Skip(startingIndex).Take(maxElement)
-                .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
+                .Select((s, i) => "-{0}{1,2}: {2} ".FormatWith(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
 
             Console.WriteLine(SynchronizerMessage.NNone.NiceToString());

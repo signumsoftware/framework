@@ -1,4 +1,4 @@
-# OperationClient
+﻿# OperationClient
 
 `OperationClient` is the class responsible of providing the services to `NormalWindow` and `SearchControl` to show the available [Operations](../../Signum.Engine/Operations/Operations.md) for an entity as `ToolBarButton` (in the first case) or `MenuItem` (for the second). 
 
@@ -96,14 +96,14 @@ And `ConstructorContext` as defined in [Constructor](../Facades/Constructor.md).
 
 ### Example:
 
-> The constructor is overriden to open a `SearchWindow` before to asking for the optional `CustomerDN`
+> The constructor is overriden to open a `SearchWindow` before to asking for the optional `CustomerEntity`
 
 ```C#
-new ConstructorOperationSettings<OrderDN>(OrderOperation.Create)
+new ConstructorOperationSettings<OrderEntity>(OrderOperation.Create)
 {
     Constructor = ctx=>
     {
-        var cust = Finder.Find<CustomerDN>(); // could return null, but we let it continue 
+        var cust = Finder.Find<CustomerEntity>(); // could return null, but we let it continue 
 
         return OperationServer.Construct(OrderOperation.Create, cust);
     },
@@ -165,16 +165,16 @@ public class ContextualOperationContext<T>  /*Simplification*/
 
 ### Example: 
 
-> The `ContextualOperationSettings.Click` is overridden to open a `SearchWindow` before asking for the optional `CustomerDN`
+> The `ContextualOperationSettings.Click` is overridden to open a `SearchWindow` before asking for the optional `CustomerEntity`
 
 ```C#
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new ContextualOperationSettings<ProductDN>(OrderOperation.CreateOrderFromProducts)
+    new ContextualOperationSettings<ProductEntity>(OrderOperation.CreateOrderFromProducts)
     {
          Click = ctx =>
          {
-             var cust = Finder.Find<CustomerDN>(); // could return null, but we let it continue 
+             var cust = Finder.Find<CustomerEntity>(); // could return null, but we let it continue 
 
              var result = OperationServer.ConstructFromMany(ctx.Entities, OrderOperation.CreateOrderFromProducts, cust);
 
@@ -256,7 +256,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
 {
     new EntityOperationSettings(OrderOperation.Cancel)
     { 
-        ConfirmMessage = ctx=> ((OrderDN)ctx.Entity).State != OrderState.Shipped ? null :
+        ConfirmMessage = ctx=> ((OrderEntity)ctx.Entity).State != OrderState.Shipped ? null :
            OrderMessage.CancelShippedOrder0.NiceToString(ctx.Entity) 
     }, 
 }); 
@@ -275,7 +275,7 @@ In order to implement `Click`, some methods could be handy:
 ```C#
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new EntityOperationSettings<OrderDN>(OrderOperation.Ship)
+    new EntityOperationSettings<OrderEntity>(OrderOperation.Ship)
     { 
         Click = ctx=>
         {
@@ -283,7 +283,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
                 return null;
 
             DateTime shipDate = DateTime.Now;
-            if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderDN o) => o.ShippedDate)))
+            if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderEntity o) => o.ShippedDate)))
                 return null;
 
             return ctx.Entity.Execute(OrderOperation.Ship, shipDate); 
@@ -343,7 +343,7 @@ So, as a rule of thumb: If you override the `EntityOperationSettings` then the `
 ```C#
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new EntityOperationSettings<OrderDN>(OrderOperation.Ship)
+    new EntityOperationSettings<OrderEntity>(OrderOperation.Ship)
     { 
         Click = ctx=>
         {
@@ -351,7 +351,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
                 return null;
 
             DateTime shipDate = DateTime.Now;
-            if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderDN o) => o.ShippedDate)))
+            if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderEntity o) => o.ShippedDate)))
                 return null;
 
             return ctx.Entity.Execute(OrderOperation.Ship, shipDate); 
@@ -363,7 +363,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
             Click = ctx =>
             {
                 DateTime shipDate = DateTime.Now;
-                if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderDN o) => o.ShippedDate)))
+                if (!ValueLineBox.Show(ref shipDate, labelText: DescriptionManager.NiceName((OrderEntity o) => o.ShippedDate)))
                     return;
 
                 ctx.Entities.SingleEx().ExecuteLite(OrderOperation.Ship, shipDate); 

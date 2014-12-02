@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -114,7 +114,7 @@ namespace Signum.Entities
                 get
                 {
                     if (entityOrNull == null)
-                        throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".Formato(this));
+                        throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".FormatWith(this));
                     return entityOrNull;
                 }
             }
@@ -211,12 +211,12 @@ namespace Signum.Entities
 
             public string Key()
             {
-                return "{0};{1}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id);
+                return "{0};{1}".FormatWith(TypeEntity.GetCleanName(this.EntityType), this.Id);
             }
 
             public string KeyLong()
             {
-                return "{0};{1};{2}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id, this.ToString());
+                return "{0};{1};{2}".FormatWith(TypeEntity.GetCleanName(this.EntityType), this.Id, this.ToString());
             }
 
             public int CompareTo(Lite<Entity> other)
@@ -331,9 +331,9 @@ namespace Signum.Entities
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
-            Type type = TypeDN.TryGetType(match.Groups["type"].Value);
+            Type type = TypeEntity.TryGetType(match.Groups["type"].Value);
             if (type == null)
-                return LiteMessage.Type0NotFound.NiceToString().Formato(match.Groups["type"].Value);
+                return LiteMessage.Type0NotFound.NiceToString().FormatWith(match.Groups["type"].Value);
 
             PrimaryKey id;
             if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out id))
@@ -447,7 +447,7 @@ namespace Signum.Entities
 
         class RefersToExpander : IMethodExpander
         {
-            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeDN type) => type.ToLite()).GetGenericMethodDefinition();
+            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {

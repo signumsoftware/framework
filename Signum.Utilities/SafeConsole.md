@@ -1,4 +1,4 @@
-
+﻿
 # SafeConsole
 
 Small class that contains some tools for `Console`. 
@@ -82,7 +82,7 @@ public static void WaitRows(string startingText, Func<int> updateOrDelete)
 Example
 
 ```C#
-SafeConsole.WaitRows("Removing all exceptions", ()=>Database.Query<ExceptonDN>().UnsafeDelete());
+SafeConsole.WaitRows("Removing all exceptions", ()=>Database.Query<ExceptonEntity>().UnsafeDelete());
 ```
 
 

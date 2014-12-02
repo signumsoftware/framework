@@ -18,7 +18,7 @@ namespace Signum.Web
         public static MvcHtmlString NumericPagerEllipsis<T>(this HtmlHelper helper, Page<T> page, string urlFormat, string footer = null)
         {
             if (footer != null && footer.Contains("{0}"))
-                footer = footer.Formato(page.TotalElements); 
+                footer = footer.FormatWith(page.TotalElements); 
 
             return NumericPagerEllipsis(helper, page.TotalPages, page.CurrentPage, urlFormat, footer);
         }

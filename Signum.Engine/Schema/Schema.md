@@ -1,4 +1,4 @@
-# Schema
+﻿# Schema
 
 `Schema` class is a data structure that stays between classes and tables, between fields and columns, between references and foreign keys. 
 
@@ -13,7 +13,7 @@ That means that generating the schema is usually nothing more than two or three 
 public static void Start(string connectionString)
 {
     SchemaBuilder sb = new SchemaBuilder();
-    sb.Include<CustomerDN>();
+    sb.Include<CustomerEntity>();
     Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
 }
 ```
@@ -53,11 +53,11 @@ However, if the entity is reused in many project and you can not modify it, this
 
 By overriding field attributes in an entity (`IgnoreAttribute`, `ImplementedByAttribute`, `SqlDbTypeAttribute`...) and including [Mixins](../Signum.Entities/FieldAttributes.md) we increase dramatically the scenarios where an entity can be reused in different projects, allowing vertical modules.
 
-For example, `ExceptionDN`, defined in Signum.Entities, saves detailed information of any exception that is recorded using `LogException` extension method. 
+For example, `ExceptionEntity`, defined in Signum.Entities, saves detailed information of any exception that is recorded using `LogException` extension method. 
 
 ```C#
 [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-public class ExceptionDN : Entity
+public class ExceptionEntity : Entity
 {    
     //...
     [SqlDbType(Size = 100)]
@@ -69,8 +69,8 @@ public class ExceptionDN : Entity
         set { Set(ref controllerName, value); }
     }
 
-    Lite<IUserDN> user;
-    public Lite<IUserDN> User
+    Lite<IUserEntity> user;
+    public Lite<IUserEntity> User
     {
         get { return user; }
         set { Set(ref user, value); }
@@ -82,15 +82,15 @@ public class ExceptionDN : Entity
 If in our application we have particularly long controller names, we could override the database size like this: 
 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionDN ua) => ua.User, 
+sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, 
     new SqlDbTypeAttribute{ Size = 200 });
 ```
 
-And if we are using **Authorization module** we can implement `IUserDN User` property with `UserDN` type. 
+And if we are using **Authorization module** we can implement `IUserEntity User` property with `UserEntity` type. 
 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionDN ua) => ua.User, 
-    new ImplementedByAttribute(typeof(UserDN)));
+sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, 
+    new ImplementedByAttribute(typeof(UserEntity)));
 ```
 
 Some things to remember: 
@@ -124,7 +124,7 @@ Usually, the underlying objects of these dictionaries are the same, depending of
 ```C#
 Schema s = sb.Schema;
 
-((ValueField)s.Field((BillDN b) => b.Lines.First().Quantity)).SqlDbType = SqlDbType.SmallInt;;
+((ValueField)s.Field((BillEntity b) => b.Lines.First().Quantity)).SqlDbType = SqlDbType.SmallInt;;
 
 ConnectionScope.Default = new Connection(connectionString, s);
 ```
@@ -135,7 +135,7 @@ For big applications with lots of requests, the RDBMS tends to end up being the 
 
 Microsoft SQL Server has no support for sharding (horizontal partitioning), but we can move some tables to other databases/database servers to improve performance. 
 
-Another good strategy that we use often is moving the log tables (i.e.: `OperationLogDN`, `ExceptionDN`, `EmailMEssageDN`...) to a log database that we can backup less often, keeping the important data in principal database that we can move easily. 
+Another good strategy that we use often is moving the log tables (i.e.: `OperationLogEntity`, `ExceptionEntity`, `EmailMEssageEntity`...) to a log database that we can backup less often, keeping the important data in principal database that we can move easily. 
 
 In order to do this, `Table` and `MListTable` classes have a `Name` property of type `ObjectName`, that represents a [four-part name](http://msdn.microsoft.com/en-us/library/ms177563.aspx).  
 
@@ -201,8 +201,8 @@ Example:
 //Called at the end of `Starter.Start` method: 
 public static void SetLogDatabase(Schema schema, DatabaseName logDatabaseName)
 {
-    schema.Table<OperationLogDN>().ToDatabase(logDatabaseName);
-    schema.Table<ExceptionDN>().ToDatabase(logDatabaseName);
+    schema.Table<OperationLogEntity>().ToDatabase(logDatabaseName);
+    schema.Table<ExceptionEntity>().ToDatabase(logDatabaseName);
 }
 ```
 

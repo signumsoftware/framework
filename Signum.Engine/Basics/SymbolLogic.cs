@@ -90,7 +90,7 @@ namespace Signum.Engine
         static Dictionary<string, T> AssertStarted()
         {
             if (lazy == null)
-                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SymbolLogic<T>).TypeName()));
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".FormatWith(typeof(SymbolLogic<T>).TypeName()));
 
             return lazy.Value;
         }

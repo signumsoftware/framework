@@ -89,7 +89,7 @@ namespace Signum.Entities.Reflection
                         let error = ident.IdentifiableIntegrityCheck()
                         where error.HasText()
                         select new { ident, error })
-                        .ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+                        .ToString(p => "{0}:\r\n{1}".FormatWith(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
             }
             else
             {
@@ -99,13 +99,13 @@ namespace Signum.Entities.Reflection
                                  let error = ident.IdentifiableIntegrityCheck()
                                  where error.HasText()
                                  select new { ident, error })
-                                 .ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+                                 .ToString(p => "{0}:\r\n{1}".FormatWith(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
 
                 string embeddedErrors = (from emb in graph.Except(identGraph).OfType<ModifiableEntity>()
                                          let error = emb.IntegrityCheck()
                                          where error.HasText()
                                          select new { emb, error })
-                                        .ToString(p => "{0}:\r\n{1}".Formato(p.emb.GetType().Name, p.error.Indent(2)), "\r\n");
+                                        .ToString(p => "{0}:\r\n{1}".FormatWith(p.emb.GetType().Name, p.error.Indent(2)), "\r\n");
 
                 return "\r\n".CombineIfNotEmpty(errors, embeddedErrors);
             }
@@ -122,10 +122,10 @@ namespace Signum.Entities.Reflection
             if (problems.Count == 0)
                 return null;
 
-            return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
+            return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".FormatWith(
                 p.Count(),
                 p.Key,
-                p.ToString(m => "  {0}{1}".Formato(m.Modified, m), "\r\n")), "\r\n\r\n");
+                p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n");
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
@@ -200,11 +200,11 @@ namespace Signum.Entities.Reflection
 
             }).ToList();
 
-            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2} shape={3}{4}, label=\"{5}\"]".Formato(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label), "\r\n");
+            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2} shape={3}{4}, label=\"{5}\"]".FormatWith(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label), "\r\n");
 
-            string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".Formato(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
+            string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
 
-            return "digraph \"Grafo\"\r\n{{\r\n    node [ style = \"filled,bold\"]\r\n\r\n{0}\r\n\r\n{1}\r\n}}".Formato(nodes, arrows);
+            return "digraph \"Grafo\"\r\n{{\r\n    node [ style = \"filled,bold\"]\r\n\r\n{0}\r\n\r\n{1}\r\n}}".FormatWith(nodes, arrows);
         }
 
         public static DirectedGraph<Entity> ColapseIdentifiables(DirectedGraph<Modifiable> modifiables)
@@ -249,7 +249,7 @@ namespace Signum.Entities.Reflection
 
         private static string Modified(Modifiable ie)
         {
-            return "({0})".Formato(ie.Modified);
+            return "({0})".FormatWith(ie.Modified);
         }
 
         private static XAttribute[] GetAttributes(Lite<Entity> lite)

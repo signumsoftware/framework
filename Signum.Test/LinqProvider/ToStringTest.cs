@@ -30,15 +30,15 @@ namespace Signum.Test.LinqProvider
         public void ToStringMainQuery()
         {
             Assert.AreEqual(
-                Database.Query<ArtistDN>().Select(a => a.Name).ToString(" | "),
-                Database.Query<ArtistDN>().ToString(a => a.Name, " | "));
+                Database.Query<ArtistEntity>().Select(a => a.Name).ToString(" | "),
+                Database.Query<ArtistEntity>().ToString(a => a.Name, " | "));
         }
 
 
         [TestMethod]
         public void ToStringSubCollection()
         {
-            var result1 = (from b in Database.Query<BandDN>()
+            var result1 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
@@ -46,7 +46,7 @@ namespace Signum.Test.LinqProvider
                                MembersToString = b.Members.OrderBy(a => a.Name).ToString(a => a.Name, " | "),
                            }).ToList();
 
-            var result2 = (from b in Database.Query<BandDN>()
+            var result2 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
@@ -61,20 +61,20 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ToStringSubQuery()
         {
-            var result1 = (from b in Database.Query<BandDN>()
+            var result1 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumDN>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Name, " | "),
+                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Name, " | "),
                            }).ToList();
 
-            var result2 = (from b in Database.Query<BandDN>()
+            var result2 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumDN>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
+                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
                            }).ToList();
 
             Assert.IsTrue(Enumerable.SequenceEqual(result1, result2));
@@ -84,28 +84,28 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ToStringNumbers()
         {
-            var result1 = (from b in Database.Query<BandDN>()
+            var result1 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumDN>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Id.ToString(), " | "),
+                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).ToString(a => a.Id.ToString(), " | "),
                            }).ToList();
 
-            var result2 = (from b in Database.Query<BandDN>()
+            var result2 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumDN>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToString(" | "),
+                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToString(" | "),
                            }).ToList();
 
-            var result3 = (from b in Database.Query<BandDN>()
+            var result3 = (from b in Database.Query<BandEntity>()
                            orderby b.Name
                            select new
                            {
                                b.Name,
-                               MembersToString = Database.Query<AlbumDN>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToList().ToString(" | "),
+                               MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Id).ToList().ToString(" | "),
                            }).ToList();
 
 

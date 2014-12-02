@@ -16,10 +16,10 @@ namespace Signum.Engine.Maps
             var pre = OnPreDeleteSqlSync(ident);
             var collections = (from tml in this.TablesMList()
                                select new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                                   .Formato(tml.Name, tml.BackReference.Name.SqlEscape(), ident.Id, comment ?? ident.ToString()))).Combine(Spacing.Simple);
+                                   .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(), ident.Id, comment ?? ident.ToString()))).Combine(Spacing.Simple);
 
             var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                    .Formato(Name, "Id", ident.Id, comment ?? ident.ToString()));
+                    .FormatWith(Name, "Id", ident.Id, comment ?? ident.ToString()));
 
             return SqlPreCommand.Combine(Spacing.Simple, pre, collections, main);
         }

@@ -44,7 +44,7 @@ namespace Signum.Engine.CodeGeneration
             string projectFolder = GetProjectFolder();
 
             if (!Directory.Exists(projectFolder))
-                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
+                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
 
             bool? overwriteFiles = null;
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.CodeGeneration
 
                     FileTools.CreateParentDirectory(fileName);
 
-                    if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fileName)))
+                    if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
                     {
                         File.WriteAllText(fileName, str);
                     }
@@ -96,7 +96,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetUsingNamespaces(fileName, tables))
-                sb.AppendLine("using {0};".Formato(item));
+                sb.AppendLine("using {0};".FormatWith(item));
 
             sb.AppendLine();
             sb.AppendLine("namespace " + GetNamespace(fileName));
@@ -205,7 +205,7 @@ namespace Signum.Engine.CodeGeneration
 
             StringBuilder sb = new StringBuilder();
             WriteAttributeTag(sb, GetEntityAttributes(table));
-            sb.AppendLine("public class {0} : {1}".Formato(name, GetEntityBaseClass(table.Name)));
+            sb.AppendLine("public class {0} : {1}".FormatWith(name, GetEntityBaseClass(table.Name)));
             sb.AppendLine("{");
 
             string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
@@ -293,7 +293,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             WriteAttributeTag(sb, new[] { "Serializable" });
-            sb.AppendLine("public class {0} : {1}".Formato(name, typeof(EmbeddedEntity).Name));
+            sb.AppendLine("public class {0} : {1}".FormatWith(name, typeof(EmbeddedEntity).Name));
             sb.AppendLine("{");
 
             string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
@@ -332,7 +332,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
 
             WriteAttributeTag(sb, GetEnumAttributes(table));
-            sb.AppendLine("public enum {0}".Formato(GetEntityName(table.Name)));
+            sb.AppendLine("public enum {0}".FormatWith(GetEntityName(table.Name)));
             sb.AppendLine("{");
 
             var dataTable = Executor.ExecuteDataTable("select * from " + table.Name);
@@ -405,7 +405,7 @@ namespace Signum.Engine.CodeGeneration
                 .Where(ix => ix.Columns.Intersect(columnNames).Any()))
             {
                 sb.AppendLine("//Add to Logic class");
-                sb.AppendLine("//sb.AddUniqueIndex<{0}>(e => new {{ {1} }}{2});".Formato(name,
+                sb.AppendLine("//sb.AddUniqueIndex<{0}>(e => new {{ {1} }}{2});".FormatWith(name,
                     ix.Columns.ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c)).FirstUpper(), ", "),
                     ix.FilterDefinition == null ? null : ", " + ix.FilterDefinition));
             }
@@ -420,16 +420,16 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("public static class {0}".Formato(GetOperationName(table.Name)));
+            sb.AppendLine("public static class {0}".FormatWith(GetOperationName(table.Name)));
             sb.AppendLine("{");
-            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save = OperationSymbol.Execute<{0}>();".Formato(GetEntityName(table.Name)));
+            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save = OperationSymbol.Execute<{0}>();".FormatWith(GetEntityName(table.Name)));
             sb.AppendLine("}");
             return sb.ToString();
         }
 
         protected virtual string GetOperationName(ObjectName objectName)
         {
-            return GetEntityName(objectName).RemoveSuffix("DN") + "Operation";
+            return GetEntityName(objectName).RemoveSuffix("Entity") + "Operation";
         }
 
         protected virtual MListInfo GetMListInfo(DiffTable table)
@@ -535,7 +535,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetEntityName(ObjectName objectName)
         {
-            return objectName.Name + (IsEnum(objectName) ? "" : "DN");
+            return objectName.Name + (IsEnum(objectName) ? "" : "Entity");
         }
 
         protected virtual string GetEntityBaseClass(ObjectName objectName)
@@ -554,10 +554,10 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
 
             WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity));
-            sb.AppendLine("{0} {1};".Formato(type, CSharpRenderer.Escape(fieldName)));
+            sb.AppendLine("{0} {1};".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             WriteAttributeTag(sb, GetPropertyAttributes(table, col, relatedEntity));
 
-            sb.AppendLine("public {0} {1}".Formato(type, fieldName.FirstUpper()));
+            sb.AppendLine("public {0} {1}".FormatWith(type, fieldName.FirstUpper()));
             sb.AppendLine("{");
             sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
             if (!IsReadonly(table, col))
@@ -768,9 +768,9 @@ namespace Signum.Engine.CodeGeneration
             string typeName = GetEmbeddedTypeName(fieldName);
 
             sb.AppendLine("[NotNullable]");
-            sb.AppendLine("{0} {1};".Formato(typeName, fieldName));
+            sb.AppendLine("{0} {1};".FormatWith(typeName, fieldName));
             sb.AppendLine("[NotNullValidator]");
-            sb.AppendLine("public {0} {1}".Formato(typeName, propertyName));
+            sb.AppendLine("public {0} {1}".FormatWith(typeName, propertyName));
             sb.AppendLine("{");
             sb.AppendLine("    get { return " + fieldName + "; }");
             sb.AppendLine("    set { Set(ref " + fieldName + ", value); }");
@@ -781,7 +781,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetEmbeddedTypeName(string fieldName)
         {
-            return fieldName.FirstUpper() + "DN";
+            return fieldName.FirstUpper() + "Embedded";
         }
 
         protected virtual string WriteFieldMList(string fileName, DiffTable table, MListInfo mListInfo, DiffTable relatedTable)
@@ -822,9 +822,9 @@ namespace Signum.Engine.CodeGeneration
             string fieldName = GetFieldMListName(table, relatedTable, mListInfo);
             WriteAttributeTag(sb, fieldAttributes);
 
-            sb.AppendLine("MList<{0}> {1} = new MList<{0}>();".Formato(type, CSharpRenderer.Escape(fieldName)));
+            sb.AppendLine("MList<{0}> {1} = new MList<{0}>();".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             sb.AppendLine("[NotNullValidator, NoRepeatValidator]");
-            sb.AppendLine("public MList<{0}> {1}".Formato(type, fieldName.FirstUpper()));
+            sb.AppendLine("public MList<{0}> {1}".FormatWith(type, fieldName.FirstUpper()));
             sb.AppendLine("{");
             sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
             sb.AppendLine("    set { Set(ref " + CSharpRenderer.Escape(fieldName) + ", value); }");
@@ -846,7 +846,7 @@ namespace Signum.Engine.CodeGeneration
 
             parts.AddRange(GetSqlDbTypeParts(mListInfo.PreserveOrderColumn, type));
 
-            return @"PreserveOrder({0})".Formato(parts.ToString(", "));
+            return @"PreserveOrder({0})".FormatWith(parts.ToString(", "));
         }
 
         protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
@@ -854,14 +854,14 @@ namespace Signum.Engine.CodeGeneration
             if (backReference.Name == "idParent")
                 return null;
 
-            return "BackReferenceColumnName(\"{0}\")".Formato(backReference.Name);
+            return "BackReferenceColumnName(\"{0}\")".FormatWith(backReference.Name);
         }
 
         protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
         {
             ObjectName name = mListInfo.TrivialElementColumn.Try(te => te.ForeignKey.TargetTable) ?? relatedTable.Name;
 
-            return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("DN")).FirstLower();
+            return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("Entity")).FirstLower();
         }
 
         protected virtual string WriteToString(DiffTable table)
@@ -871,7 +871,7 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".Formato(GetEntityName(table.Name),
+            sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".FormatWith(GetEntityName(table.Name),
                 toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
                 GetFieldType(table, toStringColumn, null) == "string" ? "" : ".TryToString()"));
             sb.AppendLine("public override string ToString()");

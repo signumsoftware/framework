@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Signum.Entities.DynamicQuery
             var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
 
             if (shouldHaveImplementations && implementations == null)
-                throw new ArgumentException("Extension token '{0}' (of type {1}) registered on type {2} has no implementations".Formato(key, type.TypeName(), parent.Type.CleanType().TypeName()));
+                throw new ArgumentException("Extension token '{0}' (of type {1}) registered on type {2} has no implementations".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
 
             this.key= key;
             this.type = type;

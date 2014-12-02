@@ -10,13 +10,13 @@ using System.Collections;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class ExceptionDN : Entity
+    public class ExceptionEntity : Entity
     {
         public const string ExceptionDataKey = "exceptionEntity";
 
-        public ExceptionDN() { }
+        public ExceptionEntity() { }
 
-        public ExceptionDN(Exception ex)
+        public ExceptionEntity(Exception ex)
         {
             this.ExceptionType = ex.GetType().Name;
             this.ExceptionMessage = ex.Message;
@@ -93,8 +93,8 @@ namespace Signum.Entities.Basics
             set { Set(ref threadId, value); }
         }
 
-        Lite<IUserDN> user;
-        public Lite<IUserDN> User
+        Lite<IUserEntity> user;
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
@@ -238,7 +238,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return "{0}: {1}".Formato(exceptionType, exceptionMessage).Etc(200);
+            return "{0}: {1}".FormatWith(exceptionType, exceptionMessage).Etc(200);
         }
 
         public static string Dump(NameValueCollection nameValueCollection)
@@ -249,7 +249,7 @@ namespace Signum.Entities.Basics
 
 
     [Serializable]
-    public class DeleteLogParametersDN : EmbeddedEntity
+    public class DeleteLogParametersEntity : EmbeddedEntity
     {
         int deleteLogsWithMoreThan = 30 * 6;
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, 0)]

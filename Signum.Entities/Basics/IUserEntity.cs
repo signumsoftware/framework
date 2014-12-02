@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Signum.Entities.Basics
 {
-    public interface IUserDN : IEntity
+    public interface IUserEntity : IEntity
     {
     }
 
@@ -14,8 +14,8 @@ namespace Signum.Entities.Basics
     {
         public static readonly string UserSessionKey = "user";
 
-        public static readonly SessionVariable<IUserDN> CurrentUserVariable = Statics.SessionVariable<IUserDN>(UserSessionKey);
-        public static IUserDN Current
+        public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>(UserSessionKey);
+        public static IUserEntity Current
         {
             get { return CurrentUserVariable.Value; }
             set { CurrentUserVariable.Value = value; }

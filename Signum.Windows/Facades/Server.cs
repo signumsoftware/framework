@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -132,11 +132,11 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server does not implement {0}".Formato(typeof(S)));
+                throw new InvalidOperationException("Server does not implement {0}".FormatWith(typeof(S)));
             
             try
             {
-                using (HeavyProfiler.Log("WCFClient", () => "{0}".Formato(typeof(S).TypeName())))
+                using (HeavyProfiler.Log("WCFClient", () => "{0}".FormatWith(typeof(S).TypeName())))
                 using (CreateOperationContext((IContextChannel)current))
                 {
                     action(server);
@@ -164,11 +164,11 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(current.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server {0} does not implement {1}".FormatWith(current.GetType(), typeof(S)));
 
             try
             {
-                using (HeavyProfiler.Log("WCFClient", () => "Return(({0} server)=>{1})".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                using (HeavyProfiler.Log("WCFClient", () => "Return(({0} server)=>{1})".FormatWith(typeof(S).TypeName(), typeof(R).TypeName())))
                 using (CreateOperationContext((IContextChannel)current))
                 {
                     return function(server);
@@ -202,7 +202,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server {0} does not implement {1}".FormatWith(server.GetType(), typeof(S)));
 
             using (HeavyProfiler.Log("WCFClient", () => typeof(S).TypeName()))
             {
@@ -354,7 +354,7 @@ namespace Signum.Windows
                 }
             }
 
-            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".Formato(obj, objType, type));
+            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".FormatWith(obj, objType, type));
         }
 
         public static bool CanConvert(object obj, Type type)
@@ -381,7 +381,7 @@ namespace Signum.Windows
             return false;
         }
 
-        public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
+        public static Dictionary<Type, TypeEntity> ServerTypes { get; private set; }
         public static Dictionary<string, Type> NameToType { get; private set; }
 
         public static Type TryGetType(string cleanName)

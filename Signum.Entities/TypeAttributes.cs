@@ -44,7 +44,7 @@ namespace Signum.Entities
             var attr = TryGetAttribute(type);
 
             if (attr == null)
-                throw new InvalidOperationException("{0} does not define an EntityKindAttribute".Formato(type.TypeName()));
+                throw new InvalidOperationException("{0} does not define an EntityKindAttribute".FormatWith(type.TypeName()));
 
             return attr;
         }
@@ -101,14 +101,14 @@ namespace Signum.Entities
         /// <summary>
         /// Not editable.
         /// Not SaveProtected
-        /// ie: ExceptionDN
+        /// ie: ExceptionEntity
         /// </summary>
         System,
 
         /// <summary>
         /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
         /// Not SaveProtected, not vieable, not creable (override on SearchControl) 
-        /// ie: DiscountProductDN
+        /// ie: DiscountProductEntity
         /// </summary>
         Relational,
 
@@ -116,35 +116,35 @@ namespace Signum.Entities
         /// <summary>
         /// Doesn't make sense to view it from other entity, since there's not to much to see. 
         /// SaveProtected
-        /// ie: CountryDN
+        /// ie: CountryEntity
         /// </summary>
         String,
 
         /// <summary>
         /// Used and shared by other entities, can be created from other entity. 
         /// SaveProtected
-        /// ie: CustomerDN (can create new while creating the order)
+        /// ie: CustomerEntity (can create new while creating the order)
         /// </summary>
         Shared,
 
         /// <summary>
         /// Used and shared by other entities, but too big to create it from other entity.
         /// SaveProtected
-        /// ie: OrderDN
+        /// ie: OrderEntity
         /// </summary>
         Main,
 
         /// <summary>
         /// Entity that belongs to just one entity and should be saved together, but that can not be implemented as EmbeddedEntity (usually to enable polymorphisim)
         /// Not SaveProtected
-        /// ie :ProductExtensionDN
+        /// ie :ProductExtensionEntity
         /// </summary>
         Part,
 
         /// <summary>
         /// Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space. 
         /// Not SaveProtected
-        /// ie: AddressDN
+        /// ie: AddressEntity
         /// </summary>
         SharedPart,
     }
@@ -154,14 +154,14 @@ namespace Signum.Entities
         /// <summary>
         /// Entity created for business definition
         /// By default ordered by id Ascending
-        /// ie: ProductDN, OperationDN, PermissionDN, CountryDN...  
+        /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...  
         /// </summary>
         Master,
 
         /// <summary>
         /// Entity created while the business is running
         /// By default is ordered by id Descending
-        /// ie: OrderDN, ExceptionDN, OperationLogDN...
+        /// ie: OrderEntity, ExceptionEntity, OperationLogEntity...
         /// </summary>
         Transactional
     }

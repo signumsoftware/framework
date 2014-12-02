@@ -198,7 +198,7 @@ namespace Signum.Engine.Maps
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
                     result.SqlInsertPattern = (suffix) =>
-                        "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
+                        "INSERT {0} ({1})\r\n VALUES ({2})".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         trios.ToString(p => p.ParameterName + suffix, ", "));
 
@@ -291,7 +291,7 @@ namespace Signum.Engine.Maps
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
                     result.SqlInsertPattern = (suffix, output) =>
-                        "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
+                        "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
                         trios.ToString(p => p.ParameterName + suffix, ", "));
@@ -311,13 +311,13 @@ namespace Signum.Engine.Maps
         static void AssertHasId(Entity ident)
         {
             if (ident.IdOrNull == null)
-                throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
+                throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".FormatWith(ident, ident.IdOrNull));
         }
 
         static void AssertNoId(Entity ident)
         {
             if (ident.IdOrNull != null)
-                throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
+                throw new InvalidOperationException("{0} is new, but has Id {1}".FormatWith(ident, ident.IdOrNull));
         }
 
 
@@ -517,20 +517,20 @@ namespace Signum.Engine.Maps
 
                     result.SqlUpdatePattern = (suffix, output) =>
                     {
-                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3}".Formato(
+                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3}".FormatWith(
                             table.Name,
-                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
+                            trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
                             table.PrimaryKey.Name.SqlEscape(),
                             idParamName + suffix);
 
 
                         if (table.Ticks != null)
-                            update += " AND {0} = {1}".Formato(table.Ticks.Name.SqlEscape(), oldTicksParamName + suffix);
+                            update += " AND {0} = {1}".FormatWith(table.Ticks.Name.SqlEscape(), oldTicksParamName + suffix);
 
                         if (!output)
                             return update;
                         else
-                            return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + suffix);
+                            return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".FormatWith(idParamName + suffix);
                     };
 
                     List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
@@ -693,7 +693,7 @@ namespace Signum.Engine.Maps
 
             public override string ToString()
             {
-                return "{0} {1} {2}".Formato(SourceColumn, ParameterName, ParameterBuilder.ToString());
+                return "{0} {1} {2}".FormatWith(SourceColumn, ParameterName, ParameterBuilder.ToString());
             }
 
             static MethodInfo miConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
@@ -1032,16 +1032,16 @@ namespace Signum.Engine.Maps
             result.table = this;
             result.Getter = ident => (MList<T>)FullGetter(ident);
 
-            result.sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".Formato(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix));
+            result.sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix));
             result.DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.PrimaryKey);
 
             result.sqlDeleteExcept = num =>
             {
                 var sql = "DELETE {0} WHERE {1} = {2}"
-                    .Formato(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name));
+                    .FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name));
 
                 sql += " AND {0} NOT IN ({1})"
-                    .Formato(PrimaryKey.Name.SqlEscape(), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
+                    .FormatWith(PrimaryKey.Name.SqlEscape(), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
 
                 return sql;
             };
@@ -1074,7 +1074,7 @@ namespace Signum.Engine.Maps
                     Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
                 Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-                result.sqlInsert = (suffix, output) => "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
+                result.sqlInsert = (suffix, output) => "INSERT {0} ({1})\r\n{2} VALUES ({3})".FormatWith(Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                     output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
                     trios.ToString(p => p.ParameterName + suffix, ", "));
@@ -1103,8 +1103,8 @@ namespace Signum.Engine.Maps
                     Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
                 Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-                result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".Formato(Name,
-                    trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
+                result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".FormatWith(Name,
+                    trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
                     this.BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(idParent + suffix),
                     this.PrimaryKey.Name.SqlEscape(), ParameterBuilder.GetParameterName(rowId + suffix));
 
@@ -1201,7 +1201,7 @@ namespace Signum.Engine.Maps
             else if (this.Type == typeof(DateTime))
                 trios.Add(new Table.Trio(this, Expression.New(ciDateTimeTicks, value), suffix));
             else
-                throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
+                throw new NotImplementedException("FieldTicks of type {0} not supported".FormatWith(this.Type));
         }
 
         internal Expression ConvertTicks(ParameterExpression paramOldTicks)
@@ -1212,7 +1212,7 @@ namespace Signum.Engine.Maps
             if (this.Type == typeof(DateTime))
                 return Expression.New(ciDateTimeTicks, paramOldTicks);
 
-            throw new NotImplementedException("FieldTicks of type {0} not supported".Formato(this.Type));
+            throw new NotImplementedException("FieldTicks of type {0} not supported".FormatWith(this.Type));
         }
     }
 
@@ -1353,7 +1353,7 @@ namespace Signum.Engine.Maps
         Type CheckType(Type type)
         {
             if (type != null && !ImplementationColumns.ContainsKey(type))
-                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".Formato(type.Name, ImplementationColumns.ToString(kvp => "{0} -> {1}".Formato(kvp.Key.Name, kvp.Value.Name), "\r\n")));
+                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".FormatWith(type.Name, ImplementationColumns.ToString(kvp => "{0} -> {1}".FormatWith(kvp.Key.Name, kvp.Value.Name), "\r\n")));
 
             return type;
         }
@@ -1427,7 +1427,7 @@ namespace Signum.Engine.Maps
         object CheckNull(object obj)
         {
             if (obj == null)
-                throw new InvalidOperationException("Impossible to save 'null' on the not-nullable embedded field of type '{0}'".Formato(this.FieldType.Name));
+                throw new InvalidOperationException("Impossible to save 'null' on the not-nullable embedded field of type '{0}'".FormatWith(this.FieldType.Name));
 
             return obj;
         }

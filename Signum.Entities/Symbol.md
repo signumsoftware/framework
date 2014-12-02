@@ -1,4 +1,4 @@
-# Symbols 
+﻿# Symbols 
 
 
 ### Enums rules :)
@@ -159,10 +159,10 @@ In fact, we could classify entities depending their *staticness-dynamicness* lik
 1. **Enums:** Can only created by the developer in control of the type. (i.e.: `OrderState`)
 * **Symbols:** Can be created by any developer. (i.e.: `PermissionSymbol`)
 * **SemiSymbols:** Can be created by any developer or user with administrative privileges. (i.e.: `AlertType`)
-* **String Master Entities:** Can be created by any user with administrative privileges. (i.e.: `CountryDN`)
-* **Master Entities:** Can be created by any user with some administrative privileges. (i.e.: `ProductDN`)
-* **Transactional Entities:** Can be created by any user. (i.e.: `OrderDN`)
-* **Log Entities:** Automatically created by the system, and removed after some time. (i.e.: `OperationLogDN`)
+* **String Master Entities:** Can be created by any user with administrative privileges. (i.e.: `CountryEntity`)
+* **Master Entities:** Can be created by any user with some administrative privileges. (i.e.: `ProductEntity`)
+* **Transactional Entities:** Can be created by any user. (i.e.: `OrderEntity`)
+* **Log Entities:** Automatically created by the system, and removed after some time. (i.e.: `OperationLogEntity`)
 
 **DOWN: Dynamic and unfrequently used**
  

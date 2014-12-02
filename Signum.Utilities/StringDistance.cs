@@ -103,10 +103,10 @@ namespace Signum.Utilities
             {
                 switch (Type)
                 {
-                    case ChoiceType.Equal: return "{0}".Formato(Added);
-                    case ChoiceType.Substitute: return "[-{0}+{1}]".Formato(Removed, Added);
-                    case ChoiceType.Remove: return "-{0}".Formato(Removed);
-                    case ChoiceType.Add: return "+{0}".Formato(Added);
+                    case ChoiceType.Equal: return "{0}".FormatWith(Added);
+                    case ChoiceType.Substitute: return "[-{0}+{1}]".FormatWith(Removed, Added);
+                    case ChoiceType.Remove: return "-{0}".FormatWith(Removed);
+                    case ChoiceType.Add: return "+{0}".FormatWith(Added);
                     default: return null;
                 }
             }

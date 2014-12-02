@@ -1,4 +1,4 @@
-# Localization
+﻿# Localization
 
 [DescriptionManager](../Signum.Utilities/DescriptionManager.md) provides the basic infrastructure to support localization of  `PropertyInfo`, `Enums`, `Symbols` and `Types` (singular and plural). 
 
@@ -78,5 +78,5 @@ public class LocTypePluralExtension : MarkupExtension
 
 Example: 
 ```XML
-<MenuItem Header="{m:LocTypePlural {x:Type d:OrderDN}}">...</MenuItem>
+<MenuItem Header="{m:LocTypePlural {x:Type d:OrderEntity}}">...</MenuItem>
 ```

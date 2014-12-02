@@ -26,7 +26,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             if (!entityCombo.Type.IsIEntity() && !entityCombo.Type.IsLite())
-                throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
+                throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".FormatWith(entityCombo.Type.CleanType()));
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.SurroundLine(new HtmlTag("div", entityCombo.Prefix).Class("SF-entity-combo SF-control-container")))

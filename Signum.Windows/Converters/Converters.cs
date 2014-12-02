@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,8 +48,8 @@ namespace Signum.Windows
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :
                 str.Length == 0 ? NormalWindowMessage.NoDirectErrors.NiceToString() :
-                str.Length == 1 ? NormalWindowMessage._1Error.NiceToString().Formato(str[0]) :
-                NormalWindowMessage._0Errors1.NiceToString().Formato(str.Length, str[0]));
+                str.Length == 1 ? NormalWindowMessage._1Error.NiceToString().FormatWith(str[0]) :
+                NormalWindowMessage._0Errors1.NiceToString().FormatWith(str.Length, str[0]));
 
         public static readonly IValueConverter ErrorListToBool =
             ConverterFactory.New((string[] str) => str != null && str.Length > 0);
@@ -123,8 +123,8 @@ namespace Signum.Windows
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
         public static readonly IValueConverter Color = ConverterFactory.New(
-            (ColorDN c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
-            (Color? c) => c == null ? null : ColorDN.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
+            (ColorEntity c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
+            (Color? c) => c == null ? null : ColorEntity.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
             (bool a, bool b) => a && b);
@@ -139,7 +139,7 @@ namespace Signum.Windows
             (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
 
         public static readonly IValueConverter LabelCount = ConverterFactory.New(
-            (ResultRow r) => "{0} ({1})".Formato(r[0] is Enum ? ((Enum)r[0]).NiceToString() : r[0], r[1]));
+            (ResultRow r) => "{0} ({1})".FormatWith(r[0] is Enum ? ((Enum)r[0]).NiceToString() : r[0], r[1]));
 
 
         public static readonly IValueConverter DirtyOpacity = ConverterFactory.New(

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,7 +50,7 @@ namespace Signum.Utilities
                     break;
             }
 
-            return AboutMessage.OS_Unknown0.NiceToString().Formato(os.VersionString);
+            return AboutMessage.OS_Unknown0.NiceToString().FormatWith(os.VersionString);
         }
 
         public static DateTime CompilationTime(this Version v)

@@ -48,7 +48,7 @@ namespace Signum.Utilities
 
         public static void CleanThreadContextAndAssert()
         {
-            string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".Formato(v.Name, v.UntypedValue), "\r\n");
+            string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".FormatWith(v.Name, v.UntypedValue), "\r\n");
 
             foreach (var v in threadVariables.Values)
             {

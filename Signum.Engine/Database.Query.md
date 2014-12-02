@@ -1,4 +1,4 @@
-# Database.Query
+﻿# Database.Query
 
 Take a comfortable seat, breath deeply and prepare yourself. `Database.Query<T>()` is Signum Engine's gate to the LINQ world, a world of elegant compiled-time checked and IntelliSense assisted queries that will empower you to a new level of productivity. 
 
@@ -47,7 +47,7 @@ Not so fast, first it would be convenient to take a look and get used to the dat
 
 ## `Query<T>`
 
-The first thing to notice is that we didn't generate any `db.Customer` property for each table, instead you have to write `Database.Query<CustomerDN>()` to get the `IQueryable<CustomerDN>` to start querying `CustomerDN` table. You can find out why in [Database page](Database.md). 
+The first thing to notice is that we didn't generate any `db.Customer` property for each table, instead you have to write `Database.Query<CustomerEntity>()` to get the `IQueryable<CustomerEntity>` to start querying `CustomerEntity` table. You can find out why in [Database page](Database.md). 
 
 ```C#
 public static IQueryable<T> Query<T>() where T : Entity
@@ -57,7 +57,7 @@ public static IQueryable<T> Query<T>() where T : Entity
 Let's see our first example, if you write a query like this:
 
 ```C#
- var result = from b in Database.Query<BugDN>()
+ var result = from b in Database.Query<BugEntity>()
               group b by b.Status into g
               select new { Status = g.Key, Num = g.Count() };
 ```
@@ -68,7 +68,7 @@ It will be translated to this SQL:
 SELECT s2.agg1 AS c0, s2.idStatus
 FROM (
   (SELECT bdn.idStatus, COUNT(*) AS agg1
-  FROM BugDN AS bdn
+  FROM BugEntity AS bdn
   GROUP BY bdn.idStatus)
 ) AS s2
 ```
@@ -78,8 +78,8 @@ FROM (
 It's common that you want to start a query from a `Lite<T>` or entity: 
 
 ```C#
-Lite<BugDN> bug = //...
-Databas.Query<BugDN>().Where(b => b.ToLite() == bug).Select(b => b.Comments.Count).SingleEx();
+Lite<BugEntity> bug = //...
+Databas.Query<BugEntity>().Where(b => b.ToLite() == bug).Select(b => b.Comments.Count).SingleEx();
 ```
 
 The following pattern can be simplified using `InDB` method:
@@ -92,7 +92,7 @@ public static IQueryable<E> InDB<E>(this Lite<E> lite) where E : class, IEntity
 This overload already does the `Database.Query` and the `Where` for you. Result:
 
 ```C#
-Lite<BugDN> bug = //...
+Lite<BugEntity> bug = //...
 bug.InDB().Select(b => b.Comments.Count).SingleEx();
 ```
 
@@ -110,16 +110,16 @@ This overload (in addition to `Database.Query` and the `Where`), already does th
 
 
 ```C#
-Lite<BugDN> bug = //...
+Lite<BugEntity> bug = //...
 bug.InDB(b => b.Comments.Count); //That simple!
 ```
 
 One important things to note is that if `InDB` is used **inside** of a query... just disappears! That let you write expression like: 
 
 ```C#
-static Expression<Func<BugDN, int>> CommentCountExpression =
+static Expression<Func<BugEntity, int>> CommentCountExpression =
     entity => entity.InDBEntity(e => e.Comments.Count); //Works in-memory and in-database
-public static int CommentCount(this BugDN entity)
+public static int CommentCount(this BugEntity entity)
 {
     return CommentCountExpression.Evaluate(entity); 
 }
@@ -136,14 +136,14 @@ While this tables are secondary citizens, and are usually manipulated implicitly
 So you can access the elements in a collection using `SelectMany`
 
 ```C#
-Database.Query<BugDN>().SelectMany(a => a.Comments).Select(a=>a.Date)
+Database.Query<BugEntity>().SelectMany(a => a.Comments).Select(a=>a.Date)
 ```
 
 And will be translated to
 
 ```C#
 SELECT s1.Date
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 CROSS APPLY (
   (SELECT bdnc.Date
   FROM BugDNComments AS bdnc
@@ -155,7 +155,7 @@ But if you want direct access to the `BugDNComments` table, you can use `MListQu
 
 
 ```C#
-Database.MListQuery((BugDN bug) => bug.Comments).Select(mle => mle.Element.Date)
+Database.MListQuery((BugEntity bug) => bug.Comments).Select(mle => mle.Element.Date)
 ```
 
 That gets translated to the simpler SQL:
@@ -199,8 +199,8 @@ Finishing the circle, `MListElements(mListProperty)` method is to `MListQuery<T>
 Sometimes you need to get the `MListElement<E, V>` of a particular entity. Instead of writing: 
 
 ```C#
-BugDN bug;
-Database.MListQuery((BugDN b) => b.Comments).Where(mle => mle.Parent == bug);
+BugEntity bug;
+Database.MListQuery((BugEntity b) => b.Comments).Where(mle => mle.Parent == bug);
 ```
 
 You can use `MListElements(mListProperty)` defined as:
@@ -216,7 +216,7 @@ public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E
 To write just: 
 
 ```C#
-BugDN bug;
+BugEntity bug;
 bug.MListElement(b => b.Comments);
 ```
 
@@ -243,14 +243,14 @@ public static string ToPascalCase(string text)
 You can still write something like this: 
 
 ```C#
-var result = from b in Database.Query<BugDN>()
+var result = from b in Database.Query<BugEntity>()
              select ToPascalCase(b.Description);
 ```
 
 And will be translated to
 
 ```SQL
-SELECT bdn.Description FROM BugDN AS bdn 
+SELECT bdn.Description FROM BugEntity AS bdn 
 ```
 
 Executing your function for each row as they come from the database before returning the results to the client code. 
@@ -258,7 +258,7 @@ Executing your function for each row as they come from the database before retur
 If you try something like this, however: 
 
 ```C#
-var result = from b in Database.Query<BugDN>()
+var result = from b in Database.Query<BugEntity>()
              where ToPascalCase(b.Description) == "Hi"
              select b.Description;
 ```
@@ -272,14 +272,14 @@ In the last select, you can force a sub-expression to be evaluated in SQL using 
 For example: 
 
 ```C#
-Database.Query<BugDN>().Select(a => a.Id + a.Project.Id)
+Database.Query<BugEntity>().Select(a => a.Id + a.Project.Id)
 ```
 
 Just translates just to:
 
 ```SQL
 SELECT bdn.Id, bdn.idProject
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 ```
 
 So the `+` operation is done in-memory as the results come from the database.
@@ -287,14 +287,14 @@ So the `+` operation is done in-memory as the results come from the database.
 But if we write this:
 
 ```C#
-Database.Query<BugDN>().Select(a => (a.Id + a.Project.Id).InSql());
+Database.Query<BugEntity>().Select(a => (a.Id + a.Project.Id).InSql());
 ```
 
 Will translate instead to
 
 ```SQL
 SELECT (bdn.Id + bdn.idProject) AS c0
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 ```
 
 Now the operation is done in-database. 

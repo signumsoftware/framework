@@ -1,4 +1,4 @@
-# Services
+﻿# Services
 
 Signum.Service is the folder in Signum.Entities that contains the WCF Service Contracts of the server required by **Signum.Windows**. 
 
@@ -42,7 +42,7 @@ public interface IServerSouthwind : IBaseServer, IDynamicQueryServer, IOperation
 {
     //Add custom method here...
     [OperationContract, NetDataContract]
-    byte[] GenerateReport(Lite<EmployeeDN> employee);
+    byte[] GenerateReport(Lite<EmployeeEntity> employee);
 }
 ```
 
@@ -86,7 +86,7 @@ public class ServerSouthwind : ServerExtensions, IServerSouthwind
     }
 
     //Implement custom methods here...
-    public byte[] GenerateReport(Lite<EmployeeDN> employee)
+    public byte[] GenerateReport(Lite<EmployeeEntity> employee)
     {
         return Return(MethodInfo.GetCurrentMethod(), null,
             () => ReportLogic.GenerateReport(employee));
@@ -99,7 +99,7 @@ Additionally, you'll need to implement `Return` method that is executed for any 
 * `ScopeSessionFactory.OverrideSession` restore the session on every call.
 * `TimeTracker.Start` saves aggregated performance information (in Profiler module)
 * `HeavyProfiler.Log` saves detailed performance information if enabled (in Profiler module)
-* `LogException` saves a .Net `System.Exception` as a `ExceptionDN` in the database.
+* `LogException` saves a .Net `System.Exception` as a `ExceptionEntity` in the database.
 * convert your exception to `FaultException` to give detailed information to the client without shouting down the service
 * `Statics.CleanThreadContextAndAssert` asserts that all the thread variables are clean, and also cleans them anyway if not. 
 

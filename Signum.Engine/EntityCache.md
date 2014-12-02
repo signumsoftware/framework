@@ -1,4 +1,4 @@
-# EntityCache
+﻿# EntityCache
 
 EntityCache uses the scope pattern to avoid duplicated entities in a region of your code. 
 
@@ -17,8 +17,8 @@ We choose `EntityCache` to be opt-in because Signum Framework is designed to mak
 ### The problem
 
 ```C#
-var bugA = Database.Retrieve<BugDN>(1);
-var bugB = Database.Retrieve<BugDN>(1);
+var bugA = Database.Retrieve<BugEntity>(1);
+var bugB = Database.Retrieve<BugEntity>(1);
 
 bugA.Equals(bugB); //returns true
 bugA == bugB; //returns false
@@ -35,8 +35,8 @@ If you get bite by our decision in some code, you can bring back this data struc
 ```C#
 using(new EntityCache())
 {
-   var bugA = Database.Retrieve<BugDN>(1);
-   var bugB = Database.Retrieve<BugDN>(1);
+   var bugA = Database.Retrieve<BugEntity>(1);
+   var bugB = Database.Retrieve<BugEntity>(1);
    
    bugA.Equals(bugB); //returns true
    bugA == bugB; //returns true too!!!!
@@ -52,14 +52,14 @@ Nested `EntityCache` became silent, as `Transactions`.
 You can manually add some objects to an object cache like this:  
 
 ```C#
-var developer = Database.Retrieve<DeveloperDN>(3);
+var developer = Database.Retrieve<DeveloperEntity>(3);
 Console.WriteLine(developer.Name);
 
 using (new EntityCache())
 {
     EntityCache.Add(developer); //added to the internal dictionary
 
-    var bug = Database.Query<BugDN>().Where(b => b.Fixer == developer).First(); //Fixer retrieved from the internal dicitonary
+    var bug = Database.Query<BugEntity>().Where(b => b.Fixer == developer).First(); //Fixer retrieved from the internal dicitonary
     
     bug.Fixer == developer; //returns true!
 }
@@ -74,10 +74,10 @@ You can create an `EntityCache` that does not become silent if there's a parent 
 ```C#
 using(new EntityCache())
 {
-   var bugA = Database.Retrieve<BugDN>(1);
+   var bugA = Database.Retrieve<BugEntity>(1);
    using(new EntityCache(EntityCacheType.ForceNew))
    {
-	   var bugB = Database.Retrieve<BugDN>(1);
+	   var bugB = Database.Retrieve<BugEntity>(1);
 	   
 	   bugA.Equals(bugB); //returns true
 	   bugA == bugB; //returns false
@@ -93,10 +93,10 @@ You can create an `EntityCache` that does not become silent if there's a parent 
 ```C#
 using(new EntityCache())
 {
-   var bugA = Database.Retrieve<BugDN>(1);
+   var bugA = Database.Retrieve<BugEntity>(1);
    using(new EntityCache(EntityCacheType.ForceNew))
    {
-	   var bugB = Database.Retrieve<BugDN>(1);
+	   var bugB = Database.Retrieve<BugEntity>(1);
 	   
 	   bugA.Equals(bugB); //returns true
 	   bugA == bugB; //returns false

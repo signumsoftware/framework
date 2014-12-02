@@ -55,7 +55,7 @@ namespace Signum.Windows
 
         public XElement GenerateEntityStackPanel(Type type)
         {
-            XNamespace entityNamespace = "clr-namespace:{0};assembly={1}".Formato(type.Namespace, type.Assembly.GetName().Name);
+            XNamespace entityNamespace = "clr-namespace:{0};assembly={1}".FormatWith(type.Namespace, type.Assembly.GetName().Name);
             string alias = new string(type.Namespace.Split('.').Select(a => a[0]).ToArray()).ToLower();
 
             XElement sp = GenerateStackPanel(type);

@@ -1,4 +1,4 @@
-# SearchControl
+﻿# SearchControl
 
 We have already seen how to register queries and extensions in the [`DynamicQueryManager`](../../Signum.Engines/DynamicQuery/DynamicQueries.md) and how to open `SearchWindows` using [`Finder`](../Facades/Finder.md).
 
@@ -127,13 +127,13 @@ This two properties can only be set at construction time, before it has been loa
 For example: 
 
 ```XML
-<m:SearchControl QueryName="{x:Type d:PackageLineDN}"  FilterColumn="Package"/>
+<m:SearchControl QueryName="{x:Type d:PackageLineEntity}"  FilterColumn="Package"/>
 ```
 
 Is equivalent to:
 
 ```XML
-<m:SearchControl QueryName="{x:Type d:PackageLineDN}" ColumnOptionsMode="Remove" SearchOnLoad="True" >
+<m:SearchControl QueryName="{x:Type d:PackageLineEntity}" ColumnOptionsMode="Remove" SearchOnLoad="True" >
     <m:SearchControl.FilterOptions>
         <m:FilterOption  ColumnName="Package"  Operation="EqualTo" Value="{Binding DataContext}" Frozen="True" />
     </m:SearchControl.FilterOptions>
