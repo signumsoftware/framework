@@ -28,7 +28,7 @@ namespace Signum.Web.Controllers
     public class NavigatorController : Controller
     {
         [ValidateInput(false), ActionSplitter("webTypeName")]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
-        public ViewResult View(string webTypeName, string id)
+        public new ViewResult View(string webTypeName, string id)
         {
             Type t = Navigator.ResolveType(webTypeName);
 
