@@ -27,9 +27,9 @@ namespace Signum.Windows.Basics
             InitializeComponent();
         }
 
-        Lite<RoleDN> Lite
+        Lite<RoleEntity> Lite
         {
-            get { return ((RoleDN)DataContext).ToLite(); }
+            get { return ((RoleEntity)DataContext).ToLite(); }
         }
    }
 }

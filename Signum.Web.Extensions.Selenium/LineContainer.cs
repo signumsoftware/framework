@@ -34,7 +34,7 @@ namespace Signum.Web.Selenium
     {
         public static bool HasError(this ISelenium selenium, string elementId)
         {
-            return selenium.IsElementPresent("jq=#{0}.input-validation-error".Formato(elementId));
+            return selenium.IsElementPresent("jq=#{0}.input-validation-error".FormatWith(elementId));
         }
 
         public static PropertyRoute GetRoute<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property, out string newPrefix) where T : ModifiableEntity
@@ -219,7 +219,7 @@ namespace Signum.Web.Selenium
             return routeType.IsAssignableFrom(type);
         }
 
-        public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenDN>> property)
+        public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEntity>> property)
             where T : ModifiableEntity
         {
             string newPrefix;
@@ -231,8 +231,8 @@ namespace Signum.Web.Selenium
         public static void SelectTab(this ILineContainer lineContainer, string tabId)
         {
             var fullTabId = lineContainer.PrefixUnderscore() + tabId;
-            lineContainer.Selenium.Click("jq=a[href='#{0}']".Formato(fullTabId));
-            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}:visible".Formato(fullTabId)));
+            lineContainer.Selenium.Click("jq=a[href='#{0}']".FormatWith(fullTabId));
+            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent("jq=#{0}:visible".FormatWith(fullTabId)));
 
         }
 
@@ -256,7 +256,7 @@ namespace Signum.Web.Selenium
         {
             string query = QueryUtils.GetQueryUniqueKey(queryName);
 
-            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".Formato(query));
+            var prefix = lineContainer.Selenium.GetEval("window.$('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
 
             return new SearchControlProxy(lineContainer.Selenium, prefix);
         }
@@ -330,10 +330,10 @@ namespace Signum.Web.Selenium
 
         public string EntityState()
         {
-            if (int.Parse(Selenium.GetEval("window.$('#sfEntityState').length".Formato(Prefix))) == 0)
+            if (int.Parse(Selenium.GetEval("window.$('#sfEntityState').length".FormatWith(Prefix))) == 0)
                 return null;
 
-            return Selenium.GetEval("window.$('#sfEntityState')[0].value".Formato(Prefix));
+            return Selenium.GetEval("window.$('#sfEntityState')[0].value".FormatWith(Prefix));
         }
     }
 }

@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -41,13 +41,13 @@ namespace Signum.Web.Files
             bool isEmbedded = info.EntityType.IsEmbeddedEntity(); 
 
             IFile file;
-            if (info.EntityType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathEntity))
             {
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
-                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(fileName));
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(fileName));
 
-                file = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
+                file = new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
             }
             else
             {
@@ -67,7 +67,7 @@ namespace Signum.Web.Files
             sb.AppendLine("<html><head><title>-</title></head><body>");
             sb.AppendLine("<script type='text/javascript'>");
             RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IEntity)file);
-            sb.AppendLine("window.parent.$.data(window.parent.document.getElementById('{0}'), 'SF-control').onUploaded('{1}', '{2}', '{3}', '{4}')".Formato(
+            sb.AppendLine("window.parent.$.data(window.parent.document.getElementById('{0}'), 'SF-control').onUploaded('{1}', '{2}', '{3}', '{4}')".FormatWith(
                 prefix,
                 file.FileName,
                 FilesClient.GetDownloadPath(file),
@@ -90,13 +90,13 @@ namespace Signum.Web.Files
             bool isEmbedded = info.EntityType.IsEmbeddedEntity(); 
             
             IFile file;
-            if (info.EntityType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathEntity))
             {
                 string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
                 if (!fileType.HasText())
-                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(prefix));
 
-                file = new FilePathDN(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
+                file = new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType));
             }
             else
             {
@@ -127,15 +127,15 @@ namespace Signum.Web.Files
 
             RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            if (ri.EntityType == typeof(FilePathDN))
+            if (ri.EntityType == typeof(FilePathEntity))
             {
-                FilePathDN fp = Database.Retrieve<FilePathDN>(ri.IdOrNull.Value);
+                FilePathEntity fp = Database.Retrieve<FilePathEntity>(ri.IdOrNull.Value);
 
                 return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
             }
             else
             {
-                FileDN f = Database.Retrieve<FileDN>(ri.IdOrNull.Value);
+                FileEntity f = Database.Retrieve<FileEntity>(ri.IdOrNull.Value);
 
                 return new StaticContentResult(f.BinaryFile, f.FileName);
             }

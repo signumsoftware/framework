@@ -11,11 +11,11 @@ using Signum.Services;
 namespace Signum.Entities.Files
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional), TicksColumn(false)]
-    public class FileDN : ImmutableEntity, IFile
+    public class FileEntity : ImmutableEntity, IFile
     {
-        public FileDN() { }
+        public FileEntity() { }
 
-        public FileDN(string path)
+        public FileEntity(string path)
         {
             this.FileName = Path.GetFileName(path);
             this.BinaryFile = File.ReadAllBytes(path);
@@ -50,7 +50,7 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".FormatWith(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         public Uri WebPath

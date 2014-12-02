@@ -108,7 +108,7 @@ namespace Signum.Windows.UIAutomation
             var result = element.TryElementByCondition(scope, condition);
 
             if (result == null)
-                throw new ElementNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
+                throw new ElementNotFoundException("No AutomationElement found: {0}".FormatWith(condition.NiceToString()));
 
             return result;
         } 

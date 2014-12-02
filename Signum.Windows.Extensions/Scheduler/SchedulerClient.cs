@@ -23,17 +23,17 @@ namespace Signum.Windows.Scheduler
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {              
-                    new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") },
+                    new EntitySettings<ScheduledTaskEntity> { View = e => new ScheduledTask(), Icon = Image("clock.png") },
 
                     new EntitySettings<SimpleTaskSymbol> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") },
-                    new EntitySettings<ScheduledTaskLogDN> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") },
+                    new EntitySettings<ScheduledTaskLogEntity> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") },
 
-                    new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() },
-                    new EntitySettings<ScheduleRuleWeeklyDN> { View = e => new ScheduleRuleWeekly() },
-                    new EntitySettings<ScheduleRuleWeekDaysDN> { View = e => new ScheduleRuleWeekDays() },
-                    new EntitySettings<ScheduleRuleMinutelyDN> { View = e => new ScheduleRuleMinutely() },
-                    new EntitySettings<ScheduleRuleHourlyDN> { View = e => new ScheduleRuleHourly() },
-                    new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() },
+                    new EntitySettings<ScheduleRuleDailyEntity> { View = e => new ScheduleRuleDaily() },
+                    new EntitySettings<ScheduleRuleWeeklyEntity> { View = e => new ScheduleRuleWeekly() },
+                    new EntitySettings<ScheduleRuleWeekDaysEntity> { View = e => new ScheduleRuleWeekDays() },
+                    new EntitySettings<ScheduleRuleMinutelyEntity> { View = e => new ScheduleRuleMinutely() },
+                    new EntitySettings<ScheduleRuleHourlyEntity> { View = e => new ScheduleRuleHourly() },
+                    new EntitySettings<HolidayCalendarEntity> { View = e => new HolidayCalendar() },
                 });
 
                 Server.SetSymbolIds<SimpleTaskSymbol>();
@@ -45,8 +45,8 @@ namespace Signum.Windows.Scheduler
                     Text = () => TaskMessage.Execute.NiceToString() + "...",
                 };
 
-                OperationClient.AddSetting(new EntityOperationSettings<ITaskDN>(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
-                OperationClient.AddSetting(new EntityOperationSettings<ITaskDN>(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
             }
         }
 

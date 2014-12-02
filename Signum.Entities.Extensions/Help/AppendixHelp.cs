@@ -10,7 +10,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class AppendixHelpDN : Entity
+    public class AppendixHelpEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string uniqueName;
@@ -22,9 +22,9 @@ namespace Signum.Entities.Help
         }
 
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -54,6 +54,6 @@ namespace Signum.Entities.Help
 
     public static class AppendixHelpOperation
     {
-        public static readonly ExecuteSymbol<AppendixHelpDN> Save = OperationSymbol.Execute<AppendixHelpDN>();
+        public static readonly ExecuteSymbol<AppendixHelpEntity> Save = OperationSymbol.Execute<AppendixHelpEntity>();
     }
 }

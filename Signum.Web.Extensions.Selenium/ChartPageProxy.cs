@@ -19,7 +19,7 @@ namespace Signum.Web.Selenium
 
         public QueryTokenBuilderProxy GetColumnTokenBuilder(int index)
         {
-            return new QueryTokenBuilderProxy(this.Selenium, "Columns_{0}_Token_".Formato(index)); 
+            return new QueryTokenBuilderProxy(this.Selenium, "Columns_{0}_Token_".FormatWith(index)); 
         }
 
         public ChartPageProxy(ISelenium selenium)
@@ -70,19 +70,19 @@ namespace Signum.Web.Selenium
 
         public string MenuOptionLocator(string menuId, string optionId)
         {
-            return "jq=a#{0}".Formato(optionId);
+            return "jq=a#{0}".FormatWith(optionId);
         }
 
         public string MenuOptionLocatorByAttr(string menuId, string optionLocator)
         {
-            return "jq=a[{0}]".Formato(optionLocator);
+            return "jq=a[{0}]".FormatWith(optionLocator);
         }
 
-        public NormalPage<UserChartDN> NewUserChart()
+        public NormalPage<UserChartEntity> NewUserChart()
         {
             Selenium.MouseUp(MenuOptionLocator("tmUserCharts", "qbUserChartNew"));
             Selenium.WaitForPageToLoad();
-            return new NormalPage<UserChartDN>(Selenium); 
+            return new NormalPage<UserChartEntity>(Selenium); 
         }
 
         public void SelectUserChart(string userChartName)
@@ -91,11 +91,11 @@ namespace Signum.Web.Selenium
             Selenium.WaitForPageToLoad();
         }
 
-        public NormalPage<UserChartDN> EditUserChart()
+        public NormalPage<UserChartEntity> EditUserChart()
         {
             Selenium.Click(MenuOptionLocator("tmUserCharts", "qbUserChartEdit"));
             Selenium.WaitForPageToLoad();
-            return new NormalPage<UserChartDN>(Selenium); 
+            return new NormalPage<UserChartEntity>(Selenium); 
         }
 
         public void Dispose()

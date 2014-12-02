@@ -12,7 +12,7 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
     {
         List<MessageUid> GetMessageInfos();
 
-        EmailMessageDN GetMessage(MessageUid messageInfo, Lite<Pop3ReceptionDN> reception);
+        EmailMessageEntity GetMessage(MessageUid messageInfo, Lite<Pop3ReceptionEntity> reception);
 
         void DeleteMessage(MessageUid messageInfo);
         void Disconnect();
@@ -37,7 +37,7 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
     {
         Pop3Client client;
 
-        public OpenPop3Client(Pop3ConfigurationDN configuration)
+        public OpenPop3Client(Pop3ConfigurationEntity configuration)
         {
             client = new Pop3Client();
             client.Connect(configuration.Host, configuration.Port, configuration.EnableSSL);
@@ -51,11 +51,11 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
                 .ToList();
         }
 
-        public EmailMessageDN GetMessage(MessageInfo messageInfo, Lite<Pop3ReceptionDN> reception)
+        public EmailMessageEntity GetMessage(MessageInfo messageInfo, Lite<Pop3ReceptionEntity> reception)
         {
             var message = client.GetMessage(messageInfo.Number);
 
-            var em = new EmailMessageDN
+            var em = new EmailMessageEntity
             {
                 EditableMessage = false,
                 From = ToEmailAddress(message.Headers.From),
@@ -66,15 +66,15 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
                 State = EmailMessageState.Received,
                 Subject = message.Headers.Subject,
                 Attachments = message.FindAllAttachments().Select(a =>
-                    new EmailAttachmentDN
+                    new EmailAttachmentEntity
                     {
                         ContentId = a.ContentId,
-                        File = new FilePathDN(EmailFileType.Attachment, a.ContentDisposition.Try(cd => cd.FileName) ?? a.FileName, a.Body).Save(),
+                        File = new FilePathEntity(EmailFileType.Attachment, a.ContentDisposition.Try(cd => cd.FileName) ?? a.FileName, a.Body).Save(),
                         Type = a.ContentDisposition.Try(cd => cd.DispositionType) == "attachment" ? EmailAttachmentType.Attachment : EmailAttachmentType.LinkedResource
                     }).ToMList()
             };
 
-            var receptionInfo = new EmailReceptionInfoDN
+            var receptionInfo = new EmailReceptionInfoEntity
             {
                 Reception = reception,
                 UniqueId = messageInfo.Uid,
@@ -96,9 +96,9 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
             return em;
         }
 
-        private EmailRecipientDN ToEmailRecipient(RfcMailAddress rfcMailAddress, EmailRecipientKind emailRecipientKind)
+        private EmailRecipientEntity ToEmailRecipient(RfcMailAddress rfcMailAddress, EmailRecipientKind emailRecipientKind)
         {
-            return new EmailRecipientDN
+            return new EmailRecipientEntity
             {
                 DisplayName = rfcMailAddress.DisplayName,
                 EmailAddress = rfcMailAddress.Address ?? "unknown@unknown.com",
@@ -106,9 +106,9 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
             };
         }
 
-        private EmailAddressDN ToEmailAddress(RfcMailAddress rfcMailAddress)
+        private EmailAddressEntity ToEmailAddress(RfcMailAddress rfcMailAddress)
         {
-            return new EmailAddressDN
+            return new EmailAddressEntity
             {
                 DisplayName = rfcMailAddress.DisplayName,
                 EmailAddress = rfcMailAddress.Address ?? "unknown@unknown.com",

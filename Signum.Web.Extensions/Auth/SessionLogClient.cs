@@ -30,10 +30,10 @@ namespace Signum.Web.Auth
 
         static void AuthController_OnUserLoggingOut()
         {
-            LogSessionEnd(UserDN.Current, null);
+            LogSessionEnd(UserEntity.Current, null);
         }
 
-        public static void LogSessionEnd(UserDN user, TimeSpan? timeOut)
+        public static void LogSessionEnd(UserEntity user, TimeSpan? timeOut)
         {
             SessionLogLogic.SessionEnd(user, timeOut);
         }

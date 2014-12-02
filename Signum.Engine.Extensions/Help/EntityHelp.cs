@@ -30,7 +30,7 @@ namespace Signum.Engine.Help
         {
             string error = IsAllowed();
             if (error != null)
-                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(this.GetType(), error));
+                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(this.GetType(), error));
         }
 
         public abstract override string ToString();
@@ -42,9 +42,9 @@ namespace Signum.Engine.Help
         public readonly string Title;
         public readonly string Description;
         public readonly CultureInfo Culture;
-        public readonly AppendixHelpDN Entity;
+        public readonly AppendixHelpEntity Entity;
 
-        public AppendixHelp(CultureInfo culture, AppendixHelpDN entity)
+        public AppendixHelp(CultureInfo culture, AppendixHelpEntity entity)
         {
             Culture = culture;
             UniqueName = entity.UniqueName;
@@ -71,10 +71,10 @@ namespace Signum.Engine.Help
         public readonly string Title;
         public readonly string Description;
         public readonly CultureInfo Culture;
-        public readonly NamespaceHelpDN Entity;
+        public readonly NamespaceHelpEntity Entity;
         public readonly Type[] Types;
 
-        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpDN entity, Type[] types)
+        public NamespaceHelp(string @namespace, CultureInfo culture, NamespaceHelpEntity entity, Type[] types)
         {
             Culture = culture;
             Namespace = @namespace;
@@ -88,9 +88,9 @@ namespace Signum.Engine.Help
             Before = clean.TryBeforeLast('.');
 
             Description = entity == null ? null : entity.Description;
-            Entity = entity ?? new NamespaceHelpDN
+            Entity = entity ?? new NamespaceHelpEntity
             {
-                Culture = this.Culture.ToCultureInfoDN(),
+                Culture = this.Culture.ToCultureInfoEntity(),
                 Name = this.Namespace
             };
         }
@@ -118,7 +118,7 @@ namespace Signum.Engine.Help
         public readonly CultureInfo Culture;
 
         public readonly bool HasEntity; 
-        public readonly Lazy<EntityHelpDN> Entity;
+        public readonly Lazy<EntityHelpEntity> Entity;
 
         public readonly string Info;
         public readonly string Description;
@@ -127,7 +127,7 @@ namespace Signum.Engine.Help
         public readonly Dictionary<OperationSymbol, OperationHelp> Operations;
         public readonly Dictionary<object, QueryHelp> Queries;
 
-        public EntityHelp(Type type, CultureInfo culture, EntityHelpDN entity)
+        public EntityHelp(Type type, CultureInfo culture, EntityHelpEntity entity)
         {
             Type = type;
             Culture = culture;
@@ -164,19 +164,19 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Entity = new Lazy<EntityHelpDN>(() => HelpLogic.GlobalContext(() =>
+            Entity = new Lazy<EntityHelpEntity>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
-                    entity = new EntityHelpDN
+                    entity = new EntityHelpEntity
                     {
-                        Culture = this.Culture.ToCultureInfoDN(),
-                        Type = this.Type.ToTypeDN(),
+                        Culture = this.Culture.ToCultureInfoEntity(),
+                        Type = this.Type.ToTypeEntity(),
                     };
 
                 entity.Properties.AddRange(
-                   PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeDN())
+                   PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
                    .Except(entity.Properties.Select(a => a.Property))
-                   .Select(pr => new PropertyRouteHelpDN
+                   .Select(pr => new PropertyRouteHelpEntity
                    {
                        Property = pr,
                        Description = null,
@@ -231,7 +231,7 @@ namespace Signum.Engine.Help
 
     public class OperationHelp : BaseHelp
     {
-        public OperationHelp(OperationSymbol operationSymbol, CultureInfo ci, OperationHelpDN entity)
+        public OperationHelp(OperationSymbol operationSymbol, CultureInfo ci, OperationHelpEntity entity)
         {
             this.OperationSymbol = operationSymbol;
             this.Culture = ci;
@@ -245,12 +245,12 @@ namespace Signum.Engine.Help
                 UserDescription = entity.Description;
             }
 
-            Entity = new Lazy<OperationHelpDN>(() => HelpLogic.GlobalContext(() =>
+            Entity = new Lazy<OperationHelpEntity>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
-                    entity = new OperationHelpDN
+                    entity = new OperationHelpEntity
                     {
-                        Culture = this.Culture.ToCultureInfoDN(),
+                        Culture = this.Culture.ToCultureInfoEntity(),
                         Operation = this.OperationSymbol,
                     };
 
@@ -262,7 +262,7 @@ namespace Signum.Engine.Help
         public readonly CultureInfo Culture;
         public readonly OperationSymbol OperationSymbol;
         public readonly bool HasEntity;
-        public readonly Lazy<OperationHelpDN> Entity;
+        public readonly Lazy<OperationHelpEntity> Entity;
         public readonly string Info;
         public string UserDescription;
 
@@ -284,12 +284,12 @@ namespace Signum.Engine.Help
         public readonly CultureInfo Culture;
 
         public readonly bool HasEntity;
-        public readonly Lazy<QueryHelpDN> Entity;
+        public readonly Lazy<QueryHelpEntity> Entity;
         public readonly string UserDescription;
         public readonly string Info;
         public readonly Dictionary<string, QueryColumnHelp> Columns;
 
-        public QueryHelp(object queryName, CultureInfo ci, QueryHelpDN entity)
+        public QueryHelp(object queryName, CultureInfo ci, QueryHelpEntity entity)
         {
             QueryName = queryName;
             Culture = ci;
@@ -310,19 +310,19 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Entity = new Lazy<QueryHelpDN>(() => HelpLogic.GlobalContext(() =>
+            Entity = new Lazy<QueryHelpEntity>(() => HelpLogic.GlobalContext(() =>
             {
                 if (entity == null)
-                    entity = new QueryHelpDN
+                    entity = new QueryHelpEntity
                     {
-                        Culture = this.Culture.ToCultureInfoDN(),
+                        Culture = this.Culture.ToCultureInfoEntity(),
                         Query = QueryLogic.GetQuery(this.QueryName),
                     };
 
                 entity.Columns.AddRange(
                      DynamicQueryManager.Current.GetQuery(this.QueryName).Core.Value.StaticColumns.Select(a => a.Name)
                      .Except(entity.Columns.Select(a => a.ColumnName))
-                     .Select(pr => new QueryColumnHelpDN
+                     .Select(pr => new QueryColumnHelpEntity
                      {
                          ColumnName = pr,
                          Description = null,
@@ -340,7 +340,7 @@ namespace Signum.Engine.Help
         public override string IsAllowed()
         {
             return DynamicQueryManager.Current.QueryAllowed(this.QueryName) ? null :
-                "Access to query {0} not allowed".Formato(QueryUtils.GetQueryUniqueKey(this.QueryName)); 
+                "Access to query {0} not allowed".FormatWith(QueryUtils.GetQueryUniqueKey(this.QueryName)); 
         }
     }
 

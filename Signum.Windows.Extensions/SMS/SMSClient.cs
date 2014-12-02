@@ -25,11 +25,11 @@ namespace Signum.Windows.SMS
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN> { View = e => new SMSMessage(), Icon = ExtensionsImageLoader.GetImageSortName("sms.png") },
-                    new EntitySettings<SMSTemplateDN> { View = e => new SMSTemplate(), Icon = ExtensionsImageLoader.GetImageSortName("smstemplate.png") },
-                    new EmbeddedEntitySettings<SMSTemplateMessageDN>() { View = e => new Signum.Windows.SMS.SMSTemplateMessage() },
-                    new EntitySettings<SMSSendPackageDN> { View = e => new SMSSendPackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
-                    new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
+                    new EntitySettings<SMSMessageEntity> { View = e => new SMSMessage(), Icon = ExtensionsImageLoader.GetImageSortName("sms.png") },
+                    new EntitySettings<SMSTemplateEntity> { View = e => new SMSTemplate(), Icon = ExtensionsImageLoader.GetImageSortName("smstemplate.png") },
+                    new EmbeddedEntitySettings<SMSTemplateMessageEntity>() { View = e => new Signum.Windows.SMS.SMSTemplateMessage() },
+                    new EntitySettings<SMSSendPackageEntity> { View = e => new SMSSendPackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
+                    new EntitySettings<SMSUpdatePackageEntity> { View = e => new SMSUpdatePackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                     new EmbeddedEntitySettings<MultipleSMSModel> { View = e => new MultipleSMS(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                 });
 
@@ -59,7 +59,7 @@ namespace Signum.Windows.SMS
 
         public static Entity FindAssociatedTemplates(EntityOperationContext<Entity> e)
         {
-            var template = Finder.Find(new FindOptions(typeof(SMSTemplateDN))
+            var template = Finder.Find(new FindOptions(typeof(SMSTemplateEntity))
             {
                 FilterOptions = new List<FilterOption>
                 {
@@ -70,7 +70,7 @@ namespace Signum.Windows.SMS
             });
 
             if (template != null)
-                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite(SMSMessageOperation.CreateSMSWithTemplateFromEntity, ((Lite<SMSTemplateDN>)template).Retrieve()));
+                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite(SMSMessageOperation.CreateSMSWithTemplateFromEntity, ((Lite<SMSTemplateEntity>)template).Retrieve()));
 
             return null;
         }

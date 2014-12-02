@@ -36,7 +36,7 @@ namespace Signum.Web.Profiler
             lock (HeavyProfiler.Entries)
                 entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a => a.BeforeStart).ToList() : HeavyProfiler.Entries.ToList();
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), entries);
+            return View(ProfilerClient.ViewPrefix.FormatWith("HeavyList"), entries);
         }
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
@@ -49,9 +49,9 @@ namespace Signum.Web.Profiler
             ViewData[ViewDataKeys.Title] = "Slowest SQLs";
 
             if (Request.IsAjaxRequest())
-                return PartialView(ProfilerClient.ViewPrefix.Formato("StatisticsTable"), list);
+                return PartialView(ProfilerClient.ViewPrefix.FormatWith("StatisticsTable"), list);
             else
-                return View(ProfilerClient.ViewPrefix.Formato("Statistics"), list);
+                return View(ProfilerClient.ViewPrefix.FormatWith("Statistics"), list);
         }
 
         private Func<SqlProfileResume, long> GetOrder(SqlProfileResumeOrder order)
@@ -76,7 +76,7 @@ namespace Signum.Web.Profiler
 
             ViewData[ViewDataKeys.Title] = "Entry " + entry.FullIndex(); 
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyDetails"), entry);
+            return View(ProfilerClient.ViewPrefix.FormatWith("HeavyDetails"), entry);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -130,7 +130,7 @@ namespace Signum.Web.Profiler
             {
                 HeavyProfiler.ExportXml().Save(ms);
 
-                string fileName = "Profile-{0}.xml".Formato(DateTime.Now.ToString("o").Replace(":", "."));
+                string fileName = "Profile-{0}.xml".FormatWith(DateTime.Now.ToString("o").Replace(":", "."));
 
                 //Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName); 
 
@@ -143,7 +143,7 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermission.ViewTimeTracker.AssertAuthorized();
 
-            return View(ProfilerClient.ViewPrefix.Formato("Times"));
+            return View(ProfilerClient.ViewPrefix.FormatWith("Times"));
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -160,7 +160,7 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermission.ViewTimeTracker.AssertAuthorized();
 
-            return View(ProfilerClient.ViewPrefix.Formato("TimeTable"));
+            return View(ProfilerClient.ViewPrefix.FormatWith("TimeTable"));
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -180,7 +180,7 @@ namespace Signum.Web.Profiler
 
             ProfilerLogic.SessionTimeout = sec;
 
-            return Content("Session Timeout overriden to {0} seconds".Formato(ProfilerLogic.SessionTimeout));
+            return Content("Session Timeout overriden to {0} seconds".FormatWith(ProfilerLogic.SessionTimeout));
         }
 
     }

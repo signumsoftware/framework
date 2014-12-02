@@ -53,7 +53,7 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", query.PlainSql() } } };
 
                 if (CacheLogic.LogWriter != null)
-                    CacheLogic.LogWriter.WriteLine("Change {0}".Formato(GetType().TypeName())); 
+                    CacheLogic.LogWriter.WriteLine("Change {0}".FormatWith(GetType().TypeName())); 
 
                 Reset();
 
@@ -70,7 +70,7 @@ namespace Signum.Engine.Cache
         public void ResetAll(bool forceReset)
         {
             if (CacheLogic.LogWriter != null)
-                CacheLogic.LogWriter.WriteLine("ResetAll {0}".Formato(GetType().TypeName()));
+                CacheLogic.LogWriter.WriteLine("ResetAll {0}".FormatWith(GetType().TypeName()));
 
             Reset();
 
@@ -169,7 +169,7 @@ namespace Signum.Engine.Cache
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
-                string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
+                string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToStringDbo(),
                     ctr.currentAlias.Name.SqlEscape());
@@ -217,7 +217,7 @@ namespace Signum.Engine.Cache
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
                     ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
@@ -234,7 +234,7 @@ namespace Signum.Engine.Cache
         protected override void Reset()
         {
             if (CacheLogic.LogWriter != null)
-                CacheLogic.LogWriter.WriteLine((rows.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+                CacheLogic.LogWriter.WriteLine((rows.IsValueCreated ? "RESET {0}" : "Reset {0}").FormatWith(GetType().TypeName()));
 
             rows.Reset();
         }
@@ -334,7 +334,7 @@ namespace Signum.Engine.Cache
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
-                string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
+                string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToStringDbo(),
                     ctr.currentAlias.Name.SqlEscape());
@@ -388,7 +388,7 @@ namespace Signum.Engine.Cache
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
                     ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
@@ -410,7 +410,7 @@ namespace Signum.Engine.Cache
         protected override void Reset()
         {
             if (CacheLogic.LogWriter != null)
-                CacheLogic.LogWriter.WriteLine((relationalRows.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+                CacheLogic.LogWriter.WriteLine((relationalRows.IsValueCreated ? "RESET {0}" : "Reset {0}").FormatWith(GetType().TypeName()));
 
 
             relationalRows.Reset();
@@ -488,7 +488,7 @@ namespace Signum.Engine.Cache
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
-                string select = "SELECT {0}\r\nFROM {1} {2}\r\n".Formato(
+                string select = "SELECT {0}\r\nFROM {1} {2}\r\n".FormatWith(
                     columns.ToString(c => currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ", "),
                     table.Name.ToStringDbo(),
                     currentAlias.Name.SqlEscape());
@@ -522,7 +522,7 @@ namespace Signum.Engine.Cache
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
                     ((SqlConnector)Connector.Current).ExecuteDataReaderOpionalDependency(query, OnChange, fr =>
                     {
@@ -539,7 +539,7 @@ namespace Signum.Engine.Cache
         protected override void Reset()
         {
             if (CacheLogic.LogWriter != null)
-                CacheLogic.LogWriter.WriteLine((toStrings.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+                CacheLogic.LogWriter.WriteLine((toStrings.IsValueCreated ? "RESET {0}" : "Reset {0}").FormatWith(GetType().TypeName()));
 
             toStrings.Reset();
         }
@@ -638,7 +638,7 @@ namespace Signum.Engine.Cache
                 if (field is FieldPrimaryKey || field is FieldValue || field is FieldTicks)
                     return (IColumn)field;
 
-                throw new InvalidOperationException("{0} not supported".Formato(field.GetType()));
+                throw new InvalidOperationException("{0} not supported".FormatWith(field.GetType()));
             }
         }
     }

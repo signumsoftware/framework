@@ -31,7 +31,7 @@ namespace Signum.Windows
             return queryNames.GetOrThrow(uniqueQueryName, "Query with name '{0}' is not found");
         }
 
-        public static QueryDN GetQuery(object queryName)
+        public static QueryEntity GetQuery(object queryName)
         {
             return Server.Return((IQueryServer s) => s.GetQuery(queryName));
         }

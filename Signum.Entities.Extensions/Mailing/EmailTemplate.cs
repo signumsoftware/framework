@@ -19,19 +19,19 @@ namespace Signum.Entities.Mailing
 {
     public static class EmailTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailTemplateDN>.From<SystemEmailDN> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateDN>.From<SystemEmailDN>();
-        public static readonly ConstructSymbol<EmailTemplateDN>.Simple Create = OperationSymbol.Construct<EmailTemplateDN>.Simple();
-        public static readonly ExecuteSymbol<EmailTemplateDN> Save = OperationSymbol.Execute<EmailTemplateDN>();
-        public static readonly ExecuteSymbol<EmailTemplateDN> Enable = OperationSymbol.Execute<EmailTemplateDN>();
-        public static readonly ExecuteSymbol<EmailTemplateDN> Disable = OperationSymbol.Execute<EmailTemplateDN>();
+        public static readonly ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateEntity>.From<SystemEmailEntity>();
+        public static readonly ConstructSymbol<EmailTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailTemplateEntity>.Simple();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Save = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Enable = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Disable = OperationSymbol.Execute<EmailTemplateEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailTemplateDN : Entity
+    public class EmailTemplateEntity : Entity
     {
-        public EmailTemplateDN() { }
+        public EmailTemplateEntity() { }
 
-        public EmailTemplateDN(object queryName)
+        public EmailTemplateEntity(object queryName)
         {
             this.queryName = queryName;
         }
@@ -63,16 +63,16 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
         }
 
-        SystemEmailDN systemEmail;
-        public SystemEmailDN SystemEmail
+        SystemEmailEntity systemEmail;
+        public SystemEmailEntity SystemEmail
         {
             get { return systemEmail; }
             set { Set(ref systemEmail, value); }
@@ -85,32 +85,32 @@ namespace Signum.Entities.Mailing
             set { Set(ref sendDifferentMessages, value); }
         }
 
-        EmailTemplateContactDN from;
-        public EmailTemplateContactDN From
+        EmailTemplateContactEntity from;
+        public EmailTemplateContactEntity From
         {
             get { return from; }
             set { Set(ref from, value); }
         }
 
         [NotNullable]
-        MList<EmailTemplateRecipientDN> recipients = new MList<EmailTemplateRecipientDN>();
+        MList<EmailTemplateRecipientEntity> recipients = new MList<EmailTemplateRecipientEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailTemplateRecipientDN> Recipients
+        public MList<EmailTemplateRecipientEntity> Recipients
         {
             get { return recipients; }
             set { Set(ref recipients, value); }
         }
 
        
-        Lite<EmailMasterTemplateDN> masterTemplate;
-        public Lite<EmailMasterTemplateDN> MasterTemplate
+        Lite<EmailMasterTemplateEntity> masterTemplate;
+        public Lite<EmailMasterTemplateEntity> MasterTemplate
         {
             get { return masterTemplate; }
             set { Set(ref masterTemplate, value); }
         }
 
-        Lite<SmtpConfigurationDN> smtpConfiguration;
-        public Lite<SmtpConfigurationDN> SmtpConfiguration
+        Lite<SmtpConfigurationEntity> smtpConfiguration;
+        public Lite<SmtpConfigurationEntity> SmtpConfiguration
         {
             get { return smtpConfiguration; }
             set { Set(ref smtpConfiguration, value); }
@@ -124,8 +124,8 @@ namespace Signum.Entities.Mailing
         }
 
         [NotifyCollectionChanged]
-        MList<EmailTemplateMessageDN> messages = new MList<EmailTemplateMessageDN>();
-        public MList<EmailTemplateMessageDN> Messages
+        MList<EmailTemplateMessageEntity> messages = new MList<EmailTemplateMessageEntity>();
+        public MList<EmailTemplateMessageEntity> Messages
         {
             get { return messages; }
             set { Set(ref messages, value); }
@@ -154,7 +154,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<EmailTemplateDN, bool>> IsActiveNowExpression =
+        static Expression<Func<EmailTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
@@ -166,11 +166,11 @@ namespace Signum.Entities.Mailing
             if (sender == messages)
             {
                 if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
+                    foreach (var item in args.OldItems.Cast<EmailTemplateMessageEntity>())
                         item.Template = null;
 
                 if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
+                    foreach (var item in args.NewItems.Cast<EmailTemplateMessageEntity>())
                         item.Template = this;
             }
         }
@@ -202,7 +202,7 @@ namespace Signum.Entities.Mailing
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.Name;
+        static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -220,10 +220,10 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateContactDN : EmbeddedEntity
+    public class EmailTemplateContactEntity : EmbeddedEntity
     {
-        QueryTokenDN token;
-        public QueryTokenDN Token
+        QueryTokenEntity token;
+        public QueryTokenEntity Token
         {
             get { return token; }
             set { Set(ref token, value); }
@@ -245,7 +245,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0} <{1}>".Formato(displayName, emailAddress);
+            return "{0} <{1}>".FormatWith(displayName, emailAddress);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -267,7 +267,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateRecipientDN : EmailTemplateContactDN
+    public class EmailTemplateRecipientEntity : EmailTemplateContactEntity
     {
         EmailRecipientKind kind;
         public EmailRecipientKind Kind
@@ -278,32 +278,32 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0} {1} <{2}>".Formato(kind.NiceToString(), DisplayName, EmailAddress);
+            return "{0} {1} <{2}>".FormatWith(kind.NiceToString(), DisplayName, EmailAddress);
         }
     }
 
     [Serializable]
-    public class EmailTemplateMessageDN : EmbeddedEntity
+    public class EmailTemplateMessageEntity : EmbeddedEntity
     {
-        private EmailTemplateMessageDN() { }
+        private EmailTemplateMessageEntity() { }
 
-        public EmailTemplateMessageDN(CultureInfoDN culture)
+        public EmailTemplateMessageEntity(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }
 
         [Ignore]
-        internal EmailTemplateDN template;
-        public EmailTemplateDN Template
+        internal EmailTemplateEntity template;
+        public EmailTemplateEntity Template
         {
             get { return template; }
             set { template = value; }
         }
 
         [NotNullable]
-        CultureInfoDN cultureInfo;
+        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoDN CultureInfo
+        public CultureInfoEntity CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value); }

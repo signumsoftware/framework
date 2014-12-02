@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Help.Views
+namespace Signum.Web.Help.Views
 {
     using System;
     using System.Collections.Generic;
@@ -407,7 +407,7 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 71 "..\..\Help\Views\MiniMenu.cshtml"
-     if (Navigator.IsCreable(typeof(AppendixHelpDN), isSearch: true))
+     if (Navigator.IsCreable(typeof(AppendixHelpEntity), isSearch: true))
     {
 
             

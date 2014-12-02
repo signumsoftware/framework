@@ -23,7 +23,7 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessRunnerLogic
     {
-        static Dictionary<Lite<ProcessDN>, ExecutingProcess> executing = new Dictionary<Lite<ProcessDN>, ExecutingProcess>();
+        static Dictionary<Lite<ProcessEntity>, ExecutingProcess> executing = new Dictionary<Lite<ProcessEntity>, ExecutingProcess>();
 
         static Timer timerNextExecution;
         static Timer timerPeriodic;
@@ -76,7 +76,7 @@ namespace Signum.Engine.Processes
             });
         }
 
-        static int SetAsQueued(this IQueryable<ProcessDN> query)
+        static int SetAsQueued(this IQueryable<ProcessEntity> query)
         {
             return query.UnsafeUpdate()
             .Set(p => p.State, p => ProcessState.Queued)
@@ -87,12 +87,12 @@ namespace Signum.Engine.Processes
             .Set(p => p.Progress, p => null)
             .Set(p => p.Exception, p => null)
             .Set(p => p.ExceptionDate, p => null)
-            .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None)
-            .Set(p => p.ApplicationName, p => ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None)
+            .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None)
+            .Set(p => p.ApplicationName, p => ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None)
             .Execute();
         }
 
-        internal static void SetAsQueued(this ProcessDN process)
+        internal static void SetAsQueued(this ProcessEntity process)
         {
             process.State = ProcessState.Queued;
             process.QueuedDate = TimeZoneManager.Now;
@@ -102,20 +102,20 @@ namespace Signum.Engine.Processes
             process.Progress = null;
             process.Exception = null;
             process.ExceptionDate = null;
-            process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None;
-            process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None;
+            process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+            process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
         }
 
-        static Expression<Func<ProcessDN, bool>> IsMineExpression =
+        static Expression<Func<ProcessEntity, bool>> IsMineExpression =
             p => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName; 
-        public static bool IsMine(this ProcessDN p)
+        public static bool IsMine(this ProcessEntity p)
         {
             return IsMineExpression.Evaluate(p);
         }
 
-        static Expression<Func<ProcessDN, bool>> IsSharedExpression =
-            p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None;
-        public static bool IsShared(this ProcessDN p)
+        static Expression<Func<ProcessEntity, bool>> IsSharedExpression =
+            p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None;
+        public static bool IsShared(this ProcessEntity p)
         {
             return IsSharedExpression.Evaluate(p);
         }
@@ -123,7 +123,7 @@ namespace Signum.Engine.Processes
         internal static List<T> ToListWakeup<T>(this IQueryable<T> query, string action)
         {
             if (CacheLogic.WithSqlDependency)
-                query.ToListWithInvalidation(typeof(ProcessDN), action, a => WakeUp(action, a));
+                query.ToListWithInvalidation(typeof(ProcessEntity), action, a => WakeUp(action, a));
 
             return query.ToList();
         }
@@ -136,7 +136,7 @@ namespace Signum.Engine.Processes
 
             Task.Factory.StartNew(() =>
             {
-                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.Try(s => s.Database); 
+                var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema.Try(s => s.Database); 
 
                 using (AuthLogic.Disable())
                 {
@@ -144,7 +144,7 @@ namespace Signum.Engine.Processes
                     {
                         running = true;
 
-                        (from p in Database.Query<ProcessDN>()
+                        (from p in Database.Query<ProcessEntity>()
                          where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
                          p.IsShared() && p.State == ProcessState.Suspended
                          select p).SetAsQueued();
@@ -168,11 +168,11 @@ namespace Signum.Engine.Processes
 
                             using (HeavyProfiler.Log("PWL", ()=> "Process Runner"))
                             {
-                                (from p in Database.Query<ProcessDN>()
+                                (from p in Database.Query<ProcessEntity>()
                                  where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now                              
                                  select p).SetAsQueued();
 
-                                var list = Database.Query<ProcessDN>()
+                                var list = Database.Query<ProcessEntity>()
                                         .Where(p => p.IsMine() || p.IsShared())
                                         .Where(p => p.State == ProcessState.Planned)
                                         .Select(p => p.PlannedDate)
@@ -188,7 +188,7 @@ namespace Signum.Engine.Processes
                                     {
 
                                     retry:
-                                        var queued = Database.Query<ProcessDN>()
+                                        var queued = Database.Query<ProcessEntity>()
                                             .Where(p => p.State == ProcessState.Queued)
                                             .Where(p => p.IsMine() || p.IsShared())
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
@@ -199,14 +199,14 @@ namespace Signum.Engine.Processes
                                             .OrderBy(a => a.QueuedDate)
                                             .Take(remaining).ToList();
 
-                                        var taken = afordable.Where(p => p.MachineName == ProcessDN.None).Select(a => a.Process).ToList();
+                                        var taken = afordable.Where(p => p.MachineName == ProcessEntity.None).Select(a => a.Process).ToList();
 
                                         if (taken.Any())
                                         {
                                             using (Transaction tr = Transaction.ForceNew())
                                             {
-                                                Database.Query<ProcessDN>()
-                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
+                                                Database.Query<ProcessEntity>()
+                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessEntity.None)
                                                     .UnsafeUpdate()
                                                     .Set(p => p.MachineName, p => Environment.MachineName)
                                                     .Set(p => p.ApplicationName, p => Schema.Current.ApplicationName)
@@ -221,7 +221,7 @@ namespace Signum.Engine.Processes
 
                                         foreach (var pair in afordable)
                                         {
-                                            ProcessDN pro = pair.Process.Retrieve();
+                                            ProcessEntity pro = pair.Process.Retrieve();
 
                                             IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
@@ -260,7 +260,7 @@ namespace Signum.Engine.Processes
                                             });
                                         }
 
-                                        var suspending = Database.Query<ProcessDN>()
+                                        var suspending = Database.Query<ProcessEntity>()
                                                 .Where(p => p.State == ProcessState.Suspending)
                                                 .Where(p => p.IsMine())
                                                 .Select(a => a.ToLite())
@@ -314,7 +314,7 @@ namespace Signum.Engine.Processes
             if (args == null)
                 return null;
 
-            return " ({0} {1} {2})".Formato(args.Type, args.Source, args.Info); 
+            return " ({0} {1} {2})".FormatWith(args.Type, args.Source, args.Info); 
         }
 
         private static void SetNextPannedExecution(DateTime? next)
@@ -361,18 +361,18 @@ namespace Signum.Engine.Processes
 
     public sealed class ExecutingProcess
     {
-        public ProcessDN CurrentExecution { get; internal set; }
+        public ProcessEntity CurrentExecution { get; internal set; }
         internal IProcessAlgorithm Algorithm;
         internal CancellationTokenSource CancelationSource;
 
-        public ExecutingProcess(IProcessAlgorithm processAlgorithm, ProcessDN process)
+        public ExecutingProcess(IProcessAlgorithm processAlgorithm, ProcessEntity process)
         {
             this.CancelationSource = new CancellationTokenSource();
             this.Algorithm = processAlgorithm;
             this.CurrentExecution = process;
         }
 
-        public IProcessDataDN Data
+        public IProcessDataEntity Data
         {
             get { return CurrentExecution.Data; }
         }
@@ -385,7 +385,7 @@ namespace Signum.Engine.Processes
         public void ProgressChanged(int position, int count)
         {
             if (position > count)
-                throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".Formato(position, count));
+                throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".FormatWith(position, count));
 
             decimal progress = ((decimal)position) / count;
 
@@ -413,9 +413,9 @@ namespace Signum.Engine.Processes
             using (Transaction tr = new Transaction())
             {
                 if (CurrentExecution.InDB().Any(a => a.State == ProcessState.Executing))
-                    throw new InvalidOperationException("The process {0} is allready Executing!".Formato(CurrentExecution.Id));
+                    throw new InvalidOperationException("The process {0} is allready Executing!".FormatWith(CurrentExecution.Id));
                          
-                using (OperationLogic.AllowSave<ProcessDN>())
+                using (OperationLogic.AllowSave<ProcessEntity>())
                     CurrentExecution.Save();
 
                 tr.Commit();
@@ -428,8 +428,8 @@ namespace Signum.Engine.Processes
             {
                 using (ProcessLogic.OnApplySession(CurrentExecution))
                 {
-                    if (UserDN.Current == null)
-                        UserDN.Current = AuthLogic.SystemUser;
+                    if (UserEntity.Current == null)
+                        UserEntity.Current = AuthLogic.SystemUser;
                     try
                     {
                         Algorithm.Execute(this);
@@ -437,7 +437,7 @@ namespace Signum.Engine.Processes
                         CurrentExecution.ExecutionEnd = TimeZoneManager.Now;
                         CurrentExecution.State = ProcessState.Finished;
                         CurrentExecution.Progress = null;
-                        using (OperationLogic.AllowSave<ProcessDN>())
+                        using (OperationLogic.AllowSave<ProcessEntity>())
                             CurrentExecution.Save();
                     }
                     catch (OperationCanceledException e)
@@ -447,7 +447,7 @@ namespace Signum.Engine.Processes
 
                         CurrentExecution.SuspendDate = TimeZoneManager.Now;
                         CurrentExecution.State = ProcessState.Suspended;
-                        using (OperationLogic.AllowSave<ProcessDN>())
+                        using (OperationLogic.AllowSave<ProcessEntity>())
                             CurrentExecution.Save();
                     }
                     catch (Exception e)
@@ -458,7 +458,7 @@ namespace Signum.Engine.Processes
                         CurrentExecution.State = ProcessState.Error;
                         CurrentExecution.ExceptionDate = TimeZoneManager.Now;
                         CurrentExecution.Exception = e.LogException(el => el.ActionName = CurrentExecution.Algorithm.ToString()).ToLite();
-                        using (OperationLogic.AllowSave<ProcessDN>())
+                        using (OperationLogic.AllowSave<ProcessEntity>())
                             CurrentExecution.Save();
                     }
                 }
@@ -467,7 +467,7 @@ namespace Signum.Engine.Processes
 
         public override string ToString()
         {
-            return "Execution (ID = {0}): {1} ".Formato(CurrentExecution.Id, CurrentExecution);
+            return "Execution (ID = {0}): {1} ".FormatWith(CurrentExecution.Id, CurrentExecution);
         }
     }
 
@@ -485,7 +485,7 @@ namespace Signum.Engine.Processes
 
     public class ExecutionState
     {
-        public Lite<ProcessDN> Process;
+        public Lite<ProcessEntity> Process;
         public ProcessState State;
         public bool IsCancellationRequested;
         public decimal? Progress;

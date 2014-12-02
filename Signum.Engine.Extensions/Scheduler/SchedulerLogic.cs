@@ -26,39 +26,39 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskDN, IDisposable> ApplySession;
+        public static Func<ITaskEntity, IDisposable> ApplySession;
 
-        static Expression<Func<ITaskDN, IQueryable<ScheduledTaskLogDN>>> ExecutionsExpression =
-         ct => Database.Query<ScheduledTaskLogDN>().Where(a => a.Task == ct);
-        public static IQueryable<ScheduledTaskLogDN> Executions(this ITaskDN e)
+        static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
+         ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
         {
             return ExecutionsExpression.Evaluate(e);
         }
 
-        static Expression<Func<ITaskDN, ScheduledTaskLogDN>> LastExecutionExpression =
+        static Expression<Func<ITaskEntity, ScheduledTaskLogEntity>> LastExecutionExpression =
             e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
-        public static ScheduledTaskLogDN LastExecution(this ITaskDN e)
+        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity e)
         {
             return LastExecutionExpression.Evaluate(e);
         }
 
-        static Expression<Func<ScheduledTaskDN, IQueryable<ScheduledTaskLogDN>>> ExecutionsSTExpression =
-            ct => Database.Query<ScheduledTaskLogDN>().Where(a => a.ScheduledTask == ct);
+        static Expression<Func<ScheduledTaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsSTExpression =
+            ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == ct);
         [ExpressionField("ExecutionsSTExpression")]
-        public static IQueryable<ScheduledTaskLogDN> Executions(this ScheduledTaskDN e)
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity e)
         {
             return ExecutionsSTExpression.Evaluate(e);
         }
 
-        public static Polymorphic<Func<ITaskDN, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IEntity>>>();
+        public static Polymorphic<Func<ITaskEntity, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, Lite<IEntity>>>();
         
         public class ScheduledTaskPair
         {
-            public ScheduledTaskDN ScheduledTask;
+            public ScheduledTaskEntity ScheduledTask;
             public DateTime NextDate; 
         }
 
-        static ResetLazy<List<ScheduledTaskDN>> ScheduledTasksLazy;
+        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
 
         static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
 
@@ -75,22 +75,22 @@ namespace Signum.Engine.Scheduler
                 AuthLogic.AssertStarted(sb);
                 OperationLogic.AssertStarted(sb);
 
-                Implementations imp = sb.Settings.GetImplementations((ScheduledTaskDN st) => st.Task);
-                Implementations imp2 = sb.Settings.GetImplementations((ScheduledTaskLogDN st) => st.Task);
+                Implementations imp = sb.Settings.GetImplementations((ScheduledTaskEntity st) => st.Task);
+                Implementations imp2 = sb.Settings.GetImplementations((ScheduledTaskLogEntity st) => st.Task);
 
                 if (!imp2.Equals(imp2))
-                    throw new InvalidOperationException("Implementations of ScheduledTaskDN.Task should be the same as in ScheduledTaskLogDN.Task");
+                    throw new InvalidOperationException("Implementations of ScheduledTaskEntity.Task should be the same as in ScheduledTaskLogEntity.Task");
 
                 PermissionAuthLogic.RegisterPermissions(SchedulerPermission.ViewSchedulerPanel);
 
-                ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
+                ExecuteTask.Register((ITaskEntity t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".FormatWith(t.GetType().Name)); });
 
                 SimpleTaskLogic.Start(sb, dqm);
-                sb.Include<ScheduledTaskDN>();
-                sb.Include<ScheduledTaskLogDN>();
+                sb.Include<ScheduledTaskEntity>();
+                sb.Include<ScheduledTaskLogEntity>();
 
-                dqm.RegisterQuery(typeof(HolidayCalendarDN), () =>
-                     from st in Database.Query<HolidayCalendarDN>()
+                dqm.RegisterQuery(typeof(HolidayCalendarEntity), () =>
+                     from st in Database.Query<HolidayCalendarEntity>()
                      select new
                      {
                          Entity = st,
@@ -100,8 +100,8 @@ namespace Signum.Engine.Scheduler
                      });
 
 
-                dqm.RegisterQuery(typeof(ScheduledTaskDN), () =>
-                    from st in Database.Query<ScheduledTaskDN>()
+                dqm.RegisterQuery(typeof(ScheduledTaskEntity), () =>
+                    from st in Database.Query<ScheduledTaskEntity>()
                     select new
                     {
                         Entity = st,
@@ -113,8 +113,8 @@ namespace Signum.Engine.Scheduler
                         st.ApplicationName
                     });
 
-                dqm.RegisterQuery(typeof(ScheduledTaskLogDN), () =>
-                    from cte in Database.Query<ScheduledTaskLogDN>()
+                dqm.RegisterQuery(typeof(ScheduledTaskLogEntity), () =>
+                    from cte in Database.Query<ScheduledTaskLogEntity>()
                     select new
                     {
                         Entity = cte,
@@ -130,30 +130,30 @@ namespace Signum.Engine.Scheduler
                         
                     });
 
-                dqm.RegisterExpression((ITaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
-                dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
-                dqm.RegisterExpression((ScheduledTaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ITaskEntity ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
+                dqm.RegisterExpression((ScheduledTaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
 
-                new Graph<HolidayCalendarDN>.Execute(HolidayCalendarOperation.Save)
+                new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (c, _) => { },
                 }.Register();
 
-                new Graph<HolidayCalendarDN>.Delete(HolidayCalendarOperation.Delete)
+                new Graph<HolidayCalendarEntity>.Delete(HolidayCalendarOperation.Delete)
                 {
                     Delete = (c, _) => { c.Delete(); },
                 }.Register();
 
-                new Graph<ScheduledTaskDN>.Execute(ScheduledTaskOperation.Save)
+                new Graph<ScheduledTaskEntity>.Execute(ScheduledTaskOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (st, _) => { },
                 }.Register();
 
-                new Graph<ScheduledTaskDN>.Delete(ScheduledTaskOperation.Delete)
+                new Graph<ScheduledTaskEntity>.Delete(ScheduledTaskOperation.Delete)
                 {
                     Delete = (st, _) =>
                     {
@@ -163,20 +163,20 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
 
-                new Graph<IEntity>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
+                new Graph<IEntity>.ConstructFrom<ITaskEntity>(TaskOperation.ExecuteSync)
                 {
                     Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())
                 }.Register();
 
-                new Graph<ITaskDN>.Execute(TaskOperation.ExecuteAsync)
+                new Graph<ITaskEntity>.Execute(TaskOperation.ExecuteAsync)
                 {
                     Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current)
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
-                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && 
-                        (a.MachineName == ScheduledTaskDN.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
-                    new InvalidateWith(typeof(ScheduledTaskDN)));
+                    Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended && 
+                        (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
+                    new InvalidateWith(typeof(ScheduledTaskEntity)));
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
 
@@ -184,9 +184,9 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
-            Database.Query<ScheduledTaskLogDN>().Where(a => a.StartTime < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
@@ -204,7 +204,7 @@ namespace Signum.Engine.Scheduler
         public static void StartScheduledTasks()
         {
             if (running)
-                throw new InvalidOperationException("SchedulerLogic is already Running in {0}".Formato(Environment.MachineName));
+                throw new InvalidOperationException("SchedulerLogic is already Running in {0}".FormatWith(Environment.MachineName));
 
             running = true;
 
@@ -214,7 +214,7 @@ namespace Signum.Engine.Scheduler
         public static void StopScheduledTasks()
         {
             if (!running)
-                throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".Formato(Environment.MachineName));
+                throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".FormatWith(Environment.MachineName));
 
             lock (priorityQueue)
             {
@@ -313,7 +313,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExecuteAsync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
+        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
             Task.Factory.StartNew(() =>
             {
@@ -332,12 +332,12 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
-        public static Lite<IEntity> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
+        public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
             using (Disposable.Combine(ApplySession, f => f(task)))
             {
-                ScheduledTaskLogDN stl = new ScheduledTaskLogDN
+                ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
                 {
                     Task = task,
                     ScheduledTask = scheduledTask, 
@@ -416,7 +416,7 @@ namespace Signum.Engine.Scheduler
 
     public class SchedulerItemState
     {
-        public Lite<ScheduledTaskDN> ScheduledTask;
+        public Lite<ScheduledTaskEntity> ScheduledTask;
         public string Rule; 
         public DateTime NextExecution; 
     }

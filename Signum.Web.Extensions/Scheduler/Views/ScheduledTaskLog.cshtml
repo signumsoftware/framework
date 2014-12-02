@@ -1,7 +1,7 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Scheduler
 
-@using (var e = Html.TypeContext<ScheduledTaskLogDN>()) 
+@using (var e = Html.TypeContext<ScheduledTaskLogEntity>()) 
 {
     @Html.EntityLine(e, f => f.Task)
     @Html.EntityLine(e, f => f.ScheduledTask)

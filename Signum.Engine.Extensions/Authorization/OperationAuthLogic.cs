@@ -19,7 +19,7 @@ namespace Signum.Engine.Authorization
 {
     public static class OperationAuthLogic
     {
-        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed> cache;
+        static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed> cache;
 
         public static IManualAuth<OperationSymbol, OperationAllowed> Manual { get { return cache; } }
 
@@ -36,14 +36,13 @@ namespace Signum.Engine.Authorization
 
                 OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
-                cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed>(sb,
+                cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed>(sb,
                      s=>s,
                      s=>s,
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
 
-                AuthLogic.SuggestRuleChanges += SuggestOperationRules;
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.Key, b => b.ToString(),
                     exportAll ? OperationLogic.RegisteredOperations.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
@@ -68,90 +67,15 @@ namespace Signum.Engine.Authorization
             return operation;
         }
 
-        static Action<Lite<RoleDN>> SuggestOperationRules()
-        {
-            var operations = (from type in Schema.Current.Tables.Keys
-                              let ops = OperationLogic.ServiceGetOperationInfos(type).Where(oi => oi.OperationType == OperationType.Execute && oi.Lite == false).ToList()
-                              where ops.Any()
-                              select KVP.Create(type, ops.ToList())).ToDictionary();
-
-            return r =>
-            {
-                bool? warnings = null;
-
-                foreach (var type in operations.Keys)
-                {
-                    var ta = TypeAuthLogic.GetAllowed(r, type);
-                    var max = ta.MaxCombined();
-
-
-                    if (max.GetUI() == TypeAllowedBasic.None)
-                    {
-                        OperationAllowed typeAllowed =
-                             max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
-                             max.GetDB() >= TypeAllowedBasic.Modify ? OperationAllowed.DBOnly :
-                             OperationAllowed.None;
-
-                        var ops = operations[type];
-                        foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.OperationSymbol) > typeAllowed))
-                        {
-                            bool isError = ta.MaxDB() == TypeAllowedBasic.None;
-
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Operation {1} is {2} but type {3} is [{4}]".Formato(
-                                  isError ? "Error" : "Warning",
-                                oi.OperationSymbol.Key,
-                                GetOperationAllowed(r, oi.OperationSymbol),
-                                type.Name,
-                                ta));
-
-
-                            SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
-                            string message = "{0} to {1} for {2}?".Formato(oi.OperationSymbol.Key, typeAllowed, r);
-                            if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
-                            {
-                                Manual.SetAllowed(r, oi.OperationSymbol, typeAllowed);
-                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Disallowed");
-                            }
-                            else
-                            {
-                                SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var ops = operations[type];
-                        if (ta.MaxUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.OperationSymbol, inUserInterface: true)))
-                        {
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no save operation is allowed".Formato(type.Name, ta));
-                            var only = ops.Only();
-                            if (only != null)
-                            {
-                                SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
-                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(only.OperationSymbol.Key, r)))
-                                {
-                                    Manual.SetAllowed(r, only.OperationSymbol, OperationAllowed.Allow);
-                                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
-                                }
-                                else
-                                {
-                                    SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
         static bool OperationLogic_AllowOperation(OperationSymbol operationKey, bool inUserInterface)
         {
             return GetOperationAllowed(operationKey, inUserInterface);
         }
 
-        public static OperationRulePack GetOperationRules(Lite<RoleDN> role, TypeDN typeDN)
+        public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)
         {
-            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => a.OperationSymbol);
-            var result = new OperationRulePack { Role = role, Type = typeDN, };
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeEntity]).Select(a => a.OperationSymbol);
+            var result = new OperationRulePack { Role = role, Type = typeEntity, };
 
             cache.GetRules(result, resources);
 
@@ -169,14 +93,14 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => keys.Contains(r));
         }
 
-        public static bool GetOperationAllowed(Lite<RoleDN> role, OperationSymbol operationKey, bool inUserInterface)
+        public static bool GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operationKey, bool inUserInterface)
         {
             OperationAllowed allowed = GetOperationAllowed(role, operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
 
-        public static OperationAllowed GetOperationAllowed(Lite<RoleDN> role, OperationSymbol operationKey)
+        public static OperationAllowed GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operationKey)
         {
             return cache.GetAllowed(role, operationKey);
         }
@@ -189,19 +113,19 @@ namespace Signum.Engine.Authorization
             if (GetTemporallyAllowed(operationKey))
                 return true;
 
-            OperationAllowed allowed =cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+            OperationAllowed allowed =cache.GetAllowed(RoleEntity.Current.ToLite(), operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
 
-        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
+        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
         {
             return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.OperationSymbol)).Collapse();
         }
 
         public static Dictionary<OperationSymbol, OperationAllowed> AllowedOperations()
         {
-            return OperationLogic.AllSymbols().ToDictionary(k => k, k => cache.GetAllowed(RoleDN.Current.ToLite(), k));
+            return OperationLogic.AllSymbols().ToDictionary(k => k, k => cache.GetAllowed(RoleEntity.Current.ToLite(), k));
         }
 
         static readonly Variable<ImmutableStack<OperationSymbol>> tempAllowed = Statics.ThreadVariable<ImmutableStack<OperationSymbol>>("authTempOperationsAllowed");
@@ -226,7 +150,7 @@ namespace Signum.Engine.Authorization
         {
             Func<Type, OperationAllowed> operationAllowed = t =>
             {
-                if (!TypeLogic.TypeToDN.ContainsKey(t))
+                if (!TypeLogic.TypeToEntity.ContainsKey(t))
                     return OperationAllowed.Allow;
                 
                 var ta = allowed(t);
@@ -263,7 +187,7 @@ namespace Signum.Engine.Authorization
 
     class OperationMerger : IMerger<OperationSymbol, OperationAllowed>
     {
-        public OperationAllowed Merge(OperationSymbol key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, OperationAllowed>> baseValues)
+        public OperationAllowed Merge(OperationSymbol key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
         {   
             OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ? 
                 Max(baseValues.Select(a => a.Value)):
@@ -278,7 +202,7 @@ namespace Signum.Engine.Authorization
             return best; 
         }
 
-        static OperationAllowed GetDefault(OperationSymbol key, Lite<RoleDN> role)
+        static OperationAllowed GetDefault(OperationSymbol key, Lite<RoleEntity> role)
         {
             return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
         }
@@ -315,7 +239,7 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        public Func<OperationSymbol, OperationAllowed> MergeDefault(Lite<RoleDN> role)
+        public Func<OperationSymbol, OperationAllowed> MergeDefault(Lite<RoleEntity> role)
         {
             return key => 
             {
@@ -336,7 +260,7 @@ namespace Signum.Engine.Authorization
         {
         }
 
-        public override Func<OperationSymbol, OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleDN> role)
+        public override Func<OperationSymbol, OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleEntity> role)
         {
             return (operationKey, allowed) =>
             {
@@ -346,7 +270,7 @@ namespace Signum.Engine.Authorization
             };
         }
 
-        public override Func<Lite<RoleDN>, OperationAllowed, OperationAllowed> GetCoerceValueManual(OperationSymbol operationKey)
+        public override Func<Lite<RoleEntity>, OperationAllowed, OperationAllowed> GetCoerceValueManual(OperationSymbol operationKey)
         {
             return (role, allowed) =>
             {

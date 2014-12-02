@@ -15,7 +15,7 @@ using Signum.Entities.UserQueries;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class NewsletterDN : Entity, IProcessDataDN
+    public class NewsletterEntity : Entity, IProcessDataEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -33,8 +33,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value); }
         }
 
-        Lite<SmtpConfigurationDN> smtpConfig = DefaultSmtpConfig();
-        public Lite<SmtpConfigurationDN> SmtpConfig
+        Lite<SmtpConfigurationEntity> smtpConfig = DefaultSmtpConfig();
+        public Lite<SmtpConfigurationEntity> SmtpConfig
         {
             get { return smtpConfig; }
             set { Set(ref smtpConfig, value); }
@@ -82,7 +82,7 @@ namespace Signum.Entities.Mailing
         [Ignore]
         internal object TextParsedNode;
 
-        static StateValidator<NewsletterDN, NewsletterState> stateValidator = new StateValidator<NewsletterDN, NewsletterState>
+        static StateValidator<NewsletterEntity, NewsletterState> stateValidator = new StateValidator<NewsletterEntity, NewsletterState>
             (     n => n.State,            n => n.Subject, n => n.Text)
             {
                 { NewsletterState.Created, null,           null },
@@ -95,16 +95,16 @@ namespace Signum.Entities.Mailing
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public static Func<Lite<SmtpConfigurationDN>> DefaultSmtpConfig;
+        public static Func<Lite<SmtpConfigurationEntity>> DefaultSmtpConfig;
 
-        QueryDN query;
-        public QueryDN Query
+        QueryEntity query;
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
@@ -112,7 +112,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class NewsletterDeliveryDN : Entity, IProcessLineDataDN
+    public class NewsletterDeliveryEntity : Entity, IProcessLineDataEntity
     {
         bool sent;
         public bool Sent
@@ -129,15 +129,15 @@ namespace Signum.Entities.Mailing
             set { Set(ref sendDate, value); }
         }
 
-        Lite<IEmailOwnerDN> recipient;
-        public Lite<IEmailOwnerDN> Recipient
+        Lite<IEmailOwnerEntity> recipient;
+        public Lite<IEmailOwnerEntity> Recipient
         {
             get { return recipient; }
             set { Set(ref recipient, value); }
         }
 
-        Lite<NewsletterDN> newsletter;
-        public Lite<NewsletterDN> Newsletter
+        Lite<NewsletterEntity> newsletter;
+        public Lite<NewsletterEntity> Newsletter
         {
             get { return newsletter; }
             set { Set(ref newsletter, value); }
@@ -151,11 +151,11 @@ namespace Signum.Entities.Mailing
 
     public static class NewsletterOperation
     {
-        public static readonly ExecuteSymbol<NewsletterDN> Save = OperationSymbol.Execute<NewsletterDN>();
-        public static readonly ConstructSymbol<ProcessDN>.From<NewsletterDN> Send = OperationSymbol.Construct<ProcessDN>.From<NewsletterDN>();
-        public static readonly ExecuteSymbol<NewsletterDN> AddRecipients = OperationSymbol.Execute<NewsletterDN>();
-        public static readonly ExecuteSymbol<NewsletterDN> RemoveRecipients = OperationSymbol.Execute<NewsletterDN>();
-        public static readonly ConstructSymbol<NewsletterDN>.From<NewsletterDN> Clone = OperationSymbol.Construct<NewsletterDN>.From<NewsletterDN>();
+        public static readonly ExecuteSymbol<NewsletterEntity> Save = OperationSymbol.Execute<NewsletterEntity>();
+        public static readonly ConstructSymbol<ProcessEntity>.From<NewsletterEntity> Send = OperationSymbol.Construct<ProcessEntity>.From<NewsletterEntity>();
+        public static readonly ExecuteSymbol<NewsletterEntity> AddRecipients = OperationSymbol.Execute<NewsletterEntity>();
+        public static readonly ExecuteSymbol<NewsletterEntity> RemoveRecipients = OperationSymbol.Execute<NewsletterEntity>();
+        public static readonly ConstructSymbol<NewsletterEntity>.From<NewsletterEntity> Clone = OperationSymbol.Construct<NewsletterEntity>.From<NewsletterEntity>();
     }
 
     public enum NewsletterState

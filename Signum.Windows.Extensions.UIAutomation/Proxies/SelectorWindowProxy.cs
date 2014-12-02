@@ -36,7 +36,7 @@ namespace Signum.Windows.UIAutomation
         {
             return Element.CaptureWindow(
                 () => Select(value),
-                () => "select {0} on selector window".Formato(value), timeout);
+                () => "select {0} on selector window".FormatWith(value), timeout);
         }
 
         public AutomationElement SelectCapture(Type type, int? timeout = null)

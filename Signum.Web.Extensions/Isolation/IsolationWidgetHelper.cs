@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -36,7 +36,7 @@ namespace Signum.Web.Isolation
         class IsolationWidget : IWidget
         {
             public string Prefix;
-            public Lite<IsolationDN> Isolation;
+            public Lite<IsolationEntity> Isolation;
 
             MvcHtmlString IWidget.ToHtml(HtmlHelper helper)
             {

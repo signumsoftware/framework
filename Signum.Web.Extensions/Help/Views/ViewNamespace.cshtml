@@ -2,6 +2,9 @@
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
 @using Signum.Entities.Help
+@using Signum.Engine
+@using Signum.Engine.Basics
+
 @model NamespaceHelp
 @section head
 {
@@ -18,16 +21,24 @@
 
 <div class="row">
     <div class="col-md-9" id="entityName">
-        @using (TypeContext<NamespaceHelpDN> nc = new TypeContext<NamespaceHelpDN>(nh.Entity, null))
+        @using (TypeContext<NamespaceHelpEntity> nc = new TypeContext<NamespaceHelpEntity>(nh.Entity, null))
         {
             using (Html.BeginForm((HelpController hc) => hc.SaveNamespace(), new { id = "form-save" }))
             {
             @Html.HiddenRuntimeInfo(nc)
             @Html.HiddenRuntimeInfo(nc, e => e.Culture)
             @Html.HiddenLine(nc, e => e.Name)
-                if (!Navigator.IsReadOnly(typeof(NamespaceHelpDN)))
+                if (!Navigator.IsReadOnly(typeof(NamespaceHelpEntity)))
                 {
-                    Html.RenderPartial(HelpClient.Buttons);
+                    Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
+                    {
+                        { "options",  Database.Query<NamespaceHelpEntity>()
+                        .Where(e => e.Name == nc.Value.Name && e.Culture != nc.Value.Culture)
+                        .Select(e => new { e.Culture })
+                        .ToList()
+                        .Select(e => KVP.Create(e.Culture.ToCultureInfo(), this.Url.Action((HelpController a) => a.TraslateNamespace(e.Culture.Name))))
+                        .ToDictionary() }
+                    });
                 }
             <h1>
                 @Html.TextArea(nc.SubContextPrefix(a => a.Title), nh.Title, 1, 80, new { @class = "editable" })

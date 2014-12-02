@@ -1,7 +1,7 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Scheduler
 
-@using (var e = Html.TypeContext<HolidayCalendarDN>())
+@using (var e = Html.TypeContext<HolidayCalendarEntity>())
 {
     @Html.ValueLine(e, f => f.Name)
     <div class="repeater-inline">

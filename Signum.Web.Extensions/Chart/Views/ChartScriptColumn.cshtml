@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Chart
-@using (var cc = Html.TypeContext<ChartScriptColumnDN>())
+@using (var cc = Html.TypeContext<ChartScriptColumnEntity>())
 {
     @Html.ValueLine(cc, c => c.DisplayName, vl => vl.ValueColumns = new BsColumn(8))
 

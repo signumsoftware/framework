@@ -29,7 +29,7 @@ namespace Signum.Windows.Dashboard
 
         public override Run GetIcon()
         {
-            return new Run("({0})".Formato(typeof(DashboardDN).NiceName())) { Foreground = Brushes.DarkSlateBlue };
+            return new Run("({0})".FormatWith(typeof(DashboardEntity).NiceName())) { Foreground = Brushes.DarkSlateBlue };
         }
 
         public override void OnSelected(DashboardOmniboxResult result, Window window)

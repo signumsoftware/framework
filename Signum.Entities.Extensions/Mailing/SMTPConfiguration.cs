@@ -10,7 +10,7 @@ using Signum.Entities.Files;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class SmtpConfigurationDN : Entity
+    public class SmtpConfigurationEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -62,17 +62,17 @@ namespace Signum.Entities.Mailing
             set { Set(ref useDefaultCredentials, value); }
         }
 
-        EmailAddressDN defaultFrom;
-        public EmailAddressDN DefaultFrom
+        EmailAddressEntity defaultFrom;
+        public EmailAddressEntity DefaultFrom
         {
             get { return defaultFrom; }
             set { Set(ref defaultFrom, value); }
         }
 
         [NotNullable]
-        MList<EmailRecipientDN> aditionalRecipients = new MList<EmailRecipientDN>();
+        MList<EmailRecipientEntity> aditionalRecipients = new MList<EmailRecipientEntity>();
         [NoRepeatValidator]
-        public MList<EmailRecipientDN> AditionalRecipients
+        public MList<EmailRecipientEntity> AditionalRecipients
         {
             get { return aditionalRecipients; }
             set { Set(ref aditionalRecipients, value); }
@@ -86,14 +86,14 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        MList<ClientCertificationFileDN> clientCertificationFiles = new MList<ClientCertificationFileDN>();
-        public MList<ClientCertificationFileDN> ClientCertificationFiles
+        MList<ClientCertificationFileEntity> clientCertificationFiles = new MList<ClientCertificationFileEntity>();
+        public MList<ClientCertificationFileEntity> ClientCertificationFiles
         {
             get { return clientCertificationFiles; }
             set { Set(ref clientCertificationFiles, value); }
         }
 
-        static readonly Expression<Func<SmtpConfigurationDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -103,11 +103,11 @@ namespace Signum.Entities.Mailing
 
     public static class SmtpConfigurationOperation
     {
-        public static readonly ExecuteSymbol<SmtpConfigurationDN> Save = OperationSymbol.Execute<SmtpConfigurationDN>();
+        public static readonly ExecuteSymbol<SmtpConfigurationEntity> Save = OperationSymbol.Execute<SmtpConfigurationEntity>();
     }
 
     [Serializable]
-    public class ClientCertificationFileDN : EmbeddedEntity
+    public class ClientCertificationFileEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 300)]
         string fullFilePath;
@@ -125,7 +125,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref certFileType, value); }
         }
 
-        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.fullFilePath;
+        static readonly Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.fullFilePath;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

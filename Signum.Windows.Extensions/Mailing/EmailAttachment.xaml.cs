@@ -30,7 +30,7 @@ namespace Signum.Windows.Mailing
 
         private Signum.Entities.Files.IFile File_Creating()
         {
-            return new FilePathDN(EmailFileType.Attachment);
+            return new FilePathEntity(EmailFileType.Attachment);
         }
     }
 }

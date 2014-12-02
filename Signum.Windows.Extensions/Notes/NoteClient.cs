@@ -22,21 +22,21 @@ namespace Signum.Windows.Notes
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
                 {
-                    if (obj is Entity && types.Contains(obj.GetType()) && !((Entity)obj).IsNew && Finder.IsFindable(typeof(NoteDN)))
+                    if (obj is Entity && types.Contains(obj.GetType()) && !((Entity)obj).IsNew && Finder.IsFindable(typeof(NoteEntity)))
                         return new NotesWidget();
 
                     return null;
                 };
 
-                Server.SetSemiSymbolIds<NoteTypeDN>();
+                Server.SetSemiSymbolIds<NoteTypeEntity>();
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings<Entity>(NoteOperation.CreateNoteFromEntity)  { IsVisible  = _ => false }
                 });
 
-                Navigator.AddSetting(new EntitySettings<NoteTypeDN> { View = e => new NoteType() });
-                Navigator.AddSetting(new EntitySettings<NoteDN>
+                Navigator.AddSetting(new EntitySettings<NoteTypeEntity> { View = e => new NoteType() });
+                Navigator.AddSetting(new EntitySettings<NoteEntity>
                 {
                     View = e => new Note(),
                     IsCreable = EntityWhen.Never,

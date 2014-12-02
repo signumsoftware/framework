@@ -33,7 +33,7 @@ namespace Signum.Windows.Dashboard
 
         void UserChartPartView_Loaded(object sender, RoutedEventArgs e)
         {
-            var dc = (UserChartPartDN)DataContext;
+            var dc = (UserChartPartEntity)DataContext;
             chartRenderer.FilterOptions = new FreezableCollection<FilterOption>();
             var currentEntity = UserAssetsClient.GetCurrentEntity(this);
 

@@ -46,44 +46,44 @@ namespace Signum.Web.Selenium
             get
             {
 
-                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".FormatWith(Prefix)))
                     return Selenium.IsChecked(Prefix).ToString();
 
-                if (Selenium.IsElementPresent("jq=[name={0}]".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=[name={0}]".FormatWith(Prefix)))
                     return Selenium.GetValue(Prefix);
 
-                if (Selenium.IsElementPresent("jq=input[name={0}_Date]".Formato(Prefix)) &&
-                    Selenium.IsElementPresent("jq=input[name={0}_Time]".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input[name={0}_Date]".FormatWith(Prefix)) &&
+                    Selenium.IsElementPresent("jq=input[name={0}_Time]".FormatWith(Prefix)))
                     return Selenium.GetValue(Prefix + "_Date") + " " + Selenium.GetValue(Prefix + "_Time");
 
-                if (Selenium.IsElementPresent("jq=#{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=#{0}".FormatWith(Prefix)))
                     return Selenium.GetText(Prefix);
 
-                throw new InvalidOperationException("Element {0} not found".Formato(Prefix));
+                throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
             }
 
             set
             {
-                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".Formato(Prefix)))
+                if (Selenium.IsElementPresent("jq=input:checkbox#{0}".FormatWith(Prefix)))
                 {
                     Selenium.SetChecked(Prefix, bool.Parse(value));
                 }
-                else if (Selenium.IsElementPresent("jq=div.input-group.date>#{0}".Formato(Prefix)))
+                else if (Selenium.IsElementPresent("jq=div.input-group.date>#{0}".FormatWith(Prefix)))
                 {
-                    Selenium.RunScript("window.$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".Formato(Prefix, value));
+                    Selenium.RunScript("window.$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value));
                 }
-                else if (Selenium.IsElementPresent("jq=#{0} > div.date".Formato(Prefix)) &&
-                    Selenium.IsElementPresent("jq=#{0} > div.time".Formato(Prefix)))
+                else if (Selenium.IsElementPresent("jq=#{0} > div.date".FormatWith(Prefix)) &&
+                    Selenium.IsElementPresent("jq=#{0} > div.time".FormatWith(Prefix)))
                 {
-                    Selenium.RunScript("window.$('#{0} > div.date').datepicker('setDate', '{1}')".Formato(Prefix, value.TryBefore(" ")));
-                    Selenium.RunScript("window.$('#{0} > div.time').timepicker('setTime', '{1}')".Formato(Prefix, value.TryAfter(" ")));
+                    Selenium.RunScript("window.$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
+                    Selenium.RunScript("window.$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
                 }
-                else if (Selenium.IsElementPresent("jq=[name={0}]".Formato(Prefix)))
+                else if (Selenium.IsElementPresent("jq=[name={0}]".FormatWith(Prefix)))
                 {
                     Selenium.Type(Prefix, value);
                 }
                 else
-                    throw new InvalidOperationException("Element {0} not found".Formato(Prefix));
+                    throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
             }
         }
 
@@ -121,7 +121,7 @@ namespace Signum.Web.Selenium
 
         public string CreateLocator
         {
-            get { return "jq=#{0}_btnCreate:visible".Formato(Prefix); }
+            get { return "jq=#{0}_btnCreate:visible".FormatWith(Prefix); }
         }
 
         protected void CreateEmbedded<T>(bool mlist)
@@ -164,7 +164,7 @@ namespace Signum.Web.Selenium
 
         public string ViewLocator
         {
-            get { return "jq=#{0}_btnView:visible".Formato(Prefix); }
+            get { return "jq=#{0}_btnView:visible".FormatWith(Prefix); }
         }
 
         protected PopupControl<T> ViewPopup<T>(int? index) where T : ModifiableEntity
@@ -182,12 +182,12 @@ namespace Signum.Web.Selenium
 
         public string FindLocator
         {
-            get { return "jq=#{0}_btnFind:visible".Formato(Prefix); }
+            get { return "jq=#{0}_btnFind:visible".FormatWith(Prefix); }
         }
 
         public string RemoveLocator
         {
-            get { return "jq=#{0}_btnRemove:visible".Formato(Prefix); }
+            get { return "jq=#{0}_btnRemove:visible".FormatWith(Prefix); }
         }
 
         public void Remove()
@@ -213,7 +213,7 @@ namespace Signum.Web.Selenium
             string newPrefix = Prefix + (index == null ? "" : ("_" + index));
 
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix) || Popup.IsPopupVisible(Selenium, Prefix), 
-                () => "Popup {0} or {1} to be visible".Formato(newPrefix, Prefix));
+                () => "Popup {0} or {1} to be visible".FormatWith(newPrefix, Prefix));
 
             if (selectType == null)
             {
@@ -244,12 +244,12 @@ namespace Signum.Web.Selenium
 
         public void WaitNewChanges(string changes, string actionDescription)
         {
-            Selenium.Wait(() => GetChanges() != changes, () => "Waiting for changes after {0} in {1}".Formato(actionDescription, Prefix));
+            Selenium.Wait(() => GetChanges() != changes, () => "Waiting for changes after {0} in {1}".FormatWith(actionDescription, Prefix));
         }
 
         public string GetChanges()
         {
-            return Selenium.GetEval("window.$('#{0}').attr('changes')".Formato(Prefix));
+            return Selenium.GetEval("window.$('#{0}').attr('changes')".FormatWith(Prefix));
         }
 
 
@@ -273,7 +273,7 @@ namespace Signum.Web.Selenium
                 var listLocator = "jq=ul.typeahead.dropdown-menu:visible";
 
                 Selenium.WaitElementPresent(listLocator);
-                string itemLocator = listLocator + " span[data-type='{0}'][data-id={1}]".Formato(TypeLogic.GetCleanName(lite.EntityType), lite.Id);
+                string itemLocator = listLocator + " span[data-type='{0}'][data-id={1}]".FormatWith(TypeLogic.GetCleanName(lite.EntityType), lite.Id);
 
                 Selenium.MouseOver(itemLocator);
                 Selenium.Click(itemLocator);
@@ -292,12 +292,12 @@ namespace Signum.Web.Selenium
 
         public string ToStrLocator
         {
-            get { return "jq=#{0}_sfToStr".Formato(Prefix); }
+            get { return "jq=#{0}_sfToStr".FormatWith(Prefix); }
         }
 
         public string LinkLocator
         {
-            get { return "jq=#{0}_sfLink".Formato(Prefix); }
+            get { return "jq=#{0}_sfLink".FormatWith(Prefix); }
         }
 
         public bool HasEntity()
@@ -327,7 +327,7 @@ namespace Signum.Web.Selenium
 
         public string AutoCompleteLocator
         {
-            get { return "jq=#{0}_sfToStr".Formato(Prefix); }
+            get { return "jq=#{0}_sfToStr".FormatWith(Prefix); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)
@@ -362,7 +362,7 @@ namespace Signum.Web.Selenium
 
         public string ComboLocator
         {
-            get { return "jq=#{0}_sfCombo".Formato(Prefix); }
+            get { return "jq=#{0}_sfCombo".FormatWith(Prefix); }
         }
 
         public Lite<IEntity> LiteValue
@@ -415,7 +415,7 @@ namespace Signum.Web.Selenium
 
         public string DivSelector
         {
-            get { return "jq=#{0}_sfDetail".Formato(Prefix); }
+            get { return "jq=#{0}_sfDetail".FormatWith(Prefix); }
         }
 
         public bool HasEntity()
@@ -473,22 +473,22 @@ namespace Signum.Web.Selenium
 
         public string OptionIdLocator(int index)
         {
-            return "jq=#{0}_{1}_sfToStr".Formato(Prefix, index);
+            return "jq=#{0}_{1}_sfToStr".FormatWith(Prefix, index);
         }
 
         public string ListLocator
         {
-            get { return "jq=#{0}_sfList".Formato(Prefix); }
+            get { return "jq=#{0}_sfList".FormatWith(Prefix); }
         }
 
         public void Select(int index)
         {
-            Selenium.Select(ListLocator, "id={0}_{1}_sfToStr".Formato(Prefix, index));
+            Selenium.Select(ListLocator, "id={0}_{1}_sfToStr".FormatWith(Prefix, index));
         }
 
         public void AddSelection(int index)
         {
-            Selenium.AddSelection(ListLocator, "id={0}_{1}_sfToStr".Formato(Prefix, index));
+            Selenium.AddSelection(ListLocator, "id={0}_{1}_sfToStr".FormatWith(Prefix, index));
         }
 
         public PopupControl<T> View<T>(int index) where T : ModifiableEntity
@@ -508,14 +508,14 @@ namespace Signum.Web.Selenium
 
         public int ItemsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfList option').length".Formato(Prefix));
+            string result = Selenium.GetEval("window.$('#{0}_sfList option').length".FormatWith(Prefix));
 
             return int.Parse(result);
         }
 
         public override int? NewIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+            string result = Selenium.GetEval("window.$('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -545,23 +545,14 @@ namespace Signum.Web.Selenium
         public EntityListDetailProxy(ISelenium selenium, string prefix, PropertyRoute route)
             : base(selenium, prefix, route)
         {
-            this.DetailsDivSelector = "jq=#{0}_sfDetail".Formato(Prefix);
+            this.DetailsDivSelector = "jq=#{0}_sfDetail".FormatWith(Prefix);
         }
 
         public string DetailsDivSelector { get; set; }
 
         public bool HasDetailEntity()
         {
-            bool parentVisible = Selenium.IsElementPresent(DetailsDivSelector + ":parent");
-            bool emptyVisible = Selenium.IsElementPresent(DetailsDivSelector + ":empty");
-
-            if (parentVisible != !emptyVisible)
-                throw new InvalidOperationException("{0}_sfDetail is {1} but has {1}".Formato(Prefix,
-                    parentVisible ? "has parent" : "has no parent",
-                    emptyVisible ? "empty" : "not empty"));
-
-
-            return parentVisible;
+            return Selenium.IsElementPresent(DetailsDivSelector + ":parent");
         }
 
         public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
@@ -589,12 +580,12 @@ namespace Signum.Web.Selenium
 
         public string ItemsContainerLocator
         {
-            get { return "jq=#{0}_sfItemsContainer".Formato(Prefix); }
+            get { return "jq=#{0}_sfItemsContainer".FormatWith(Prefix); }
         }
 
         public virtual string RepeaterItemSelector(int index)
         {
-            return "{0} > #{1}_{2}_sfRepeaterItem".Formato(ItemsContainerLocator, Prefix, index);
+            return "{0} > #{1}_{2}_sfRepeaterItem".FormatWith(ItemsContainerLocator, Prefix, index);
         }
 
         public void WaitItemLoaded(int index)
@@ -604,12 +595,12 @@ namespace Signum.Web.Selenium
 
         public virtual void MoveUp(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnUp".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnUp".FormatWith(Prefix, index));
         }
 
         public virtual void MoveDown(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnDown".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnDown".FormatWith(Prefix, index));
         }
 
         public bool HasEntity(int index)
@@ -619,14 +610,14 @@ namespace Signum.Web.Selenium
 
         public virtual int ItemsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').length".Formato(ItemsContainerLocator));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').length".FormatWith(ItemsContainerLocator));
 
             return int.Parse(result);
         }
 
         public override int? NewIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -638,7 +629,7 @@ namespace Signum.Web.Selenium
 
         public string RemoveLocatorIndex(int index)
         {
-            return "jq=#{0}_{1}_btnRemove".Formato(Prefix, index);
+            return "jq=#{0}_{1}_btnRemove".FormatWith(Prefix, index);
         }
 
         public void Remove(int index)
@@ -675,24 +666,24 @@ namespace Signum.Web.Selenium
 
         public override void MoveUp(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnUp".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnUp".FormatWith(Prefix, index));
         }
 
         public override void MoveDown(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnDown".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnDown".FormatWith(Prefix, index));
         }
 
         public override int ItemsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').length".Formato(ItemsContainerLocator));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').length".FormatWith(ItemsContainerLocator));
 
             return int.Parse(result);
         }
 
         public override int? NewIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -707,12 +698,12 @@ namespace Signum.Web.Selenium
 
         public string ItemsContainerLocator
         {
-            get { return "jq=#{0}_sfItemsContainer".Formato(Prefix); }
+            get { return "jq=#{0}_sfItemsContainer".FormatWith(Prefix); }
         }
 
         public string StripItemSelector(int index)
         {
-            return "{0} > #{1}_{2}_sfStripItem".Formato(ItemsContainerLocator, Prefix, index);
+            return "{0} > #{1}_{2}_sfStripItem".FormatWith(ItemsContainerLocator, Prefix, index);
         }
 
         public void WaitItemLoaded(int index)
@@ -722,12 +713,12 @@ namespace Signum.Web.Selenium
 
         public void MoveUp(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnUp".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnUp".FormatWith(Prefix, index));
         }
 
         public void MoveDown(int index)
         {
-            Selenium.Click("jq=#{0}_{1}_btnDown".Formato(Prefix, index));
+            Selenium.Click("jq=#{0}_{1}_btnDown".FormatWith(Prefix, index));
         }
 
         public bool HasEntity(int index)
@@ -737,14 +728,14 @@ namespace Signum.Web.Selenium
 
         public int ItemsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li.sf-strip-element').length".Formato(ItemsContainerLocator));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li.sf-strip-element').length".FormatWith(ItemsContainerLocator));
 
             return int.Parse(result);
         }
 
         public override int? NewIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li.sf-strip-element').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer li.sf-strip-element').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -752,12 +743,12 @@ namespace Signum.Web.Selenium
 
         public string ViewLocatorIndex(int index)
         {
-            return "jq=#{0}_{1}_btnView".Formato(Prefix, index);
+            return "jq=#{0}_{1}_btnView".FormatWith(Prefix, index);
         }
 
         public string RemoveLocatorIndex(int index)
         {
-            return "jq=#{0}_{1}_btnRemove".Formato(Prefix, index);
+            return "jq=#{0}_{1}_btnRemove".FormatWith(Prefix, index);
         }
 
         public void Remove(int index)
@@ -777,7 +768,7 @@ namespace Signum.Web.Selenium
 
         public string AutoCompleteLocator
         {
-            get { return "jq=#{0}_sfToStr".Formato(Prefix); }
+            get { return "jq=#{0}_sfToStr".FormatWith(Prefix); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)
@@ -803,12 +794,12 @@ namespace Signum.Web.Selenium
 
         public void SetPath(string path)
         {
-            Selenium.WaitElementPresent("jq=#{0}_DivNew .sf-file-drop:visible".Formato(Prefix));
-            Selenium.Type("{0}_sfFile".Formato(Prefix), path);
-            Selenium.FireEvent("{0}_sfFile".Formato(Prefix), "change");
+            Selenium.WaitElementPresent("jq=#{0}_DivNew .sf-file-drop:visible".FormatWith(Prefix));
+            Selenium.Type("{0}_sfFile".FormatWith(Prefix), path);
+            //Selenium.FireEvent("{0}_sfFile".FormatWith(Prefix), "change");
             Selenium.Wait(() =>
-                Selenium.IsElementPresent("jq=#{0}_sfLink:visible".Formato(Prefix)) ||
-                Selenium.IsElementPresent("jq=#{0}_sfToStr:visible".Formato(Prefix)));
+                Selenium.IsElementPresent("jq=#{0}_sfLink:visible".FormatWith(Prefix)) ||
+                Selenium.IsElementPresent("jq=#{0}_sfToStr:visible".FormatWith(Prefix)));
         }
     }
 }

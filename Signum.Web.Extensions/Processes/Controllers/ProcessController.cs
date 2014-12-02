@@ -27,7 +27,7 @@ namespace Signum.Web.Processes
         [HttpPost]
         public JsonNetResult GetProgressExecution(PrimaryKey id)
         {
-            decimal progress = Database.Query<ProcessDN>().Where(pe =>
+            decimal progress = Database.Query<ProcessEntity>().Where(pe =>
                     pe.Id == id && pe.State == ProcessState.Executing).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 1;
 
             return this.JsonNet(progress);
@@ -39,9 +39,9 @@ namespace Signum.Web.Processes
             ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
-                return PartialView(ProcessClient.ViewPrefix.Formato("ProcessPanelTable"), state);
+                return PartialView(ProcessClient.ViewPrefix.FormatWith("ProcessPanelTable"), state);
             else
-                return View(ProcessClient.ViewPrefix.Formato("ProcessPanel"), state);
+                return View(ProcessClient.ViewPrefix.FormatWith("ProcessPanel"), state);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -73,7 +73,7 @@ namespace Signum.Web.Processes
         {
             var lites = this.ParseLiteKeys<Entity>();
 
-            ProcessDN process = PackageLogic.CreatePackageOperation(lites, this.GetOperationKeyAssert());
+            ProcessEntity process = PackageLogic.CreatePackageOperation(lites, this.GetOperationKeyAssert());
 
             return this.DefaultConstructResult(process);
         }

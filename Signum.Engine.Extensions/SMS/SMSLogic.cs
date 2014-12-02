@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,38 +27,38 @@ namespace Signum.Engine.SMS
 
     public static class SMSLogic
     {
-        public static SMSTemplateMessageDN GetCultureMessage(this SMSTemplateDN template, CultureInfo ci)
+        public static SMSTemplateMessageEntity GetCultureMessage(this SMSTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Expression<Func<Entity, IQueryable<SMSMessageDN>>> SMSMessagesExpression =
-            e => Database.Query<SMSMessageDN>().Where(m => m.Referred.RefersTo(e));
-        public static IQueryable<SMSMessageDN> SMSMessages(this Entity e)
+        public static Expression<Func<Entity, IQueryable<SMSMessageEntity>>> SMSMessagesExpression =
+            e => Database.Query<SMSMessageEntity>().Where(m => m.Referred.RefersTo(e));
+        public static IQueryable<SMSMessageEntity> SMSMessages(this Entity e)
         {
             return SMSMessagesExpression.Evaluate(e);
         }
 
-        static Expression<Func<SMSSendPackageDN, IQueryable<SMSMessageDN>>> SMSMessagesSendExpression =
-            e => Database.Query<SMSMessageDN>().Where(a => a.SendPackage.RefersTo(e));
+        static Expression<Func<SMSSendPackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesSendExpression =
+            e => Database.Query<SMSMessageEntity>().Where(a => a.SendPackage.RefersTo(e));
         [ExpressionField("SMSMessagesSendExpression")]
-        public static IQueryable<SMSMessageDN> SMSMessages(this SMSSendPackageDN e)
+        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSSendPackageEntity e)
         {
             return SMSMessagesSendExpression.Evaluate(e);
         }
 
-        static Expression<Func<SMSUpdatePackageDN, IQueryable<SMSMessageDN>>> SMSMessagesUpdateExpression =
-          e => Database.Query<SMSMessageDN>().Where(a => a.UpdatePackage.RefersTo(e));
+        static Expression<Func<SMSUpdatePackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesUpdateExpression =
+          e => Database.Query<SMSMessageEntity>().Where(a => a.UpdatePackage.RefersTo(e));
         [ExpressionField("SMSMessagesUpdateExpression")]
-        public static IQueryable<SMSMessageDN> SMSMessages(this SMSUpdatePackageDN e)
+        public static IQueryable<SMSMessageEntity> SMSMessages(this SMSUpdatePackageEntity e)
         {
             return SMSMessagesUpdateExpression.Evaluate(e);
         }
 
 
 
-        static Func<SMSConfigurationDN> getConfiguration;
-        public static SMSConfigurationDN Configuration
+        static Func<SMSConfigurationEntity> getConfiguration;
+        public static SMSConfigurationEntity Configuration
         {
             get { return getConfiguration(); }
         }
@@ -70,7 +70,7 @@ namespace Signum.Engine.SMS
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationDN> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationEntity> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -79,11 +79,11 @@ namespace Signum.Engine.SMS
                 SMSLogic.getConfiguration = getConfiguration;
                 SMSLogic.Provider = provider;
 
-                sb.Include<SMSMessageDN>();
-                sb.Include<SMSTemplateDN>();
+                sb.Include<SMSMessageEntity>();
+                sb.Include<SMSTemplateEntity>();
 
-                dqm.RegisterQuery(typeof(SMSMessageDN), () =>
-                    from m in Database.Query<SMSMessageDN>()
+                dqm.RegisterQuery(typeof(SMSMessageEntity), () =>
+                    from m in Database.Query<SMSMessageEntity>()
                     select new
                     {
                         Entity = m,
@@ -95,8 +95,8 @@ namespace Signum.Engine.SMS
                         m.Template
                     });
 
-                dqm.RegisterQuery(typeof(SMSTemplateDN), () =>
-                    from t in Database.Query<SMSTemplateDN>()
+                dqm.RegisterQuery(typeof(SMSTemplateEntity), () =>
+                    from t in Database.Query<SMSTemplateEntity>()
                     select new
                     {
                         Entity = t,
@@ -112,10 +112,10 @@ namespace Signum.Engine.SMS
                 SMSMessageGraph.Register();
                 SMSTemplateGraph.Register();
 
-                Validator.PropertyValidator<SMSTemplateDN>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
+                Validator.PropertyValidator<SMSTemplateEntity>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
                 {
                     if (!t.Messages.Any(m => m.CultureInfo.Is(SMSLogic.Configuration.DefaultCulture)))
-                        return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(SMSLogic.Configuration.DefaultCulture.EnglishName);
+                        return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(SMSLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
                 };
@@ -130,7 +130,7 @@ namespace Signum.Engine.SMS
             phoneNumberProviders[typeof(T)] = phoneExpression;
             cultureProviders[typeof(T)] = cultureExpression;
 
-            new Graph<ProcessDN>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessages)
+            new Graph<ProcessEntity>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessages)
             {
                 Construct = (providers, args) =>
                 {
@@ -150,12 +150,12 @@ namespace Signum.Engine.SMS
                     if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
 
-                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
+                    SMSSendPackageEntity package = new SMSSendPackageEntity().Save();
 
                     var packLite = package.ToLite();
 
-                    using (OperationLogic.AllowSave<SMSMessageDN>())
-                        numbers.Select(n => new SMSMessageDN
+                    using (OperationLogic.AllowSave<SMSMessageEntity>())
+                        numbers.Select(n => new SMSMessageEntity
                         {
                             DestinationNumber = n.Exp,
                             SendPackage = packLite,
@@ -181,7 +181,7 @@ namespace Signum.Engine.SMS
         public static string GetPhoneNumber<T>(T entity) where T : IEntity
         {
             var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
-                .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".Formato(typeof(T).NiceName()));
+                .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".FormatWith(typeof(T).NiceName()));
 
             return phoneFunc.Evaluate(entity);
         }
@@ -189,7 +189,7 @@ namespace Signum.Engine.SMS
         public static CultureInfo GetCulture<T>(T entity) where T : IEntity
         {
             var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
-                .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".Formato(typeof(T).NiceName()));
+                .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
 
             return cultureFunc.Evaluate(entity);
         }
@@ -198,40 +198,40 @@ namespace Signum.Engine.SMS
 
         static Dictionary<Type, LambdaExpression> dataObjectProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static List<Lite<TypeDN>> RegisteredDataObjectProviders()
+        public static List<Lite<TypeEntity>> RegisteredDataObjectProviders()
         {
-            return dataObjectProviders.Keys.Select(t => t.ToTypeDN().ToLite()).ToList();
+            return dataObjectProviders.Keys.Select(t => t.ToTypeEntity().ToLite()).ToList();
         }
 
         public static List<string> GetLiteralsFromDataObjectProvider(Type type)
         {
             if (!dataObjectProviders.ContainsKey(type))
                 throw new ArgumentOutOfRangeException("The type {0} is not a registered data provider"
-                    .Formato(type.FullName));
+                    .FormatWith(type.FullName));
 
             return dataObjectProviders[type].GetType().GetGenericArguments()[0]
-                .GetGenericArguments()[1].GetProperties().Select(p => "{{{0}}}".Formato(p.Name)).ToList();
+                .GetGenericArguments()[1].GetProperties().Select(p => "{{{0}}}".FormatWith(p.Name)).ToList();
         }
 
         public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : Entity
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new Graph<ProcessDN>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessagesFromTemplate)
+            new Graph<ProcessEntity>.ConstructFromMany<T>(SMSMessageOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
-                    var template = args.GetArg<SMSTemplateDN>();
+                    var template = args.GetArg<SMSTemplateEntity>();
 
                     if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
-                            .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
+                            .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
 
                     var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders
-                        .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".Formato(typeof(T).NiceName()));
+                        .GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider".FormatWith(typeof(T).NiceName()));
 
                     var cultureFunc = (Expression<Func<T, CultureInfo>>)cultureProviders
-                        .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".Formato(typeof(T).NiceName()));
+                        .GetOrThrow(typeof(T), "{0} is not registered as CultureProvider".FormatWith(typeof(T).NiceName()));
 
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                           .Select(p => new
@@ -254,12 +254,12 @@ namespace Signum.Engine.SMS
 
                     numbers = splitdNumbers;
 
-                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
+                    SMSSendPackageEntity package = new SMSSendPackageEntity().Save();
                     var packLite = package.ToLite();
 
-                    using (OperationLogic.AllowSave<SMSMessageDN>())
+                    using (OperationLogic.AllowSave<SMSMessageEntity>())
                     {
-                        numbers.Select(n => new SMSMessageDN
+                        numbers.Select(n => new SMSMessageEntity
                         {
                             Message = template.ComposeMessage(n.Data, n.Culture),
                             EditableMessage = template.EditableMessage,
@@ -279,18 +279,18 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Graph<SMSMessageDN>.ConstructFrom<T>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+            new Graph<SMSMessageEntity>.ConstructFrom<T>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
             {
                 Construct = (provider, args) =>
                 {
-                    var template = args.GetArg<SMSTemplateDN>();
+                    var template = args.GetArg<SMSTemplateEntity>();
 
                     if (template.AssociatedType != null &&
                         TypeLogic.DnToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
-                            .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
+                            .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
 
-                    return new SMSMessageDN
+                    return new SMSMessageEntity
                     {
                         Message = template.ComposeMessage(func.Evaluate(provider), GetCulture(provider)),
                         EditableMessage = template.EditableMessage,
@@ -319,7 +319,7 @@ namespace Signum.Engine.SMS
 
         static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
 
-        public static string ComposeMessage(this SMSTemplateDN template, object o, CultureInfo culture)
+        public static string ComposeMessage(this SMSTemplateEntity template, object o, CultureInfo culture)
         {
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
             var templateMessage = template.GetCultureMessage(culture ?? defaultCulture) ??
@@ -353,7 +353,7 @@ namespace Signum.Engine.SMS
             public string Value;
         }
 
-        static string CombineText(SMSTemplateDN template, SMSTemplateMessageDN templateMessage, List<Combination> combinations)
+        static string CombineText(SMSTemplateEntity template, SMSTemplateMessageEntity templateMessage, List<Combination> combinations)
         {
             string text = templateMessage.Message;
 
@@ -404,20 +404,20 @@ namespace Signum.Engine.SMS
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SMSSendPackageDN>();
-                sb.Include<SMSUpdatePackageDN>();
+                sb.Include<SMSSendPackageEntity>();
+                sb.Include<SMSUpdatePackageEntity>();
                 SMSLogic.AssertStarted(sb);
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new Graph<ProcessDN>.ConstructFromMany<SMSMessageDN>(SMSMessageOperation.CreateUpdateStatusPackage)
+                new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
-                dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
-                    from e in Database.Query<SMSSendPackageDN>()
+                dqm.RegisterQuery(typeof(SMSSendPackageEntity), () =>
+                    from e in Database.Query<SMSSendPackageEntity>()
                     let p = e.LastProcess()
                     select new
                     {
@@ -429,8 +429,8 @@ namespace Signum.Engine.SMS
                         NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
                     });
 
-                dqm.RegisterQuery(typeof(SMSUpdatePackageDN), () =>
-                    from e in Database.Query<SMSUpdatePackageDN>()
+                dqm.RegisterQuery(typeof(SMSUpdatePackageEntity), () =>
+                    from e in Database.Query<SMSUpdatePackageEntity>()
                     let p = e.LastProcess()
                     select new
                     {
@@ -444,9 +444,9 @@ namespace Signum.Engine.SMS
             }
         }
 
-        private static ProcessDN UpdateMessages(List<SMSMessageDN> messages)
+        private static ProcessEntity UpdateMessages(List<SMSMessageEntity> messages)
         {
-            SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
+            SMSUpdatePackageEntity package = new SMSUpdatePackageEntity().Save();
 
             var packLite = package.ToLite();
 
@@ -469,7 +469,7 @@ namespace Signum.Engine.SMS
 
       
 
-        public static void SendSMS(SMSMessageDN message)
+        public static void SendSMS(SMSMessageEntity message)
         {
             if (Provider == null)
                 throw new InvalidOperationException("Provider was not established");
@@ -485,7 +485,7 @@ namespace Signum.Engine.SMS
                 SendOneMessage(message);
                 foreach (var number in numbers.Skip(1))
                 {
-                    SendOneMessage(new SMSMessageDN
+                    SendOneMessage(new SMSMessageEntity
                     {
                         DestinationNumber = number,
                         Certified = message.Certified,
@@ -503,7 +503,7 @@ namespace Signum.Engine.SMS
             }
         }
 
-        private static void SendOneMessage(SMSMessageDN message)
+        private static void SendOneMessage(SMSMessageEntity message)
         {
             message.MessageID = Provider.SMSSendAndGetTicket(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
@@ -511,7 +511,7 @@ namespace Signum.Engine.SMS
             message.Save();
         }
 
-        public static void SendAsyncSMS(SMSMessageDN message)
+        public static void SendAsyncSMS(SMSMessageEntity message)
         {
             Task.Factory.StartNew(() =>
             {
@@ -519,14 +519,14 @@ namespace Signum.Engine.SMS
             });
         }
 
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(MultipleSMSModel template, List<string> phones)
+        public static List<SMSMessageEntity> CreateAndSendMultipleSMSMessages(MultipleSMSModel template, List<string> phones)
         {
-            var messages = new List<SMSMessageDN>();
+            var messages = new List<SMSMessageEntity>();
             var IDs = Provider.SMSMultipleSendAction(template, phones);
             var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
-                var message = new SMSMessageDN { Message = template.Message, From = template.From };
+                var message = new SMSMessageEntity { Message = template.Message, From = template.From };
                 message.SendDate = sendDate;
                 //message.SendState = SendState.Sent;
                 message.DestinationNumber = phones[i];
@@ -539,13 +539,13 @@ namespace Signum.Engine.SMS
         }
     }
 
-    public class SMSMessageGraph : Graph<SMSMessageDN, SMSMessageState>
+    public class SMSMessageGraph : Graph<SMSMessageEntity, SMSMessageState>
     {
         public static void Register()
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperation.CreateSMSFromSMSTemplate)
+            new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
                 CanConstruct = t => !t.Active ? SmsMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToState = SMSMessageState.Created,
@@ -554,7 +554,7 @@ namespace Signum.Engine.SMS
                     var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
                     var ci = args.TryGetArgC<CultureInfo>() ?? defaultCulture;
 
-                    return new SMSMessageDN
+                    return new SMSMessageEntity
                     {
                         Template = t.ToLite(),
                         Message = (t.GetCultureMessage(ci) ?? t.GetCultureMessage(defaultCulture)).Message,
@@ -593,12 +593,12 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Graph<SMSMessageDN>.Execute(SMSMessageOperation.UpdateStatus)
+            new Graph<SMSMessageEntity>.Execute(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
                 Execute = (sms, args) =>
                 {
-                    var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
+                    var func = args.TryGetArgC<Func<SMSMessageEntity, SMSMessageState>>();
                     if (func == null)
                         func = SMSLogic.Provider.SMSUpdateStatusAction;
 
@@ -613,9 +613,9 @@ namespace Signum.Engine.SMS
 
     public interface ISMSProvider
     {
-        string SMSSendAndGetTicket(SMSMessageDN message);
+        string SMSSendAndGetTicket(SMSMessageEntity message);
         List<string> SMSMultipleSendAction(MultipleSMSModel template, List<string> phones);
-        SMSMessageState SMSUpdateStatusAction(SMSMessageDN message);
+        SMSMessageState SMSUpdateStatusAction(SMSMessageEntity message);
     }
 
   

@@ -10,7 +10,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Help
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
-    public class OperationHelpDN : Entity
+    public class OperationHelpEntity : Entity
     {
         [NotNullable]
         OperationSymbol operation;
@@ -22,9 +22,9 @@ namespace Signum.Entities.Help
         }
 
         [NotNullable]
-        CultureInfoDN culture;
+        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public CultureInfoEntity Culture
         {
             get { return culture; }
             set { Set(ref culture, value); }
@@ -39,7 +39,7 @@ namespace Signum.Entities.Help
             set { Set(ref description, value); }
         }
 
-        static Expression<Func<OperationHelpDN, string>> ToStringExpression = e => e.Operation.ToString();
+        static Expression<Func<OperationHelpEntity, string>> ToStringExpression = e => e.Operation.ToString();
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -49,6 +49,6 @@ namespace Signum.Entities.Help
 
     public static class OperationHelpOperation
     {
-        public static readonly ExecuteSymbol<OperationHelpDN> Save = OperationSymbol.Execute<OperationHelpDN>();
+        public static readonly ExecuteSymbol<OperationHelpEntity> Save = OperationSymbol.Execute<OperationHelpEntity>();
     }
 }

@@ -1,0 +1,18 @@
+﻿@using Signum.Entities.Basics
+@using System.Globalization
+@using (var tc = Html.TypeContext<CultureInfoEntity>())
+{
+    @Html.ValueLine(tc, t => t.Name, vl => 
+    { 
+        vl.ValueLineType = ValueLineType.Enum;
+        vl.EnumComboItems = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures)
+            .OrderBy(a=>a.Name)
+            .Select(ci => new SelectListItem
+            {
+                Text = "{0} :  {1}".FormatWith(ci.Name, ci.DisplayName),
+                Value = ci.Name,
+                Selected = object.Equals(tc.Value.Name, ci.Name),
+            }).ToList();
+        vl.ValueHtmlProps.Clear();
+    });
+}

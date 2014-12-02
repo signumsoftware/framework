@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
             foreach (var t in types.NotNull())
             {
                 if (!t.IsStaticClass())
-                    throw new ArgumentException("{0} is not a static class".Formato(t.Name));
+                    throw new ArgumentException("{0} is not a static class".FormatWith(t.Name));
 
                 permissions.AddRange(t.GetFields(BindingFlags.Public | BindingFlags.Static).Select(fi => fi.GetValue(null)).Cast<PermissionSymbol>());
             }
@@ -42,7 +42,7 @@ namespace Signum.Engine.Authorization
             get { return permissions; }
         }
 
-        static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache;
+        static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache;
 
         public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
 
@@ -63,7 +63,7 @@ namespace Signum.Engine.Authorization
 
                 SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
 
-                cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
+                cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
                     s=>s,
                     s=>s,
                     merger: new PermissionMerger(),
@@ -94,13 +94,13 @@ namespace Signum.Engine.Authorization
         public static void AssertAuthorized(this PermissionSymbol permissionSymbol)
         {
             if (!IsAuthorized(permissionSymbol))
-                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionSymbol));
+                throw new UnauthorizedAccessException("Permission '{0}' is denied".FormatWith(permissionSymbol));
         }
 
         public static string IsAuthorizedString(this PermissionSymbol permissionSymbol)
         {
             if (!IsAuthorized(permissionSymbol))
-                return "Permission '{0}' is denied".Formato(permissionSymbol);
+                return "Permission '{0}' is denied".FormatWith(permissionSymbol);
 
             return null;
         }
@@ -110,10 +110,10 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), permissionSymbol);
+            return cache.GetAllowed(RoleEntity.Current.ToLite(), permissionSymbol);
         }
 
-        public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleDN> role)
+        public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
         {
             //if (permissionSymbol == BasicPermission.AutomaticUpgradeOfOperations ||
             //  permissionSymbol == BasicPermission.AutomaticUpgradeOfProperties ||
@@ -128,7 +128,7 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
+        public static PermissionRulePack GetPermissionRules(Lite<RoleEntity> roleLite)
         {
             var result = new PermissionRulePack { Role = roleLite };
             cache.GetRules(result, SymbolLogic<PermissionSymbol>.Symbols);
@@ -144,7 +144,7 @@ namespace Signum.Engine.Authorization
 
     class PermissionMerger : IMerger<PermissionSymbol, bool>
     {
-        public bool Merge(PermissionSymbol key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
+        public bool Merge(PermissionSymbol key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, bool>> baseValues)
         {
             if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
                 return baseValues.Any(a => a.Value);
@@ -152,7 +152,7 @@ namespace Signum.Engine.Authorization
                 return baseValues.All(a => a.Value);
         }
 
-        public Func<PermissionSymbol, bool> MergeDefault(Lite<RoleDN> role)
+        public Func<PermissionSymbol, bool> MergeDefault(Lite<RoleEntity> role)
         {
             return new ConstantFunction<PermissionSymbol, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
         }

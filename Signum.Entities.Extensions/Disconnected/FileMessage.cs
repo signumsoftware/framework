@@ -50,27 +50,27 @@ namespace Signum.Entities.Disconnected
     public class UploadDatabaseResult
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<DisconnectedImportDN> UploadStatistics;
+        public Lite<DisconnectedImportEntity> UploadStatistics;
     }
 
     [MessageContract]
     public class DownloadDatabaseRequests
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<DisconnectedExportDN> DownloadStatistics;
+        public Lite<DisconnectedExportEntity> DownloadStatistics;
 
         [MessageHeader(MustUnderstand = true)]
-        public Lite<UserDN> User;
+        public Lite<UserEntity> User;
     }
 
     [MessageContract]
     public class UploadDatabaseRequest: FileMessage
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<UserDN> User;
+        public Lite<UserEntity> User;
 
         [MessageHeader(MustUnderstand = true)]
-        public Lite<DisconnectedMachineDN> Machine; 
+        public Lite<DisconnectedMachineEntity> Machine; 
     }
 
     [ServiceContract]
@@ -80,7 +80,7 @@ namespace Signum.Entities.Disconnected
         UploadDatabaseResult UploadDatabase(UploadDatabaseRequest request);
 
         [OperationContract, NetDataContractAttribute]
-        Lite<DisconnectedExportDN> BeginExportDatabase(Lite<UserDN> user, Lite<DisconnectedMachineDN> machine);
+        Lite<DisconnectedExportEntity> BeginExportDatabase(Lite<UserEntity> user, Lite<DisconnectedMachineEntity> machine);
 
         [OperationContract, NetDataContractAttribute]
         FileMessage EndExportDatabase(DownloadDatabaseRequests request);
@@ -90,21 +90,21 @@ namespace Signum.Entities.Disconnected
     public interface IDisconnectedServer
     {
         [OperationContract, NetDataContractAttribute]
-        DisconnectedExportDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine);
+        DisconnectedExportEntity GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine);
 
         [OperationContract, NetDataContractAttribute]
-        Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName);
+        Lite<DisconnectedMachineEntity> GetDisconnectedMachine(string machineName);
 
         [OperationContract, NetDataContractAttribute]
-        DisconnectedImportDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine);
+        DisconnectedImportEntity GetUploadEstimation(Lite<DisconnectedMachineEntity> machine);
 
         [OperationContract, NetDataContractAttribute]
         Dictionary<Type, StrategyPair> GetStrategyPairs();
 
         [OperationContract, NetDataContractAttribute]
-        void SkipExport(Lite<DisconnectedMachineDN> machine);
+        void SkipExport(Lite<DisconnectedMachineEntity> machine);
 
         [OperationContract, NetDataContractAttribute]
-        void ConnectAfterFix(Lite<DisconnectedMachineDN> machine);
+        void ConnectAfterFix(Lite<DisconnectedMachineEntity> machine);
     }
 }

@@ -26,10 +26,10 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ChartColorDN>();
+                sb.Include<ChartColorEntity>();
 
-                dqm.RegisterQuery(typeof(ChartColorDN), () =>
-                    from cc in Database.Query<ChartColorDN>()
+                dqm.RegisterQuery(typeof(ChartColorEntity), () =>
+                    from cc in Database.Query<ChartColorEntity>()
                     select new
                     {
                         Entity = cc,
@@ -38,10 +38,10 @@ namespace Signum.Engine.Chart
                     });
 
                 Colors = sb.GlobalLazy(() =>
-                    Database.Query<ChartColorDN>()
+                    Database.Query<ChartColorEntity>()
                         .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
                         .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
-                    new InvalidateWith(typeof(ChartColorDN)));
+                    new InvalidateWith(typeof(ChartColorEntity)));
             }
         }
 
@@ -56,9 +56,9 @@ namespace Signum.Engine.Chart
         {
             AssertFewEntities(type);
 
-            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<Entity>)l }).ToDictionary(a => a.Related);
+            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity { Related = (Lite<Entity>)l }).ToDictionary(a => a.Related);
 
-            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
+            dic.SetRange(Database.Query<ChartColorEntity>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
 
             var list = dic.Values.ToList();
 
@@ -66,7 +66,7 @@ namespace Signum.Engine.Chart
 
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Color = ColorDN.FromRGBHex(cats[i % cats.Length]);
+                list[i].Color = ColorEntity.FromRGBHex(cats[i % cats.Length]);
             }
 
             list.SaveList();
@@ -82,7 +82,7 @@ namespace Signum.Engine.Chart
             int count = giCount.GetInvoker(type)();
 
             if (count > Limit)
-                throw new ApplicationException("Too many {0} ({1}), maximum is {2}".Formato(type.NicePluralName(), count, Limit));
+                throw new ApplicationException("Too many {0} ({1}), maximum is {2}".FormatWith(type.NicePluralName(), count, Limit));
         }
 
         public static void SavePalette(ChartPaletteModel model)
@@ -108,7 +108,7 @@ namespace Signum.Engine.Chart
         static int DeleteColors<T>() where T : Entity
         {
             return (from t in Database.Query<T>() // To filter by type conditions
-                    join cc in Database.Query<ChartColorDN>() on t.ToLite() equals cc.Related
+                    join cc in Database.Query<ChartColorEntity>() on t.ToLite() equals cc.Related
                     select cc).UnsafeDelete();
         }
 
@@ -120,11 +120,11 @@ namespace Signum.Engine.Chart
 
             return new ChartPaletteModel
             {
-                Type = type.ToTypeDN(),
-                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorDN
+                Type = type.ToTypeEntity(),
+                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id).Try(c => new ColorDN { Argb = c.ToArgb() })
+                    Color = dic.TryGetS(l.Id).Try(c => new ColorEntity { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }
@@ -146,7 +146,7 @@ namespace Signum.Engine.Chart
 
         public static void DeletePalette(Type type)
         {
-            Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).UnsafeDelete();
+            Database.Query<ChartColorEntity>().Where(c => c.Related.EntityType == type).UnsafeDelete();
         }
     }
 }

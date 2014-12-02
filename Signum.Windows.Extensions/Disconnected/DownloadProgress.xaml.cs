@@ -33,12 +33,12 @@ namespace Signum.Windows.Disconnected
 
             this.Loaded += new RoutedEventHandler(DownloadDatabase_Loaded);
 
-            var a = DisconnectedMachineDN.Current;
+            var a = DisconnectedMachineEntity.Current;
         }
 
-        DisconnectedExportDN estimation;
+        DisconnectedExportEntity estimation;
 
-        Lite<DisconnectedExportDN> currentLite;
+        Lite<DisconnectedExportEntity> currentLite;
 
         IDisconnectedTransferServer transferServer = DisconnectedClient.GetTransferServer();
 
@@ -46,12 +46,12 @@ namespace Signum.Windows.Disconnected
 
         void DownloadDatabase_Loaded(object sender, RoutedEventArgs e)
         {
-            estimation = Server.Return((IDisconnectedServer ds) => ds.GetDownloadEstimation(DisconnectedMachineDN.Current));
+            estimation = Server.Return((IDisconnectedServer ds) => ds.GetDownloadEstimation(DisconnectedMachineEntity.Current));
 
             pbGenerating.Minimum = 0;
             pbGenerating.Maximum = 1;
 
-            currentLite = transferServer.BeginExportDatabase(UserDN.Current.ToLite(), DisconnectedMachineDN.Current);
+            currentLite = transferServer.BeginExportDatabase(UserEntity.Current.ToLite(), DisconnectedMachineEntity.Current);
 
             timer.Tick += new EventHandler(timer_Tick);
 
@@ -99,7 +99,7 @@ namespace Signum.Windows.Disconnected
         {
             var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests
             {
-                User = UserDN.Current.ToLite(),
+                User = UserEntity.Current.ToLite(),
                 DownloadStatistics = currentLite
             });
 

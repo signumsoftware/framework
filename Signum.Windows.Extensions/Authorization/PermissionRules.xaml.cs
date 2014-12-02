@@ -22,14 +22,14 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class PermissionRules : Window
     {
-        public Lite<RoleDN> Role
+        public Lite<RoleEntity> Role
         {
-            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleEntity>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(PermissionRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lite<RoleEntity>), typeof(PermissionRules), new UIPropertyMetadata(null));
 
         public PermissionRules()
         {
@@ -44,7 +44,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionSymbol).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PermissionSymbol).NiceName(), Role);
             DataContext = Server.Return((IPermissionAuthServer s) => s.GetPermissionRules(Role));
         }
 

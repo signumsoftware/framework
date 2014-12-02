@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Web;
 using System.Web.Mvc;
@@ -31,7 +31,7 @@ namespace Signum.Web.Auth
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
         public static event Action UserLogged;
-        public static event Action<Controller, UserDN> UserPreLogin;
+        public static event Action<Controller, UserEntity> UserPreLogin;
         public static Func<Controller, string> UserLoggedRedirect = c =>
         {
             string referrer = c.ControllerContext.HttpContext.Request["referrer"];
@@ -51,7 +51,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser()
         {
-            var context = this.ExtractEntity<UserDN>().ApplyChanges(this, UserMapping.NewUser).ValidateGlobal();
+            var context = this.ExtractEntity<UserEntity>().ApplyChanges(this, UserMapping.NewUser).ValidateGlobal();
 
             if (context.HasErrors())
                 return context.ToJsonModelState();
@@ -76,7 +76,7 @@ namespace Signum.Web.Auth
 
             var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this, passPrefix);
 
-            UserDN user = this.ExtractLite<UserDN>()
+            UserEntity user = this.ExtractLite<UserEntity>()
                 .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
             return this.DefaultExecuteResult(user);
@@ -95,12 +95,12 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
-            UserDN user = null;
+            UserEntity user = null;
             using (AuthLogic.Disable())
             {
                 ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
 
-                if (UserDN.Current == null)
+                if (UserEntity.Current == null)
                 {
                     var username = (string)TempData["username"];
                     if (!username.HasText())
@@ -119,7 +119,7 @@ namespace Signum.Web.Auth
                         return View(AuthClient.ChangePasswordView);
                     }
 
-                    string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                    string errorPasswordValidation = UserEntity.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
                     if (errorPasswordValidation.HasText())
                     {
                         ViewData["username"] = username;
@@ -129,7 +129,7 @@ namespace Signum.Web.Auth
                 }
                 else
                 {
-                    var context = UserDN.Current.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
+                    var context = UserEntity.Current.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
                     if (context.HasErrors())
                     {
                         ModelState.FromContext(context);
@@ -137,7 +137,7 @@ namespace Signum.Web.Auth
                         return View(AuthClient.ChangePasswordView);
                     }
 
-                    string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                    string errorPasswordValidation = UserEntity.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
                     if (errorPasswordValidation.HasText())
                     {
                         ModelState.AddModelError("password", errorPasswordValidation);
@@ -163,7 +163,7 @@ namespace Signum.Web.Auth
         private void RefreshSessionUserChanges()
         {
             using (AuthLogic.Disable())
-                UserDN.Current = UserDN.Current.ToLite().Retrieve();
+                UserEntity.Current = UserEntity.Current.ToLite().Retrieve();
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -195,7 +195,7 @@ namespace Signum.Web.Auth
 
             using (AuthLogic.Disable())
             {
-                UserDN user = ResetPasswordRequestLogic.GetUserByEmail(email);
+                UserEntity user = ResetPasswordRequestLogic.GetUserByEmail(email);
 
                 if(user == null)
                 {
@@ -203,7 +203,7 @@ namespace Signum.Web.Auth
                     return View(AuthClient.ResetPasswordView);
                 }
 
-                ResetPasswordRequestDN rpr = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+                ResetPasswordRequestEntity rpr = ResetPasswordRequestLogic.ResetPasswordRequest(user);
                 string url = HttpContext.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Action<AuthController>(ac => ac.ResetPasswordCode(email, rpr.Code));
                 new ResetPasswordRequestMail { Entity = rpr, Url = url }.SendMailAsync();
             }
@@ -223,7 +223,7 @@ namespace Signum.Web.Auth
         {
             using (AuthLogic.Disable())
             {
-                TempData["ResetPasswordRequest"] = Database.Query<ResetPasswordRequestDN>()
+                TempData["ResetPasswordRequest"] = Database.Query<ResetPasswordRequestEntity>()
                   .Where(r => r.User.Email == email && r.Code == code)
                   .SingleOrDefaultEx(() => AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
             }
@@ -234,7 +234,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSetNew()
         {
-            ResetPasswordRequestDN rpr = (ResetPasswordRequestDN)TempData["ResetPasswordRequest"];
+            ResetPasswordRequestEntity rpr = (ResetPasswordRequestEntity)TempData["ResetPasswordRequest"];
             if (rpr == null)
             {
                 TempData["Error"] = AuthMessage.ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin.NiceToString();
@@ -245,11 +245,11 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
+        public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestEntity> rpr)
         {
             using (AuthLogic.Disable())
             {
-                ResetPasswordRequestDN request = rpr.Retrieve();
+                ResetPasswordRequestEntity request = rpr.Retrieve();
 
                 var user = request.User;
 
@@ -263,17 +263,17 @@ namespace Signum.Web.Auth
                     return ResetPasswordSetNewError(request.Id, "");
                 }
 
-                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                string errorPasswordValidation = UserEntity.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
                 if (errorPasswordValidation.HasText())
                     return ResetPasswordSetNewError(request.Id, errorPasswordValidation);
 
 
-                using (OperationLogic.AllowSave<UserDN>())
+                using (OperationLogic.AllowSave<UserEntity>())
                 {
                     context.Value.Save();
                 }
                 //remove pending requests
-                Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
+                Database.Query<ResetPasswordRequestEntity>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
             }
 
             return RedirectToAction("ResetPasswordSuccess");
@@ -319,7 +319,7 @@ namespace Signum.Web.Auth
                 return LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
-            UserDN user = null;
+            UserEntity user = null;
             try
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
@@ -348,7 +348,7 @@ namespace Signum.Web.Auth
 
             OnUserPreLogin(this, user);
 
-            UserDN.Current = user;
+            UserEntity.Current = user;
 
             if (rememberMe == true)
             {
@@ -364,7 +364,7 @@ namespace Signum.Web.Auth
 
         }
 
-        internal static void OnUserPreLogin(Controller controller, UserDN user)
+        internal static void OnUserPreLogin(Controller controller, UserEntity user)
         {
             if (UserPreLogin != null)
             {
@@ -383,21 +383,21 @@ namespace Signum.Web.Auth
 
 
 
-        public static Action<UserDN> OnUpdatedSessionUser;
+        public static Action<UserEntity> OnUpdatedSessionUser;
 
         public static void UpdateSessionUser()
         {
-            var newUser = UserDN.Current.ToLite().Retrieve();
+            var newUser = UserEntity.Current.ToLite().Retrieve();
 
-            UserDN.Current = newUser;
+            UserEntity.Current = newUser;
 
             if (OnUpdatedSessionUser != null)
                 OnUpdatedSessionUser(newUser);
         }
 
-        public static void AddUserSession(UserDN user)
+        public static void AddUserSession(UserEntity user)
         {
-            UserDN.Current = user;
+            UserEntity.Current = user;
 
             if (UserLogged != null)
                 UserLogged();

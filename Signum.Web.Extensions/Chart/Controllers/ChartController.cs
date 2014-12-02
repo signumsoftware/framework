@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -31,7 +31,7 @@ namespace Signum.Web.Chart
             ChartPermission.ViewCharting.AssertAuthorized();
 
             if (!Finder.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().FormatWith(findOptions.QueryName));
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
@@ -189,7 +189,7 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption GetSubgroupFilter(ChartColumnDN chartToken, string key)
+        private FilterOption GetSubgroupFilter(ChartColumnEntity chartToken, string key)
         {
             if (chartToken == null || chartToken.Token.Token is AggregateToken)
                 return null;
@@ -224,7 +224,7 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(null).Value;
 
             if (!Finder.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
@@ -253,7 +253,7 @@ namespace Signum.Web.Chart
             return ctx;
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, Lite<UserChartDN> currentUserChart)
+        ViewResult OpenChartRequest(ChartRequest request, Lite<UserChartEntity> currentUserChart)
         {
             ViewData[ViewDataKeys.Title] = QueryUtils.GetNiceName(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
@@ -269,20 +269,20 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(null).Value;
 
             if (!Finder.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             var userChart = request.ToUserChart();
 
-            userChart.Owner = UserDN.Current.ToLite();
+            userChart.Owner = UserEntity.Current.ToLite();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
             return Navigator.NormalPage(this, userChart);
         }
 
-        public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<Entity> currentEntity)
+        public ActionResult ViewUserChart(Lite<UserChartEntity> lite, Lite<Entity> currentEntity)
         {
-            UserChartDN uc = UserChartLogic.RetrieveUserChart(lite);
+            UserChartEntity uc = UserChartLogic.RetrieveUserChart(lite);
 
             ChartRequest request = (uc.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity.Retrieve()))
                 .Using(_ => uc.ToRequest());

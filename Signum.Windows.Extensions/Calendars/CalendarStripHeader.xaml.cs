@@ -122,7 +122,7 @@ namespace Signum.Windows.Calendars
 
             public string MonthNameYear
             {
-                get { return "{0}, {1}".Formato(monthNames[Month-1], Year); }
+                get { return "{0}, {1}".FormatWith(monthNames[Month-1], Year); }
             }
 
             public string MonthName
@@ -148,7 +148,7 @@ namespace Signum.Windows.Calendars
             public DateTime Value;
             public string DayFullName
             {
-                get { return "{0} {1}".Formato(dayNames[Value.DayOfWeek], Value.Day); }
+                get { return "{0} {1}".FormatWith(dayNames[Value.DayOfWeek], Value.Day); }
             }
             public string DayFullToolTip
             {
@@ -184,7 +184,7 @@ namespace Signum.Windows.Calendars
             public int Count{ get; set; }
             public string WeekName
             {
-                get { return "{0}-{1}".Formato(Min, Max); }
+                get { return "{0}-{1}".FormatWith(Min, Max); }
             }
 
             public event PropertyChangedEventHandler PropertyChanged;

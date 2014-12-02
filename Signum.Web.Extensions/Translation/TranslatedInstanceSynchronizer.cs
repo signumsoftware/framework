@@ -63,7 +63,7 @@ namespace Signum.Web.Translation
 
         public override string ToString()
         {
-            return "Changes for instances of type {0}".Formato(Type.NiceName());
+            return "Changes for instances of type {0}".FormatWith(Type.NiceName());
         }
     }
 }

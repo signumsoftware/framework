@@ -19,7 +19,7 @@ namespace Signum.Engine.Disconnected
         {
             Executor.ExecuteNonQuery(
 @"ALTER DATABASE {0} SET single_user WITH ROLLBACK IMMEDIATE
-DROP DATABASE {0}".Formato(databaseName));
+DROP DATABASE {0}".FormatWith(databaseName));
         }
 
         public static void DropIfExists(DatabaseName databaseName)
@@ -29,7 +29,7 @@ DROP DATABASE {0}".Formato(databaseName));
 BEGIN
      ALTER DATABASE {0} SET single_user WITH ROLLBACK IMMEDIATE
      DROP DATABASE {0}
-END".Formato(databaseName);
+END".FormatWith(databaseName);
 
             Executor.ExecuteNonQuery(dropDatabase);
         }
@@ -39,19 +39,19 @@ END".Formato(databaseName);
             string script = @"CREATE DATABASE {0} ON  PRIMARY 
     ( NAME = N'{0}_Data', FILENAME = N'{1}' , SIZE = 167872KB , MAXSIZE = UNLIMITED, FILEGROWTH = 16384KB )
 LOG ON 
-    ( NAME = N'{0}_Log', FILENAME =  N'{2}' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 16384KB )".Formato(databaseName, databaseFile, databaseLogFile);
+    ( NAME = N'{0}_Log', FILENAME =  N'{2}' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 16384KB )".FormatWith(databaseName, databaseFile, databaseLogFile);
 
             Executor.ExecuteNonQuery(script);
         }
 
         public static void BackupDatabase(DatabaseName databaseName, string backupFile)
         {
-            Executor.ExecuteNonQuery(@"BACKUP DATABASE {0} TO DISK = '{1}'WITH FORMAT".Formato(databaseName, backupFile));
+            Executor.ExecuteNonQuery(@"BACKUP DATABASE {0} TO DISK = '{1}'WITH FORMAT".FormatWith(databaseName, backupFile));
         }
 
         public static void RestoreDatabase(DatabaseName databaseName, string backupFile, string databaseFile, string databaseLogFile, bool replace = false)
         {
-            DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".Formato(backupFile));
+            DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".FormatWith(backupFile));
 
 
             string logicalDatabaseFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "D").Field<string>("LogicalName");
@@ -62,25 +62,25 @@ LOG ON
                     from DISK = '{1}'
 WITH
 MOVE '{2}' TO '{3}',
-MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
+MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
                     logicalDatabaseFile, databaseFile,
                     logicalDatabaseLogFile, databaseLogFile, replace ? ",\r\nREPLACE" : "")).ExecuteNonQuery();
         }
 
         public static void DisableForeignKeys(ITable table)
         {
-            Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT all".Formato(table.Name));
+            Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT all".FormatWith(table.Name));
         }
 
         public static void EnableForeignKeys(ITable table)
         {
-            Executor.ExecuteNonQuery("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT all".Formato(table.Name));
+            Executor.ExecuteNonQuery("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT all".FormatWith(table.Name));
         }
 
 
         public static void DeleteTable(ObjectName tableName)
         {
-            Executor.ExecuteNonQuery("DELETE FROM {0}".Formato(tableName));
+            Executor.ExecuteNonQuery("DELETE FROM {0}".FormatWith(tableName));
         }
 
         // TSQL Seed madness pseudo-code. 
@@ -101,7 +101,7 @@ MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
 
             var pb = Connector.Current.ParameterBuilder;
 
-            object obj = Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".Formato(table.Name), new List<DbParameter>
+            object obj = Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".FormatWith(table.Name), new List<DbParameter>
             {
                 pb.CreateParameter("@min", seedMin, type),
                 pb.CreateParameter("@max", seedMax, type)
@@ -121,7 +121,7 @@ MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
 
                 ((SqlConnection)Transaction.CurrentConnection).InfoMessage += (object sender, SqlInfoMessageEventArgs e) => { message = e.Message; };
 
-                Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', NORESEED)".Formato(table.Name));
+                Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', NORESEED)".FormatWith(table.Name));
 
                 if (message == null)
                     throw new InvalidOperationException("DBCC CHECKIDENT didn't write a message");
@@ -157,14 +157,14 @@ MOVE '{4}' TO '{5}'{6}".Formato(databaseName, backupFile,
             if (info.Identity.HasValue)
                 return info.Identity.Value + 1;
 
-            return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".Formato(table.Name));
+            return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".FormatWith(table.Name));
         }
 
         public static void SetNextId(ITable table, long nextId)
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', RESEED, @seed)".Formato(table.Name), new List<DbParameter>
+            Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', RESEED, @seed)".FormatWith(table.Name), new List<DbParameter>
             {
                 pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1,  table.PrimaryKey.Type)
             });

@@ -22,12 +22,12 @@ namespace Signum.Engine.Translation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<TranslationReplacementDN>();
+                sb.Include<TranslationReplacementEntity>();
 
-                sb.AddUniqueIndex<TranslationReplacementDN>(tr => new { tr.CultureInfo, tr.WrongTranslation });
+                sb.AddUniqueIndex<TranslationReplacementEntity>(tr => new { tr.CultureInfo, tr.WrongTranslation });
 
-                dqm.RegisterQuery(typeof(TranslationReplacementDN), () =>
-                   from e in Database.Query<TranslationReplacementDN>()
+                dqm.RegisterQuery(typeof(TranslationReplacementEntity), () =>
+                   from e in Database.Query<TranslationReplacementEntity>()
                    select new
                    {
                        Entity = e,
@@ -37,19 +37,19 @@ namespace Signum.Engine.Translation
                        e.RightTranslation,
                    });
 
-                new Graph<TranslationReplacementDN>.Execute(TranslationReplacementOperation.Save)
+                new Graph<TranslationReplacementEntity>.Execute(TranslationReplacementOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
 
-                new Graph<TranslationReplacementDN>.Delete(TranslationReplacementOperation.Delete)
+                new Graph<TranslationReplacementEntity>.Delete(TranslationReplacementOperation.Delete)
                 {
                     Delete = (e, _) => { e.Delete(); },
                 }.Register();
 
-                ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementDN>()
+                ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
                     .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
                     gr =>
                     {
@@ -59,7 +59,7 @@ namespace Signum.Engine.Translation
 
                         return new TranslationReplacementPack { Dictionary = dic, Regex = regex };
                     }),
-                    new InvalidateWith(typeof(TranslationReplacementDN)));
+                    new InvalidateWith(typeof(TranslationReplacementEntity)));
 
             }
         }
@@ -72,11 +72,11 @@ namespace Signum.Engine.Translation
             if (string.IsNullOrWhiteSpace(translationRight))
                 throw new ArgumentNullException(translationRight);
             
-            if (!Database.Query<TranslationReplacementDN>().Any(a => a.CultureInfo == ci.ToCultureInfoDN() && a.WrongTranslation == translationWrong))
-                using (OperationLogic.AllowSave<TranslationReplacementDN>())
-                    new TranslationReplacementDN
+            if (!Database.Query<TranslationReplacementEntity>().Any(a => a.CultureInfo == ci.ToCultureInfoEntity() && a.WrongTranslation == translationWrong))
+                using (OperationLogic.AllowSave<TranslationReplacementEntity>())
+                    new TranslationReplacementEntity
                     {
-                        CultureInfo = ci.ToCultureInfoDN(),
+                        CultureInfo = ci.ToCultureInfoEntity(),
                         WrongTranslation = translationWrong,
                         RightTranslation = translationRight,
                     }.Save();

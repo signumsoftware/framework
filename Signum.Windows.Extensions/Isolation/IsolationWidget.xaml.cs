@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,7 +39,7 @@ namespace Signum.Windows.Isolation
                     this.Visibility = System.Windows.Visibility.Collapsed;
                 else
                 {
-                    if (IsolationDN.Default == null && !IsolationDN.Default.Is(isolation))
+                    if (IsolationEntity.Default == null && !IsolationEntity.Default.Is(isolation))
                     {
                         if (ForceShow != null)
                             ForceShow();

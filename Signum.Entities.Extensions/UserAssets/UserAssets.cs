@@ -91,23 +91,23 @@ namespace Signum.Entities.UserAssets
     {
         Guid Include(IUserAssetEntity content);
 
-        string TypeToName(Lite<TypeDN> type);
+        string TypeToName(Lite<TypeEntity> type);
 
-        string QueryToName(Lite<QueryDN> query);
+        string QueryToName(Lite<QueryEntity> query);
     }
 
     public interface IFromXmlContext
     {
-        QueryDN GetQuery(string queryKey);
-        Lite<TypeDN> GetType(string cleanName);
+        QueryEntity GetQuery(string queryKey);
+        Lite<TypeEntity> GetType(string cleanName);
 
-        ChartScriptDN ChartScript(string chartScriptName);
+        ChartScriptEntity ChartScript(string chartScriptName);
 
         IUserAssetEntity GetEntity(Guid guid);
 
-        IPartDN GetPart(IPartDN old, XElement element);
+        IPartEntity GetPart(IPartEntity old, XElement element);
 
-        DynamicQuery.QueryDescription GetQueryDescription(QueryDN Query);
+        DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
     }
 
     public interface IUserAssetEntity : IEntity

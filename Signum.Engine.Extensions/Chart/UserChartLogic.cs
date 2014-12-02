@@ -25,25 +25,25 @@ namespace Signum.Engine.Chart
 {
     public static class UserChartLogic
     {
-        public static ResetLazy<Dictionary<Lite<UserChartDN>, UserChartDN>> UserCharts;
-        public static ResetLazy<Dictionary<Type, List<Lite<UserChartDN>>>> UserChartsByType;
-        public static ResetLazy<Dictionary<object, List<Lite<UserChartDN>>>> UserChartsByQuery;
+        public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByType;
+        public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (sb.Schema.Tables.ContainsKey(typeof(UserChartDN)))
+                if (sb.Schema.Tables.ContainsKey(typeof(UserChartEntity)))
                     throw new InvalidOperationException("UserChart has already been registered");
 
-                UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
+                UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartEntity));
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
-                sb.Include<UserChartDN>();
+                sb.Include<UserChartEntity>();
 
-                dqm.RegisterQuery(typeof(UserChartDN), () =>
-                    from uq in Database.Query<UserChartDN>()
+                dqm.RegisterQuery(typeof(UserChartEntity), () =>
+                    from uq in Database.Query<UserChartEntity>()
                     select new
                     {
                         Entity = uq,
@@ -55,32 +55,32 @@ namespace Signum.Engine.Chart
                         uq.GroupResults,
                     });
 
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
+                sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
-                new Graph<UserChartDN>.Execute(UserChartOperation.Save)
+                new Graph<UserChartEntity>.Execute(UserChartOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (uc, _) => { }
                 }.Register();
 
-                new Graph<UserChartDN>.Delete(UserChartOperation.Delete)
+                new Graph<UserChartEntity>.Delete(UserChartOperation.Delete)
                 {
                     Delete = (uc, _) => { uc.Delete(); }
                 }.Register();
 
-                UserCharts = sb.GlobalLazy(() => Database.Query<UserChartDN>().ToDictionary(a => a.ToLite()),
-                 new InvalidateWith(typeof(UserChartDN)));
+                UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
+                 new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
-                    new InvalidateWith(typeof(UserChartDN)));
+                    new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
-                    new InvalidateWith(typeof(UserChartDN)));
+                    new InvalidateWith(typeof(UserChartEntity)));
             }
         }
 
-        public static UserChartDN ParseData(this UserChartDN userChart)
+        public static UserChartEntity ParseData(this UserChartEntity userChart)
         {
             if (!userChart.IsNew || userChart.queryName == null)
                 throw new InvalidOperationException("userChart should be new and have queryName");
@@ -94,7 +94,7 @@ namespace Signum.Engine.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartDN userQuery)
+        static void ChartLogic_Retrieved(UserChartEntity userQuery)
         {
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
@@ -108,37 +108,37 @@ namespace Signum.Engine.Chart
             userQuery.ParseData(description);
         }
 
-        public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
+        public static List<Lite<UserChartEntity>> GetUserCharts(object queryName)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
 
             return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 
-        public static List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
+        public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
 
             return UserChartsByType.Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 
-        public static List<Lite<UserChartDN>> Autocomplete(string subString, int limit)
+        public static List<Lite<UserChartEntity>> Autocomplete(string subString, int limit)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
 
             return UserCharts.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
                 .Select(a => a.Key).Autocomplete(subString, limit).ToList();
         }
 
-        public static UserChartDN RetrieveUserChart(this Lite<UserChartDN> userChart)
+        public static UserChartEntity RetrieveUserChart(this Lite<UserChartEntity> userChart)
         {
             using (ViewLogLogic.LogView(userChart, "UserChart"))
             {
                 var result = UserCharts.Value.GetOrThrow(userChart);
 
-                var isAllowed = Schema.Current.GetInMemoryFilter<UserChartDN>(userInterface: true);
+                var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
                 if (!isAllowed(result))
                     throw new EntityNotFoundException(userChart.EntityType, userChart.Id);
 
@@ -148,17 +148,17 @@ namespace Signum.Engine.Chart
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(UserDN));
+            sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
 
-            TypeConditionLogic.RegisterCompile<UserChartDN>(typeCondition, uq => uq.Owner.RefersTo(UserDN.Current));
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => uq.Owner.RefersTo(UserEntity.Current));
         }
 
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Owner, typeof(RoleDN));
+            sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
 
-            TypeConditionLogic.RegisterCompile<UserChartDN>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner));
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
@@ -166,16 +166,16 @@ namespace Signum.Engine.Chart
             if (!replacements.Interactive)
                 return null;
 
-            var list = Database.Query<UserChartDN>().ToList();
+            var list = Database.Query<UserChartEntity>().ToList();
 
-            var table = Schema.Current.Table(typeof(UserChartDN));
+            var table = Schema.Current.Table(typeof(UserChartEntity));
 
             SqlPreCommand cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
 
             return cmd;
         }
 
-        static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartDN uc)
+        static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
         {
             try
             {
@@ -198,8 +198,8 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Filters:");
                         foreach (var item in uc.Filters.ToList())
                         {
-                            QueryTokenDN token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".Formato(item.Operation, item.ValueString)))
+                            QueryTokenEntity token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString)))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
@@ -216,7 +216,7 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Columns:");
                         foreach (var item in uc.Columns.ToList())
                         {
-                            QueryTokenDN token = item.Token;
+                            QueryTokenEntity token = item.Token;
                             if (item.Token == null)
                                 break;
 
@@ -237,7 +237,7 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Orders:");
                         foreach (var item in uc.Orders.ToList())
                         {
-                            QueryTokenDN token = item.Token;
+                            QueryTokenEntity token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString()))
                             {
                                 case FixTokenResult.Nothing: break;
@@ -302,7 +302,7 @@ namespace Signum.Engine.Chart
             }
             catch (Exception e)
             {
-                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(uc.BaseToString(), e.Message));
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(uc.BaseToString(), e.Message));
             }
             finally
             {

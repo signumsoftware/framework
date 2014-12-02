@@ -24,7 +24,7 @@ namespace Signum.Entities.Files
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class FileRepositoryDN : Entity
+    public class FileRepositoryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -45,7 +45,7 @@ namespace Signum.Entities.Files
         }
 
 
-        static Expression<Func<FileRepositoryDN, string>> FullPhysicalPrefixExpression = fr => ConvertToAbsolute(fr.PhysicalPrefix);
+        static Expression<Func<FileRepositoryEntity, string>> FullPhysicalPrefixExpression = fr => ConvertToAbsolute(fr.PhysicalPrefix);
         public string FullPhysicalPrefix
         {
             get { return ConvertToAbsolute(PhysicalPrefix); }
@@ -85,7 +85,7 @@ namespace Signum.Entities.Files
             set { Set(ref fileTypes, value); }
         }
 
-        static readonly Expression<Func<FileRepositoryDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<FileRepositoryEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -94,6 +94,6 @@ namespace Signum.Entities.Files
 
     public static class FileRepositoryOperation
     {
-        public static readonly ExecuteSymbol<FileRepositoryDN> Save = OperationSymbol.Execute<FileRepositoryDN>();
+        public static readonly ExecuteSymbol<FileRepositoryEntity> Save = OperationSymbol.Execute<FileRepositoryEntity>();
     }
 }

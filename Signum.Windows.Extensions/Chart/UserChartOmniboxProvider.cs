@@ -30,12 +30,12 @@ namespace Signum.Windows.Chart
 
         public override Run GetIcon()
         {
-            return new Run("({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet };
+            return new Run("({0})".FormatWith(typeof(UserChartEntity).NiceName())) { Foreground = Brushes.DarkViolet };
         }
 
         public override void OnSelected(UserChartOmniboxResult result, Window window)
         {
-            UserChartDN uc = result.UserChart.RetrieveAndForget();
+            UserChartEntity uc = result.UserChart.RetrieveAndForget();
 
             ChartClient.View(uc, null);
         }

@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Dashboard;assembly=Signum.Entities.Extensions"
     xmlns:swcp="clr-namespace:Signum.Windows.Dashboard"
-    m:Common.TypeContext="{x:Type d:DashboardDN}"
+    m:Common.TypeContext="{x:Type d:DashboardEntity}"
     MinWidth="600">
     <Grid>
         <Grid.RowDefinitions>
@@ -38,7 +38,7 @@
                 </ItemsPanelTemplate>
             </m:EntityRepeater.ItemsPanel>
             <m:EntityRepeater.EntityTemplate>
-                <DataTemplate DataType="{x:Type d:PanelPartDN}">
+                <DataTemplate DataType="{x:Type d:PanelPartEntity}">
                     <StackPanel>
                         <m:ValueLine m:Common.Route="Title" Background="{DynamicResource LightBlue}"/>
                         <m:ValueLine m:Common.Route="Row" Background="{DynamicResource LightBlue}"/>

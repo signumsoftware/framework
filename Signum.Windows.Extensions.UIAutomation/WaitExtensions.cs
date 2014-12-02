@@ -32,7 +32,7 @@ namespace Signum.Windows.UIAutomation
                     return;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeout) + (actionDescription == null ? null : actionDescription()));
+                    throw new TimeoutException("Wait condition failed after {0} ms: ".FormatWith(timeOut ?? DefaultTimeout) + (actionDescription == null ? null : actionDescription()));
             }
         }
 
@@ -49,7 +49,7 @@ namespace Signum.Windows.UIAutomation
             action();
 
             if (actionDescription == null)
-                actionDescription = () => "DataContextChanged for {0}".Formato(oldValue);
+                actionDescription = () => "DataContextChanged for {0}".FormatWith(oldValue);
          
             element.Wait(() =>
             {
@@ -140,7 +140,7 @@ namespace Signum.Windows.UIAutomation
             if (result.IsEmpty() || result.Any(a => a.SafeGet(p => p.ClassName.StartsWith("HwndWrapper"), false)))
             {
                 if (retryCount > 4)
-                    throw new InvalidOperationException("No windows found after {0} retries".Formato(retryCount));
+                    throw new InvalidOperationException("No windows found after {0} retries".FormatWith(retryCount));
 
                 retryCount++;
                 goto retry;
@@ -228,7 +228,7 @@ namespace Signum.Windows.UIAutomation
             if (ae == null)
                 return "NULL";
 
-            return "{0} [{1}] ({2})".Formato(ae.Current.Name, ae.Current.ClassName, ae.GetRuntimeId().ToString("."));
+            return "{0} [{1}] ({2})".FormatWith(ae.Current.Name, ae.Current.ClassName, ae.GetRuntimeId().ToString("."));
         }
 
         public static AutomationElement WaitDescendant(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
@@ -260,7 +260,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new TimeoutException("Element not found after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).ToString()));
+                    throw new TimeoutException("Element not found after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).ToString()));
             }
         }
 
@@ -295,7 +295,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".Formato((timeOut ?? DefaultTimeout), automationId));
+                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".FormatWith((timeOut ?? DefaultTimeout), automationId));
             }
         }
 
@@ -329,7 +329,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), condition.NiceToString()));
+                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), condition.NiceToString()));
             }
         }
     }

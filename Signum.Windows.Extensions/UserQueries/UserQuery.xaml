@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:ua="clr-namespace:Signum.Windows.UserAssets"
     xmlns:dq="clr-namespace:Signum.Entities.UserQueries;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type dq:UserQueryDN}" MinWidth="450">
+    m:Common.TypeContext="{x:Type dq:UserQueryEntity}" MinWidth="450">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -32,10 +32,10 @@ namespace Signum.Windows.Authorization
         public static Type ConditionType = typeof(TypeConditionRuleBuilder);
 
         public static readonly DependencyProperty RoleProperty =
-           DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(TypeRules), new UIPropertyMetadata(null));
-        public Lite<RoleDN> Role
+           DependencyProperty.Register("Role", typeof(Lite<RoleEntity>), typeof(TypeRules), new UIPropertyMetadata(null));
+        public Lite<RoleEntity> Role
         {
-            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleEntity>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
@@ -63,7 +63,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(TypeEntity).NiceName(), Role);
 
             TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role));
 
@@ -146,7 +146,7 @@ namespace Signum.Windows.Authorization
                 elementIcon: null,
                 elementText: v => v.NiceToString(),
                 title: "New condition", 
-                message: "Select the condition for {0} to add specific authorization rules".Formato(rules.Resource.CleanName), 
+                message: "Select the condition for {0} to add specific authorization rules".FormatWith(rules.Resource.CleanName), 
                 owner: this))
             {
                 rules.Conditions.Add(new TypeConditionRuleBuilder(value, rules.Allowed.None ? TypeAllowed.Create : TypeAllowed.None)); 
@@ -330,7 +330,7 @@ namespace Signum.Windows.Authorization
             set { Set(ref availableConditions, value); }
         }
 
-        public TypeDN Resource { get; set; }
+        public TypeEntity Resource { get; set; }
 
         public AuthThumbnail? Properties { get; set; }
         public AuthThumbnail? Operations { get; set; }

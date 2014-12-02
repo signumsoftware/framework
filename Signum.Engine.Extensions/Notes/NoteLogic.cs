@@ -22,23 +22,23 @@ namespace Signum.Engine.Notes
 {
     public static class NoteLogic
     {
-        static Expression<Func<Entity, IQueryable<NoteDN>>> NotesExpression =
-            ident => Database.Query<NoteDN>().Where(n => n.Target.RefersTo(ident));
-        public static IQueryable<NoteDN> Notes(this Entity ident)
+        static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
+            ident => Database.Query<NoteEntity>().Where(n => n.Target.RefersTo(ident));
+        public static IQueryable<NoteEntity> Notes(this Entity ident)
         {
             return NotesExpression.Evaluate(ident);
         }
 
-        static HashSet<NoteTypeDN> SystemNoteTypes = new HashSet<NoteTypeDN>();
+        static HashSet<NoteTypeEntity> SystemNoteTypes = new HashSet<NoteTypeEntity>();
         static bool started = false;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<NoteDN>();
-                dqm.RegisterQuery(typeof(NoteDN), () =>
-                    from n in Database.Query<NoteDN>()
+                sb.Include<NoteEntity>();
+                dqm.RegisterQuery(typeof(NoteEntity), () =>
+                    from n in Database.Query<NoteEntity>()
                     select new
                     {
                         Entity = n,
@@ -50,20 +50,20 @@ namespace Signum.Engine.Notes
                         n.Target
                     });
 
-                new Graph<NoteDN>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
+                new Graph<NoteEntity>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
                 {
-                    Construct = (a, _) => new NoteDN{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
+                    Construct = (a, _) => new NoteEntity{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
                 }.Register();
 
-                new Graph<NoteDN>.Execute(NoteOperation.Save)
+                new Graph<NoteEntity>.Execute(NoteOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (a, _) => { }
                 }.Register();
 
-                dqm.RegisterQuery(typeof(NoteTypeDN), () =>
-                    from t in Database.Query<NoteTypeDN>()
+                dqm.RegisterQuery(typeof(NoteTypeEntity), () =>
+                    from t in Database.Query<NoteTypeEntity>()
                     select new
                     {
                         Entity = t,
@@ -72,9 +72,9 @@ namespace Signum.Engine.Notes
                         t.Key,
                     });
 
-                SemiSymbolLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
+                SemiSymbolLogic<NoteTypeEntity>.Start(sb, () => SystemNoteTypes);
 
-                new Graph<NoteTypeDN>.Execute(NoteTypeOperation.Save)
+                new Graph<NoteTypeEntity>.Execute(NoteTypeOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -85,14 +85,14 @@ namespace Signum.Engine.Notes
                 {
                     var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Notes());
                     foreach (var type in registerExpressionsFor)
-                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteDN).NicePluralName()));
+                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteEntity).NicePluralName()));
                 }
 
                 started = true;
             }
         }
 
-        public static void RegisterNoteType(NoteTypeDN noteType)
+        public static void RegisterNoteType(NoteTypeEntity noteType)
         {
             if (!noteType.Key.HasText())
                 throw new InvalidOperationException("noteType must have a key, use MakeSymbol method after the constructor when declaring it");
@@ -101,14 +101,14 @@ namespace Signum.Engine.Notes
         }
 
 
-        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, NoteTypeDN noteType,  Lite<UserDN> user = null, string title = null) where T : class, IEntity
+        public static NoteEntity CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType,  Lite<UserEntity> user = null, string title = null) where T : class, IEntity
         {
             if (started == false)
                 return null;
 
-            return new NoteDN
+            return new NoteEntity
             {               
-                CreatedBy = user ?? UserDN.Current.ToLite(),
+                CreatedBy = user ?? UserEntity.Current.ToLite(),
                 Text = text,
                 Title = title,
                 Target = (Lite<Entity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),

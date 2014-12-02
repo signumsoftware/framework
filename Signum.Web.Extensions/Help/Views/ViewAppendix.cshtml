@@ -2,6 +2,8 @@
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
 @using Signum.Entities.Help
+@using Signum.Engine
+@using Signum.Engine.Basics
 
 @section head
 {
@@ -19,16 +21,24 @@
 
 <div class="row">
     <div class="col-md-9" id="entityName">
-        @using (TypeContext<AppendixHelpDN> ac = new TypeContext<AppendixHelpDN>(ah.Entity, null))
+        @using (TypeContext<AppendixHelpEntity> ac = new TypeContext<AppendixHelpEntity>(ah.Entity, null))
         {
             using (Html.BeginForm((HelpController hc) => hc.SaveAppendix(), new { id = "form-save" }))
             {
             @Html.HiddenRuntimeInfo(ac)
             @Html.HiddenRuntimeInfo(ac, e => e.Culture)
 
-            if(!Navigator.IsReadOnly(typeof(AppendixHelpDN)))
+            if(!Navigator.IsReadOnly(typeof(AppendixHelpEntity)))
             {
-                Html.RenderPartial(HelpClient.Buttons);
+                   Html.RenderPartial(HelpClient.Buttons, new ViewDataDictionary
+                    {
+                        { "options",  Database.Query<AppendixHelpEntity>()
+                        .Where(e => e.UniqueName == ac.Value.UniqueName && e.Culture != ac.Value.Culture)
+                        .Select(e => new { e.Culture })
+                        .ToList()
+                        .Select(e => KVP.Create(e.Culture.ToCultureInfo(), this.Url.Action((HelpController a) => a.TraslateAppendix(e.Culture.Name))))
+                        .ToDictionary() }                   
+                    });
             }
                 if (ac.Value.UniqueName == null)
                 {

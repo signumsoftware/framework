@@ -24,18 +24,18 @@ namespace Signum.Windows.Authorization
     public partial class QueryRules : Window
     {
         public static readonly DependencyProperty TypeProperty =
-            DependencyProperty.Register("Type", typeof(TypeDN), typeof(QueryRules), new UIPropertyMetadata(null));
-        public TypeDN Type
+            DependencyProperty.Register("Type", typeof(TypeEntity), typeof(QueryRules), new UIPropertyMetadata(null));
+        public TypeEntity Type
         {
-            get { return (TypeDN)GetValue(TypeProperty); }
+            get { return (TypeEntity)GetValue(TypeProperty); }
             set { SetValue(TypeProperty, value); }
         }
 
         public static readonly DependencyProperty RoleProperty =
-          DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(QueryRules), new UIPropertyMetadata(null));
-        public Lite<RoleDN> Role
+          DependencyProperty.Register("Role", typeof(Lite<RoleEntity>), typeof(QueryRules), new UIPropertyMetadata(null));
+        public Lite<RoleEntity> Role
         {
-            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleEntity>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
@@ -52,7 +52,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {   
-            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
+            this.Title = AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
 
             DataContext = Server.Return((IQueryAuthServer s)=>s.GetQueryRules(Role, Type)); 
         }

@@ -86,7 +86,7 @@ namespace Signum.Web.Combine
         {
             ScriptElement elem;
             if (!ElementsByKey.TryGetValue(key, out elem))
-                throw new KeyNotFoundException("Script '{0}' not found".Formato(key));
+                throw new KeyNotFoundException("Script '{0}' not found".FormatWith(key));
 
             if (elem.Content != null)
                 return elem.Content;

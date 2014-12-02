@@ -14,21 +14,21 @@ namespace Signum.Services
     public interface IDashboardServer
     {
         [OperationContract, NetDataContract]
-        DashboardDN GetHomePageDashboard();
+        DashboardEntity GetHomePageDashboard();
 
         [OperationContract, NetDataContract]
-        DashboardDN GetEmbeddedDashboard(Type entityType);
+        DashboardEntity GetEmbeddedDashboard(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<Lite<DashboardDN>> GetDashboardsEntity(Type entityType);
+        List<Lite<DashboardEntity>> GetDashboardsEntity(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<Lite<DashboardDN>> GetDashboards();
+        List<Lite<DashboardEntity>> GetDashboards();
 
         [OperationContract, NetDataContract]
-        DashboardDN RetrieveDashboard(Lite<DashboardDN> dashboard);
+        DashboardEntity RetrieveDashboard(Lite<DashboardEntity> dashboard);
 
         [OperationContract, NetDataContract]
-        List<Lite<DashboardDN>> AutocompleteDashboard(string subString, int limit);
+        List<Lite<DashboardEntity>> AutocompleteDashboard(string subString, int limit);
     }
 }

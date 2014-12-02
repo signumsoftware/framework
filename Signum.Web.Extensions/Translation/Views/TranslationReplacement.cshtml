@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Translation
-@using (var tc = Html.TypeContext<TranslationReplacementDN>())
+@using (var tc = Html.TypeContext<TranslationReplacementEntity>())
 {
     @Html.EntityLine(tc, t => t.CultureInfo)
     @Html.ValueLine(tc, t => t.WrongTranslation)

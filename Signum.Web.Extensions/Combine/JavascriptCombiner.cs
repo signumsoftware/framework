@@ -21,7 +21,7 @@ namespace Signum.Web.Combine
 
         internal static StaticContentResult Combine(string[] virtualFiles)
         {
-            string combineComment = "/* {0} */".Formato(virtualFiles.ToString(",")) + "\r\n";
+            string combineComment = "/* {0} */".FormatWith(virtualFiles.ToString(",")) + "\r\n";
 
             StringBuilder sb = new StringBuilder();
             foreach (var vf in virtualFiles)

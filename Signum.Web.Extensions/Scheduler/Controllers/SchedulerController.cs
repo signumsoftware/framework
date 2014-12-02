@@ -27,7 +27,7 @@ namespace Signum.Web.Scheduler
         {
             var state = SchedulerLogic.GetSchedulerState();
 
-            return View(SchedulerClient.ViewPrefix.Formato("SchedulerPanel"), state);
+            return View(SchedulerClient.ViewPrefix.FormatWith("SchedulerPanel"), state);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

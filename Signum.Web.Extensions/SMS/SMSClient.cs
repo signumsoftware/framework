@@ -20,6 +20,7 @@ using Newtonsoft.Json.Linq;
 using Signum.Engine.DynamicQuery;
 using Signum.Web.Basic;
 using Signum.Engine.Maps;
+using Signum.Web.Cultures;
 #endregion
 
 
@@ -39,16 +40,16 @@ namespace Signum.Web.SMS
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<SMSConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SMSConfiguration") },
+                    new EmbeddedEntitySettings<SMSConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSConfiguration") },
 
-                    new EntitySettings<SMSMessageDN> { PartialViewName = e => ViewPrefix.Formato("SMSMessage") },
-                    new EntitySettings<SMSTemplateDN> { PartialViewName = e => ViewPrefix.Formato("SMSTemplate") },
-                    new EmbeddedEntitySettings<SMSTemplateMessageDN> { PartialViewName = e => ViewPrefix.Formato("SMSTemplateMessage") },
+                    new EntitySettings<SMSMessageEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSMessage") },
+                    new EntitySettings<SMSTemplateEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSTemplate") },
+                    new EmbeddedEntitySettings<SMSTemplateMessageEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSTemplateMessage") },
 
-                    new EntitySettings<SMSSendPackageDN> { PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
-                    new EntitySettings<SMSUpdatePackageDN> { PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
+                    new EntitySettings<SMSSendPackageEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSSendPackage") },
+                    new EntitySettings<SMSUpdatePackageEntity> { PartialViewName = e => ViewPrefix.FormatWith("SMSUpdatePackage") },
 
-                    new EmbeddedEntitySettings<MultipleSMSModel> { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
+                    new EmbeddedEntitySettings<MultipleSMSModel> { PartialViewName = e => ViewPrefix.FormatWith("MultipleSMS") },
                 });
 
                 OperationClient.AddSettings(new List<OperationSettings> 
@@ -79,12 +80,12 @@ namespace Signum.Web.SMS
 
         private static FindOptions SmsTemplateFindOptions(Type type)
         {
-            return new FindOptions(typeof(SMSTemplateDN))
+            return new FindOptions(typeof(SMSTemplateEntity))
             {
                 FilterOptions = new List<FilterOption> 
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
-                    { new FilterOption("AssociatedType", type.ToTypeDN().ToLite()) }
+                    { new FilterOption("AssociatedType", type.ToTypeEntity().ToLite()) }
                 }
             };
         }

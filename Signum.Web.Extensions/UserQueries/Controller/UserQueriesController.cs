@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,11 +31,11 @@ namespace Signum.Web.UserQueries
 {
     public class UserQueriesController : Controller
     {
-        public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<Entity> currentEntity)
+        public ActionResult View(Lite<UserQueryEntity> lite, FindOptions findOptions, Lite<Entity> currentEntity)
         {
             UserQueryPermission.ViewUserQuery.AssertAuthorized();
 
-            UserQueryDN uq =  UserQueryLogic.RetrieveUserQuery(lite);
+            UserQueryEntity uq =  UserQueryLogic.RetrieveUserQuery(lite);
 
             using (uq.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity.Retrieve()))
             {
@@ -51,16 +51,16 @@ namespace Signum.Web.UserQueries
         public ActionResult Create(QueryRequest request)
         {
             if (!Finder.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             var userQuery = ToUserQuery(request);
 
-            userQuery.Owner = UserDN.Current.ToLite();
+            userQuery.Owner = UserEntity.Current.ToLite();
 
             return Navigator.NormalPage(this, userQuery);
         }
 
-        public static UserQueryDN ToUserQuery(QueryRequest request)
+        public static UserQueryEntity ToUserQuery(QueryRequest request)
         {
             return request.ToUserQuery(
                 DynamicQueryManager.Current.QueryDescription(request.QueryName),

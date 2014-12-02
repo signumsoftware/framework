@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,10 +25,10 @@ namespace Signum.Windows.Chart
     public class UserChartMenuItem : MenuItem
     {
         public static readonly DependencyProperty CurrentUserChartProperty =
-            DependencyProperty.Register("CurrentUserChart", typeof(UserChartDN), typeof(UserChartMenuItem), new UIPropertyMetadata((d, e) => ((UserChartMenuItem)d).UpdateCurrent((UserChartDN)e.NewValue)));
-        public UserChartDN CurrentUserChart
+            DependencyProperty.Register("CurrentUserChart", typeof(UserChartEntity), typeof(UserChartMenuItem), new UIPropertyMetadata((d, e) => ((UserChartMenuItem)d).UpdateCurrent((UserChartEntity)e.NewValue)));
+        public UserChartEntity CurrentUserChart
         {
-            get { return (UserChartDN)GetValue(CurrentUserChartProperty); }
+            get { return (UserChartEntity)GetValue(CurrentUserChartProperty); }
             set { SetValue(CurrentUserChartProperty, value); }
         }
 
@@ -36,7 +36,7 @@ namespace Signum.Windows.Chart
 
         public UserChartMenuItem()
         {
-            if (!Navigator.IsViewable(typeof(UserChartDN)))
+            if (!Navigator.IsViewable(typeof(UserChartEntity)))
                 Visibility = System.Windows.Visibility.Hidden;
 
             this.Loaded += new RoutedEventHandler(UserChartMenuItem_Loaded);
@@ -68,21 +68,21 @@ namespace Signum.Windows.Chart
             get { return DynamicQueryServer.GetQueryDescription(ChartRequest.QueryName); }
         }
 
-        private void UpdateCurrent(UserChartDN current)
+        private void UpdateCurrent(UserChartEntity current)
         {
             Header = new TextBlock
             {
                 Inlines = 
                 { 
                     new Run(
-                    current == null ? typeof(UserChartDN).NicePluralName() : current.DisplayName), 
+                    current == null ? typeof(UserChartEntity).NicePluralName() : current.DisplayName), 
                     UserCharts == null || UserCharts.Count==0 ? (Inline)new Run():  new Bold(new Run(" (" + UserCharts.Count + ")")) 
                 }
             };
 
             foreach (var item in this.Items.OfType<MenuItem>().Where(mi => mi.IsCheckable))
             {
-                item.IsChecked = ((Lite<UserChartDN>)item.Tag).RefersTo(current);
+                item.IsChecked = ((Lite<UserChartEntity>)item.Tag).RefersTo(current);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Signum.Windows.Chart
             Icon = ExtensionsImageLoader.GetImageSortName("favorite.png").ToSmallImage();
         }
 
-        List<Lite<UserChartDN>> UserCharts; 
+        List<Lite<UserChartEntity>> UserCharts; 
 
         public void Initialize()
         {
@@ -104,7 +104,7 @@ namespace Signum.Windows.Chart
             
             if (UserCharts.Count > 0)
             {
-                foreach (Lite<UserChartDN> uc in UserCharts.OrderBy(a => a.ToString()))
+                foreach (Lite<UserChartEntity> uc in UserCharts.OrderBy(a => a.ToString()))
                 {
                     MenuItem mi = new MenuItem()
                     {
@@ -118,11 +118,11 @@ namespace Signum.Windows.Chart
 
             UpdateCurrent(CurrentUserChart);
 
-            if (Navigator.IsNavigable(typeof(UserChartDN), true))
+            if (Navigator.IsNavigable(typeof(UserChartEntity), true))
             {
                 Items.Add(new Separator());
 
-                if (Navigator.IsCreable(typeof(UserChartDN), true))
+                if (Navigator.IsCreable(typeof(UserChartEntity), true))
                 {
                     Items.Add(new MenuItem()
                     {
@@ -149,7 +149,7 @@ namespace Signum.Windows.Chart
 
         }
 
-        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Collapsed);
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartEntity uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Collapsed);
 
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)
@@ -159,7 +159,7 @@ namespace Signum.Windows.Chart
             if (e.OriginalSource is MenuItem)
             {
                 MenuItem b = (MenuItem)e.OriginalSource;
-                Lite<UserChartDN> userChart = (Lite<UserChartDN>)b.Tag;
+                Lite<UserChartEntity> userChart = (Lite<UserChartEntity>)b.Tag;
 
                 var uc = Server.Return((IChartServer s) => s.RetrieveUserChart(userChart));
 
@@ -167,7 +167,7 @@ namespace Signum.Windows.Chart
             }
         }
 
-        private void SetCurrent(UserChartDN uc)
+        private void SetCurrent(UserChartEntity uc)
         {
             CurrentUserChart = uc;
 
@@ -180,7 +180,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            UserChartDN userChart = ChartRequest.ToUserChart();
+            UserChartEntity userChart = ChartRequest.ToUserChart();
 
             userChart = Navigator.View(userChart, new ViewOptions
             {
@@ -211,7 +211,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            if (MessageBox.Show(Window.GetWindow(this), UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(CurrentUserChart), UserQueryMessage.RemoveUserQuery.NiceToString(),
+            if (MessageBox.Show(Window.GetWindow(this), UserQueryMessage.AreYouSureToRemove0.NiceToString().FormatWith(CurrentUserChart), UserQueryMessage.RemoveUserQuery.NiceToString(),
                 MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
             {
                 CurrentUserChart.ToLite().DeleteLite(UserChartOperation.Delete);

@@ -9,7 +9,7 @@
 @using Signum.Entities.DynamicQuery
 
 
-@using (var e = Html.TypeContext<UserQueryDN>())
+@using (var e = Html.TypeContext<UserQueryEntity>())
 {
     e.LabelColumns = new BsColumn(2);
 
@@ -27,7 +27,7 @@
 
     var niceName = QueryUtils.GetNiceName(query.Value.ToQueryName());
 
-    @Html.FormGroup(e, null, typeof(QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+    @Html.FormGroup(e, null, typeof(QueryEntity).NiceName(), Finder.IsFindable(queryName) ?
                      new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                      Html.Span(null, niceName, "form-control-static"))
 
@@ -44,7 +44,7 @@
     })
     
     <p class="messageEntity col-sm-offset-2">
-        @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
+        @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey)
     </p>
     
     @Html.ValueLine(e, f => f.WithoutFilters)

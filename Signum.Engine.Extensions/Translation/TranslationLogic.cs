@@ -21,9 +21,9 @@ namespace Signum.Engine.Translation
 {
     public static class TranslationLogic
     {
-        static Expression<Func<IUserDN, TranslatorUserDN>> TranslatorUserExpression =
-             user => Database.Query<TranslatorUserDN>().SingleOrDefault(a => a.User.RefersTo(user));
-        public static TranslatorUserDN TranslatorUser(this IUserDN entity)
+        static Expression<Func<IUserEntity, TranslatorUserEntity>> TranslatorUserExpression =
+             user => Database.Query<TranslatorUserEntity>().SingleOrDefault(a => a.User.RefersTo(user));
+        public static TranslatorUserEntity TranslatorUser(this IUserEntity entity)
         {
             return TranslatorUserExpression.Evaluate(entity);
         }
@@ -35,10 +35,10 @@ namespace Signum.Engine.Translation
             {
                 CultureInfoLogic.AssertStarted(sb);
 
-                sb.Include<TranslatorUserDN>();
+                sb.Include<TranslatorUserEntity>();
 
-                dqm.RegisterQuery(typeof(TranslatorUserDN), () =>
-                    from e in Database.Query<TranslatorUserDN>()
+                dqm.RegisterQuery(typeof(TranslatorUserEntity), () =>
+                    from e in Database.Query<TranslatorUserEntity>()
                     select new
                     {
                         Entity = e,
@@ -50,16 +50,16 @@ namespace Signum.Engine.Translation
 
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
 
-                dqm.RegisterExpression((IUserDN e) => e.TranslatorUser(), () => typeof(TranslatorUserDN).NiceName());
+                dqm.RegisterExpression((IUserEntity e) => e.TranslatorUser(), () => typeof(TranslatorUserEntity).NiceName());
 
-                new Graph<TranslatorUserDN>.Execute(TranslatorUserOperation.Save)
+                new Graph<TranslatorUserEntity>.Execute(TranslatorUserOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { }
                 }.Register();
 
-                new Graph<TranslatorUserDN>.Delete(TranslatorUserOperation.Delete)
+                new Graph<TranslatorUserEntity>.Delete(TranslatorUserOperation.Delete)
                 {
                     Delete = (e, _) => { e.Delete(); }
                 }.Register();
@@ -70,9 +70,9 @@ namespace Signum.Engine.Translation
         {
             var cultures = CultureInfoLogic.ApplicationCultures;
 
-            if (Schema.Current.Tables.ContainsKey(typeof(TranslatorUserDN)))
+            if (Schema.Current.Tables.ContainsKey(typeof(TranslatorUserEntity)))
             {
-                TranslatorUserDN tr = UserDN.Current.TranslatorUser();
+                TranslatorUserEntity tr = UserEntity.Current.TranslatorUser();
 
                 if (tr != null)
                     cultures = cultures.Where(ci => ci.Name == defaultCulture.Name || tr.Cultures.Any(tc => tc.Culture.ToCultureInfo() == ci));

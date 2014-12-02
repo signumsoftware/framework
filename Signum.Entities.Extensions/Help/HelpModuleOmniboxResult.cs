@@ -68,7 +68,7 @@ namespace Signum.Entities.Help
             {
                 new HelpOmniboxResult 
                 { 
-                    Text =  NiceName() + " " + typeof(TypeDN).NiceName(), 
+                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(), 
                     OmniboxResultType = resultType 
                 },
                 new HelpOmniboxResult 
@@ -93,7 +93,7 @@ namespace Signum.Entities.Help
             if (Type == null && !SearchString.HasText())
                 return KeywordMatch.Value.ToString() + " ";
 
-            return "{0} {1}".Formato(KeywordMatch.Value,
+            return "{0} {1}".FormatWith(KeywordMatch.Value,
                 Type != null ? Type.NiceName().ToOmniboxPascal() :
                 ("'" + SearchString + "'"));
         }

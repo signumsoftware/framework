@@ -44,17 +44,17 @@ namespace Signum.Windows.Processes
 
         void timer_Tick(object sender, EventArgs e)
         {
-            ProcessDN pe = DataContext as ProcessDN;
+            ProcessEntity pe = DataContext as ProcessEntity;
             if (pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
             {
-                ProcessDN npe = pe.ToLite().RetrieveAndForget();
+                ProcessEntity npe = pe.ToLite().RetrieveAndForget();
                 RaiseEvent(new ChangeDataContextEventArgs(npe));
             }
         }
 
         void Process_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            ProcessDN pe = e.NewValue as ProcessDN;
+            ProcessEntity pe = e.NewValue as ProcessEntity;
             timer.IsEnabled = pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending); 
         }
     }

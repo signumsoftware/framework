@@ -6,11 +6,11 @@
 }
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
-  @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+  @Html.Partial(ProfilerClient.ViewPrefix.FormatWith("ProfilerButtons"))
   @Html.ActionLink("Root Entries", "Heavy", new {@class = "sf-button" })
 </div>
 
-@Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable"))
+@Html.Partial(ProfilerClient.ViewPrefix.FormatWith("StatisticsTable"))
 <script>
     $(function () {
         @(ProfilerClient.Module["initStats"]());

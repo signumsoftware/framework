@@ -6,7 +6,7 @@
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:ua="clr-namespace:Signum.Windows.UserAssets"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type dn:UserChartDN}">
+    m:Common.TypeContext="{x:Type dn:UserChartEntity}">
     <StackPanel>
         <m:EntityLine m:Common.Route="Query" m:Common.IsReadOnly="True" />
         <m:ValueLine m:Common.Route="DisplayName"/>

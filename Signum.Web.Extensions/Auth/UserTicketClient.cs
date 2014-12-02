@@ -25,7 +25,7 @@ namespace Signum.Web.Auth
 
                     string ticketText = authCookie.Value;
 
-                    UserDN user = UserTicketLogic.UpdateTicket(
+                    UserEntity user = UserTicketLogic.UpdateTicket(
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);
 

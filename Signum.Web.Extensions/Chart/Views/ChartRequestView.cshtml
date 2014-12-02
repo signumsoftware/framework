@@ -1,4 +1,4 @@
-@using Signum.Web
+﻿@using Signum.Web
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -58,7 +58,7 @@
         <div class="sf-query-button-bar">
             <button type="submit" class="sf-query-button sf-chart-draw btn btn-primary" id="@Model.Compose("qbDraw")">@ChartMessage.Chart_Draw.NiceToString()</button>
             <button class="sf-query-button sf-chart-script-edit btn btn-default"  id="@Model.Compose("qbEdit")">@ChartMessage.EditScript.NiceToString()</button>
-            @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.Prefix, (Lite<UserChartDN>)ViewData["UserChart"]).ToStringButton(Html)
+            @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.Prefix, (Lite<UserChartEntity>)ViewData["UserChart"]).ToStringButton(Html)
         </div>
         <br />
         <div id="@Model.Compose("divResults")" class="sf-search-results-container">

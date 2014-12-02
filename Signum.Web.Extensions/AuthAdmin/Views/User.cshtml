@@ -1,4 +1,4 @@
-@using (var e = Html.TypeContext<UserDN>())
+﻿@using (var e = Html.TypeContext<UserEntity>())
 {
     @Html.ValueLine(e, f => f.State, v => v.ReadOnly = true)
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)

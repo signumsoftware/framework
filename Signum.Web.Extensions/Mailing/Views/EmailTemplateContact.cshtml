@@ -2,7 +2,7 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserAssets
 @using Signum.Web.Mailing
-@using (var tc = Html.TypeContext<EmailTemplateContactDN>())
+@using (var tc = Html.TypeContext<EmailTemplateContactEntity>())
 {
     
     using(var sc = tc.SubContext())
@@ -10,7 +10,7 @@
         sc.LabelColumns = new BsColumn(4);
         <div class="row">
             <div class="col-sm-2" style="text-align: right;padding: 8px;">
-                <label>@Html.PropertyNiceName((EmailTemplateDN e)=>e.From)</label>
+                <label>@Html.PropertyNiceName((EmailTemplateEntity e)=>e.From)</label>
             </div>
             <div class="col-sm-5">
                    @Html.ValueLine(sc, c => c.EmailAddress)

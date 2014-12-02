@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:FilePathDN}"
+    m:Common.TypeContext="{x:Type d:FilePathEntity}"
     MinWidth="300">
     <StackPanel m:Common.MinLabelWidth="115">
         <m:ValueLine m:Common.Route="FileName" />

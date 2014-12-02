@@ -113,7 +113,7 @@ namespace Signum.Web.Selenium
         public NormalPage<T> NormalPage<T>(Lite<T> lite) where T : Entity
         {
             if(lite != null && lite.EntityType != typeof(T))
-                throw new InvalidOperationException("Use NormalPage<{0}> instead".Formato(lite.EntityType.Name));
+                throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
             
             var url = Url(NavigateRoute(lite));
 
@@ -133,9 +133,9 @@ namespace Signum.Web.Selenium
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
             if (id.HasValue)
-                return "View/{0}/{1}".Formato(typeName, id.HasValue ? id.ToString() : "");
+                return "View/{0}/{1}".FormatWith(typeName, id.HasValue ? id.ToString() : "");
             else
-                return "Create/{0}".Formato(typeName);
+                return "Create/{0}".FormatWith(typeName);
         }
 
         protected virtual string NavigateRoute(Lite<IEntity> lite)

@@ -39,7 +39,7 @@ namespace Signum.Windows.UIAutomation
             return new NormalWindowProxy<T>(SelectCapture(omniboxName, "E:" + lite.Key(), className: "NormalWindow")); 
         }
 
-        public SearchWindowProxy SelectUserQuery(Lite<UserQueryDN> userQuery)
+        public SearchWindowProxy SelectUserQuery(Lite<UserQueryEntity> userQuery)
         {
             var omniboxName = "'" + userQuery.ToString() + "'";
 
@@ -60,14 +60,14 @@ namespace Signum.Windows.UIAutomation
                     var item = lb.TryDescendant(e => e.Current.Name == name);
 
                     if (item == null)
-                        throw new ElementNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(name, autoCompleteText));
+                        throw new ElementNotFoundException("{0} not found after writing {1} on the Omnibox".FormatWith(name, autoCompleteText));
 
                     var listItem = item.Parent(a => a.Current.ControlType == ControlType.ListItem);
 
                     listItem.Pattern<SelectionItemPattern>().Select();
                 },
                 windowsCondition: ae => className == null || ae.Current.ClassName == className,
-                actionDescription: () => "window after selecting {0} on the omnibox".Formato(name),
+                actionDescription: () => "window after selecting {0} on the omnibox".FormatWith(name),
                 timeOut: timeOut);
         }
     }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,61 +33,61 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessDN, IDisposable> ApplySession;
+        public static Func<ProcessEntity, IDisposable> ApplySession;
 
-        static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessDN>>> ProcessesFromAlgorithmExpression =
-            p => Database.Query<ProcessDN>().Where(a => a.Algorithm == p);
+        static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessEntity>>> ProcessesFromAlgorithmExpression =
+            p => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p);
         [ExpressionField("ProcessesFromAlgorithmExpression")]
-        public static IQueryable<ProcessDN> Processes(this ProcessAlgorithmSymbol p)
+        public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p)
         {
             return ProcessesFromAlgorithmExpression.Evaluate(p);
         }
 
-        static Expression<Func<ProcessAlgorithmSymbol, ProcessDN>> LastProcessFromAlgorithmExpression =
+        static Expression<Func<ProcessAlgorithmSymbol, ProcessEntity>> LastProcessFromAlgorithmExpression =
             p => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
           [ExpressionField("LastProcessFromAlgorithmExpression")]
-        public static ProcessDN LastProcess(this ProcessAlgorithmSymbol p)
+        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p)
         {
             return LastProcessFromAlgorithmExpression.Evaluate(p);
         }
 
-        static Expression<Func<ProcessDN, IQueryable<ProcessExceptionLineDN>>> ExceptionLinesProcessExpression =
-            p => Database.Query<ProcessExceptionLineDN>().Where(a => a.Process.RefersTo(p));
+        static Expression<Func<ProcessEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesProcessExpression =
+            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.RefersTo(p));
         [ExpressionField("ExceptionLinesProcessExpression")]
-        public static IQueryable<ProcessExceptionLineDN> ExceptionLines(this ProcessDN p)
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p)
         {
             return ExceptionLinesProcessExpression.Evaluate(p);
         }
 
 
-        static Expression<Func<IProcessLineDataDN, IQueryable<ProcessExceptionLineDN>>> ExceptionLinesLineExpression =
-            p => Database.Query<ProcessExceptionLineDN>().Where(a => a.Line.RefersTo(p));
+        static Expression<Func<IProcessLineDataEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesLineExpression =
+            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.RefersTo(p));
         [ExpressionField("ExceptionLinesLineExpression")]
-        public static IQueryable<ProcessExceptionLineDN> ExceptionLines(this IProcessLineDataDN pl)
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl)
         {
             return ExceptionLinesLineExpression.Evaluate(pl);
         }
 
-        static Expression<Func<IProcessLineDataDN, ProcessDN, ExceptionDN>> ExceptionExpression =
+        static Expression<Func<IProcessLineDataEntity, ProcessEntity, ExceptionEntity>> ExceptionExpression =
             (pl, p) => p.ExceptionLines().SingleOrDefault(el => el.Line.RefersTo(pl)).Exception.Entity;
-        public static ExceptionDN Exception(this IProcessLineDataDN pl, ProcessDN p)
+        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p)
         {
             return ExceptionExpression.Evaluate(pl, p);
         }
 
 
-        static Expression<Func<IProcessDataDN, IQueryable<ProcessDN>>> ProcessesFromDataExpression =
-            e => Database.Query<ProcessDN>().Where(a => a.Data == e);
+        static Expression<Func<IProcessDataEntity, IQueryable<ProcessEntity>>> ProcessesFromDataExpression =
+            e => Database.Query<ProcessEntity>().Where(a => a.Data == e);
         [ExpressionField("ProcessesFromDataExpression")]
-        public static IQueryable<ProcessDN> Processes(this IProcessDataDN e)
+        public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e)
         {
             return ProcessesFromDataExpression.Evaluate(e);
         }
 
-        static Expression<Func<IProcessDataDN, ProcessDN>> LastProcessFromDataExpression =
+        static Expression<Func<IProcessDataEntity, ProcessEntity>> LastProcessFromDataExpression =
           e => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
         [ExpressionField("LastProcessFromDataExpression")]
-        public static ProcessDN LastProcess(this IProcessDataDN e)
+        public static ProcessEntity LastProcess(this IProcessDataEntity e)
         {
             return LastProcessFromDataExpression.Evaluate(e);
         }
@@ -104,8 +104,8 @@ namespace Signum.Engine.Processes
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ProcessAlgorithmSymbol>();
-                sb.Include<ProcessDN>();
-                sb.Include<ProcessExceptionLineDN>();
+                sb.Include<ProcessEntity>();
+                sb.Include<ProcessExceptionLineEntity>();
 
                 PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
@@ -124,8 +124,8 @@ namespace Signum.Engine.Processes
                                  pa.Key
                              });
 
-                dqm.RegisterQuery(typeof(ProcessDN), ()=>
-                             from p in Database.Query<ProcessDN>()
+                dqm.RegisterQuery(typeof(ProcessEntity), ()=>
+                             from p in Database.Query<ProcessEntity>()
                               select new
                               {
                                   Entity = p,
@@ -145,8 +145,8 @@ namespace Signum.Engine.Processes
                                   p.ExceptionDate,
                               });
 
-                dqm.RegisterQuery(typeof(ProcessExceptionLineDN), () =>
-                             from p in Database.Query<ProcessExceptionLineDN>()
+                dqm.RegisterQuery(typeof(ProcessExceptionLineEntity), () =>
+                             from p in Database.Query<ProcessExceptionLineEntity>()
                              select new
                              {
                                  Entity = p,
@@ -155,18 +155,18 @@ namespace Signum.Engine.Processes
                                  p.Exception,
                              });
 
-                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
+                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
                 dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((IProcessDataDN p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
-                dqm.RegisterExpression((IProcessDataDN p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+                dqm.RegisterExpression((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
+                dqm.RegisterExpression((IProcessDataEntity p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((IProcessLineDataDN p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
+                dqm.RegisterExpression((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
 
                 if (userProcessSession)
                 {
-                    PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessDN p) => p.Mixin<UserProcessSessionMixin>().User));
-                    MixinDeclarations.AssertDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin));
+                    PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessEntity p) => p.Mixin<UserProcessSessionMixin>().User));
+                    MixinDeclarations.AssertDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin));
                     ApplySession += process =>
                     {
                         var user = process.Mixin<UserProcessSessionMixin>().User;
@@ -183,23 +183,23 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
             Remove(ProcessState.Canceled, parameters);
             Remove(ProcessState.Finished, parameters);
             Remove(ProcessState.Error, parameters);
         }
 
-        private static void Remove(ProcessState processState, DeleteLogParametersDN parameters)
+        private static void Remove(ProcessState processState, DeleteLogParametersEntity parameters)
         {
-            var query = Database.Query<ProcessDN>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < parameters.DateLimit);
+            var query = Database.Query<ProcessEntity>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < parameters.DateLimit);
 
             query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
 
             query.UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
-        public static IDisposable OnApplySession(ProcessDN process)
+        public static IDisposable OnApplySession(ProcessEntity process)
         {
             return Disposable.Combine(ApplySession, f => f(process));
         }
@@ -216,7 +216,7 @@ namespace Signum.Engine.Processes
         }
 
 
-        public class ProcessGraph : Graph<ProcessDN, ProcessState>
+        public class ProcessGraph : Graph<ProcessEntity, ProcessState>
         {
             public static void Register()
             {
@@ -240,8 +240,8 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Planned,
                     Execute = (p, args) =>
                     {
-                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None;
-                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None;
+                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
                       
                         p.State = ProcessState.Planned;
                         p.PlannedDate = args.GetArg<DateTime>();
@@ -265,8 +265,8 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (p, _) =>
                     {
-                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None;
-                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName: ProcessDN.None;
+                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName: ProcessEntity.None;
 
                         p.SetAsQueued();
 
@@ -285,7 +285,7 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new ConstructFrom<ProcessDN>(ProcessOperation.Retry)
+                new ConstructFrom<ProcessEntity>(ProcessOperation.Retry)
                 {
                     CanConstruct = p => p.State.InState(ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
                     ToState = ProcessState.Created,
@@ -294,16 +294,16 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessDN Create(this ProcessAlgorithmSymbol process, IProcessDataDN processData, Entity copyMixinsFrom = null)
+        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity processData, Entity copyMixinsFrom = null)
         {
-            using (OperationLogic.AllowSave<ProcessDN>())
+            using (OperationLogic.AllowSave<ProcessEntity>())
             {
-                var result = new ProcessDN(process)
+                var result = new ProcessEntity(process)
                 {
                     State = ProcessState.Created,
                     Data = processData,
-                    MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None,
-                    ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None,
+                    MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None,
+                    ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
                 };
                 
                 if(copyMixinsFrom != null)
@@ -313,7 +313,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExecuteTest(this ProcessDN p)
+        public static void ExecuteTest(this ProcessEntity p)
         {
             p.QueuedDate = TimeZoneManager.Now;
             var ep = new ExecutingProcess(
@@ -331,7 +331,7 @@ namespace Signum.Engine.Processes
         }
 
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
-            where T : Entity, IProcessLineDataDN, new()
+            where T : Entity, IProcessLineDataEntity, new()
         {
             var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
 
@@ -368,7 +368,7 @@ namespace Signum.Engine.Processes
 
                             Transaction.ForceNew().EndUsing(tr =>
                             {
-                                new ProcessExceptionLineDN
+                                new ProcessExceptionLineEntity
                                 {
                                     Exception = exLog.ToLite(),
                                     Line = pl.ToLite(),

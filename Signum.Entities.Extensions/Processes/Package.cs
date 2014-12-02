@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Processes
 {
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-    public class PackageDN : Entity, IProcessDataDN
+    public class PackageEntity : Entity, IProcessDataEntity
     {
         [SqlDbType(Size = 200)]
         string name;
@@ -38,12 +38,12 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {0}".Formato(Name);
+            return "Package {0}".FormatWith(Name);
         }
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PackageOperationDN : PackageDN
+    public class PackageOperationEntity : PackageEntity
     {
         OperationSymbol operation;
         public OperationSymbol Operation
@@ -54,7 +54,7 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {0} {1}".Formato(Operation, Name); ;
+            return "Package {0} {1}".FormatWith(Operation, Name); ;
         }
     }
 
@@ -65,12 +65,12 @@ namespace Signum.Entities.Processes
 
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class PackageLineDN : Entity, IProcessLineDataDN
+    public class PackageLineEntity : Entity, IProcessLineDataEntity
     {
         [NotNullable]
-        Lite<PackageDN> package;
+        Lite<PackageEntity> package;
         [NotNullValidator]
-        public Lite<PackageDN> Package
+        public Lite<PackageEntity> Package
         {
             get { return package; }
             set { Set(ref package, value); }

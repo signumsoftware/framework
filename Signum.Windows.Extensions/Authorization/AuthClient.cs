@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,17 +45,17 @@ namespace Signum.Windows.Authorization
 
                 UpdateCache();
 
-                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User(), Icon = ImageLoader.GetImageSortName("user.png") });
-                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role(), Icon = ImageLoader.GetImageSortName("role.png") });
+                Navigator.AddSetting(new EntitySettings<UserEntity> { View = e => new User(), Icon = ImageLoader.GetImageSortName("user.png") });
+                Navigator.AddSetting(new EntitySettings<RoleEntity> { View = e => new Role(), Icon = ImageLoader.GetImageSortName("role.png") });
 
                 if (defaultPasswordExpiresLogic)
-                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { View = e => new PasswordExpiresInterval() });
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalEntity> { View = e => new PasswordExpiresInterval() });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings<UserDN>(UserOperation.SetPassword){ IsVisible = e => false },
-                    new EntityOperationSettings<UserDN>(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
-                    new EntityOperationSettings<UserDN>(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
+                    new EntityOperationSettings<UserEntity>(UserOperation.SetPassword){ IsVisible = e => false },
+                    new EntityOperationSettings<UserEntity>(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
+                    new EntityOperationSettings<UserEntity>(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
                 });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("UpdateAuthCache",

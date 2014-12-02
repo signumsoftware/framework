@@ -20,8 +20,8 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(), () =>
                 {
-                    if (file is FilePathDN)
-                        return Signum.Engine.Files.FilePathLogic.GetByteArray((FilePathDN)file);
+                    if (file is FilePathEntity)
+                        return Signum.Engine.Files.FilePathLogic.GetByteArray((FilePathEntity)file);
                     throw new InvalidOperationException("The file type is not known or this method must not be invoked for it");
                 });
         }       

@@ -17,23 +17,23 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailPackageLogic
     {
-        static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> MessagesExpression =
-            p => Database.Query<EmailMessageDN>().Where(a => a.Package.RefersTo(p));
-        public static IQueryable<EmailMessageDN> Messages(this EmailPackageDN p)
+        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> MessagesExpression =
+            p => Database.Query<EmailMessageEntity>().Where(a => a.Package.RefersTo(p));
+        public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p)
         {
             return MessagesExpression.Evaluate(p);
         }
 
-        static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> RemainingMessagesExpression =
+        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> RemainingMessagesExpression =
             p => p.Messages().Where(a => a.State == EmailMessageState.Created);
-        public static IQueryable<EmailMessageDN> RemainingMessages(this EmailPackageDN p)
+        public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p)
         {
             return RemainingMessagesExpression.Evaluate(p);
         }
 
-        static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> ExceptionMessagesExpression =
+        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> ExceptionMessagesExpression =
             p => p.Messages().Where(a => a.State == EmailMessageState.SentException);
-        public static IQueryable<EmailMessageDN> ExceptionMessages(this EmailPackageDN p)
+        public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p)
         {
             return ExceptionMessagesExpression.Evaluate(p);
         }
@@ -43,27 +43,27 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailPackageDN>();
+                sb.Include<EmailPackageEntity>();
 
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.Messages(), ()=>EmailMessageMessage.Messages.NiceToString());
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
+                dqm.RegisterExpression((EmailPackageEntity ep) => ep.Messages(), ()=>EmailMessageMessage.Messages.NiceToString());
+                dqm.RegisterExpression((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
+                dqm.RegisterExpression((EmailPackageEntity ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailMessageProcess.SendEmails, new SendEmailProcessAlgorithm());
 
-                new Graph<ProcessDN>.ConstructFromMany<EmailMessageDN>(EmailMessageOperation.ReSendEmails)
+                new Graph<ProcessEntity>.ConstructFromMany<EmailMessageEntity>(EmailMessageOperation.ReSendEmails)
                 {
                     Construct = (messages, args) =>
                     {
-                        EmailPackageDN emailPackage = new EmailPackageDN()
+                        EmailPackageEntity emailPackage = new EmailPackageEntity()
                         {
                             Name = args.TryGetArgC<string>()
                         }.Save();
 
                         foreach (var m in messages.Select(m => m.RetrieveAndForget()))
                         {
-                            new EmailMessageDN()
+                            new EmailMessageEntity()
                             {
                                 Package = emailPackage.ToLite(),
                                 From = m.From,
@@ -83,8 +83,8 @@ namespace Signum.Engine.Mailing
                     }
                 }.Register();
 
-                dqm.RegisterQuery(typeof(EmailPackageDN), () =>
-                    from e in Database.Query<EmailPackageDN>()
+                dqm.RegisterQuery(typeof(EmailPackageEntity), () =>
+                    from e in Database.Query<EmailPackageEntity>()
                     select new
                     {
                         Entity = e,
@@ -99,12 +99,12 @@ namespace Signum.Engine.Mailing
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
+            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;
 
 
             
 
-            List<Lite<EmailMessageDN>> emails = package.RemainingMessages()
+            List<Lite<EmailMessageEntity>> emails = package.RemainingMessages()
                                                 .Select(e => e.ToLite())
                                                 .ToList();
 
@@ -112,7 +112,7 @@ namespace Signum.Engine.Mailing
             {
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
-                EmailMessageDN ml = emails[i].RetrieveAndForget();
+                EmailMessageEntity ml = emails[i].RetrieveAndForget();
 
                 ml.Execute(EmailMessageOperation.Send);
 

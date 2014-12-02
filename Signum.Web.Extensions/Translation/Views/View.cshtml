@@ -9,7 +9,7 @@
     CultureInfo defaultCulture = ViewBag.DefaultCulture;
     Assembly assembly = ViewBag.Assembly;
 
-    ViewBag.Title = TranslationMessage.View0In1.NiceToString().Formato(assembly.GetName().Name, culture == null ? TranslationMessage.AllLanguages.NiceToString() : culture.DisplayName);
+    ViewBag.Title = TranslationMessage.View0In1.NiceToString().FormatWith(assembly.GetName().Name, culture == null ? TranslationMessage.AllLanguages.NiceToString() : culture.DisplayName);
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
 

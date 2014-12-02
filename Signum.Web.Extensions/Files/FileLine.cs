@@ -14,7 +14,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using System.Web.Routing;
 using Signum.Engine;
-using Signum.Web.Extensions.Files;
+using Signum.Web.Files;
 using Newtonsoft.Json.Linq;
 #endregion
 
@@ -77,10 +77,10 @@ namespace Signum.Web.Files
                 result.Add("dragAndDrop", false);
             result.Add("download", (int)Download);
 
-            if (this.Type.CleanType() == typeof(FilePathDN) && !this.ReadOnly)
+            if (this.Type.CleanType() == typeof(FilePathEntity) && !this.ReadOnly)
             {
                 if (FileType == null)
-                    throw new ArgumentException("FileType is mandatory for FilePathDN (FileLine {0})".Formato(Prefix));
+                    throw new ArgumentException("FileType is mandatory for FilePathEntity (FileLine {0})".FormatWith(Prefix));
 
                 result.Add("fileType", FileType.Key);
             }       

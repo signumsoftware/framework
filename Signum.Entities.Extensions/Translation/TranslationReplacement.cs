@@ -8,12 +8,12 @@ namespace Signum.Entities.Translation
 {
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class TranslationReplacementDN : Entity
+    public class TranslationReplacementEntity : Entity
     {
         [NotNullable]
-        CultureInfoDN cultureInfo;
+        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoDN CultureInfo
+        public CultureInfoEntity CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value); }
@@ -40,7 +40,7 @@ namespace Signum.Entities.Translation
 
     public static class TranslationReplacementOperation
     {
-        public static readonly ExecuteSymbol<TranslationReplacementDN> Save = OperationSymbol.Execute<TranslationReplacementDN>();
-        public static readonly DeleteSymbol<TranslationReplacementDN> Delete = OperationSymbol.Delete<TranslationReplacementDN>();
+        public static readonly ExecuteSymbol<TranslationReplacementEntity> Save = OperationSymbol.Execute<TranslationReplacementEntity>();
+        public static readonly DeleteSymbol<TranslationReplacementEntity> Delete = OperationSymbol.Delete<TranslationReplacementEntity>();
     }
 }

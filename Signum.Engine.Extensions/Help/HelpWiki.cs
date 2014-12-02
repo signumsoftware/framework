@@ -42,7 +42,7 @@ namespace Signum.Engine.Help
 
             public override string ToHtmlString()
             {
-                return "{0} ({1})".Formato(Text, Links.CommaAnd(l => l.ToHtmlString()));
+                return "{0} ({1})".FormatWith(Text, Links.CommaAnd(l => l.ToHtmlString()));
             }
         }
 
@@ -71,7 +71,7 @@ namespace Signum.Engine.Help
                     case WikiFormat.OperationLink:
                         OperationSymbol operation = SymbolLogic<OperationSymbol>.TryToSymbol(link);
 
-                        List<Type> types = OperationLogic.FindTypes(operation).Where(TypeLogic.TypeToDN.ContainsKey).ToList();
+                        List<Type> types = OperationLogic.FindTypes(operation).Where(TypeLogic.TypeToEntity.ContainsKey).ToList();
                         if (types.Count == 1)
                         {
                             return new WikiLink(
@@ -152,11 +152,11 @@ namespace Signum.Engine.Help
                 if (footer.HasText())
                 {
                     //Has footer
-                    return "<div class=\"image{0}\"><img alt=\"{1}\" src=\"{2}\"/><p class=\"imagedescription\">{1}</p></div>".Formato(position, footer, fullUrl);
+                    return "<div class=\"image{0}\"><img alt=\"{1}\" src=\"{2}\"/><p class=\"imagedescription\">{1}</p></div>".FormatWith(position, footer, fullUrl);
                 }
                 else
                 {
-                    return "<div class=\"image{0}\"><img src=\"{1}\"/></div>".Formato(position, fullUrl);
+                    return "<div class=\"image{0}\"><img src=\"{1}\"/></div>".FormatWith(position, fullUrl);
                 }
             }
             return null;
@@ -199,7 +199,7 @@ namespace Signum.Engine.Help
 
             public virtual string ToHtmlString()
             {
-                return "<a {0} href=\"{1}\">{2}</a>".Formato(
+                return "<a {0} href=\"{1}\">{2}</a>".FormatWith(
                     Class.HasText() ? "class=\"" + Class + "\"" : "",
                     Url,
                     Text);

@@ -1,0 +1,20 @@
+﻿@using Signum.Entities.Alerts
+@using (var cp = Html.TypeContext<AlertEntity>())
+{
+    @Html.ValueLine(cp, d => d.CreationDate, vl => vl.ReadOnly = true)
+    @Html.EntityLine(cp, d => d.Target, vl => vl.ReadOnly = true)
+    @Html.EntityCombo(cp, d => d.AlertType)
+    @Html.ValueLine(cp, d => d.AlertDate)
+
+    if (cp.Value.Attended)
+    {
+    @Html.ValueLine(cp, d => d.AttendedDate, vl => vl.ReadOnly = true)
+    @Html.EntityLine(cp, d => d.AttendedBy, vl => vl.ReadOnly = true)
+    }
+    @Html.ValueLine(cp, d => d.Text, vl =>
+    {
+        vl.ValueLineType = ValueLineType.TextArea;
+        vl.ValueHtmlProps["rows"] = 6;
+        vl.ValueHtmlProps["cols"] = 100;
+    })
+}

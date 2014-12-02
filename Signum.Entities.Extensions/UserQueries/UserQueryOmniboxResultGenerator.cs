@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +11,9 @@ namespace Signum.Entities.UserQueries
 {
     public class UserQueryOmniboxResultGenerator : OmniboxResultGenerator<UserQueryOmniboxResult>
     {
-        Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete;
+        Func<string, int, IEnumerable<Lite<UserQueryEntity>>> autoComplete;
 
-        public UserQueryOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete)
+        public UserQueryOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserQueryEntity>>> autoComplete)
         {
             this.autoComplete = autoComplete;
         }
@@ -29,7 +29,7 @@ namespace Signum.Entities.UserQueries
 
             var userQueries = autoComplete(ident, AutoCompleteLimit);
 
-            foreach (Lite<UserQueryDN> uq in userQueries)
+            foreach (Lite<UserQueryEntity> uq in userQueries)
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 
@@ -38,7 +38,7 @@ namespace Signum.Entities.UserQueries
                     ToStr = ident,
                     ToStrMatch = match,
                     Distance = match.Distance,
-                    UserQuery = (Lite<UserQueryDN>)uq,
+                    UserQuery = (Lite<UserQueryEntity>)uq,
                 };
             }
         }
@@ -49,7 +49,7 @@ namespace Signum.Entities.UserQueries
             var userQuery = OmniboxMessage.Omnibox_UserQuery.NiceToString();
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "'{0}'".FormatWith(userQuery), OmniboxResultType = resultType }
             };
         }
     }
@@ -59,11 +59,11 @@ namespace Signum.Entities.UserQueries
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite<UserQueryDN> UserQuery { get; set; }
+        public Lite<UserQueryEntity> UserQuery { get; set; }
 
         public override string ToString()
         {
-            return "\"{0}\"".Formato(ToStr);
+            return "\"{0}\"".FormatWith(ToStr);
         }
     }
 }

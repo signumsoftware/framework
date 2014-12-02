@@ -1,4 +1,4 @@
-@using Signum.Web.Extensions
+﻿@using Signum.Web.Extensions
 @using Signum.Web.Help
 @using Signum.Entities.Help
 @using Signum.Engine.Help
@@ -49,7 +49,7 @@
 </div>
 
 <h3 class="centered">@HelpMessage.Appendices.NiceToString()
-    @if (Navigator.IsCreable(typeof(AppendixHelpDN), isSearch: true))
+    @if (Navigator.IsCreable(typeof(AppendixHelpEntity), isSearch: true))
     {
         <a href="@Url.Action((HelpController c) => c.NewAppendix())">+</a> 
     }

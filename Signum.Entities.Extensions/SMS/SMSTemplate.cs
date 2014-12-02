@@ -15,7 +15,7 @@ using System.Globalization;
 namespace Signum.Entities.SMS
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class SMSTemplateDN : Entity
+    public class SMSTemplateEntity : Entity
     {
         [SqlDbType(Size = 100)]
         string name;
@@ -40,16 +40,16 @@ namespace Signum.Entities.SMS
             set { Set(ref editableMessage, value); }
         }
 
-        TypeDN associatedType;
-        public TypeDN AssociatedType
+        TypeEntity associatedType;
+        public TypeEntity AssociatedType
         {
             get { return associatedType; }
             set { Set(ref associatedType, value); }
         }
 
         [NotifyCollectionChanged]
-        MList<SMSTemplateMessageDN> messages = new MList<SMSTemplateMessageDN>();
-        public MList<SMSTemplateMessageDN> Messages
+        MList<SMSTemplateMessageEntity> messages = new MList<SMSTemplateMessageEntity>();
+        public MList<SMSTemplateMessageEntity> Messages
         {
             get { return messages; }
             set { Set(ref messages, value); }
@@ -100,7 +100,7 @@ namespace Signum.Entities.SMS
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<SMSTemplateDN, bool>> IsActiveNowExpression =
+        static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
@@ -127,7 +127,7 @@ namespace Signum.Entities.SMS
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<SMSTemplateDN, string>> ToStringExpression = e => e.Name;
+        static readonly Expression<Func<SMSTemplateEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -138,11 +138,11 @@ namespace Signum.Entities.SMS
             if (sender == messages)
             {
                 if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageDN>())
+                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageEntity>())
                         item.Template = null;
 
                 if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageDN>())
+                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageEntity>())
                         item.Template = this;
             }
         }
@@ -159,8 +159,8 @@ namespace Signum.Entities.SMS
 
     public static class SMSTemplateOperation
     {
-        public static readonly ConstructSymbol<SMSTemplateDN>.Simple Create = OperationSymbol.Construct<SMSTemplateDN>.Simple();
-        public static readonly ExecuteSymbol<SMSTemplateDN> Save = OperationSymbol.Execute<SMSTemplateDN>();
+        public static readonly ConstructSymbol<SMSTemplateEntity>.Simple Create = OperationSymbol.Construct<SMSTemplateEntity>.Simple();
+        public static readonly ExecuteSymbol<SMSTemplateEntity> Save = OperationSymbol.Execute<SMSTemplateEntity>();
     }
 
     public enum MessageLengthExceeded
@@ -171,27 +171,27 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable]
-    public class SMSTemplateMessageDN : EmbeddedEntity
+    public class SMSTemplateMessageEntity : EmbeddedEntity
     {
-        public SMSTemplateMessageDN() { }
+        public SMSTemplateMessageEntity() { }
 
-        public SMSTemplateMessageDN(CultureInfoDN culture)
+        public SMSTemplateMessageEntity(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }
 
         [Ignore]
-        internal SMSTemplateDN template;
-        public SMSTemplateDN Template
+        internal SMSTemplateEntity template;
+        public SMSTemplateEntity Template
         {
             get { return template; }
             set { template = value; }
         }
 
         [NotNullable]
-        CultureInfoDN cultureInfo;
+        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoDN CultureInfo
+        public CultureInfoEntity CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value); }

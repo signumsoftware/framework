@@ -1,11 +1,11 @@
 ﻿@using Signum.Entities.Processes
 
-@using (var e = Html.TypeContext<PackageOperationDN>())
+@using (var e = Html.TypeContext<PackageOperationEntity>())
 {
     @Html.ValueLine(e, f => f.Name)
     @Html.EntityLine(e, f => f.Operation, f => f.ReadOnly = true)
     <fieldset>
         <legend>Lines</legend>
-        @Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value), new Context(e, "lines"))
+        @Html.SearchControl(new FindOptions(typeof(PackageLineEntity), "Package", e.Value), new Context(e, "lines"))
     </fieldset>
 }

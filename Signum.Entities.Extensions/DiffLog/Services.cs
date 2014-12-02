@@ -14,6 +14,6 @@ namespace Signum.Services
     public interface IDiffLogServer
     {
         [OperationContract, NetDataContract]
-        MinMax<OperationLogDN> OperationLogNextPrev(OperationLogDN log);
+        MinMax<OperationLogEntity> OperationLogNextPrev(OperationLogEntity log);
     }
 }

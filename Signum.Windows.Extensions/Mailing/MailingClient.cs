@@ -22,26 +22,26 @@ namespace Signum.Windows.Mailing
             {
                 Navigator.AddSettings(new List<EntitySettings> 
                 { 
-                    new EntitySettings<EmailMessageDN> { View = e => new EmailMessage() },
-                    new EmbeddedEntitySettings<EmailAttachmentDN> { View = e => new EmailAttachment() },
-                    new EmbeddedEntitySettings<EmailAddressDN> { View = e => new EmailAddress() },
-                    new EmbeddedEntitySettings<EmailRecipientDN> { View = e => new EmailRecipient() }
+                    new EntitySettings<EmailMessageEntity> { View = e => new EmailMessage() },
+                    new EmbeddedEntitySettings<EmailAttachmentEntity> { View = e => new EmailAttachment() },
+                    new EmbeddedEntitySettings<EmailAddressEntity> { View = e => new EmailAddress() },
+                    new EmbeddedEntitySettings<EmailRecipientEntity> { View = e => new EmailRecipient() }
                 });
 
                 if (smtp || pop3)
-                    Navigator.AddSetting(new EmbeddedEntitySettings<ClientCertificationFileDN> { View = e => new ClientCertificationFile() });
+                    Navigator.AddSetting(new EmbeddedEntitySettings<ClientCertificationFileEntity> { View = e => new ClientCertificationFile() });
 
                 if (smtp)
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<SmtpConfigurationDN> { View = e => new SmtpConfiguration() },
+                        new EntitySettings<SmtpConfigurationEntity> { View = e => new SmtpConfiguration() },
                         
                     });
                 }
 
                 if (pop3)
-                    Navigator.AddSetting(new EntitySettings<Pop3ConfigurationDN> { View = e => new Pop3Configuration() });
+                    Navigator.AddSetting(new EntitySettings<Pop3ConfigurationEntity> { View = e => new Pop3Configuration() });
             }
         }
     }

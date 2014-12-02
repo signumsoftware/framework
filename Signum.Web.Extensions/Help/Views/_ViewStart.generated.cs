@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Help.Views
+namespace Signum.Web.Help.Views
 {
     using System;
     using System.Collections.Generic;

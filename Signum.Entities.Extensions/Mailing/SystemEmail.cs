@@ -8,7 +8,7 @@ using System.Text;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
-    public class SystemEmailDN : Entity
+    public class SystemEmailEntity : Entity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;
@@ -18,7 +18,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref fullClassName, value); }
         }
 
-        static readonly Expression<Func<SystemEmailDN, string>> ToStringExpression = e => e.fullClassName;
+        static readonly Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.fullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

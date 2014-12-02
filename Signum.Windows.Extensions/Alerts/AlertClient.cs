@@ -20,8 +20,8 @@ namespace Signum.Windows.Alerts
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlertTypeDN> { View = e => new AlertType() },
-                    new EntitySettings<AlertDN>
+                    new EntitySettings<AlertTypeEntity> { View = e => new AlertType() },
+                    new EntitySettings<AlertEntity>
                     {
                         View = e => new Alert(),
                         IsCreable = EntityWhen.Never,
@@ -29,18 +29,18 @@ namespace Signum.Windows.Alerts
                     }   
                 });
 
-                Server.SetSemiSymbolIds<AlertTypeDN>();
+                Server.SetSemiSymbolIds<AlertTypeEntity>();
 
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
                     new EntityOperationSettings<Entity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
-                    new EntityOperationSettings<AlertDN>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
-                    new EntityOperationSettings<AlertDN>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
+                    new EntityOperationSettings<AlertEntity>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
+                    new EntityOperationSettings<AlertEntity>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
                     (obj is Entity && types.Contains(obj.GetType()) && !((Entity)obj).IsNew) &&
-                    Finder.IsFindable(typeof(AlertDN)) ? new AlertsWidget() : null;
+                    Finder.IsFindable(typeof(AlertEntity)) ? new AlertsWidget() : null;
             }
         }
     }

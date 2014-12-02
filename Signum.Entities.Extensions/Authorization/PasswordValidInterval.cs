@@ -6,7 +6,7 @@ using System.Text;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class PasswordExpiresIntervalDN : Entity
+    public class PasswordExpiresIntervalEntity : Entity
     {
         decimal days;
         public decimal Days
@@ -32,7 +32,7 @@ namespace Signum.Entities.Authorization
 
     public static class PasswordExpiresIntervalOperation
     {
-        public static readonly ExecuteSymbol<PasswordExpiresIntervalDN> Save = OperationSymbol.Execute<PasswordExpiresIntervalDN>();
+        public static readonly ExecuteSymbol<PasswordExpiresIntervalEntity> Save = OperationSymbol.Execute<PasswordExpiresIntervalEntity>();
     }
 
     [Serializable]

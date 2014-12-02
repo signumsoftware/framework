@@ -5,7 +5,7 @@
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     xmlns:m2 ="clr-namespace:Signum.Windows.Extensions"
     xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
-    m:Common.TypeContext="{x:Type d:ScheduleRuleWeekDaysDN}"
+    m:Common.TypeContext="{x:Type d:ScheduleRuleWeekDaysEntity}"
     Padding="2">
 	<UserControl.Resources>
 		<ResourceDictionary>

@@ -168,7 +168,7 @@ namespace Signum.Engine.Cache
                 throw new NotImplementedException("FieldMList not supported in cached ToString");
             }
 
-            throw new InvalidOperationException("Unexpected {0}".Formato(field.GetType().Name));
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
         }
 
         private Expression GetEntity(bool isLite, IColumn column, Type type, CachedTableConstructor constructor)

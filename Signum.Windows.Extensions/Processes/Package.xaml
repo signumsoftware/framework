@@ -3,11 +3,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:PackageDN}"
+    m:Common.TypeContext="{x:Type d:PackageEntity}"
     x:Name="ctrl"
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" m:Common.IsReadOnly="False" />
-        <m:SearchControl QueryName="{x:Type d:PackageLineDN}" FilterColumn="Package" x:Name="sc"/>
+        <m:SearchControl QueryName="{x:Type d:PackageLineEntity}" FilterColumn="Package" x:Name="sc"/>
     </StackPanel>
 </UserControl>

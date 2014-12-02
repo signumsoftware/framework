@@ -2,7 +2,7 @@
 @using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
 @using Signum.Entities.UserAssets
-@model DashboardDN
+@model DashboardEntity
 @section head
 {
     @Html.ScriptCss("~/Dashboard/Content/Dashboard.css")
@@ -22,7 +22,7 @@
         {
             var offset = part.StartColumn - lastEnd;
             <div class="part-control-panel col-sm-@part.Columns @(offset == 0 ? null : "col-sm-offset-" + offset)">
-                @Html.Partial(DashboardClient.ViewPrefix.Formato("PanelPartView"), part)
+                @Html.Partial(DashboardClient.ViewPrefix.FormatWith("PanelPartView"), part)
 
             </div>
             lastEnd = part.StartColumn + part.Columns;

@@ -25,7 +25,7 @@ namespace Signum.Windows.Authorization
 
             Server.SetSymbolIds<PermissionSymbol>();
 
-            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleEntity>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.IsAuthorized();
                 return new QuickLink[]
@@ -59,7 +59,7 @@ namespace Signum.Windows.Authorization
         public static void Authorize(this PermissionSymbol permissionSymbol)
         {
             if (IsAuthorized(permissionSymbol) == false)
-                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionSymbol));
+                throw new UnauthorizedAccessException("Permission '{0}' is denied".FormatWith(permissionSymbol));
         }
     }
 

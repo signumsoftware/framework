@@ -16,9 +16,9 @@ namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
-        static Expression<Func<Entity, IQueryable<ViewLogDN>>> ViewLogsExpression =
-            a => Database.Query<ViewLogDN>().Where(log => log.Target.RefersTo(a));
-        public static IQueryable<ViewLogDN> ViewLogs(this Entity a)
+        static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
+            a => Database.Query<ViewLogEntity>().Where(log => log.Target.RefersTo(a));
+        public static IQueryable<ViewLogEntity> ViewLogs(this Entity a)
         {
             return ViewLogsExpression.Evaluate(a);
         }
@@ -32,10 +32,10 @@ namespace Signum.Engine.ViewLog
             {
                 Started = true;
 
-                sb.Include<ViewLogDN>();
+                sb.Include<ViewLogEntity>();
 
-                dqm.RegisterQuery(typeof(ViewLogDN), () =>
-                    from e in Database.Query<ViewLogDN>()
+                dqm.RegisterQuery(typeof(ViewLogEntity), () =>
+                    from e in Database.Query<ViewLogEntity>()
                     select new
                     {
                         Entity = e,
@@ -54,10 +54,10 @@ namespace Signum.Engine.ViewLog
 
                 foreach (var t in types)
                 {
-                    dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogDN).NicePluralName()));
+                    dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogEntity).NicePluralName()));
                 }
 
-                if (types.Contains(typeof(QueryDN)))
+                if (types.Contains(typeof(QueryEntity)))
                 {
                     DynamicQueryManager.Current.QueryExecuted += Current_QueryExecuted;
                 }
@@ -77,9 +77,9 @@ namespace Signum.Engine.ViewLog
             return null;
         }
 
-        static void ExceptionLogic_DeleteLogs(DeleteLogParametersDN parameters)
+        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
-            Database.Query<ViewLogDN>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
@@ -87,7 +87,7 @@ namespace Signum.Engine.ViewLog
             if (!Started || !Types.Contains(entity.EntityType))
                 return null;
 
-            var viewLog = new ViewLogDN
+            var viewLog = new ViewLogEntity
             {
                 Target = (Lite<Entity>)entity,
                 User = UserHolder.Current.ToLite(),

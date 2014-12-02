@@ -34,7 +34,7 @@ namespace Signum.Web.Translation
     {
         public List<string> TranslateBatch(List<string> list, string from, string to)
         {
-            return list.Select(text => "In{0}({1})".Formato(to, text)).ToList();
+            return list.Select(text => "In{0}({1})".FormatWith(to, text)).ToList();
         }
 
         public bool AutoSelect()

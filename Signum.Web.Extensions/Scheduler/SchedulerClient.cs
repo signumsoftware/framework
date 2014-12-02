@@ -34,24 +34,24 @@ namespace Signum.Web.Scheduler
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ScheduledTaskLogDN>{ PartialViewName = _ => ViewPrefix.Formato("ScheduledTaskLog") },
-                    new EntitySettings<ScheduledTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("ScheduledTask") },
+                    new EntitySettings<ScheduledTaskLogEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduledTaskLog") },
+                    new EntitySettings<ScheduledTaskEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduledTask") },
                     
-                    new EntitySettings<ScheduleRuleDailyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleDaily") },
-                    new EntitySettings<ScheduleRuleWeeklyDN>{ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekly") },
-                    new EntitySettings<ScheduleRuleWeekDaysDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekDays") },
-                    new EntitySettings<ScheduleRuleMinutelyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleMinutely") },
-                    new EntitySettings<ScheduleRuleHourlyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
+                    new EntitySettings<ScheduleRuleDailyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleDaily") },
+                    new EntitySettings<ScheduleRuleWeeklyEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleWeekly") },
+                    new EntitySettings<ScheduleRuleWeekDaysEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleWeekDays") },
+                    new EntitySettings<ScheduleRuleMinutelyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleMinutely") },
+                    new EntitySettings<ScheduleRuleHourlyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleHourly") },
 
-                    new EntitySettings<HolidayCalendarDN> { PartialViewName = _ => ViewPrefix.Formato("HolidayCalendar") },
-                    new EmbeddedEntitySettings<HolidayDN> { PartialViewName = _ => ViewPrefix.Formato("Holiday") },
+                    new EntitySettings<HolidayCalendarEntity> { PartialViewName = _ => ViewPrefix.FormatWith("HolidayCalendar") },
+                    new EmbeddedEntitySettings<HolidayEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Holiday") },
                 });
 
                 if (simpleTask)
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<SimpleTaskSymbol>{ PartialViewName = _ => ViewPrefix.Formato("SimpleTask") },
+                        new EntitySettings<SimpleTaskSymbol>{ PartialViewName = _ => ViewPrefix.FormatWith("SimpleTask") },
                     });
                 }
                 

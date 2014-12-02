@@ -16,10 +16,11 @@ using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Web.Basic;
-using Signum.Web.Extensions.Translation.Views;
+using Signum.Web.Translation.Views;
 using Signum.Web.Omnibox;
 using Signum.Web.PortableAreas;
 using Signum.Web.Translation.Controllers;
+using Signum.Web.Cultures;
 
 namespace Signum.Web.Translation
 {
@@ -46,8 +47,8 @@ namespace Signum.Web.Translation
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<TranslatorUserDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUser")},
-                        new EmbeddedEntitySettings<TranslatorUserCultureDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUserCulture")},
+                        new EntitySettings<TranslatorUserEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUser")},
+                        new EmbeddedEntitySettings<TranslatorUserCultureEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUserCulture")},
                     });
                 }
 
@@ -57,7 +58,7 @@ namespace Signum.Web.Translation
 
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<TranslationReplacementDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslationReplacement")},
+                        new EntitySettings<TranslationReplacementEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslationReplacement")},
                     });
                 }
 

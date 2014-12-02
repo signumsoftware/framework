@@ -16,7 +16,7 @@
     data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
     data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
     data-prefix="@Model.Prefix">
-    @using (var uc = Html.TypeContext<UserChartDN>())
+    @using (var uc = Html.TypeContext<UserChartEntity>())
     {
         uc.LabelColumns = new BsColumn(2);
 
@@ -40,7 +40,7 @@
 
         var niceName = QueryUtils.GetNiceName(query.Value.ToQueryName());
         
-        @Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryDN).NiceName(), Finder.IsFindable(queryName) ?
+        @Html.FormGroup(uc, null, typeof(Signum.Entities.Basics.QueryEntity).NiceName(), Finder.IsFindable(queryName) ?
                 new HtmlTag("a").Class("form-control-static").Attr("href", Finder.FindRoute(queryName)).SetInnerText(niceName).ToHtml() :
                 Html.Span(null, niceName, "form-control-static"))
         }
@@ -57,7 +57,7 @@
         })
 
         <p class="messageEntity col-sm-offset-2">
-            @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
+            @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey)
         </p>
         
         using (var sc = uc.SubContext())

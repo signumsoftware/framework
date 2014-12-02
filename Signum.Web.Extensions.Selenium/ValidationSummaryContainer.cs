@@ -18,7 +18,7 @@ namespace Signum.Web.Selenium
     {
         public static string ValidationSummaryLocator(this IValidationSummaryContainer container)
         {
-            return "jq=#{0}_sfGlobalValidationSummary".Formato(container.Prefix);
+            return "jq=#{0}_sfGlobalValidationSummary".FormatWith(container.Prefix);
         }
 
         public static bool FormHasNErrors(this IValidationSummaryContainer container, int? numberOfErrors)
@@ -27,12 +27,12 @@ namespace Signum.Web.Selenium
 
             if (numberOfErrors.HasValue)
             {
-                return container.Selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(locator, numberOfErrors)) &&
-                       !container.Selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(locator, numberOfErrors + 1));
+                return container.Selenium.IsElementPresent("{0} > ul > li:nth-child({1})".FormatWith(locator, numberOfErrors)) &&
+                       !container.Selenium.IsElementPresent("{0} > ul > li:nth-child({1})".FormatWith(locator, numberOfErrors + 1));
             }
             else
             {
-                return container.Selenium.IsElementPresent("{0} > ul > li".Formato(locator));
+                return container.Selenium.IsElementPresent("{0} > ul > li".FormatWith(locator));
             }
         }
     }

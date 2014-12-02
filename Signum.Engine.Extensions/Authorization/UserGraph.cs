@@ -13,7 +13,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Authorization
 {
-    public class UserGraph : Graph<UserDN, UserState>
+    public class UserGraph : Graph<UserEntity, UserState>
     {
         public static void Register()
         {
@@ -22,7 +22,7 @@ namespace Signum.Engine.Authorization
             new Construct(UserOperation.Create)
             {
                 ToState = UserState.New,
-                Construct = args => new UserDN { State = UserState.New }
+                Construct = args => new UserEntity { State = UserState.New }
             }.Register();
 
             new Execute(UserOperation.SaveNew)
@@ -70,7 +70,7 @@ namespace Signum.Engine.Authorization
                 Lite = true
             }.Register();
 
-            new Graph<UserDN>.Execute(UserOperation.SetPassword)
+            new Graph<UserEntity>.Execute(UserOperation.SetPassword)
             {
                 Lite = true,
                 Execute = (u, args) =>

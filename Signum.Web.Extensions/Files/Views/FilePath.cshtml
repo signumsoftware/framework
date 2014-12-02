@@ -1,0 +1,15 @@
+﻿@using Signum.Entities.Files
+@using (var e = Html.TypeContext<FilePathEntity>())
+{
+    @Html.ValueLine(e, f => f.Locked)
+    @Html.ValueLine(e, f => f.FileName)
+    @Html.ValueLine(e, f => f.FileLength)
+    @Html.EntityLine(e, f => f.Repository)
+    @Html.EntityLine(e, f => f.FileType)
+    @Html.ValueLine(e, f => f.Sufix)
+
+    @Html.ValueLine(e, f => f.FullPhysicalPath)
+    @Html.ValueLine(e, f => f.FullWebPath)
+   
+ 
+}

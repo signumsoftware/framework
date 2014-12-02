@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Files
-@using (var e = Html.TypeContext<FileRepositoryDN>())
+@using (var e = Html.TypeContext<FileRepositoryEntity>())
 {
     @Html.ValueLine(e, f => f.Name)
     @Html.ValueLine(e, f => f.Active)
@@ -8,7 +8,7 @@
     @Html.EntityList(e, f => f.FileTypes)
     if (!e.Value.IsNew)
     {
-    @Html.CountSearchControl(new FindOptions(typeof(FilePathDN), "Repository", e.Value),
+    @Html.CountSearchControl(new FindOptions(typeof(FilePathEntity), "Repository", e.Value),
     new Context(e, "repos"), csc => { csc.View = true; });
     }
 }

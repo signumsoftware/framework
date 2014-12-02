@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Help.Views
+namespace Signum.Web.Help.Views
 {
     using System;
     using System.Collections.Generic;
@@ -174,7 +174,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</a></td>\r\n                <td><code>[e:MyEntityDN]</code></td>\r\n            </tr" +
+WriteLiteral("</a></td>\r\n                <td><code>[e:MyEntityEntity]</code></td>\r\n            </tr" +
 ">\r\n            <tr>\r\n                <td><a");
 
 WriteLiteral(" href=\"#\"");
@@ -188,7 +188,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</a></td>\r\n                <td><code>[p:MyEntityDN.Property]</code></td>\r\n       " +
+WriteLiteral("</a></td>\r\n                <td><code>[p:MyEntityEntity.Property]</code></td>\r\n       " +
 "     </tr>\r\n            <tr>\r\n                <td><a");
 
 WriteLiteral(" href=\"#\"");
@@ -492,7 +492,11 @@ WriteLiteral(" class=\"btn-toolbar\"");
 
 WriteLiteral(" role=\"toolbar\"");
 
-WriteLiteral(">\r\n    <button");
+WriteLiteral(">\r\n    <div");
+
+WriteLiteral(" class=\"btn-group\"");
+
+WriteLiteral(">\r\n        <button");
 
 WriteLiteral(" id=\"edit-action\"");
 
@@ -500,20 +504,24 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"btn btn-default btn-sm\"");
 
-WriteLiteral(">\r\n        <span");
+WriteLiteral(">\r\n            <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-pencil\"");
 
 WriteLiteral("></span>&nbsp;");
 
             
-            #line 117 "..\..\Help\Views\Buttons.cshtml"
-                                                         Write(HelpSyntaxMessage.Edit.NiceToString());
+            #line 118 "..\..\Help\Views\Buttons.cshtml"
+                                                             Write(HelpSyntaxMessage.Edit.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </button>\r\n    <button");
+WriteLiteral("\r\n        </button>\r\n    </div>\r\n    <div");
+
+WriteLiteral(" class=\"btn-group\"");
+
+WriteLiteral(">\r\n        <button");
 
 WriteLiteral(" id=\"save-action\"");
 
@@ -523,20 +531,24 @@ WriteLiteral(" class=\"btn btn-default btn-sm btn-primary\"");
 
 WriteLiteral(" style=\"display: none\"");
 
-WriteLiteral(">\r\n        <span");
+WriteLiteral(">\r\n            <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-floppy-disk\"");
 
 WriteLiteral("></span>&nbsp;");
 
             
-            #line 120 "..\..\Help\Views\Buttons.cshtml"
-                                                              Write(HelpSyntaxMessage.Save.NiceToString());
+            #line 123 "..\..\Help\Views\Buttons.cshtml"
+                                                                  Write(HelpSyntaxMessage.Save.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </button>\r\n    <button");
+WriteLiteral("\r\n        </button>\r\n    </div>\r\n    <div");
+
+WriteLiteral(" class=\"btn-group\"");
+
+WriteLiteral(">\r\n        <button");
 
 WriteLiteral(" id=\"syntax-action\"");
 
@@ -546,25 +558,153 @@ WriteLiteral(" class=\"btn btn-default btn-sm\"");
 
 WriteLiteral(" style=\"display: none\"");
 
-WriteLiteral(">\r\n        <span");
+WriteLiteral(">\r\n            <span");
 
 WriteLiteral(" class=\"glyphicon glyphicon-info-sign\"");
 
 WriteLiteral("></span>&nbsp;");
 
             
-            #line 123 "..\..\Help\Views\Buttons.cshtml"
-                                                            Write(HelpSyntaxMessage.Syntax.NiceToString());
+            #line 128 "..\..\Help\Views\Buttons.cshtml"
+                                                                Write(HelpSyntaxMessage.Syntax.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </button>\r\n</div>\r\n\r\n<script>\r\n");
+WriteLiteral("\r\n        </button>\r\n    </div>\r\n");
+
+            
+            #line 131 "..\..\Help\Views\Buttons.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 131 "..\..\Help\Views\Buttons.cshtml"
+      
+        var cultures = (Dictionary<System.Globalization.CultureInfo, string>)ViewData["options"];
+    
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+            
+            #line 134 "..\..\Help\Views\Buttons.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 134 "..\..\Help\Views\Buttons.cshtml"
+     if (cultures.Any())
+    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <div");
+
+WriteLiteral(" class=\"btn-group\"");
+
+WriteLiteral(" role=\"group\"");
+
+WriteLiteral(" id=\"translate-action\"");
+
+WriteLiteral(" style=\"display: none\"");
+
+WriteLiteral(">\r\n            <button");
+
+WriteLiteral(" type=\"button\"");
+
+WriteLiteral(" class=\"btn btn-default btn-sm dropdown-toggle\"");
+
+WriteLiteral(" data-toggle=\"dropdown\"");
+
+WriteLiteral(" aria-expanded=\"false\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                ");
+
+            
+            #line 138 "..\..\Help\Views\Buttons.cshtml"
+           Write(HelpSyntaxMessage.TranslateFrom.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" <span");
+
+WriteLiteral(" class=\"caret\"");
+
+WriteLiteral("></span>\r\n            </button>\r\n            <ul");
+
+WriteLiteral(" class=\"dropdown-menu\"");
+
+WriteLiteral(" role=\"menu\"");
+
+WriteLiteral(">\r\n");
+
+            
+            #line 141 "..\..\Help\Views\Buttons.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 141 "..\..\Help\Views\Buttons.cshtml"
+                 foreach (var kvp in cultures)
+                {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    <li><a");
+
+WriteAttribute("href", Tuple.Create(" href=\"", 6833), Tuple.Create("\"", 6850)
+            
+            #line 143 "..\..\Help\Views\Buttons.cshtml"
+, Tuple.Create(Tuple.Create("", 6840), Tuple.Create<System.Object, System.Int32>(kvp.Value
+            
+            #line default
+            #line hidden
+, 6840), false)
+);
+
+WriteLiteral(">");
+
+            
+            #line 143 "..\..\Help\Views\Buttons.cshtml"
+                                        Write(kvp.Key.NativeName);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a></li>\r\n");
+
+            
+            #line 144 "..\..\Help\Views\Buttons.cshtml"
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </ul>\r\n        </div>\r\n");
+
+            
+            #line 147 "..\..\Help\Views\Buttons.cshtml"
+    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</div>\r\n\r\n<script>\r\n");
 
 WriteLiteral("    ");
 
             
-            #line 128 "..\..\Help\Views\Buttons.cshtml"
+            #line 151 "..\..\Help\Views\Buttons.cshtml"
 Write(HelpClient.Module["init"]());
 
             

@@ -1,10 +1,10 @@
-<UserControl x:Class="Signum.Windows.SMS.SMSTemplate"
+﻿<UserControl x:Class="Signum.Windows.SMS.SMSTemplate"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.SMS;assembly=Signum.Entities.Extensions"
     xmlns:w="clr-namespace:Signum.Windows.SMS"
-    m:Common.TypeContext="{x:Type d:SMSTemplateDN}"
+    m:Common.TypeContext="{x:Type d:SMSTemplateEntity}"
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
@@ -54,7 +54,7 @@
                                 </DataTemplate>
                             </TabControl.ItemTemplate>
                             <TabControl.ContentTemplate>
-                                <DataTemplate DataType="{x:Type d:SMSTemplateMessageDN}">
+                                <DataTemplate DataType="{x:Type d:SMSTemplateMessageEntity}">
                                     <w:SMSTemplateMessage m:Common.PropertyRoute="{m:ContinueRoute Messages/}" />
                                 </DataTemplate>
                             </TabControl.ContentTemplate>

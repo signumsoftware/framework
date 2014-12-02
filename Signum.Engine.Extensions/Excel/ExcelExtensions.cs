@@ -155,7 +155,7 @@ namespace Signum.Engine.Excel
               Where(s => s.Id == sheetId).FirstOrDefault();
 
             if (theSheet == null)
-                throw new ArgumentException("Sheet with id {0} not found".Formato(sheetId));
+                throw new ArgumentException("Sheet with id {0} not found".FormatWith(sheetId));
 
             // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
             // a reference to the cell whose address matches the address you've supplied:
@@ -171,7 +171,7 @@ namespace Signum.Engine.Excel
               Where(s => s.Name == sheetName).FirstOrDefault();
 
             if (theSheet == null)
-                throw new ArgumentException("Sheet with name {0} not found".Formato(sheetName));
+                throw new ArgumentException("Sheet with name {0} not found".FormatWith(sheetName));
 
             // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
             // a reference to the cell whose address matches the address you've supplied:

@@ -10,21 +10,21 @@ using System.Linq.Expressions;
 namespace Signum.Entities.SMS
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class SMSSendPackageDN : SMSPackageDN
+    public class SMSSendPackageEntity : SMSPackageEntity
     {
 
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class SMSUpdatePackageDN : SMSPackageDN
+    public class SMSUpdatePackageEntity : SMSPackageEntity
     {
 
     }
 
     [Serializable]
-    public abstract class SMSPackageDN : Entity, IProcessDataDN
+    public abstract class SMSPackageEntity : Entity, IProcessDataEntity
     {
-        public SMSPackageDN()
+        public SMSPackageEntity()
         {
             this.name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
         }
@@ -38,7 +38,7 @@ namespace Signum.Entities.SMS
             set { SetToStr(ref name, value); }
         }
 
-        static Expression<Func<SMSPackageDN, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<SMSPackageEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

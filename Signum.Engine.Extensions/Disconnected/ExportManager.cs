@@ -51,7 +51,7 @@ namespace Signum.Engine.Disconnected
 
         List<DownloadTable> downloadTables;
 
-        Dictionary<Lite<DisconnectedExportDN>, RunningExports> runningExports = new Dictionary<Lite<DisconnectedExportDN>, RunningExports>();
+        Dictionary<Lite<DisconnectedExportEntity>, RunningExports> runningExports = new Dictionary<Lite<DisconnectedExportEntity>, RunningExports>();
 
         class RunningExports
         {
@@ -59,20 +59,20 @@ namespace Signum.Engine.Disconnected
             public CancellationTokenSource CancelationSource;
         }
 
-        public virtual Lite<DisconnectedExportDN> BeginExportDatabase(DisconnectedMachineDN machine)
+        public virtual Lite<DisconnectedExportEntity> BeginExportDatabase(DisconnectedMachineEntity machine)
         {
-            Lite<DisconnectedExportDN> export = new DisconnectedExportDN
+            Lite<DisconnectedExportEntity> export = new DisconnectedExportEntity
             {
                 Machine = machine.ToLite(),
-                Copies = downloadTables.Select(t => new DisconnectedExportTableDN
+                Copies = downloadTables.Select(t => new DisconnectedExportTableEntity
                 {
-                    Type = t.Type.ToTypeDN().ToLite()
+                    Type = t.Type.ToTypeEntity().ToLite()
                 }).ToMList()
             }.Save().ToLite();
 
             var cancelationSource = new CancellationTokenSource();
 
-            UserDN user = UserDN.Current;
+            UserEntity user = UserEntity.Current;
 
             var token = cancelationSource.Token;
 
@@ -81,7 +81,7 @@ namespace Signum.Engine.Disconnected
                 using (AuthLogic.UserSession(user))
                 {
                     OnStartExporting(machine);
-                    DisconnectedMachineDN.Current = machine.ToLite();
+                    DisconnectedMachineEntity.Current = machine.ToLite();
 
                     try
                     {
@@ -133,7 +133,7 @@ namespace Signum.Engine.Disconnected
                                 tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
                             }
 
-                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.RefersTo(tuple.Type.ToTypeDN())).UnsafeUpdateMList()
+                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.RefersTo(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
                             .Set(mle => mle.Element.CopyTable, mle => ms)
                             .Execute();
                         }
@@ -202,7 +202,7 @@ namespace Signum.Engine.Disconnected
                     finally
                     {
                         runningExports.Remove(export);
-                        DisconnectedMachineDN.Current = null;
+                        DisconnectedMachineEntity.Current = null;
 
                         OnEndExporting();
                     }
@@ -215,7 +215,7 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
-        private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
+        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlConnector newDatabase)
         {
             var clone = export.Retrieve().Clone();
 
@@ -227,7 +227,7 @@ namespace Signum.Engine.Disconnected
         }
 
 
-        protected virtual void OnStartExporting(DisconnectedMachineDN machine)
+        protected virtual void OnStartExporting(DisconnectedMachineEntity machine)
         {
 
         }
@@ -237,20 +237,20 @@ namespace Signum.Engine.Disconnected
 
         }
 
-        protected virtual void OnExportingError(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Exception exception)
+        protected virtual void OnExportingError(DisconnectedMachineEntity machine, Lite<DisconnectedExportEntity> export, Exception exception)
         {
         }
 
         readonly MethodInfo miUnsafeLock;
-        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : Entity, new()
+        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineEntity> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportEntity> stats) where T : Entity, new()
         {
             using (ExecutionMode.Global())
             {
                 var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null).Select(a =>
-                    "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
+                    "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
-                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.RefersTo(typeof(T).ToTypeDN())).UnsafeUpdateMList()
+                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.RefersTo(typeof(T).ToTypeEntity())).UnsafeUpdateMList()
                         .Set(mle => mle.Element.Errors, mle => result)
                         .Execute();
 
@@ -261,7 +261,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        public virtual void AbortExport(Lite<DisconnectedExportDN> stat)
+        public virtual void AbortExport(Lite<DisconnectedExportEntity> stat)
         {
             runningExports.GetOrThrow(stat).CancelationSource.Cancel();
         }
@@ -271,23 +271,23 @@ namespace Signum.Engine.Disconnected
             DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
         }
 
-        protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
+        protected virtual string DatabaseFileName(DisconnectedMachineEntity machine)
         {
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + 
                 DisconnectedTools.CleanMachineName(machine.MachineName) + ".mdf");
         }
 
-        protected virtual string DatabaseLogFileName(DisconnectedMachineDN machine)
+        protected virtual string DatabaseLogFileName(DisconnectedMachineEntity machine)
         {
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName) + "_Log.ldf");
         }
 
-        protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
+        protected virtual DatabaseName DatabaseName(DisconnectedMachineEntity machine)
         {
             return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName));
         }
 
-        protected virtual string CreateDatabase(DisconnectedMachineDN machine)
+        protected virtual string CreateDatabase(DisconnectedMachineEntity machine)
         {
             DatabaseName databaseName = DatabaseName(machine);
 
@@ -317,21 +317,21 @@ namespace Signum.Engine.Disconnected
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
-        protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
+        protected virtual void BackupDatabase(DisconnectedMachineEntity machine, Lite<DisconnectedExportEntity> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
             FileTools.CreateParentDirectory(backupFileName);
             DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
         }
 
-        public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)
+        public virtual string BackupNetworkFileName(DisconnectedMachineEntity machine, Lite<DisconnectedExportEntity> export)
         {
             return Path.Combine(DisconnectedLogic.BackupNetworkFolder, BackupFileName(machine, export));
         }
 
-        protected virtual string BackupFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)
+        protected virtual string BackupFileName(DisconnectedMachineEntity machine, Lite<DisconnectedExportEntity> export)
         {
-            return "{0}.{1}.Export.{2}.bak".Formato(Connector.Current.DatabaseName(), machine.MachineName.ToString(), export.Id);
+            return "{0}.{1}.Export.{2}.bak".FormatWith(Connector.Current.DatabaseName(), machine.MachineName.ToString(), export.Id);
         }
 
     }
@@ -339,12 +339,12 @@ namespace Signum.Engine.Disconnected
 
     public interface ICustomExporter
     {
-        void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine);
+        void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineEntity machine);
     }
 
     public class BasicExporter<T> : ICustomExporter where T : Entity
     {
-        public virtual void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
+        public virtual void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineEntity machine)
         {
             this.CopyTable(table, strategy, newDatabaseName);
         }
@@ -366,7 +366,7 @@ namespace Signum.Engine.Disconnected
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
-                    from {1} as [table]".Formato(
+                    from {1} as [table]".FormatWith(
                     newTableName,
                     table.Name,
                     table.Columns.Keys.ToString(a => a.SqlEscape(), ", "),
@@ -376,21 +376,21 @@ SELECT {3}
             {
                 if (table is Table)
                 {
-                    command += "\r\nWHERE [table].Id in ({0})".Formato(filter.Sql);
+                    command += "\r\nWHERE [table].Id in ({0})".FormatWith(filter.Sql);
                 }
                 else
                 {
                     TableMList rt = (TableMList)table;
                     command +=
-                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape()) +
-                        "\r\nWHERE [masterTable].Id in ({0})".Formato(filter.Sql);
+                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".FormatWith(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape()) +
+                        "\r\nWHERE [masterTable].Id in ({0})".FormatWith(filter.Sql);
                 }
             }
 
             string fullCommand = !table.PrimaryKey.Identity ? command :
-                ("SET IDENTITY_INSERT {0} ON\r\n".Formato(newTableName) +
+                ("SET IDENTITY_INSERT {0} ON\r\n".FormatWith(newTableName) +
                 command + "\r\n" +
-                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName));
+                "SET IDENTITY_INSERT {0} OFF\r\n".FormatWith(newTableName));
 
             return Executor.ExecuteNonQuery(fullCommand, filter.Try(a => a.Parameters));
         }
@@ -405,7 +405,7 @@ SELECT {3}
 
     public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : Entity
     {
-        public override void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
+        public override void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineEntity machine)
         {
             this.DeleteTable(table, newDatabaseName);
 

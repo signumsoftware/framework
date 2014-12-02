@@ -1,7 +1,7 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.Basics
 
-@using (var sc = Html.TypeContext<Pop3ReceptionDN>())
+@using (var sc = Html.TypeContext<Pop3ReceptionEntity>())
 {
     @Html.EntityLine(sc, s => s.Pop3Configuration)
     @Html.ValueLine(sc, s => s.StartDate)
@@ -9,12 +9,12 @@
     @Html.ValueLine(sc, s => s.NewEmails)
     @Html.EntityLine(sc, s => s.Exception)
 
-    @Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
+    @Html.CountSearchControl(new FindOptions(typeof(EmailMessageEntity))
     {
         FilterOptions = { new FilterOption("Entity.ReceptionInfo.Reception", sc.Value) }
     }, new Context(sc, "emails"), csc => { csc.View = true; });
 
-    @Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
+    @Html.CountSearchControl(new FindOptions(typeof(ExceptionEntity))
     {
         FilterOptions = { new FilterOption("Entity.Pop3Reception", sc.Value) }
     }, new Context(sc, "ex"), csc => { csc.View = true; });

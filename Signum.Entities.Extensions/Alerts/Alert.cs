@@ -17,7 +17,7 @@ using System.Diagnostics;
 namespace Signum.Entities.Alerts
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class AlertDN : Entity
+    public class AlertEntity : Entity
     {
         [ImplementedByAll]
         Lite<Entity> target;
@@ -68,24 +68,24 @@ namespace Signum.Entities.Alerts
             set { SetToStr(ref text, value); }
         }
 
-        Lite<IUserDN> createdBy;
-        public Lite<IUserDN> CreatedBy
+        Lite<IUserEntity> createdBy;
+        public Lite<IUserEntity> CreatedBy
         {
             get { return createdBy; }
             set { Set(ref createdBy, value); }
         }
 
-        Lite<IUserDN> attendedBy;
-        public Lite<IUserDN> AttendedBy
+        Lite<IUserEntity> attendedBy;
+        public Lite<IUserEntity> AttendedBy
         {
             get { return attendedBy; }
             set { Set(ref attendedBy, value); }
         }
 
         [NotNullable]
-        AlertTypeDN alertType;
+        AlertTypeEntity alertType;
         [NotNullValidator]
-        public AlertTypeDN AlertType
+        public AlertTypeEntity AlertType
         {
             get { return alertType; }
             set { Set(ref alertType, value); }
@@ -103,35 +103,35 @@ namespace Signum.Entities.Alerts
             return text.FirstNonEmptyLine().Etc(100);
         }
 
-        static Expression<Func<AlertDN, bool>> AttendedExpression =
+        static Expression<Func<AlertEntity, bool>> AttendedExpression =
            a => a.AttendedDate.HasValue;
         public bool Attended
         {
             get { return AttendedExpression.Evaluate(this); }
         }
 
-        static Expression<Func<AlertDN, bool>> NotAttendedExpression =
+        static Expression<Func<AlertEntity, bool>> NotAttendedExpression =
            a => a.AttendedDate == null;
         public bool NotAttended
         {
             get { return NotAttendedExpression.Evaluate(this); }
         }
 
-        static Expression<Func<AlertDN, bool>> AlertedExpression =
+        static Expression<Func<AlertEntity, bool>> AlertedExpression =
             a => !a.AttendedDate.HasValue && a.AlertDate <= TimeZoneManager.Now;
         public bool Alerted
         {
             get{ return AlertedExpression.Evaluate(this); }
         }
 
-        static Expression<Func<AlertDN, bool>> FutureExpression =
+        static Expression<Func<AlertEntity, bool>> FutureExpression =
             a => !a.AttendedDate.HasValue && a.AlertDate > TimeZoneManager.Now; 
         public bool Future
         {
             get{ return FutureExpression.Evaluate(this); }
         }
 
-        static Expression<Func<AlertDN, AlertCurrentState>> CurrentStateExpression = 
+        static Expression<Func<AlertEntity, AlertCurrentState>> CurrentStateExpression = 
             a =>a.attendedDate.HasValue ? AlertCurrentState.Attended: 
                 a.alertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted:  AlertCurrentState.Future;
         public AlertCurrentState CurrentState
@@ -157,18 +157,18 @@ namespace Signum.Entities.Alerts
 
     public static class AlertOperation
     {
-        public static readonly ConstructSymbol<AlertDN>.From<Entity> CreateAlertFromEntity = OperationSymbol.Construct<AlertDN>.From<Entity>();
-        public static readonly ExecuteSymbol<AlertDN> SaveNew = OperationSymbol.Execute<AlertDN>();
-        public static readonly ExecuteSymbol<AlertDN> Save = OperationSymbol.Execute<AlertDN>();
-        public static readonly ExecuteSymbol<AlertDN> Attend = OperationSymbol.Execute<AlertDN>();
-        public static readonly ExecuteSymbol<AlertDN> Unattend = OperationSymbol.Execute<AlertDN>();
+        public static readonly ConstructSymbol<AlertEntity>.From<Entity> CreateAlertFromEntity = OperationSymbol.Construct<AlertEntity>.From<Entity>();
+        public static readonly ExecuteSymbol<AlertEntity> SaveNew = OperationSymbol.Execute<AlertEntity>();
+        public static readonly ExecuteSymbol<AlertEntity> Save = OperationSymbol.Execute<AlertEntity>();
+        public static readonly ExecuteSymbol<AlertEntity> Attend = OperationSymbol.Execute<AlertEntity>();
+        public static readonly ExecuteSymbol<AlertEntity> Unattend = OperationSymbol.Execute<AlertEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class AlertTypeDN : SemiSymbol
+    public class AlertTypeEntity : SemiSymbol
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public AlertTypeDN MakeSymbol([CallerMemberName]string memberName = null)
+        public AlertTypeEntity MakeSymbol([CallerMemberName]string memberName = null)
         {
             base.MakeSymbol(new StackFrame(1, false), memberName);
             return this;
@@ -177,7 +177,7 @@ namespace Signum.Entities.Alerts
 
     public static class AlertTypeOperation
     {
-        public static readonly ExecuteSymbol<AlertTypeDN> Save = OperationSymbol.Execute<AlertTypeDN>();
+        public static readonly ExecuteSymbol<AlertTypeEntity> Save = OperationSymbol.Execute<AlertTypeEntity>();
     }
 
     public enum AlertMessage

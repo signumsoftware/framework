@@ -14,6 +14,6 @@ namespace Signum.Services
     public interface IIsolationServer
     {
         [OperationContract, NetDataContract]
-        Lite<IsolationDN> GetOnlyIsolation(List<Lite<Entity>> selectedEntities);
+        Lite<IsolationEntity> GetOnlyIsolation(List<Lite<Entity>> selectedEntities);
     }
 }

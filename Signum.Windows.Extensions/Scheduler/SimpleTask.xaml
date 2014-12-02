@@ -8,7 +8,7 @@
     <StackPanel m:Common.IsReadOnly="True">
         <m:ValueLine m:Common.Route="Key" />
         <GroupBox Header="Executions">
-            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:ScheduledTaskLogDN}" MaxHeight="400" FilterColumn="Task"/>
+            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:ScheduledTaskLogEntity}" MaxHeight="400" FilterColumn="Task"/>
         </GroupBox>
     </StackPanel>
 </UserControl>

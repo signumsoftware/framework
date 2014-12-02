@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Basics
 @using Signum.Engine.Authorization
-@using (var e = Html.TypeContext<RoleDN>())
+@using (var e = Html.TypeContext<RoleEntity>())
 {
     @Html.ValueLine(e, f => f.Name)
     @Html.ValueLine(e, f => f.MergeStrategy, vl=>vl.UnitText = e.Value.StrategyHint)

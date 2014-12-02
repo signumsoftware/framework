@@ -43,12 +43,12 @@ namespace Signum.Windows.UserQueries
         {
             if (QueryDescription == null)
             {
-                UserQueryDN uq = (UserQueryDN)DataContext;
+                UserQueryEntity uq = (UserQueryEntity)DataContext;
 
                 QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
 
-            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey);
+            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey);
         }
 
         private List<QueryToken> QueryTokenBuilderFilters_SubTokensEvent(QueryToken token)

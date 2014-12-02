@@ -8,6 +8,7 @@ export function edit() {
     "edit-action".get().hide();
     "syntax-action".get().show();
     "save-action".get().show();
+    "translate-action".get().show();
 }
 
 function save() {
@@ -17,24 +18,25 @@ function save() {
         url: (<HTMLFormElement>document.getElementById("form-save")).action,
         async: false,
         data: $("form#form-save :input").serializeObject(),
-        success: function (result) {
+        success: result => {
             if (!result) {
                 location.reload(true);
-                $("#saving-error").hide();
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            var msg;
-            if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-                var startError = XMLHttpRequest.responseText.indexOf("<title>");
-                var endError = XMLHttpRequest.responseText.indexOf("</title>");
-                if ((startError != -1) && (endError != -1))
-                    msg = XMLHttpRequest.responseText.substring(startError + 7, endError);
-                else
-                    msg = XMLHttpRequest.responseText;
+        }
+    });
+}
+
+
+function translate(v: JQueryEventObject) {
+    v.preventDefault();
+    $.ajax({
+        url: $(v.currentTarget).attr("href"),
+        async: false,
+        data: $("form#form-save :input").serializeObject(),
+        success: (result) => {
+            if (!result) {
+                location.reload(true);
             }
-            $("#saving-error .text").html(msg);
-            $("#saving-error").show();
         }
     });
 }
@@ -48,7 +50,7 @@ function hashSelected() {
 }
 
 export function init() {
-    $(function () {
+    $(() => {
         //$(".shortcut").click(function () { $.copy($(this).html()); });
 
         hashSelected();
@@ -60,10 +62,12 @@ export function init() {
         "save-action".get().click(save);
         "edit-action".get().click(edit);
 
-        "syntax-action".get().click(function () {
+        "syntax-action".get().click(e => {
             $("#syntax-list").slideToggle("slow");
-            $(this).toggleClass("active");
+            $(e.currentTarget).toggleClass("active");
             return null;
         });
+
+        "translate-action".get().find("a").click(args => translate(args)); 
     });
 }

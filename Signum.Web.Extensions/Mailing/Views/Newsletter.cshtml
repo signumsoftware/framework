@@ -5,11 +5,11 @@
 @using Signum.Web.Mailing
 @using Signum.Entities.DynamicQuery
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
-@using (var nc = Html.TypeContext<NewsletterDN>())
+@using (var nc = Html.TypeContext<NewsletterEntity>())
 {  
     using(var tabs = Html.Tabs(nc)) 
     {
-        tabs.Tab("emTabMain", typeof(NewsletterDN).NiceName(), @<text>
+        tabs.Tab("emTabMain", typeof(NewsletterEntity).NiceName(), @<text>
     @Html.ValueLine(nc, n => n.Name)
     @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
 
@@ -72,7 +72,7 @@
     </text>);
         if (!nc.Value.IsNew)
         {
-            tabs.Tab("emTabSend", typeof(NewsletterDeliveryDN).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
+            tabs.Tab("emTabSend", typeof(NewsletterDeliveryEntity).NiceName(), Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryEntity))
                {
                    FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
                    SearchOnLoad = true,

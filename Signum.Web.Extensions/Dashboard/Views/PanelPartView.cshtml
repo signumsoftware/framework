@@ -1,10 +1,10 @@
 ﻿@using System.Configuration
 @using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
-@model PanelPartDN
+@model PanelPartEntity
 
 @{ 
-    string prefix = "r{0}c{1}".Formato(Model.Row, Model.StartColumn);
+    string prefix = "r{0}c{1}".FormatWith(Model.Row, Model.StartColumn);
     DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
     var link = config.TitleLink == null ? null : config.TitleLink(Model.Content); 
 }

@@ -32,7 +32,7 @@ namespace Signum.Engine.Isolation
 
     public static class IsolationLogic
     {
-        public static ResetLazy<List<Lite<IsolationDN>>> Isolations;
+        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations;
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
@@ -40,10 +40,10 @@ namespace Signum.Engine.Isolation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<IsolationDN>();
+                sb.Include<IsolationEntity>();
 
-                dqm.RegisterQuery(typeof(IsolationDN), () =>
-                    from iso in Database.Query<IsolationDN>()
+                dqm.RegisterQuery(typeof(IsolationEntity), () =>
+                    from iso in Database.Query<IsolationEntity>()
                     select new
                     {
                         Entity = iso,
@@ -51,7 +51,7 @@ namespace Signum.Engine.Isolation
                         iso.Name
                     });
 
-                new Graph<IsolationDN>.Execute(IsolationOperation.Save)
+                new Graph<IsolationEntity>.Execute(IsolationOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -62,8 +62,8 @@ namespace Signum.Engine.Isolation
                 sb.Schema.Initializing += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
-                Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationDN>(),
-                    new InvalidateWith(typeof(IsolationDN)));
+                Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
+                    new InvalidateWith(typeof(IsolationEntity)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
                 SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
@@ -79,32 +79,32 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static IDisposable ProcessLogic_ApplySession(ProcessDN process)
+        static IDisposable ProcessLogic_ApplySession(ProcessEntity process)
         {
-            return IsolationDN.Override(process.Data.TryIsolation());
+            return IsolationEntity.Override(process.Data.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskDN task)
+        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task)
         {
-            return IsolationDN.Override(task.TryIsolation());
+            return IsolationEntity.Override(task.TryIsolation());
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogDN log, Entity entity, object[] args)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            return IsolationDN.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationDN>>());
+            return IsolationEntity.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }
 
         static void EntityEventsGlobal_PreSaving(Entity ident, ref bool graphModified)
         {
-            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) != IsolationStrategy.None && IsolationDN.Current != null)
+            if (strategies.TryGet(ident.GetType(), IsolationStrategy.None) != IsolationStrategy.None && IsolationEntity.Current != null)
             {
                 if (ident.Mixin<IsolationMixin>().Isolation == null)
                 {
-                    ident.Mixin<IsolationMixin>().Isolation = IsolationDN.Current;
+                    ident.Mixin<IsolationMixin>().Isolation = IsolationEntity.Current;
                     graphModified = true;
                 }
-                else if (!ident.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current))
-                    throw new ApplicationException(IsolationMessage.Entity0HasIsolation1ButCurrentIsolationIs2.NiceToString(ident, ident.Mixin<IsolationMixin>().Isolation, IsolationDN.Current));
+                else if (!ident.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current))
+                    throw new ApplicationException(IsolationMessage.Entity0HasIsolation1ButCurrentIsolationIs2.NiceToString(ident, ident.Mixin<IsolationMixin>().Isolation, IsolationEntity.Current));
             }
         }
 
@@ -117,10 +117,10 @@ namespace Signum.Engine.Isolation
                 a => a,
                 (a, b) => 0);
 
-            var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".Formato(t.Name), "\r\n");
+            var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n");
 
-            var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".Formato(gr.Key) +
-                gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".Formato(t.Name), "\r\n"), "\r\n\r\n");
+            var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".FormatWith(gr.Key) +
+                gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n"), "\r\n\r\n");
 
             if (extra.HasText() || lacking.HasText())
                 throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\r\n" +
@@ -132,14 +132,14 @@ namespace Signum.Engine.Isolation
                 giRegisterFilterQuery.GetInvoker(item)(); 
             }
 
-            Schema.Current.EntityEvents<IsolationDN>().FilterQuery += () =>
+            Schema.Current.EntityEvents<IsolationEntity>().FilterQuery += () =>
             {
-                if (IsolationDN.Current == null || ExecutionMode.InGlobal)
+                if (IsolationEntity.Current == null || ExecutionMode.InGlobal)
                     return null;
 
-                return new FilterQueryResult<IsolationDN>(
-                    a => a.ToLite().Is(IsolationDN.Current), 
-                    a => a.ToLite().Is(IsolationDN.Current));
+                return new FilterQueryResult<IsolationEntity>(
+                    a => a.ToLite().Is(IsolationEntity.Current), 
+                    a => a.ToLite().Is(IsolationEntity.Current));
             };
         }
 
@@ -153,26 +153,26 @@ namespace Signum.Engine.Isolation
         {
             Schema.Current.EntityEvents<T>().FilterQuery += () =>
             {
-                if (ExecutionMode.InGlobal || IsolationDN.Current == null)
+                if (ExecutionMode.InGlobal || IsolationEntity.Current == null)
                     return null;
 
                 return new FilterQueryResult<T>(
-                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current),
-                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationDN.Current));
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current),
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current));
             };
 
             Schema.Current.EntityEvents<T>().PreUnsafeInsert += (IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery) =>
             {
-                if (ExecutionMode.InGlobal || IsolationDN.Current == null)
+                if (ExecutionMode.InGlobal || IsolationEntity.Current == null)
                     return constructor;
 
                 if (constructor.Body.Type == typeof(T)) 
                 {
                     var newBody = Expression.Call(
-                      miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationDN>)),
+                      miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationEntity>)),
                       constructor.Body,
                       Expression.Quote(isolationProperty),
-                      Expression.Constant(IsolationDN.Current));
+                      Expression.Constant(IsolationEntity.Current));
 
                     return Expression.Lambda(newBody, constructor.Parameters);
                 }
@@ -182,7 +182,7 @@ namespace Signum.Engine.Isolation
         }
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
-        static Expression<Func<IsolationMixin, Lite<IsolationDN>>> isolationProperty = (IsolationMixin m) => m.Isolation;
+        static Expression<Func<IsolationMixin, Lite<IsolationEntity>>> isolationProperty = (IsolationMixin m) => m.Isolation;
 
 
         public static void Register<T>(IsolationStrategy strategy) where T : Entity
@@ -208,12 +208,12 @@ namespace Signum.Engine.Isolation
             if (val == -1)
                 return null;
 
-            return IsolationDN.Override(Lite.Parse<IsolationDN>(headers.GetHeader<string>(val)));
+            return IsolationEntity.Override(Lite.Parse<IsolationEntity>(headers.GetHeader<string>(val)));
         }
 
         public static IEnumerable<T> WhereCurrentIsolationInMemory<T>(this IEnumerable<T> collection) where T : Entity
         {
-            var curr = IsolationDN.Current;
+            var curr = IsolationEntity.Current;
 
             if (curr == null || strategies[typeof(T)] == IsolationStrategy.None)
                 return collection;
@@ -221,7 +221,7 @@ namespace Signum.Engine.Isolation
             return collection.Where(a => a.Isolation().Is(curr));
         }
 
-        public static Lite<IsolationDN> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
+        public static Lite<IsolationEntity> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
         {
             return selectedEntities.GroupBy(a => a.EntityType)
                 .Select(gr => strategies[gr.Key] == IsolationStrategy.None ? null : giGetOnlyIsolation.GetInvoker(gr.Key)(gr))
@@ -230,9 +230,9 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationDN>>> giGetOnlyIsolation = 
-            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationDN>>>(list => GetOnlyIsolation<Entity>(list));
-        public static Lite<IsolationDN> GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
+        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>> giGetOnlyIsolation = 
+            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>>(list => GetOnlyIsolation<Entity>(list));
+        public static Lite<IsolationEntity> GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
         {
             return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
                 Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()

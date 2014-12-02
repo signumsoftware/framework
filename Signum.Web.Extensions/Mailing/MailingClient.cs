@@ -28,6 +28,7 @@ using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
 using Signum.Web.Basic;
 using Signum.Entities.Processes;
+using Signum.Web.Cultures;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -37,16 +38,16 @@ namespace Signum.Web.Mailing
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing");
 
-        private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
+        private static QueryTokenEntity ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
             if (tokenString.IsNullOrEmpty())
                 return null;
 
             var queryRuntimeInfo = RuntimeInfo.FromFormValue(queryRuntimeInfoInput);
-            var queryName = QueryLogic.ToQueryName(((Lite<QueryDN>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
+            var queryName = QueryLogic.ToQueryName(((Lite<QueryEntity>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
+            return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
         public static void Start(bool newsletter, bool pop3Config)
@@ -58,43 +59,43 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<EmailAttachmentDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAttachment")},
-                    new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
+                    new EmbeddedEntitySettings<EmailAttachmentEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAttachment")},
+                    new EntitySettings<EmailPackageEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailPackage")},
                     
-                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage"), AvoidValidateRequest = true },
+                    new EntitySettings<EmailMessageEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailMessage"), AvoidValidateRequest = true },
                     
-                    new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
-                    new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
+                    new EmbeddedEntitySettings<EmailAddressEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAddress")},
+                    new EmbeddedEntitySettings<EmailRecipientEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailRecipient")},
                     
-                    new EmbeddedEntitySettings<EmailConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailConfiguration")},
-                    new EntitySettings<SystemEmailDN>{ },
+                    new EmbeddedEntitySettings<EmailConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailConfiguration")},
+                    new EntitySettings<SystemEmailEntity>{ },
                     
-                    new EntitySettings<EmailMasterTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplate"), AvoidValidateRequest = true  },
-                    new EmbeddedEntitySettings<EmailMasterTemplateMessageDN>
+                    new EntitySettings<EmailMasterTemplateEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailMasterTemplate"), AvoidValidateRequest = true  },
+                    new EmbeddedEntitySettings<EmailMasterTemplateMessageEntity>
                     {
-                        PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplateMessage"),
-                        MappingDefault = new EntityMapping<EmailMasterTemplateMessageDN>(true)
+                        PartialViewName = e => ViewPrefix.FormatWith("EmailMasterTemplateMessage"),
+                        MappingDefault = new EntityMapping<EmailMasterTemplateMessageEntity>(true)
                             .SetProperty(emtm => emtm.MasterTemplate, ctx => 
                             {
-                                return (EmailMasterTemplateDN)ctx.Parent.Parent.Parent.Parent.UntypedValue;
+                                return (EmailMasterTemplateEntity)ctx.Parent.Parent.Parent.Parent.UntypedValue;
                             })
                     },
                     
-                    new EntitySettings<EmailTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailTemplate"), AvoidValidateRequest = true },
-                    new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
+                    new EntitySettings<EmailTemplateEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailTemplate"), AvoidValidateRequest = true },
+                    new EmbeddedEntitySettings<EmailTemplateMessageEntity>() 
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage"),
-                        MappingDefault = new EntityMapping<EmailTemplateMessageDN>(true)
+                        PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateMessage"),
+                        MappingDefault = new EntityMapping<EmailTemplateMessageEntity>(true)
                             .SetProperty(etm => etm.Template, ctx =>
                             {
-                                return (EmailTemplateDN)ctx.Parent.Parent.Parent.Parent.UntypedValue;
+                                return (EmailTemplateEntity)ctx.Parent.Parent.Parent.Parent.UntypedValue;
                             })
                     },
 
-                    new EmbeddedEntitySettings<EmailTemplateContactDN>() 
+                    new EmbeddedEntitySettings<EmailTemplateContactEntity>() 
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateContact"),
-                        MappingDefault = new EntityMapping<EmailTemplateContactDN>(true)
+                        PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateContact"),
+                        MappingDefault = new EntityMapping<EmailTemplateContactEntity>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
                                 string tokenStr = UserAssetsHelper.GetTokenString(ctx);
@@ -102,10 +103,10 @@ namespace Signum.Web.Mailing
                             }),
                     },
 
-                    new EmbeddedEntitySettings<EmailTemplateRecipientDN>() 
+                    new EmbeddedEntitySettings<EmailTemplateRecipientEntity>() 
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateRecipient"),
-                        MappingDefault = new EntityMapping<EmailTemplateRecipientDN>(true)
+                        PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateRecipient"),
+                        MappingDefault = new EntityMapping<EmailTemplateRecipientEntity>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
                                 string tokenStr = UserAssetsHelper.GetTokenString(ctx);
@@ -114,17 +115,17 @@ namespace Signum.Web.Mailing
                             })
                     },
 
-                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
-                    new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
+                    new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
+                    new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
                 });
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<EmailTemplateDN>(EmailMessageOperation.CreateMailFromTemplate)
+                    new EntityOperationSettings<EmailTemplateEntity>(EmailMessageOperation.CreateMailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
                         Click = ctx => Module["createMailFromTemplate"](ctx.Options(), JsFunction.Event, 
-                            new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
+                            new FindOptions(((EmailTemplateEntity)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
                 });
@@ -133,20 +134,20 @@ namespace Signum.Web.Mailing
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter"), AvoidValidateRequest = true},
-                        new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                        new EntitySettings<NewsletterEntity> { PartialViewName = e => ViewPrefix.FormatWith("Newsletter"), AvoidValidateRequest = true},
+                        new EntitySettings<NewsletterDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("NewsletterDelivery") },
                     });
 
                     OperationClient.AddSettings(new List<OperationSettings>
                     {
-                        new EntityOperationSettings<NewsletterDN>(NewsletterOperation.RemoveRecipients)
+                        new EntityOperationSettings<NewsletterEntity>(NewsletterOperation.RemoveRecipients)
                         {
                             Click = ctx => Module["removeRecipients"](ctx.Options(),
-                                new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
+                                new FindOptions(typeof(NewsletterDeliveryEntity), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
                                 ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
                         },
 
-                        new EntityOperationSettings<NewsletterDN>(NewsletterOperation.Send)
+                        new EntityOperationSettings<NewsletterEntity>(NewsletterOperation.Send)
                         {
                             Group = EntityOperationGroup.None,
                         }
@@ -156,8 +157,8 @@ namespace Signum.Web.Mailing
                 if (pop3Config)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<Pop3ConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Configuration") },
-                    new EntitySettings<Pop3ReceptionDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Reception") },
+                    new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
+                    new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
                 });
 
 
@@ -167,11 +168,11 @@ namespace Signum.Web.Mailing
                 TasksSetWebMailBody += WebMailProcessor.AssertNoUntrusted;
                 TasksSetWebMailBody += WebMailProcessor.FilePathToCid;
 
-                Navigator.EntitySettings<EmailMessageDN>().MappingMain.AsEntityMapping()
+                Navigator.EntitySettings<EmailMessageEntity>().MappingMain.AsEntityMapping()
                     .RemoveProperty(a => a.Body)
                     .SetProperty(a => a.Body, ctx =>
                     {
-                        var email = ((EmailMessageDN)ctx.Parent.UntypedValue);
+                        var email = ((EmailMessageEntity)ctx.Parent.UntypedValue);
 
                         return SetWebMailBody(ctx.Value, new WebMailOptions
                         {

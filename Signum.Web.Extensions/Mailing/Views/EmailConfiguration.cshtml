@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<EmailConfigurationDN>()) 
+@using (var sc = Html.TypeContext<EmailConfigurationEntity>()) 
 {
 	@Html.ValueLine(sc, ca => ca.ReciveEmails)
 	@Html.ValueLine(sc, ca => ca.SendEmails)

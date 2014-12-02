@@ -5,7 +5,7 @@
 
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 
-@using (var ec = Html.TypeContext<EmailTemplateDN>())
+@using (var ec = Html.TypeContext<EmailTemplateEntity>())
 {
     ec.LabelColumns = new BsColumn(3);
     <div class="col-sm-8">

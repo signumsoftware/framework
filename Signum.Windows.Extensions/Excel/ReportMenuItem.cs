@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
@@ -32,7 +31,7 @@ namespace Signum.Windows.Excel
                 if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
                 {
                     MenuItem b = (MenuItem)e.OriginalSource;
-                    Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
+                    Lite<ExcelReportEntity> reportLite = (Lite<ExcelReportEntity>)b.Tag;
                     
                     SaveFileDialog sfd = new SaveFileDialog()
                     {
@@ -67,7 +66,7 @@ namespace Signum.Windows.Excel
             {
                 var query = QueryClient.GetQuery(sc.QueryName);
 
-                Finder.Explore(new ExploreOptions(typeof(ExcelReportDN))
+                Finder.Explore(new ExploreOptions(typeof(ExcelReportEntity))
                 {
                     ShowFilters = false,
                     ShowFilterButton = false,
@@ -91,7 +90,7 @@ namespace Signum.Windows.Excel
             {
                 miResult.Items.Clear();
 
-                List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(sc.QueryName));
+                List<Lite<ExcelReportEntity>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(sc.QueryName));
 
                 if (plainExcelMenuItem != null)
                 {
@@ -103,7 +102,7 @@ namespace Signum.Windows.Excel
 
                 if (reports.Count > 0)
                 {
-                    foreach (Lite<ExcelReportDN> report in reports)
+                    foreach (Lite<ExcelReportEntity> report in reports)
                     {
                         MenuItem mi = new MenuItem()
                         {

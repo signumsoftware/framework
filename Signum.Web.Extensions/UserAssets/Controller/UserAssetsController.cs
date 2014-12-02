@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
-using Signum.Web.Extensions.UserAssets;
+using Signum.Web.UserAssets;
 
 
 namespace Signum.Web.UserAssets
@@ -32,7 +32,7 @@ namespace Signum.Web.UserAssets
     {
         public ActionResult Import()
         {
-            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset")); 
+            return View(UserAssetsClient.ViewPrefix.FormatWith("ImportUserAsset")); 
         }
 
         [HttpPost]
@@ -46,7 +46,7 @@ namespace Signum.Web.UserAssets
 
             ViewData["Document"] = Convert.ToBase64String(bytes);
 
-            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset"), model);  
+            return View(UserAssetsClient.ViewPrefix.FormatWith("ImportUserAsset"), model);  
 
         }
 
@@ -67,14 +67,14 @@ namespace Signum.Web.UserAssets
 
             ViewData["Message"] = UserAssetMessage.SucessfullyImported.NiceToString();
 
-            return View(UserAssetsClient.ViewPrefix.Formato("ImportUserAsset"));
+            return View(UserAssetsClient.ViewPrefix.FormatWith("ImportUserAsset"));
         }
 
         public FileResult Export(Lite<IUserAssetEntity> entity)
         {
             var result = UserAssetsExporter.ToXml(entity.Retrieve());
 
-            return File(result, MimeType.FromExtension("xml"), "{0}{1}.xml".Formato(entity.EntityType.Name, entity.Id));
+            return File(result, MimeType.FromExtension("xml"), "{0}{1}.xml".FormatWith(entity.EntityType.Name, entity.Id));
         }
     }
 }

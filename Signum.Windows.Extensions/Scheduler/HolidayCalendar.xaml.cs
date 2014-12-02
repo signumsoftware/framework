@@ -29,11 +29,11 @@ namespace Signum.Windows.Scheduler
 
         private object EntityList_Creating()
         {
-            HolidayCalendarDN cal = ((HolidayCalendarDN)DataContext);
+            HolidayCalendarEntity cal = ((HolidayCalendarEntity)DataContext);
             if (cal == null || cal.Holidays == null || cal.Holidays.Count == 0)
-                return new HolidayDN { Date = DateTime.Today };
+                return new HolidayEntity { Date = DateTime.Today };
             else
-                return new HolidayDN { Date = cal.Holidays.Max(a => a.Date) }; 
+                return new HolidayEntity { Date = cal.Holidays.Max(a => a.Date) }; 
         }
     }
 }

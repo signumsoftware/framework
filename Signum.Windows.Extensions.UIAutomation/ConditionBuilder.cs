@@ -55,7 +55,7 @@ namespace Signum.Windows.UIAutomation
 
             public override string ToString()
             {
-                return "Condition({0})".Formato(AutomationCondition.NiceToString());
+                return "Condition({0})".FormatWith(AutomationCondition.NiceToString());
             }
         }
 
@@ -70,7 +70,7 @@ namespace Signum.Windows.UIAutomation
 
             public override string ToString()
             {
-                return "Property({0})".Formato(AutomationProperty);
+                return "Property({0})".FormatWith(AutomationProperty);
             }
         }
 
@@ -85,7 +85,7 @@ namespace Signum.Windows.UIAutomation
 
             public override string ToString()
             {
-                return "Pattern<{0}>".Formato(AutomationPattern.Name);
+                return "Pattern<{0}>".FormatWith(AutomationPattern.Name);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Signum.Windows.UIAutomation
         {
             var result = base.Visit(node);
             if (result.Type == typeof(bool) && !(result is AutomationConditionExpression || result is AutomationPropertyExpression))
-                throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".Formato(node.ToString()));
+                throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".FormatWith(node.ToString()));
 
             return result;
         }
@@ -194,7 +194,7 @@ namespace Signum.Windows.UIAutomation
 
             AutomationPatternExpression pattern = exp as AutomationPatternExpression;
             if (pattern != null && ce.Value == null)
-                return new PropertyCondition(GetCachedProperty(pattern.AutomationPattern, "Is{0}AvailableProperty".Formato(pattern.AutomationPattern.Name)), false);
+                return new PropertyCondition(GetCachedProperty(pattern.AutomationPattern, "Is{0}AvailableProperty".FormatWith(pattern.AutomationPattern.Name)), false);
 
             return null;
         }
@@ -235,7 +235,7 @@ namespace Signum.Windows.UIAutomation
             var result = dic.TryGetC(propertyName);
 
             if (result == null)
-                throw new InvalidOperationException("Property {0} is not accessible on UIAutomation queries".Formato(propertyName));
+                throw new InvalidOperationException("Property {0} is not accessible on UIAutomation queries".FormatWith(propertyName));
 
             return result;
         }

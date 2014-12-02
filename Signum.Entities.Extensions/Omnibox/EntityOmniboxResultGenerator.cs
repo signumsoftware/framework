@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -102,8 +102,8 @@ namespace Signum.Entities.Omnibox
 
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "{0} Id".Formato(entityTypeName), OmniboxResultType = resultType },
-                new HelpOmniboxResult { Text = "{0} 'ToStr'".Formato(entityTypeName), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "{0} Id".FormatWith(entityTypeName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} 'ToStr'".FormatWith(entityTypeName), OmniboxResultType = resultType }
             };
         }
     }
@@ -123,10 +123,10 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".Formato(Type.NicePluralName().ToOmniboxPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".Formato(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             return Type.NicePluralName().ToOmniboxPascal();
         }

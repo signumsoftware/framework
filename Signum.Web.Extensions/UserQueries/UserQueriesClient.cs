@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,10 +19,10 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Web.Operations;
 using Signum.Web.Basic;
-using Signum.Web.Extensions.UserQueries;
+using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
-using Signum.Web.Extensions.UserAssets;
+using Signum.Web.UserAssets;
 
 namespace Signum.Web.UserQueries
 {
@@ -33,14 +33,14 @@ namespace Signum.Web.UserQueries
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery");
 
-        public static Func<SubTokensOptions, Mapping<QueryTokenDN>> QueryTokenMapping = opts => ctx =>
+        public static Func<SubTokensOptions, Mapping<QueryTokenEntity>> QueryTokenMapping = opts => ctx =>
         {
             string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
             string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
             object queryName = QueryLogic.ToQueryName(queryKey);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, opts));
+            return new QueryTokenEntity(QueryUtils.Parse(tokenStr, qd, opts));
         };
 
         public static void Start()
@@ -52,36 +52,36 @@ namespace Signum.Web.UserQueries
                 Navigator.RegisterArea(typeof(UserQueriesClient));
 
                 UserAssetsClient.Start();
-                UserAssetsClient.RegisterExportAssertLink<UserQueryDN>();
+                UserAssetsClient.RegisterExportAssertLink<UserQueryEntity>();
 
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryDN> { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                    new EntitySettings<UserQueryEntity> { PartialViewName = e => ViewPrefix.FormatWith("UserQuery") },
                     
-                    new EmbeddedEntitySettings<QueryFilterDN>
+                    new EmbeddedEntitySettings<QueryFilterEntity>
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
-                        MappingDefault = new EntityMapping<QueryFilterDN>(false)
+                        PartialViewName = e => ViewPrefix.FormatWith("QueryFilter"), 
+                        MappingDefault = new EntityMapping<QueryFilterEntity>(false)
                             .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
                     },
 
-                    new EmbeddedEntitySettings<QueryColumnDN>
+                    new EmbeddedEntitySettings<QueryColumnEntity>
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
-                        MappingDefault = new EntityMapping<QueryColumnDN>(false)
+                        PartialViewName = e => ViewPrefix.FormatWith("QueryColumn"), 
+                        MappingDefault = new EntityMapping<QueryColumnEntity>(false)
                             .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.DisplayName)
                     },
 
-                    new EmbeddedEntitySettings<QueryOrderDN>
+                    new EmbeddedEntitySettings<QueryOrderEntity>
                     { 
-                        PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
-                        MappingDefault = new EntityMapping<QueryOrderDN>(false)
+                        PartialViewName = e => ViewPrefix.FormatWith("QueryOrder"), 
+                        MappingDefault = new EntityMapping<QueryOrderEntity>(false)
                             .SetProperty(a=>a.Token, QueryTokenMapping(SubTokensOptions.CanElement))
                             .CreateProperty(a=>a.OrderType)
                             
@@ -92,9 +92,9 @@ namespace Signum.Web.UserQueries
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<UserQueryDN>(UserQueryOperation.Delete)
+                    new EntityOperationSettings<UserQueryEntity>(UserQueryOperation.Delete)
                     {
-                        Click = ctx => Module["deleteUserQuery"](ctx.Options(), Finder.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName())),
+                        Click = ctx => Module["deleteUserQuery"](ctx.Options(), Finder.FindRoute( ((UserQueryEntity)ctx.Entity).Query.ToQueryName())),
                         Contextual = { IsVisible = a => true },
                         ContextualFromMany = { IsVisible = a => true },
                     }
@@ -113,10 +113,10 @@ namespace Signum.Web.UserQueries
 
         class UserQueryQuickLink : QuickLink
         {
-            Lite<UserQueryDN> userQuery;
+            Lite<UserQueryEntity> userQuery;
             Lite<Entity> entity;
 
-            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<Entity> entity)
+            public UserQueryQuickLink(Lite<UserQueryEntity> userQuery, Lite<Entity> entity)
             {
                 this.Text = userQuery.ToString();
                 this.userQuery = userQuery;
@@ -137,15 +137,15 @@ namespace Signum.Web.UserQueries
             if (ctx.Prefix.HasText())
                 return null;
 
-            if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearch: true))
+            if (!Navigator.IsNavigable(typeof(UserQueryEntity), null, isSearch: true))
                 return null;
 
             var items = new List<IMenuItem>();
 
-            Lite<UserQueryDN> currentUserQuery = null;
+            Lite<UserQueryEntity> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).Try(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = Lite.Create<UserQueryDN>(PrimaryKey.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString(), typeof(UserQueryDN)));
+                currentUserQuery = Lite.Create<UserQueryEntity>(PrimaryKey.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString(), typeof(UserQueryEntity)));
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName).OrderBy(a => a.ToString()))
             {
@@ -161,7 +161,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserQueryDN), isSearch: true))
+            if (Navigator.IsCreable(typeof(UserQueryEntity), isSearch: true))
             {
                 items.Add(new MenuItem(ctx.Prefix, "qbUserQueryNew")
                 {
@@ -193,7 +193,7 @@ namespace Signum.Web.UserQueries
             };
         }
 
-        public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
+        public static void ApplyUserQuery(this FindOptions findOptions, UserQueryEntity userQuery)
         {
             if (!userQuery.WithoutFilters)
             {
@@ -229,7 +229,7 @@ namespace Signum.Web.UserQueries
             findOptions.Pagination = userQuery.GetPagination();
         }
 
-        public static FindOptions ToFindOptions(this UserQueryDN userQuery)
+        public static FindOptions ToFindOptions(this UserQueryEntity userQuery)
         {
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 

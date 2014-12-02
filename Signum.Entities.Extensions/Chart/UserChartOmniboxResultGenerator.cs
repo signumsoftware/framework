@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +11,9 @@ namespace Signum.Entities.Chart
 {
     public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartOmniboxResult>
     {
-        Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete;
+        Func<string, int, IEnumerable<Lite<UserChartEntity>>> autoComplete;
 
-        public UserChartOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete)
+        public UserChartOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserChartEntity>>> autoComplete)
         {
             this.autoComplete = autoComplete;
         }
@@ -38,7 +38,7 @@ namespace Signum.Entities.Chart
                     ToStr = ident,
                     ToStrMatch = match,
                     Distance = match.Distance,
-                    UserChart = (Lite<UserChartDN>)uq,
+                    UserChart = (Lite<UserChartEntity>)uq,
                 };
             }
         }
@@ -50,7 +50,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    Text = "'{0}'".Formato(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
+                    Text = "'{0}'".FormatWith(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
                     OmniboxResultType = resultType 
                 }
             };
@@ -62,11 +62,11 @@ namespace Signum.Entities.Chart
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite<UserChartDN> UserChart { get; set; }
+        public Lite<UserChartEntity> UserChart { get; set; }
 
         public override string ToString()
         {
-            return "\"{0}\"".Formato(ToStr);
+            return "\"{0}\"".FormatWith(ToStr);
         }
     }
 }

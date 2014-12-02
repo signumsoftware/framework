@@ -16,19 +16,19 @@ namespace Signum.Services
         ResultTable ExecuteChart(ChartRequest request);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserChartDN>> GetUserCharts(object queryName);
+        List<Lite<UserChartEntity>> GetUserCharts(object queryName);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType);
+        List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserChartDN>> AutocompleteUserChart(string subString, int limit);
+        List<Lite<UserChartEntity>> AutocompleteUserChart(string subString, int limit);
 
         [OperationContract, NetDataContract]
-        UserChartDN RetrieveUserChart(Lite<UserChartDN> userChart);
+        UserChartEntity RetrieveUserChart(Lite<UserChartEntity> userChart);
 
         [OperationContract, NetDataContract]
-        List<ChartScriptDN> GetChartScripts();
+        List<ChartScriptEntity> GetChartScripts();
     }
 
     [ServiceContract]

@@ -2,7 +2,7 @@
 @using Signum.Web.Mailing
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 
-@using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
+@using (var ec = Html.TypeContext<EmailMasterTemplateEntity>())
 {
     @Html.ValueLine(ec, e => e.Name)
     <div class="clearall"></div>

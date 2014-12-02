@@ -1,0 +1,5 @@
+﻿@using Signum.Entities.Isolation
+@using (var cp = Html.TypeContext<IsolationEntity>())
+{
+    @Html.ValueLine(cp, d => d.Name)
+}

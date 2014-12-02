@@ -29,35 +29,35 @@ namespace Signum.Windows.Processes
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.AddSetting(new EntitySettings<ProcessAlgorithmSymbol> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
-                Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessEntity> { View = e => new ProcessUI(), Icon = Image("process.png") });
 
 
                 Server.SetSymbolIds<ProcessAlgorithmSymbol>();
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
-                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
-                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Execute){ Icon = Image("play.png") },
-                    new EntityOperationSettings<ProcessDN>(ProcessOperation.Suspend){ Icon = Image("pause.png") },
+                    new EntityOperationSettings<ProcessEntity>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
+                    new EntityOperationSettings<ProcessEntity>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
+                    new EntityOperationSettings<ProcessEntity>(ProcessOperation.Execute){ Icon = Image("play.png") },
+                    new EntityOperationSettings<ProcessEntity>(ProcessOperation.Suspend){ Icon = Image("pause.png") },
                 });
 
                 if (packageOperation || package)
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN> { View = e => new PackageLine(), Icon = Image("packageLine.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineEntity> { View = e => new PackageLine(), Icon = Image("packageLine.png") });
 
                 if (package)
-                    Navigator.AddSetting(new EntitySettings<PackageDN> { View = e => new Package(), Icon = Image("package.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageEntity> { View = e => new Package(), Icon = Image("package.png") });
 
                 if (packageOperation)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN> { View = e => new PackageOperation(), Icon = Image("package.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationEntity> { View = e => new PackageOperation(), Icon = Image("package.png") });
 
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }
 
-                if (MixinDeclarations.IsDeclared(typeof(ProcessDN), typeof(UserProcessSessionMixin)))
+                if (MixinDeclarations.IsDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin)))
                 {
-                    Navigator.EntitySettings<ProcessDN>().OverrideView += (p, c) =>
+                    Navigator.EntitySettings<ProcessEntity>().OverrideView += (p, c) =>
                     {
                         c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
                         return c;
@@ -72,7 +72,7 @@ namespace Signum.Windows.Processes
 
         static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {
-            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+            if (!Navigator.IsViewable(typeof(PackageOperationEntity)))
                 return Enumerable.Empty<MenuItem>();
 
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Count == 1)
@@ -117,12 +117,12 @@ namespace Signum.Windows.Processes
         }
 
 
-        static ProcessDN ProcessOperation_Plan(EntityOperationContext<ProcessDN> args)
+        static ProcessEntity ProcessOperation_Plan(EntityOperationContext<ProcessEntity> args)
         {
             DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, Window.GetWindow(args.SenderButton)))
             {
-                return  ((ProcessDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
+                return  ((ProcessEntity)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
             }
             return null; 
         }

@@ -23,10 +23,10 @@ namespace Signum.Web.Basic
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<QueryDN> 
+                    new EntitySettings<QueryEntity> 
                     {  
-                        MappingMain = new EntityMapping<QueryDN>(true).GetValue,
-                        MappingLine = new EntityMapping<QueryDN>(true).GetValue
+                        MappingMain = new EntityMapping<QueryEntity>(true).GetValue,
+                        MappingLine = new EntityMapping<QueryEntity>(true).GetValue
                     }
                 });
             }

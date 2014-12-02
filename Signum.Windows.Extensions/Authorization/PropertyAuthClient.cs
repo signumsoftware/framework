@@ -72,7 +72,7 @@ namespace Signum.Windows.Authorization
             {
                 var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
                 if (typeAllowed < requested)
-                    return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), typeAllowed, RoleDN.Current);
+                    return "Type {0} is set to {1} for {2}".FormatWith(route.RootType.NiceName(), typeAllowed, RoleEntity.Current);
 
                 return null;
             }
@@ -83,9 +83,9 @@ namespace Signum.Windows.Authorization
                 var typeAllowed = TypeAuthClient.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
 
                 if (typeAllowed < requested)
-                    return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), typeAllowed, RoleDN.Current);
+                    return "Type {0} is set to {1} for {2}".FormatWith(route.RootType.NiceName(), typeAllowed, RoleEntity.Current);
 
-                return "Property {0} is set to {1} for {2}".Formato(route, propAllowed, RoleDN.Current);
+                return "Property {0} is set to {1} for {2}".FormatWith(route, propAllowed, RoleEntity.Current);
             }
 
             return null;

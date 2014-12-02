@@ -14,7 +14,7 @@ using System.Diagnostics;
 namespace Signum.Entities.Notes
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class NoteDN : Entity
+    public class NoteEntity : Entity
     {
         [SqlDbType(Size = 100)]
         string title;
@@ -50,9 +50,9 @@ namespace Signum.Entities.Notes
             set { SetToStr(ref text, value); }
         }
 
-        Lite<IUserDN> createdBy = UserHolder.Current.ToLite();
+        Lite<IUserEntity> createdBy = UserHolder.Current.ToLite();
         [NotNullValidator]
-        public Lite<IUserDN> CreatedBy
+        public Lite<IUserEntity> CreatedBy
         {
             get { return createdBy; }
             set { Set(ref createdBy, value); }
@@ -63,8 +63,8 @@ namespace Signum.Entities.Notes
             return " - ".Combine(title, text.FirstNonEmptyLine()).Etc(100);
         }
 
-        NoteTypeDN noteType;
-        public NoteTypeDN NoteType
+        NoteTypeEntity noteType;
+        public NoteTypeEntity NoteType
         {
             get { return noteType; }
             set { Set(ref noteType, value); }
@@ -73,8 +73,8 @@ namespace Signum.Entities.Notes
 
     public static class NoteOperation
     {
-        public static readonly ConstructSymbol<NoteDN>.From<Entity> CreateNoteFromEntity = OperationSymbol.Construct<NoteDN>.From<Entity>();
-        public static readonly ExecuteSymbol<NoteDN> Save = OperationSymbol.Execute<NoteDN>();
+        public static readonly ConstructSymbol<NoteEntity>.From<Entity> CreateNoteFromEntity = OperationSymbol.Construct<NoteEntity>.From<Entity>();
+        public static readonly ExecuteSymbol<NoteEntity> Save = OperationSymbol.Execute<NoteEntity>();
     }
 
     public enum NoteMessage
@@ -94,10 +94,10 @@ namespace Signum.Entities.Notes
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class NoteTypeDN : SemiSymbol
+    public class NoteTypeEntity : SemiSymbol
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public NoteTypeDN MakeSymbol([CallerMemberName]string memberName = null)
+        public NoteTypeEntity MakeSymbol([CallerMemberName]string memberName = null)
         {
             base.MakeSymbol(new StackFrame(1, false), memberName);
             return this;
@@ -107,6 +107,6 @@ namespace Signum.Entities.Notes
 
     public static class NoteTypeOperation
     {
-        public static readonly ExecuteSymbol<NoteTypeDN> Save = OperationSymbol.Execute<NoteTypeDN>();
+        public static readonly ExecuteSymbol<NoteTypeEntity> Save = OperationSymbol.Execute<NoteTypeEntity>();
     }
 }

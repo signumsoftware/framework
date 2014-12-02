@@ -9,7 +9,7 @@
         <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button btn btn-default"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">Start </a>
     </div>
 
-    @Html.Partial(ProcessClient.ViewPrefix.Formato("ProcessPanelTable"))
+    @Html.Partial(ProcessClient.ViewPrefix.FormatWith("ProcessPanelTable"))
     <script>
         $(function () {
             @(ProcessClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())))

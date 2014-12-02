@@ -17,21 +17,21 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailMasterTemplateLogic
     {
-        public static EmailMasterTemplateMessageDN GetCultureMessage(this EmailMasterTemplateDN template, CultureInfo ci)
+        public static EmailMasterTemplateMessageEntity GetCultureMessage(this EmailMasterTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
-        public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
+        public static Func<EmailMasterTemplateEntity> CreateDefaultMasterTemplate;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailMasterTemplateDN>();
+                sb.Include<EmailMasterTemplateEntity>();
 
-                dqm.RegisterQuery(typeof(EmailMasterTemplateDN), () =>
-                    from t in Database.Query<EmailMasterTemplateDN>()
+                dqm.RegisterQuery(typeof(EmailMasterTemplateEntity), () =>
+                    from t in Database.Query<EmailMasterTemplateEntity>()
                     select new
                     {
                         Entity = t,
@@ -41,24 +41,24 @@ namespace Signum.Engine.Mailing
 
                 EmailMasterTemplateGraph.Register();
 
-                Validator.PropertyValidator<EmailMasterTemplateDN>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
+                Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
                     if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
-                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(EmailLogic.Configuration.DefaultCulture.EnglishName);
+                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
                 }; 
             }
         }
 
-        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN>
+        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateEntity>
         {
             public static void Register()
             {
                 new Construct(EmailMasterTemplateOperation.Create)
                 {
                     Construct = _ => CreateDefaultMasterTemplate == null ?
-                        new EmailMasterTemplateDN { } :
+                        new EmailMasterTemplateEntity { } :
                         CreateDefaultMasterTemplate()
                 }.Register();
 
@@ -71,9 +71,9 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static Lite<EmailMasterTemplateDN> GetDefaultMasterTemplate()
+        public static Lite<EmailMasterTemplateEntity> GetDefaultMasterTemplate()
         {
-            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).FirstOrDefault();
+            var result = Database.Query<EmailMasterTemplateEntity>().Select(emt => emt.ToLite()).FirstOrDefault();
 
             if (result != null)
                 return result;
@@ -83,7 +83,7 @@ namespace Signum.Engine.Mailing
 
             var newTemplate = CreateDefaultMasterTemplate();
 
-            using (OperationLogic.AllowSave<EmailMasterTemplateDN>())
+            using (OperationLogic.AllowSave<EmailMasterTemplateEntity>())
                 return newTemplate.Save().ToLite();
         }
     }

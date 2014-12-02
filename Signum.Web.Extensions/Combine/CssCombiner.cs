@@ -38,7 +38,7 @@ namespace Signum.Web.Combine
             {
                 var content = CombineClient.ReadStaticFile(vf);
                 content = ReplaceRelativeImg(content, VirtualPathUtility.ToAbsolute(vf));
-                sb.AppendLine("/* {0} */".Formato(vf));
+                sb.AppendLine("/* {0} */".FormatWith(vf));
                 content = Minify(content); 
                 sb.AppendLine(content);
             }
@@ -57,7 +57,7 @@ namespace Signum.Web.Combine
 
                 string absolute = VirtualPathUtility.Combine(virtualFile, route); 
 
-                return "url(\"{0}\")".Formato(absolute);
+                return "url(\"{0}\")".FormatWith(absolute);
             }); 
 
             return result;

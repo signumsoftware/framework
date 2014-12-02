@@ -93,7 +93,7 @@ namespace Signum.Engine.WikiMarkup
             {
                 var guid = Guid.NewGuid();
                 regions.Add(guid.ToString(), m.Groups["code"].Value);
-                return "%%%CODE%{0}%%%".Formato(guid);
+                return "%%%CODE%{0}%%%".FormatWith(guid);
             }, RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
             codeRegions = regions;
@@ -119,7 +119,7 @@ namespace Signum.Engine.WikiMarkup
                 }
                 catch
                 {
-                    return "<span class=\"sf-wiki-error\">{0}</span>".Formato(m.Value);
+                    return "<span class=\"sf-wiki-error\">{0}</span>".FormatWith(m.Value);
                 }
             });
         }

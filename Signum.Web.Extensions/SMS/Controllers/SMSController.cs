@@ -50,7 +50,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public JsonNetResult GetLiteralsForType()
         {
-            var type = this.ParseLite<TypeDN>("type");
+            var type = this.ParseLite<TypeEntity>("type");
             return this.JsonNet(new
             {
                 literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.Retrieve().ToType())
@@ -61,7 +61,7 @@ namespace Signum.Web.SMS
         public ActionResult CreateSMSMessageFromTemplate()
         {
             var ie = this.ExtractLite<Entity>();
-            var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
+            var template = Lite.Parse<SMSTemplateEntity>(Request["template"]);
 
             var message = ie.ConstructFromLite(SMSMessageOperation.CreateSMSWithTemplateFromEntity, template.Retrieve());
             return this.DefaultConstructResult(message);
@@ -70,7 +70,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public ActionResult SendMultipleMessagesFromTemplate()
         {
-            var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
+            var template = Lite.Parse<SMSTemplateEntity>(Request["template"]);
 
             var lites = this.ParseLiteKeys<Entity>();
 

@@ -14,11 +14,11 @@ using System.Text.RegularExpressions;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class UserTicketDN : Entity
+    public class UserTicketEntity : Entity
     {
-        Lite<UserDN> user;
+        Lite<UserEntity> user;
         [NotNullValidator]
-        public Lite<UserDN> User
+        public Lite<UserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
@@ -50,14 +50,14 @@ namespace Signum.Entities.Authorization
 
         public string StringTicket()
         {
-            return "{0}|{1}".Formato(user.Id, ticket);
+            return "{0}|{1}".FormatWith(user.Id, ticket);
         }
 
         public static Tuple<PrimaryKey, string> ParseTicket(string ticket)
         {
             Match m = Regex.Match(ticket, @"^(?<id>.*)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
-            return new Tuple<PrimaryKey, string>(PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserDN)), m.Groups["ticket"].Value);
+            return new Tuple<PrimaryKey, string>(PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserEntity)), m.Groups["ticket"].Value);
         }
     }
 }

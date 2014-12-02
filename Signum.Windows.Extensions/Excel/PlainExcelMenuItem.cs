@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,6 @@ using System.Windows.Media.Imaging;
 using Signum.Entities.DynamicQuery;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Utilities;
 using System.IO;
 using Signum.Services;
@@ -36,7 +35,7 @@ namespace Signum.Windows.Excel
                     DefaultExt = ".xlsx",
                     Filter = ExcelMessage.Excel2007Spreadsheet.NiceToString(),
                     OverwritePrompt = true,
-                    FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceName(sc.QueryName)),
+                    FileName = "{0}.xlsx".FormatWith(QueryUtils.GetNiceName(sc.QueryName)),
                     Title = ExcelMessage.FindLocationFoExcelReport.NiceToString()
                 };
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,10 +22,10 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ResetPasswordRequestDN>();
+                sb.Include<ResetPasswordRequestEntity>();
 
-                dqm.RegisterQuery(typeof(ResetPasswordRequestDN), () =>
-                    from e in Database.Query<ResetPasswordRequestDN>()
+                dqm.RegisterQuery(typeof(ResetPasswordRequestEntity), () =>
+                    from e in Database.Query<ResetPasswordRequestEntity>()
                     select new
                     {
                         Entity = e,
@@ -38,13 +38,13 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateDN
+                SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateEntity
                 {
-                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageDN(culture)
+                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEntity(culture)
                     {
-                        Text = "<p>{0}</p>".Formato(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
-                            "<p>{0} @[User.UserName]</p>".Formato(AuthEmailMessage.YourUsernameIs.NiceToString()) +
-                            "<p>{0}</p>".Formato(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
+                        Text = "<p>{0}</p>".FormatWith(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
+                            "<p>{0} @[User.UserName]</p>".FormatWith(AuthEmailMessage.YourUsernameIs.NiceToString()) +
+                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
                             "<p><a href=\"@model[Url]\">@model[Url]</a></p>",
                         Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
                     }).ToMList()
@@ -52,16 +52,16 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
+        public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
         {
             using (AuthLogic.Disable())
             {
                 //Remove old previous requests
-                Database.Query<ResetPasswordRequestDN>()
+                Database.Query<ResetPasswordRequestEntity>()
                     .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
                     .UnsafeDelete();
 
-                return new ResetPasswordRequestDN()
+                return new ResetPasswordRequestEntity()
                 {
                     Code = MyRandom.Current.NextString(5),
                     User = user,
@@ -70,10 +70,10 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static Func<string, UserDN> GetUserByEmail = (email) => Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
+        public static Func<string, UserEntity> GetUserByEmail = (email) => Database.Query<UserEntity>().Where(u => u.Email == email).SingleOrDefaultEx();
     }
 
-    public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>
+    public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestEntity>
     {
         public string Url;
 

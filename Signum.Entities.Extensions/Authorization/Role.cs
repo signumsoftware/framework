@@ -10,7 +10,7 @@ using System.Collections.Specialized;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class RoleDN : Entity
+    public class RoleEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -33,8 +33,8 @@ namespace Signum.Entities.Authorization
         }
     
         [NotNullable, NotifyCollectionChanged]
-        MList<Lite<RoleDN>> roles = new MList<Lite<RoleDN>>();
-        public MList<Lite<RoleDN>> Roles
+        MList<Lite<RoleEntity>> roles = new MList<Lite<RoleEntity>>();
+        public MList<Lite<RoleEntity>> Roles
         {
             get { return roles; }
             set { Set(ref roles, value); }
@@ -57,17 +57,17 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        static readonly Expression<Func<RoleDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<RoleEntity, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public static RoleDN Current
+        public static RoleEntity Current
         {
             get
             {
-                UserDN user = UserDN.Current;
+                UserEntity user = UserEntity.Current;
                 if (user == null)
                     throw new AuthenticationException(AuthMessage.NotUserLogged.NiceToString());
 
@@ -89,12 +89,12 @@ namespace Signum.Entities.Authorization
 
     public static class RoleOperation
     {
-        public static readonly ExecuteSymbol<RoleDN> Save = OperationSymbol.Execute<RoleDN>();
-        public static readonly DeleteSymbol<RoleDN> Delete = OperationSymbol.Delete<RoleDN>();
+        public static readonly ExecuteSymbol<RoleEntity> Save = OperationSymbol.Execute<RoleEntity>();
+        public static readonly DeleteSymbol<RoleEntity> Delete = OperationSymbol.Delete<RoleEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
-    public class LastAuthRulesImportDN : Entity
+    public class LastAuthRulesImportEntity : Entity
     {
         [UniqueIndex, FieldWithoutProperty]
         string uniqueKey = "Unique";
@@ -106,7 +106,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref date, value); }
         }
 
-        static Expression<Func<LastAuthRulesImportDN, string>> ToStringExpression = e => e.uniqueKey;
+        static Expression<Func<LastAuthRulesImportEntity, string>> ToStringExpression = e => e.uniqueKey;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

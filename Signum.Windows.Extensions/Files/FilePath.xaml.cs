@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,8 +32,8 @@ namespace Signum.Windows.Files
         {
             InitializeComponent();
 
-            lblFullFP.Content = ReflectionTools.GetPropertyInfo((FilePathDN f) => f.FullPhysicalPath).NiceName();
-            lblFullWP.Content = ReflectionTools.GetPropertyInfo((FilePathDN f) => f.FullWebPath).NiceName();
+            lblFullFP.Content = ReflectionTools.GetPropertyInfo((FilePathEntity f) => f.FullPhysicalPath).NiceName();
+            lblFullWP.Content = ReflectionTools.GetPropertyInfo((FilePathEntity f) => f.FullWebPath).NiceName();
         }
 
         private void hypFullPhysicalPath_Click(object sender, RoutedEventArgs e)
@@ -43,7 +43,7 @@ namespace Signum.Windows.Files
                 MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            Process.Start(((FilePathDN)DataContext).FullPhysicalPath);
+            Process.Start(((FilePathEntity)DataContext).FullPhysicalPath);
         }
 
         private void hypFullWebPath_Click(object sender, RoutedEventArgs e)
@@ -53,7 +53,7 @@ namespace Signum.Windows.Files
                 MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            System.Diagnostics.Process.Start(((FilePathDN)DataContext).FullWebPath);
+            System.Diagnostics.Process.Start(((FilePathEntity)DataContext).FullWebPath);
         }
 
         #region IHaveToolBarElements Members
@@ -72,9 +72,9 @@ namespace Signum.Windows.Files
             return new List<FrameworkElement>() { button };
         }
 
-        private FilePathDN Fp
+        private FilePathEntity Fp
         {
-            get { return (FilePathDN)DataContext; }
+            get { return (FilePathEntity)DataContext; }
         }
 
         private byte[] file = null;
@@ -84,7 +84,7 @@ namespace Signum.Windows.Files
             OpenFile(Fp, file);
         }
 
-        public static void OpenFile(FilePathDN fp, byte[] file)
+        public static void OpenFile(FilePathEntity fp, byte[] file)
         {
             if (fp == null || fp.IsNew)
                 return;
@@ -97,7 +97,7 @@ namespace Signum.Windows.Files
             do
             {
                 string fileName = loop == 0 ? fp.FileName :
-                    "{0}({1}){2}".Formato(System.IO.Path.GetFileNameWithoutExtension(fp.FileName),
+                    "{0}({1}){2}".FormatWith(System.IO.Path.GetFileNameWithoutExtension(fp.FileName),
                     loop, System.IO.Path.GetExtension(fp.FileName));
                 fullPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), fileName);
                 loop++;
