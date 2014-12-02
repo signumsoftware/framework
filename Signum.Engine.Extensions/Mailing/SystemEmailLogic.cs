@@ -236,18 +236,18 @@ namespace Signum.Engine.Mailing
             return list.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(systemEmailEntity));
         }
 
-        internal static EmailTemplateEntity CreateDefaultTemplate(SystemEmailEntity systemEmailEntity)
+        internal static EmailTemplateEntity CreateDefaultTemplate(SystemEmailEntity systemEmail)
         {
-            SystemEmailInfo info = systemEmails.GetOrThrow(systemEmailToType.Value.GetOrThrow(systemEmailEntity));
+            SystemEmailInfo info = systemEmails.GetOrThrow(systemEmailToType.Value.GetOrThrow(systemEmail));
 
             EmailTemplateEntity template = info.DefaultTemplateConstructor();
             if (template.MasterTemplate != null)
                 template.MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate();
 
             if (template.Name == null)
-                template.Name = systemEmailEntity.FullClassName;
+                template.Name = systemEmail.FullClassName;
 
-            template.SystemEmail = systemEmailEntity;
+            template.SystemEmail = systemEmail;
             template.Active = true;
             template.Query = QueryLogic.GetQuery(info.QueryName);
 

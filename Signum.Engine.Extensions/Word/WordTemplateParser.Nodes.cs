@@ -29,9 +29,9 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class BaseNode : Run
+    public abstract class BaseNode : Run
     {
-        internal protected abstract void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows);
+        //internal protected abstract void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows);
     }
 
     public class TokenNode : BaseNode
@@ -81,31 +81,31 @@ namespace Signum.Engine.Word
                 entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
             if (entityToken.Type.IsAssignableFrom(Route.RootType))
-                return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
+                return "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
 
             return null;
         }
 
-        internal protected override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
-        {
-            string text;
-            if (EntityToken != null)
-            {
-                var entity = (Lite<Entity>)rows.DistinctSingle(p.Columns[EntityToken]);
-                var fallback = (string)rows.DistinctSingle(p.Columns[Token.QueryToken]);
+        //internal protected override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
+        //{
+        //    string text;
+        //    if (EntityToken != null)
+        //    {
+        //        var entity = (Lite<Entity>)rows.DistinctSingle(p.Columns[EntityToken]);
+        //        var fallback = (string)rows.DistinctSingle(p.Columns[Token.QueryToken]);
 
-                text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
-            }
-            else
-            {
-                object obj = rows.DistinctSingle(p.Columns[Token.QueryToken]);
-                text = obj is Enum ? ((Enum)obj).NiceToString() :
-                    obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.QueryToken.Format, p.CultureInfo) :
-                    obj.TryToString();
-            }
+        //        text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+        //    }
+        //    else
+        //    {
+        //        object obj = rows.DistinctSingle(p.Columns[Token.QueryToken]);
+        //        text = obj is Enum ? ((Enum)obj).NiceToString() :
+        //            obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.QueryToken.Format, p.CultureInfo) :
+        //            obj.TryToString();
+        //    }
 
-            this.Parent.ReplaceChild(new Run(this.RunProperties, new Text(text)), this);
-        }
+        //    this.Parent.ReplaceChild(new Run(this.RunProperties, new Text(text)), this);
+        //}
     }
 
     public class DeclareNode : BaseNode
@@ -115,7 +115,7 @@ namespace Signum.Engine.Word
         internal DeclareNode(ParsedToken token, WordTemplateParser walker)
         {
             if (!token.Variable.HasText())
-                walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".Formato(token));
+                walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(token));
 
             this.Token = token;
         }
@@ -134,7 +134,7 @@ namespace Signum.Engine.Word
         {
             if (walker.ModelType == null)
             {
-                walker.AddError(false, WordTemplateMessage.ModelShouldBeSetToUseModel0.NiceToString().Formato(fieldOrPropertyChain));
+                walker.AddError(false, WordTemplateMessage.ModelShouldBeSetToUseModel0.NiceToString().FormatWith(fieldOrPropertyChain));
                 return;
             }
 
@@ -149,7 +149,7 @@ namespace Signum.Engine.Word
 
                 if (info == null)
                 {
-                    walker.AddError(false, WordTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().Formato(type.Name, field));
+                    walker.AddError(false, WordTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().FormatWith(type.Name, field));
                     members = null;
                     break;
                 }
@@ -161,7 +161,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class BlockNode : BaseNode
+    public abstract class BlockNode : BaseNode
     {
         public static string UserString(Type type)
         {
@@ -253,6 +253,15 @@ namespace Signum.Engine.Word
             var childs = parent.ChildElements.Where((e, i) => indexFirst < i && i < indexLast).ToList();
             return childs;
         }
+
+        public static void MoveTo(IEnumerable<OpenXmlElement> childs, OpenXmlElement target)
+        {
+            foreach (var c in childs)
+            {
+                c.Remove();
+                target.AppendChild(c);
+            }
+        }
     }
 
     public class ForeachNode : BlockNode
@@ -271,13 +280,7 @@ namespace Signum.Engine.Word
         {
             OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(ForeachToken, EndForeachToken));
 
-            var childs = NodesBetween(pair);
-
-            foreach (var c in childs)
-            {   
-                c.Remove(); 
-                this.AppendChild(c);
-            }
+            MoveTo(NodesBetween(pair), this);
 
             pair.CommonParent.ReplaceChild(this, pair.First);
             pair.Last.Remove();
@@ -302,7 +305,7 @@ namespace Signum.Engine.Word
         public AnyNode(ParsedToken token, WordTemplateParser parser)
         {
             if (token.QueryToken != null && token.QueryToken.HasAllOrAny())
-                parser.AddError(false, "Any {0} can not contains Any or All".Formato(token.QueryToken));
+                parser.AddError(false, "Any {0} can not contains Any or All".FormatWith(token.QueryToken));
 
             this.Token = token;
         }
@@ -332,11 +335,7 @@ namespace Signum.Engine.Word
             {
                 OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, EndAnyToken));
 
-                foreach (var c in NodesBetween(pair))
-                {
-                    c.Remove();
-                    this.AppendChild(c);
-                }
+                MoveTo(NodesBetween(pair), this);
 
                 pair.CommonParent.ReplaceChild(this, pair.First);
                 pair.Last.Remove();
@@ -350,22 +349,13 @@ namespace Signum.Engine.Word
                     throw new InvalidOperationException("Unbalanced tokens");
 
                 this.AnyBlock = new Paragraph();
-                foreach (var c in NodesBetween(pairAny))
-                {
-                    c.Remove();
-                    this.AnyBlock.AppendChild(c);
-                }
+                MoveTo(NodesBetween(pairAny), this.AnyBlock);
 
                 this.NotAnyBlock = new Paragraph();
-                foreach (var c in NodesBetween(pairNotAny))
-                {
-                    c.Remove();
-                    this.NotAnyBlock.AppendChild(c);
-                }
+                MoveTo(NodesBetween(pairAny), this.NotAnyBlock);
 
                 pairAny.CommonParent.ReplaceChild(this, pairAny.First);
                 pairAny.Last.Remove();
-
             }
         }
     }
@@ -402,6 +392,36 @@ namespace Signum.Engine.Word
 
                 if (error.HasText())
                     walker.AddError(false, error);
+            }
+        }
+
+        protected internal override void ReplaceBlock()
+        {
+            if (this.ElseToken == null)
+            {
+                OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(IfToken, EndIfToken));
+
+                MoveTo(NodesBetween(pair), this);
+
+                pair.CommonParent.ReplaceChild(this, pair.First);
+                pair.Last.Remove();
+            }
+            else
+            {
+                OpenXmlElementPair pairAny = this.NormalizeSiblings(new OpenXmlElementPair(IfToken, ElseToken));
+                OpenXmlElementPair pairNotAny = this.NormalizeSiblings(new OpenXmlElementPair(ElseToken, EndIfToken));
+
+                if (pairAny.Last != pairNotAny.First)
+                    throw new InvalidOperationException("Unbalanced tokens");
+
+                this.IfBlock = new Paragraph();
+                MoveTo(NodesBetween(pairAny), this.IfBlock);
+
+                this.ElseBlock = new Paragraph();
+                MoveTo(NodesBetween(pairAny), this.ElseBlock);
+
+                pairAny.CommonParent.ReplaceChild(this, pairAny.First);
+                pairAny.Last.Remove();
             }
         }
     }

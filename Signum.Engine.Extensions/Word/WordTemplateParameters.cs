@@ -1,4 +1,5 @@
-﻿using Signum.Engine.DynamicQuery;
+﻿using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -53,14 +54,14 @@ namespace Signum.Engine.Word
     {
         class SystemWordReportInfo
         {
-            public Func<WordReportTemplateDN> DefaultTemplateConstructor;
+            public Func<WordReportTemplateEntity> DefaultTemplateConstructor;
             public object QueryName;
         }
 
-        static ResetLazy<Dictionary<Lite<SystemWordReportDN>, List<WordReportTemplateDN>>> SystemWordReportToWordReportTemplates;
+        static ResetLazy<Dictionary<Lite<SystemWordReportEntity>, List<WordReportTemplateEntity>>> SystemWordReportToWordReportTemplates;
         static Dictionary<Type, SystemWordReportInfo> systemWordReports = new Dictionary<Type, SystemWordReportInfo>();
-        static ResetLazy<Dictionary<Type, SystemWordReportDN>> systemWordReportToDN;
-        static ResetLazy<Dictionary<SystemWordReportDN, Type>> systemWordReportToType;
+        static ResetLazy<Dictionary<Type, SystemWordReportEntity>> systemWordReportToEntity;
+        static ResetLazy<Dictionary<SystemWordReportEntity, Type>> systemWordReportToType;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -69,8 +70,8 @@ namespace Signum.Engine.Word
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
-                dqm.RegisterQuery(typeof(SystemWordReportDN), () =>
-                    (from se in Database.Query<SystemWordReportDN>()
+                dqm.RegisterQuery(typeof(SystemWordReportEntity), () =>
+                    (from se in Database.Query<SystemWordReportEntity>()
                      select new
                      {
                          Entity = se,
@@ -78,44 +79,60 @@ namespace Signum.Engine.Word
                          se.FullClassName,
                      }));
                 
-                new Graph<WordReportTemplateDN>.ConstructFrom<SystemWordReportDN>(WordReportTemplateOperation.CreateWordReportTemplateFromSystemWordReport)
+                new Graph<WordReportTemplateEntity>.ConstructFrom<SystemWordReportEntity>(WordReportTemplateOperation.CreateWordReportTemplateFromSystemWordReport)
                 {
                     Construct = (se, _) => CreateDefaultTemplate(se)
                 }.Register();
 
                 SystemWordReportToWordReportTemplates = sb.GlobalLazy(() => (
-                    from et in Database.Query<WordReportTemplateDN>()
+                    from et in Database.Query<WordReportTemplateEntity>()
                     where et.SystemWordReport != null
                         && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     select new { swe = et.SystemWordReport, et })
                     .GroupToDictionary(pair => pair.swe.ToLite(), pair => pair.et),
-                    new InvalidateWith(typeof(SystemWordReportDN), typeof(WordReportTemplateDN)));
+                    new InvalidateWith(typeof(SystemWordReportEntity), typeof(WordReportTemplateEntity)));
 
-                systemWordReportToDN = sb.GlobalLazy(() =>
+                systemWordReportToEntity = sb.GlobalLazy(() =>
                 {
-                    var dbSystemWordReports = Database.RetrieveAll<SystemWordReportDN>();
+                    var dbSystemWordReports = Database.RetrieveAll<SystemWordReportEntity>();
                     return EnumerableExtensions.JoinStrict(
                         dbSystemWordReports, systemWordReports.Keys, swr => swr.FullClassName, type => type.FullName,
                         (swr, type) => KVP.Create(type, swr), "caching EmailTemplates. Consider synchronize").ToDictionary();
-                }, new InvalidateWith(typeof(SystemWordReportDN)));
+                }, new InvalidateWith(typeof(SystemWordReportEntity)));
 
-                systemWordReportToType = sb.GlobalLazy(() => systemWordReportToDN.Value.Inverse(),
-                    new InvalidateWith(typeof(SystemWordReportDN)));
+                systemWordReportToType = sb.GlobalLazy(() => systemWordReportToEntity.Value.Inverse(),
+                    new InvalidateWith(typeof(SystemWordReportEntity)));
             }
+        }
+
+        internal static WordReportTemplateEntity CreateDefaultTemplate(SystemWordReportEntity systemWordReport)
+        {
+            SystemWordReportInfo info = systemWordReports.GetOrThrow(systemWordReportToType.Value.GetOrThrow(systemWordReport));
+
+            WordReportTemplateEntity template = info.DefaultTemplateConstructor();
+
+            if (template.Name == null)
+                template.Name = systemWordReport.FullClassName;
+
+            template.SystemWordReport = systemWordReport;
+            template.Active = true;
+            template.Query = QueryLogic.GetQuery(info.QueryName);
+
+            return template;
         }
 
         static SqlPreCommand Schema_Generating()
         {
-            Table table = Schema.Current.Table<SystemWordReportDN>();
+            Table table = Schema.Current.Table<SystemWordReportEntity>();
 
             return (from ei in GenerateTemplates()
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
         }
 
-        internal static List<SystemWordReportDN> GenerateTemplates()
+        internal static List<SystemWordReportEntity> GenerateTemplates()
         {
             var list = (from type in systemWordReports.Keys
-                        select new SystemWordReportDN
+                        select new SystemWordReportEntity
                         {
                             FullClassName = type.FullName
                         }).ToList();
@@ -126,17 +143,17 @@ namespace Signum.Engine.Word
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
-            Table table = Schema.Current.Table<SystemWordReportDN>();
+            Table table = Schema.Current.Table<SystemWordReportEntity>();
 
-            Dictionary<string, SystemWordReportDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
-            Dictionary<string, SystemWordReportDN> old = Administrator.TryRetrieveAll<SystemWordReportDN>(replacements).ToDictionary(c =>
+            Dictionary<string, SystemWordReportEntity> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+            Dictionary<string, SystemWordReportEntity> old = Administrator.TryRetrieveAll<SystemWordReportEntity>(replacements).ToDictionary(c =>
                 c.FullClassName);
 
             replacements.AskForReplacements(
                 old.Keys.ToHashSet(),
                 should.Keys.ToHashSet(), systemTemplatesReplacementKey);
 
-            Dictionary<string, SystemWordReportDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
+            Dictionary<string, SystemWordReportEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             return Synchronizer.SynchronizeScript(should, current,
                 (tn, s) => table.InsertSqlSync(s),
@@ -150,13 +167,13 @@ namespace Signum.Engine.Word
                 Spacing.Double);
         }
 
-        public static void RegisterSystemWordReport<T>(Func<WordReportTemplateDN> defaultTemplateConstructor, object queryName = null)
+        public static void RegisterSystemWordReport<T>(Func<WordReportTemplateEntity> defaultTemplateConstructor, object queryName = null)
          where T : ISystemWordReport
         {
             RegisterSystemWordReport(typeof(T), defaultTemplateConstructor, queryName);
         }
 
-        public static void RegisterSystemWordReport(Type model, Func<WordReportTemplateDN> defaultTemplateConstructor, object queryName = null)
+        public static void RegisterSystemWordReport(Type model, Func<WordReportTemplateEntity> defaultTemplateConstructor, object queryName = null)
         {
             if (defaultTemplateConstructor == null)
                 throw new ArgumentNullException("defaultTemplateConstructor");
@@ -177,7 +194,7 @@ namespace Signum.Engine.Word
                 return baseType.GetGenericArguments()[0];
             }
 
-            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".Formato(model.TypeName()));
+            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".FormatWith(model.TypeName()));
         }
     }
 }

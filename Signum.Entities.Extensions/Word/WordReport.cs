@@ -12,28 +12,37 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Word
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class WordReportTemplateDN : Entity
+    public class WordReportTemplateEntity : Entity
     {
+        [NotNullable, SqlDbType(Size = 200)]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        public string Name
+        {
+            get { return name; }
+            set { Set(ref name, value); }
+        }
+
         [NotNullable]
-        TypeDN type;
+        TypeEntity type;
         [NotNullValidator]
-        public TypeDN Type
+        public TypeEntity Type
         {
             get { return type; }
             set { Set(ref type, value); }
         }
 
         [NotNullable]
-        QueryDN query;
+        QueryEntity query;
         [NotNullValidator]
-        public QueryDN Query
+        public QueryEntity Query
         {
             get { return query; }
             set { Set(ref query, value); }
         }
 
-        SystemWordReportDN systemWordReport;
-        public SystemWordReportDN SystemWordReport
+        SystemWordReportEntity systemWordReport;
+        public SystemWordReportEntity SystemWordReport
         {
             get { return systemWordReport; }
             set { Set(ref systemWordReport, value); }
@@ -62,7 +71,7 @@ namespace Signum.Entities.Word
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<WordReportTemplateDN, bool>> IsActiveNowExpression =
+        static Expression<Func<WordReportTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
@@ -70,20 +79,26 @@ namespace Signum.Entities.Word
         }
 
         [NotNullable]
-        Lite<FileDN> template;
+        Lite<FileEntity> template;
         [NotNullValidator]
-        public Lite<FileDN> Template
+        public Lite<FileEntity> Template
         {
             get { return template; }
             set { Set(ref template, value); }
+        }
+
+        static Expression<Func<WordReportTemplateEntity, string>> ToStringExpression = e => e.Name;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
         }
     }
 
     public static class WordReportTemplateOperation
     {
-        public static readonly ExecuteSymbol<WordReportTemplateDN> Save = OperationSymbol.Execute<WordReportTemplateDN>();
+        public static readonly ExecuteSymbol<WordReportTemplateEntity> Save = OperationSymbol.Execute<WordReportTemplateEntity>();
 
-        public static readonly ConstructSymbol<WordReportTemplateDN>.From<SystemWordReportDN> CreateWordReportTemplateFromSystemWordReport = OperationSymbol.Construct<WordReportTemplateDN>.From<SystemWordReportDN>();
+        public static readonly ConstructSymbol<WordReportTemplateEntity>.From<SystemWordReportEntity> CreateWordReportTemplateFromSystemWordReport = OperationSymbol.Construct<WordReportTemplateEntity>.From<SystemWordReportEntity>();
     }
 
     public enum WordTemplateMessage

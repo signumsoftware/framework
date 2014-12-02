@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Word
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
-    public class SystemWordReportDN : Entity
+    public class SystemWordReportEntity : Entity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;
@@ -19,7 +19,7 @@ namespace Signum.Entities.Word
             set { Set(ref fullClassName, value); }
         }
 
-        static readonly Expression<Func<SystemWordReportDN, string>> ToStringExpression = e => e.fullClassName;
+        static readonly Expression<Func<SystemWordReportEntity, string>> ToStringExpression = e => e.fullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

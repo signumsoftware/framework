@@ -21,18 +21,18 @@ namespace Signum.Engine.Word
 {
     public static class WordReportLogic
     {
-        public static ResetLazy<ConcurrentDictionary<Lite<WordReportTemplateDN>, WordReportTemplateDN>> Templates;
+        public static ResetLazy<ConcurrentDictionary<Lite<WordReportTemplateEntity>, WordReportTemplateEntity>> Templates;
 
-        public static ResetLazy<Dictionary<TypeDN, List<Lite<WordReportTemplateDN>>>> TemplatesByType; 
+        public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordReportTemplateEntity>>>> TemplatesByType; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<WordReportTemplateDN>();
+                sb.Include<WordReportTemplateEntity>();
 
-                dqm.RegisterQuery(typeof(WordReportTemplateDN), ()=>
-                    from e in Database.Query<WordReportTemplateDN>()
+                dqm.RegisterQuery(typeof(WordReportTemplateEntity), ()=>
+                    from e in Database.Query<WordReportTemplateEntity>()
                     select new
                     {
                         Entity = e,
@@ -42,24 +42,24 @@ namespace Signum.Engine.Word
                         e.Template.Entity.FileName
                     });
 
-                new Graph<WordReportTemplateDN>.Execute(WordReportTemplateOperation.Save)
+                new Graph<WordReportTemplateEntity>.Execute(WordReportTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { }
                 }.Register();
 
-                TemplatesByType = sb.GlobalLazy(() => Database.Query<WordReportTemplateDN>()
+                TemplatesByType = sb.GlobalLazy(() => Database.Query<WordReportTemplateEntity>()
                     .Select(r => KVP.Create(r.Type, r.ToLite()))
                     .GroupToDictionary(a => a.Key, a => a.Value),
-                    new InvalidateWith(typeof(WordReportTemplateDN)));
+                    new InvalidateWith(typeof(WordReportTemplateEntity)));
 
-                Templates = sb.GlobalLazy(() => new ConcurrentDictionary<Lite<WordReportTemplateDN>, WordReportTemplateDN>(), 
-                    new InvalidateWith(typeof(WordReportTemplateDN)));
+                Templates = sb.GlobalLazy(() => new ConcurrentDictionary<Lite<WordReportTemplateEntity>, WordReportTemplateEntity>(), 
+                    new InvalidateWith(typeof(WordReportTemplateEntity)));
             }
         }
 
-        public static WordReportTemplateDN GetTemplate(this Lite<WordReportTemplateDN> report)
+        public static WordReportTemplateEntity GetTemplate(this Lite<WordReportTemplateEntity> report)
         {
             return Templates.Value.GetOrAdd(report, r =>
             {
@@ -69,9 +69,9 @@ namespace Signum.Engine.Word
             });
         }
 
-        public static byte[] GenerateTemplate(Lite<WordReportTemplateDN> word, Lite<Entity> entity)
+        public static byte[] GenerateTemplate(Lite<WordReportTemplateEntity> word, Lite<Entity> entity)
         {
-            WordReportTemplateDN template = GetTemplate(word);
+            WordReportTemplateEntity template = GetTemplate(word);
 
             object queryName = template.Query.ToQueryName(); 
 

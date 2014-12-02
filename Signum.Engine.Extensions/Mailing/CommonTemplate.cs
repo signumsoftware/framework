@@ -38,7 +38,7 @@ namespace Signum.Engine.Mailing
 
                 if (!variables.TryGetValue(v, out token))
                 {
-                    error = "Variable '{0}' is not defined at this scope".Formato(v);
+                    error = "Variable '{0}' is not defined at this scope".FormatWith(v);
                     return result;
                 }
 

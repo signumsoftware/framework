@@ -138,7 +138,7 @@ namespace Signum.Engine.Word
                     case "raw":
                         var tok = TemplateRegex.TokenFormatRegex.Match(token);
                         if (!tok.Success)
-                            Errors.Add(new Error(true, "{0} has invalid format".Formato(token)));
+                            Errors.Add(new Error(true, "{0} has invalid format".FormatWith(token)));
                         else
                         {
                             var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
@@ -271,14 +271,14 @@ namespace Signum.Engine.Word
         {
             if (stack.Count() <= 1)
             {
-                AddError(true, "No {0} has been opened".Formato(BlockNode.UserString(typeof(T))));
+                AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
                 return null;
             }
             BlockNode n = stack.Pop();
             variables = variables.Previous;
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
             return (T)n;
@@ -288,13 +288,13 @@ namespace Signum.Engine.Word
         {
             if (stack.Count() <= 1)
             {
-                AddError(true, "No {0} has been opened".Formato(BlockNode.UserString(typeof(T))));
+                AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
                 return null;
             }
             BlockNode n = stack.Peek();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
             return (T)n;
@@ -324,7 +324,7 @@ namespace Signum.Engine.Word
                 if(variables.TryGetValue(token.Variable, out t))
                 {
                     if(!t.QueryToken.Equals(token.QueryToken))
-                        this.Errors.Add(new Error(true, "There's already a variable '{0}' defined in this scope".Formato(token.Variable)));
+                        this.Errors.Add(new Error(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable)));
                 }
                 else
                 {
