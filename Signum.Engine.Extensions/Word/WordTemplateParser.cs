@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -48,8 +49,10 @@ namespace Signum.Engine.Word
             }
         }
 
+        
+
         void ParseDocument(WordprocessingDocument wordprocessingDocument)
-        {
+        {  
             var paragraphs = wordprocessingDocument.MainDocumentPart.Document.Descendants<Paragraph>();
 
             foreach (var par in paragraphs)
@@ -199,10 +202,10 @@ namespace Signum.Engine.Word
                             var an = PopBlock<AnyNode>();
                             an.EndAnyToken = matchNode;
 
-                            an.ReplaceChild(); 
+                            an.ReplaceBlock(); 
+
                             break;
                         }
-
                     case "if":
                         {
                             IfNode ifn;
@@ -224,20 +227,23 @@ namespace Signum.Engine.Word
                             stack.Push(ifn);
 
                             DeclareVariable(t);
+
                             break;
                         }
                     case "else":
                         {
                             var an = PeekBlock<IfNode>();
                             an.ElseToken = matchNode;
+
                             break;
                         }
                     case "endif":
                         {
-                            var an = PopBlock<IfNode>();
-                            an.EndIfToken = matchNode;
+                            var ifn = PopBlock<IfNode>();
+                            ifn.EndIfToken = matchNode;
 
-                            an.ReplaceChild();
+                            ifn.ReplaceBlock();
+
                             break;
                         }
                     case "foreach":
@@ -254,9 +260,9 @@ namespace Signum.Engine.Word
                             var fn = PopBlock<ForeachNode>();
                             fn.EndForeachToken = matchNode;
 
-                            fn.ReplaceChild();
+                            fn.ReplaceBlock();
+                            break;
                         }
-                        break;
                 }
             }
         }
@@ -314,10 +320,16 @@ namespace Signum.Engine.Word
         {
             if (token.Variable.HasText())
             {
-                if (variables.ContainsKey(token.Variable))
-                    this.Errors.Add(new Error(true, "There's already a variable '{0}' defined in this scope".Formato(token.Variable)));
-
-                variables.Add(token.Variable, token);
+                ParsedToken t;
+                if(variables.TryGetValue(token.Variable, out t))
+                {
+                    if(!t.QueryToken.Equals(token.QueryToken))
+                        this.Errors.Add(new Error(true, "There's already a variable '{0}' defined in this scope".Formato(token.Variable)));
+                }
+                else
+                {
+                    variables.Add(token.Variable, token);
+                }
             }
         }
     }
@@ -345,5 +357,18 @@ namespace Signum.Engine.Word
 
         public string Message;
         public bool IsFatal;
+    }
+
+    public static class OpenXmlElementExtensions
+    {
+        public static string NiceToString(this OpenXmlElement element)
+        {
+            using (var sw = new StringWriter())
+            using (var xtw = new XmlTextWriter(sw) { Formatting = Formatting.Indented })
+            {
+                element.WriteTo(xtw);
+                return sw.ToString();
+            }
+        }
     }
 }

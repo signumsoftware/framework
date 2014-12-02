@@ -183,6 +183,7 @@
     <Compile Include="SMS\SMSTemplateGraph.cs" />
     <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
+    <Compile Include="Word\WordTemplateParameters.cs" />
     <Compile Include="Word\WordTemplateParser.cs" />
     <Compile Include="Word\WordLogic.cs" />
     <Compile Include="Word\WordTemplateParser.Nodes.cs" />

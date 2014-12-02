@@ -256,19 +256,18 @@ namespace Signum.Engine.Mailing
             if (!replacements.Interactive || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".Formato(systemEmails.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
                 return null;
 
-            var cmd = systemEmails
-                    .Select(se =>
-                    {
-                        try
-                        {
-                            return table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true);
-                        }
-                        catch (Exception e)
-                        {
-                            return new SqlPreCommandSimple("Exception on SystemEmail {0}: {1}".Formato(se, e.Message));
-                        }
-                    })
-                    .Combine(Spacing.Double);
+            var cmd = systemEmails.Select(se =>
+            {
+                try
+                {
+                    return table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true);
+                }
+                catch (Exception e)
+                {
+                    return new SqlPreCommandSimple("Exception on SystemEmail {0}: {1}".Formato(se, e.Message));
+                }
+            })
+            .Combine(Spacing.Double);
 
             if (cmd != null)
                 return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @idParent INT"), cmd);

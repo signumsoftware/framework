@@ -42,7 +42,7 @@ namespace Signum.Engine.Word
                         e.Template.Entity.FileName
                     });
 
-                new Graph<WordReportTemplateDN>.Execute(WordReportOperation.Save)
+                new Graph<WordReportTemplateDN>.Execute(WordReportTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

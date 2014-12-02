@@ -106,8 +106,8 @@ namespace Signum.Engine.Mailing
                 {
                     var dbSystemEmails = Database.RetrieveAll<SystemEmailDN>();
                     return EnumerableExtensions.JoinStrict(
-                        dbSystemEmails, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
-                        (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates. Consider synchronize").ToDictionary();
+                        dbSystemEmails, systemEmails.Keys, systemEmail => systemEmail.FullClassName, type => type.FullName,
+                        (systemEmail, type) => KVP.Create(type, systemEmail), "caching EmailTemplates. Consider synchronize").ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailDN)));
 
                 systemEmailToType = sb.GlobalLazy(() => systemEmailToDN.Value.Inverse(),
@@ -115,7 +115,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static readonly string systemTemplatesReplacementKey = "EmailTemplates";
+        static readonly string systemTemplatesReplacementKey = "SystemEmail";
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {

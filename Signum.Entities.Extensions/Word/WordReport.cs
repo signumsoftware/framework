@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,11 +32,41 @@ namespace Signum.Entities.Word
             set { Set(ref query, value); }
         }
 
-        Lite<WordReportModelDN> model;
-        public Lite<WordReportModelDN> Model
+        SystemWordReportDN systemWordReport;
+        public SystemWordReportDN SystemWordReport
         {
-            get { return model; }
-            set { Set(ref model, value); }
+            get { return systemWordReport; }
+            set { Set(ref systemWordReport, value); }
+        }
+
+        bool active;
+        public bool Active
+        {
+            get { return active; }
+            set { Set(ref active, value); }
+        }
+
+        DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
+        [MinutesPrecissionValidator]
+        public DateTime StartDate
+        {
+            get { return startDate; }
+            set { Set(ref startDate, value); }
+        }
+
+        DateTime? endDate;
+        [MinutesPrecissionValidator]
+        public DateTime? EndDate
+        {
+            get { return endDate; }
+            set { Set(ref endDate, value); }
+        }
+
+        static Expression<Func<WordReportTemplateDN, bool>> IsActiveNowExpression =
+            (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        public bool IsActiveNow()
+        {
+            return IsActiveNowExpression.Evaluate(this);
         }
 
         [NotNullable]
@@ -48,9 +79,11 @@ namespace Signum.Entities.Word
         }
     }
 
-    public static class WordReportOperation
+    public static class WordReportTemplateOperation
     {
         public static readonly ExecuteSymbol<WordReportTemplateDN> Save = OperationSymbol.Execute<WordReportTemplateDN>();
+
+        public static readonly ConstructSymbol<WordReportTemplateDN>.From<SystemWordReportDN> CreateWordReportTemplateFromSystemWordReport = OperationSymbol.Construct<WordReportTemplateDN>.From<SystemWordReportDN>();
     }
 
     public enum WordTemplateMessage

@@ -29,7 +29,12 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class TokenNode : Run
+    public class BaseNode : Run
+    {
+        internal protected abstract void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows);
+    }
+
+    public class TokenNode : BaseNode
     {
         public readonly bool IsRaw;
 
@@ -80,9 +85,30 @@ namespace Signum.Engine.Word
 
             return null;
         }
+
+        internal protected override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
+        {
+            string text;
+            if (EntityToken != null)
+            {
+                var entity = (Lite<Entity>)rows.DistinctSingle(p.Columns[EntityToken]);
+                var fallback = (string)rows.DistinctSingle(p.Columns[Token.QueryToken]);
+
+                text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+            }
+            else
+            {
+                object obj = rows.DistinctSingle(p.Columns[Token.QueryToken]);
+                text = obj is Enum ? ((Enum)obj).NiceToString() :
+                    obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.QueryToken.Format, p.CultureInfo) :
+                    obj.TryToString();
+            }
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties, new Text(text)), this);
+        }
     }
 
-    public class DeclareNode : Run
+    public class DeclareNode : BaseNode
     {
         public readonly ParsedToken Token;
 
@@ -95,7 +121,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class ModelNode : Run
+    public class ModelNode : BaseNode
     {
         public bool IsRaw { get; set; }
 
@@ -135,7 +161,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class BlockNode : Paragraph
+    public class BlockNode : BaseNode
     {
         public static string UserString(Type type)
         {
@@ -149,6 +175,83 @@ namespace Signum.Engine.Word
                 return "any";
 
             return "block";
+        }
+
+        protected internal abstract void ReplaceBlock();
+
+        protected OpenXmlElementPair NormalizeSiblings(OpenXmlElementPair tuple)
+        {
+            if (tuple.First == tuple.Last)
+                throw new ArgumentException("first and last are the same node");
+
+            var chainFirst = ((OpenXmlElement)tuple.First).Follow(a => a.Parent).Reverse().ToList();
+            var chainLast = ((OpenXmlElement)tuple.Last).Follow(a => a.Parent).Reverse().ToList();
+
+            var result = chainFirst.Zip(chainLast, (f, i) => new OpenXmlElementPair(f, i)).First(a => a.First != a.Last);
+            AssertNotImportant(chainFirst, result.First);
+            AssertNotImportant(chainLast, result.Last);
+
+            return result;
+        }
+
+        public struct OpenXmlElementPair
+        {
+            public readonly OpenXmlElement First;
+            public readonly OpenXmlElement Last;
+
+            public OpenXmlElementPair(OpenXmlElement first, OpenXmlElement last)
+            {
+                this.First = first;
+                this.Last = last;
+            }
+
+            public OpenXmlElement CommonParent
+            {
+                get
+                {
+                    if (First.Parent != Last.Parent)
+                        throw new InvalidOperationException("Parents do not match");
+
+                    return First.Parent;
+                }
+            }
+        }
+
+        private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement)
+        {
+            var index = chain.IndexOf(openXmlElement);
+
+            for (int i = index; i < chain.Count; i++)
+            {
+                var current = chain[i];
+                var next = i == chain.Count - 1 ? null : chain[i + 1];
+
+                var important = current.ChildElements.Where(c => c != next && IsImportant(c));
+
+                if (important.Any())
+                    throw new InvalidOperationException("Some important nodes are being removed:\r\n" + important.ToString(a => a.NiceToString(), "\r\n\r\n"));
+            }
+        }
+
+        private bool IsImportant(OpenXmlElement c)
+        {
+            return c is Run || c is Paragraph;
+        }
+
+        protected static List<OpenXmlElement> NodesBetween(OpenXmlElementPair pair)
+        {
+            var parent = pair.CommonParent;
+
+            int indexFirst = parent.ChildElements.IndexOf(pair.First);
+            if (indexFirst == -1)
+                throw new InvalidOperationException("Element not found");
+
+            int indexLast = parent.ChildElements.IndexOf(pair.Last);
+            if (indexLast == -1)
+                throw new InvalidOperationException("Element not found");
+
+            var childs = parent.ChildElements.Where((e, i) => indexFirst < i && i < indexLast).ToList();
+            return childs;
         }
     }
 
@@ -164,10 +267,23 @@ namespace Signum.Engine.Word
             this.Token = token;
         }
 
-        internal void ReplaceChild()
+        protected internal override void ReplaceBlock()
         {
-            throw new NotImplementedException();
+            OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(ForeachToken, EndForeachToken));
+
+            var childs = NodesBetween(pair);
+
+            foreach (var c in childs)
+            {   
+                c.Remove(); 
+                this.AppendChild(c);
+            }
+
+            pair.CommonParent.ReplaceChild(this, pair.First);
+            pair.Last.Remove();
         }
+
+       
     }
 
     public class AnyNode : BlockNode
@@ -210,9 +326,47 @@ namespace Signum.Engine.Word
             }
         }
 
-        internal void ReplaceChild()
+        protected internal override void ReplaceBlock()
         {
-            throw new NotImplementedException();
+            if (this.NotAnyToken == null)
+            {
+                OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, EndAnyToken));
+
+                foreach (var c in NodesBetween(pair))
+                {
+                    c.Remove();
+                    this.AppendChild(c);
+                }
+
+                pair.CommonParent.ReplaceChild(this, pair.First);
+                pair.Last.Remove();
+            }
+            else
+            {
+                OpenXmlElementPair pairAny = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, NotAnyToken));
+                OpenXmlElementPair pairNotAny = this.NormalizeSiblings(new OpenXmlElementPair(NotAnyToken, EndAnyToken));
+
+                if (pairAny.Last != pairNotAny.First)
+                    throw new InvalidOperationException("Unbalanced tokens");
+
+                this.AnyBlock = new Paragraph();
+                foreach (var c in NodesBetween(pairAny))
+                {
+                    c.Remove();
+                    this.AnyBlock.AppendChild(c);
+                }
+
+                this.NotAnyBlock = new Paragraph();
+                foreach (var c in NodesBetween(pairNotAny))
+                {
+                    c.Remove();
+                    this.NotAnyBlock.AppendChild(c);
+                }
+
+                pairAny.CommonParent.ReplaceChild(this, pairAny.First);
+                pairAny.Last.Remove();
+
+            }
         }
     }
 
@@ -249,11 +403,6 @@ namespace Signum.Engine.Word
                 if (error.HasText())
                     walker.AddError(false, error);
             }
-        }
-
-        internal void ReplaceChild()
-        {
-            throw new NotImplementedException();
         }
     }
 }
