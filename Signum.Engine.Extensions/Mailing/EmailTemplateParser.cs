@@ -19,6 +19,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
+using Signum.Engine.Templating;
 
 
 namespace Signum.Engine.Mailing
@@ -33,77 +34,8 @@ namespace Signum.Engine.Mailing
 
     public static partial class EmailTemplateParser
     {
-        class SemiStructuralEqualityComparer : IEqualityComparer<object>
-        {
-            public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
-
-            ConcurrentDictionary<Type, List<Func<object, object>>> Cache = new ConcurrentDictionary<Type, List<Func<object, object>>>();
-
-            public List<Func<object, object>> GetFieldGetters(Type type)
-            {
-                return Cache.GetOrAdd(type, t =>
-                    t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                    .Where(f => !f.HasAttribute<IgnoreAttribute>())
-                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)).ToList());
-            }
-
-            bool IEqualityComparer<object>.Equals(object x, object y)
-            {
-                if (x == null || y == null)
-                    return x == null && y == null;
-
-                Type t = x.GetType();
-
-                if (IsSimple(t))
-                    return x.Equals(y);
-
-                var fields = GetFieldGetters(t);
-                for (int i = 0; i < fields.Count; i++)
-                {
-                    var f = fields[i];
-                    if (!Equals(f(x), f(y)))
-                        return false;
-                }
-
-
-                return true;
-            }
-
-            public int GetHashCode(object obj)
-            {
-                if (obj == null)
-                    return 0;
-
-                Type t = obj.GetType();
-
-                if (IsSimple(t))
-                    return obj.GetHashCode();
-
-                int result = 1;
-
-                var fields = GetFieldGetters(t);
-                for (int i = 0; i < fields.Count; i++)
-                    result ^= GetHashCode(fields[i](obj)) << (i % 8);
-
-                return result;
-            }
-
-            static bool IsSimple(Type t)
-            {
-                return t == typeof(string) || Type.GetTypeCode(t) >= TypeCode.Boolean ||
-                    typeof(IEntity).IsAssignableFrom(t) || typeof(Lite<IEntity>).IsAssignableFrom(t) ||
-                    typeof(IEquatable<>).MakeGenericType(t).IsAssignableFrom(t);
-            }
-        }
-
         public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
 
-        public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
-        {
-            return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
-                () =>"No values for column {0}".FormatWith(column.Column.Token.FullKey()),
-                () =>"Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
-        }
 
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
@@ -218,7 +150,7 @@ namespace Signum.Engine.Mailing
                 this.errors = new List<Error>(); 
                 PushBlock(mainBlock);
 
-                var matches = TemplateRegex.KeywordsRegex.Matches(text);
+                var matches = TemplateUtils.KeywordsRegex.Matches(text);
 
                 if (matches.Count == 0)
                 {
@@ -241,7 +173,7 @@ namespace Signum.Engine.Mailing
                     {
                         case "":
                         case "raw":
-                            var tok = TemplateRegex.TokenFormatRegex.Match(token);
+                            var tok = TemplateUtils.TokenFormatRegex.Match(token);
                             if (!tok.Success)
                                 AddError(true, "{0} has invalid format".FormatWith(token));
                             else
@@ -275,7 +207,7 @@ namespace Signum.Engine.Mailing
                             {
                                 AnyNode any;
                                 ParsedToken t;
-                                var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
+                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
                                     t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
@@ -325,7 +257,7 @@ namespace Signum.Engine.Mailing
                             {
                                 IfNode ifn;
                                 ParsedToken t;
-                                var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
+                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
                                     t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);

@@ -190,7 +190,7 @@
     <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
     <Compile Include="Word\WordReport.cs" />
-    <Compile Include="Word\SystemWordReport.cs" />
+    <Compile Include="Word\SystemWordTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

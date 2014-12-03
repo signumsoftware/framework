@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Net.Mail;
 using Signum.Engine.Exceptions;
 using Signum.Entities.UserQueries;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing
 {
@@ -280,7 +281,7 @@ namespace Signum.Engine.Mailing
             var entityColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity");
             var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
             var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
-
+            
             var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]).Select(g => new SendLine
                 {
                     NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn),

@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
+using Signum.Engine.Templating;
 using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -13,6 +14,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,32 +30,19 @@ namespace Signum.Engine.Word
         List<Error> Errors = new List<Error>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);
-        public Type ModelType;
+        public readonly Type SystemWordTemplateType;
+        WordprocessingDocument document;
 
-        public WordTemplateParser(QueryDescription queryDescription, Type modelType)
+        public WordTemplateParser(WordprocessingDocument document, QueryDescription queryDescription, Type systemWordTemplateType)
         {
             this.queryDescription = queryDescription;
-            this.ModelType = modelType;
+            this.SystemWordTemplateType = systemWordTemplateType;
+            this.document = document;
         }
 
-        public void ParseDocument(byte[] template)
-        {
-            using (var memory = new MemoryStream(template))
-            {
-                using (WordprocessingDocument wordProcessingDocument = WordprocessingDocument.Open(memory, true))
-                {
-                    ParseDocument(wordProcessingDocument);
-
-                    CreateStructures(wordProcessingDocument);
-                }
-            }
-        }
-
-        
-
-        void ParseDocument(WordprocessingDocument wordprocessingDocument)
+        public void ParseDocument()
         {  
-            var paragraphs = wordprocessingDocument.MainDocumentPart.Document.Descendants<Paragraph>();
+            var paragraphs = document.MainDocumentPart.Document.Descendants<Paragraph>();
 
             foreach (var par in paragraphs)
             {
@@ -67,7 +56,7 @@ namespace Signum.Engine.Word
 
                 string text = runs.Select(r => r.Text).ToString("");
 
-                IEnumerable<Match> matches = TemplateRegex.KeywordsRegex.Matches(text).Cast<Match>().ToList();
+                IEnumerable<Match> matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
 
                 if (matches.Any())
                 {
@@ -98,7 +87,7 @@ namespace Signum.Engine.Word
                         var index = firstIndex;
                         if (first.Index < m.Index)
                         {
-                            Run firstRunPart = new Run { RunProperties = first.Run.RunProperties };
+                            Run firstRunPart = new Run { RunProperties = first.Run.RunProperties.TryDo(r => r.Remove()) };
                             firstRunPart.AppendChild(new Text { Text = first.Text.Substring(0, m.Index - first.Index) });
                             par.InsertAt(firstRunPart, index++);
                         }
@@ -107,11 +96,8 @@ namespace Signum.Engine.Word
 
                         if (lastChar < last.Index + last.Lenght - 1)
                         {
-                            last.Run.Remove(); //was not included
-
-                            Run lastRunPart = new Run { RunProperties = last.Run.RunProperties };
-                            lastRunPart.AppendChild(new Text { Text = first.Text.Substring(lastChar - last.Index) });
-                            par.InsertAt(lastRunPart, index++);
+                            Run lastRunPart = new Run { RunProperties = last.Run.RunProperties.TryDo(r=>r.Remove()) };
+                            lastRunPart.AppendChild(new Text { Text = last.Text.Substring(lastChar - last.Index) });
                         }
                     }
                 }
@@ -120,9 +106,9 @@ namespace Signum.Engine.Word
         
         Stack<BlockNode> stack = new Stack<BlockNode>();
 
-        void CreateStructures(WordprocessingDocument wordProcessingDocument)
+        public void CreateNodes()
         {
-            var lists = wordProcessingDocument.MainDocumentPart.Document.Descendants<MatchNode>().ToList();
+            var lists = document.MainDocumentPart.Document.Descendants<MatchNode>().ToList();
             
             foreach (var matchNode in lists)
             {
@@ -136,7 +122,7 @@ namespace Signum.Engine.Word
                 {
                     case "":
                     case "raw":
-                        var tok = TemplateRegex.TokenFormatRegex.Match(token);
+                        var tok = TemplateUtils.TokenFormatRegex.Match(token);
                         if (!tok.Success)
                             Errors.Add(new Error(true, "{0} has invalid format".FormatWith(token)));
                         else
@@ -172,7 +158,7 @@ namespace Signum.Engine.Word
                         {
                             AnyNode any;
                             ParsedToken t;
-                            var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
+                            var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
                             {
                                 t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
@@ -186,7 +172,7 @@ namespace Signum.Engine.Word
                                 any = new AnyNode(t, comparer, value, this) { AnyToken = matchNode };
                             }
 
-                            stack.Push(any);
+                            PushBlock(any);
 
                             DeclareVariable(t);
                             break;
@@ -210,7 +196,7 @@ namespace Signum.Engine.Word
                         {
                             IfNode ifn;
                             ParsedToken t;
-                            var filter = TemplateRegex.TokenOperationValueRegex.Match(token);
+                            var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
                             {
                                 t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
@@ -224,7 +210,7 @@ namespace Signum.Engine.Word
                                 ifn = new IfNode(t, comparer, value, this) { IfToken = matchNode };
                             }
 
-                            stack.Push(ifn);
+                            PushBlock(ifn);
 
                             DeclareVariable(t);
 
@@ -267,36 +253,49 @@ namespace Signum.Engine.Word
             }
         }
 
-        public T PopBlock<T>() where T : BlockNode
+        void PushBlock(BlockNode node)
         {
-            if (stack.Count() <= 1)
+            stack.Push(node);
+            variables = new ScopedDictionary<string, ParsedToken>(variables);
+        }
+
+        T PopBlock<T>() where T : BlockNode
+        {
+            if (stack.IsEmpty())
             {
                 AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
                 return null;
             }
+
             BlockNode n = stack.Pop();
-            variables = variables.Previous;
             if (n == null || !(n is T))
             {
                 AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
+
+            variables = variables.Previous;
             return (T)n;
         }
 
-        public T PeekBlock<T>() where T : BlockNode
+        T PeekBlock<T>() where T : BlockNode
         {
-            if (stack.Count() <= 1)
+            if (stack.IsEmpty())
             {
                 AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
                 return null;
             }
+
             BlockNode n = stack.Peek();
             if (n == null || !(n is T))
             {
                 AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
+
+
+            variables = variables.Previous;
+            variables = new ScopedDictionary<string, ParsedToken>(variables);
             return (T)n;
         }
 
@@ -332,6 +331,8 @@ namespace Signum.Engine.Word
                 }
             }
         }
+
+      
     }
 
     class RunInfo
@@ -344,6 +345,11 @@ namespace Signum.Engine.Word
         internal bool Contains(int index)
         {
             return Index <= index && index < Index + Lenght;
+        }
+
+        public override string ToString()
+        {
+            return Text;
         }
     }
 

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Word
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class WordReportTemplateEntity : Entity
+    public class WordTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 200)]
         string name;
@@ -41,11 +41,20 @@ namespace Signum.Entities.Word
             set { Set(ref query, value); }
         }
 
-        SystemWordReportEntity systemWordReport;
-        public SystemWordReportEntity SystemWordReport
+        SystemWordTemplateEntity systemWordTemplate;
+        public SystemWordTemplateEntity SystemWordTemplate
         {
-            get { return systemWordReport; }
-            set { Set(ref systemWordReport, value); }
+            get { return systemWordTemplate; }
+            set { Set(ref systemWordTemplate, value); }
+        }
+
+        [NotNullable]
+        CultureInfoEntity culture;
+        [NotNullValidator]
+        public CultureInfoEntity Culture
+        {
+            get { return culture; }
+            set { Set(ref culture, value); }
         }
 
         bool active;
@@ -71,7 +80,14 @@ namespace Signum.Entities.Word
             set { Set(ref endDate, value); }
         }
 
-        static Expression<Func<WordReportTemplateEntity, bool>> IsActiveNowExpression =
+        bool disableAuthorization;
+        public bool DisableAuthorization
+        {
+            get { return disableAuthorization; }
+            set { Set(ref disableAuthorization, value); }
+        }
+
+        static Expression<Func<WordTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
@@ -87,18 +103,20 @@ namespace Signum.Entities.Word
             set { Set(ref template, value); }
         }
 
-        static Expression<Func<WordReportTemplateEntity, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
+
+        
     }
 
-    public static class WordReportTemplateOperation
+    public static class WordTemplateOperation
     {
-        public static readonly ExecuteSymbol<WordReportTemplateEntity> Save = OperationSymbol.Execute<WordReportTemplateEntity>();
+        public static readonly ExecuteSymbol<WordTemplateEntity> Save = OperationSymbol.Execute<WordTemplateEntity>();
 
-        public static readonly ConstructSymbol<WordReportTemplateEntity>.From<SystemWordReportEntity> CreateWordReportTemplateFromSystemWordReport = OperationSymbol.Construct<WordReportTemplateEntity>.From<SystemWordReportEntity>();
+        public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
     }
 
     public enum WordTemplateMessage

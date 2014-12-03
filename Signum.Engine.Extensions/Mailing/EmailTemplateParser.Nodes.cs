@@ -17,6 +17,7 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing
 {
@@ -509,29 +510,29 @@ namespace Signum.Engine.Mailing
                 return NotAnyBlock;
             }
 
-            protected static bool ToBool(object obj)
+            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (obj == null || obj is bool && ((bool)obj) == false)
-                    return false;
+                var filtered = GetFiltered(p, rows);
 
-                return true;
+                if (filtered.Any())
+                {
+                    AnyBlock.PrintList(p, filtered);
+                }
+                else if (NotAnyBlock != null)
+                {
+                    NotAnyBlock.PrintList(p, filtered);
+                }
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            private IEnumerable<ResultRow> GetFiltered(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
                 if (Operation == null)
                 {
                     var column = p.Columns[Token.QueryToken];
 
-                    var filtered = rows.Where(r => ToBool(r[column])).ToList();
-                    if (filtered.Any())
-                    {
-                        AnyBlock.PrintList(p, filtered);
-                    }
-                    else if (NotAnyBlock != null)
-                    {
-                        NotAnyBlock.PrintList(p, filtered);
-                    }
+                    var filtered = rows.Where(r => TemplateUtils.ToBool(r[column])).ToList();
+
+                    return filtered;
                 }
                 else
                 {
@@ -547,14 +548,8 @@ namespace Signum.Engine.Mailing
                     var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
 
                     var filtered = rows.Where(lambda).ToList();
-                    if (filtered.Any())
-                    {
-                        AnyBlock.PrintList(p, filtered);
-                    }
-                    else if (NotAnyBlock != null)
-                    {
-                        NotAnyBlock.PrintList(p, filtered);
-                    }
+
+                    return filtered;
                 }
             }
 
@@ -661,44 +656,32 @@ namespace Signum.Engine.Mailing
                     ElseBlock.FillQueryTokens(list);
             }
 
-            protected static bool ToBool(object obj)
-            {
-                if (obj == null || obj is bool && ((bool)obj) == false)
-                    return false;
-
-                return true;
-            }
-
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (Operation == null)
+                if (GetCondition(p, rows))
                 {
-                    if (!rows.IsEmpty() &&  ToBool(rows.DistinctSingle(p.Columns[Token.QueryToken])))
-                    {
-                        IfBlock.PrintList(p, rows);
-                    }
-                    else if (ElseBlock != null)
-                    {
-                        ElseBlock.PrintList(p, rows);
-                    }
+                    IfBlock.PrintList(p, rows);
                 }
+                else if (ElseBlock != null)
+                {
+                    ElseBlock.PrintList(p, rows);
+                }
+            }
+
+            public bool GetCondition(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            {
+                if (this.Operation == null)
+                    return !rows.IsEmpty() && TemplateUtils.ToBool(rows.DistinctSingle(p.Columns[Token.QueryToken]));
                 else
                 {
                     Expression token = Expression.Constant(rows.DistinctSingle(p.Columns[Token.QueryToken]), Token.QueryToken.Type);
 
                     Expression value = Expression.Constant(FilterValueConverter.Parse(Value, Token.QueryToken.Type, Operation == FilterOperation.IsIn), Token.QueryToken.Type);
 
-                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value,  token, value, inMemory: true);
+                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
                     var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
 
-                    if (lambda())
-                    {
-                        IfBlock.PrintList(p, rows);
-                    }
-                    else if (ElseBlock != null)
-                    {
-                        ElseBlock.PrintList(p, rows);
-                    }
+                    return lambda();
                 }
             }
 
