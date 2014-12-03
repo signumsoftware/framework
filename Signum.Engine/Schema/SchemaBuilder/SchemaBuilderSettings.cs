@@ -66,7 +66,6 @@ namespace Signum.Engine.Maps
         {
             {SqlDbType.NVarChar, 200}, 
             {SqlDbType.VarChar, 200}, 
-            {SqlDbType.Image, 8000}, 
             {SqlDbType.VarBinary, int.MaxValue}, 
             {SqlDbType.Binary, 8000}, 
             {SqlDbType.Char, 1}, 
