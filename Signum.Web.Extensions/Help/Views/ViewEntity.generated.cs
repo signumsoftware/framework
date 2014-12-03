@@ -887,7 +887,7 @@ WriteLiteral("</h2>\r\n");
             #line 166 "..\..\Help\Views\ViewEntity.cshtml"
                          foreach (var mq in allowedQueries)
                         {
-                            using (TypeElementContext<QueryHelpEntity> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
+                            using (TypeElementContext<QueryHelpEntity> qctx = queries.GetOrThrow(QueryLogic.GetQueryEntity(mq.Key)))
                             {
                                         
                             

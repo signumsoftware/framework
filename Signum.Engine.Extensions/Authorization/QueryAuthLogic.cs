@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
-                    QueryLogic.GetQuery,
+                    QueryLogic.GetQueryEntity,
                     merger: new QueryMerger(), 
                     invalidateWithTypes : true,
                     coercer: QueryCoercer.Instance);
@@ -61,7 +61,7 @@ namespace Signum.Engine.Authorization
                         if (qn == null)
                             return null;
 
-                        return QueryLogic.GetQuery(qn);
+                        return QueryLogic.GetQueryEntity(qn);
                     }, bool.Parse);
                 };
             }

@@ -75,7 +75,7 @@ namespace Signum.Web.Chart
                      new { controller = "Chart", action = "ViewUserChart" });
 
                 UserChartEntity.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryName =>
-                    QueryLogic.GetQuery(queryName));
+                    QueryLogic.GetQueryEntity(queryName));
 
                 OperationClient.AddSetting(new EntityOperationSettings<UserChartEntity>(UserChartOperation.Delete)
                 {

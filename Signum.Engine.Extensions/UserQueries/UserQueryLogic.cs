@@ -83,7 +83,7 @@ namespace Signum.Engine.UserQueries
             if (!userQuery.IsNew || userQuery.queryName == null)
                 throw new InvalidOperationException("userQuery should be new and have queryName");
 
-            userQuery.Query = QueryLogic.GetQuery(userQuery.queryName);
+            userQuery.Query = QueryLogic.GetQueryEntity(userQuery.queryName);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(userQuery.queryName);
 

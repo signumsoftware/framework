@@ -25,7 +25,7 @@ namespace Signum.Web.Help
                 AssignTranslatedEntity(entity, fromEntity);
             }
 
-            var queries = HelpLogic.TypeToQuery.Value.TryGetC(entity.Type.ToType()).EmptyIfNull().Select(QueryLogic.GetQuery).ToList();
+            var queries = HelpLogic.TypeToQuery.Value.TryGetC(entity.Type.ToType()).EmptyIfNull().Select(QueryLogic.GetQueryEntity).ToList();
 
             foreach (var q in queries)
             {

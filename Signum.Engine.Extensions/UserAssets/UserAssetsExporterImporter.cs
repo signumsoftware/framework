@@ -82,7 +82,7 @@ namespace Signum.Engine.UserAssets
 
             QueryEntity IFromXmlContext.GetQuery(string queryKey)
             {
-                return QueryLogic.GetQuery(QueryLogic.ToQueryName(queryKey));
+                return QueryLogic.GetQueryEntity(QueryLogic.ToQueryName(queryKey));
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -171,7 +171,7 @@ namespace Signum.Engine.UserAssets
 
             QueryEntity IFromXmlContext.GetQuery(string queryKey)
             {
-                return QueryLogic.GetQuery(QueryLogic.ToQueryName(queryKey));
+                return QueryLogic.GetQueryEntity(QueryLogic.ToQueryName(queryKey));
             }
 
             public IUserAssetEntity GetEntity(Guid guid)

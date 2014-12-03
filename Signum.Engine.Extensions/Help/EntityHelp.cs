@@ -316,7 +316,7 @@ namespace Signum.Engine.Help
                     entity = new QueryHelpEntity
                     {
                         Culture = this.Culture.ToCultureInfoEntity(),
-                        Query = QueryLogic.GetQuery(this.QueryName),
+                        Query = QueryLogic.GetQueryEntity(this.QueryName),
                     };
 
                 entity.Columns.AddRange(

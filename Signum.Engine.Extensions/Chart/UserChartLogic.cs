@@ -85,7 +85,7 @@ namespace Signum.Engine.Chart
             if (!userChart.IsNew || userChart.queryName == null)
                 throw new InvalidOperationException("userChart should be new and have queryName");
 
-            userChart.Query = QueryLogic.GetQuery(userChart.queryName);
+            userChart.Query = QueryLogic.GetQueryEntity(userChart.queryName);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
 

@@ -162,7 +162,7 @@ namespace Signum.Engine.Help
                 if (queryName == null)
                     return ImportAction.Skipped;
 
-                var query = QueryLogic.GetQuery(queryName);
+                var query = QueryLogic.GetQueryEntity(queryName);
 
                 var entity = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Query == query) ??
                     new QueryHelpEntity

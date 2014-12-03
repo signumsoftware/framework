@@ -71,7 +71,7 @@ namespace Signum.Engine.ViewLog
             if (type == DynamicQueryManager.ExecuteType.ExecuteQuery ||
                 type == DynamicQueryManager.ExecuteType.ExecuteGroupQuery)
             {
-                return LogView(QueryLogic.GetQuery(queryName).ToLite(), "Query");
+                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query");
             }
 
             return null;

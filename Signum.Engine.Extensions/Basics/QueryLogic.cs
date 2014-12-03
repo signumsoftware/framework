@@ -99,7 +99,7 @@ namespace Signum.Engine.Basics
         {
             Type type = TypeLogic.GetType(typeEntity.CleanName);
 
-            return DynamicQueryManager.Current.GetTypeQueries(type).Keys.Select(GetQuery).ToList();
+            return DynamicQueryManager.Current.GetTypeQueries(type).Keys.Select(GetQueryEntity).ToList();
         }
 
 
@@ -138,7 +138,7 @@ namespace Signum.Engine.Basics
                 }, Spacing.Double);
         }
 
-        public static QueryEntity GetQuery(object queryName)
+        public static QueryEntity GetQueryEntity(object queryName)
         {
             return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database"); 
         }

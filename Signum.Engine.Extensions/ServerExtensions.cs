@@ -107,7 +107,7 @@ namespace Signum.Services
         public QueryEntity GetQuery(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => QueryLogic.GetQuery(queryName));
+                () => QueryLogic.GetQueryEntity(queryName));
         }
 
         #endregion

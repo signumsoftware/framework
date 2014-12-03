@@ -249,7 +249,7 @@ namespace Signum.Engine.Mailing
 
             template.SystemEmail = systemEmail;
             template.Active = true;
-            template.Query = QueryLogic.GetQuery(info.QueryName);
+            template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             template.ParseData(DynamicQueryManager.Current.QueryDescription(info.QueryName));
 

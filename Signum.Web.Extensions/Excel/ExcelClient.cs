@@ -94,7 +94,7 @@ namespace Signum.Web.Excel
 
                 items.Add(new MenuItemSeparator());
 
-                var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key();
+                var current =  QueryLogic.GetQueryEntity(ctx.QueryName).ToLite().Key();
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportAdminister")
                 {
