@@ -674,14 +674,20 @@ namespace Signum.Engine.CodeGeneration
                 parts.Add("SqlDbType = SqlDbType." + col.SqlDbType);
 
             var defaultSize = CurrentSchema.Settings.GetSqlSize(null, pair.SqlDbType);
-            if (!(defaultSize == null || defaultSize == col.Precission || defaultSize == col.Length / 2 || defaultSize == int.MaxValue && col.Length == -1))
-                parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
-                                    col.Length != 0 ? (col.Length / 2).ToString() :
-                                    col.Precission != 0 ? col.Precission.ToString() : "0"));
+            if (defaultSize != null)
+            {
+                if (!(defaultSize == col.Precission || defaultSize == col.Length / 2 || defaultSize == int.MaxValue && col.Length == -1))
+                    parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
+                                        col.Length != 0 ? (col.Length / 2).ToString() :
+                                        col.Precission != 0 ? col.Precission.ToString() : "0"));
+            }
 
             var defaultScale = CurrentSchema.Settings.GetSqlScale(null, col.SqlDbType);
-            if (!(defaultScale == null || col.Scale == defaultScale))
-                parts.Add("Scale = " + col.Scale);
+            if (defaultScale != null)
+            {
+                if (!(col.Scale == defaultScale))
+                    parts.Add("Scale = " + col.Scale);
+            }
 
             if (col.Default != null)
                 parts.Add("Default = \"" + CleanDefault(col.Default) + "\"");
