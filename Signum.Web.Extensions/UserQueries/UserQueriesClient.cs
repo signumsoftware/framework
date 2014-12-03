@@ -22,7 +22,6 @@ using Signum.Web.Basic;
 using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
-using Signum.Web.UserAssets;
 
 namespace Signum.Web.UserQueries
 {

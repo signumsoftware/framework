@@ -9,7 +9,6 @@ using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Web.Omnibox;
 using Signum.Web.UserAssets;
-using Signum.Web.UserAssets;
 
 namespace Signum.Web.UserAssets
 {
