@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Selenium;
+using OpenQA.Selenium.Remote;
 using System.Diagnostics;
 using System.Threading;
 using Signum.Engine;
@@ -13,58 +13,16 @@ using Signum.Entities;
 using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
+using OpenQA.Selenium;
 
 namespace Signum.Web.Selenium
 {
     [TestClass]
     public class SeleniumTestClass
     {
-        protected static ISelenium selenium;
+        protected static RemoteWebDriver selenium;
         protected static Process seleniumServerProcess;
         private static bool Cleaned = false;
-
-        public SeleniumTestClass()
-        {
-
-        }
-
-        public static void LaunchSelenium()
-        {
-            try
-            {
-                seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
-                //Thread.Sleep(5000);
-                selenium = SeleniumExtensions.InitializeSelenium();
-            }
-            catch (Exception)
-            {
-                MyTestCleanup();
-                throw;
-            }
-        }
-
-        [ClassCleanup]
-        public static void MyTestCleanup()
-        {
-            try
-            {
-                if (!Cleaned)
-                {
-                    if (selenium != null)
-                    {
-                        selenium.Stop();
-                        selenium.ShutDownSeleniumServer();
-                    }
-                    SeleniumExtensions.KillSelenium(seleniumServerProcess);
-                }
-                Cleaned = true;
-            }
-            catch (Exception)
-            {
-                // Ignore errors if unable to close the browser
-                throw;
-            }
-        }
 
         protected virtual string Url(string url)
         {
@@ -76,8 +34,7 @@ namespace Signum.Web.Selenium
         {
             var url = Url(FindRoute(queryName));
 
-            selenium.Open(url);
-            selenium.WaitForPageToLoad();
+            selenium.Url = url;
 
             return new SearchPageProxy(selenium);
         }
@@ -122,10 +79,9 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> NormalPageUrl<T>(string url) where T : Entity
         {
-            selenium.Open(url);
-            selenium.WaitForPageToLoad();
+            selenium.Url = url;
 
-            return new NormalPage<T>(selenium, null);
+            return new NormalPage<T>(selenium, null).WaitLoaded();
         }
 
         protected virtual string NavigateRoute(Type type, PrimaryKey? id)
@@ -146,29 +102,30 @@ namespace Signum.Web.Selenium
 
         public virtual string GetCurrentUser()
         {
-            if (selenium.IsElementPresent("jq=.sf-login:visible"))
+            if (selenium.IsElementPresent(By.CssSelector(".sf-login:visible")))
                 return null;
 
-            if (!selenium.IsElementPresent("jq=a.sf-user"))
+            if (!selenium.IsElementPresent(By.CssSelector("a.sf-user")))
                 throw new InvalidOperationException("No login or logout button found");
 
-            var result = selenium.GetEval("window.$('.sf-user span').text()");
+            var result = (string)selenium.ExecuteScript("window.$('.sf-user span').text()");
 
             return result;
         }
 
         public virtual void Logout()
         {
-            selenium.Click("jq=a[href$='Auth/Logout']");
-            selenium.WaitForPageToLoad();
-            selenium.Open(Url("Auth/Login"));
-            selenium.WaitForPageToLoad();
+            selenium.FindElement(By.CssSelector("a[href$='Auth/Logout']")).Click();
+            selenium.Wait(() => GetCurrentUser() == null);
+
+            selenium.Url = Url("Auth/Login");
+            selenium.WaitElementPresent(By.CssSelector(".sf-login:visible"));
         }
 
         public virtual void Login(string username, string password)
         {
-            selenium.Open(Url("Auth/Login"));
-            selenium.WaitForPageToLoad();
+            selenium.Url = Url("Auth/Login");
+            selenium.WaitElementPresent(By.CssSelector(".sf-login:visible"));
 
             var currentUser = GetCurrentUser();
             if (currentUser == username)
@@ -177,11 +134,11 @@ namespace Signum.Web.Selenium
             if (currentUser.HasText())
                 Logout();
 
-            selenium.Type("username", username);
-            selenium.Type("password", password);
-            selenium.Submit("jq=form");
+            selenium.FindElement(By.Id("username")).SendKeys(username);
+            selenium.FindElement(By.Id("password")).SendKeys(username);
+            selenium.FindElement(By.Id("login")).Submit();
 
-            selenium.WaitForPageToLoad();
+            selenium.Wait(() => GetCurrentUser() != null);
         }
     }
 }

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -19,7 +20,7 @@ namespace Signum.Web.Selenium
         public FiltersProxy Filters { get { return SearchControl.Filters; } }
         public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
 
-        public SearchPopupProxy(ISelenium selenium, string prefix)
+        public SearchPopupProxy(RemoteWebDriver selenium, string prefix)
             : base(selenium, prefix)
         {
             this.SearchControl = new SearchControlProxy(selenium, prefix);
@@ -101,13 +102,13 @@ namespace Signum.Web.Selenium
 
     public class SearchPageProxy : IDisposable
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
         public SearchControlProxy SearchControl { get; private set; }
         public ResultTableProxy Results { get { return SearchControl.Results; } }
         public FiltersProxy Filters { get { return SearchControl.Filters; } }
         public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
 
-        public SearchPageProxy(ISelenium selenium)
+        public SearchPageProxy(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
             this.SearchControl = new SearchControlProxy(selenium, "");
@@ -115,16 +116,14 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> Create<T>() where T : ModifiableEntity
         {
-            Selenium.Click(SearchControl.CreateButtonLocator);
+            Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
 
-            Selenium.WaitForPageToLoad();
-
-            return new NormalPage<T>(Selenium);
+            return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
         public NormalPage<T> CreateChoose<T>() where T : ModifiableEntity
         {
-            Selenium.Click(SearchControl.CreateButtonLocator);
+            Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
 
             //implementation popup opens
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Prefix));
@@ -134,9 +133,7 @@ namespace Signum.Web.Selenium
 
             ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T));
 
-            Selenium.WaitForPageToLoad();
-
-            return new NormalPage<T>(Selenium);
+            return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
         public void Dispose()
@@ -147,11 +144,17 @@ namespace Signum.Web.Selenium
         {
             this.SearchControl.Search();
         }
+
+        internal SearchPageProxy WaitLoaded()
+        {
+            this.Selenium.WaitElementPresent(this.SearchControl.SearchButtonLocator);
+            return this;
+        }
     }
 
     public class SearchControlProxy
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
 
         public string Prefix { get; private set; }
 
@@ -160,7 +163,7 @@ namespace Signum.Web.Selenium
         public ResultTableProxy Results { get; private set; }
 
 
-        public SearchControlProxy(ISelenium selenium, string prefix)
+        public SearchControlProxy(RemoteWebDriver selenium, string prefix)
         {
             this.Selenium = selenium;
             this.Prefix = prefix;
@@ -169,9 +172,9 @@ namespace Signum.Web.Selenium
             this.Filters = new FiltersProxy(this.Selenium, PrefixUnderscore);
         }
 
-        public string SearchButtonLocator
+        public By SearchButtonLocator
         {
-            get { return "jq=#{0}qbSearch".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}qbSearch".FormatWith(PrefixUnderscore)); }
         }
 
         public string PrefixUnderscore
@@ -181,12 +184,12 @@ namespace Signum.Web.Selenium
 
         public void Search()
         {
-            WaitSearchCompleted(() => Selenium.Click(SearchButtonLocator));
+            WaitSearchCompleted(() => Selenium.FindElement(SearchButtonLocator).Click());
         }
 
         public void WaitSearchCompleted(Action searchTrigger)
         {
-            string counter = Selenium.GetEval("window.$('#{0}qbSearch').attr('data-searchcount')".FormatWith(this.PrefixUnderscore));
+            string counter = (string)Selenium.ExecuteScript("window.$('#{0}qbSearch').attr('data-searchcount')".FormatWith(this.PrefixUnderscore));
             searchTrigger();
             WaitSearchCompleted(counter);
         }
@@ -198,34 +201,32 @@ namespace Signum.Web.Selenium
 
         void WaitSearchCompleted(string counter)
         {
-            var searchButtonDisctinct = SearchButtonLocator + (counter == "null" ? "[data-searchcount]" : "[data-searchcount!={0}]".FormatWith(counter));
+            By searchButtonDisctinct = SearchButtonLocator.CombineCss((counter == "null" ? "[data-searchcount]" : "[data-searchcount!={0}]".FormatWith(counter)));
             Selenium.Wait(() =>
                 Selenium.IsElementPresent(searchButtonDisctinct)
                 , () => "button {0} to finish searching".FormatWith(SearchButtonLocator));
         }
 
 
-        public string ToggleFiltersLocator
+        public By ToggleFiltersLocator
         {
-            get { return "jq=#{0}sfSearchControl .sf-filters-header".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}sfSearchControl .sf-filters-header".FormatWith(PrefixUnderscore)); }
         }
 
-        public string FiltersPanelLocator
+        public By FiltersPanelLocator
         {
-            get { return "jq=#{0}sfSearchControl .sf-filters".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}sfSearchControl .sf-filters".FormatWith(PrefixUnderscore)); }
         }
 
         public void ToggleFilters(bool show)
         {
-            Selenium.Click(ToggleFiltersLocator);
-            Selenium.WaitElementPresent(FiltersPanelLocator + (show ? ":visible" : ":hidden"));
+            Selenium.FindElement(ToggleFiltersLocator).Click();
+            Selenium.WaitElementPresent(FiltersPanelLocator.CombineCss(show ? ":visible" : ":hidden"));
         }
 
-
-
-        public string AddColumnButtonLocator
+        public By AddColumnButtonLocator
         {
-            get { return "jq=#{0}btnAddColumn".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}btnAddColumn".FormatWith(PrefixUnderscore)); }
         }
 
         public bool IsAddColumnEnabled
@@ -234,7 +235,7 @@ namespace Signum.Web.Selenium
             {
                 Selenium.AssertElementPresent(AddColumnButtonLocator);
 
-                return Selenium.IsElementPresent(AddColumnButtonLocator + ":not([disabled])");
+                return Selenium.IsElementPresent(AddColumnButtonLocator.CombineCss(":not([disabled])"));
             }
         }
 
@@ -242,7 +243,7 @@ namespace Signum.Web.Selenium
         {
             Filters.QueryTokenBuilder.SelectToken(token);
             Selenium.Wait(() => IsAddColumnEnabled);
-            Selenium.Click(AddColumnButtonLocator);
+            Selenium.FindElement(AddColumnButtonLocator).Click();
             Selenium.WaitElementPresent(Results.HeaderCellLocator(token));
         }
 
@@ -250,13 +251,12 @@ namespace Signum.Web.Selenium
         public FilterOptionProxy AddQuickFilter(int rowIndex, string token)
         {
             var newFilterIndex = Filters.NewFilterIndex();
+           
+            Selenium.FindElement(Results.CellLocator(rowIndex, token)).ContextClick();
 
-            string cellLocator = Results.CellLocator(rowIndex, token);
-            Selenium.ContextMenuAt(cellLocator, "0,0");
-
-            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter";
+            By quickFilterLocator = By.CssSelector("#sfContextMenu .sf-quickfilter");
             Selenium.WaitElementPresent(quickFilterLocator);
-            Selenium.Click(quickFilterLocator);
+            Selenium.FindElement(quickFilterLocator).Click();
 
             FilterOptionProxy filter = new FilterOptionProxy(this.Filters, newFilterIndex);
             Selenium.WaitElementPresent(filter.OperationLocator);
@@ -267,12 +267,12 @@ namespace Signum.Web.Selenium
         {
             var newFilterIndex = Filters.NewFilterIndex();
 
-            string cellLocator = Results.HeaderCellLocator(token);
-            Selenium.ContextMenuAt(cellLocator, "0,0");
+            var headerLocator = Results.HeaderCellLocator(token);
+            Selenium.FindElement(headerLocator).ContextClick();
 
-            string quickFilterLocator = "jq=#sfContextMenu .sf-quickfilter-header".FormatWith(cellLocator);
+            By quickFilterLocator = By.CssSelector("#sfContextMenu .sf-quickfilter-header");
             Selenium.WaitElementPresent(quickFilterLocator);
-            Selenium.Click(quickFilterLocator);
+            Selenium.FindElement(quickFilterLocator).Click();
 
             FilterOptionProxy filter = new FilterOptionProxy(this.Filters, newFilterIndex);
             Selenium.WaitElementPresent(filter.OperationLocator);
@@ -280,21 +280,21 @@ namespace Signum.Web.Selenium
         }
 
 
-        public string QueryButtonLocator(string id)
+        public By QueryButtonLocator(string id)
         {
-            return "jq=#{0}.sf-query-button".FormatWith(id);
+            return By.CssSelector("#{0}.sf-query-button".FormatWith(id));
         }
 
         public void QueryButtonClick(string id)
         {
-            Selenium.MouseUp(QueryButtonLocator(id));
+            Selenium.FindElement(QueryButtonLocator(id)).Click();
         }
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
             var prefix = this.PrefixUnderscore + "Temp";
 
-            Selenium.Click(CreateButtonLocator);
+            Selenium.FindElement(CreateButtonLocator).Click();
 
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, prefix));
 
@@ -303,7 +303,7 @@ namespace Signum.Web.Selenium
 
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
-            Selenium.Click(CreateButtonLocator);
+            Selenium.FindElement(CreateButtonLocator).Click();
 
             //implementation popup opens
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, Prefix));
@@ -316,34 +316,34 @@ namespace Signum.Web.Selenium
             return new PopupControl<T>(Selenium, Prefix);
         }
 
-        public string CreateButtonLocator
+        public By CreateButtonLocator
         {
             get { return QueryButtonLocator(PrefixUnderscore + "qbSearchCreate"); }
         }
 
         public bool HasMultiplyMessage
         {
-            get { return Selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-td-multiply".FormatWith(PrefixUnderscore)); }
+            get { return Selenium.IsElementPresent(By.CssSelector("#{0}sfSearchControl .sf-td-multiply".FormatWith(PrefixUnderscore))); }
         }
 
-        public string MenuOptionLocator(string optionId)
+        public By MenuOptionLocator(string optionId)
         {
-            return "jq=#{0}sfSearchControl a#{1}".FormatWith(PrefixUnderscore, optionId);
+            return By.CssSelector("#{0}sfSearchControl a#{1}".FormatWith(PrefixUnderscore, optionId));
         }
 
-        public string MenuOptionLocatorByAttr(string optionLocator)
+        public By MenuOptionLocatorByAttr(string optionLocator)
         {
-            return "jq=#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator);
+            return By.CssSelector("#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator));
         }
     }
 
     public class FiltersProxy
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
         public string PrefixUnderscore { get; private set; }
         public QueryTokenBuilderProxy QueryTokenBuilder { get; private set; }
 
-        public FiltersProxy(ISelenium selenium, string PrefixUnderscore)
+        public FiltersProxy(RemoteWebDriver selenium, string PrefixUnderscore)
         {
             this.Selenium = selenium;
             this.PrefixUnderscore = PrefixUnderscore;
@@ -352,14 +352,14 @@ namespace Signum.Web.Selenium
 
         public int NumFilters()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').length".FormatWith(this.PrefixUnderscore));
+            int result = (int)Selenium.ExecuteScript("window.$('#{0}tblFilters tbody tr').length".FormatWith(this.PrefixUnderscore));
 
-            return int.Parse(result);
+            return result;
         }
 
         public int NewFilterIndex()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblFilters tbody tr').get().map(function(a){{return parseInt(a.id.substr('{0}trFilter'.length + 1));}}).join()".FormatWith(PrefixUnderscore));
+            string result = (string)Selenium.ExecuteScript("window.$('#{0}tblFilters tbody tr').get().map(function(a){{return parseInt(a.id.substr('{0}trFilter'.length + 1));}}).join()".FormatWith(PrefixUnderscore));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -368,7 +368,7 @@ namespace Signum.Web.Selenium
         {
             var newFilterIndex = NewFilterIndex();
 
-            Selenium.Click(AddFilterButtonLocator);
+            Selenium.FindElement(AddFilterButtonLocator).Click();
 
             FilterOptionProxy filter = new FilterOptionProxy(this, newFilterIndex);
             Selenium.WaitElementPresent(filter.OperationLocator);
@@ -384,9 +384,9 @@ namespace Signum.Web.Selenium
             filter.SetValue(value);
         }
 
-        public string AddFilterButtonLocator
+        public By AddFilterButtonLocator
         {
-            get { return "jq=#{0}btnAddFilter".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}btnAddFilter".FormatWith(PrefixUnderscore)); }
         }
 
         public bool IsAddFilterEnabled
@@ -395,7 +395,7 @@ namespace Signum.Web.Selenium
             {
                 Selenium.AssertElementPresent(AddFilterButtonLocator);
 
-                return Selenium.IsElementPresent(AddFilterButtonLocator + ":not([disabled])");
+                return Selenium.IsElementPresent(AddFilterButtonLocator.CombineCss(":not([disabled])"));
             }
         }
 
@@ -407,20 +407,20 @@ namespace Signum.Web.Selenium
 
     public class QueryTokenBuilderProxy
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
         public string PrefixUnderscore { get; private set; }
 
-        public QueryTokenBuilderProxy(ISelenium selenium, string prefixUnderscore)
+        public QueryTokenBuilderProxy(RemoteWebDriver selenium, string prefixUnderscore)
         {
             this.Selenium = selenium;
             this.PrefixUnderscore = prefixUnderscore;
         }
 
-        public string TokenLocator(int tokenIndex, string previousToken, bool isEnd)
+        public By TokenLocator(int tokenIndex, string previousToken, bool isEnd)
         {
-            var result = "jq=#{0}{1}_{2}".FormatWith(PrefixUnderscore, !isEnd ? "ddlTokens" : "ddlTokensEnd", tokenIndex);
+            var result = By.CssSelector("#{0}{1}_{2}".FormatWith(PrefixUnderscore, !isEnd ? "ddlTokens" : "ddlTokensEnd", tokenIndex));
 
-            result += "[data-parenttoken='" + previousToken + "']";
+            result = result.CombineCss("[data-parenttoken='" + previousToken + "']");
 
             return result;
         }
@@ -437,7 +437,7 @@ namespace Signum.Web.Selenium
 
                 Selenium.WaitElementPresent(tokenLocator);
 
-                Selenium.Select(tokenLocator, "value=" + parts[i]);
+                Selenium.FindElement(tokenLocator).SelectElement().SelectByValue(parts[i]);
             }
 
             Selenium.Wait(() =>
@@ -445,7 +445,7 @@ namespace Signum.Web.Selenium
                 var tokenLocator = TokenLocator(parts.Length, token, isEnd: false);
                 if (Selenium.IsElementPresent(tokenLocator))
                 {
-                    Selenium.Select(tokenLocator, "value=");
+                    Selenium.FindElement(tokenLocator).SelectElement().SelectByValue("");
                     return true;
                 }
 
@@ -461,7 +461,7 @@ namespace Signum.Web.Selenium
 
     public class ResultTableProxy
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
 
         public string PrefixUnderscore;
 
@@ -469,7 +469,7 @@ namespace Signum.Web.Selenium
 
         public bool HasDataEntity;
 
-        public ResultTableProxy(ISelenium selenium, string prefixUndescore, Action<Action> waitSearchCompleted, bool hasDataEntity)
+        public ResultTableProxy(RemoteWebDriver selenium, string prefixUndescore, Action<Action> waitSearchCompleted, bool hasDataEntity)
         {
             this.Selenium = selenium;
             this.PrefixUnderscore = prefixUndescore;
@@ -477,27 +477,27 @@ namespace Signum.Web.Selenium
             this.HasDataEntity = hasDataEntity;
         }
 
-        public string ResultTableLocator
+        public By ResultTableLocator
         {
-            get { return "jq=#{0}tblResults".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}tblResults".FormatWith(PrefixUnderscore)); }
         }
 
-        public string RowsLocator
+        public By RowsLocator
         {
-            get { return "jq=#{0}tblResults > tbody > tr".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}tblResults > tbody > tr".FormatWith(PrefixUnderscore)); }
         }
 
-        public string RowLocator(int rowIndex)
+        public By RowLocator(int rowIndex)
         {
-            return RowsLocator + ":nth-child({0})".FormatWith(rowIndex + 1);
+            return RowsLocator.CombineCss(":nth-child({0})".FormatWith(rowIndex + 1));
         }
 
-        public string RowLocator(Lite<IEntity> lite)
+        public By RowLocator(Lite<IEntity> lite)
         {
-            return "{0}[data-entity='{1}']".FormatWith(RowsLocator, lite.Key());
+            return  By.CssSelector("{0}[data-entity='{1}']".FormatWith(RowsLocator, lite.Key()));
         }
 
-        public string CellLocator(int rowIndex, string token)
+        public By CellLocator(int rowIndex, string token)
         {
             var tokens = this.GetColumnTokens();
 
@@ -506,17 +506,17 @@ namespace Signum.Web.Selenium
             if (index == -1)
                 throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.CommaAnd()));
 
-            return RowLocator(rowIndex) + "> td:nth-child({0})".FormatWith(index + 1);
+            return RowLocator(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
         }
 
-        public string RowSelectorLocator(int rowIndex)
+        public By RowSelectorLocator(int rowIndex)
         {
-            return "{0}rowSelection_{1}".FormatWith(PrefixUnderscore, rowIndex);
+            return By.CssSelector("{0}rowSelection_{1}".FormatWith(PrefixUnderscore, rowIndex));
         }
 
         public void SelectRow(int rowIndex)
         {
-            Selenium.Click(RowSelectorLocator(rowIndex));
+            Selenium.FindElement(RowSelectorLocator(rowIndex)).Click();
         }
 
         public void SelectRow(params int[] rowIndexes)
@@ -527,30 +527,30 @@ namespace Signum.Web.Selenium
 
         public void SelectRow(Lite<IEntity> lite)
         {
-            Selenium.Click(RowLocator(lite) + " .sf-td-selection");
+            Selenium.FindElement(RowLocator(lite).CombineCss(" .sf-td-selection")).Click();
         }
 
         public bool HasFooter
         {
-            get { return Selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-search-footer".FormatWith(PrefixUnderscore)); }
+            get { return Selenium.IsElementPresent(By.CssSelector("#{0}tblResults > tbody > tr.sf-search-footer".FormatWith(PrefixUnderscore))); }
         }
 
-        public string HeaderLocator
+        public By HeaderLocator
         {
-            get { return "jq=#{0}tblResults > thead > tr > th".FormatWith(PrefixUnderscore); }
+            get { return By.CssSelector("#{0}tblResults > thead > tr > th".FormatWith(PrefixUnderscore)); }
         }
 
         public string[] GetColumnTokens()
         {
-            var array = Selenium.GetEval("window.$('#" + PrefixUnderscore + "tblResults > thead > tr > th')" +
+            var array = (string)Selenium.ExecuteScript("window.$('#" + PrefixUnderscore + "tblResults > thead > tr > th')" +
                 ".toArray().map(function(e){ return  $(e).hasClass('sf-th-entity')? 'Entity' : $(e).attr('data-column-name'); }).join(',')");
 
             return array.Split(',');
         }
 
-        public string HeaderCellLocator(string token)
+        public By HeaderCellLocator(string token)
         {
-            return HeaderLocator + "[data-column-name='{0}']".FormatWith(token);
+            return HeaderLocator.CombineCss("[data-column-name='{0}']".FormatWith(token));
         }
 
         public ResultTableProxy OrderBy(string token)
@@ -588,13 +588,13 @@ namespace Signum.Web.Selenium
                 WaitSearchCompleted(() =>
                 {
                     if (thenBy)
-                        Selenium.ShiftKeyDown();
-                    Selenium.Click(HeaderCellLocator(token));
+                        Selenium.Keyboard.PressKey(Keys.Shift);
+                    Selenium.FindElement(HeaderCellLocator(token)).Click();
                     if (thenBy)
-                        Selenium.ShiftKeyUp();
+                        Selenium.Keyboard.ReleaseKey(Keys.Shift);
                 });
             }
-            while (!Selenium.IsElementPresent(HeaderCellLocator(token) + SortSpan(orderType)));
+            while (!Selenium.IsElementPresent(HeaderCellLocator(token).CombineCss(SortSpan(orderType))));
         }
 
         public bool HasColumn(string token)
@@ -604,70 +604,64 @@ namespace Signum.Web.Selenium
 
         public void RemoveColumn(string token)
         {
-            string headerSelector = HeaderCellLocator(token);
-            Selenium.ContextMenuAt(headerSelector, "0,0");
-            Selenium.Click("jq=#sfContextMenu .sf-remove-header");
+            By headerSelector = HeaderCellLocator(token);
+            Selenium.FindElement(headerSelector).ContextClick();
+            Selenium.FindElement(By.CssSelector("#sfContextMenu .sf-remove-header")).Click();
             Selenium.WaitElementDisapear(headerSelector);
         }
 
-        public string EntityLinkLocator(Lite<IEntity> lite, bool allowSelection = true)
+        public By EntityLinkLocator(Lite<IEntity> lite, bool allowSelection = true)
         {
-            return RowLocator(lite) + " > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1);
+            return RowLocator(lite).CombineCss(" > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1));
         }
 
-        public string EntityLinkLocator(int rowIndex, bool allowSelection = true)
+        public By EntityLinkLocator(int rowIndex, bool allowSelection = true)
         {
-            return RowLocator(rowIndex) + " > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1);
+            return RowLocator(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1));
         }
 
         public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
         {
-            Selenium.Click(EntityLinkLocator(lite, allowSelection));
-            Selenium.WaitForPageToLoad();
-            return new NormalPage<T>(Selenium);
+            Selenium.FindElement(EntityLinkLocator(lite, allowSelection)).Click();
+            return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
         public NormalPage<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : Entity
         {
-            Selenium.Click(EntityLinkLocator(rowIndex, allowSelection));
-            Selenium.WaitForPageToLoad();
-            return new NormalPage<T>(Selenium);
+            Selenium.FindElement(EntityLinkLocator(rowIndex, allowSelection)).Click();
+            return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
         public EntityContextMenuProxy EntityContextMenu(int rowIndex)
         {
-            Selenium.ContextMenuAt(CellLocator(rowIndex, "Entity"), "0,0");
+            Selenium.FindElement(CellLocator(rowIndex, "Entity")).ContextClick();
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
 
-            Selenium.WaitElementPresent(ctx.EntityContextMenuLocator + ":not(:has(.sf-tm-selected-loading))");
+            Selenium.WaitElementPresent(ctx.EntityContextMenuLocator.CombineCss(":not(:has(.sf-tm-selected-loading))"));
 
             return ctx;
         }
 
         public EntityContextMenuProxy SelectedClick()
         {
-            Selenium.Click("jq=#{0}sfSearchControl .sf-tm-selected".FormatWith(PrefixUnderscore));
+            Selenium.FindElement(By.CssSelector("#{0}sfSearchControl .sf-tm-selected".FormatWith(PrefixUnderscore))).Click();
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: false);
 
-            Selenium.WaitElementPresent(ctx.EntityContextMenuLocator + ":not(:has(.sf-tm-selected-loading))");
+            Selenium.WaitElementPresent(ctx.EntityContextMenuLocator.CombineCss(":not(:has(.sf-tm-selected-loading))"));
 
             return ctx;
         }
 
         public int RowsCount()
         {
-            string result = Selenium.GetEval("window.$('#{0}tblResults > tbody > tr{1}').length".FormatWith(PrefixUnderscore, (HasDataEntity ? "[data-entity]" : null)));
-
-            int num = int.Parse(result);
-
-            return num;
+            return (int)Selenium.ExecuteScript("window.$('#{0}tblResults > tbody > tr{1}').length".FormatWith(PrefixUnderscore, (HasDataEntity ? "[data-entity]" : null)));
         }
 
         public Lite<Entity> EntityInIndex(int index)
         {
-            var result = Selenium.GetEval("window.$('{0}').data('entity')".FormatWith(RowLocator(index).RemoveStart(3)));
+            var result = (string)Selenium.ExecuteScript("window.$('{0}').data('entity')".FormatWith(RowLocator(index).CssSelector().RemoveStart(3)));
 
             return Lite.Parse(result);
         }
@@ -681,7 +675,7 @@ namespace Signum.Web.Selenium
 
         public bool IsHeaderMarkedSorted(string token, OrderType orderType)
         {
-            return Selenium.IsElementPresent(HeaderCellLocator(token) + SortSpan(orderType));
+            return Selenium.IsElementPresent(HeaderCellLocator(token).CombineCss(SortSpan(orderType)));
         }
 
         private static string SortSpan(OrderType orderType)
@@ -691,49 +685,24 @@ namespace Signum.Web.Selenium
 
         public bool IsElementInCell(int rowIndex, string token, string selector)
         {
-            return Selenium.IsElementPresent(CellLocator(rowIndex, token) + " " + selector);
+            return Selenium.IsElementPresent(CellLocator(rowIndex, token).CombineCss(" " + selector));
         }
 
         public void EditColumnName(string token, string newName)
         {
-            string headerSelector = this.HeaderCellLocator(token);
-            Selenium.ContextMenuAt(headerSelector, "0,0");
-            Selenium.Click("jq=#sfContextMenu .sf-edit-header");
+            By headerSelector = this.HeaderCellLocator(token);
+            Selenium.FindElement(headerSelector).ContextClick();
+            Selenium.FindElement(By.CssSelector("#sfContextMenu .sf-edit-header")).Click();
 
             using (var popup = new Popup(Selenium, this.PrefixUnderscore + "newName"))
             {
                 Selenium.WaitElementPresent(popup.PopupVisibleLocator);
-                Selenium.Type(popup.PopupVisibleLocator + " input:text", newName);
+                Selenium.FindElement(popup.PopupVisibleLocator.CombineCss(" input:text")).SendKeys(newName);
                 popup.OkWaitClosed();
             }
 
-            Selenium.WaitElementPresent("{0}:contains('{1}')".FormatWith(headerSelector, newName));
+            Selenium.WaitElementPresent(headerSelector.CombineCss(":contains('{0}')".FormatWith(newName)));
         }
-
-
-        //public void MoveAfter(string srcToken, string targetToken)
-        //{
-        //    MoveColumn(srcToken, targetToken, after: true );
-        //}
-
-        //public void MoveBefore(string srcToken, string targetToken)
-        //{
-        //    MoveColumn(srcToken, targetToken, after: false);
-        //}
-
-        //void MoveColumn(string srcToken, string targetToken, bool after)
-        //{
-        //    string srcLocator = HeaderCellLocator(srcToken);
-        //    string targetLocator = HeaderCellLocator(targetToken);
-
-        //    decimal srcX = Selenium.GetElementPositionLeft(srcLocator);
-        //    decimal targetX = Selenium.GetElementPositionLeft(targetLocator);
-        //    decimal targetWidth = Selenium.GetElementWidth(targetLocator);
-
-        //    decimal dx = (targetX - srcX) + (after ? (targetWidth - 5) : 5);
-
-        //    Selenium.DragAndDrop(srcLocator, dx.ToString("+00;-00;+00") + ",+0");
-        //}
     }
 
     public class EntityContextMenuProxy
@@ -746,20 +715,20 @@ namespace Signum.Web.Selenium
             this.IsContext = isContext;
         }
 
-        public string EntityContextMenuLocator
+        public By EntityContextMenuLocator
         {
             get
             {
                 if (IsContext)
-                    return "jq=#sfContextMenu:visible";
+                    return By.CssSelector("#sfContextMenu:visible");
                 else
-                    return "jq=#{0}btnSelectedDropDown:visible".FormatWith(resultTable.PrefixUnderscore);
+                    return By.CssSelector("#{0}btnSelectedDropDown:visible".FormatWith(resultTable.PrefixUnderscore));
             }
         }
 
         public void QuickLinkClick(string title)
         {
-            resultTable.Selenium.Click("{0} li.sf-quick-link[data-name='{1}'] > a".FormatWith(EntityContextMenuLocator, title));
+            resultTable.Selenium.FindElement(EntityContextMenuLocator.CombineCss(" li.sf-quick-link[data-name='{0}'] > a".FormatWith(title))).Click();
         }
 
         public SearchPopupProxy QuickLinkClickSearch(string title)
@@ -780,7 +749,7 @@ namespace Signum.Web.Selenium
         {
             MenuClick(operationSymbol.KeyWeb());
             if (consumeConfirmation)
-                this.resultTable.Selenium.ConsumeConfirmation();
+                this.resultTable.Selenium.ConsumeAlert();
 
             resultTable.Selenium.WaitElementDisapear(EntityContextMenuLocator);
         }
@@ -794,7 +763,7 @@ namespace Signum.Web.Selenium
         {
             MenuClick(operationSymbol.KeyWeb());
             if (consumeConfirmation)
-                this.resultTable.Selenium.ConsumeConfirmation();
+                this.resultTable.Selenium.ConsumeAlert();
         }
 
         public PopupControl<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
@@ -805,7 +774,7 @@ namespace Signum.Web.Selenium
         public PopupControl<ProcessEntity> DeleteProcessClick(OperationSymbol operationSymbol)
         {
             MenuClick(operationSymbol.KeyWeb());
-            resultTable.Selenium.ConsumeConfirmation();
+            resultTable.Selenium.ConsumeAlert();
 
             var result = new PopupControl<ProcessEntity>(this.resultTable.Selenium, "New");
             result.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -816,18 +785,18 @@ namespace Signum.Web.Selenium
         public void MenuClick(string itemId)
         {
             var loc = MenuItemLocator(itemId);
-            resultTable.Selenium.MouseUp(loc);
-            resultTable.Selenium.Click(loc);
+            //resultTable.Selenium.FindElement(loc).MouseUp();
+            resultTable.Selenium.FindElement(loc).Click();
         }
 
-        public string MenuItemLocator(string itemId)
+        public By MenuItemLocator(string itemId)
         {
-            return "{0} li a#{1}".FormatWith(EntityContextMenuLocator, itemId);
+            return EntityContextMenuLocator.CombineCss(" li a#{0}".FormatWith(itemId));
         }
 
         public bool IsDisabled(string itemId)
         {
-            return resultTable.Selenium.IsElementPresent(MenuItemLocator(itemId) + "[disabled]");
+            return resultTable.Selenium.IsElementPresent(MenuItemLocator(itemId).CombineCss("[disabled]"));
         }
 
         public bool IsDisabled(IOperationSymbolContainer symbol)
@@ -859,8 +828,7 @@ namespace Signum.Web.Selenium
         private NormalPage<T> MenuClickNormalPage<T>(string itemId) where T : Entity
         {
             MenuClick(itemId);
-            resultTable.Selenium.WaitForPageToLoad();
-            var result = new NormalPage<T>(this.resultTable.Selenium);
+            var result = new NormalPage<T>(this.resultTable.Selenium).WaitLoaded();
             return result;
         }
     }
@@ -874,9 +842,9 @@ namespace Signum.Web.Selenium
             this.SearchControl = seachControl;
         }
 
-        public string ElementsPerPageLocator
+        public By ElementsPerPageLocator
         {
-            get { return "jq=#{0}sfElems".FormatWith(SearchControl.PrefixUnderscore); }
+            get { return By.CssSelector("#{0}sfElems".FormatWith(SearchControl.PrefixUnderscore)); }
         }
 
         public void SetElementsPerPage(int elementPerPage)
@@ -884,21 +852,21 @@ namespace Signum.Web.Selenium
             SearchControl.WaitSearchCompleted(() =>
             {
                 var combo = ElementsPerPageLocator;
-                SearchControl.Selenium.Select(combo, "value=" + elementPerPage.ToString());
-                SearchControl.Selenium.FireEvent(combo, "change");
+                SearchControl.Selenium.FindElement(combo).SelectElement().SelectByValue(elementPerPage.ToString());
+                //SearchControl.Selenium.FireEvent(combo, "change");
             });
         }
 
-        public string PaginationModeLocator
+        public By PaginationModeLocator
         {
-            get { return "jq=#{0}sfPaginationMode".FormatWith(SearchControl.Prefix); }
+            get { return By.CssSelector("#{0}sfPaginationMode".FormatWith(SearchControl.Prefix)); }
         }
 
         public void SetPaginationMode(PaginationMode mode)
         {
             var combo = PaginationModeLocator;
-            SearchControl.Selenium.Select(combo, "value=" + mode.ToString());
-            SearchControl.Selenium.FireEvent(combo, "change");
+            SearchControl.Selenium.FindElement(combo).SelectElement().SelectByValue(mode.ToString());
+            //SearchControl.Selenium.FireEvent(combo, "change");
         }
     }
 
@@ -913,25 +881,25 @@ namespace Signum.Web.Selenium
             this.FilterIndex = index;
         }
 
-        public string OperationLocator
+        public By OperationLocator
         {
-            get { return "jq=#{0}ddlSelector_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex); }
+            get { return By.CssSelector("#{0}ddlSelector_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex)); }
         }
 
         public FilterOperation Operation
         {
-            get { return Filters.Selenium.GetValue(OperationLocator).ToEnum<FilterOperation>(); }
-            set { Filters.Selenium.Select(OperationLocator, "value=" + value.ToString()); }
+            get { return Filters.Selenium.FindElement(OperationLocator).SelectElement().SelectedOption.GetAttribute("value").ToEnum<FilterOperation>(); }
+            set { Filters.Selenium.FindElement(OperationLocator).SelectElement().SelectByValue(value.ToString()); }
         }
 
-        public string DeleteButtonLocator
+        public By DeleteButtonLocator
         {
-            get { return "jq=#{0}btnDelete_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex); }
+            get { return By.CssSelector("#{0}btnDelete_{1}".FormatWith(Filters.PrefixUnderscore, FilterIndex)); }
         }
 
         public void Delete()
         {
-            Filters.Selenium.Click(DeleteButtonLocator);
+            Filters.Selenium.FindElement(DeleteButtonLocator).Click();
         }
 
         public ValueLineProxy ValueLine()

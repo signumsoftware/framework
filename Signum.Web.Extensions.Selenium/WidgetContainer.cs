@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Remote;
 using Signum.Entities.Alerts;
 using Signum.Entities.Notes;
 using Signum.Utilities;
@@ -11,30 +13,30 @@ namespace Signum.Web.Selenium
 {
     public interface IWidgetContainer
     {
-        ISelenium Selenium { get; }
+        RemoteWebDriver Selenium { get; }
 
         string Prefix { get; }
     }
 
     public static class WidgetContainerExtensions
     {
-        public static string WidgetContainerLocator(this IWidgetContainer container)
+        public static By WidgetContainerLocator(this IWidgetContainer container)
         {
             if (container.Prefix.HasText())
                 throw new NotImplementedException("WidgetContainerSelector not implemented for popups");
 
-            return "jq=#divMainPage ul.sf-widgets";
+            return By.CssSelector("#divMainPage ul.sf-widgets");
         }
 
 
 
         public static void QuickLinkClick(this IWidgetContainer container, string name)
         {
-            container.Selenium.Click("{0} .sf-quicklinks".FormatWith(container.WidgetContainerLocator()));
+            container.Selenium.FindElement(By.CssSelector("{0} .sf-quicklinks".FormatWith(container.WidgetContainerLocator())));
 
-            string quickLinkSelector = "{0} ul li.sf-quick-link[data-name='{1}'] > a".FormatWith(container.WidgetContainerLocator(), name);
-            container.Selenium.WaitElementPresent("{0}:visible".FormatWith(quickLinkSelector));
-            container.Selenium.Click(quickLinkSelector);
+            By quickLinkSelector = By.CssSelector("{0} ul li.sf-quick-link[data-name='{1}'] > a".FormatWith(container.WidgetContainerLocator(), name));
+            container.Selenium.WaitElementPresent(quickLinkSelector);
+            container.Selenium.FindElement(quickLinkSelector).Click();
         }
 
         public static SearchPopupProxy QuickLinkClickSearch(this IWidgetContainer container, string name)
@@ -48,11 +50,11 @@ namespace Signum.Web.Selenium
 
         public static PopupControl<NoteEntity> NotesCreateClick(this IWidgetContainer container)
         {
-            container.Selenium.Click("{0} .sf-notes-toggler".FormatWith(container.WidgetContainerLocator()));
+            container.Selenium.FindElement(container.WidgetContainerLocator().CombineCss(" .sf-notes-toggler")).Click();
 
             string createSelector = "{0} a.sf-note-create".FormatWith(container.WidgetContainerLocator());
-            container.Selenium.WaitElementPresent("{0}:visible".FormatWith(createSelector));
-            container.Selenium.MouseUp(createSelector);
+            container.Selenium.WaitElementPresent(By.CssSelector("{0}:visible".FormatWith(createSelector)));
+            container.Selenium.FindElement(By.CssSelector(createSelector)).Click();
 
             PopupControl<NoteEntity> result = new PopupControl<NoteEntity>(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -61,11 +63,11 @@ namespace Signum.Web.Selenium
 
         public static SearchPopupProxy NotesViewClick(this IWidgetContainer container)
         {
-            container.Selenium.Click("{0} .sf-notes-toggler".FormatWith(container.WidgetContainerLocator()));
+            container.Selenium.FindElement(By.CssSelector("{0} .sf-notes-toggler".FormatWith(container.WidgetContainerLocator()))).Click();
 
             string viewSelector = "{0} a.sf-note-view".FormatWith(container.WidgetContainerLocator());
-            container.Selenium.WaitElementPresent("{0}:visible".FormatWith(viewSelector));
-            container.Selenium.MouseUp(viewSelector);
+            container.Selenium.WaitElementPresent(By.CssSelector("{0}:visible".FormatWith(viewSelector)));
+            container.Selenium.FindElement(By.CssSelector(viewSelector)).Click();
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -75,18 +77,18 @@ namespace Signum.Web.Selenium
 
         public static int NotesCount(this IWidgetContainer container)
         {
-            string str = container.Selenium.GetEval("window.$('{0} .sf-notes-toggler .sf-widget-count').html()".FormatWith(container.WidgetContainerLocator().RemoveStart(3)));
+            string str = (string)container.Selenium.ExecuteScript("window.$('{0} .sf-notes-toggler .sf-widget-count').html()".FormatWith(container.WidgetContainerLocator().CssSelector().RemoveStart(3)));
 
             return int.Parse(str); 
         }
 
         public static PopupControl<AlertEntity> AlertCreateClick(this IWidgetContainer container)
         {
-            container.Selenium.Click("{0} .sf-alerts-toggler".FormatWith(container.WidgetContainerLocator()));
+            container.Selenium.FindElement(container.WidgetContainerLocator().CombineCss(" .sf-alerts-toggler")).Click();
 
             string createSelector = "{0} a.sf-alert-create".FormatWith(container.WidgetContainerLocator());
-            container.Selenium.WaitElementPresent("{0}:visible".FormatWith(createSelector));
-            container.Selenium.MouseUp(createSelector);
+            container.Selenium.WaitElementPresent(By.CssSelector("{0}:visible".FormatWith(createSelector)));
+            container.Selenium.FindElement(By.CssSelector(createSelector)).Click();
 
             PopupControl<AlertEntity> result = new PopupControl<AlertEntity>(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -96,14 +98,14 @@ namespace Signum.Web.Selenium
 
         public static SearchPopupProxy AlertsViewClick(this IWidgetContainer container, AlertCurrentState state)
         {
-            container.Selenium.Click("{0} .sf-alerts-toggler".FormatWith(container.WidgetContainerLocator()));
+            container.Selenium.FindElement(By.CssSelector("{0} .sf-alerts-toggler".FormatWith(container.WidgetContainerLocator()))).Click();
 
             string viewSelector = "{0} .sf-alert-view .{1}.sf-alert-count-label".FormatWith(
                 container.WidgetContainerLocator(),
                 GetCssClass(state));
 
-            container.Selenium.WaitElementPresent(viewSelector + ":visible");
-            container.Selenium.MouseUp(viewSelector);
+            container.Selenium.WaitElementPresent(By.CssSelector(viewSelector + ":visible"));
+            container.Selenium.FindElement(By.CssSelector(viewSelector)).Click();
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "alerts");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
@@ -136,8 +138,8 @@ namespace Signum.Web.Selenium
 
         public static int AlertCount(this IWidgetContainer container, AlertCurrentState state)
         {
-            var result = container.Selenium.GetEval("window.$('{0} span.sf-widget-count.{1}').html()".FormatWith(
-                container.WidgetContainerLocator().RemoveStart(3),
+            var result = (string)container.Selenium.ExecuteScript("window.$('{0} span.sf-widget-count.{1}').html()".FormatWith(
+                container.WidgetContainerLocator().CssSelector().RemoveStart(3),
                 GetCssClass(state)));
 
             return int.Parse(result);

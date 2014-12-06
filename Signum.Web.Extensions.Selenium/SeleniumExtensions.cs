@@ -1,187 +1,153 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using Selenium;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Utilities;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Support;
+using OpenQA.Selenium.Support.UI;
+using Signum.Utilities;
+
 
 namespace Signum.Web.Selenium
 {
-    public enum WebExplorer
-    {
-        IE,
-        Chrome,
-        Firefox
-    }
-
     public static class SeleniumExtensions
     {
-        public static WebExplorer Explorer = WebExplorer.Firefox;
-        public static readonly string DefaultTimeout = "180000";
+        //public static string PageLoadTimeout = "20000";
+        public static TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(20 * 1000);
+        public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
 
-        public static Process LaunchSeleniumProcess()
+        //public static void WaitForPageToLoad(this RemoteWebDriver selenium)
+        //{
+        //    selenium.WaitForPageToLoad(PageLoadTimeout);
+        //}
+
+        public static T Wait<T>(this RemoteWebDriver selenium, Func<T> condition, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
-            Process seleniumServerProcess = new Process();
-            seleniumServerProcess.StartInfo.FileName = "java";
-            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Selenium"))
-                seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 180";
-            else
-                seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -log selenium.log -timeout 180"; /*timeout in seconds*/
-
-            seleniumServerProcess.Start();
-            return seleniumServerProcess;
-        }
-
-        public static ISelenium InitializeSelenium()
-        {
-            ISelenium selenium = new DefaultSelenium("localhost",
-                4444,
-                Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome",
-                "http://localhost/");
-
-            StartSelenium(selenium);
-
-            selenium.SetTimeout(DefaultTimeout); //timeout in ms => 3mins
-            //selenium.SetSpeed("200");
-            
-            selenium.AddLocationStrategy("jq",
-            "var loc = locator; " +
-            "var attr = null; " +
-            "var isattr = false; " +
-            "var inx = locator.lastIndexOf('@'); " +
-
-            "if (inx != -1){ " +
-            "   loc = locator.substring(0, inx); " +
-            "   attr = locator.substring(inx + 1); " +
-            "   isattr = true; " +
-            "} " +
-
-            "var found = jQuery(inDocument).find(loc); " +
-            "if (found.length >= 1) { " +
-            "   if (isattr) { " +
-            "       return found[0].getAttribute(attr); " +
-            "   } else { " +
-            "       return found[0]; " +
-            "   } " +
-            "} else { " +
-            "   return null; " +
-            "}"
-        );
-
-            return selenium;
-        }
-
-
-        private static void StartSelenium(ISelenium selenium)
-        {
-            int attempts = 0;
-            while (true)
+            try
             {
-                try
+                var wait = new DefaultWait<string>(null)
                 {
-                    selenium.Start();
-                    return;
-                }
-                catch (Exception)
-                {
-                    attempts += 1;
-                    System.Threading.Thread.Sleep(3000);
-                    if (attempts > 8)
-                        throw new ApplicationException("Could not start selenium");
-                }
+                    Timeout = timeout ?? DefaultTimeout,
+                    PollingInterval = DefaultPoolingInterval
+                };
+                
+                return wait.Until(_ => condition());
+            }
+            catch (WebDriverTimeoutException ex)
+            {
+                throw new WebDriverTimeoutException(ex.Message + ": waiting for {0} in page {1}({2})".FormatWith(
+                    actionDescription == null ? "visual condition" : actionDescription(),
+                    selenium.Title,
+                    selenium.Url));
             }
         }
 
-        public static void KillSelenium(Process seleniumProcess)
+        public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
-            if (seleniumProcess != null && !seleniumProcess.HasExited)
-                seleniumProcess.Kill();
+            return selenium.Wait(() => selenium.FindElement(locator),
+                actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
         }
 
-        public static string PageLoadTimeout = "20000";
-        public static int AjaxTimeout = 20000;
-        public static int AjaxWait = 200;
-
-        public static void WaitForPageToLoad(this ISelenium selenium)
+        public static void WaitElementDisapear(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.Wait(() => !selenium.IsElementPresent(locator), 
+                actionDescription ?? (Func<string>)(() => "{0} to disapear".FormatWith(locator)), timeout);
         }
 
-        public static void Wait(this ISelenium selenium, Func<bool> condition, Func<string> actionDescription = null, int? timeout = null)
-        {
-            if (condition())
-                return;
-
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? AjaxTimeout);
-            do
-            {
-                Thread.Sleep(AjaxWait);
-
-                if (condition())
-                    return;
-
-            } while (DateTime.Now < limit);
-
-
-            throw new TimeoutException("Timeout after {0} ms waiting for {1} in page {2}({3})".FormatWith(
-                timeout ?? AjaxTimeout,
-                actionDescription == null ? "visual condition" : actionDescription(),
-                selenium.GetTitle(),
-                selenium.GetLocation()));
-        }
-
-        public static void WaitElementPresent(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
-        {
-            selenium.Wait(() => selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
-        }
-
-        public static void WaitElementDisapear(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
-        {
-            selenium.Wait(() => !selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to disapear".FormatWith(locator)), timeout);
-        }
-
-        public static void AssertElementPresent(this ISelenium selenium, string locator)
+        public static void AssertElementPresent(this RemoteWebDriver selenium, By locator)
         {
             if (!selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} not found".FormatWith(locator));
         }
 
-        public static void AssertElementNotPresent(this ISelenium selenium, string locator)
+        public static bool IsElementPresent(this RemoteWebDriver selenium, By locator)
+        {
+            return selenium.FindElements(locator).Any();
+        }
+
+        public static void AssertElementNotPresent(this RemoteWebDriver selenium, By locator)
         {
             if (selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
-        public static void SetChecked(this ISelenium selenium, string locator, bool isChecked)
+        public static void SetChecked(this RemoteWebDriver selenium, By locator, bool isChecked)
         {
-            if (selenium.IsChecked(locator) == isChecked)
+            var element = selenium.FindElement(locator);
+
+            if (element.Selected == isChecked)
                 return;
 
-            if (isChecked)
-                selenium.Check(locator);
-            else
-                selenium.Uncheck(locator);
+            element.Click();
+
+            if (element.Selected != isChecked)
+                throw new InvalidOperationException();
         }
 
-        public static void ConsumeConfirmation(this ISelenium selenium)
+        public static bool IsAlertPresent(this RemoteWebDriver selenium)
         {
-            selenium.Wait(() => selenium.IsConfirmationPresent(), () => "confirmation present");
-            selenium.GetConfirmation();
+            try
+            {
+                selenium.SwitchTo().Alert();
+                return true;
+            }
+            catch (NoAlertPresentException e)
+            {
+                return false;
+            }
         }
 
-
-        public static void ConsumeAlert(this ISelenium selenium)
+        public static void ConsumeAlert(this RemoteWebDriver selenium)
         {
-            selenium.Wait(() => selenium.IsAlertPresent(), () => "alert present");
-            selenium.GetAlert();
+            selenium.Wait(() => selenium.SwitchTo().Alert()).Accept();
         }
-     
+
+        public static string CssSelector(this By by)
+        {
+            string str = by.ToString();
+
+            var after = str.After(": ");
+            switch (str.Before(":"))
+            {
+                case "By.CssSelector": return after;
+                case "By.Id": return "#" + after;
+                case "By.Name": return "[name=" + after + "]";
+                default: throw new InvalidOperationException("Impossible to combine: " + str);
+            }
+        }
+
+        public static By CombineCss(this By by, string cssSelectorSuffix)
+        {
+            return By.CssSelector(by.CssSelector() + cssSelectorSuffix);
+        }
+
+        public static SelectElement SelectElement(this IWebElement element)
+        {
+            return new SelectElement(element);
+        }
+
+        public static void SelectByPredicate(this SelectElement element, Func<IWebElement, bool> predicate)
+        {
+            element.AllSelectedOptions.SingleEx(predicate).Click();
+        }
+
+        public static void ContextClick(this IWebElement element)
+        {
+            //Astronautical architects turn back to Houston...
+            ((RemoteWebDriver)((RemoteWebElement)element).WrappedDriver).Mouse.ContextClick(((ILocatable)element).Coordinates);
+        }
+
+        public static void DoubleClick(this IWebElement element)
+        {
+            //Astronautical architects turn back to Houston...
+            ((RemoteWebDriver)((RemoteWebElement)element).WrappedDriver).Mouse.DoubleClick(((ILocatable)element).Coordinates);
+        }
     }
 }

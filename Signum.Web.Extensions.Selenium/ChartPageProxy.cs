@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Web.Selenium;
@@ -11,7 +12,7 @@ namespace Signum.Web.Selenium
 {
     public class ChartPageProxy : IDisposable
     {
-        public ISelenium Selenium { get; private set; }
+        public RemoteWebDriver Selenium { get; private set; }
 
         public ResultTableProxy Results { get ; private set; }
 
@@ -22,95 +23,96 @@ namespace Signum.Web.Selenium
             return new QueryTokenBuilderProxy(this.Selenium, "Columns_{0}_Token_".FormatWith(index)); 
         }
 
-        public ChartPageProxy(ISelenium selenium)
+        public ChartPageProxy(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
             this.Results = new ResultTableProxy(selenium, null, a => a(), hasDataEntity: false);
             this.Filters = new FiltersProxy(selenium, null); 
         }
 
-        public string DrawButtonLocator
+        public By DrawButtonLocator
         {
-            get { return "jq=#qbDraw"; }
+            get { return By.CssSelector("#qbDraw"); }
         }
 
         public void Draw()
         {
-            Selenium.Click(DrawButtonLocator); 
+            Selenium.FindElement(DrawButtonLocator).Click(); 
         }
 
-      
-
-        public string DataTabLocator
+        public By DataTabLocator
         {
-            get { return "jq=a[href='#sfChartData']"; }
+            get { return By.CssSelector("a[href='#sfChartData']"); }
         }
 
         public void DataTab()
         {
-            Selenium.Click(DataTabLocator);
+            Selenium.FindElement(DataTabLocator).Click();
             Selenium.WaitElementPresent(Results.ResultTableLocator);
         }
 
-        public string ChartTabLocator
+        public By ChartTabLocator
         {
-            get { return "jq=a[href='#sfChartContainer']"; }
+            get { return By.CssSelector("a[href='#sfChartContainer']"); }
         }
 
         public void ChartTab()
         {
-            Selenium.Click(ChartTabLocator);
+            Selenium.FindElement(ChartTabLocator).Click();
             Selenium.WaitElementPresent(ChartContianerLocator);
         }
 
-        public string ChartContianerLocator
+        public By ChartContianerLocator
         {
-            get { return "jq=#sf-chart-container"; }
+            get { return By.CssSelector("#sf-chart-container"); }
         }
 
-        public string MenuOptionLocator(string menuId, string optionId)
+        public By MenuOptionLocator(string menuId, string optionId)
         {
-            return "jq=a#{0}".FormatWith(optionId);
+            return By.CssSelector("a#{0}".FormatWith(optionId));
         }
 
-        public string MenuOptionLocatorByAttr(string menuId, string optionLocator)
+        public By MenuOptionLocatorByAttr(string menuId, string optionLocator)
         {
-            return "jq=a[{0}]".FormatWith(optionLocator);
+            return By.CssSelector("a[{0}]".FormatWith(optionLocator));
         }
 
         public NormalPage<UserChartEntity> NewUserChart()
         {
-            Selenium.MouseUp(MenuOptionLocator("tmUserCharts", "qbUserChartNew"));
-            Selenium.WaitForPageToLoad();
-            return new NormalPage<UserChartEntity>(Selenium); 
+            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartNew")).Click();
+            return new NormalPage<UserChartEntity>(Selenium).WaitLoaded(); 
         }
 
         public void SelectUserChart(string userChartName)
         {
-            Selenium.Click(MenuOptionLocatorByAttr("tmUserCharts", "title=" + userChartName));
-            Selenium.WaitForPageToLoad();
+            Selenium.FindElement(MenuOptionLocatorByAttr("tmUserCharts", "title=" + userChartName)).Click();
+            this.WaitLoaded();
         }
 
         public NormalPage<UserChartEntity> EditUserChart()
         {
-            Selenium.Click(MenuOptionLocator("tmUserCharts", "qbUserChartEdit"));
-            Selenium.WaitForPageToLoad();
-            return new NormalPage<UserChartEntity>(Selenium); 
+            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartEdit"));
+            return new NormalPage<UserChartEntity>(Selenium).WaitLoaded(); 
         }
 
         public void Dispose()
         {
         }
 
+
+        public ChartPageProxy WaitLoaded()
+        {
+            this.Selenium.WaitElementPresent(DrawButtonLocator);
+            return this;
+        }
     }
 
     public static class SearchControlChartExtensions
     {
         public static ChartPageProxy OpenChart(this SearchControlProxy searchControl)
         {
-            searchControl.Selenium.MouseUp("jq=#qbChartNew");
-            searchControl.Selenium.WaitForPageToLoad();
-            return new ChartPageProxy(searchControl.Selenium);
+            searchControl.Selenium.FindElement(By.CssSelector("#qbChartNew")).Click();
+            return new ChartPageProxy(searchControl.Selenium).WaitLoaded();
         }
     }
 }
