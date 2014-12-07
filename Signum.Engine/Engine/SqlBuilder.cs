@@ -21,7 +21,7 @@ namespace Signum.Engine
         public static SqlPreCommand CreateTableSql(ITable t)
         {
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(
-                t.Name, 
+                t.Name,
                 t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToString(",\r\n").Indent(2)));
         }
 
@@ -50,7 +50,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            string defaulltComment = column.Default == null && !column.Nullable && !column.Identity ? 
+            string defaulltComment = column.Default == null && !column.Nullable && !column.Identity ?
                 " -- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : "";
 
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), defaulltComment));
@@ -224,7 +224,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
-            if(!object.Equals(table.Name.Schema.Database, foreignTable.Name.Schema.Database))
+            if (!object.Equals(table.Name.Schema.Database, foreignTable.Name.Schema.Database))
                 return null;
 
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".Formato(
@@ -248,7 +248,7 @@ namespace Signum.Engine
         public static SqlPreCommandSimple SP_RENAME(DatabaseName database, string oldName, string newName, string objectType)
         {
             return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3}".Formato(
-                database == null ? null: (new SchemaName(database, "dbo").ToString() + "."),
+                database == null ? null : (new SchemaName(database, "dbo").ToString() + "."),
                 oldName,
                 newName,
                 objectType == null ? null : ", '{0}'".Formato(objectType)
@@ -313,6 +313,16 @@ FROM {1} as [table]".Formato(
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
                 tableName, value ? "ON" : "OFF"));
+        }
+
+        public static SqlPreCommandSimple SetSingleUser(string databaseName)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".Formato(databaseName));
+        }
+
+        public static SqlPreCommandSimple SetMultiUser(string databaseName)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".Formato(databaseName));
         }
 
         public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
@@ -420,6 +430,6 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape() + "." + s.StatsName.SqlEscape(), ",\r\n"));
         }
 
-     
+
     }
 }
