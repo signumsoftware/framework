@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,26 +26,33 @@ namespace Signum.Web.Selenium
             this.WaitVisible();
         }
 
-        public By PopupVisibleLocator
+        public By PopupLocator
         {
-            get { return By.CssSelector("#{0}_panelPopup:visible".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix)); }
         }
 
         public By CloseButtonLocator
         {
-            get { return By.CssSelector("#{0}_panelPopup:visible button.close, #{0}_panelPopup:visible #{0}_btnCancel".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_panelPopup button.close, #{0}_panelPopup #{0}_btnCancel".FormatWith(Prefix)); }
         }
 
         public bool AvoidClose { get; set; }
 
+        [DebuggerStepThrough]
         public virtual void Dispose()
         {
             if (!AvoidClose)
             {
-                if (Selenium.IsElementPresent(CloseButtonLocator))
+                try
+                {
                     Selenium.FindElement(CloseButtonLocator).Click();
+                }
+                catch (ElementNotVisibleException)
+                {
+                    
+                }
 
-                Selenium.WaitElementDisapear(PopupVisibleLocator);
+                Selenium.WaitElementNotVisible(PopupLocator);
             }
 
             if (Disposing != null)
@@ -66,7 +74,7 @@ namespace Signum.Web.Selenium
         public void OkWaitSubmit()
         {
             Selenium.FindElement(OkButtonLocator).Click();
-            Selenium.WaitElementDisapear(OkButtonLocator);
+            Selenium.WaitElementNotPresent(OkButtonLocator);
             this.Disposing = null;
         }
 
@@ -91,13 +99,13 @@ namespace Signum.Web.Selenium
         public void OkWaitClosed()
         {
             Selenium.FindElement(OkButtonLocator).Click();
-            Selenium.WaitElementDisapear(PopupVisibleLocator);
+            Selenium.WaitElementNotVisible(PopupLocator);
             this.OkPressed = true;
         }
 
         public static bool IsPopupVisible(RemoteWebDriver selenium, string prefix)
         {
-            return selenium.IsElementPresent(By.CssSelector("#{0}.modal.fade.in:visible".FormatWith(PopupId(prefix))));
+            return selenium.IsElementVisible(By.CssSelector("#{0}.modal.fade.in".FormatWith(PopupId(prefix))));
         }
 
         public static string PopupId(string prefix)
@@ -129,7 +137,7 @@ namespace Signum.Web.Selenium
 
         public static bool IsChooser(RemoteWebDriver selenium, string prefix)
         {
-            return selenium.IsElementPresent(By.CssSelector("#{0}:visible".FormatWith(PopupId(prefix)) + " .sf-chooser-button"));
+            return selenium.IsElementVisible(By.CssSelector("#{0}".FormatWith(PopupId(prefix)) + " .sf-chooser-button"));
         }
 
         public static void ChooseButton(RemoteWebDriver Selenium, string prefix, Type type)
@@ -194,7 +202,7 @@ namespace Signum.Web.Selenium
 
             Selenium.ConsumeAlert();
 
-            Selenium.WaitElementDisapear(PopupVisibleLocator);
+            Selenium.WaitElementNotVisible(PopupLocator);
         }
 
         public override void Dispose()
@@ -204,10 +212,10 @@ namespace Signum.Web.Selenium
                 string confirmationMessage;
                 Selenium.Wait(() =>
                 {
-                    if (!Selenium.IsElementPresent(PopupVisibleLocator))
+                    if (!Selenium.IsElementVisible(PopupLocator))
                         return true;
 
-                    if (Selenium.IsElementPresent(CloseButtonLocator))
+                    if (Selenium.IsElementVisible(CloseButtonLocator))
                     {
                         try
                         {
@@ -237,15 +245,15 @@ namespace Signum.Web.Selenium
 
         public RuntimeInfoProxy RuntimeInfo()
         {
-            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("window.$('#{0}_divMainControl').data('runtimeinfo')".FormatWith(Prefix)));
+            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("return $('#{0}_divMainControl').data('runtimeinfo')".FormatWith(Prefix)));
         }
 
         public string EntityState()
         {
-            if ((int)Selenium.ExecuteScript("window.$('#{0}_sfEntityState').length".FormatWith(Prefix)) == 0)
+            if ((long)Selenium.ExecuteScript("return $('#{0}_sfEntityState').length".FormatWith(Prefix)) == 0)
                 return null;
 
-            return (string)Selenium.ExecuteScript("window.$('#{0}_sfEntityState')[0].value".FormatWith(Prefix));
+            return (string)Selenium.ExecuteScript("return $('#{0}_sfEntityState')[0].value".FormatWith(Prefix));
         }
 
         public bool HasId()

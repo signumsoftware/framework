@@ -29,7 +29,7 @@ namespace Signum.Web.Selenium
 
         public static By ButtonLocator(this IEntityButtonContainer container, string buttonId)
         {
-            return By.CssSelector(container.ContainerLocator() + " #" + "_".CombineIfNotEmpty(container.Prefix, buttonId));
+            return container.ContainerLocator().CombineCss(" #" + "_".CombineIfNotEmpty(container.Prefix, buttonId));
         }
 
         public static By OperationLocator<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -71,7 +71,12 @@ namespace Signum.Web.Selenium
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
         {
-            container.Selenium.FindElement(container.ButtonLocator(idButton).CombineCss(":not([disabled])")).Click();
+            var button = container.Selenium.FindElement(container.ButtonLocator(idButton));
+
+            if(!button.Enabled)
+                throw new InvalidOperationException("Button {0} is not enabled".FormatWith(idButton));
+
+            button.Click();
         }
 
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -147,7 +152,7 @@ namespace Signum.Web.Selenium
 
             var popup = new PopupControl<T>(container.Selenium, prefix);
 
-            container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
+            container.Selenium.WaitElementPresent(popup.PopupLocator);
 
             return popup;
         }
@@ -160,7 +165,7 @@ namespace Signum.Web.Selenium
 
             var popup = new PopupControl<T>(container.Selenium, "New");
 
-            container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
+            container.Selenium.WaitElementPresent(popup.PopupLocator);
 
             return popup;
         }
@@ -174,7 +179,7 @@ namespace Signum.Web.Selenium
         {
             try
             {
-                return ((string)container.Selenium.ExecuteScript("window && window.$ && window.$('#" + container.PrefixUnderscore() + "divMainControl').attr('data-test-ticks')")).ToLong();
+                return ((string)container.Selenium.ExecuteScript("return $ && $('#" + container.PrefixUnderscore() + "divMainControl').attr('data-test-ticks')")).ToLong();
             }
             catch
             {

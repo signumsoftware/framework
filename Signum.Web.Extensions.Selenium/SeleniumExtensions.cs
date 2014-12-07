@@ -9,6 +9,8 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
@@ -32,11 +34,12 @@ namespace Signum.Web.Selenium
         {
             try
             {
-                var wait = new DefaultWait<string>(null)
+                var wait = new DefaultWait<string>("")
                 {
                     Timeout = timeout ?? DefaultTimeout,
                     PollingInterval = DefaultPoolingInterval
                 };
+                wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
                 
                 return wait.Until(_ => condition());
             }
@@ -49,16 +52,15 @@ namespace Signum.Web.Selenium
             }
         }
 
+        public static IWebElement TryFindElement(this RemoteWebDriver selenium, By locator)
+        {
+            return selenium.FindElements(locator).FirstOrDefault();
+        }
+
         public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElement(locator),
                 actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
-        }
-
-        public static void WaitElementDisapear(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
-        {
-            selenium.Wait(() => !selenium.IsElementPresent(locator), 
-                actionDescription ?? (Func<string>)(() => "{0} to disapear".FormatWith(locator)), timeout);
         }
 
         public static void AssertElementPresent(this RemoteWebDriver selenium, By locator)
@@ -72,16 +74,68 @@ namespace Signum.Web.Selenium
             return selenium.FindElements(locator).Any();
         }
 
+        public static void WaitElementNotPresent(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
+        {
+            selenium.Wait(() => !selenium.IsElementPresent(locator),
+                actionDescription ?? (Func<string>)(() => "{0} to be not present".FormatWith(locator)), timeout);
+        }
+
         public static void AssertElementNotPresent(this RemoteWebDriver selenium, By locator)
         {
             if (selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
-        public static void SetChecked(this RemoteWebDriver selenium, By locator, bool isChecked)
-        {
-            var element = selenium.FindElement(locator);
 
+        public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
+        {
+            return selenium.Wait(() => { var result = selenium.FindElement(locator); return result.Displayed ? result : null; },
+                actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
+        }
+
+        public static void AssertElementVisible(this RemoteWebDriver selenium, By locator)
+        {
+            var elements = selenium.FindElements(locator);
+
+            if (!elements.Any())
+                throw new InvalidOperationException("{0} not found".FormatWith(locator));
+
+            if (!elements.First().Displayed)
+                throw new InvalidOperationException("{0} found but not visible".FormatWith(locator));
+        }
+
+        public static bool IsElementVisible(this RemoteWebDriver selenium, By locator)
+        {
+            var elements = selenium.FindElements(locator);
+            try
+            {
+                return elements.Any() && elements.First().Displayed;
+            }
+            catch (StaleElementReferenceException)
+            {
+                return false;
+            }
+        }
+
+        public static void WaitElementNotVisible(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
+        {
+            selenium.Wait(() => !selenium.IsElementVisible(locator),
+                actionDescription ?? (Func<string>)(() => "{0} to be not visible".FormatWith(locator)), timeout);
+        }
+
+        public static void AssertElementNotVisible(this RemoteWebDriver selenium, By locator)
+        {
+            if (selenium.IsElementVisible(locator))
+                throw new InvalidOperationException("{0} is visible".FormatWith(locator));
+        }
+
+        public static RemoteWebDriver GetDriver(this IWebElement element)
+        {
+            return (RemoteWebDriver)((IWrapsDriver)element).WrappedDriver;
+        }
+
+        public static void SetChecked(this IWebElement element, bool isChecked)
+        {
             if (element.Selected == isChecked)
                 return;
 
@@ -91,6 +145,7 @@ namespace Signum.Web.Selenium
                 throw new InvalidOperationException();
         }
 
+        [DebuggerStepThrough]
         public static bool IsAlertPresent(this RemoteWebDriver selenium)
         {
             try
@@ -133,21 +188,57 @@ namespace Signum.Web.Selenium
             return new SelectElement(element);
         }
 
+        public static string GetID(this IWebElement element)
+        {
+            return element.GetAttribute("id");
+        }
+
+        public static IEnumerable<string> GetClasses(this IWebElement element)
+        {
+            return element.GetAttribute("class").Split(' ');
+        }
+
+        public static bool HasClass(this IWebElement element, string className)
+        {
+            return element.GetClasses().Contains(className);
+        }
+
+        public static bool HasClass(this IWebElement element, params string[] classNames)
+        {
+            var classes = element.GetClasses();
+            return classNames.All(classes.Contains);
+        }
+
+        public static IWebElement GetParent(this IWebElement e)
+        {
+            return e.FindElement(By.XPath(".."));
+        }
+
         public static void SelectByPredicate(this SelectElement element, Func<IWebElement, bool> predicate)
         {
-            element.AllSelectedOptions.SingleEx(predicate).Click();
+            element.Options.SingleEx(predicate).Click();
         }
 
         public static void ContextClick(this IWebElement element)
         {
-            //Astronautical architects turn back to Houston...
-            ((RemoteWebDriver)((RemoteWebElement)element).WrappedDriver).Mouse.ContextClick(((ILocatable)element).Coordinates);
+            Actions builder = new Actions(element.GetDriver());
+            //use ContextClick method to open context menu of e1
+            builder.MoveToElement(element).ContextClick(element).Build().Perform();
         }
 
         public static void DoubleClick(this IWebElement element)
         {
             //Astronautical architects turn back to Houston...
-            ((RemoteWebDriver)((RemoteWebElement)element).WrappedDriver).Mouse.DoubleClick(((ILocatable)element).Coordinates);
+            element.GetDriver().Mouse.DoubleClick(((ILocatable)element).Coordinates);
+        }
+
+        public static void SafeSendKeys(this IWebElement element, string text)
+        {
+            while(element.GetAttribute("value").Length > 0)
+                element.SendKeys(Keys.Backspace);
+            element.SendKeys(text);
+            Thread.Sleep(0);
+            element.GetDriver().Wait(() => element.GetAttribute("value") == text);
         }
     }
 }

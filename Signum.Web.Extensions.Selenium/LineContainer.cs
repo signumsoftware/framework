@@ -233,7 +233,7 @@ namespace Signum.Web.Selenium
         {
             var fullTabId = lineContainer.PrefixUnderscore() + tabId;
             lineContainer.Selenium.FindElement(By.CssSelector("a[href='#{0}']".FormatWith(fullTabId))).Click();
-            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementPresent(By.CssSelector("#{0}:visible".FormatWith(fullTabId))));
+            lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementVisible(By.Id(fullTabId)));
 
         }
 
@@ -248,7 +248,7 @@ namespace Signum.Web.Selenium
         public static string[] Errors(this ILineContainer lineContainer)
         {
             var result = (string)lineContainer.Selenium
-                .ExecuteScript("window.$('#" + lineContainer.PrefixUnderscore() + "sfGlobalValidationSummary > ul > li').toArray().map(function(e){return $(e).text()}).join('\\r\\n');");
+                .ExecuteScript("return $('#" + lineContainer.PrefixUnderscore() + "sfGlobalValidationSummary > ul > li').toArray().map(function(e){return $(e).text()}).join('\\r\\n');");
 
             return result.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
         }
@@ -257,7 +257,7 @@ namespace Signum.Web.Selenium
         {
             string query = QueryUtils.GetQueryUniqueKey(queryName);
 
-            var prefix = (string)lineContainer.Selenium.ExecuteScript("window.$('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
+            var prefix = (string)lineContainer.Selenium.ExecuteScript("return $('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
 
             return new SearchControlProxy(lineContainer.Selenium, prefix);
         }
@@ -322,12 +322,12 @@ namespace Signum.Web.Selenium
 
         public string Title()
         {
-            return (string)Selenium.ExecuteScript("window.$('#divMainPage > h3 > .sf-entity-title').html()");
+            return (string)Selenium.ExecuteScript("return $('#divMainPage > h3 > .sf-entity-title').html()");
         }
 
         public RuntimeInfoProxy RuntimeInfo()
         {
-            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("window.$('#sfRuntimeInfo').val()"));
+            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("return $('#sfRuntimeInfo').val()"));
         }
 
         public T RetrieveEntity()
@@ -338,10 +338,10 @@ namespace Signum.Web.Selenium
 
         public string EntityState()
         {
-            if ((int)Selenium.ExecuteScript("window.$('#sfEntityState').length".FormatWith(Prefix)) == 0)
+            if ((long)Selenium.ExecuteScript("return $('#sfEntityState').length".FormatWith(Prefix)) == 0)
                 return null;
 
-            return (string)Selenium.ExecuteScript("window.$('#sfEntityState')[0].value".FormatWith(Prefix));
+            return (string)Selenium.ExecuteScript("return $('#sfEntityState')[0].value".FormatWith(Prefix));
         }
     }
 }

@@ -48,42 +48,51 @@ namespace Signum.Web.Selenium
         {
             get
             {
-                if (Selenium.IsElementPresent(By.CssSelector("input:checkbox#{0}".FormatWith(Prefix))))
-                    return Selenium.FindElement(By.Id(Prefix)).Selected.ToString();
+                
+                IWebElement element =  Selenium.TryFindElement(By.Id(Prefix));
+                if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
+                    return element.Selected.ToString();
 
-                if (Selenium.IsElementPresent(By.CssSelector("[name={0}]".FormatWith(Prefix))))
-                    return Selenium.FindElement(By.Id(Prefix)).GetAttribute("value");
+                IWebElement namedElement = Selenium.TryFindElement(By.Name(Prefix));
+                if(namedElement != null)
+                    return namedElement.GetAttribute("value");
 
-                if (Selenium.IsElementPresent(By.CssSelector("input[name={0}_Date]".FormatWith(Prefix))) &&
-                    Selenium.IsElementPresent(By.CssSelector("input[name={0}_Time]".FormatWith(Prefix))))
-                    return Selenium.FindElement(By.Id(Prefix + "_Date")).GetAttribute("value") + " " +
-                        Selenium.FindElement(By.Id(Prefix + "_Time")).GetAttribute("value");
+                IWebElement date = Selenium.TryFindElement(By.Name(Prefix + "_Date"));
+                IWebElement time = Selenium.TryFindElement(By.Name(Prefix + "_Time"));
 
-                if (Selenium.IsElementPresent(By.Id(Prefix)))
-                    return Selenium.FindElement(By.Id(Prefix)).Text;
+                if (date != null && time != null)
+                    return date.GetAttribute("value") + " " + time.GetAttribute("value");
+
+                if (element != null)
+                    return element.Text;
             
                 throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
             }
 
             set
             {
-                if (Selenium.IsElementPresent(By.CssSelector("input:checkbox#{0}".FormatWith(Prefix))))
+                IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
+                if (element != null)
                 {
-                    Selenium.SetChecked(By.Id(Prefix), bool.Parse(value));
+                    if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
+                    {
+                        element.SetChecked(bool.Parse(value));
+                    }
+                    else if (element.GetParent().HasClass("input-group", "date"))
+                    {
+                        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value));
+                    }
+                    if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.tie")).Any())
+                    {
+                        Selenium.ExecuteScript("$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
+                        Selenium.ExecuteScript("$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
+                    }
                 }
-                else if (Selenium.IsElementPresent(By.CssSelector("div.input-group.date>#{0}".FormatWith(Prefix))))
+
+                var byName = Selenium.TryFindElement(By.Name(Prefix));
+                if (byName != null)
                 {
-                    Selenium.ExecuteScript("window.$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value));
-                }
-                else if (Selenium.IsElementPresent(By.CssSelector("#{0} > div.date".FormatWith(Prefix))) &&
-                    Selenium.IsElementPresent(By.CssSelector("#{0} > div.time".FormatWith(Prefix))))
-                {
-                    Selenium.ExecuteScript("window.$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
-                    Selenium.ExecuteScript("window.$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
-                }
-                else if (Selenium.IsElementPresent(By.CssSelector("[name={0}]".FormatWith(Prefix))))
-                {
-                    Selenium.FindElement(By.Id(Prefix)).SendKeys(value);
+                    byName.SafeSendKeys(value);
                 }
                 else
                     throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
@@ -124,7 +133,7 @@ namespace Signum.Web.Selenium
 
         public By CreateLocator
         {
-            get { return By.CssSelector("#{0}_btnCreate:visible".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_btnCreate".FormatWith(Prefix)); }
         }
 
         protected void CreateEmbedded<T>(bool mlist)
@@ -167,7 +176,7 @@ namespace Signum.Web.Selenium
 
         public By ViewLocator
         {
-            get { return By.CssSelector("#{0}_btnView:visible".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_btnView".FormatWith(Prefix)); }
         }
 
         protected PopupControl<T> ViewPopup<T>(int? index) where T : ModifiableEntity
@@ -185,12 +194,12 @@ namespace Signum.Web.Selenium
 
         public By FindLocator
         {
-            get { return By.CssSelector("#{0}_btnFind:visible".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_btnFind".FormatWith(Prefix)); }
         }
 
         public By RemoveLocator
         {
-            get { return By.CssSelector("#{0}_btnRemove:visible".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_btnRemove".FormatWith(Prefix)); }
         }
 
         public void Remove()
@@ -252,7 +261,7 @@ namespace Signum.Web.Selenium
 
         public string GetChanges()
         {
-            return (string)Selenium.ExecuteScript("window.$('#{0}').attr('changes')".FormatWith(Prefix));
+            return (string)Selenium.ExecuteScript("return $('#{0}').attr('changes')".FormatWith(Prefix));
         }
 
 
@@ -270,13 +279,13 @@ namespace Signum.Web.Selenium
         {
             WaitChanges(() =>
             {
-                Selenium.FindElement(autoCompleteLocator).SendKeys(lite.Id.ToString());
+                Selenium.FindElement(autoCompleteLocator).SafeSendKeys(lite.Id.ToString());
                 //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
-                var listLocator = By.CssSelector("ul.typeahead.dropdown-menu:visible");
+                var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
 
-                Selenium.WaitElementPresent(listLocator);
-                By itemLocator = listLocator.CombineCss(" span[data-type='{0}'][data-id={1}]".FormatWith(TypeLogic.GetCleanName(lite.EntityType), lite.Id));
+                Selenium.WaitElementVisible(listLocator);
+                By itemLocator = listLocator.CombineCss(" span[data-type='{0}'][data-id='{1}']".FormatWith(TypeLogic.GetCleanName(lite.EntityType), lite.Id));
 
                 Selenium.FindElement(itemLocator).Click();
 
@@ -304,7 +313,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity()
         {
-            return Selenium.IsElementPresent(LinkLocator.CombineCss(":visible"));
+            return Selenium.IsElementVisible(LinkLocator);
         }
 
         public Lite<IEntity> LiteValue
@@ -422,7 +431,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity()
         {
-            return Selenium.IsElementPresent(DivSelector.CombineCss(" *:first"));
+            return Selenium.IsElementPresent(DivSelector.CombineCss(" *:first-child"));
         }
 
         public Lite<IEntity> Lite
@@ -486,15 +495,8 @@ namespace Signum.Web.Selenium
         public void Select(int index)
         {
             var selectElement = Selenium.FindElement(ListLocator).SelectElement();
-            selectElement.DeselectAll();
-
-            var id = "{0}_{1}_sfToStr".FormatWith(Prefix, index);
-            selectElement.SelectByPredicate(a => a.GetAttribute("id") == id);
-        }
-
-        public void AddSelection(int index)
-        {
-            var selectElement = Selenium.FindElement(ListLocator).SelectElement();
+            if (selectElement.IsMultiple)
+                selectElement.DeselectAll();
 
             var id = "{0}_{1}_sfToStr".FormatWith(Prefix, index);
             selectElement.SelectByPredicate(a => a.GetAttribute("id") == id);
@@ -517,12 +519,12 @@ namespace Signum.Web.Selenium
 
         public int ItemsCount()
         {
-            return (int)Selenium.ExecuteScript("window.$('#{0}_sfList option').length".FormatWith(Prefix));
+            return (int)(long)Selenium.ExecuteScript("return .$('#{0}_sfList option').length".FormatWith(Prefix));
         }
 
         public override int? NewIndex()
         {
-            string result = (string)Selenium.ExecuteScript("window.$('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
+            string result = (string)Selenium.ExecuteScript("return $('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -559,7 +561,7 @@ namespace Signum.Web.Selenium
 
         public bool HasDetailEntity()
         {
-            return Selenium.IsElementPresent(DetailsDivSelector.CombineCss(":parent"));
+            return Selenium.FindElements(DetailsDivSelector.CombineCss(" *")).Any();
         }
 
         public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
@@ -617,12 +619,12 @@ namespace Signum.Web.Selenium
 
         public virtual int ItemsCount()
         {
-            return (int)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer fieldset').length".FormatWith(ItemsContainerLocator));
+            return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer fieldset').length".FormatWith(ItemsContainerLocator));
         }
 
         public override int? NewIndex()
         {
-            string result = (string)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
+            string result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -681,12 +683,12 @@ namespace Signum.Web.Selenium
 
         public override int ItemsCount()
         {
-            return (int)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer li').length".FormatWith(ItemsContainerLocator));
+            return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li').length".FormatWith(ItemsContainerLocator));
         }
 
         public override int? NewIndex()
         {
-            string result = (string)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
+            string result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -731,12 +733,12 @@ namespace Signum.Web.Selenium
 
         public int ItemsCount()
         {
-            return (int)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer li.sf-strip-element').length".FormatWith(ItemsContainerLocator));
+            return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li.sf-strip-element').length".FormatWith(ItemsContainerLocator));
         }
 
         public override int? NewIndex()
         {
-            var result = (string)Selenium.ExecuteScript("window.$('#{0}_sfItemsContainer li.sf-strip-element').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
+            var result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li.sf-strip-element').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
 
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
@@ -795,12 +797,12 @@ namespace Signum.Web.Selenium
 
         public void SetPath(string path)
         {
-            Selenium.WaitElementPresent(By.CssSelector("#{0}_DivNew .sf-file-drop:visible".FormatWith(Prefix)));
-            Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SendKeys(path);
+            Selenium.WaitElementVisible(By.CssSelector("#{0}_DivNew .sf-file-drop".FormatWith(Prefix)));
+            Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SafeSendKeys(path);
             //Selenium.FireEvent("{0}_sfFile".FormatWith(Prefix), "change");
             Selenium.Wait(() =>
-                Selenium.IsElementPresent(By.CssSelector("#{0}_sfLink:visible".FormatWith(Prefix))) ||
-                Selenium.IsElementPresent(By.CssSelector("#{0}_sfToStr:visible".FormatWith(Prefix))));
+                Selenium.IsElementVisible(By.CssSelector("#{0}_sfLink".FormatWith(Prefix))) ||
+                Selenium.IsElementVisible(By.CssSelector("#{0}_sfToStr".FormatWith(Prefix))));
         }
     }
 }
