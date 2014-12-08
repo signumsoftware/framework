@@ -35,7 +35,7 @@ namespace Signum.Engine.Files
             return WebDownloadExpression.Evaluate(fp);
         }
 
-        public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> fileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
+        public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> FileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -48,7 +48,7 @@ namespace Signum.Engine.Files
             {
                 sb.Include<FilePathEntity>();
 
-                SymbolLogic<FileTypeSymbol>.Start(sb, () => fileTypes.Keys.ToHashSet());
+                SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
@@ -182,7 +182,7 @@ namespace Signum.Engine.Files
             {
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
-                    FileTypeAlgorithm alg = fileTypes[fp.FileType];
+                    FileTypeAlgorithm alg = FileTypes[fp.FileType];
                     string sufix = alg.CalculateSufix(fp);
                     if (!sufix.HasText())
                         throw new InvalidOperationException("Sufix not set");
@@ -244,7 +244,7 @@ namespace Signum.Engine.Files
 
         public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
         {
-            fileTypes.Add(fileTypeSymbol, algorithm);
+            FileTypes.Add(fileTypeSymbol, algorithm);
         }
 
         public static byte[] GetByteArray(this FilePathEntity fp)
