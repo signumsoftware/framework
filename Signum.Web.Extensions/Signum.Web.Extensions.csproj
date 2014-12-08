@@ -51,6 +51,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -984,6 +988,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Word\Controllers\WordController.cs" />
+    <Compile Include="Word\WordClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Alerts\Scripts\Alerts.ts" />

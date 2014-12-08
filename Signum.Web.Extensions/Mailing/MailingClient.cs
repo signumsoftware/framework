@@ -212,13 +212,13 @@ namespace Signum.Web.Mailing
         static string CanIf(QueryToken token)
         {
             if (token == null)
-                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+                return TemplateTokenMessage.NoColumnSelected.NiceToString();
 
             if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
-                return EmailTemplateCanAddTokenMessage.YouCannotAddIfBlocksOnCollectionFields.NiceToString();
+                return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.NiceToString();
 
             if (token.HasAllOrAny())
-                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
+                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
 
             return null;
         }
@@ -226,16 +226,16 @@ namespace Signum.Web.Mailing
         static string CanForeach(QueryToken token)
         {
             if (token == null)
-                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+                return TemplateTokenMessage.NoColumnSelected.NiceToString();
 
             if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
-                return EmailTemplateCanAddTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.NiceToString();
+                return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.NiceToString();
 
             if (token.Key != "Element" || token.Parent == null || token.Parent.Type.ElementType() == null)
-                return EmailTemplateCanAddTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.NiceToString();
+                return TemplateTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.NiceToString();
 
             if (token.HasAllOrAny())
-                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
+                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
 
             return null; 
         }
@@ -243,10 +243,10 @@ namespace Signum.Web.Mailing
         static string CanAny(QueryToken token)
         {
             if (token == null)
-                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+                return TemplateTokenMessage.NoColumnSelected.NiceToString();
 
             if (token.HasAllOrAny())
-                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
+                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
 
             return null;
         }

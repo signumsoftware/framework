@@ -103,13 +103,18 @@ namespace Signum.Entities.Word
             set { Set(ref template, value); }
         }
 
+        FileTypeSymbol fileType = WordReportFileType.DefaultWordReport;
+        public FileTypeSymbol FileType
+        {
+            get { return fileType; }
+            set { Set(ref fileType, value); }
+        }
+
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
-
-        
     }
 
     public static class WordTemplateOperation
@@ -119,6 +124,12 @@ namespace Signum.Entities.Word
         public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
     }
 
+    public static class WordReportFileType
+    {
+        public static readonly FileTypeSymbol DefaultWordReport = new FileTypeSymbol(); 
+        
+    }
+
     public enum WordTemplateMessage
     {
         [Description("Model should be set to use model {0}")]
@@ -126,4 +137,5 @@ namespace Signum.Entities.Word
         [Description("Type {0} does not have a property with name {1}")]
         Type0DoesNotHaveAPropertyWithName1,
     }
+
 }

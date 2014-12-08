@@ -559,7 +559,7 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="Para" />
   </Type>
-  <Type Name="EmailTemplateCanAddTokenMessage">
+  <Type Name="TemplateTokenMessage">
     <Member Name="NoColumnSelected" Description="Ninguna columna seleccionada" />
     <Member Name="YouCannotAddBlocksWithAllOrAny" Description="No puede agregar bloques con 'Todos' o 'Alguno'" />
     <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="No se puede agregar bloques 'If' en campos de colección" />

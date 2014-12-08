@@ -184,6 +184,7 @@
     <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
     <Compile Include="Word\SystemWordTemplateLogic.cs" />
+    <Compile Include="Word\WordReportLogic.cs" />
     <Compile Include="Word\WordTemplateParser.cs" />
     <Compile Include="Word\WordTemplateLogic.cs" />
     <Compile Include="Word\WordTemplateNodes.cs" />

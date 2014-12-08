@@ -374,7 +374,7 @@ namespace Signum.Entities.Mailing
         TokenMustBeA0,
     }
 
-    public enum EmailTemplateCanAddTokenMessage
+    public enum TemplateTokenMessage
     { 
         [Description("No column selected")]
         NoColumnSelected,
