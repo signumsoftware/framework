@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -28,13 +29,55 @@ namespace Signum.Engine.Word
         {
             this.Match = match;
         }
+
+        public override string ToString()
+        {
+            return "Match " + Match.ToString();
+        }
+
+        public override string LocalName
+        {
+            get { return this.GetType().Name; }
+        }
+
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
+        {
+            var tempText = new Text(Match.ToString());
+
+            this.AppendChild(tempText);
+            base.WriteTo(xmlWriter);
+            this.RemoveChild(tempText);
+        }
     }
 
     public abstract class BaseNode : Run
     {
-        public abstract QueryToken GetToken();
+        public BaseNode() { }
+
+        public BaseNode(BaseNode original)
+        {
+            this.SetAttributes(original.GetAttributes().ToList());
+            foreach (var item in original.ChildElements)
+            {
+                this.AppendChild(item.CloneNode(true));
+            }
+        }
+
+        public abstract void FillTokens(List<QueryToken> tokens);
+
+        public override string LocalName
+        {
+            get { return this.GetType().Name; }
+        }
 
         internal protected abstract void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows);
+
+        public override string ToString()
+        {
+            return this.GetType().Name;
+        }
+
+        public abstract override OpenXmlElement CloneNode(bool deep);
     }
 
     public class TokenNode : BaseNode
@@ -59,6 +102,15 @@ namespace Signum.Engine.Word
                 if (error != null)
                     parser.AddError(false, error);
             }
+        }
+
+        internal TokenNode(TokenNode original) : base(original)
+        {
+            this.IsRaw = original.IsRaw;
+            this.Token = original.Token;
+            this.EntityToken = original.EntityToken;
+            this.Format = original.Format;
+            this.Route = original.Route;
         }
 
         static bool IsTranslateInstanceCanditate(QueryToken token)
@@ -89,9 +141,9 @@ namespace Signum.Engine.Word
             return null;
         }
 
-        public override QueryToken GetToken()
+        public override void FillTokens(List<QueryToken> tokens)
         {
-            return this.Token.QueryToken;
+            tokens.Add(this.Token.QueryToken);
         }
 
         internal protected override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -114,6 +166,20 @@ namespace Signum.Engine.Word
 
             this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(text)), this);
         }
+
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
+        {
+            var tempText = new Text(Token.QueryToken.FullKey());
+
+            this.AppendChild(tempText);
+            base.WriteTo(xmlWriter);
+            this.RemoveChild(tempText);
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new TokenNode(this);
+        }
     }
 
     public class DeclareNode : BaseNode
@@ -128,14 +194,23 @@ namespace Signum.Engine.Word
             this.Token = token;
         }
 
+        public DeclareNode(DeclareNode original) : base(original)
+        {
+            this.Token = original.Token;
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new DeclareNode(this);
+        }
+
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
         {
             this.Remove();
-        }
-
-        public override QueryToken GetToken()
-        {
-            return null;
         }
     }
 
@@ -178,9 +253,20 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override QueryToken GetToken()
+        public ModelNode(ModelNode original) : base(original)
         {
-            return null;
+            this.IsRaw = original.IsRaw;
+            this.fieldOrPropertyChain = original.fieldOrPropertyChain;
+            this.members = original.members;
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new ModelNode(this);
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
         }
 
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -210,8 +296,50 @@ namespace Signum.Engine.Word
         }
     }
 
-    public abstract class BlockNode : BaseNode
+    public class BlockNode : BaseNode
     {
+        public BlockNode() { }
+
+        public BlockNode(BlockNode original) : base(original) { }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new BlockNode(this);
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
+            foreach (var item in this.Descendants<BaseNode>().ToList())
+            {
+                item.FillTokens(tokens);
+            }
+        }
+
+        protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
+        {
+            foreach (var item in this.Descendants<BaseNode>().ToList())
+            {
+                item.RenderNode(p, rows);
+            }
+
+            var parent = this.Parent;
+            int index = parent.ChildElements.IndexOf(this);
+            parent.RemoveChild(this);
+  
+            foreach (var item in this.ChildElements.ToList())
+            {
+                item.Remove();
+                parent.InsertAt(item, index++);
+            }   
+        }
+    }
+
+    public abstract class BlockContainerNode : BaseNode
+    {
+        public BlockContainerNode() { }
+
+        public BlockContainerNode(BlockContainerNode original) : base(original) { }
+
         public static string UserString(Type type)
         {
             if (type == typeof(ForeachNode))
@@ -303,7 +431,7 @@ namespace Signum.Engine.Word
             return childs;
         }
 
-        public static void MoveTo(IEnumerable<OpenXmlElement> childs, OpenXmlElement target)
+        public static void MoveTo(IEnumerable<OpenXmlElement> childs, BlockNode target)
         {
             foreach (var c in childs)
             {
@@ -313,47 +441,93 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class ForeachNode : BlockNode
+    public class ForeachNode : BlockContainerNode
     {
         public readonly ParsedToken Token;
 
         public MatchNode ForeachToken;
         public MatchNode EndForeachToken;
 
+        public BlockNode ForeachBlock;
+
         public ForeachNode(ParsedToken token)
         {
             this.Token = token;
+        }
+
+        public ForeachNode(ForeachNode original)
+            : base(original)
+        {
+            this.Token = original.Token;
+            this.ForeachToken = (MatchNode)original.ForeachToken.Try(a => a.CloneNode(true));
+            this.EndForeachToken = (MatchNode)original.EndForeachToken.Try(a => a.CloneNode(true));
+            this.ForeachBlock = (BlockNode)original.ForeachBlock.Try(a => a.CloneNode(true));
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
+            tokens.Add(Token.QueryToken);
+
+            this.ForeachBlock.FillTokens(tokens);
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new ForeachNode(this);
         }
 
         protected internal override void ReplaceBlock()
         {
             OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(ForeachToken, EndForeachToken));
 
-            MoveTo(NodesBetween(pair), this);
+            this.ForeachBlock = new BlockNode();
+            MoveTo(NodesBetween(pair), this.ForeachBlock);
 
             pair.CommonParent.ReplaceChild(this, pair.First);
             pair.Last.Remove();
         }
 
-        public override QueryToken GetToken()
+        public override void WriteTo(XmlWriter xmlWriter)
         {
-            return this.Token.QueryToken;
+            this.AppendChild(this.ForeachBlock);
+
+            base.WriteTo(xmlWriter);
+
+            this.RemoveChild(this.ForeachBlock);
         }
 
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
         {
             var groups = rows.GroupBy(r => r[p.Columns[Token.QueryToken]]).ToList();
             if (groups.Count == 1 && groups[0].Key == null)
-                return;
-
-            foreach (var group in groups)
             {
-                //Block.PrintList(p, group);
+                this.Remove();
+                return;
+            }
+
+            var parent = this.Parent;
+            int index = parent.ChildElements.IndexOf(this);
+            parent.RemoveChild(this);
+
+
+            List<Tuple<BlockNode, IEnumerable<ResultRow>>> tuples = new List<Tuple<BlockNode, IEnumerable<ResultRow>>>();
+            foreach (IEnumerable<ResultRow> group in groups)
+            {
+                var clone = (BlockNode)this.ForeachBlock.CloneNode(true);
+
+                parent.InsertAt(clone, index++);
+
+                tuples.Add(Tuple.Create(clone, group));
+            }
+
+            foreach (var tuple in tuples)
+            {
+                tuple.Item1.RenderNode(p, tuple.Item2);
             }
         }
     }
 
-    public class AnyNode : BlockNode
+    public class AnyNode : BlockContainerNode
     {
         public readonly ParsedToken Token;
         public readonly FilterOperation? Operation;
@@ -363,8 +537,8 @@ namespace Signum.Engine.Word
         public MatchNode NotAnyToken;
         public MatchNode EndAnyToken;
 
-        public OpenXmlElement AnyBlock;
-        public OpenXmlElement NotAnyBlock;
+        public BlockNode AnyBlock;
+        public BlockNode NotAnyBlock;
 
         public AnyNode(ParsedToken token, WordTemplateParser parser)
         {
@@ -393,13 +567,49 @@ namespace Signum.Engine.Word
             }
         }
 
+        public AnyNode(AnyNode original)
+            : base(original)
+        {
+            this.Token = original.Token;
+            this.Operation = original.Operation;
+            this.Value = original.Value;
+
+            this.AnyToken = (MatchNode)original.AnyToken.Try(a => a.CloneNode(true));
+            this.NotAnyToken = (MatchNode)original.NotAnyToken.Try(a => a.CloneNode(true));
+            this.EndAnyToken = (MatchNode)original.EndAnyToken.Try(a => a.CloneNode(true));
+
+            this.AnyBlock = (BlockNode)original.AnyBlock.Try(a => a.CloneNode(true));
+            this.NotAnyBlock = (BlockNode)original.NotAnyBlock.Try(a => a.CloneNode(true));
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new AnyNode(this);
+        }
+
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
+        {
+            this.AppendChild(this.AnyBlock);
+
+            if (this.NotAnyBlock != null)
+                this.AppendChild(this.NotAnyBlock);
+
+            base.WriteTo(xmlWriter);
+
+            if (this.NotAnyBlock != null)
+                this.RemoveChild(this.NotAnyBlock);
+
+            this.RemoveChild(this.AnyBlock);
+        }
+
         protected internal override void ReplaceBlock()
         {
             if (this.NotAnyToken == null)
             {
                 OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, EndAnyToken));
 
-                MoveTo(NodesBetween(pair), this);
+                this.AnyBlock = new BlockNode();
+                MoveTo(NodesBetween(pair), this.AnyBlock);
 
                 pair.CommonParent.ReplaceChild(this, pair.First);
                 pair.Last.Remove();
@@ -412,20 +622,25 @@ namespace Signum.Engine.Word
                 if (pairAny.Last != pairNotAny.First)
                     throw new InvalidOperationException("Unbalanced tokens");
 
-                this.AnyBlock = new Paragraph();
+                this.AnyBlock = new BlockNode();
                 MoveTo(NodesBetween(pairAny), this.AnyBlock);
 
-                this.NotAnyBlock = new Paragraph();
-                MoveTo(NodesBetween(pairAny), this.NotAnyBlock);
+                this.NotAnyBlock = new BlockNode();
+                MoveTo(NodesBetween(pairNotAny), this.NotAnyBlock);
 
                 pairAny.CommonParent.ReplaceChild(this, pairAny.First);
                 pairAny.Last.Remove();
+                pairNotAny.Last.Remove();
             }
         }
 
-        public override QueryToken GetToken()
+        public override void FillTokens(List<QueryToken> tokens)
         {
-            return this.Token.QueryToken;
+            tokens.Add(Token.QueryToken);
+
+            this.AnyBlock.FillTokens(tokens);
+            if (this.NotAnyBlock != null)
+                this.NotAnyBlock.FillTokens(tokens);
         }
 
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -435,17 +650,15 @@ namespace Signum.Engine.Word
             if (filtered.Any())
             {
                 this.Parent.ReplaceChild(this.AnyBlock, this);
-
-                foreach (var item in this.AnyBlock.Descendants<BaseNode>().ToList())
-                    item.RenderNode(p, rows);
+                this.AnyBlock.RenderNode(p, filtered);
             }
             else if (NotAnyBlock != null)
             {
                 this.Parent.ReplaceChild(this.NotAnyBlock, this);
-
-                foreach (var item in this.NotAnyBlock.Descendants<BaseNode>().ToList())
-                    item.RenderNode(p, rows);
+                this.NotAnyBlock.RenderNode(p, filtered);
             }
+            else
+                this.Parent.RemoveChild(this);
         }
 
         private IEnumerable<ResultRow> GetFiltered(WordTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -478,7 +691,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class IfNode : BlockNode
+    public class IfNode : BlockContainerNode
     {
         public readonly ParsedToken Token;
 
@@ -489,8 +702,8 @@ namespace Signum.Engine.Word
         public MatchNode ElseToken;
         public MatchNode EndIfToken;
 
-        public OpenXmlElement IfBlock;
-        public OpenXmlElement ElseBlock;
+        public BlockNode IfBlock;
+        public BlockNode ElseBlock;
         
         internal IfNode(ParsedToken token, WordTemplateParser parser)
         {
@@ -513,13 +726,34 @@ namespace Signum.Engine.Word
             }
         }
 
+        public IfNode(IfNode original)
+            : base(original)
+        {
+            this.Token = original.Token;
+            this.Operation = original.Operation;
+            this.Value = original.Value;
+
+            this.IfToken = (MatchNode)original.IfToken.Try(a => a.CloneNode(true));
+            this.ElseToken = (MatchNode)original.ElseToken.Try(a => a.CloneNode(true));
+            this.EndIfToken = (MatchNode)original.EndIfToken.Try(a => a.CloneNode(true));
+
+            this.IfBlock = (BlockNode)original.IfBlock.Try(a => a.CloneNode(true));
+            this.ElseBlock = (BlockNode)original.ElseBlock.Try(a => a.CloneNode(true));
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new IfNode(this);
+        }
+
         protected internal override void ReplaceBlock()
         {
             if (this.ElseToken == null)
             {
                 OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(IfToken, EndIfToken));
 
-                MoveTo(NodesBetween(pair), this);
+                this.IfBlock = new BlockNode();
+                MoveTo(NodesBetween(pair), this.IfBlock);
 
                 pair.CommonParent.ReplaceChild(this, pair.First);
                 pair.Last.Remove();
@@ -532,20 +766,40 @@ namespace Signum.Engine.Word
                 if (pairAny.Last != pairNotAny.First)
                     throw new InvalidOperationException("Unbalanced tokens");
 
-                this.IfBlock = new Paragraph();
+                this.IfBlock = new BlockNode();
                 MoveTo(NodesBetween(pairAny), this.IfBlock);
 
-                this.ElseBlock = new Paragraph();
-                MoveTo(NodesBetween(pairAny), this.ElseBlock);
+                this.ElseBlock = new BlockNode();
+                MoveTo(NodesBetween(pairNotAny), this.ElseBlock);
 
                 pairAny.CommonParent.ReplaceChild(this, pairAny.First);
                 pairAny.Last.Remove();
+                pairNotAny.Last.Remove();
             }
         }
 
-        public override QueryToken GetToken()
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
         {
-            return this.Token.QueryToken;
+            this.AppendChild(this.IfBlock);
+
+            if (this.ElseBlock != null)
+                this.AppendChild(this.ElseBlock);
+         
+            base.WriteTo(xmlWriter);
+            
+            if (this.ElseBlock != null)
+                this.RemoveChild(this.ElseBlock);
+
+            this.RemoveChild(this.IfBlock);
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
+            tokens.Add(Token.QueryToken);
+
+            this.IfBlock.FillTokens(tokens);
+            if (this.ElseBlock != null)
+                this.ElseBlock.FillTokens(tokens);
         }
 
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -553,17 +807,15 @@ namespace Signum.Engine.Word
             if (GetCondition(p, rows))
             {
                 this.Parent.ReplaceChild(this.IfBlock, this);
-
-                foreach (var item in this.IfBlock.Descendants<BaseNode>().ToList())
-                    item.RenderNode(p, rows);
+                this.IfBlock.RenderNode(p, rows);
             }
             else if (ElseBlock != null)
             {
-                this.Parent.ReplaceChild(this.IfBlock, this);
-
-                foreach (var item in this.IfBlock.Descendants<BaseNode>().ToList())
-                    item.RenderNode(p, rows);
+                this.Parent.ReplaceChild(this.ElseBlock, this);
+                this.ElseBlock.RenderNode(p, rows);
             }
+            else
+                this.Parent.RemoveChild(this);
         }
 
 

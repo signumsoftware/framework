@@ -87,24 +87,25 @@ namespace Signum.Engine.Word
                         var index = firstIndex;
                         if (first.Index < m.Index)
                         {
-                            Run firstRunPart = new Run { RunProperties = first.Run.RunProperties.TryDo(r => r.Remove()) };
+                            Run firstRunPart = new Run { RunProperties = first.Run.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
                             firstRunPart.AppendChild(new Text { Text = first.Text.Substring(0, m.Index - first.Index) });
                             par.InsertAt(firstRunPart, index++);
                         }
 
-                        par.InsertAt(new MatchNode(m), index++);
+                        par.InsertAt(new MatchNode(m){ RunProperties = first.Run.RunProperties.TryDo(r => r.Remove()) }, index++);
 
-                        if (lastChar < last.Index + last.Lenght - 1)
+                        if (lastChar + 1 < last.Index + last.Lenght)
                         {
                             Run lastRunPart = new Run { RunProperties = last.Run.RunProperties.TryDo(r=>r.Remove()) };
-                            lastRunPart.AppendChild(new Text { Text = last.Text.Substring(lastChar - last.Index) });
+                            lastRunPart.AppendChild(new Text { Text = last.Text.Substring(lastChar + 1 - last.Index) });
+                            par.InsertAt(lastRunPart, index++);
                         }
                     }
                 }
             }
         }
         
-        Stack<BlockNode> stack = new Stack<BlockNode>();
+        Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
 
         public void CreateNodes()
         {
@@ -132,7 +133,10 @@ namespace Signum.Engine.Word
                             var format = tok.Groups["format"].Value;
                             var isRaw = keyword.Contains("raw");
 
-                            matchNode.Parent.ReplaceChild(new TokenNode(t, format, isRaw, this), matchNode);
+                            matchNode.Parent.ReplaceChild(new TokenNode(t, format, isRaw, this)
+                            {
+                                RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
+                            }, matchNode);
 
                             DeclareVariable(t);
                         }
@@ -149,7 +153,10 @@ namespace Signum.Engine.Word
                     case "model":
                     case "modelraw":
                         {
-                            var model = new ModelNode(token, walker: this) { IsRaw = keyword == "modelraw" };
+                            var model = new ModelNode(token, walker: this) { 
+                                IsRaw = keyword == "modelraw",                             
+                                RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
+                            };
 
                             matchNode.Parent.ReplaceChild(model, matchNode);
                         }
@@ -253,24 +260,24 @@ namespace Signum.Engine.Word
             }
         }
 
-        void PushBlock(BlockNode node)
+        void PushBlock(BlockContainerNode node)
         {
             stack.Push(node);
             variables = new ScopedDictionary<string, ParsedToken>(variables);
         }
 
-        T PopBlock<T>() where T : BlockNode
+        T PopBlock<T>() where T : BlockContainerNode
         {
             if (stack.IsEmpty())
             {
-                AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
+                AddError(true, "No {0} has been opened".FormatWith(BlockContainerNode.UserString(typeof(T))));
                 return null;
             }
 
-            BlockNode n = stack.Pop();
+            BlockContainerNode n = stack.Pop();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
 
@@ -278,18 +285,18 @@ namespace Signum.Engine.Word
             return (T)n;
         }
 
-        T PeekBlock<T>() where T : BlockNode
+        T PeekBlock<T>() where T : BlockContainerNode
         {
             if (stack.IsEmpty())
             {
-                AddError(true, "No {0} has been opened".FormatWith(BlockNode.UserString(typeof(T))));
+                AddError(true, "No {0} has been opened".FormatWith(BlockContainerNode.UserString(typeof(T))));
                 return null;
             }
 
-            BlockNode n = stack.Peek();
+            BlockContainerNode n = stack.Peek();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
                 return null;
             }
 
@@ -332,7 +339,13 @@ namespace Signum.Engine.Word
             }
         }
 
-      
+        public void AssertClean()
+        {
+            var list = this.document.MainDocumentPart.Document.Descendants<MatchNode>().ToList();
+
+            if (list.Any())
+                throw new InvalidOperationException("{0} unexpected MatchNode instances found".FormatWith(list.Count));
+        }
     }
 
     class RunInfo

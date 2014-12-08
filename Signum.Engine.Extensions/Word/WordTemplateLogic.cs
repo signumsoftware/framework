@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.Word
 {
-    public static class WordReportLogic
+    public static class WordTemplateLogic
     {
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
@@ -68,6 +68,8 @@ namespace Signum.Engine.Word
             return result; 
         }
 
+        public static string DumpFileFolder;
+
         public static byte[] CreateWordReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null)
         {
             WordTemplateEntity template = WordTemplatesLazy.Value.GetOrThrow(liteTemplate, "Word report template {0} not in cache".FormatWith(liteTemplate));
@@ -80,22 +82,36 @@ namespace Signum.Engine.Word
 
                  using (var memory = new MemoryStream())
                  {
-                     memory.WriteAllBytes(template.Template.Entity.BinaryFile);
+                     memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
 
                      using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
                      {
-                         var parser = new WordTemplateParser(document, qd, systemWordTemplate.GetType());
-                         parser.ParseDocument();
-                         parser.CreateNodes();
+                         Dump(document, "0.Original.txt");
+
+                         var parser = new WordTemplateParser(document, qd, systemWordTemplate.Try(swt => swt.GetType()));
+                         parser.ParseDocument(); Dump(document, "1.Match.txt");
+                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                         parser.AssertClean();
 
                          var renderer = new WordTemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
                          renderer.MakeQuery();
-                         renderer.RenderNodes();
+                         renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
+                         renderer.AssertClean();
                      }
 
                      return memory.ToArray();
                  }
             }
+        }
+
+        private static void Dump(WordprocessingDocument document, string fileName)
+        {
+            if (DumpFileFolder == null)
+                return;
+
+            string fullFileName = Path.Combine(DumpFileFolder, fileName);
+
+            File.WriteAllText(fullFileName, document.MainDocumentPart.Document.NiceToString());
         }
     }
 }

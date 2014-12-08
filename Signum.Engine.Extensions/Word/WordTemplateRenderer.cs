@@ -34,12 +34,16 @@ namespace Signum.Engine.Word
 
         internal void MakeQuery()
         {
-            var tokens = document.MainDocumentPart.Document.Descendants<BaseNode>().ToList().Select(t => t.GetToken()).NotNull().ToList();
+            List<QueryToken> tokens = new List<QueryToken>();
+            foreach (var item in document.MainDocumentPart.Document.Descendants<BaseNode>())
+            {
+                item.FillTokens(tokens);
+            }
 
-            var columns = tokens.Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
+            var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
             var filters = systemWordTemplate != null ? systemWordTemplate.GetFilters(this.queryDescription) :
-                new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity) };
+                new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) };
 
             this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
@@ -63,10 +67,20 @@ namespace Signum.Engine.Word
                 SystemWordTemplate = systemWordTemplate
             };
 
-            foreach (var item in document.MainDocumentPart.Document.Descendants<BaseNode>().ToList())
+            var nodes = document.MainDocumentPart.Document.Descendants<BaseNode>().ToList();
+
+            foreach (var item in nodes)
             {
                 item.RenderNode(parameters, this.table.Rows);
             }
+        }
+
+        public void AssertClean()
+        {
+            var list = this.document.MainDocumentPart.Document.Descendants<BaseNode>().ToList();
+
+            if (list.Any())
+                throw new InvalidOperationException("{0} unexpected BaseNode instances found: {1}".FormatWith(list.Count, list.ToString(l => l.LocalName, ", ")));
         }
     }
 }

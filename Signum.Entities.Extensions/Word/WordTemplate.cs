@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Signum.Entities.Word
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WordTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 200)]
