@@ -100,17 +100,6 @@ WriteLiteral("        ");
 
             
             #line 11 "..\..\Word\Views\WordTemplate.cshtml"
-   Write(Html.EntityLine(ec, f => f.Type));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 12 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.EntityLine(ec, f => f.Query));
 
             
@@ -121,7 +110,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 13 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 12 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.EntityLine(ec, f => f.SystemWordTemplate));
 
             
@@ -132,7 +121,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 14 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 13 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.EntityLine(ec, f => f.Culture));
 
             
@@ -141,7 +130,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 16 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 15 "..\..\Word\Views\WordTemplate.cshtml"
     if (!ec.Value.IsNew)
     {
         using (var sc = ec.SubContext())
@@ -160,7 +149,7 @@ WriteLiteral(">\r\n                <fieldset>\r\n                    <legend>Act
 WriteLiteral("                    ");
 
             
-            #line 24 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 23 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true));
 
             
@@ -171,7 +160,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 25 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 24 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.StartDate));
 
             
@@ -182,7 +171,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 26 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 25 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.EndDate));
 
             
@@ -191,7 +180,7 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </fieldset>\r\n            </div>\r\n");
 
             
-            #line 29 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 28 "..\..\Word\Views\WordTemplate.cshtml"
         }
     }
 
@@ -210,7 +199,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 35 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 34 "..\..\Word\Views\WordTemplate.cshtml"
        Write(Html.QueryTokenBuilder(null, ec, WordClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)));
 
             
@@ -225,7 +214,7 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 36 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 35 "..\..\Word\Views\WordTemplate.cshtml"
                                                              Write(ec.Prefix);
 
             
@@ -236,14 +225,14 @@ WriteLiteral("\"");
 WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
 "n-basic\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1488), Tuple.Create("\"", 1569)
+WriteAttribute("value", Tuple.Create(" value=\"", 1445), Tuple.Create("\"", 1526)
             
-            #line 36 "..\..\Word\Views\WordTemplate.cshtml"
-                                                                                               , Tuple.Create(Tuple.Create("", 1496), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
+            #line 35 "..\..\Word\Views\WordTemplate.cshtml"
+                                                                                               , Tuple.Create(Tuple.Create("", 1453), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1496), false)
+, 1453), false)
 );
 
 WriteLiteral(" />\r\n            <input");
@@ -255,7 +244,7 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 37 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 36 "..\..\Word\Views\WordTemplate.cshtml"
                                                              Write(ec.Prefix);
 
             
@@ -279,7 +268,7 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 38 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 37 "..\..\Word\Views\WordTemplate.cshtml"
                                                              Write(ec.Prefix);
 
             
@@ -303,7 +292,7 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 39 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 38 "..\..\Word\Views\WordTemplate.cshtml"
                                                              Write(ec.Prefix);
 
             
@@ -321,7 +310,7 @@ WriteLiteral(" value=\"any\"");
 WriteLiteral(" />\r\n        </div>\r\n");
 
             
-            #line 41 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 40 "..\..\Word\Views\WordTemplate.cshtml"
     
 
             
@@ -332,7 +321,7 @@ WriteLiteral("        <script>\r\n            $(function () {\r\n");
 WriteLiteral("                ");
 
             
-            #line 44 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 43 "..\..\Word\Views\WordTemplate.cshtml"
             Write(WordClient.Module["initReplacements"]());
 
             
@@ -341,21 +330,21 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            });\r\n        </script>\r\n");
 
             
-            #line 47 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 46 "..\..\Word\Views\WordTemplate.cshtml"
 
         
             
             #line default
             #line hidden
             
-            #line 48 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 47 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.FileLineLite(ec, e => e.Template));
 
             
             #line default
             #line hidden
             
-            #line 48 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 47 "..\..\Word\Views\WordTemplate.cshtml"
                                                
     }
 }
