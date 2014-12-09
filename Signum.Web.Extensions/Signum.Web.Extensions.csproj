@@ -989,9 +989,40 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Word\Controllers\WordController.cs" />
+    <Compile Include="Word\Views\WordReportLog.generated.cs">
+      <DependentUpon>WordReportLog.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Word\Views\WordTemplate.generated.cs">
+      <DependentUpon>WordTemplate.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Word\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Word\WordClient.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Word\Scripts\Word.js">
+      <DependentUpon>Word.ts</DependentUpon>
+    </EmbeddedResource>
+    <Content Include="Word\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Word\Views\Web.config" />
+    <Content Include="Word\Views\WordTemplate.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>WordTemplate.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Word\Views\WordReportLog.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>WordReportLog.generated.cs</LastGenOutput>
+    </Content>
     <TypeScriptCompile Include="Alerts\Scripts\Alerts.ts" />
     <EmbeddedResource Include="Alerts\Scripts\Alerts.js">
       <DependentUpon>Alerts.ts</DependentUpon>
@@ -1550,6 +1581,7 @@
     <Content Include="UserQueries\Views\Web.config" />
     <Content Include="Excel\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
+    <TypeScriptCompile Include="Word\Scripts\Word.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Views\Web.config" />
@@ -1812,6 +1844,7 @@
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

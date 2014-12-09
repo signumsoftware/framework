@@ -39,7 +39,7 @@ namespace Signum.Engine.Word
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                WordReportLogic.Start(sb, dqm);
+                WordTemplateLogic.Start(sb, dqm);
 
                 sb.Include<WordReportLogEntity>();
 

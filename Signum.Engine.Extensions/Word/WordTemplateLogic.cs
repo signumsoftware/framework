@@ -38,7 +38,6 @@ namespace Signum.Engine.Word
                     {
                         Entity = e,
                         e.Id,
-                        e.Type,
                         e.Query,
                         e.Template.Entity.FileName
                     });
@@ -50,10 +49,18 @@ namespace Signum.Engine.Word
                     Execute = (e, _) => { }
                 }.Register();
 
-                TemplatesByType = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-                    .Select(r => KVP.Create(r.Type, r.ToLite()))
-                    .GroupToDictionary(a => a.Key, a => a.Value),
-                    new InvalidateWith(typeof(WordTemplateEntity)));
+                TemplatesByType = sb.GlobalLazy(() =>
+                {
+                    var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query.ToQueryName(), r.ToLite())).ToList();
+
+                    return (from kvp in list
+                            let imp = dqm.GetEntityImplementations(kvp.Key)
+                            where !imp.IsByAll
+                            from t in imp.Types
+                            group kvp.Value by t into g
+                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())).ToDictionary();
+
+                }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
                    .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))

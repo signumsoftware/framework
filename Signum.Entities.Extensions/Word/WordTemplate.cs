@@ -24,15 +24,6 @@ namespace Signum.Entities.Word
         }
 
         [NotNullable]
-        TypeEntity type;
-        [NotNullValidator]
-        public TypeEntity Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
-
-        [NotNullable]
         QueryEntity query;
         [NotNullValidator]
         public QueryEntity Query

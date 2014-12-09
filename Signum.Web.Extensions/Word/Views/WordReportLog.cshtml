@@ -1,0 +1,20 @@
+﻿@using Signum.Entities.Word
+@using Signum.Web.Files
+
+@using (var sc = Html.TypeContext<WordReportLogEntity>())
+{
+    <div class="row">
+        <div class="col-sm-8">
+            @Html.EntityLine(sc, s => s.Target)
+            @Html.EntityLine(sc, s => s.Template)
+            @Html.EntityLine(sc, s => s.User)
+        </div>
+        <div class="col-sm-4">
+            @Html.ValueLine(sc, s => s.Start)
+            @Html.ValueLine(sc, s => s.End)
+            @Html.ValueLine(sc, s => s.Duration)
+        </div>
+    </div>
+    @Html.EntityLine(sc, s => s.Exception)
+    @Html.FileLineLite(sc, s => s.Report)
+}

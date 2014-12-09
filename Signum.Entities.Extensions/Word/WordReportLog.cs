@@ -1,4 +1,5 @@
 ﻿using Signum.Entities.Basics;
+using Signum.Entities.Files;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,13 @@ namespace Signum.Entities.Word
         {
             get { return exception; }
             set { Set(ref exception, value); }
+        }
+
+        Lite<FilePathEntity> report;
+        public Lite<FilePathEntity> Report
+        {
+            get { return report; }
+            set { Set(ref report, value); }
         }
 
         public override string ToString()

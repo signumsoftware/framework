@@ -53,8 +53,6 @@ namespace Signum.Web.Word
                     new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},
                     new EntitySettings<WordReportLogEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordReportLog")},
                 });
-
-             
             }
         }
 

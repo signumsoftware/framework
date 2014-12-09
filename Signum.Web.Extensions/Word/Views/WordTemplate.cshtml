@@ -1,0 +1,51 @@
+﻿@using Signum.Entities.Files
+@using Signum.Entities.Word
+@using Signum.Web.Word
+@using Signum.Web.Files
+@using Signum.Entities.DynamicQuery
+
+@using (var ec = Html.TypeContext<WordTemplateEntity>())
+{
+    <div class="col-sm-8">
+        @Html.ValueLine(ec, f => f.Name)
+        @Html.EntityLine(ec, f => f.Type)
+        @Html.EntityLine(ec, f => f.Query)
+        @Html.EntityLine(ec, f => f.SystemWordTemplate)
+        @Html.EntityLine(ec, f => f.Culture)
+    </div>
+    if (!ec.Value.IsNew)
+    {
+        using (var sc = ec.SubContext())
+        {
+            sc.FormGroupStyle = FormGroupStyle.Basic;
+            <div class="col-sm-4 form-vertical">
+                <fieldset>
+                    <legend>Active</legend>
+                    @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
+                    @Html.ValueLine(sc, e => e.StartDate)
+                    @Html.ValueLine(sc, e => e.EndDate)
+                </fieldset>
+            </div>
+        }
+    }
+
+    if (ec.Value.Query != null)
+    {
+        <div class="sf-template-message-insert-container">
+            @Html.QueryTokenBuilder(null, ec, WordClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-basic" value="@(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString())" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-if" data-block="if" value="if" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-block="foreach" value="foreach" />
+            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-any" data-block="any" value="any" />
+        </div>
+    
+        <script>
+            $(function () {
+                @(WordClient.Module["initReplacements"]())
+            });
+        </script>
+
+        @Html.FileLineLite(ec, e => e.Template)
+    }
+}
+
