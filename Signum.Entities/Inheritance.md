@@ -77,7 +77,7 @@ You can use PFK with Lite<T> seamlessly. In fact, the whole reason Lite<T> are c
 Lite<IWeapon> weapon;
 ```
 
-### OverrideAttributes
+### Overriding attributes
 The ability of using `SchemaBuilderSetting` to override attributes on entities that you don't control lets you integrate different modules in a type-safe and elegant way. Take a look in [Schema](../Signum.Engine/Schema.md).
 
 ### Save and Retrieving

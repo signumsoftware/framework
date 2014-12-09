@@ -87,7 +87,7 @@ namespace Signum.Entities
                 if(t.IsInterface || t.IsAbstract)
                 {
                     message += @"\r\nConsider writing something like this in your Starter class: 
-sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribute(typeof(YourConcrete{2}));"
+sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAttribute(typeof(YourConcrete{2})));"
                     .FormatWith(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
                 }
 

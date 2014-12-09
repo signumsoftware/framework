@@ -142,7 +142,7 @@ namespace Signum.Engine.Maps
             var pr = PropertyRoute.Construct<T, S>(propertyRoute);
 
             if (FieldAttribute<IgnoreAttribute>(pr) != null)
-                throw new InvalidOperationException("In order to {0} you need to OverrideAttributes for {1} to remove IgnoreAttribute".FormatWith(errorContext, pr));
+                throw new InvalidOperationException("In order to {0} you need to override the attributes for {1} by using SchemaBuilderSettings.FieldAttributes to remove IgnoreAttribute".FormatWith(errorContext, pr));
         }
 
         public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute

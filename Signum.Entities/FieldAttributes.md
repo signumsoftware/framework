@@ -4,7 +4,7 @@ We should have it clear now that in Signum Framework, entities rule. The databas
 
 There are, however, some situations where you have to enrich your entities with database-related information, like **Indexes**, specifying **Scale** and **Precision** for numbers, or use **different database types**. 
 
-We use .Net Attributes over the entity **fields** to specify this information, but you can use [OverrideAttributes](../Signum.Engine/Schema/Schema.md) to override this information for entities that are not in your control. 
+We use .Net Attributes over the entity **fields** to specify this information, but you can use [FieldAttributes](../Signum.Engine/Schema/Schema.md) to override this information for entities that are not in your control. 
 
 Also note that if the attribute is set on a `MList<T>` field, it will be used by the MListTable or element column instead. 
 

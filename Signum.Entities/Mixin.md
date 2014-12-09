@@ -198,7 +198,7 @@ PropertyRoute.Construct((UserEntity a) => a.Mixin<UserEmployeeMixin>())
 PropertyRoute.Construct((UserEntity a) => a.Mixin<UserEmployeeMixin>().Employee) 
 ```
 
-That means that other parts of the framework that are based on `PropertyRoute` also support mixins, like `OverrideAttributes` or property authorization. 
+That means that other parts of the framework that are based on `PropertyRoute` also support mixins, like `FieldAttributes` or property authorization. 
 
 
 ## User interface support
