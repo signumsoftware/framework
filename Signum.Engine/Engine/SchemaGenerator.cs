@@ -60,8 +60,11 @@ namespace Signum.Engine
             var cmd = list.Select(a =>
                 SqlPreCommand.Combine(Spacing.Simple,
                 //DisconnectUsers(a.name, "SPID" + i) : null,
+                SqlBuilder.SetSingleUser(a),
                 SqlBuilder.SetSnapshotIsolation(a, true),
-                SqlBuilder.MakeSnapshotIsolationDefault(a, true))).Combine(Spacing.Double);
+                SqlBuilder.MakeSnapshotIsolationDefault(a, true),
+                SqlBuilder.SetMultiUser(a))                              
+                ).Combine(Spacing.Double);
 
             return cmd;
         }
