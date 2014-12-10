@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -85,9 +86,7 @@ namespace Signum.Entities.Word
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        [NotNullable]
         Lite<FileEntity> template;
-        [NotNullValidator]
         public Lite<FileEntity> Template
         {
             get { return template; }
@@ -105,6 +104,14 @@ namespace Signum.Entities.Word
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Template) && Template == null && Active)
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return base.PropertyValidation(pi);
         }
     }
 

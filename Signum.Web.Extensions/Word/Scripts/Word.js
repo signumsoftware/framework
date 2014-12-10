@@ -3,7 +3,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], fun
     function initReplacements() {
         var self = this;
 
-        $(".sf-email-replacements-container").on("click", ".sf-email-inserttoken", function () {
+        $(".sf-word-template-container").on("click", ".sf-word-inserttoken", function () {
             var tokenName = Finder.QueryTokenBuilder.constructTokenName($(this).data("prefix"));
             if (SF.isEmpty(tokenName)) {
                 return;
@@ -14,7 +14,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], fun
             window.prompt("Copy to clipboard: Ctrl+C, Enter", tokenTag);
         });
 
-        $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event) {
+        $(".sf-word-template-container").on("sf-new-subtokens-combo", "select", function (event) {
             var idSelectedCombo = [];
             for (var _i = 0; _i < (arguments.length - 1); _i++) {
                 idSelectedCombo[_i] = arguments[_i + 1];
@@ -40,10 +40,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], fun
     ;
 
     function newSubTokensComboAdded($selectedCombo) {
-        var $btnInsertBasic = $(".sf-email-inserttoken-basic");
-        var $btnInsertIf = $(".sf-email-inserttoken-if");
-        var $btnInsertForeach = $(".sf-email-inserttoken-foreach");
-        var $btnInsertAny = $(".sf-email-inserttoken-any");
+        var $btnInsertBasic = $(".sf-word-inserttoken-basic");
+        var $btnInsertIf = $(".sf-word-inserttoken-if");
+        var $btnInsertForeach = $(".sf-word-inserttoken-foreach");
+        var $btnInsertAny = $(".sf-word-inserttoken-any");
 
         var $selectedOption = $selectedCombo.children("option:selected");
         $selectedCombo.attr("title", $selectedOption.attr("title"));

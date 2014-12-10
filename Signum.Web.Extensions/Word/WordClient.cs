@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +29,6 @@ using Signum.Web.Basic;
 using Signum.Entities.Processes;
 using Signum.Web.Cultures;
 using Signum.Entities.Mailing;
-#endregion
 
 namespace Signum.Web.Word
 {

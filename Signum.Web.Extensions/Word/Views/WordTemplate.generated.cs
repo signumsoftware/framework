@@ -26,6 +26,18 @@ namespace Signum.Web.Word.Views
     using System.Web.Security;
     using System.Web.UI;
     using System.Web.WebPages;
+    
+    #line 6 "..\..\Word\Views\WordTemplate.cshtml"
+    using Signum.Engine.Basics;
+    
+    #line default
+    #line hidden
+    
+    #line 7 "..\..\Word\Views\WordTemplate.cshtml"
+    using Signum.Engine.DynamicQuery;
+    
+    #line default
+    #line hidden
     using Signum.Entities;
     
     #line 5 "..\..\Word\Views\WordTemplate.cshtml"
@@ -72,7 +84,7 @@ namespace Signum.Web.Word.Views
 WriteLiteral("\r\n");
 
             
-            #line 7 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 9 "..\..\Word\Views\WordTemplate.cshtml"
  using (var ec = Html.TypeContext<WordTemplateEntity>())
 {
 
@@ -88,7 +100,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 10 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 12 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.ValueLine(ec, f => f.Name));
 
             
@@ -99,7 +111,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 11 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 13 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.EntityLine(ec, f => f.Query));
 
             
@@ -110,8 +122,8 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 12 "..\..\Word\Views\WordTemplate.cshtml"
-   Write(Html.EntityLine(ec, f => f.SystemWordTemplate));
+            #line 14 "..\..\Word\Views\WordTemplate.cshtml"
+   Write(Html.EntityCombo(ec, f => f.SystemWordTemplate));
 
             
             #line default
@@ -121,8 +133,8 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 13 "..\..\Word\Views\WordTemplate.cshtml"
-   Write(Html.EntityLine(ec, f => f.Culture));
+            #line 15 "..\..\Word\Views\WordTemplate.cshtml"
+   Write(Html.EntityCombo(ec, f => f.Culture));
 
             
             #line default
@@ -130,7 +142,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 15 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 17 "..\..\Word\Views\WordTemplate.cshtml"
     if (!ec.Value.IsNew)
     {
         using (var sc = ec.SubContext())
@@ -149,7 +161,7 @@ WriteLiteral(">\r\n                <fieldset>\r\n                    <legend>Act
 WriteLiteral("                    ");
 
             
-            #line 23 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 25 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true));
 
             
@@ -160,7 +172,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 24 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 26 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.StartDate));
 
             
@@ -171,7 +183,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 25 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 27 "..\..\Word\Views\WordTemplate.cshtml"
                Write(Html.ValueLine(sc, e => e.EndDate));
 
             
@@ -180,27 +192,31 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </fieldset>\r\n            </div>\r\n");
 
             
-            #line 28 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 30 "..\..\Word\Views\WordTemplate.cshtml"
         }
     }
 
     if (ec.Value.Query != null)
     {
+        var ctx = new Context(ec, "tokenBuilder");
+
+        var qd = DynamicQueryManager.Current.QueryDescription(ec.Value.Query.ToQueryName());
+        
 
             
             #line default
             #line hidden
 WriteLiteral("        <div");
 
-WriteLiteral(" class=\"sf-template-message-insert-container\"");
+WriteLiteral(" class=\"sf-word-template-container\"");
 
 WriteLiteral(">\r\n");
 
 WriteLiteral("            ");
 
             
-            #line 34 "..\..\Word\Views\WordTemplate.cshtml"
-       Write(Html.QueryTokenBuilder(null, ec, WordClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)));
+            #line 40 "..\..\Word\Views\WordTemplate.cshtml"
+       Write(Html.QueryTokenBuilder(null, ctx, WordClient.GetQueryTokenBuilderSettings(qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)));
 
             
             #line default
@@ -214,25 +230,25 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 35 "..\..\Word\Views\WordTemplate.cshtml"
-                                                             Write(ec.Prefix);
+            #line 41 "..\..\Word\Views\WordTemplate.cshtml"
+                                                             Write(ctx.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
-"n-basic\"");
+WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-" +
+"basic\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1445), Tuple.Create("\"", 1526)
+WriteAttribute("value", Tuple.Create(" value=\"", 1604), Tuple.Create("\"", 1685)
             
-            #line 35 "..\..\Word\Views\WordTemplate.cshtml"
-                                                                                               , Tuple.Create(Tuple.Create("", 1453), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
+            #line 41 "..\..\Word\Views\WordTemplate.cshtml"
+                                                                                              , Tuple.Create(Tuple.Create("", 1612), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1453), false)
+, 1612), false)
 );
 
 WriteLiteral(" />\r\n            <input");
@@ -244,16 +260,16 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 36 "..\..\Word\Views\WordTemplate.cshtml"
-                                                             Write(ec.Prefix);
+            #line 42 "..\..\Word\Views\WordTemplate.cshtml"
+                                                             Write(ctx.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
-"n-if\"");
+WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-" +
+"if\"");
 
 WriteLiteral(" data-block=\"if\"");
 
@@ -268,16 +284,16 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 37 "..\..\Word\Views\WordTemplate.cshtml"
-                                                             Write(ec.Prefix);
+            #line 43 "..\..\Word\Views\WordTemplate.cshtml"
+                                                             Write(ctx.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
-"n-foreach\"");
+WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-" +
+"foreach\"");
 
 WriteLiteral(" data-block=\"foreach\"");
 
@@ -292,16 +308,16 @@ WriteLiteral(" disabled=\"disabled\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 38 "..\..\Word\Views\WordTemplate.cshtml"
-                                                             Write(ec.Prefix);
+            #line 44 "..\..\Word\Views\WordTemplate.cshtml"
+                                                             Write(ctx.Prefix);
 
             
             #line default
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
-"n-any\"");
+WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-" +
+"any\"");
 
 WriteLiteral(" data-block=\"any\"");
 
@@ -310,7 +326,7 @@ WriteLiteral(" value=\"any\"");
 WriteLiteral(" />\r\n        </div>\r\n");
 
             
-            #line 40 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 46 "..\..\Word\Views\WordTemplate.cshtml"
     
 
             
@@ -321,7 +337,7 @@ WriteLiteral("        <script>\r\n            $(function () {\r\n");
 WriteLiteral("                ");
 
             
-            #line 43 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 49 "..\..\Word\Views\WordTemplate.cshtml"
             Write(WordClient.Module["initReplacements"]());
 
             
@@ -329,22 +345,23 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n            });\r\n        </script>\r\n");
 
-            
-            #line 46 "..\..\Word\Views\WordTemplate.cshtml"
+WriteLiteral("        <br/>\r\n");
 
+            
+            #line 53 "..\..\Word\Views\WordTemplate.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 47 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 53 "..\..\Word\Views\WordTemplate.cshtml"
    Write(Html.FileLineLite(ec, e => e.Template));
 
             
             #line default
             #line hidden
             
-            #line 47 "..\..\Word\Views\WordTemplate.cshtml"
+            #line 53 "..\..\Word\Views\WordTemplate.cshtml"
                                                
     }
 }

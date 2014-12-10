@@ -3,14 +3,16 @@
 @using Signum.Web.Word
 @using Signum.Web.Files
 @using Signum.Entities.DynamicQuery
+@using Signum.Engine.Basics
+@using Signum.Engine.DynamicQuery
 
 @using (var ec = Html.TypeContext<WordTemplateEntity>())
 {
     <div class="col-sm-8">
         @Html.ValueLine(ec, f => f.Name)
         @Html.EntityLine(ec, f => f.Query)
-        @Html.EntityLine(ec, f => f.SystemWordTemplate)
-        @Html.EntityLine(ec, f => f.Culture)
+        @Html.EntityCombo(ec, f => f.SystemWordTemplate)
+        @Html.EntityCombo(ec, f => f.Culture)
     </div>
     if (!ec.Value.IsNew)
     {
@@ -30,12 +32,16 @@
 
     if (ec.Value.Query != null)
     {
-        <div class="sf-template-message-insert-container">
-            @Html.QueryTokenBuilder(null, ec, WordClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription], SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-basic" value="@(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString())" />
-            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-if" data-block="if" value="if" />
-            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-block="foreach" value="foreach" />
-            <input type="button" disabled="disabled" data-prefix="@ec.Prefix" class="btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoken-any" data-block="any" value="any" />
+        var ctx = new Context(ec, "tokenBuilder");
+
+        var qd = DynamicQueryManager.Current.QueryDescription(ec.Value.Query.ToQueryName());
+        
+        <div class="sf-word-template-container">
+            @Html.QueryTokenBuilder(null, ctx, WordClient.GetQueryTokenBuilderSettings(qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+            <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-basic" value="@(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString())" />
+            <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-if" data-block="if" value="if" />
+            <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-foreach" data-block="foreach" value="foreach" />
+            <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-any" data-block="any" value="any" />
         </div>
     
         <script>
@@ -43,7 +49,7 @@
                 @(WordClient.Module["initReplacements"]())
             });
         </script>
-
+        <br/>
         @Html.FileLineLite(ec, e => e.Template)
     }
 }
