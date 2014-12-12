@@ -305,6 +305,20 @@ namespace Signum.Engine
                 query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
         }
 
+        public static void UpdateToString<T>(T entity) where T : Entity, new()
+        {
+                entity.InDB().UnsafeUpdate()
+                    .Set(e => e.toStr, e => entity.ToString())
+                    .Execute();
+        }
+
+        public static void UpdateToString<T>(T entity, Expression<Func<T, string>> expression) where T : Entity, new()
+        {
+            entity.InDB().UnsafeUpdate()
+                .Set(e => e.toStr, expression)
+                .Execute();
+        }
+
         public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : Entity
         {
             Table table = Schema.Current.Table(typeof(T));

@@ -54,6 +54,12 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrupto" />
   </Type>
+  <Type Name="DeleteLogParametersDN" Description="Parámetros para eliminar registro">
+    <Member Name="ChunkSize" Description="Tamaño" />
+    <Member Name="DateLimit" Description="Fecha límite" />
+    <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
+    <Member Name="MaxChunks" Description="Max trozos" />
+  </Type>
   <Type Name="EmbeddedEntity" Description="Entidad embebida" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}" />

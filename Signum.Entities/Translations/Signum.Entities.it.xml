@@ -54,6 +54,12 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompere" />
   </Type>
+  <Type Name="DeleteLogParametersDN" Description="Parametri di eliminazione del registro">
+    <Member Name="ChunkSize" Description="Dimensione del blocco" />
+    <Member Name="DateLimit" Description="Data limite" />
+    <Member Name="DeleteLogsWithMoreThan" Description="Eliminare i registri con più di" />
+    <Member Name="MaxChunks" Description="Max pezzi" />
+  </Type>
   <Type Name="EmbeddedEntity" Description="Entità incorporato" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concorrenza nel database, tabella errore = {0}, Id = {1}" />
@@ -62,7 +68,7 @@
     <Member Name="TheEntity0IsNew" Description="L'entità {0} è nuovo" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Ci sono '{0}' che fanno riferimento a questa entità" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Ci sono record in '{0}' che fanno riferimento a questa tabella mediante la colonna '{1}'" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2" Description="C'è già un {0} con uguale a {1} '{2}',C'è già un {0} con {1} uguale a '{2}'" />
+    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="C'è già [m:un|f:una] {0} con {1} uguale a '{2}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Accesso negato a {0} a causa di {1}" />
   </Type>
   <Type Name="Entity" Description="Entità,Valore" PluralDescription="Valori" />
@@ -73,7 +79,6 @@
     <Member Name="MoveDown" Description="Sposta giù" />
     <Member Name="MoveUp" Description="Spostarsi verso l'alto,Sposta su" />
     <Member Name="Navigate" Description="Navigare" />
-    <Member Name="New" Description="Nuovo" />
     <Member Name="No" Description="no" />
     <Member Name="NullValueNotAllowed" Description="Valore null non consentito,Valore nullo non consentito" />
     <Member Name="Remove" Description="Rimuovere" />
@@ -176,7 +181,7 @@
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id non valido" />
     <Member Name="InvalidFormat" Description="Formato non valido" />
-    <Member Name="New" Description="Nuovo" />
+    <Member Name="New_G" Description="Nuov[m:o|f:a] " />
     <Member Name="ToStr" Description="Testo" />
     <Member Name="Type0NotFound" Description="Tipo {0} non trovato" />
   </Type>
@@ -187,7 +192,6 @@
   <Type Name="ModelEntity" Description=",Entità modello" />
   <Type Name="ModifiableEntity" Description=",Valore modificabile" />
   <Type Name="NormalControlMessage">
-    <Member Name="New" Description="Nuovo" />
     <Member Name="Save" Description="Salva" />
     <Member Name="ViewForType0IsNotAllowed" Description="Non è consentita la visualizzazione del tipo {0}" />
   </Type>
@@ -278,19 +282,19 @@
     <Member Name="Quicklinks" Description="Collegamenti rapidi" />
   </Type>
   <Type Name="SearchMessage">
-    <Member Name="_01of2Results" Description="{0} - {1} del risultato {2} [s].,{0} - {1} d risultati {2}." />
-    <Member Name="_0Results" Description="{0} risultato [s].,{0} risultati." />
+    <Member Name="_01of2Results_N" Description="{0} - {1} di {2} risultati." />
+    <Member Name="_0Results_N" Description="{0} risultato[i]." />
     <Member Name="AddColumn" Description="Aggiungi colonna" />
     <Member Name="AddFilter" Description="Aggiungi filtro" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Scegliere il nome della nuova colonna" />
     <Member Name="Create" Description="Creare" />
-    <Member Name="CreateNew0" Description="Creare nuovi {0}" />
+    <Member Name="CreateNew0_G" Description="Creare nuov[m:o|f:a] {0}" />
     <Member Name="DeleteFilter" Description="Elimina filtro" />
     <Member Name="Field" Description="Campo" />
     <Member Name="Filters" Description="Filtri" />
     <Member Name="Find" Description="Trovare,Cercare" />
     <Member Name="FinderOf0" Description="Ricerca per {0}" />
-    <Member Name="First0Results" Description=",Primo {0} risultato" />
+    <Member Name="First0Results_N" Description="primi {0} risultati." />
     <Member Name="Name" Description="Nome" />
     <Member Name="NewColumnSName" Description="Nome della nuova colonna" />
     <Member Name="NoActionsFound" Description="Le azioni non sono state trovate" />
@@ -357,7 +361,7 @@
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} è obbligatorio se si imposta {1},{0} è obbligatorio se si imposta {1}" />
     <Member Name="_0IsNecessary" Description="{0} è necessario" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} è necessario il stato {1},{0} è necessario nello stato {1}" />
-    <Member Name="_0IsNotA1" Description="{0} non è un {1},{0} non è un {1}" />
+    <Member Name="_0IsNotA1_G" Description="{0} non è [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} non è consentito" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} non è consentito il stato {1},{0} non è consentito nello stato {1}" />
     <Member Name="_0IsNotSet" Description="{0} non è impostato,{0} non è impostato" />
@@ -365,7 +369,7 @@
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} deve essere null se non è impostato {1},{0} deve essere nullo se {1} non è impostato " />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description=",{0} deve essere nullo se {1} è impostato" />
     <Member Name="Be" Description="essere " />
-    <Member Name="BeA0" Description="essere un {0},essere un {0}" />
+    <Member Name="BeA0_G" Description="essere [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="essere tra {0} e {1}" />
     <Member Name="BeNotNull" Description="non essere nullo" />
     <Member Name="FileName" Description="Nome del file" />
