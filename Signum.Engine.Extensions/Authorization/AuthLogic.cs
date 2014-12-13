@@ -291,7 +291,7 @@ namespace Signum.Engine.Authorization
             get { return !tempDisabled.Value && gloaballyEnabled; }
         }
 
-        public static UserEntity Login(string username, string passwordHash)
+        public static UserEntity Login(string username, byte[] passwordHash)
         {
             using (AuthLogic.Disable())
             {
@@ -304,7 +304,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static UserEntity RetrieveUser(string username, string passwordHash)
+        public static UserEntity RetrieveUser(string username, byte[] passwordHash)
         {
             using (AuthLogic.Disable())
             {
@@ -312,14 +312,14 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
-                if (user.PasswordHash != passwordHash)
+                if (!user.PasswordHash.SequenceEqual(passwordHash))
                     throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
 
                 return user;
             }
         }
 
-        public static UserEntity ChangePasswordLogin(string username, string passwordHash, string newPasswordHash)
+        public static UserEntity ChangePasswordLogin(string username, byte[] passwordHash, byte[] newPasswordHash)
         {
             var userEntity = RetrieveUser(username, passwordHash);
             userEntity.PasswordHash = newPasswordHash;
@@ -329,7 +329,7 @@ namespace Signum.Engine.Authorization
             return Login(username, newPasswordHash);
         }
 
-        public static void ChangePassword(Lite<UserEntity> user, string passwordHash, string newPasswordHash)
+        public static void ChangePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash)
         {
             var userEntity = user.RetrieveAndForget();
             userEntity.PasswordHash = newPasswordHash;

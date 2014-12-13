@@ -77,7 +77,7 @@ namespace Signum.Web.Auth
                 {
                     PartialViewName = _ => ViewPrefix.FormatWith("SetPassword"),
                     MappingDefault = new EntityMapping<SetPasswordModel>(false)
-                    .SetProperty(a => a.Password, ctx => UserMapping.GetNewPassword(ctx, UserMapping.NewPasswordKey, UserMapping.NewPasswordBisKey))
+                    .SetProperty(a => a.PasswordHash, ctx => UserMapping.GetNewPassword(ctx, UserMapping.NewPasswordKey, UserMapping.NewPasswordBisKey))
                 });
 
                 if (property)

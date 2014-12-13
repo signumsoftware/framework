@@ -45,9 +45,9 @@ namespace Signum.Entities.Authorization
         }
 
         [NotNullable]
-        string passwordHash;
+        byte[] passwordHash;
         [NotNullValidator]
-        public string PasswordHash
+        public byte[] PasswordHash
         {
             get { return passwordHash; }
             set

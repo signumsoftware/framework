@@ -56,7 +56,7 @@ namespace Signum.Services
 
 
         #region ILoginServer Members
-        public virtual void Login(string username, string passwordHash)
+        public virtual void Login(string username, byte[] passwordHash)
         {
             Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {
@@ -64,7 +64,7 @@ namespace Signum.Services
             });
         }
 
-        public virtual void ChagePassword(Lite<UserEntity> user, string passwordHash, string newPasswordHash)
+        public virtual void ChagePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
             {
@@ -73,7 +73,7 @@ namespace Signum.Services
         }
 
 
-        public virtual void LoginChagePassword(string username, string passwordHash, string newPasswordHash)
+        public virtual void LoginChagePassword(string username, byte[] passwordHash, byte[] newPasswordHash)
         {
             Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {

@@ -28,12 +28,12 @@ namespace Signum.Web.Auth
     [Serializable, Description("")]
     public class SetPasswordModel : ModelEntity
     {
-        string password;
+        byte[] passwordHash;
         [NotNullValidator]
-        public string Password
+        public byte[] PasswordHash
         {
-            get { return password; }
-            set { Set(ref password, value); }
+            get { return passwordHash; }
+            set { Set(ref passwordHash, value); }
         }
     }
 }

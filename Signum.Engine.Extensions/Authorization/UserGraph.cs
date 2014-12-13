@@ -75,7 +75,7 @@ namespace Signum.Engine.Authorization
                 Lite = true,
                 Execute = (u, args) =>
                 {
-                    string passwordHash = args.TryGetArgC<string>();
+                    byte[] passwordHash = args.GetArg<byte[]>();
                     u.PasswordHash = passwordHash;
                 }
             }.Register();
