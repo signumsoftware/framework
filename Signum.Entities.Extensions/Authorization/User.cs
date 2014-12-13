@@ -44,7 +44,7 @@ namespace Signum.Entities.Authorization
             set { SetToStr(ref userName, value); }
         }
 
-        [NotNullable]
+        [NotNullable, SqlDbType(Size=128)]
         byte[] passwordHash;
         [NotNullValidator]
         public byte[] PasswordHash
